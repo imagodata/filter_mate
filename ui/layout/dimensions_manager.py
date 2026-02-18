@@ -550,8 +550,7 @@ class DimensionsManager(LayoutManagerBase):
 
         Applies consistent spacer dimensions to exploring/filtering/exporting key widgets
         based on section-specific sizes from UI config.
-        Uses Fixed vertical policy to keep buttons compact at the top, with a bottom
-        stretch to absorb extra space.
+        Uses Fixed vertical policy to keep buttons compact at the top.
         """
         try:
             UIConfig = self._get_ui_config()
@@ -613,19 +612,6 @@ class DimensionsManager(LayoutManagerBase):
                                             QSizePolicy.Fixed
                                         )
                                         spacer_count += 1
-
-                                # Add bottom stretch (only once — guard against repeated calls)
-                                has_stretch = False
-                                for k in range(nested_layout.count()):
-                                    stretch_item = nested_layout.itemAt(k)
-                                    if (stretch_item and isinstance(stretch_item, QSpacerItem)
-                                            and stretch_item.sizePolicy().verticalPolicy() == QSizePolicy.Expanding
-                                            and stretch_item.sizePolicy().horizontalPolicy() == QSizePolicy.Minimum
-                                            and stretch_item.sizeHint().height() == 0):
-                                        has_stretch = True
-                                        break
-                                if not has_stretch:
-                                    nested_layout.addStretch(1)
 
                                 nested_layout.invalidate()
 
