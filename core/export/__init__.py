@@ -20,6 +20,8 @@ from .layer_exporter import (  # noqa: F401
     ExportConfig,
     ExportResult,
     ExportFormat,
+    OGR_EXTENSION_MAP,
+    get_extension_for_format,
 )
 
 from .style_exporter import (  # noqa: F401
@@ -39,12 +41,23 @@ from .batch_exporter import (  # noqa: F401
     sanitize_filename,
 )
 
+from .gpkg_layer_tree_writer import (  # noqa: F401
+    write_layer_tree_to_gpkg,
+)
+
+from .kml_folder_writer import (  # noqa: F401
+    merge_kml_with_folders,
+    cleanup_individual_kmls,
+)
+
 __all__ = [
     # Layer exporter
     'LayerExporter',
     'ExportConfig',
     'ExportResult',
     'ExportFormat',
+    'OGR_EXTENSION_MAP',
+    'get_extension_for_format',
     # Style exporter
     'StyleExporter',
     'StyleFormat',
@@ -56,4 +69,9 @@ __all__ = [
     'BatchExporter',
     'BatchExportResult',
     'sanitize_filename',
+    # GPKG layer tree writer
+    'write_layer_tree_to_gpkg',
+    # KML folder writer
+    'merge_kml_with_folders',
+    'cleanup_individual_kmls',
 ]

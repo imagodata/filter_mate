@@ -35,7 +35,7 @@ except ImportError:
     QgsCoordinateReferenceSystem = None
     QgsProject = None
 
-from .layer_exporter import LayerExporter
+from .layer_exporter import LayerExporter, get_extension_for_format
 
 logger = logging.getLogger('FilterMate.Export.Batch')
 
@@ -136,25 +136,6 @@ class BatchExporter:
 
     """
 
-    # File extension mapping
-    EXTENSION_MAP = {
-        'GPKG': '.gpkg',
-        'SHP': '.shp',
-        'SHAPEFILE': '.shp',
-        'ESRI SHAPEFILE': '.shp',
-        'GEOJSON': '.geojson',
-        'JSON': '.geojson',
-        'GML': '.gml',
-        'KML': '.kml',
-        'CSV': '.csv',
-        'XLSX': '.xlsx',
-        'TAB': '.tab',
-        'MAPINFO': '.tab',
-        'DXF': '.dxf',
-        'SQLITE': '.sqlite',
-        'SPATIALITE': '.sqlite'
-    }
-
     def __init__(self, project: Optional[QgsProject] = None):
         """
         Initialize batch exporter.
@@ -243,7 +224,7 @@ class BatchExporter:
 
             # Sanitize filename
             safe_filename = sanitize_filename(layer_name)
-            file_extension = self.EXTENSION_MAP.get(datatype.upper(), f'.{datatype.lower()}')
+            file_extension = get_extension_for_format(datatype)
             output_path = os.path.join(output_folder, f"{safe_filename}{file_extension}")
 
             # Export layer
@@ -359,7 +340,7 @@ class BatchExporter:
 
             # Sanitize filename
             safe_filename = sanitize_filename(layer_name)
-            file_extension = self.EXTENSION_MAP.get(datatype.upper(), f'.{datatype.lower()}')
+            file_extension = get_extension_for_format(datatype)
 
             # Create temporary directory for this layer's export
             temp_dir = tempfile.mkdtemp(prefix=f"fm_batch_{safe_filename}_")

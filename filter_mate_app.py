@@ -860,6 +860,11 @@ class FilterMateApp:
             self.update_undo_redo_buttons
         )
 
+        # Tab switch requests undo/redo state refresh
+        self.dockwidget.undoRedoStateRequested.connect(
+            self.update_undo_redo_buttons
+        )
+
         # Layer variable signals - persist layer properties
         self.dockwidget.settingLayerVariable.connect(
             lambda layer, properties: self._safe_layer_operation(

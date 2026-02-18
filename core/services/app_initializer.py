@@ -686,6 +686,7 @@ class AppInitializer:
         # Connect current layer changed signal
         if self._update_undo_redo_buttons:
             dockwidget.currentLayerChanged.connect(self._update_undo_redo_buttons)
+            dockwidget.undoRedoStateRequested.connect(self._update_undo_redo_buttons)
 
         # Connect variable management signals
         if self._save_variables_from_layer and self._remove_variables_from_layer:

@@ -727,12 +727,19 @@ class DockwidgetSignalManager:
         except Exception as e:
             logger.warning(f"Could not connect EXPORTING signals at startup: {e}")
 
-        # FIX 2026-02-18: Connect DOCK.TOOLS.currentChanged to update action button states on tab switch
+        # FIX 2026-02-18: Connect toolBox_tabTools.currentChanged directly
+        # to update action button enabled/disabled states on tab switch
         try:
-            self.manage_signal(["DOCK", "TOOLS"], 'connect', 'currentChanged')
-            logger.debug("Connected DOCK.TOOLS.currentChanged signal")
+            toolbox = getattr(self.dockwidget, 'toolBox_tabTools', None)
+            if toolbox:
+                try:
+                    toolbox.currentChanged.disconnect(self.dockwidget.select_tabTools_index)
+                except (TypeError, RuntimeError):
+                    pass
+                toolbox.currentChanged.connect(self.dockwidget.select_tabTools_index)
+                logger.debug("Connected toolBox_tabTools.currentChanged DIRECTLY")
         except Exception as e:
-            logger.warning(f"Could not connect DOCK.TOOLS signal: {e}")
+            logger.warning(f"Could not connect toolBox_tabTools signal: {e}")
 
         # FIX 2026-01-14: Connect LAYER_TREE_VIEW if AUTO_CURRENT_LAYER enabled
         try:

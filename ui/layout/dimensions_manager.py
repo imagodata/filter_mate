@@ -550,7 +550,8 @@ class DimensionsManager(LayoutManagerBase):
 
         Applies consistent spacer dimensions to exploring/filtering/exporting key widgets
         based on section-specific sizes from UI config.
-        Uses Fixed vertical policy to keep buttons compact at the top.
+        Uses Expanding vertical policy so spacers auto-compensate for height differences
+        between key buttons and value widgets in parallel layouts.
         """
         try:
             UIConfig = self._get_ui_config()
@@ -604,19 +605,18 @@ class DimensionsManager(LayoutManagerBase):
                                 for j in range(nested_layout.count()):
                                     nested_item = nested_layout.itemAt(j)
                                     if nested_item and isinstance(nested_item, QSpacerItem):
-                                        # Fixed vertical policy keeps buttons compact
+                                        # Expanding policy lets spacers auto-compensate
+                                        # for height differences between columns
                                         nested_item.changeSize(
                                             spacer_width,
                                             target_spacer_height,
                                             QSizePolicy.Minimum,
-                                            QSizePolicy.Fixed
+                                            QSizePolicy.Expanding
                                         )
                                         spacer_count += 1
 
-                                nested_layout.invalidate()
-
                         if spacer_count > 0:
-                            logger.debug(f"Harmonized {spacer_count} spacers in {section_name} to {target_spacer_height}px (Fixed)")
+                            logger.debug(f"Harmonized {spacer_count} spacers in {section_name} to {target_spacer_height}px")
 
             mode_name = 'COMPACT' if is_compact else 'NORMAL'
             logger.debug(f"Applied spacer dimensions ({mode_name} mode): {spacer_sizes}")
@@ -727,7 +727,7 @@ class DimensionsManager(LayoutManagerBase):
                     layout = getattr(self.dockwidget, layout_name)
                     layout.setSpacing(button_spacing)
                     layout.setContentsMargins(0, 0, 0, 0)
-                    layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+                    layout.setAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
 
                     # Center each item horizontally within the layout
                     for i in range(layout.count()):
@@ -762,25 +762,10 @@ class DimensionsManager(LayoutManagerBase):
                     layout.setContentsMargins(0, 0, 0, 0)
                     layout.setSpacing(4)
 
-            # Pin all keys widgets to top of their parent layout cells
-            keys_in_parents = [
-                ('horizontalLayout_filtering_content', 'widget_filtering_keys'),
-                ('horizontalLayout_exporting_content', 'widget_exporting_keys')
-            ]
-            for layout_name, widget_name in keys_in_parents:
-                if hasattr(self.dockwidget, layout_name) and hasattr(self.dockwidget, widget_name):
-                    getattr(self.dockwidget, layout_name).setAlignment(
-                        getattr(self.dockwidget, widget_name), Qt.AlignTop)
-
             # Configure column stretch for gridLayout_main_actions
-            # and pin exploring keys widget to top of its grid cell
             if hasattr(self.dockwidget, 'gridLayout_main_actions'):
-                grid = self.dockwidget.gridLayout_main_actions
-                grid.setColumnStretch(0, 0)
-                grid.setColumnStretch(1, 1)
-                # Prevent keys widget from stretching to match content area row height
-                if hasattr(self.dockwidget, 'widget_exploring_keys'):
-                    grid.setAlignment(self.dockwidget.widget_exploring_keys, Qt.AlignTop)
+                self.dockwidget.gridLayout_main_actions.setColumnStretch(0, 0)
+                self.dockwidget.gridLayout_main_actions.setColumnStretch(1, 1)
 
             # Ensure gridLayout_main_header expands properly
             if hasattr(self.dockwidget, 'gridLayout_main_header'):
@@ -800,8 +785,7 @@ class DimensionsManager(LayoutManagerBase):
                     max_width = widget_keys_config.get('max_width', 40) if widget_keys_config else 40
                     widget.setMinimumWidth(min_width)
                     widget.setMaximumWidth(max_width)
-                    # Don't expand vertically beyond button content
-                    widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+                    widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
                     parent_layout = widget.layout()
                     if parent_layout:
@@ -834,8 +818,6 @@ class DimensionsManager(LayoutManagerBase):
                     layout = getattr(self.dockwidget, layout_name)
                     layout.setContentsMargins(2, 2, 2, 2)
                     layout.setSpacing(4)
-                    # Pin content to top of toolbox page to avoid bottom gap
-                    layout.setAlignment(Qt.AlignTop)
 
             logger.debug(f"Aligned key layouts with {button_spacing}px spacing, {widget_keys_padding}px padding")
 

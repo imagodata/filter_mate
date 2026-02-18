@@ -2894,6 +2894,80 @@ class FilterEngineTask(QgsTask):
         self._pending_subset_requests = cleared_pending
         self.ogr_source_geom = cleared_ogr
 
+        # GPKG layer tree write (sqlite3-based, no QgsProject/QgsVectorLayer creation)
+        if result and self.task_action == 'export':
+            pending = getattr(self._export_handler, '_pending_layer_tree_write', None)
+            if pending:
+                del self._export_handler._pending_layer_tree_write
+                try:
+                    from ..export.gpkg_layer_tree_writer import write_layer_tree_to_gpkg
+                    success = write_layer_tree_to_gpkg(
+                        pending['gpkg_path'],
+                        pending['layer_ids'],
+                        pending['project_title'],
+                    )
+                    if success:
+                        logger.info(f"Layer tree written to GPKG: {pending['gpkg_path']}")
+                    else:
+                        logger.warning("Failed to write layer tree to GPKG")
+                except Exception as e:
+                    logger.error(f"Error writing layer tree to GPKG: {e}")
+
+            # KML folder merge (pure Python xml.etree, runs on main thread for
+            # QgsProject.instance() access to resolve layer names & hierarchy)
+            pending_kml = getattr(self._export_handler, '_pending_kml_merge', None)
+            if pending_kml:
+                del self._export_handler._pending_kml_merge
+                try:
+                    self._execute_kml_folder_merge(pending_kml)
+                except Exception as e:
+                    logger.error(f"Error merging KML with folders: {e}")
+
+    def _execute_kml_folder_merge(self, pending: dict) -> None:
+        """Merge individual KML files into a single KML with Folder structure."""
+        import os
+        from qgis.core import QgsProject
+        from ..export.kml_folder_writer import merge_kml_with_folders, cleanup_individual_kmls
+        from ...infrastructure.utils.layer_tree_utils import get_layer_group_hierarchy
+
+        output_folder = pending['output_folder']
+        layer_ids = pending['layer_ids']
+        project_title = pending['project_title']
+
+        # Resolve layer_id → KML file path via QgsProject.instance()
+        source_project = QgsProject.instance()
+        kml_files = {}
+        for lid in layer_ids:
+            layer = source_project.mapLayer(lid)
+            if not layer:
+                continue
+            kml_path = os.path.join(output_folder, f"{layer.name()}.kml")
+            if os.path.isfile(kml_path):
+                kml_files[lid] = kml_path
+
+        if not kml_files:
+            logger.warning("No KML files found to merge")
+            return
+
+        # Compute hierarchy from source project
+        hierarchy = get_layer_group_hierarchy(list(kml_files.keys()))
+
+        # Determine merged output path
+        merged_name = project_title.replace(' ', '_') if project_title else 'export'
+        merged_path = os.path.join(output_folder, f"{merged_name}.kml")
+
+        success = merge_kml_with_folders(
+            kml_files, hierarchy, merged_path, project_title
+        )
+        if success:
+            deleted = cleanup_individual_kmls(kml_files)
+            logger.info(
+                f"KML folder merge complete: {merged_path} "
+                f"({len(kml_files)} layers merged, {deleted} individual files removed)"
+            )
+        else:
+            logger.warning("KML folder merge failed - individual files preserved")
+
     def _cleanup_safe_intersect_layers(self):
         """Cleanup orphaned safe_intersect layers. Delegates to FinishedHandler."""
         self._finished_handler.cleanup_safe_intersect_layers()

@@ -226,6 +226,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
     resettingLayerVariableOnError = pyqtSignal(QgsVectorLayer, list)
 
     settingProjectVariables = pyqtSignal()
+    undoRedoStateRequested = pyqtSignal()
 
     # Static cache for geometry icons to avoid repeated calculations
     _icon_cache = {}
@@ -753,13 +754,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
             self._splitter_manager.setup()
         else:
             self._setup_main_splitter()
-        self.apply_dynamic_dimensions()
         self._fix_toolbox_icons()
         self._setup_backend_indicator()
         self._setup_action_bar_layout()
         self._setup_exploring_tab_widgets()
         self._setup_filtering_tab_widgets()
         self._setup_exporting_tab_widgets()
+        # Apply dimensions AFTER tab setup so dynamically inserted spacers are processed
+        self.apply_dynamic_dimensions()
         if 'CURRENT_PROJECT' in self.CONFIG_DATA:
             self.project_props = self.CONFIG_DATA["CURRENT_PROJECT"]
         self.manage_configuration_model()
@@ -1126,8 +1128,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
 
         Applies consistent spacer dimensions to exploring/filtering/exporting key widgets
         based on section-specific sizes from UI config.
-        Uses Fixed vertical policy to keep buttons compact at the top, with a bottom
-        stretch to absorb extra vertical space.
+        Uses Expanding vertical policy so spacers auto-compensate for height differences
+        between key buttons and value widgets in parallel layouts.
         """
         try:
             from qgis.PyQt.QtWidgets import QSpacerItem, QSizePolicy; from .ui.elements import get_spacer_size; from .ui.config import UIConfig, DisplayProfile
@@ -1144,23 +1146,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                             nested_layout = item.layout()
                             for j in range(nested_layout.count()):
                                 if (nested := nested_layout.itemAt(j)) and isinstance(nested, QSpacerItem):
-                                    nested.changeSize(20, target_h, QSizePolicy.Minimum, QSizePolicy.Fixed)
+                                    nested.changeSize(20, target_h, QSizePolicy.Minimum, QSizePolicy.Expanding)
                                     spacer_count += 1
-                            # Add bottom stretch (only once — guard against repeated calls)
-                            has_stretch = False
-                            for k in range(nested_layout.count()):
-                                stretch_item = nested_layout.itemAt(k)
-                                if (stretch_item and isinstance(stretch_item, QSpacerItem)
-                                        and stretch_item.sizePolicy().verticalPolicy() == QSizePolicy.Expanding
-                                        and stretch_item.sizePolicy().horizontalPolicy() == QSizePolicy.Minimum
-                                        and stretch_item.sizeHint().height() == 0):
-                                    has_stretch = True
-                                    break
-                            if not has_stretch:
-                                nested_layout.addStretch(1)
                             nested_layout.invalidate()
                 if spacer_count > 0:
-                    logger.debug(f"Harmonized {spacer_count} spacers in {section} to {target_h}px (Fixed)")
+                    logger.debug(f"Harmonized {spacer_count} spacers in {section} to {target_h}px (Expanding)")
             logger.debug(f"Applied spacer dimensions ({mode_name} mode): {spacer_sizes}")
         except Exception as e:
             logger.warning(f"Could not harmonize spacers: {e}")
@@ -2049,6 +2039,21 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
             logger.debug("✓ EXPORTING button signals connected at startup")
         except Exception as e:
             logger.warning(f"Could not connect EXPORTING signals at startup: {e}")
+
+        # FIX 2026-02-18: Connect toolBox_tabTools.currentChanged directly
+        # to update action button enabled/disabled states on tab switch.
+        # Without this, switching to EXPORTING panel won't enable pushButton_action_export.
+        try:
+            toolbox = getattr(self, 'toolBox_tabTools', None)
+            if toolbox:
+                try:
+                    toolbox.currentChanged.disconnect(self.select_tabTools_index)
+                except (TypeError, RuntimeError):
+                    pass
+                toolbox.currentChanged.connect(self.select_tabTools_index)
+                logger.debug("✓ Connected toolBox_tabTools.currentChanged → select_tabTools_index")
+        except Exception as e:
+            logger.warning(f"Could not connect toolBox_tabTools signal: {e}")
 
         # FIX 2026-01-14: Connect LAYER_TREE_VIEW only if AUTO_CURRENT_LAYER is enabled
         # This is also handled by filtering_auto_current_layer_changed() but we need to
@@ -3249,15 +3254,25 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                 widget.setEnabled(True)
                 logger.debug(f"✓ Widget {widget_name} set to always enabled")
 
-    def select_tabTools_index(self):
-        """v4.0 S18: Update action buttons based on active tab."""
-        if not self.widgets_initialized: return
+    def select_tabTools_index(self, index=None):
+        """v4.0 S18: Update action buttons based on active tab.
+
+        Args:
+            index: Optional tab index from currentChanged signal. If None,
+                   reads from widget directly.
+        """
+        if not self.widgets_initialized:
+            logger.debug("select_tabTools_index: SKIPPED (widgets not initialized)")
+            return
         self.tabTools_current_index = self.widgets["DOCK"]["TOOLS"]["WIDGET"].currentIndex()
         states = {0: (True, True, True, True, False), 1: (False, False, False, False, True), 2: (False,) * 5}
         s = states.get(self.tabTools_current_index, (False,) * 5)
-        for i, name in enumerate(['FILTER', 'UNDO_FILTER', 'REDO_FILTER', 'UNFILTER', 'EXPORT']): self.widgets["ACTION"][name]["WIDGET"].setEnabled(s[i])
+        logger.info(f"select_tabTools_index: index={self.tabTools_current_index}, EXPORT enabled={s[4]}")
+        for i, name in enumerate(['FILTER', 'UNDO_FILTER', 'REDO_FILTER', 'UNFILTER', 'EXPORT']):
+            self.widgets["ACTION"][name]["WIDGET"].setEnabled(s[i])
         self.widgets["ACTION"]["ABOUT"]["WIDGET"].setEnabled(True)
         self.set_exporting_properties()
+        self.undoRedoStateRequested.emit()
 
     def _connect_groupbox_signals_directly(self):
         """v4.0 S18: Connect groupbox signals for exclusive behavior.
@@ -6048,6 +6063,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         # These are checkable pushbuttons that may not be properly connected via connect_widgets_signals()
         self.force_reconnect_exploring_signals()
 
+        # FIX 2026-02-18: Force reconnect toolbox signal (may be disconnected by
+        # disconnect_widgets_signals from layer task begun without _signals_connected reset)
+        try:
+            toolbox = getattr(self, 'toolBox_tabTools', None)
+            if toolbox:
+                try:
+                    toolbox.currentChanged.disconnect(self.select_tabTools_index)
+                except (TypeError, RuntimeError):
+                    pass
+                toolbox.currentChanged.connect(self.select_tabTools_index)
+        except Exception as e:
+            logger.warning(f"_activate_layer_ui: Could not reconnect toolbox signal: {e}")
+
         # Update backend indicator
         if self.PROJECT_LAYERS:
             first_layer_id = list(self.PROJECT_LAYERS.keys())[0]
@@ -6429,6 +6457,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
 
             # FIX 2026-01-22 v4.3.7: Sync HAS_LAYERS_TO_EXPORT JUST-IN-TIME before export
             # Qt restores widget states without emitting signals - sync flag to match UI
+            layers_to_export = None
             try:
                 layers_to_export = self.get_layers_to_export()
                 if layers_to_export:
@@ -6497,6 +6526,64 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                                 has_styles_widget.setChecked(True)
             except Exception as e:
                 logger.warning(f"Failed to sync export flags: {e}")
+
+            # Show preserve groups dialog for GPKG / KML exports
+            # CRITICAL: QDialog.exec_() crashes QGIS 3.44 (access violation in
+            # QgsCustomization::preNotify) because the nested event loop conflicts with
+            # QGIS's event processing. Use dialog.open() (non-blocking, no nested loop)
+            # with accepted/rejected signal connections instead.
+            try:
+                datatype_widget = self.widgets.get('EXPORTING', {}).get('DATATYPE_TO_EXPORT', {}).get('WIDGET')
+                current_datatype = datatype_widget.currentText().strip().upper() if datatype_widget and hasattr(datatype_widget, 'currentText') else ''
+                show_group_dialog = current_datatype in ('GPKG', 'KML')
+
+                if show_group_dialog and layers_to_export:
+                    config_key = f"{current_datatype}_PRESERVE_GROUPS"
+                    preserve_default = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get(
+                        config_key, {}
+                    ).get("value", False)
+
+                    layer_ids = []
+                    for l_info in layers_to_export:
+                        if isinstance(l_info, dict):
+                            layer_ids.append(l_info.get('layer_id', ''))
+                        else:
+                            layer_ids.append(str(l_info))
+
+                    output_path = self.project_props.get('EXPORTING', {}).get('OUTPUT_FOLDER_TO_EXPORT', '')
+
+                    from .infrastructure.utils.layer_tree_utils import get_layer_group_hierarchy
+                    from .ui.dialogs.export_group_recap_dialog import ExportGroupRecapDialog
+
+                    hierarchy = get_layer_group_hierarchy(layer_ids)
+                    dialog = ExportGroupRecapDialog(
+                        hierarchy, len(layer_ids), output_path,
+                        export_format=current_datatype,
+                        preserve_default=preserve_default, parent=self
+                    )
+                    # Keep a reference to prevent garbage collection
+                    self._export_recap_dialog = dialog
+
+                    def _on_accepted():
+                        preserve = dialog.preserve_groups()
+                        self.project_props.setdefault('EXPORTING', {})['HAS_PRESERVE_GROUPS'] = preserve
+                        # Schedule safe Qt destruction before emitting the task
+                        dialog.deleteLater()
+                        self._export_recap_dialog = None
+                        self.launchingTask.emit(task_name)
+
+                    def _on_rejected():
+                        logger.info(f"{current_datatype} export cancelled by user")
+                        dialog.deleteLater()
+                        self._export_recap_dialog = None
+
+                    dialog.accepted.connect(_on_accepted)
+                    dialog.rejected.connect(_on_rejected)
+                    dialog.open()  # Non-blocking modal - no nested event loop
+                    return  # Don't emit launchingTask - callbacks will handle it
+            except Exception as e:
+                logger.warning(f"Export group dialog setup failed: {e}", exc_info=True)
+
             self.launchingTask.emit(task_name)
             return
 

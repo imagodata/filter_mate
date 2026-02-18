@@ -417,6 +417,18 @@
           "description": "Number of features per batch during streaming export"
         }
       },
+      "GPKG_PRESERVE_GROUPS": {
+        "description": "Default behavior for preserving QGIS layer group structure in GPKG exports",
+        "value": false,
+        "choices": [true, false],
+        "applies_to": "GPKG export - embeds a QGIS project with layer tree groups into the GeoPackage file"
+      },
+      "KML_PRESERVE_GROUPS": {
+        "description": "Default behavior for merging KML exports into a single file with folder structure",
+        "value": false,
+        "choices": [true, false],
+        "applies_to": "KML export - merges all layers into a single KML file with Folder hierarchy"
+      },
       "PERFORMANCE": {
         "description": "Performance monitoring and warning settings",
         "enable_performance_warnings": {

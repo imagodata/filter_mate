@@ -67,6 +67,9 @@ class ExportValidationResult:
     batch_zip: bool = False
     """Whether to export to zip archive."""
 
+    preserve_groups: bool = False
+    """Whether to preserve QGIS layer group structure in GPKG export."""
+
     error_message: Optional[str] = None
     """Error message if validation failed."""
 
@@ -199,6 +202,12 @@ def validate_export_parameters(
     batch_zip = config.get("BATCH_ZIP", False)
     logger.debug(f"Batch modes - folder: {batch_output_folder}, zip: {batch_zip}")
 
+    # Preserve layer group structure (GPKG embeds project, KML uses Folders)
+    preserve_groups = config.get("HAS_PRESERVE_GROUPS", False)
+    if preserve_groups and datatype not in ('GPKG', 'KML'):
+        preserve_groups = False
+    logger.debug(f"Preserve groups: {preserve_groups}")
+
     logger.info(f"Export validation PASSED: {len(layers)} layers, format={datatype}, output={output_folder}")
 
     # Debug logging
@@ -214,5 +223,6 @@ def validate_export_parameters(
         output_folder=output_folder,
         zip_path=zip_path,
         batch_output_folder=batch_output_folder,
-        batch_zip=batch_zip
+        batch_zip=batch_zip,
+        preserve_groups=preserve_groups,
     )
