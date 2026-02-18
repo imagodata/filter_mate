@@ -2,6 +2,25 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.5.3] - 2026-02-18
+
+### Bug Fix - GPKG Export Crash (Thread-Safety)
+
+**Symptom**: QGIS crashes with "Windows fatal exception: access violation" when exporting to GPKG
+**Root Cause**: `iface.messageBar()` was called from QgsTask background thread instead of main GUI thread
+
+#### Changes
+
+- **layer_exporter.py**: Remove `iface.messageBar().pushSuccess()` from `export_to_gpkg()` - success message now displayed by `finished_handler` on main thread
+- **layer_management_task.py**: Add `_deferred_warnings` list to queue warnings for display in `finished()` callback
+- **layer_management_task.py**: Move PostgreSQL PRIMARY KEY warning from `run()` to deferred display in `finished()`
+
+#### Technical Details
+
+Qt GUI operations are NOT thread-safe. Calling `iface.messageBar()` from a worker thread (QgsTask.run()) causes access violations on Windows. The fix defers all GUI operations to the `finished()` callback which runs on the main thread.
+
+---
+
 ## [4.5.2] - 2026-02-12
 
 ### Bug Fix
