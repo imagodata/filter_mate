@@ -578,6 +578,12 @@ class FilterResultHandler:
             logger.info("📡 About to call _force_reconnect_action_signals()")
             self._force_reconnect_action_signals()
 
+            # FIX 2026-02-18: Reconnect toolbox signal and sync button states
+            # The toolBox_tabTools.currentChanged signal may have been disconnected
+            # during filtering (e.g., via disconnect_widgets_signals from add_layers).
+            # Without this, switching tabs won't update action button enabled states.
+            self._reconnect_toolbox_signal()
+
             # v3.0.11: CRITICAL FIX - Force reconnect EXPLORING signals
             self._force_reconnect_exploring_signals()
 
@@ -671,6 +677,42 @@ class FilterResultHandler:
         dockwidget = self._get_dockwidget() if self._get_dockwidget else None
         if dockwidget and hasattr(dockwidget, 'force_reconnect_exploring_signals'):
             dockwidget.force_reconnect_exploring_signals()
+
+    def _reconnect_toolbox_signal(self) -> None:
+        """FIX 2026-02-18: Reconnect toolBox_tabTools.currentChanged and sync button states.
+
+        After filtering, the toolbox signal may have been disconnected (e.g., by
+        disconnect_widgets_signals from add_layers task). Without this signal,
+        switching between filtering/exporting/exploring tabs won't update
+        action button enabled/disabled states.
+
+        Also calls select_tabTools_index() to synchronize button states with
+        the current tab, ensuring correct enabled/disabled states.
+        """
+        dockwidget = self._get_dockwidget() if self._get_dockwidget else None
+        if not dockwidget:
+            return
+
+        # Reconnect toolbox signal
+        toolbox = getattr(dockwidget, 'toolBox_tabTools', None)
+        if toolbox and hasattr(dockwidget, 'select_tabTools_index'):
+            try:
+                try:
+                    toolbox.currentChanged.disconnect(dockwidget.select_tabTools_index)
+                except (TypeError, RuntimeError):
+                    pass  # Not connected - expected
+                toolbox.currentChanged.connect(dockwidget.select_tabTools_index)
+                logger.debug("FIX 2026-02-18: ✓ Reconnected toolBox_tabTools.currentChanged")
+            except Exception as e:
+                logger.warning(f"FIX 2026-02-18: Could not reconnect toolbox signal: {e}")
+
+        # Sync button states with current tab
+        if hasattr(dockwidget, 'select_tabTools_index'):
+            try:
+                dockwidget.select_tabTools_index()
+                logger.debug("FIX 2026-02-18: ✓ Synced action button states with current tab")
+            except Exception as e:
+                logger.warning(f"FIX 2026-02-18: Could not sync tab button states: {e}")
 
     def _invalidate_exploring_cache(self) -> None:
         """Invalidate exploring cache after filtering to show fresh features."""
@@ -770,6 +812,10 @@ class FilterResultHandler:
                 # Reconnect our handler
                 if hasattr(dockwidget, 'manageSignal'):
                     dockwidget.manageSignal(["FILTERING", "CURRENT_LAYER"], 'connect', 'layerChanged')
+
+                # FIX 2026-02-18: Reconnect toolbox signal + sync button states
+                # Ensures tab switching properly updates action buttons after filtering
+                self._reconnect_toolbox_signal()
 
                 # v3.0.19: CRITICAL FIX - Reset _filtering_in_progress HERE, not earlier
                 dockwidget._filtering_in_progress = False

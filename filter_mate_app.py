@@ -1928,11 +1928,26 @@ class FilterMateApp:
             logger.warning("UndoRedoHandler not available, history not updated")
 
     def update_undo_redo_buttons(self):
-        """Update undo/redo button states via UndoRedoHandler."""
+        """Update undo/redo button states via UndoRedoHandler.
+
+        FIX 2026-02-18: Only enable undo/redo on filtering tab (tab 0).
+        Previously, undoRedoStateRequested emitted by select_tabTools_index()
+        would re-enable undo/redo buttons even on the exporting tab, overriding
+        the correct disabled state set by select_tabTools_index().
+        """
         if not self.dockwidget: return
         undo_btn = getattr(self.dockwidget, 'pushButton_action_undo_filter', None)
         redo_btn = getattr(self.dockwidget, 'pushButton_action_redo_filter', None)
         if not undo_btn or not redo_btn: return
+
+        # FIX 2026-02-18: Only update undo/redo on filtering tab (index 0)
+        # On other tabs, these buttons must stay disabled per select_tabTools_index()
+        tab_index = getattr(self.dockwidget, 'tabTools_current_index', 0)
+        if tab_index != 0:
+            undo_btn.setEnabled(False)
+            redo_btn.setEnabled(False)
+            return
+
         if self._undo_redo_handler:
             current_layer = self.dockwidget.current_layer
             layers_to_filter = (
