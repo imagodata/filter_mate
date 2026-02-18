@@ -157,9 +157,21 @@ class FilterResultHandler:
         # v2.9.19: CRITICAL - Restore EXACT same current_layer that was active BEFORE filtering
         restored_layer = self._restore_current_layer(current_layer_id_before_filter)
 
-        # v2.8.15: CRITICAL FIX - Ensure current_layer combo and exploring panel stay synchronized
-        # v3.0.10: Use restored_layer directly to avoid issues if current_layer is modified by async signals
-        self._refresh_ui_after_filtering(restored_layer, display_backend, current_layer_id_before_filter)
+        # FIX 2026-02-18: Suppress tracking zoom during post-filter widget reload.
+        # _handle_auto_zoom already performed the correct zoom to filtered extent.
+        # Without this flag, widget reload can trigger exploring_features_changed →
+        # handle_exploring_features_result → zooming_to_features with partial data
+        # (often just 1 feature), overriding the correct auto-zoom.
+        dockwidget = self._get_dockwidget() if self._get_dockwidget else None
+        if dockwidget:
+            dockwidget._suppress_tracking_zoom = True
+        try:
+            # v2.8.15: CRITICAL FIX - Ensure current_layer combo and exploring panel stay synchronized
+            # v3.0.10: Use restored_layer directly to avoid issues if current_layer is modified by async signals
+            self._refresh_ui_after_filtering(restored_layer, display_backend, current_layer_id_before_filter)
+        finally:
+            if dockwidget:
+                dockwidget._suppress_tracking_zoom = False
 
         # v2.8.13: CRITICAL - Invalidate expression cache after filtering
         self._invalidate_expression_cache(source_layer, task_parameters)

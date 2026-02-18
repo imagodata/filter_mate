@@ -7,34 +7,34 @@
 name=FilterMate
 qgisMinimumVersion=3.22
 description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector data with lightning-fast performance on ANY data source.
-version=4.5.3
+version=4.6.0
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🎯 FilterMate 4.5 - Your Swiss Army Knife for Spatial Data!
-    
+about=🎯 FilterMate 4.6 - Your Swiss Army Knife for Spatial Data!
+
     Stop struggling with complex filters. FilterMate makes spatial queries intuitive, fast, and powerful.
-    
+
     🌟 WHY FILTERMATE?
     ━━━━━━━━━━━━━━━━━
     ✓ Works with EVERYTHING: PostgreSQL, Spatialite, GeoPackage, Shapefiles, WFS...
     ✓ Lightning fast: 2-8× faster with 4 performance optimizers + smart caching
     ✓ Intuitive: Filter by clicking, drawing, or selecting - no SQL needed!
     ✓ Professional: Undo/Redo, Favorites, Dark Mode, 21 languages
-    
+
     🔥 KILLER FEATURES:
     ━━━━━━━━━━━━━━━━━━
     📍 Geometric filtering with buffer, intersection, containment...
     🔍 Smart entity search across any layer type
     ⭐ Save & share your favorite filter configurations with spatial context
-    📦 One-click export with styles to GeoPackage
+    📦 One-click export to GeoPackage with embedded QGIS project (preserves group structure, styles & CRS)
     🎨 Beautiful UI that adapts to your QGIS theme
     ⚡ Filter chaining with dynamic buffer expressions
-    
+
+    💡 v4.6.0: GPKG export now embeds a full QGIS project with layer groups, styles & CRS
     💡 v4.5.3: Fix GPKG export crash (thread-safety fix for GUI calls)
     💡 v4.5.2: Fix square key buttons sizing, exploring sidebar layout alignment
-    💡 v4.5.1: Website launch, org migration, 600 unit tests, score 9.0/10
-    
+
     📖 Full docs: https://imagodata.github.io/filter_mate
 
 tracker=https://github.com/imagodata/filter_mate/issues
@@ -45,7 +45,7 @@ repository=https://github.com/imagodata/filter_mate
 
 hasProcessingProvider=no
 
-changelog=v4.5.3 (2026-02-18): Fix GPKG export crash caused by GUI calls from background thread. v4.5.2 (2026-02-12): Fix square key buttons sizing, exploring sidebar layout alignment. v4.5.1 (2026-02-11): Website launch, org migration, 600 tests, quality score 9.0/10.
+changelog=v4.6.0 (2026-02-18): GPKG export now embeds a full QGIS project preserving layer group hierarchy, styles and CRS. Fix action buttons not disabled when switching to exporting tab. v4.5.3 (2026-02-18): Fix GPKG export crash caused by GUI calls from background thread. v4.5.2 (2026-02-12): Fix square key buttons sizing, exploring sidebar layout alignment. v4.5.1 (2026-02-11): Website launch, org migration, 600 tests, quality score 9.0/10.
 
 # Tags are comma separated with spaces allowed
 tags=python,filter,vector,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export

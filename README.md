@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.5.3** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.6.0** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -22,6 +22,7 @@
 | 📝 **Undo/Redo** | Complete filter history |
 | 🌍 **21 Languages** | Full internationalization |
 | 🎨 **Dark Mode** | Automatic theme detection |
+| 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 
 ---

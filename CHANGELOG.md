@@ -2,6 +2,30 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.6.0] - 2026-02-18
+
+### Feature - GPKG Embedded Project Export
+
+Exported GeoPackages now embed a full QGIS project that preserves layer group hierarchy, styles, and CRS. When opening the GPKG in QGIS, the embedded project automatically restores the original group structure.
+
+#### New
+
+- **gpkg_layer_tree_writer.py**: New module that embeds a QGIS project into exported GeoPackages using pure sqlite3 + xml.etree (safe for QGIS 3.44, no QgsProject lifecycle issues)
+- Reads source project layer tree and reproduces group hierarchy in the embedded project
+- Embeds layer styles (renderer, labeling, etc.) when "Save styles" is checked
+- Uses export CRS when data is reprojected, preserving correct spatial reference
+- Project stored as hex-encoded QGZ (ZIP) matching native QGIS GeoPackage project storage format
+
+#### Bug Fix
+
+- Fix action buttons not disabled when switching to exporting tab after filtering
+
+#### Technical Details
+
+The embedded project is built as XML, wrapped in QGZ (ZIP) format, hex-encoded, and inserted into the `qgis_projects` table — exactly matching how QGIS natively stores projects in GeoPackages. This ensures full compatibility with QGIS "Open Project from GeoPackage" workflow.
+
+---
+
 ## [4.5.3] - 2026-02-18
 
 ### Bug Fix - GPKG Export Crash (Thread-Safety)

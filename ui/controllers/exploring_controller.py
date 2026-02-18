@@ -2222,8 +2222,15 @@ class ExploringController(BaseController, LayerSelectionMixin):
         is_tracking = is_tracking_from_props or is_tracking_from_button
 
         if is_tracking:
-            logger.info(f"handle_exploring_features_result: TRACKING {len(features)} features (props={is_tracking_from_props}, btn={is_tracking_from_button})")
-            self.zooming_to_features(features)
+            # FIX 2026-02-18: Skip tracking zoom during post-filter widget reload.
+            # _handle_auto_zoom already zoomed to the correct filtered extent.
+            # Without this guard, widget reload triggers exploring_features_changed with
+            # partial data (often 1 feature), overriding the correct auto-zoom.
+            if getattr(dw, '_suppress_tracking_zoom', False):
+                logger.info(f"handle_exploring_features_result: SKIPPED tracking zoom ({len(features)} features) - post-filter auto-zoom already done")
+            else:
+                logger.info(f"handle_exploring_features_result: TRACKING {len(features)} features (props={is_tracking_from_props}, btn={is_tracking_from_button})")
+                self.zooming_to_features(features)
 
         # Update button states
         dw._update_exploring_buttons_state()
