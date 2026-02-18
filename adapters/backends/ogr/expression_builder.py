@@ -363,21 +363,25 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 safe_set_subset_string(layer, "1 = 0")
                 return True
 
-            # FIX v4.0.8: For PostgreSQL layers via OGR, we need actual PK values, not QGIS internal FIDs
-            # selectedFeatureIds() returns QGIS internal feature IDs, which don't match PostgreSQL PK values
+            # FIX v4.5.3: For OGR layers with a real PK attribute field, use actual
+            # field values instead of QGIS internal FIDs. selectedFeatureIds() returns
+            # QGIS-internal IDs which don't match attribute values and the pseudo
+            # 'fid' column is unreliable in setSubsetString for many OGR drivers
+            # (ESRI Shapefile, PostgreSQL via OGR, etc.).
             pk_field = self._get_primary_key(layer)
-            storage_type = ""
-            try:
-                storage_type = layer.dataProvider().storageType().lower()
-            except Exception:
-                pass
+            use_pk_values = False
 
-            # Check if this is a PostgreSQL layer accessed via OGR
-            is_postgres_via_ogr = 'postgresql' in storage_type or 'postgis' in storage_type
+            # Use actual PK values when we have a real attribute field (not pseudo 'fid')
+            if pk_field and pk_field.lower() != 'fid':
+                use_pk_values = True
+                self.log_info(f"  - Real PK field '{pk_field}' detected: fetching actual attribute values")
+            else:
+                # Even for 'fid', check if it's a real field in the layer
+                if pk_field and layer.fields().indexOf(pk_field) >= 0:
+                    use_pk_values = True
+                    self.log_info(f"  - PK field '{pk_field}' exists as attribute: fetching actual values")
 
-            if is_postgres_via_ogr and pk_field:
-                # Get actual PK values from selected features
-                self.log_info(f"  - PostgreSQL via OGR detected: fetching actual PK values from '{pk_field}'")
+            if use_pk_values:
                 pk_values = []
                 for fid in selected_ids:
                     feature = layer.getFeature(fid)
@@ -388,13 +392,12 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
                 if pk_values:
                     self.log_info(f"  - Retrieved {len(pk_values)} actual PK values")
-                    # Build filter with actual PK values
                     fid_filter = self._build_fid_filter_with_values(layer, pk_values, pk_field)
                 else:
                     self.log_warning("  - Could not retrieve PK values, falling back to FID-based filter")
                     fid_filter = self._build_fid_filter(layer, selected_ids)
             else:
-                # Build FID filter normally for non-PostgreSQL layers
+                # No real PK field: use QGIS internal FIDs with pseudo 'fid' column
                 fid_filter = self._build_fid_filter(layer, selected_ids)
 
             # Clear selection (filter applied via subset)
