@@ -51,6 +51,7 @@ def write_layer_tree_to_gpkg(
     gpkg_path: str,
     layer_ids: List[str],
     project_title: str = "FilterMate Export",
+    export_crs_authid: Optional[str] = None,
 ) -> bool:
     """Embed a QGIS project with layer tree groups into a GeoPackage.
 
@@ -61,6 +62,7 @@ def write_layer_tree_to_gpkg(
         gpkg_path: Path to the exported GPKG file.
         layer_ids: Original layer IDs from the source project.
         project_title: Title for the embedded project.
+        export_crs_authid: If set, override layer CRS (data was reprojected).
 
     Returns:
         True on success, False on failure.
@@ -74,13 +76,18 @@ def write_layer_tree_to_gpkg(
         return False
 
     try:
-        return _do_write(gpkg_path, layer_ids, project_title)
+        return _do_write(gpkg_path, layer_ids, project_title, export_crs_authid)
     except Exception as e:
         logger.error(f"Failed to write layer tree to GPKG: {e}", exc_info=True)
         return False
 
 
-def _do_write(gpkg_path: str, layer_ids: List[str], project_title: str) -> bool:
+def _do_write(
+    gpkg_path: str,
+    layer_ids: List[str],
+    project_title: str,
+    export_crs_authid: Optional[str] = None,
+) -> bool:
     """Build project XML and write it into the GPKG via sqlite3."""
     gpkg_filename = os.path.basename(gpkg_path)
 
@@ -102,6 +109,25 @@ def _do_write(gpkg_path: str, layer_ids: List[str], project_title: str) -> bool:
     # 3. Extract styles and CRS from source layers
     layer_styles = {}   # layer_id → style XML string (from exportNamedStyle)
     layer_crs = {}      # layer_id → {authid, proj4, wkt, srid, description}
+
+    # If export reprojected data, build CRS info from the export CRS
+    override_crs = None
+    if export_crs_authid:
+        try:
+            from qgis.core import QgsCoordinateReferenceSystem
+            crs = QgsCoordinateReferenceSystem(export_crs_authid)
+            if crs.isValid():
+                override_crs = {
+                    'authid': crs.authid(),
+                    'proj4': crs.toProj(),
+                    'wkt': crs.toWkt(),
+                    'srid': crs.postgisSrid(),
+                    'description': crs.description(),
+                }
+                logger.info(f"Export CRS override: {crs.authid()}")
+        except Exception as e:
+            logger.debug(f"Could not resolve export CRS {export_crs_authid}: {e}")
+
     for lid in layer_map:
         layer = source_project.mapLayer(lid)
         if not layer:
@@ -114,19 +140,22 @@ def _do_write(gpkg_path: str, layer_ids: List[str], project_title: str) -> bool:
             layer_styles[lid] = doc.toString()
         except Exception as e:
             logger.debug(f"Could not export style for layer {lid}: {e}")
-        # Extract CRS
-        try:
-            crs = layer.crs()
-            if crs.isValid():
-                layer_crs[lid] = {
-                    'authid': crs.authid(),
-                    'proj4': crs.toProj(),
-                    'wkt': crs.toWkt(),
-                    'srid': crs.postgisSrid(),
-                    'description': crs.description(),
-                }
-        except Exception as e:
-            logger.debug(f"Could not read CRS for layer {lid}: {e}")
+        # CRS: use export CRS if data was reprojected, else source layer CRS
+        if override_crs:
+            layer_crs[lid] = override_crs
+        else:
+            try:
+                crs = layer.crs()
+                if crs.isValid():
+                    layer_crs[lid] = {
+                        'authid': crs.authid(),
+                        'proj4': crs.toProj(),
+                        'wkt': crs.toWkt(),
+                        'srid': crs.postgisSrid(),
+                        'description': crs.description(),
+                    }
+            except Exception as e:
+                logger.debug(f"Could not read CRS for layer {lid}: {e}")
 
     # 4. Build project XML
     qgis_version = getattr(Qgis, 'QGIS_VERSION', '3.44.0-Unknown')

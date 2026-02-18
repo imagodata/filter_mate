@@ -241,6 +241,7 @@ class ExportHandler:
                 layers, output_folder, save_styles, zip_path,
                 project, layer_exporter, batch_exporter, sanitize_filename,
                 preserve_groups=export_config.get('preserve_groups', False),
+                export_crs=projection,
             )
 
         # STREAMING MODE: For large datasets (non-GPKG)
@@ -350,6 +351,7 @@ class ExportHandler:
         batch_exporter_class: Any,
         sanitize_filename_fn: Callable,
         preserve_groups: bool = False,
+        export_crs: Any = None,
     ) -> tuple:
         """Handle GPKG export mode.
 
@@ -363,6 +365,7 @@ class ExportHandler:
             batch_exporter_class: BatchExporter class (for create_zip_archive)
             sanitize_filename_fn: Function to sanitize filenames
             preserve_groups: Whether to preserve layer group structure in GPKG
+            export_crs: Optional QgsCoordinateReferenceSystem for reprojection
 
         Returns:
             tuple: (success: bool, message: str, error_details: Optional[str])
@@ -409,6 +412,7 @@ class ExportHandler:
                 'gpkg_path': gpkg_output_path,
                 'layer_ids': layer_ids,
                 'project_title': project.title() or 'FilterMate Export',
+                'export_crs_authid': export_crs.authid() if export_crs and export_crs.isValid() else None,
             }
             logger.info("Layer tree write deferred to main thread (finished callback)")
 
