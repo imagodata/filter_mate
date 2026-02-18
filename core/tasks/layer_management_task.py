@@ -200,6 +200,10 @@ class LayersManagementEngineTask(QgsTask):
         # or (layer_id, None, None) for setLayerVariables({}) to clear all
         self._deferred_layer_variables = []
 
+        # THREAD SAFETY: Store warnings for display in finished() on main thread
+        # DO NOT call iface.messageBar() from run() - causes crash (access violation)
+        self._deferred_warnings = []
+
         # JSON templates for layer properties
         # NOTE: has_combine_operator defaults to false - additive filter is auto-enabled
         # when existing subsets are detected on source or distant layers (see _synchronize_layer_widgets)
@@ -945,19 +949,15 @@ class LayersManagementEngineTask(QgsTask):
             # Check if PostgreSQL layer using ctid (no PRIMARY KEY)
             primary_key = result[0]
             if layer.providerType() == 'postgres' and primary_key == 'ctid':
-                # Show warning to user about limitations
-                from qgis.core import Qgis
-                from qgis.utils import iface
-                iface.messageBar().pushMessage(
-                    "FilterMate",
-                    self.tr(
-                        "La couche '{0}' n'a pas de PRIMARY KEY. "
-                        "Fonctionnalités limitées : vues matérialisées désactivées. "
-                        "Recommandation : ajoutez une PRIMARY KEY pour performances optimales."
-                    ).format(layer.name()),
-                    Qgis.Warning,
-                    duration=10
-                )
+                # Store warning for display on main thread in finished()
+                # DO NOT call iface.messageBar() here - causes crash (access violation)
+                warning_msg = self.tr(
+                    "La couche '{0}' n'a pas de PRIMARY KEY. "
+                    "Fonctionnalités limitées : vues matérialisées désactivées. "
+                    "Recommandation : ajoutez une PRIMARY KEY pour performances optimales."
+                ).format(layer.name())
+                self._deferred_warnings.append(warning_msg)
+                logger.warning(f"PostgreSQL layer without PRIMARY KEY: {layer.name()}")
 
             layer_variables = self._build_new_layer_properties(layer, result)
             self._set_layer_variables(layer, layer_variables)
@@ -1839,6 +1839,18 @@ class LayersManagementEngineTask(QgsTask):
 
                 # Schedule for next event loop iteration (0ms timeout)
                 QTimer.singleShot(0, apply_deferred_layer_variables)
+
+        # THREAD SAFETY: Display deferred warnings on main thread
+        # These warnings were collected during run() but couldn't be displayed there
+        if self._deferred_warnings:
+            for warning_msg in self._deferred_warnings:
+                iface.messageBar().pushMessage(
+                    "FilterMate",
+                    warning_msg,
+                    Qgis.Warning,
+                    duration=10
+                )
+            self._deferred_warnings.clear()
 
         result_action = None
         message_category = MESSAGE_TASKS_CATEGORIES[self.task_action]

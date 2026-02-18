@@ -380,18 +380,9 @@ class LayerExporter:
 
             logger.info(f"GPKG export successful: {output['OUTPUT']}")
 
-            # Show success message to user
-            try:
-                from qgis.utils import iface
-                iface.messageBar().pushSuccess(
-                    "FilterMate",
-                    QCoreApplication.translate(
-                        "LayerExporter",
-                        "Export terminé: {0} couche(s) exportée(s) vers {1}"
-                    ).format(len(layer_objects), output_path)
-                )
-            except Exception:
-                pass  # Don't fail if message bar not available
+            # NOTE: Success message is displayed by finished_handler on main thread
+            # DO NOT call iface.messageBar() here - this code runs in background thread!
+            # Calling GUI methods from background thread causes crash (access violation)
 
             return ExportResult(
                 success=True,
