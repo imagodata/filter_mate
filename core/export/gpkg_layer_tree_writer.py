@@ -17,7 +17,7 @@ import sqlite3
 import uuid
 import zipfile
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 from xml.etree import ElementTree as ET
 
 logger = logging.getLogger(__name__)
@@ -99,14 +99,45 @@ def _do_write(gpkg_path: str, layer_ids: List[str], project_title: str) -> bool:
 
     hierarchy = _extract_hierarchy(source_project, set(layer_map.keys()))
 
-    # 3. Build project XML
+    # 3. Extract styles and CRS from source layers
+    layer_styles = {}   # layer_id → style XML string (from exportNamedStyle)
+    layer_crs = {}      # layer_id → {authid, proj4, wkt, srid, description}
+    for lid in layer_map:
+        layer = source_project.mapLayer(lid)
+        if not layer:
+            continue
+        # Extract style
+        try:
+            from qgis.PyQt.QtXml import QDomDocument
+            doc = QDomDocument()
+            layer.exportNamedStyle(doc)
+            layer_styles[lid] = doc.toString()
+        except Exception as e:
+            logger.debug(f"Could not export style for layer {lid}: {e}")
+        # Extract CRS
+        try:
+            crs = layer.crs()
+            if crs.isValid():
+                layer_crs[lid] = {
+                    'authid': crs.authid(),
+                    'proj4': crs.toProj(),
+                    'wkt': crs.toWkt(),
+                    'srid': crs.postgisSrid(),
+                    'description': crs.description(),
+                }
+        except Exception as e:
+            logger.debug(f"Could not read CRS for layer {lid}: {e}")
+
+    # 4. Build project XML
     qgis_version = getattr(Qgis, 'QGIS_VERSION', '3.44.0-Unknown')
     xml_str = _build_project_xml(
         project_title, qgis_version, gpkg_filename,
         layer_map, gpkg_meta, hierarchy,
+        layer_styles=layer_styles,
+        layer_crs=layer_crs,
     )
 
-    # 4. Write into GPKG via sqlite3
+    # 5. Write into GPKG via sqlite3
     _insert_project_into_gpkg(gpkg_path, project_title, xml_str)
 
     logger.info(f"Layer tree project written to GPKG: {gpkg_path}")
@@ -256,6 +287,49 @@ def _extract_node(group, layer_id_set: set) -> dict:
 # Project XML generation (pure Python, no QGIS objects)
 # ---------------------------------------------------------------------------
 
+
+def _build_srs_xml(parent: ET.Element, crs_info: dict) -> None:
+    """Build a <spatialrefsys> element with full CRS info."""
+    spatial = ET.SubElement(parent, "spatialrefsys", attrib={"nativeFormat": "Wkt"})
+    ET.SubElement(spatial, "authid").text = crs_info.get('authid', 'EPSG:4326')
+    if 'wkt' in crs_info:
+        ET.SubElement(spatial, "wkt").text = crs_info['wkt']
+    if 'proj4' in crs_info:
+        ET.SubElement(spatial, "proj4").text = crs_info['proj4']
+    if 'srid' in crs_info:
+        ET.SubElement(spatial, "srid").text = str(crs_info['srid'])
+    if 'description' in crs_info:
+        ET.SubElement(spatial, "description").text = crs_info['description']
+
+
+def _embed_style_elements(maplayer: ET.Element, style_xml: str) -> None:
+    """Parse exportNamedStyle() XML and embed style elements into <maplayer>.
+
+    The style XML has a <qgis> root with child elements like <renderer-v2>,
+    <labeling>, <blendMode>, etc. We extract these and append to maplayer.
+    """
+    try:
+        style_root = ET.fromstring(style_xml)
+    except ET.ParseError as e:
+        logger.debug(f"Could not parse style XML: {e}")
+        return
+
+    # Copy labelsEnabled from style root attributes if present
+    labels_enabled = style_root.get('labelsEnabled')
+    if labels_enabled is not None:
+        maplayer.set('labelsEnabled', labels_enabled)
+
+    # Elements to skip (already set in maplayer or not relevant)
+    skip_tags = {'id', 'datasource', 'layername', 'provider', 'srs',
+                 'shortname', 'title', 'abstract', 'keywordList'}
+
+    for child in style_root:
+        tag = child.tag
+        # Skip elements already defined in maplayer
+        if tag in skip_tags:
+            continue
+        maplayer.append(child)
+
 def _build_project_xml(
     project_title: str,
     qgis_version: str,
@@ -263,8 +337,10 @@ def _build_project_xml(
     layer_map: Dict[str, str],
     gpkg_meta: Dict[str, dict],
     hierarchy: dict,
+    layer_styles: Optional[Dict[str, str]] = None,
+    layer_crs: Optional[Dict[str, dict]] = None,
 ) -> str:
-    """Build minimal QGIS project XML.
+    """Build QGIS project XML with styles and CRS from source layers.
 
     Args:
         project_title: Project title.
@@ -273,10 +349,17 @@ def _build_project_xml(
         layer_map: layer_id → gpkg_table_name.
         gpkg_meta: gpkg_table_name → {geom_column, geom_type, srs_id, authid}.
         hierarchy: Tree structure from _extract_hierarchy.
+        layer_styles: layer_id → style XML string (from exportNamedStyle).
+        layer_crs: layer_id → {authid, proj4, wkt, srid, description}.
 
     Returns:
         Project XML as string.
     """
+    if layer_styles is None:
+        layer_styles = {}
+    if layer_crs is None:
+        layer_crs = {}
+
     # Generate stable IDs for each layer in the embedded project
     embedded_ids = {}
     for lid, table_name in layer_map.items():
@@ -290,14 +373,18 @@ def _build_project_xml(
     ET.SubElement(root, "homePath", attrib={"path": ""})
     ET.SubElement(root, "title").text = project_title
 
-    # --- Project CRS (use first layer's CRS as default) ---
-    first_authid = 'EPSG:4326'
+    # --- Project CRS (use first layer's CRS) ---
+    first_crs = None
     if layer_map:
-        first_table = next(iter(layer_map.values()))
-        first_authid = gpkg_meta.get(first_table, {}).get('authid', 'EPSG:4326')
+        first_lid = next(iter(layer_map))
+        first_crs = layer_crs.get(first_lid)
+    if not first_crs:
+        first_table = next(iter(layer_map.values())) if layer_map else None
+        first_authid = gpkg_meta.get(first_table, {}).get('authid', 'EPSG:4326') if first_table else 'EPSG:4326'
+        first_crs = {'authid': first_authid}
+
     pcrs = ET.SubElement(root, "projectCrs")
-    pcrs_srs = ET.SubElement(pcrs, "spatialrefsys", attrib={"nativeFormat": "Wkt"})
-    ET.SubElement(pcrs_srs, "authid").text = first_authid
+    _build_srs_xml(pcrs, first_crs)
 
     # --- layer-tree-group ---
     tree_root = ET.SubElement(root, "layer-tree-group")
@@ -318,7 +405,6 @@ def _build_project_xml(
         geom_str, wkb_type, simplify_hints = _GEOM_TYPE_MAP.get(
             geom_type_raw, ('Unknown', 'Unknown', '0')
         )
-        authid = meta.get('authid', 'EPSG:4326')
         datasource = f"./{gpkg_filename}|layername={table_name}"
 
         ml = ET.SubElement(proj_layers, "maplayer", attrib={
@@ -334,7 +420,6 @@ def _build_project_xml(
             "simplifyAlgorithm": "0",
             "simplifyMaxScale": "1",
             "simplifyLocal": "1",
-            "labelsEnabled": "0",
             "readOnly": "0",
         })
         ET.SubElement(ml, "id").text = emb_id
@@ -343,9 +428,17 @@ def _build_project_xml(
         provider_el = ET.SubElement(ml, "provider", attrib={"encoding": "UTF-8"})
         provider_el.text = "ogr"
 
+        # CRS from source layer (full info) or fallback to GPKG metadata
+        crs_info = layer_crs.get(lid)
+        if not crs_info:
+            crs_info = {'authid': meta.get('authid', 'EPSG:4326')}
         srs = ET.SubElement(ml, "srs")
-        spatial = ET.SubElement(srs, "spatialrefsys", attrib={"nativeFormat": "Wkt"})
-        ET.SubElement(spatial, "authid").text = authid
+        _build_srs_xml(srs, crs_info)
+
+        # Embed style from source layer (renderer, labeling, etc.)
+        style_xml = layer_styles.get(lid)
+        if style_xml:
+            _embed_style_elements(ml, style_xml)
 
     # Serialize with DOCTYPE
     xml_body = ET.tostring(root, encoding="unicode", xml_declaration=True)
