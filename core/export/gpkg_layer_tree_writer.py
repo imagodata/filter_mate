@@ -10,10 +10,12 @@ QgsProject/QgsVectorLayer objects whose lifecycle crashes
 QGIS 3.44 (access violation in QgsCustomization::preNotify).
 """
 
+import io
 import logging
 import os
 import sqlite3
 import uuid
+import zipfile
 from datetime import datetime
 from typing import Dict, List
 from xml.etree import ElementTree as ET
@@ -410,13 +412,22 @@ def _insert_project_into_gpkg(
 
     Uses the QGIS GeoPackage project storage format:
     - Table: qgis_projects (name TEXT PK, metadata BLOB, content BLOB)
-    - Content is hex-encoded binary (matching QgsGeoPackageProjectStorage)
+    - Content is hex-encoded QGZ (ZIP containing .qgs XML)
+    - QGIS always calls unzip() on storage-retrieved projects (no format check)
     """
     xml_bytes = xml_str.encode("utf-8")
 
+    # Wrap XML in QGZ format (ZIP archive containing a .qgs file).
+    # QGIS unconditionally calls unzip() on project storage content
+    # (see QgsProject::read() — no isZipFile check for storage URIs).
+    qgz_buffer = io.BytesIO()
+    with zipfile.ZipFile(qgz_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(f"{project_name}.qgs", xml_bytes)
+    qgz_bytes = qgz_buffer.getvalue()
+
     # QGIS stores content as hex-encoded text (see writeProject in
     # qgsgeopackageprojectstorage.cpp: content.toHex())
-    hex_content = xml_bytes.hex()
+    hex_content = qgz_bytes.hex()
 
     # Metadata JSON matching QGIS format
     metadata = (
@@ -448,7 +459,7 @@ def _insert_project_into_gpkg(
         except sqlite3.OperationalError:
             pass  # gpkg_extensions might not exist in minimal GPKGs
 
-        # Insert or replace the project (content as hex-encoded text)
+        # Insert or replace the project (content as hex-encoded QGZ)
         cur.execute(
             "INSERT OR REPLACE INTO qgis_projects (name, metadata, content) "
             "VALUES (?, ?, ?)",
@@ -458,7 +469,8 @@ def _insert_project_into_gpkg(
         conn.commit()
         logger.debug(
             f"Inserted project '{project_name}' into GPKG "
-            f"({len(xml_bytes)} bytes XML, {len(hex_content)} chars hex)"
+            f"({len(xml_bytes)} bytes XML, {len(qgz_bytes)} bytes QGZ, "
+            f"{len(hex_content)} chars hex)"
         )
     finally:
         conn.close()
