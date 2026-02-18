@@ -27,6 +27,7 @@ from qgis.core import (
 )
 
 from ..ports import get_backend_services
+from ..domain.exceptions import BackendError
 from ...infrastructure.constants import (
     PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR, PROVIDER_MEMORY,
     QGIS_PROVIDER_POSTGRES,
@@ -294,18 +295,21 @@ class FilterOrchestrator:
             # ==========================================
             if result:
                 self._log_filter_success(layer, backend_name)
+                return True
             else:
                 self._log_filter_failure(layer, backend_name)
+                error_detail = getattr(backend, 'last_error', None) or f"Backend {backend_name} returned failure"
+                raise BackendError(f"{layer.name()}: {error_detail}")
 
-            return result
-
+        except BackendError:
+            raise
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"orchestrate_geometric_filter EXCEPTION for {layer.name()}: {e}",
                 "FilterMate", Qgis.Critical
             )
             logger.error(f"Error in orchestrate_geometric_filter for {layer.name()}: {e}", exc_info=True)
-            return False
+            raise BackendError(f"{layer.name()}: {e}") from e
 
     # =====================================================================
     # PRIVATE HELPER METHODS
@@ -571,7 +575,9 @@ class FilterOrchestrator:
             bool: True if fallback succeeded, False otherwise
         """
         if backend_name not in ('spatialite', 'postgresql'):
-            return False
+            raise BackendError(
+                f"{layer.name()}: {backend_name} expression building failed (no fallback for this backend)"
+            )
 
         logger.warning(f"⚠️ {backend_name.upper()} expression building failed for {layer.name()}")
         logger.warning("  → Attempting OGR fallback (QGIS processing)...")
@@ -582,7 +588,9 @@ class FilterOrchestrator:
 
             if not ogr_source_geom:
                 logger.error("  ✗ OGR source geometry not available")
-                return False
+                raise BackendError(
+                    f"{layer.name()}: {backend_name} expression failed, OGR fallback unavailable (no source geometry)"
+                )
 
             ogr_expression = expression_builder.build_backend_expression(
                 backend=ogr_backend,
@@ -592,7 +600,9 @@ class FilterOrchestrator:
 
             if not ogr_expression:
                 logger.error("  ✗ Could not build OGR expression for fallback")
-                return False
+                raise BackendError(
+                    f"{layer.name()}: {backend_name} expression failed, OGR fallback could not build expression"
+                )
 
             logger.info(f"  → OGR expression built: {ogr_expression[:100]}...")
 
@@ -609,12 +619,19 @@ class FilterOrchestrator:
                 self.task_parameters['actual_backends'][layer.id()] = 'ogr'
                 return True
             else:
-                logger.error(f"✗ OGR fallback also FAILED for {layer.name()}")
-                return False
+                ogr_error = getattr(ogr_backend, 'last_error', None) or "OGR fallback returned failure"
+                logger.error(f"✗ OGR fallback also FAILED for {layer.name()}: {ogr_error}")
+                raise BackendError(
+                    f"{layer.name()}: {backend_name} expression failed, OGR fallback also failed: {ogr_error}"
+                )
 
+        except BackendError:
+            raise
         except Exception as e:
             logger.error(f"✗ OGR fallback exception: {e}", exc_info=True)
-            return False
+            raise BackendError(
+                f"{layer.name()}: {backend_name} expression failed, OGR fallback exception: {e}"
+            ) from e
 
     def _handle_backend_failure(
         self,
@@ -668,7 +685,10 @@ class FilterOrchestrator:
                 f"⚠️ {layer.name()}: PostgreSQL timeout on {feature_count:,} features",
                 "FilterMate", Qgis.Critical
             )
-            return False
+            raise BackendError(
+                f"{layer.name()}: PostgreSQL failed on large table ({feature_count:,} features), "
+                f"OGR fallback disabled for tables > 100k features"
+            )
 
         # Log reason for fallback
         if was_forced:
@@ -692,7 +712,9 @@ class FilterOrchestrator:
 
             if not ogr_source_geom:
                 logger.error("  ✗ OGR source geometry not available for fallback")
-                return False
+                raise BackendError(
+                    f"{layer.name()}: {backend_name} failed, OGR fallback unavailable (no source geometry)"
+                )
 
             # Build OGR expression
             ogr_expression = expression_builder.build_backend_expression(
@@ -703,7 +725,9 @@ class FilterOrchestrator:
 
             if not ogr_expression:
                 logger.error("  ✗ Could not build OGR expression for fallback")
-                return False
+                raise BackendError(
+                    f"{layer.name()}: {backend_name} failed, OGR fallback could not build expression"
+                )
 
             logger.info(f"  → OGR expression built: {ogr_expression[:100]}...")
 
@@ -722,20 +746,27 @@ class FilterOrchestrator:
                 self.task_parameters['actual_backends'][layer.id()] = 'ogr'
                 return True
             else:
-                logger.error(f"✗ OGR fallback also FAILED for {layer.name()}")
+                ogr_error = getattr(ogr_backend, 'last_error', None) or "OGR fallback returned failure"
+                logger.error(f"✗ OGR fallback also FAILED for {layer.name()}: {ogr_error}")
                 QgsMessageLog.logMessage(
-                    f"⚠️ OGR fallback FAILED for {layer.name()}",
+                    f"⚠️ OGR fallback FAILED for {layer.name()}: {ogr_error}",
                     "FilterMate", Qgis.Warning
                 )
-                return False
+                raise BackendError(
+                    f"{layer.name()}: {backend_name} failed, OGR fallback also failed: {ogr_error}"
+                )
 
+        except BackendError:
+            raise
         except Exception as e:
             logger.error(f"✗ OGR fallback exception: {e}", exc_info=True)
             QgsMessageLog.logMessage(
                 f"⚠️ OGR fallback exception for {layer.name()}: {str(e)[:100]}",
                 "FilterMate", Qgis.Warning
             )
-            return False
+            raise BackendError(
+                f"{layer.name()}: {backend_name} failed, OGR fallback exception: {e}"
+            ) from e
 
     def _collect_backend_warnings(self, backend: Any) -> None:
         """

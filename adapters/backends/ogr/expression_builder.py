@@ -157,6 +157,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         self._temp_layers_keep_alive = []
         self._source_layer_keep_alive = []
         self._feedback = None
+        self.last_error = None
 
     def get_backend_name(self) -> str:
         """Get backend name."""
@@ -296,11 +297,13 @@ class OGRExpressionBuilder(GeometricFilterPort):
             source_layer = self.source_geom
 
             if source_layer is None:
-                self.log_error("No source layer available for OGR filter")
+                self.last_error = "No source layer available for OGR filter"
+                self.log_error(self.last_error)
                 return False
 
             if not isinstance(source_layer, QgsVectorLayer):
-                self.log_error(f"Source is not a QgsVectorLayer: {type(source_layer)}")
+                self.last_error = f"Source is not a QgsVectorLayer: {type(source_layer)}"
+                self.log_error(self.last_error)
                 return False
 
             self.log_info(f"📍 Applying OGR filter to {layer.name()}")
@@ -311,14 +314,16 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 self.log_info(f"  - Applying dynamic buffer expression: {buffer_expression[:50]}...")
                 source_layer = self._apply_buffer_expression_to_layer(source_layer, buffer_expression)
                 if source_layer is None:
-                    self.log_error("Failed to apply buffer expression")
+                    self.last_error = f"Failed to apply dynamic buffer expression: {buffer_expression[:80]}"
+                    self.log_error(self.last_error)
                     return False
                 self.log_info(f"  - Buffered source: {source_layer.featureCount()} features")
             elif buffer_value is not None and buffer_value != 0:
                 self.log_info(f"  - Applying static buffer: {buffer_value}m")
                 source_layer = self._apply_buffer_to_layer(source_layer, buffer_value)
                 if source_layer is None:
-                    self.log_error("Failed to apply buffer")
+                    self.last_error = f"Failed to apply static buffer ({buffer_value}m)"
+                    self.log_error(self.last_error)
                     return False
                 self.log_info(f"  - Buffered source: {source_layer.featureCount()} features")
 
@@ -345,7 +350,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     feedback=self._feedback
                 )
             except Exception as e:
-                self.log_error(f"Processing failed: {e}")
+                self.last_error = f"native:selectbylocation processing failed: {e}"
+                self.log_error(self.last_error)
                 return False
 
             # Get selected feature IDs
@@ -410,22 +416,32 @@ class OGRExpressionBuilder(GeometricFilterPort):
             if success:
                 self.log_info(f"✓ OGR filter applied: {len(selected_ids)} features")
             else:
+                pk_name = self._get_primary_key(layer)
+                storage = ""
+                try:
+                    storage = layer.dataProvider().storageType()
+                except Exception:
+                    pass
+                self.last_error = (
+                    f"setSubsetString failed for {layer.name()} "
+                    f"(pk={pk_name}, fids={len(selected_ids)}, storage={storage})"
+                )
                 self.log_error(f"✗ Failed to apply FID filter to {layer.name()}")
                 self.log_error(f"  - Filter expression: {final_filter[:500]}...")
-                self.log_error(f"  - Primary key field: {self._get_primary_key(layer)}")
+                self.log_error(f"  - Primary key field: {pk_name}")
                 self.log_error(f"  - Number of FIDs: {len(selected_ids)}")
-                # Try to get more diagnostic info
                 try:
                     provider = layer.dataProvider()
                     self.log_error(f"  - Provider capabilities: {provider.capabilities()}")
-                    self.log_error(f"  - Storage type: {provider.storageType()}")
+                    self.log_error(f"  - Storage type: {storage}")
                 except Exception as diag_e:
                     self.log_error(f"  - Could not get diagnostics: {diag_e}")
 
             return success
 
         except Exception as e:
-            self.log_error(f"Error in OGR apply_filter: {e}")
+            self.last_error = f"OGR apply_filter exception: {e}"
+            self.log_error(self.last_error)
             return False
 
     def cancel(self):

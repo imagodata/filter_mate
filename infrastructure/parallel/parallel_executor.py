@@ -407,7 +407,8 @@ class ParallelFilterExecutor:
                 layer_name=layer_name,
                 success=bool(success),
                 feature_count=feature_count,
-                execution_time_ms=execution_time
+                execution_time_ms=execution_time,
+                error_message=None if success else "Backend returned failure (no exception details)"
             )
 
         except Exception as e:

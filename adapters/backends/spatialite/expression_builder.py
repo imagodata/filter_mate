@@ -100,6 +100,7 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         """
         super().__init__(task_params)
         self._logger = logger
+        self.last_error = None
 
     def get_backend_name(self) -> str:
         """Get backend name."""
@@ -272,12 +273,14 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         """
         try:
             if not expression:
-                self.log_warning("Empty expression, skipping filter")
+                self.last_error = "Empty expression, skipping filter"
+                self.log_warning(self.last_error)
                 return False
 
             # Check for OGR fallback sentinel
             if expression == USE_OGR_FALLBACK:
-                self.log_info("OGR fallback requested")
+                self.last_error = "OGR fallback requested"
+                self.log_info(self.last_error)
                 return False
 
             # Combine with existing filter if needed
@@ -296,12 +299,14 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             if success:
                 self.log_info("✓ Filter applied successfully")
             else:
-                self.log_error("✗ Failed to apply filter")
+                self.last_error = f"setSubsetString failed for {layer.name()} (spatialite)"
+                self.log_error(f"✗ Failed to apply filter: {self.last_error}")
 
             return success
 
         except Exception as e:
-            self.log_error(f"Error applying filter: {e}")
+            self.last_error = f"Spatialite apply_filter exception: {e}"
+            self.log_error(self.last_error)
             return False
 
     # =========================================================================

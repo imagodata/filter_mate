@@ -129,6 +129,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         """
         super().__init__(task_params)
         self._logger = logger
+        self.last_error = None
 
     def get_backend_name(self) -> str:
         """Get backend name."""
@@ -593,7 +594,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         try:
             if not expression:
-                self.log_warning("Empty expression, skipping filter")
+                self.last_error = "Empty expression, skipping filter"
+                self.log_warning(self.last_error)
                 return False
 
             # Normalize column case and apply type casting
@@ -631,6 +633,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 self.log_info(f"✓ Filter applied successfully to {layer.name()}")
                 self.log_info(f"   → Feature count after filter: {layer.featureCount()}")
             else:
+                self.last_error = f"setSubsetString failed for {layer.name()} (postgresql, expr_len={len(final_expression)})"
                 self.log_error(f"✗ FAILED to apply filter to {layer.name()}!")
                 self.log_error("   → This triggers OGR fallback")
                 # Log the FULL expression for debugging (not truncated)
@@ -639,7 +642,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             return success
 
         except Exception as e:
-            self.log_error(f"Error applying filter: {e}")
+            self.last_error = f"PostgreSQL apply_filter exception: {e}"
+            self.log_error(self.last_error)
             return False
 
     # =========================================================================

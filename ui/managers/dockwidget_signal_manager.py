@@ -690,6 +690,7 @@ class DockwidgetSignalManager:
         FIX 2026-01-14: These signals must be connected at startup:
         - FILTERING.CURRENT_LAYER.layerChanged: Updates exploring widgets
         - ACTION buttons: FILTER, UNFILTER, UNDO_FILTER, REDO_FILTER, EXPORT
+        - DOCK.TOOLS.currentChanged: Updates action button states on tab switch
 
         NOTE: QGIS.LAYER_TREE_VIEW.currentLayerChanged is managed by
         filtering_auto_current_layer_changed() based on AUTO_CURRENT_LAYER state.
@@ -725,6 +726,13 @@ class DockwidgetSignalManager:
             logger.debug("EXPORTING button signals connected at startup")
         except Exception as e:
             logger.warning(f"Could not connect EXPORTING signals at startup: {e}")
+
+        # FIX 2026-02-18: Connect DOCK.TOOLS.currentChanged to update action button states on tab switch
+        try:
+            self.manage_signal(["DOCK", "TOOLS"], 'connect', 'currentChanged')
+            logger.debug("Connected DOCK.TOOLS.currentChanged signal")
+        except Exception as e:
+            logger.warning(f"Could not connect DOCK.TOOLS signal: {e}")
 
         # FIX 2026-01-14: Connect LAYER_TREE_VIEW if AUTO_CURRENT_LAYER enabled
         try:

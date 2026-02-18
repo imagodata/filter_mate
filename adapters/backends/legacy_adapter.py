@@ -214,6 +214,13 @@ class BaseLegacyAdapter(GeometricFilterBackend):
         }
         return mapping.get(self.provider_type, ProviderType.OGR)
 
+    @property
+    def last_error(self) -> Optional[str]:
+        """Get last error from underlying backend."""
+        if self._legacy_backend and hasattr(self._legacy_backend, 'last_error'):
+            return self._legacy_backend.last_error
+        return None
+
     def apply_filter(
         self,
         layer,

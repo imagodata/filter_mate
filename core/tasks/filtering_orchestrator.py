@@ -872,7 +872,11 @@ class FilteringOrchestrator:
                 logger.debug(f"FILTERING {i}/{layers_count}: {layer_name} ({layer_provider_type})")
                 logger.info(f"   Features before filter: {layer_feature_count}")
 
-                filter_result = execute_geometric_filtering_callback(layer_provider_type, layer, layer_props)
+                try:
+                    filter_result = execute_geometric_filtering_callback(layer_provider_type, layer, layer_props)
+                except Exception as filter_exc:
+                    filter_result = False
+                    logger.error(f"  {layer_name} - filtering exception: {filter_exc}")
 
                 # Log result VISIBLY for debugging
                 logger.info(f"   -> execute_geometric_filtering RESULT: {filter_result}")

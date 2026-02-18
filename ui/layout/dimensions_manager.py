@@ -834,6 +834,8 @@ class DimensionsManager(LayoutManagerBase):
                     layout = getattr(self.dockwidget, layout_name)
                     layout.setContentsMargins(2, 2, 2, 2)
                     layout.setSpacing(4)
+                    # Pin content to top of toolbox page to avoid bottom gap
+                    layout.setAlignment(Qt.AlignTop)
 
             logger.debug(f"Aligned key layouts with {button_spacing}px spacing, {widget_keys_padding}px padding")
 
