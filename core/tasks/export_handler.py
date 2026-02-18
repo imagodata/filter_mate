@@ -414,6 +414,12 @@ class ExportHandler:
 
         message = f'Layer(s) exported to <a href="file:///{gpkg_output_path}">{gpkg_output_path}</a>'
 
+        if preserve_groups:
+            message += (
+                '<br/><i>To open with group structure: '
+                'Project &gt; Open from &gt; GeoPackage</i>'
+            )
+
         if zip_path:
             gpkg_dir = os.path.dirname(gpkg_output_path)
             if batch_exporter_class.create_zip_archive(zip_path, gpkg_dir):

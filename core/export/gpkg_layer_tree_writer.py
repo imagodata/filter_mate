@@ -14,7 +14,7 @@ import logging
 import os
 import sqlite3
 import uuid
-import zlib
+from datetime import datetime
 from typing import Dict, List
 from xml.etree import ElementTree as ET
 
@@ -410,15 +410,18 @@ def _insert_project_into_gpkg(
 
     Uses the QGIS GeoPackage project storage format:
     - Table: qgis_projects (name TEXT PK, metadata BLOB, content BLOB)
-    - Content is qCompress-compatible: 4-byte BE uncompressed length + zlib data
+    - Content is hex-encoded binary (matching QgsGeoPackageProjectStorage)
     """
     xml_bytes = xml_str.encode("utf-8")
 
-    # qCompress format: 4-byte big-endian length prefix + zlib compressed data
-    uncompressed_len = len(xml_bytes)
-    compressed = (
-        uncompressed_len.to_bytes(4, byteorder='big')
-        + zlib.compress(xml_bytes)
+    # QGIS stores content as hex-encoded text (see writeProject in
+    # qgsgeopackageprojectstorage.cpp: content.toHex())
+    hex_content = xml_bytes.hex()
+
+    # Metadata JSON matching QGIS format
+    metadata = (
+        f'{{"last_modified_time": "{datetime.now().isoformat()}", '
+        f'"last_modified_user": "FilterMate"}}'
     )
 
     conn = sqlite3.connect(gpkg_path)
@@ -445,17 +448,17 @@ def _insert_project_into_gpkg(
         except sqlite3.OperationalError:
             pass  # gpkg_extensions might not exist in minimal GPKGs
 
-        # Insert or replace the project (metadata as UTF-8 BLOB)
+        # Insert or replace the project (content as hex-encoded text)
         cur.execute(
             "INSERT OR REPLACE INTO qgis_projects (name, metadata, content) "
             "VALUES (?, ?, ?)",
-            (project_name, b'{}', compressed),
+            (project_name, metadata, hex_content),
         )
 
         conn.commit()
         logger.debug(
             f"Inserted project '{project_name}' into GPKG "
-            f"({len(xml_bytes)} bytes XML, {len(compressed)} bytes compressed)"
+            f"({len(xml_bytes)} bytes XML, {len(hex_content)} chars hex)"
         )
     finally:
         conn.close()
