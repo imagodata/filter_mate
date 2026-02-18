@@ -109,8 +109,7 @@ def _do_write(
 
     hierarchy = _extract_hierarchy(source_project, set(layer_map.keys()))
 
-    # 3. Extract styles (if requested) and CRS from source layers
-    layer_styles = {}   # layer_id → style XML string (from exportNamedStyle)
+    # 3. Build CRS from GPKG metadata (authoritative source for actual data CRS)
     layer_crs = {}      # layer_id → {authid, proj4, wkt, srid, description}
 
     # If export reprojected data, build CRS info from the export CRS
@@ -131,12 +130,35 @@ def _do_write(
         except Exception as e:
             logger.debug(f"Could not resolve export CRS {export_crs_authid}: {e}")
 
-    for lid in layer_map:
-        layer = source_project.mapLayer(lid)
-        if not layer:
-            continue
-        # Extract style only when save_styles is checked
-        if save_styles:
+    # CRS: always from GPKG metadata (matches actual data in file)
+    # This does NOT need the source layer objects
+    for lid, table_name in layer_map.items():
+        if override_crs:
+            layer_crs[lid] = override_crs
+        else:
+            meta = gpkg_meta.get(table_name, {})
+            gpkg_crs_info = {}
+            if meta.get('authid'):
+                gpkg_crs_info['authid'] = meta['authid']
+            if meta.get('wkt'):
+                gpkg_crs_info['wkt'] = meta['wkt']
+            if meta.get('proj4'):
+                gpkg_crs_info['proj4'] = meta['proj4']
+            if meta.get('srid') is not None:
+                gpkg_crs_info['srid'] = meta['srid']
+            if meta.get('description'):
+                gpkg_crs_info['description'] = meta['description']
+            if gpkg_crs_info:
+                layer_crs[lid] = gpkg_crs_info
+                logger.debug(f"Using GPKG CRS for layer {lid}: {gpkg_crs_info.get('authid')}")
+
+    # 4. Extract styles from source layers (requires source layer objects)
+    layer_styles = {}   # layer_id → style XML string (from exportNamedStyle)
+    if save_styles:
+        for lid in layer_map:
+            layer = source_project.mapLayer(lid)
+            if not layer:
+                continue
             try:
                 from qgis.PyQt.QtXml import QDomDocument
                 doc = QDomDocument()
@@ -144,24 +166,8 @@ def _do_write(
                 layer_styles[lid] = doc.toString()
             except Exception as e:
                 logger.debug(f"Could not export style for layer {lid}: {e}")
-        # CRS: use export CRS if data was reprojected, else source layer CRS
-        if override_crs:
-            layer_crs[lid] = override_crs
-        else:
-            try:
-                crs = layer.crs()
-                if crs.isValid():
-                    layer_crs[lid] = {
-                        'authid': crs.authid(),
-                        'proj4': crs.toProj(),
-                        'wkt': crs.toWkt(),
-                        'srid': crs.postgisSrid(),
-                        'description': crs.description(),
-                    }
-            except Exception as e:
-                logger.debug(f"Could not read CRS for layer {lid}: {e}")
 
-    # 4. Build project XML
+    # 5. Build project XML
     qgis_version = getattr(Qgis, 'QGIS_VERSION', '3.44.0-Unknown')
     xml_str = _build_project_xml(
         project_title, qgis_version, gpkg_filename,
@@ -170,7 +176,7 @@ def _do_write(
         layer_crs=layer_crs,
     )
 
-    # 5. Write into GPKG via sqlite3
+    # 6. Write into GPKG via sqlite3
     _insert_project_into_gpkg(gpkg_path, project_title, xml_str)
 
     logger.info(f"Layer tree project written to GPKG: {gpkg_path}")
@@ -185,22 +191,41 @@ def _read_gpkg_metadata(gpkg_path: str) -> Dict[str, dict]:
     """Read layer metadata from GPKG tables.
 
     Returns:
-        Dict mapping table_name → {geom_column, geom_type, srs_id, authid}
+        Dict mapping table_name → {geom_column, geom_type, srs_id, authid, wkt, proj4, srid, description}
     """
     meta = {}
     conn = sqlite3.connect(gpkg_path)
     try:
         cur = conn.cursor()
 
-        # Get SRS mapping: srs_id → "ORG:CODE"
+        # Get SRS mapping: srs_id → {authid, wkt, srid}
         srs_map = {}
         try:
             cur.execute(
-                "SELECT srs_id, organization, organization_coordsys_id "
+                "SELECT srs_id, organization, organization_coordsys_id, definition "
                 "FROM gpkg_spatial_ref_sys"
             )
-            for srs_id, org, code in cur.fetchall():
-                srs_map[srs_id] = f"{org.upper()}:{code}" if org else f"EPSG:{code}"
+            for srs_id, org, code, definition in cur.fetchall():
+                authid = f"{org.upper()}:{code}" if org else f"EPSG:{code}"
+                srs_entry = {'authid': authid, 'srid': code}
+                # Parse WKT definition to extract CRS details
+                if definition and definition.strip() and definition.strip() != 'undefined':
+                    srs_entry['wkt'] = definition
+                    # Try to build a full CRS from the WKT for proj4/description
+                    try:
+                        from qgis.core import QgsCoordinateReferenceSystem
+                        crs = QgsCoordinateReferenceSystem()
+                        crs.createFromWkt(definition)
+                        if crs.isValid():
+                            srs_entry['proj4'] = crs.toProj()
+                            srs_entry['description'] = crs.description()
+                            # Use the CRS authid if resolved (more reliable)
+                            if crs.authid():
+                                srs_entry['authid'] = crs.authid()
+                            srs_entry['srid'] = crs.postgisSrid()
+                    except Exception:
+                        pass
+                srs_map[srs_id] = srs_entry
         except sqlite3.OperationalError:
             pass
 
@@ -211,11 +236,16 @@ def _read_gpkg_metadata(gpkg_path: str) -> Dict[str, dict]:
                 "FROM gpkg_geometry_columns"
             )
             for table_name, geom_col, geom_type, srs_id in cur.fetchall():
+                srs_info = srs_map.get(srs_id, {'authid': f'EPSG:{srs_id}', 'srid': srs_id})
                 meta[table_name] = {
                     'geom_column': geom_col,
                     'geom_type': geom_type.upper() if geom_type else 'GEOMETRY',
                     'srs_id': srs_id,
-                    'authid': srs_map.get(srs_id, f'EPSG:{srs_id}'),
+                    'authid': srs_info.get('authid', f'EPSG:{srs_id}'),
+                    'wkt': srs_info.get('wkt'),
+                    'proj4': srs_info.get('proj4'),
+                    'srid': srs_info.get('srid', srs_id),
+                    'description': srs_info.get('description'),
                 }
         except sqlite3.OperationalError:
             pass
@@ -380,7 +410,7 @@ def _build_project_xml(
         qgis_version: QGIS version string (e.g. "3.44.6-Solothurn").
         gpkg_filename: Basename of the GPKG file (for relative datasource).
         layer_map: layer_id → gpkg_table_name.
-        gpkg_meta: gpkg_table_name → {geom_column, geom_type, srs_id, authid}.
+        gpkg_meta: gpkg_table_name → {geom_column, geom_type, srs_id, authid, wkt, proj4, srid, description}.
         hierarchy: Tree structure from _extract_hierarchy.
         layer_styles: layer_id → style XML string (from exportNamedStyle).
         layer_crs: layer_id → {authid, proj4, wkt, srid, description}.
@@ -413,11 +443,41 @@ def _build_project_xml(
         first_crs = layer_crs.get(first_lid)
     if not first_crs:
         first_table = next(iter(layer_map.values())) if layer_map else None
-        first_authid = gpkg_meta.get(first_table, {}).get('authid', 'EPSG:4326') if first_table else 'EPSG:4326'
-        first_crs = {'authid': first_authid}
+        first_meta = gpkg_meta.get(first_table, {}) if first_table else {}
+        first_crs = {'authid': first_meta.get('authid', 'EPSG:4326')}
+        if first_meta.get('wkt'):
+            first_crs['wkt'] = first_meta['wkt']
+        if first_meta.get('proj4'):
+            first_crs['proj4'] = first_meta['proj4']
+        if first_meta.get('srid') is not None:
+            first_crs['srid'] = first_meta['srid']
+        if first_meta.get('description'):
+            first_crs['description'] = first_meta['description']
 
     pcrs = ET.SubElement(root, "projectCrs")
     _build_srs_xml(pcrs, first_crs)
+
+    # --- properties (QGIS reads SpatialRefSys from here) ---
+    props = ET.SubElement(root, "properties")
+    srs_props = ET.SubElement(props, "SpatialRefSys")
+    pe = ET.SubElement(srs_props, "ProjectionsEnabled", attrib={"type": "int"})
+    pe.text = "1"
+    pc = ET.SubElement(srs_props, "ProjectCrs", attrib={"type": "QString"})
+    pc.text = first_crs.get('authid', 'EPSG:4326')
+    if first_crs.get('proj4'):
+        pp = ET.SubElement(srs_props, "ProjectCRSProj4String", attrib={"type": "QString"})
+        pp.text = first_crs['proj4']
+
+    # --- mapcanvas (display CRS for theMapCanvas) ---
+    mapcanvas = ET.SubElement(root, "mapcanvas", attrib={
+        "name": "theMapCanvas",
+        "annotationsVisible": "1",
+    })
+    ET.SubElement(mapcanvas, "units").text = "meters"
+    ET.SubElement(mapcanvas, "rotation").text = "0"
+    dsrs = ET.SubElement(mapcanvas, "destinationsrs")
+    _build_srs_xml(dsrs, first_crs)
+    ET.SubElement(mapcanvas, "rendermaptile").text = "0"
 
     # --- layer-tree-group ---
     tree_root = ET.SubElement(root, "layer-tree-group")
@@ -461,10 +521,19 @@ def _build_project_xml(
         provider_el = ET.SubElement(ml, "provider", attrib={"encoding": "UTF-8"})
         provider_el.text = "ogr"
 
-        # CRS from source layer (full info) or fallback to GPKG metadata
+        # CRS from GPKG metadata (matches actual data in file)
         crs_info = layer_crs.get(lid)
         if not crs_info:
+            # Fallback: build CRS info from GPKG metadata
             crs_info = {'authid': meta.get('authid', 'EPSG:4326')}
+            if meta.get('wkt'):
+                crs_info['wkt'] = meta['wkt']
+            if meta.get('proj4'):
+                crs_info['proj4'] = meta['proj4']
+            if meta.get('srid') is not None:
+                crs_info['srid'] = meta['srid']
+            if meta.get('description'):
+                crs_info['description'] = meta['description']
         srs = ET.SubElement(ml, "srs")
         _build_srs_xml(srs, crs_info)
 
