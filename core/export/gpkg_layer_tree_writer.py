@@ -52,6 +52,7 @@ def write_layer_tree_to_gpkg(
     layer_ids: List[str],
     project_title: str = "FilterMate Export",
     export_crs_authid: Optional[str] = None,
+    save_styles: bool = False,
 ) -> bool:
     """Embed a QGIS project with layer tree groups into a GeoPackage.
 
@@ -63,6 +64,7 @@ def write_layer_tree_to_gpkg(
         layer_ids: Original layer IDs from the source project.
         project_title: Title for the embedded project.
         export_crs_authid: If set, override layer CRS (data was reprojected).
+        save_styles: Whether to embed layer styles in the project.
 
     Returns:
         True on success, False on failure.
@@ -76,7 +78,7 @@ def write_layer_tree_to_gpkg(
         return False
 
     try:
-        return _do_write(gpkg_path, layer_ids, project_title, export_crs_authid)
+        return _do_write(gpkg_path, layer_ids, project_title, export_crs_authid, save_styles)
     except Exception as e:
         logger.error(f"Failed to write layer tree to GPKG: {e}", exc_info=True)
         return False
@@ -87,6 +89,7 @@ def _do_write(
     layer_ids: List[str],
     project_title: str,
     export_crs_authid: Optional[str] = None,
+    save_styles: bool = False,
 ) -> bool:
     """Build project XML and write it into the GPKG via sqlite3."""
     gpkg_filename = os.path.basename(gpkg_path)
@@ -106,7 +109,7 @@ def _do_write(
 
     hierarchy = _extract_hierarchy(source_project, set(layer_map.keys()))
 
-    # 3. Extract styles and CRS from source layers
+    # 3. Extract styles (if requested) and CRS from source layers
     layer_styles = {}   # layer_id → style XML string (from exportNamedStyle)
     layer_crs = {}      # layer_id → {authid, proj4, wkt, srid, description}
 
@@ -132,14 +135,15 @@ def _do_write(
         layer = source_project.mapLayer(lid)
         if not layer:
             continue
-        # Extract style
-        try:
-            from qgis.PyQt.QtXml import QDomDocument
-            doc = QDomDocument()
-            layer.exportNamedStyle(doc)
-            layer_styles[lid] = doc.toString()
-        except Exception as e:
-            logger.debug(f"Could not export style for layer {lid}: {e}")
+        # Extract style only when save_styles is checked
+        if save_styles:
+            try:
+                from qgis.PyQt.QtXml import QDomDocument
+                doc = QDomDocument()
+                layer.exportNamedStyle(doc)
+                layer_styles[lid] = doc.toString()
+            except Exception as e:
+                logger.debug(f"Could not export style for layer {lid}: {e}")
         # CRS: use export CRS if data was reprojected, else source layer CRS
         if override_crs:
             layer_crs[lid] = override_crs

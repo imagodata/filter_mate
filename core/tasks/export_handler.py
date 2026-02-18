@@ -413,6 +413,7 @@ class ExportHandler:
                 'layer_ids': layer_ids,
                 'project_title': project.title() or 'FilterMate Export',
                 'export_crs_authid': export_crs.authid() if export_crs and export_crs.isValid() else None,
+                'save_styles': save_styles,
             }
             logger.info("Layer tree write deferred to main thread (finished callback)")
 

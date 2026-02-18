@@ -2906,6 +2906,7 @@ class FilterEngineTask(QgsTask):
                         pending['layer_ids'],
                         pending['project_title'],
                         export_crs_authid=pending.get('export_crs_authid'),
+                        save_styles=pending.get('save_styles', False),
                     )
                     if success:
                         logger.info(f"Layer tree written to GPKG: {pending['gpkg_path']}")
