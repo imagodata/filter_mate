@@ -167,6 +167,9 @@ def _do_write(
             except Exception as e:
                 logger.debug(f"Could not export style for layer {lid}: {e}")
 
+    # 4b. Read selection and canvas colors from source project
+    project_colors = _read_project_colors(source_project)
+
     # 5. Build project XML
     qgis_version = getattr(Qgis, 'QGIS_VERSION', '3.44.0-Unknown')
     xml_str = _build_project_xml(
@@ -174,6 +177,7 @@ def _do_write(
         layer_map, gpkg_meta, hierarchy,
         layer_styles=layer_styles,
         layer_crs=layer_crs,
+        project_colors=project_colors,
     )
 
     # 6. Write into GPKG via sqlite3
@@ -393,6 +397,40 @@ def _embed_style_elements(maplayer: ET.Element, style_xml: str) -> None:
             continue
         maplayer.append(child)
 
+
+def _read_project_colors(project: 'QgsProject') -> Dict[str, Dict[str, int]]:
+    """Read selection and canvas background colors from the source project.
+
+    Returns:
+        Dict with 'selection_color' and 'canvas_color' keys, each mapping to
+        {'red': int, 'green': int, 'blue': int, 'alpha': int}.
+    """
+    colors = {}
+    try:
+        sel_color = project.selectionColor()
+        colors['selection_color'] = {
+            'red': sel_color.red(),
+            'green': sel_color.green(),
+            'blue': sel_color.blue(),
+            'alpha': sel_color.alpha(),
+        }
+    except Exception:
+        colors['selection_color'] = {'red': 255, 'green': 255, 'blue': 0, 'alpha': 255}
+
+    try:
+        bg_color = project.backgroundColor()
+        colors['canvas_color'] = {
+            'red': bg_color.red(),
+            'green': bg_color.green(),
+            'blue': bg_color.blue(),
+            'alpha': bg_color.alpha(),
+        }
+    except Exception:
+        colors['canvas_color'] = {'red': 255, 'green': 255, 'blue': 255, 'alpha': 255}
+
+    return colors
+
+
 def _build_project_xml(
     project_title: str,
     qgis_version: str,
@@ -402,6 +440,7 @@ def _build_project_xml(
     hierarchy: dict,
     layer_styles: Optional[Dict[str, str]] = None,
     layer_crs: Optional[Dict[str, dict]] = None,
+    project_colors: Optional[Dict[str, Dict[str, int]]] = None,
 ) -> str:
     """Build QGIS project XML with styles and CRS from source layers.
 
@@ -414,6 +453,7 @@ def _build_project_xml(
         hierarchy: Tree structure from _extract_hierarchy.
         layer_styles: layer_id → style XML string (from exportNamedStyle).
         layer_crs: layer_id → {authid, proj4, wkt, srid, description}.
+        project_colors: selection_color and canvas_color as RGBA dicts.
 
     Returns:
         Project XML as string.
@@ -422,6 +462,11 @@ def _build_project_xml(
         layer_styles = {}
     if layer_crs is None:
         layer_crs = {}
+    if project_colors is None:
+        project_colors = {}
+
+    sel_color = project_colors.get('selection_color', {'red': 255, 'green': 255, 'blue': 0, 'alpha': 255})
+    canvas_color = project_colors.get('canvas_color', {'red': 255, 'green': 255, 'blue': 255, 'alpha': 255})
 
     # Generate stable IDs for each layer in the embedded project
     embedded_ids = {}
@@ -457,7 +502,7 @@ def _build_project_xml(
     pcrs = ET.SubElement(root, "projectCrs")
     _build_srs_xml(pcrs, first_crs)
 
-    # --- properties (QGIS reads SpatialRefSys from here) ---
+    # --- properties (QGIS reads SpatialRefSys and Gui colors from here) ---
     props = ET.SubElement(root, "properties")
     srs_props = ET.SubElement(props, "SpatialRefSys")
     pe = ET.SubElement(srs_props, "ProjectionsEnabled", attrib={"type": "int"})
@@ -467,6 +512,14 @@ def _build_project_xml(
     if first_crs.get('proj4'):
         pp = ET.SubElement(srs_props, "ProjectCRSProj4String", attrib={"type": "QString"})
         pp.text = first_crs['proj4']
+
+    # Gui properties: selection color and canvas color
+    gui_props = ET.SubElement(props, "Gui")
+    for prefix, color in [("SelectionColor", sel_color), ("CanvasColor", canvas_color)]:
+        for part in ["RedPart", "GreenPart", "BluePart", "AlphaPart"]:
+            key_map = {"RedPart": "red", "GreenPart": "green", "BluePart": "blue", "AlphaPart": "alpha"}
+            el = ET.SubElement(gui_props, f"{prefix}{part}", attrib={"type": "int"})
+            el.text = str(color[key_map[part]])
 
     # --- mapcanvas (display CRS for theMapCanvas) ---
     mapcanvas = ET.SubElement(root, "mapcanvas", attrib={
@@ -478,6 +531,20 @@ def _build_project_xml(
     dsrs = ET.SubElement(mapcanvas, "destinationsrs")
     _build_srs_xml(dsrs, first_crs)
     ET.SubElement(mapcanvas, "rendermaptile").text = "0"
+
+    # Canvas and selection colors in mapcanvas element
+    ET.SubElement(mapcanvas, "canvascolor", attrib={
+        "red": str(canvas_color['red']),
+        "green": str(canvas_color['green']),
+        "blue": str(canvas_color['blue']),
+        "alpha": str(canvas_color['alpha']),
+    })
+    ET.SubElement(mapcanvas, "selectioncolor", attrib={
+        "red": str(sel_color['red']),
+        "green": str(sel_color['green']),
+        "blue": str(sel_color['blue']),
+        "alpha": str(sel_color['alpha']),
+    })
 
     # --- layer-tree-group ---
     tree_root = ET.SubElement(root, "layer-tree-group")
