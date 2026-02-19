@@ -2264,7 +2264,10 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
             # Ensure is_linking property exists (backward compatibility)
             if "is_linking" not in layer_props["exploring"]:
-                layer_props["exploring"]["is_linking"] = False
+                from config.config import _get_option_value
+                default_is_linking = _get_option_value(
+                    self._dockwidget.project_props.get("OPTIONS", {}).get("LAYERS", {}).get("DEFAULT_IS_LINKING"), True)
+                layer_props["exploring"]["is_linking"] = default_is_linking
 
             # Helper function to set filter expression only if it changed
             def _safe_set_single_filter(new_filter):
