@@ -910,7 +910,7 @@ class TaskParameterBuilder:
                     "FilterMate",
                     QCoreApplication.translate(
                         "TaskParameterBuilder",
-                        "Aucune entité sélectionnée! Le widget de sélection a perdu la feature. Re-sélectionnez une entité."
+                        "No entity selected! The selection widget lost the feature. Re-select an entity."
                     )
                 )
                 logger.warning("⚠️ ABORTING filter task - single_selection mode with no selection!")
@@ -1028,7 +1028,7 @@ class TaskParameterBuilder:
                 "FilterMate",
                 QCoreApplication.translate(
                     "TaskParameterBuilder",
-                    "La couche sélectionnée est invalide ou sa source est introuvable. Opération annulée."
+                    "Selected layer is invalid or its source cannot be found. Operation cancelled."
                 )
             )
             return "invalid_layer"
@@ -1043,8 +1043,8 @@ class TaskParameterBuilder:
                 "FilterMate",
                 QCoreApplication.translate(
                     "TaskParameterBuilder",
-                    "La couche '{0}' n'est pas encore initialisée. "
-                    "Essayez de sélectionner une autre couche puis revenez à celle-ci."
+                    "Layer '{0}' is not yet initialized. "
+                    "Try selecting another layer then switch back to this one."
                 ).format(current_layer.name())
             )
             return "layer_not_initialized"

@@ -192,13 +192,13 @@ def buffer_all_features(
     # Enhanced logging for negative buffers
     if is_negative_buffer and eroded_features > 0:
         logger.info(
-            f"📊 Buffer négatif résultats: {valid_features} features conservées, "
-            f"{eroded_features} complètement érodées, {invalid_features} invalides"
+            f"Negative buffer results: {valid_features} features kept, "
+            f"{eroded_features} completely eroded, {invalid_features} invalid"
         )
         if valid_features == 0:
             logger.warning(
-                f"⚠️ TOUTES les features ont été érodées par le buffer de {buffer_dist}m! "
-                "Réduisez la distance du buffer."
+                f"ALL features were eroded by the {buffer_dist}m buffer! "
+                "Reduce the buffer distance."
             )
     else:
         logger.debug(
@@ -374,13 +374,13 @@ def create_buffered_memory_layer(
         # Enhanced warning message for negative buffers
         if buffer_dist < 0:
             msg = (
-                f"Le buffer négatif de {buffer_dist}m a complètement érodé toutes les géométries. "
-                "Réduisez la distance du buffer."
+                f"The negative buffer of {buffer_dist}m has completely eroded all geometries. "
+                "Reduce the buffer distance."
             )
             logger.warning(
-                f"⚠️ Buffer négatif ({buffer_dist}m) a complètement érodé toutes les géométries. "
-                f"Total: {feature_count}, Valides: {valid_features}, "
-                f"Érodées: {eroded_features}, Invalides: {invalid_features}"
+                f"Negative buffer ({buffer_dist}m) completely eroded all geometries. "
+                f"Total: {feature_count}, Valid: {valid_features}, "
+                f"Eroded: {eroded_features}, Invalid: {invalid_features}"
             )
             # Store warning for display in UI thread (thread safety)
             if warning_callback:

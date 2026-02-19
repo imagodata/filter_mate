@@ -17,10 +17,11 @@ from typing import Optional, Callable
 
 try:
     from qgis.core import QgsVectorLayer
-    from qgis.PyQt.QtCore import QTimer
+    from qgis.PyQt.QtCore import QCoreApplication, QTimer
     QGIS_AVAILABLE = True
 except ImportError:
     QGIS_AVAILABLE = False
+    QCoreApplication = None
     QTimer = None
 
 try:
@@ -248,12 +249,28 @@ class TaskCompletionMessenger:
 
         # Show feature count if configured
         if self._should_show('filter_count'):
+            count_str = "{:,}".format(feature_count)
             if task_name == 'filter':
-                self._show_info(f"{feature_count:,} features visible in main layer")
+                self._show_info(
+                    QCoreApplication.translate(
+                        "TaskCompletionMessenger",
+                        "{count} features visible in main layer"
+                    ).format(count=count_str)
+                )
             elif task_name == 'unfilter':
-                self._show_info(f"All filters cleared - {feature_count:,} features visible in main layer")
+                self._show_info(
+                    QCoreApplication.translate(
+                        "TaskCompletionMessenger",
+                        "All filters cleared - {count} features visible in main layer"
+                    ).format(count=count_str)
+                )
             elif task_name == 'reset':
-                self._show_info(f"{feature_count:,} features visible in main layer")
+                self._show_info(
+                    QCoreApplication.translate(
+                        "TaskCompletionMessenger",
+                        "{count} features visible in main layer"
+                    ).format(count=count_str)
+                )
 
     def show_filter_applied(
         self,
@@ -270,9 +287,16 @@ class TaskCompletionMessenger:
             expression_preview: Preview of filter expression
         """
         if self._should_show('filter_applied'):
-            msg = f"Filter applied to '{layer_name}': {feature_count:,} features"
+            count_str = "{:,}".format(feature_count)
+            msg = QCoreApplication.translate(
+                "TaskCompletionMessenger",
+                "Filter applied to '{layer_name}': {count} features"
+            ).format(layer_name=layer_name, count=count_str)
             if expression_preview:
-                msg += f" ({expression_preview})"
+                msg += QCoreApplication.translate(
+                    "TaskCompletionMessenger",
+                    " ({expression_preview})"
+                ).format(expression_preview=expression_preview)
             self._show_info(msg)
 
     def show_filter_cleared(self, layer_name: str, feature_count: int) -> None:
@@ -284,4 +308,10 @@ class TaskCompletionMessenger:
             feature_count: Total features after clearing
         """
         if self._should_show('filter_cleared'):
-            self._show_info(f"Filter cleared for '{layer_name}': {feature_count:,} features visible")
+            count_str = "{:,}".format(feature_count)
+            self._show_info(
+                QCoreApplication.translate(
+                    "TaskCompletionMessenger",
+                    "Filter cleared for '{layer_name}': {count} features visible"
+                ).format(layer_name=layer_name, count=count_str)
+            )

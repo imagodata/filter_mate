@@ -43,11 +43,11 @@ def log_filtering_summary(
 
     logger.info("")
     logger.info("=" * 70)
-    logger.info("📊 RÉSUMÉ DU FILTRAGE GÉOMÉTRIQUE")
+    logger.info("GEOMETRIC FILTERING SUMMARY")
     logger.info("=" * 70)
-    logger.info(f"  Total couches: {layers_count}")
-    logger.info(f"  ✅ Succès: {successful_filters}")
-    logger.info(f"  ❌ Échecs: {failed_filters}")
+    logger.info(f"  Total layers: {layers_count}")
+    logger.info(f"  Success: {successful_filters}")
+    logger.info(f"  Failures: {failed_filters}")
 
     # Log to QGIS message panel if requested
     if log_to_qgis:
@@ -70,16 +70,16 @@ def log_filtering_summary(
     if failed_filters > 0:
         logger.info("")
         if failed_layer_names:
-            logger.info("  ❌ COUCHES EN ÉCHEC:")
+            logger.info("  FAILED LAYERS:")
             for name in failed_layer_names[:10]:  # Show first 10
                 logger.info(f"     • {name}")
             if len(failed_layer_names) > 10:
-                logger.info(f"     ... et {len(failed_layer_names) - 10} autre(s)")
+                logger.info(f"     ... and {len(failed_layer_names) - 10} more")
         logger.info("")
-        logger.info("  💡 CONSEIL: Si des couches échouent avec le backend Spatialite:")
-        logger.info("     → Vérifiez que les couches sont des GeoPackage/SQLite")
-        logger.info("     → Les Shapefiles ne supportent pas les fonctions Spatialite")
-        logger.info("     → Essayez le backend OGR (QGIS processing) pour ces couches")
+        logger.info("  TIP: If layers fail with the Spatialite backend:")
+        logger.info("     -> Check that layers are GeoPackage/SQLite")
+        logger.info("     -> Shapefiles do not support Spatialite functions")
+        logger.info("     -> Try the OGR backend (QGIS processing) for these layers")
     logger.info("=" * 70)
 
 

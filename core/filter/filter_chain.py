@@ -60,7 +60,7 @@ DEFAULT_PRIORITIES = {
 
 
 class CombinationStrategy(Enum):
-    """Stratégies de combinaison des filtres."""
+    """Filter combination strategies."""
 
     PRIORITY_AND = "priority_and"       # Combine avec AND selon priorité
     PRIORITY_OR = "priority_or"         # Combine avec OR selon priorité
@@ -465,7 +465,7 @@ class FilterChain:
         return chain
 
     def __repr__(self) -> str:
-        """Représentation lisible pour debugging."""
+        """Human-readable representation for debugging."""
         if not self.filters:
             return f"FilterChain({self.target_layer.name()}): EMPTY"
 

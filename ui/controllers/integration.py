@@ -17,6 +17,8 @@ Usage:
 from typing import TYPE_CHECKING, Optional, Dict, Any, Tuple
 import logging
 
+from qgis.PyQt.QtCore import QCoreApplication
+
 from .registry import ControllerRegistry, TabIndex
 from .exploring_controller import ExploringController
 from .filtering_controller import FilteringController
@@ -607,7 +609,12 @@ class ControllerIntegration:
         try:
             from qgis.utils import iface
             if iface and hasattr(iface, 'messageBar'):
-                iface.messageBar().pushWarning("FilterMate", f"Property error: {error_msg}")
+                iface.messageBar().pushWarning(
+                    "FilterMate",
+                    QCoreApplication.translate(
+                        "ControllerIntegration", "Property error: {0}"
+                    ).format(error_msg)
+                )
         except Exception:
             pass
 

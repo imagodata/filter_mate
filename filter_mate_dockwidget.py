@@ -2244,6 +2244,18 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         """v5.0 P2-2: Delegated to ConfigModelManager."""
         self._config_model_manager.save_configuration_model()
 
+    def refresh_ui_responsiveness_params(self):
+        """Re-read UI_RESPONSIVENESS params from CONFIG_DATA and update timers."""
+        try:
+            from config.config import _get_option_value
+            ui_resp = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("UI_RESPONSIVENESS", {})
+            expr_ms = _get_option_value(ui_resp.get("expression_debounce_ms"), 450)
+            if hasattr(self, '_expression_debounce_timer'):
+                self._expression_debounce_timer.setInterval(int(expr_ms))
+                logger.debug(f"Expression debounce timer updated to {expr_ms}ms")
+        except Exception as e:
+            logger.debug(f"Could not refresh UI responsiveness params: {e}")
+
     def _disconnect_config_model_signal(self):
         """v5.0 P2-2: Delegated to ConfigModelManager."""
         self._config_model_manager.disconnect_config_model_signal()
@@ -6192,16 +6204,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
 
     def resetLayerVariableEvent(self, layer=None, properties=None):
         """v4.0 Sprint 18: Reset layer properties to default values."""
+        from .config.config import _get_option_value
         if not self.widgets_initialized: return
         layer = layer or self.current_layer
         if not layer or not is_valid_layer(layer) or layer.id() not in self.PROJECT_LAYERS: return
         try:
             layer_props = self.PROJECT_LAYERS[layer.id()]
             best_field = get_best_display_field(layer) or layer_props.get("infos", {}).get("primary_key_name", "")
+            default_is_linking = _get_option_value(
+                self.project_props.get("OPTIONS", {}).get("LAYERS", {}).get("DEFAULT_IS_LINKING"), True)
             defaults = {
                 "exploring": {
                     "is_changing_all_layer_properties": True, "is_tracking": False,
-                    "is_selecting": False, "is_linking": False,
+                    "is_selecting": False, "is_linking": default_is_linking,
                     "current_exploring_groupbox": "single_selection",
                     "single_selection_expression": best_field,
                     "multiple_selection_expression": best_field,

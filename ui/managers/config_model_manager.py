@@ -97,6 +97,8 @@ class ConfigModelManager:
             )
             with open(config_path, 'r') as f:
                 dw.CONFIG_DATA = json.load(f)
+            # Sync ENV_VARS so all code reading from it sees reverted values
+            ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
 
             from ...ui.widgets.json_view.model import JsonModel
             dw.config_model = JsonModel(
@@ -169,6 +171,8 @@ class ConfigModelManager:
             if hasattr(dw, 'config_view') and dw.config_view:
                 dw.config_view.setModel(dw.config_model)
                 dw.config_view.model = dw.config_model
+            # Sync ENV_VARS so all code reading from it sees updated values
+            ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
             config_path = ENV_VARS.get(
                 'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json'
             )
@@ -178,12 +182,14 @@ class ConfigModelManager:
             logger.error(f"Error reloading configuration model: {e}")
 
     def save_configuration_model(self):
-        """Save current config model to file."""
+        """Save current config model to file and sync ENV_VARS."""
         from ...config.config import ENV_VARS
         dw = self.dockwidget
         if not dw.widgets_initialized:
             return
         dw.CONFIG_DATA = dw.config_model.serialize()
+        # Sync ENV_VARS so all code reading from it sees updated values
+        ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
         config_path = ENV_VARS.get(
             'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json'
         )

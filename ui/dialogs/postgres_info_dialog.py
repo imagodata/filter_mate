@@ -117,10 +117,12 @@ class PostgresInfoDialog(QDialog):
         layout.addWidget(icon_label)
 
         message = QLabel(
-            "<b>PostgreSQL is not available</b><br><br>"
-            "To use PostgreSQL features, install psycopg2:<br><br>"
-            "<code>pip install psycopg2-binary</code><br><br>"
-            "Then restart QGIS to apply changes."
+            self.tr(
+                "<b>PostgreSQL is not available</b><br><br>"
+                "To use PostgreSQL features, install psycopg2:<br><br>"
+                "<code>pip install psycopg2-binary</code><br><br>"
+                "Then restart QGIS to apply changes."
+            )
         )
         message.setAlignment(Qt.AlignCenter)
         message.setWordWrap(True)
@@ -145,7 +147,7 @@ class PostgresInfoDialog(QDialog):
         status_layout.addStretch()
 
         if self._session_manager.session_id:
-            session_label = QLabel(f"Session: {self._session_manager.session_id}")
+            session_label = QLabel(self.tr("Session: {0}").format(self._session_manager.session_id))
             session_label.setStyleSheet("color: white; font-size: 10pt;")
             status_layout.addWidget(session_label)
 
@@ -183,7 +185,7 @@ class PostgresInfoDialog(QDialog):
 
         # View count label
         view_count = self._session_manager.view_count
-        count_label = QLabel(f"{view_count} view(s) in this session")
+        count_label = QLabel(self.tr("{0} view(s) in this session").format(view_count))
         count_label.setStyleSheet("color: #888; font-style: italic;")
         views_layout.addWidget(count_label)
 

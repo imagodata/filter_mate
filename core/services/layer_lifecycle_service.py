@@ -22,7 +22,7 @@ import time
 
 try:
     from qgis.core import QgsVectorLayer, QgsProject
-    from qgis.PyQt.QtCore import QTimer
+    from qgis.PyQt.QtCore import QCoreApplication, QTimer
     from qgis.utils import iface
     QGIS_AVAILABLE = True
 except ImportError:
@@ -207,12 +207,15 @@ class LayerLifecycleService:
         if all_postgres and not postgresql_available:
             layer_names = ', '.join([l.name() for l in all_postgres[:3]])
             if len(all_postgres) > 3:
-                layer_names += f" (+{len(all_postgres) - 3} autres)"
+                layer_names += " (+{0} more)".format(len(all_postgres) - 3)
 
             show_warning(
-                f"Couches PostgreSQL détectées ({layer_names}) mais psycopg2 n'est pas installé. "
-                "Le plugin ne peut pas utiliser ces couches. "
-                "Installez psycopg2 pour activer le support PostgreSQL."
+                QCoreApplication.translate(
+                    "LayerLifecycleService",
+                    "PostgreSQL layers detected ({0}) but psycopg2 is not installed. "
+                    "The plugin cannot use these layers. "
+                    "Install psycopg2 to enable PostgreSQL support."
+                ).format(layer_names)
             )
             logger.warning(f"FilterMate: Cannot use {len(all_postgres)} PostgreSQL layer(s) - psycopg2 not available")
 

@@ -437,7 +437,7 @@ class LayersManagementEngineTask(QgsTask):
 
         # Ensure all required exploring boolean flags exist
         exploring_booleans = {
-            "is_linking": False,
+            "is_linking": self._get_default_is_linking(),
             "is_selecting": False,
             "is_tracking": False,
             "is_changing_all_layer_properties": True
@@ -825,6 +825,9 @@ class LayersManagementEngineTask(QgsTask):
                 escape_json_string(display_expression)
             )
         )
+        # Apply config default for is_linking
+        default_is_linking = self._get_default_is_linking()
+        new_layer_variables["exploring"]["is_linking"] = default_is_linking
         new_layer_variables["filtering"] = json.loads(self.json_template_layer_filtering)
 
         # VERIFICATION v2.9.32: Log default centroid checkbox values to confirm they are False
@@ -833,6 +836,16 @@ class LayersManagementEngineTask(QgsTask):
                     f"use_centroids_distant_layers={new_layer_variables['filtering']['use_centroids_distant_layers']}")
 
         return new_layer_variables
+
+    def _get_default_is_linking(self):
+        """Read DEFAULT_IS_LINKING from config, handling wrapped {value, description} format."""
+        try:
+            option = self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"].get("DEFAULT_IS_LINKING", True)
+            if isinstance(option, dict):
+                return bool(option.get("value", True))
+            return bool(option)
+        except (KeyError, TypeError, AttributeError):
+            return True
 
     def _set_layer_variables(self, layer, layer_variables):
         """
@@ -925,13 +938,13 @@ class LayersManagementEngineTask(QgsTask):
             if layer.providerType() == 'postgres':
                 primary_key = layer_variables.get("infos", {}).get("primary_key_name")
                 if primary_key == "virtual_id":
-                    error_msg = (
-                        f"Couche PostgreSQL '{layer.name()}' : Données corrompues détectées.\n\n"
-                        "Cette couche utilise 'virtual_id' qui n'existe pas dans PostgreSQL.\n"
-                        "Cette erreur provient d'une version précédente de FilterMate.\n\n"
-                        "Solution : Supprimez cette couche du projet FilterMate, puis rajoutez-la.\n"
-                        "Assurez-vous que la table PostgreSQL a une PRIMARY KEY définie."
-                    )
+                    error_msg = self.tr(
+                        "PostgreSQL layer '{0}': Corrupted data detected.\n\n"
+                        "This layer uses 'virtual_id' which does not exist in PostgreSQL.\n"
+                        "This error originates from a previous version of FilterMate.\n\n"
+                        "Solution: Remove this layer from the FilterMate project, then re-add it.\n"
+                        "Make sure the PostgreSQL table has a PRIMARY KEY defined."
+                    ).format(layer.name())
                     logger.error(error_msg)
                     raise ValueError(error_msg)
 
@@ -952,9 +965,9 @@ class LayersManagementEngineTask(QgsTask):
                 # Store warning for display on main thread in finished()
                 # DO NOT call iface.messageBar() here - causes crash (access violation)
                 warning_msg = self.tr(
-                    "La couche '{0}' n'a pas de PRIMARY KEY. "
-                    "Fonctionnalités limitées : vues matérialisées désactivées. "
-                    "Recommandation : ajoutez une PRIMARY KEY pour performances optimales."
+                    "Layer '{0}' has no PRIMARY KEY. "
+                    "Limited features: materialized views disabled. "
+                    "Recommendation: add a PRIMARY KEY for optimal performance."
                 ).format(layer.name())
                 self._deferred_warnings.append(warning_msg)
                 logger.warning(f"PostgreSQL layer without PRIMARY KEY: {layer.name()}")
@@ -1196,13 +1209,13 @@ class LayersManagementEngineTask(QgsTask):
         # 5. For PostgreSQL without PK, use ctid immediately
         if is_postgresql:
             logger.warning(
-                f"⚠️ Couche PostgreSQL '{layer.name()}' : Aucune clé primaire ou champ ID trouvé.\n"
-                "   FilterMate utilisera 'ctid' (identifiant interne PostgreSQL) avec limitations :\n"
-                "   - ✅ Filtrage attributaire possible\n"
-                "   - ✅ Filtrage géométrique basique possible\n"
-                "   - ❌ Vues matérialisées désactivées (performance réduite)\n"
-                "   - ❌ Historique de filtres limité\n"
-                "   Recommandation : Ajoutez une PRIMARY KEY pour performances optimales."
+                f"PostgreSQL layer '{layer.name()}': No primary key or ID field found.\n"
+                "   FilterMate will use 'ctid' (PostgreSQL internal identifier) with limitations:\n"
+                "   - Attribute filtering: OK\n"
+                "   - Basic geometry filtering: OK\n"
+                "   - Materialized views: disabled (reduced performance)\n"
+                "   - Filter history: limited\n"
+                "   Recommendation: Add a PRIMARY KEY for optimal performance."
             )
             return ('ctid', -1, 'tid', False)
 

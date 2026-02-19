@@ -19,7 +19,7 @@ from typing import Optional, Dict, Callable, List
 
 try:
     from qgis.core import QgsProject, QgsVectorLayer
-    from qgis.PyQt.QtCore import QTimer
+    from qgis.PyQt.QtCore import QCoreApplication, QTimer
     QGIS_AVAILABLE = True
 except ImportError:
     QGIS_AVAILABLE = False
@@ -177,7 +177,7 @@ class UndoRedoHandler:
             logger.warning("handle_undo: source layer invalid or source missing")
             self._show_warning(
                 "FilterMate",
-                "Impossible d'annuler: couche invalide ou source introuvable."
+                QCoreApplication.translate("UndoRedoHandler", "Cannot undo: layer invalid or source not found.")
             )
             return False
 
@@ -254,7 +254,7 @@ class UndoRedoHandler:
             logger.warning("handle_redo: source layer invalid or source missing")
             self._show_warning(
                 "FilterMate",
-                "Impossible de rétablir: couche invalide ou source introuvable."
+                QCoreApplication.translate("UndoRedoHandler", "Cannot redo: layer invalid or source not found.")
             )
             return False
 

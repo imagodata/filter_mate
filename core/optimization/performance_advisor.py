@@ -43,61 +43,61 @@ def get_contextual_performance_warning(
     is_ogr = provider_type == 'ogr'
 
     # Base message with timing
-    base_msg = f"La requête de filtrage a pris {elapsed_time:.1f}s"
+    base_msg = f"Filter query took {elapsed_time:.1f}s"
 
     if is_postgresql:
         # Already using PostgreSQL - suggest complexity reduction
         if severity == 'critical':
             return (
                 f"{base_msg} (backend: PostgreSQL). "
-                "Pour améliorer les performances, vous pouvez: "
-                "réduire le rayon du buffer, limiter le nombre de couches, "
-                "ou créer des index spatiaux sur les tables concernées."
+                "To improve performance, you can: "
+                "reduce the buffer radius, limit the number of layers, "
+                "or create spatial indexes on the affected tables."
             )
         else:
             return (
                 f"{base_msg} (backend: PostgreSQL). "
-                "Temps normal pour une requête complexe. "
-                "Vérifiez vos index spatiaux si les performances restent lentes."
+                "Normal time for a complex query. "
+                "Check your spatial indexes if performance remains slow."
             )
     elif is_spatialite:
         # Using Spatialite - suggest PostgreSQL for large datasets
         if severity == 'critical':
             return (
                 f"{base_msg} (backend: Spatialite). "
-                "Pour de meilleures performances, considérez: "
-                "PostgreSQL/PostGIS pour les grands jeux de données, "
-                "ou réduisez la complexité du filtre."
+                "For better performance, consider: "
+                "PostgreSQL/PostGIS for large datasets, "
+                "or reduce filter complexity."
             )
         else:
             return (
                 f"{base_msg} (backend: Spatialite). "
-                "Performances acceptables. PostgreSQL/PostGIS serait plus rapide "
-                "pour les requêtes fréquentes sur ce jeu de données."
+                "Acceptable performance. PostgreSQL/PostGIS would be faster "
+                "for frequent queries on this dataset."
             )
     elif is_ogr:
         # Using OGR fallback - suggest optimized backend
         if severity == 'critical':
             return (
-                f"{base_msg} (backend: OGR/mémoire). "
-                "Pour de meilleures performances, utilisez PostgreSQL/PostGIS "
-                "ou Spatialite. Le backend actuel n'est pas optimisé pour les grandes données."
+                f"{base_msg} (backend: OGR/memory). "
+                "For better performance, use PostgreSQL/PostGIS "
+                "or Spatialite. The current backend is not optimized for large data."
             )
         else:
             return (
-                f"{base_msg} (backend: OGR/mémoire). "
-                "Considérez PostgreSQL ou GeoPackage (Spatialite) pour de meilleures performances."
+                f"{base_msg} (backend: OGR/memory). "
+                "Consider PostgreSQL or GeoPackage (Spatialite) for better performance."
             )
     else:
         # Unknown/default backend
         if severity == 'critical':
             return (
                 f"{base_msg}. "
-                "Pour de meilleures performances, utilisez PostgreSQL/PostGIS "
-                "ou réduisez la complexité du filtre."
+                "For better performance, use PostgreSQL/PostGIS "
+                "or reduce filter complexity."
             )
         else:
             return (
                 f"{base_msg}. "
-                "Temps de traitement élevé. Vérifiez la taille des données et la complexité du filtre."
+                "High processing time. Check data size and filter complexity."
             )

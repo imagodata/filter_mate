@@ -11,6 +11,11 @@ import re
 import logging
 from contextlib import contextmanager
 
+try:
+    from qgis.PyQt.QtCore import QCoreApplication
+except ImportError:
+    QCoreApplication = None
+
 logger = logging.getLogger('FilterMate.Infrastructure.Database.SQLUtils')
 
 
@@ -143,11 +148,15 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                         try:
                             from qgis.utils import iface
                             if iface:
-                                message = f"Type mismatch in filter: {warnings[0][:100]}..."
-                                iface.messageBar().pushWarning(
-                                    "FilterMate - PostgreSQL Type Warning",
-                                    message
+                                title = QCoreApplication.translate(
+                                    "SqlUtils",
+                                    "FilterMate - PostgreSQL Type Warning"
                                 )
+                                message = QCoreApplication.translate(
+                                    "SqlUtils",
+                                    "Type mismatch in filter: {warning_detail}..."
+                                ).format(warning_detail=warnings[0][:100])
+                                iface.messageBar().pushWarning(title, message)
                         except (ImportError, AttributeError):
                             pass  # No UI available (testing environment)
 

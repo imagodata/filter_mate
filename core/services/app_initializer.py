@@ -236,7 +236,7 @@ class AppInitializer:
             logger.info("FilterMate: Plugin started with empty project - waiting for layers to be added")
             show_info(QCoreApplication.translate(
                 "AppInitializer",
-                "Projet vide détecté. Ajoutez des couches vectorielles pour activer le plugin."
+                "Empty project detected. Add vector layers to activate the plugin."
             ))
 
         # Connect layer store signals
@@ -305,7 +305,7 @@ class AppInitializer:
                     "FilterMate",
                     QCoreApplication.translate(
                         "AppInitializer",
-                        "Impossible d'accéder à la base de données FilterMate. Vérifiez les permissions du répertoire du projet."
+                        "Cannot access the FilterMate database. Check the project directory permissions."
                     )
                 )
                 return False
@@ -319,7 +319,7 @@ class AppInitializer:
                 "FilterMate",
                 QCoreApplication.translate(
                     "AppInitializer",
-                    "Erreur lors de la vérification de la base de données: {0}"
+                    "Error during database verification: {0}"
                 ).format(str(db_err))
             )
             return False
@@ -595,7 +595,7 @@ class AppInitializer:
                 "FilterMate",
                 QCoreApplication.translate(
                     "AppInitializer",
-                    "Échec du chargement des couches. Utilisez F5 pour forcer le rechargement."
+                    "Layer loading failed. Use F5 to force reload."
                 )
             )
 

@@ -9,7 +9,7 @@ class InputWindow(QtWidgets.QDialog):
     def __init__(self):
         """Initializer."""
         super().__init__()
-        self.setWindowTitle("Python Menus & Toolbars")
+        self.setWindowTitle(self.tr("Python Menus & Toolbars"))
         self.resize(400, 200)
 
         self.layout = QtWidgets.QGridLayout(self)
@@ -21,8 +21,8 @@ class InputWindow(QtWidgets.QDialog):
         self.buttonBox.rejected.connect(self.reject)
         self.key = QtWidgets.QLineEdit()
         self.value = QtWidgets.QTextEdit()
-        self.keyLabel = QtWidgets.QLabel("Propriété")
-        self.valueLabel = QtWidgets.QLabel("Valeur")
+        self.keyLabel = QtWidgets.QLabel(self.tr("Property"))
+        self.valueLabel = QtWidgets.QLabel(self.tr("Value"))
 
         self.layout.addWidget(self.keyLabel, 0, 0)
         self.layout.addWidget(self.key, 0, 1)
@@ -51,7 +51,7 @@ class JsonModel(QtGui.QStandardItemModel):
     def init(self, data, editable_keys=False, editable_values=False):
         """Convert the data to items and populate the model."""
         self.clear()
-        self.setHorizontalHeaderLabels(['Property', 'Value'])
+        self.setHorizontalHeaderLabels([self.tr('Property'), self.tr('Value')])
         self.editable_keys = editable_keys
         self.editable_values = editable_values
         parent = self.invisibleRootItem()

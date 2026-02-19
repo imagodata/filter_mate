@@ -13,6 +13,9 @@ Usage:
 """
 
 from qgis.core import Qgis  # noqa: F401
+from qgis.PyQt.QtCore import QCoreApplication
+
+_tr = QCoreApplication.translate
 
 try:
     from ...config.feedback_config import should_show_message  # noqa: F401
@@ -103,11 +106,11 @@ def show_backend_info(provider_type: str, layer_count: int = 1,
         backend_name = get_backend_display_name(provider_type)
 
         operation_text = {
-            'filter': f"Starting filter on {layer_count} layer(s)",
-            'unfilter': f"Removing filters from {layer_count} layer(s)",
-            'reset': f"Resetting {layer_count} layer(s)",
-            'export': f"Exporting {layer_count} layer(s)"
-        }.get(operation, f"Processing {layer_count} layer(s)")
+            'filter': _tr("FeedbackModule", "Starting filter on {0} layer(s)").format(layer_count),
+            'unfilter': _tr("FeedbackModule", "Removing filters from {0} layer(s)").format(layer_count),
+            'reset': _tr("FeedbackModule", "Resetting {0} layer(s)").format(layer_count),
+            'export': _tr("FeedbackModule", "Exporting {0} layer(s)").format(layer_count)
+        }.get(operation, _tr("FeedbackModule", "Processing {0} layer(s)").format(layer_count))
 
         if is_fallback:
             message = f"📦 OGR (fallback): {operation_text}..."
@@ -128,11 +131,11 @@ def show_success_with_backend(provider_type: str, operation: str = 'filter',
         backend_name = get_backend_display_name(provider_type)
 
         operation_text = {
-            'filter': f"Successfully filtered {layer_count} layer(s)",
-            'unfilter': f"Successfully removed filters from {layer_count} layer(s)",
-            'reset': f"Successfully reset {layer_count} layer(s)",
-            'export': f"Successfully exported {layer_count} layer(s)"
-        }.get(operation, f"Successfully processed {layer_count} layer(s)")
+            'filter': _tr("FeedbackModule", "Successfully filtered {0} layer(s)").format(layer_count),
+            'unfilter': _tr("FeedbackModule", "Successfully removed filters from {0} layer(s)").format(layer_count),
+            'reset': _tr("FeedbackModule", "Successfully reset {0} layer(s)").format(layer_count),
+            'export': _tr("FeedbackModule", "Successfully exported {0} layer(s)").format(layer_count)
+        }.get(operation, _tr("FeedbackModule", "Successfully processed {0} layer(s)").format(layer_count))
 
         if is_fallback:
             message = f"📦 OGR (fallback): {operation_text}"
@@ -149,23 +152,32 @@ def show_performance_warning(provider_type: str, feature_count: int):
     """Show performance warning for large datasets without PostgreSQL."""
     try:
         from qgis.utils import iface  # noqa: F401
+        # Skip if optimization hints are disabled in config
+        try:
+            from ...core.services.auto_optimizer import get_auto_optimization_config
+            if not get_auto_optimization_config().get('show_optimization_hints', True):
+                return
+        except Exception:
+            pass
         if provider_type == 'postgresql':
             return
 
         backend_name = get_backend_display_name(provider_type)
 
         if feature_count > 100000:
-            message = (
-                f"Large dataset ({feature_count:,} features) using {backend_name}. "
+            message = _tr(
+                "FeedbackModule",
+                "Large dataset ({0} features) using {1}. "
                 "Consider using PostgreSQL for optimal performance."
-            )
+            ).format("{:,}".format(feature_count), backend_name)
             if iface:
                 iface.messageBar().pushWarning("FilterMate - Performance", message)
         elif feature_count > 50000:
-            message = (
-                f"Medium-large dataset ({feature_count:,} features) using {backend_name}. "
+            message = _tr(
+                "FeedbackModule",
+                "Medium-large dataset ({0} features) using {1}. "
                 "PostgreSQL recommended for better performance."
-            )
+            ).format("{:,}".format(feature_count), backend_name)
             if iface:
                 iface.messageBar().pushInfo("FilterMate - Performance", message)
     except Exception:

@@ -19,7 +19,7 @@ v4.3: Strangler Fig Pattern - New service with fallback to FilterMateApp legacy 
 
 import time
 from typing import Optional, Dict, Any
-from qgis.PyQt.QtCore import QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QTimer
 from qgis.core import QgsVectorLayer, QgsProject, QgsMessageLog, Qgis
 from qgis.utils import iface
 
@@ -262,12 +262,28 @@ class FilterResultHandler:
 
         # Only show feature count if configured to do so
         if should_show_message('filter_count'):
+            count_str = "{:,}".format(feature_count)
             if task_name == 'filter':
-                show_info(f"{feature_count:,} features visible in main layer")
+                show_info(
+                    QCoreApplication.translate(
+                        "FilterResultHandler",
+                        "{count} features visible in main layer"
+                    ).format(count=count_str)
+                )
             elif task_name == 'unfilter':
-                show_info(f"All filters cleared - {feature_count:,} features visible in main layer")
+                show_info(
+                    QCoreApplication.translate(
+                        "FilterResultHandler",
+                        "All filters cleared - {count} features visible in main layer"
+                    ).format(count=count_str)
+                )
             elif task_name == 'reset':
-                show_info(f"{feature_count:,} features visible in main layer")
+                show_info(
+                    QCoreApplication.translate(
+                        "FilterResultHandler",
+                        "{count} features visible in main layer"
+                    ).format(count=count_str)
+                )
 
     def _update_backend_indicator(
         self,

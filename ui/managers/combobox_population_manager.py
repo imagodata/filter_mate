@@ -22,6 +22,8 @@ Created: February 2026
 import logging
 from typing import TYPE_CHECKING
 
+from qgis.PyQt.QtCore import QCoreApplication
+
 from ...infrastructure.signal_utils import SignalBlocker
 
 if TYPE_CHECKING:
@@ -58,9 +60,16 @@ class ComboboxPopulationManager:
                 dw._controller_integration.delegate_filtering_get_available_predicates()
                 if dw._controller_integration else None
             )
+            _tr = QCoreApplication.translate
             dw.predicates = predicates or [
-                "Intersect", "Contain", "Disjoint", "Equal",
-                "Touch", "Overlap", "Are within", "Cross",
+                _tr("ComboboxPopulationManager", "Intersect"),
+                _tr("ComboboxPopulationManager", "Contain"),
+                _tr("ComboboxPopulationManager", "Disjoint"),
+                _tr("ComboboxPopulationManager", "Equal"),
+                _tr("ComboboxPopulationManager", "Touch"),
+                _tr("ComboboxPopulationManager", "Overlap"),
+                _tr("ComboboxPopulationManager", "Are within"),
+                _tr("ComboboxPopulationManager", "Cross"),
             ]
             logger.info(
                 f"filtering_populate_predicates: predicates={dw.predicates}"
@@ -102,9 +111,16 @@ class ComboboxPopulationManager:
             try:
                 w = dw.comboBox_filtering_geometric_predicates
                 w.clear()
+                _tr = QCoreApplication.translate
                 w.addItems([
-                    "Intersect", "Contain", "Disjoint", "Equal",
-                    "Touch", "Overlap", "Are within", "Cross",
+                    _tr("ComboboxPopulationManager", "Intersect"),
+                    _tr("ComboboxPopulationManager", "Contain"),
+                    _tr("ComboboxPopulationManager", "Disjoint"),
+                    _tr("ComboboxPopulationManager", "Equal"),
+                    _tr("ComboboxPopulationManager", "Touch"),
+                    _tr("ComboboxPopulationManager", "Overlap"),
+                    _tr("ComboboxPopulationManager", "Are within"),
+                    _tr("ComboboxPopulationManager", "Cross"),
                 ])
                 logger.info(f"Fallback succeeded, widget count: {w.count()}")
             except Exception as e2:
@@ -119,7 +135,12 @@ class ComboboxPopulationManager:
         )
         w = dw.widgets["FILTERING"]["BUFFER_TYPE"]["WIDGET"]
         w.clear()
-        w.addItems(buffer_types or ["Round", "Flat", "Square"])
+        _tr = QCoreApplication.translate
+        w.addItems(buffer_types or [
+            _tr("ComboboxPopulationManager", "Round"),
+            _tr("ComboboxPopulationManager", "Flat"),
+            _tr("ComboboxPopulationManager", "Square"),
+        ])
         if not w.currentText():
             w.setCurrentIndex(0)
 

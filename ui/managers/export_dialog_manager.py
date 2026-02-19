@@ -21,6 +21,8 @@ import re
 import logging
 from typing import TYPE_CHECKING
 
+from qgis.PyQt.QtCore import QCoreApplication
+
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
 
@@ -74,7 +76,7 @@ class ExportDialogManager:
                     layer = match.group() if match else layer
                     path = str(QtWidgets.QFileDialog.getSaveFileName(
                         dw,
-                        'Save your layer to a file',
+                        QCoreApplication.translate("ExportDialogManager", "Save your layer to a file"),
                         os.path.join(
                             dw.current_project_path,
                             dw.output_name + '_' + layer.strip()
@@ -84,7 +86,7 @@ class ExportDialogManager:
                 elif datatype.upper() == 'GPKG':
                     path = str(QtWidgets.QFileDialog.getSaveFileName(
                         dw,
-                        'Save your layer to a file',
+                        QCoreApplication.translate("ExportDialogManager", "Save your layer to a file"),
                         os.path.join(
                             dw.current_project_path,
                             dw.output_name + '.gpkg'
@@ -94,13 +96,13 @@ class ExportDialogManager:
                 else:
                     path = str(QtWidgets.QFileDialog.getExistingDirectory(
                         dw,
-                        'Select a folder where to export your layers',
+                        QCoreApplication.translate("ExportDialogManager", "Select a folder where to export your layers"),
                         dw.current_project_path
                     ))
             else:
                 path = str(QtWidgets.QFileDialog.getExistingDirectory(
                     dw,
-                    'Select a folder where to export your layers',
+                    QCoreApplication.translate("ExportDialogManager", "Select a folder where to export your layers"),
                     dw.current_project_path
                 ))
 
@@ -150,7 +152,7 @@ class ExportDialogManager:
         if state:
             path = str(QtWidgets.QFileDialog.getSaveFileName(
                 dw,
-                'Save your exported data to a zip file',
+                QCoreApplication.translate("ExportDialogManager", "Save your exported data to a zip file"),
                 os.path.join(dw.current_project_path, dw.output_name),
                 '*.zip'
             )[0])

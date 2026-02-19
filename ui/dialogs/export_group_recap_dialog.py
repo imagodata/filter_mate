@@ -27,19 +27,19 @@ _FORMAT_TEXT = {
     'GPKG': {
         'title': "Export GeoPackage",
         'header': "Export GeoPackage",
-        'checkbox': "Conserver la structure des groupes dans le GPKG",
+        'checkbox': "Preserve group structure in GPKG",
         'tooltip': (
-            "Embarque un projet QGIS dans le GeoPackage qui restaure "
-            "l'arborescence des groupes à l'ouverture"
+            "Embeds a QGIS project in the GeoPackage that restores "
+            "the group tree structure on opening"
         ),
     },
     'KML': {
         'title': "Export KML",
         'header': "Export KML",
-        'checkbox': "Regrouper les couches dans un seul fichier KML avec dossiers",
+        'checkbox': "Group layers in a single KML file with folders",
         'tooltip': (
-            "Fusionne toutes les couches dans un seul fichier KML "
-            "avec des dossiers (<Folder>) correspondant aux groupes"
+            "Merges all layers into a single KML file "
+            "with folders (<Folder>) matching the groups"
         ),
     },
 }
@@ -145,7 +145,7 @@ class ExportGroupRecapDialog(QDialog):
         self._preserve_cb.setEnabled(has_groups)
         if not has_groups:
             self._preserve_cb.setToolTip(
-                self.tr("Aucun groupe détecté - toutes les couches sont à la racine")
+                self.tr("No group detected - all layers are at the root level")
             )
         layout.addWidget(self._preserve_cb)
 

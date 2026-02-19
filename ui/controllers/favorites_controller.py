@@ -227,16 +227,16 @@ class FavoritesController(BaseController):
         if not expression:
             QMessageBox.warning(
                 self.dockwidget,
-                "No Filter",
-                "No active filter to save."
+                self.tr("No Filter"),
+                self.tr("No active filter to save.")
             )
             return False
 
         if not name:
             name, ok = QInputDialog.getText(
                 self.dockwidget,
-                "Add Favorite",
-                "Favorite name:",
+                self.tr("Add Favorite"),
+                self.tr("Favorite name:"),
                 text=""
             )
             if not ok or not name:
@@ -251,7 +251,7 @@ class FavoritesController(BaseController):
             self.favorite_added.emit(name)
             self.favorites_changed.emit()
             self.update_indicator()
-            self._show_success(f"Favorite '{name}' added successfully")
+            self._show_success(self.tr("Favorite '{0}' added successfully").format(name))
 
         return success
 
@@ -393,7 +393,7 @@ class FavoritesController(BaseController):
         if not filepath:
             filepath, _ = QFileDialog.getSaveFileName(
                 self.dockwidget,
-                "Export Favorites",
+                self.tr("Export Favorites"),
                 "favorites.json",
                 "JSON Files (*.json)"
             )
@@ -402,10 +402,10 @@ class FavoritesController(BaseController):
             return False
 
         if self._favorites_manager.export_to_file(filepath):
-            self._show_success(f"Exported {self.count} favorites")
+            self._show_success(self.tr("Exported {0} favorites").format(self.count))
             return True
         else:
-            self._show_warning("Failed to export favorites")
+            self._show_warning(self.tr("Failed to export favorites"))
             return False
 
     def import_favorites(
@@ -426,7 +426,7 @@ class FavoritesController(BaseController):
         if not filepath:
             filepath, _ = QFileDialog.getOpenFileName(
                 self.dockwidget,
-                "Import Favorites",
+                self.tr("Import Favorites"),
                 "",
                 "JSON Files (*.json)"
             )
@@ -437,10 +437,10 @@ class FavoritesController(BaseController):
         if merge is None:
             result = QMessageBox.question(
                 self.dockwidget,
-                "Import Favorites",
-                "Merge with existing favorites?\n\n"
-                "Yes = Add to existing\n"
-                "No = Replace all existing",
+                self.tr("Import Favorites"),
+                self.tr("Merge with existing favorites?\n\n"
+                         "Yes = Add to existing\n"
+                         "No = Replace all existing"),
                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
             )
             if result == QMessageBox.Cancel:
@@ -453,9 +453,9 @@ class FavoritesController(BaseController):
             self._favorites_manager.save_to_project()
             self.favorites_changed.emit()
             self.update_indicator()
-            self._show_success(f"Imported {count} favorites")
+            self._show_success(self.tr("Imported {0} favorites").format(count))
         else:
-            self._show_warning("No favorites imported")
+            self._show_warning(self.tr("No favorites imported"))
 
         return count
 
@@ -464,7 +464,7 @@ class FavoritesController(BaseController):
         try:
             # Check if favorites manager is available
             if not self._favorites_manager:
-                self._show_warning("Favorites manager not initialized. Please restart FilterMate.")
+                self._show_warning(self.tr("Favorites manager not initialized. Please restart FilterMate."))
                 return
 
             from ..dialogs import FavoritesManagerDialog
@@ -480,10 +480,10 @@ class FavoritesController(BaseController):
             self.update_indicator()
         except ImportError as e:
             logger.warning(f"FavoritesManagerDialog not available: {e}")
-            self._show_warning("Favorites manager dialog not available")
+            self._show_warning(self.tr("Favorites manager dialog not available"))
         except Exception as e:
             logger.error(f"Error showing favorites manager: {e}")
-            self._show_warning(f"Error: {e}")
+            self._show_warning(self.tr("Error: {0}").format(e))
 
     # === Private Methods ===
 
@@ -685,7 +685,7 @@ class FavoritesController(BaseController):
                 # Build tooltip with expression preview
                 tooltip = f"{fav.name}\n{fav.get_preview(100)}"
                 if fav.use_count > 0:
-                    tooltip += f"\nUtilisé {fav.use_count}×"
+                    tooltip += "\n" + self.tr("Used {0} times").format(fav.use_count)
                 action.setToolTip(tooltip)
 
             if len(favorites) > 8:
@@ -696,31 +696,31 @@ class FavoritesController(BaseController):
 
         # === ADD TO FAVORITES ===
         current_expression = self.get_current_filter_expression()
-        add_action = menu.addAction("⭐ Add current filter to favorites")
+        add_action = menu.addAction("⭐ " + self.tr("Add current filter to favorites"))
         add_action.setData('__ADD_FAVORITE__')
         if not current_expression:
             add_action.setEnabled(False)
-            add_action.setText("⭐ Add filter (no active filter)")
+            add_action.setText("⭐ " + self.tr("Add filter (no active filter)"))
 
         menu.addSeparator()
 
         # === MANAGEMENT OPTIONS ===
-        manage_action = menu.addAction("⚙️ Manage favorites...")
+        manage_action = menu.addAction("⚙️ " + self.tr("Manage favorites..."))
         manage_action.setData('__MANAGE__')
 
-        export_action = menu.addAction("📤 Export...")
+        export_action = menu.addAction("📤 " + self.tr("Export..."))
         export_action.setData('__EXPORT__')
 
-        import_action = menu.addAction("📥 Import...")
+        import_action = menu.addAction("📥 " + self.tr("Import..."))
         import_action.setData('__IMPORT__')
 
         # === GLOBAL FAVORITES SUBMENU ===
         menu.addSeparator()
-        global_menu = menu.addMenu("🌐 Favoris globaux")
+        global_menu = menu.addMenu("🌐 " + self.tr("Global favorites"))
 
         # Add current favorites as global options
         if favorites:
-            copy_global_menu = global_menu.addMenu("Copier vers global...")
+            copy_global_menu = global_menu.addMenu(self.tr("Copy to global..."))
             for fav in favorites[:5]:
                 action = copy_global_menu.addAction(f"  {fav.name}")
                 action.setData(('copy_to_global', fav.id))
@@ -731,7 +731,7 @@ class FavoritesController(BaseController):
         global_favorites = self._get_global_favorites()
         if global_favorites:
             global_menu.addSeparator()
-            global_menu.addAction("── Favoris globaux disponibles ──").setEnabled(False)
+            global_menu.addAction(self.tr("── Available global favorites ──")).setEnabled(False)
             for gfav in global_favorites[:5]:
                 action = global_menu.addAction(f"  📌 {gfav.name}")
                 action.setData(('apply_global', gfav.id))
@@ -739,24 +739,24 @@ class FavoritesController(BaseController):
                 more_action = global_menu.addAction(f"  ➤ Voir tous ({len(global_favorites)})...")
                 more_action.setData('__SHOW_GLOBAL__')
         else:
-            global_menu.addAction("(Aucun favori global)").setEnabled(False)
+            global_menu.addAction(self.tr("(No global favorites)")).setEnabled(False)
 
         # === MAINTENANCE ===
         menu.addSeparator()
-        maintenance_menu = menu.addMenu("🔧 Maintenance")
+        maintenance_menu = menu.addMenu("🔧 " + self.tr("Maintenance"))
 
-        backup_action = maintenance_menu.addAction("💾 Sauvegarder dans le projet (.qgz)")
+        backup_action = maintenance_menu.addAction("💾 " + self.tr("Save to project (.qgz)"))
         backup_action.setData('__BACKUP_TO_PROJECT__')
 
-        restore_action = maintenance_menu.addAction("📂 Restaurer depuis le projet")
+        restore_action = maintenance_menu.addAction("📂 " + self.tr("Restore from project"))
         restore_action.setData('__RESTORE_FROM_PROJECT__')
 
         maintenance_menu.addSeparator()
 
-        cleanup_action = maintenance_menu.addAction("🧹 Nettoyer projets orphelins")
+        cleanup_action = maintenance_menu.addAction("🧹 " + self.tr("Clean up orphan projects"))
         cleanup_action.setData('__CLEANUP_ORPHANS__')
 
-        stats_action = maintenance_menu.addAction("📊 Statistiques base de données")
+        stats_action = maintenance_menu.addAction("📊 " + self.tr("Database statistics"))
         stats_action.setData('__SHOW_STATS__')
 
         # Show menu
@@ -801,8 +801,8 @@ class FavoritesController(BaseController):
         if not name or not name.strip():
             QMessageBox.warning(
                 self.dockwidget,
-                "Invalid Name",
-                "Favorite name cannot be empty."
+                self.tr("Invalid Name"),
+                self.tr("Favorite name cannot be empty.")
             )
             return False
 
@@ -812,9 +812,9 @@ class FavoritesController(BaseController):
             if existing:
                 result = QMessageBox.question(
                     self.dockwidget,
-                    "Duplicate Name",
-                    f"A favorite named '{name}' already exists.\n"
-                    "Do you want to replace it?",
+                    self.tr("Duplicate Name"),
+                    self.tr("A favorite named '{0}' already exists.\n"
+                             "Do you want to replace it?").format(name),
                     QMessageBox.Yes | QMessageBox.No
                 )
                 if result != QMessageBox.Yes:
@@ -1027,10 +1027,10 @@ class FavoritesController(BaseController):
         if hasattr(self._favorites_manager, 'copy_to_global'):
             new_id = self._favorites_manager.copy_to_global(favorite_id)
             if new_id:
-                self._show_success("Favori copié vers les favoris globaux")
+                self._show_success(self.tr("Favorite copied to global favorites"))
                 return True
 
-        self._show_warning("Échec de la copie vers global")
+        self._show_warning(self.tr("Failed to copy to global favorites"))
         return False
 
     def _show_global_favorites_dialog(self) -> None:
@@ -1039,9 +1039,9 @@ class FavoritesController(BaseController):
         global_count = len(self._get_global_favorites())
         QMessageBox.information(
             self.dockwidget,
-            "Favoris Globaux",
-            f"Il y a {global_count} favori(s) global(aux) disponibles.\n\n"
-            "Les favoris globaux sont partagés entre tous les projets."
+            self.tr("Global Favorites"),
+            self.tr("{0} global favorite(s) available.\n\n"
+                     "Global favorites are shared across all projects.").format(global_count)
         )
 
     def _backup_to_project(self) -> None:
@@ -1053,9 +1053,9 @@ class FavoritesController(BaseController):
             from qgis.core import QgsProject
             success = self._favorites_manager.save_to_project_file(QgsProject.instance())
             if success:
-                self._show_success(f"Sauvegardé {self.count} favori(s) dans le fichier projet")
+                self._show_success(self.tr("Saved {0} favorite(s) to project file").format(self.count))
             else:
-                self._show_warning("Échec de la sauvegarde")
+                self._show_warning(self.tr("Save failed"))
 
     def _restore_from_project(self) -> None:
         """Restore favorites from the QGIS project file."""
@@ -1067,9 +1067,9 @@ class FavoritesController(BaseController):
             count = self._favorites_manager.restore_from_project_file(QgsProject.instance())
             if count > 0:
                 self.update_indicator()
-                self._show_success(f"Restauré {count} favori(s) depuis le fichier projet")
+                self._show_success(self.tr("Restored {0} favorite(s) from project file").format(count))
             else:
-                self._show_warning("Aucun favori à restaurer trouvé dans le projet")
+                self._show_warning(self.tr("No favorites to restore found in project"))
 
     def _cleanup_orphan_projects(self) -> None:
         """Clean up orphan projects from the database."""
@@ -1086,13 +1086,13 @@ class FavoritesController(BaseController):
             deleted_count, deleted_ids = migration_service.cleanup_orphan_projects()
 
             if deleted_count > 0:
-                self._show_success(f"Nettoyé {deleted_count} projet(s) orphelin(s)")
+                self._show_success(self.tr("Cleaned up {0} orphan project(s)").format(deleted_count))
             else:
-                self._show_success("Aucun projet orphelin à nettoyer")
+                self._show_success(self.tr("No orphan projects to clean up"))
 
         except Exception as e:
             logger.error(f"Error cleaning up orphan projects: {e}")
-            self._show_warning(f"Erreur: {e}")
+            self._show_warning(self.tr("Error: {0}").format(e))
 
     def _show_database_stats(self) -> None:
         """Show database statistics dialog."""
@@ -1109,36 +1109,36 @@ class FavoritesController(BaseController):
             stats = migration_service.get_database_statistics()
 
             if 'error' in stats:
-                self._show_warning(f"Erreur: {stats['error']}")
+                self._show_warning(self.tr("Error: {0}").format(stats['error']))
                 return
 
             # Format statistics message
-            msg = """📊 Statistiques de la base de données FilterMate
-
-📁 Fichier: {os.path.basename(stats.get('database_path', 'N/A'))}
-💾 Taille: {stats.get('database_size_kb', 0):.1f} Ko
-
-📂 Projets: {stats.get('total_projects', 0)}
-   └─ Orphelins: {stats.get('orphan_projects', 0)}
-
-⭐ Favoris: {stats.get('total_favorites', 0)}
-   ├─ Orphelins: {stats.get('orphan_favorites', 0)}
-   └─ Globaux: {stats.get('global_favorites', 0)}
-"""
+            msg = self.tr(
+                "FilterMate Database Statistics\n\n"
+                "Total favorites: {0}\n"
+                "   Project: {1}\n"
+                "   Orphans: {2}\n"
+                "   Global: {3}\n"
+            ).format(
+                stats.get('total_favorites', 0),
+                stats.get('project_favorites', 0),
+                stats.get('orphan_favorites', 0),
+                stats.get('global_favorites', 0),
+            )
 
             # Add top projects
             top_projects = stats.get('top_projects', [])
             if top_projects:
-                msg += "\n🏆 Projets avec le plus de favoris:\n"
+                msg += "\n" + self.tr("Top projects by favorites:") + "\n"
                 for proj in top_projects[:3]:
                     msg += f"   • {proj['name']}: {proj['favorites']}\n"
 
             QMessageBox.information(
                 self.dockwidget,
-                "Statistiques FilterMate",
+                self.tr("FilterMate Statistics"),
                 msg
             )
 
         except Exception as e:
             logger.error(f"Error showing database stats: {e}")
-            self._show_warning(f"Erreur: {e}")
+            self._show_warning(self.tr("Error: {0}").format(e))

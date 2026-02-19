@@ -320,7 +320,7 @@ class OptimizationDialog(QDialog):
         layout.setSpacing(12)
 
         # PostgreSQL group
-        pg_group = QGroupBox("🐘 PostgreSQL")
+        pg_group = QGroupBox("🐘 " + self.tr("PostgreSQL"))
         pg_layout = QVBoxLayout(pg_group)
 
         self._widgets['pg_mv'] = QCheckBox(self.tr("Use materialized views for filtering"))
@@ -332,7 +332,7 @@ class OptimizationDialog(QDialog):
         layout.addWidget(pg_group)
 
         # Spatialite group
-        sl_group = QGroupBox("💾 Spatialite")
+        sl_group = QGroupBox("💾 " + self.tr("Spatialite"))
         sl_layout = QVBoxLayout(sl_group)
 
         self._widgets['sl_rtree'] = QCheckBox(self.tr("Use R-tree spatial index"))
@@ -341,7 +341,7 @@ class OptimizationDialog(QDialog):
         layout.addWidget(sl_group)
 
         # OGR group
-        ogr_group = QGroupBox("📁 OGR (Shapefiles, GeoPackage)")
+        ogr_group = QGroupBox("📁 " + self.tr("OGR (Shapefiles, GeoPackage)"))
         ogr_layout = QVBoxLayout(ogr_group)
 
         self._widgets['ogr_bbox'] = QCheckBox(self.tr("Use bounding box pre-filter"))
@@ -530,7 +530,11 @@ class RecommendationDialog(QDialog):
         layout.addWidget(header)
 
         # Layer info
-        info = QLabel(f"{self._layer_name} • {self._feature_count:,} features")
+        info = QLabel(
+            self.tr("{0} \u2022 {1} features").format(
+                self._layer_name, "{:,}".format(self._feature_count)
+            )
+        )
         info.setStyleSheet("color: #888;")
         layout.addWidget(info)
 
@@ -564,7 +568,7 @@ class RecommendationDialog(QDialog):
                 'low': '#95a5a6'
             }
             impact_text = f"<span style='color: {impact_colors.get(rec.impact, '#888')}'>"
-            impact_text += f"Impact: {rec.impact.upper()}</span>"
+            impact_text += self.tr("Impact: {0}").format(rec.impact.upper()) + "</span>"
             impact_label = QLabel(impact_text)
             impact_label.setStyleSheet("margin-left: 20px;")
             frame_layout.addWidget(impact_label)

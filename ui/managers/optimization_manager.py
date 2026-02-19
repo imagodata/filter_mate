@@ -19,6 +19,8 @@ Created: February 2026
 import logging
 from typing import TYPE_CHECKING
 
+from qgis.PyQt.QtCore import QCoreApplication
+
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
 
@@ -166,12 +168,14 @@ class OptimizationManager:
         from ...infrastructure.feedback import show_success, show_info
         dw = self.dockwidget
         applied = []
+        tr = QCoreApplication.translate
         overrides = [
-            ('use_centroid_distant', '_layer_centroid_overrides', "Use Centroids"),
+            ('use_centroid_distant', '_layer_centroid_overrides',
+             tr("OptimizationManager", "Use Centroids")),
             ('simplify_before_buffer', '_layer_simplify_buffer_overrides',
-             "Simplify before buffer"),
+             tr("OptimizationManager", "Simplify before buffer")),
             ('reduce_buffer_segments', '_layer_reduced_segments_overrides',
-             "Reduce buffer segments (3)"),
+             tr("OptimizationManager", "Reduce buffer segments (3)")),
         ]
         for key, attr, label in overrides:
             if selected.get(key, False):

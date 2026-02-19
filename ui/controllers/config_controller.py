@@ -219,6 +219,7 @@ class ConfigController(BaseController):
                 self._apply_action_bar_position_change(change, changes_summary)
                 self._apply_export_style_change(change, changes_summary)
                 self._apply_export_format_change(change, changes_summary)
+                self._apply_language_change(change, changes_summary)
 
                 # Save configuration after each change
                 self._save_configuration()
@@ -229,6 +230,10 @@ class ConfigController(BaseController):
 
             # Disable OK/Cancel buttons after changes have been applied
             self._update_buttonbox_state(enabled=False)
+
+            # Refresh runtime UI params (debounce timers, etc.) from updated config
+            if hasattr(self.dockwidget, 'refresh_ui_responsiveness_params'):
+                self.dockwidget.refresh_ui_responsiveness_params()
 
             logger.info(
                 "All pending configuration changes have been applied and saved"
@@ -272,7 +277,7 @@ class ConfigController(BaseController):
 
         except Exception as e:
             logger.error(f"Error cancelling configuration changes: {e}")
-            self._show_error(f"Error cancelling changes: {str(e)}")
+            self._show_error(self.tr("Error cancelling changes: {0}").format(str(e)))
 
     # === Specialized Change Handlers ===
 
@@ -561,6 +566,67 @@ class ConfigController(BaseController):
             import traceback
             logger.error(traceback.format_exc())
 
+    def _apply_language_change(
+        self,
+        change: Dict[str, Any],
+        changes_summary: List[str]
+    ) -> None:
+        """
+        Apply LANGUAGE configuration change.
+
+        Reloads the Qt translator with the new locale so that all tr() calls
+        return text in the selected language without restarting QGIS.
+
+        Args:
+            change: Change dictionary with 'path', 'index', 'item'
+            changes_summary: List to append change description to
+        """
+        items_keys_values_path = change['path']
+        index = change['index']
+
+        if 'LANGUAGE' not in items_keys_values_path:
+            return
+
+        try:
+            value_item = self.dockwidget.config_view.model.itemFromIndex(
+                index.siblingAtColumn(1)
+            )
+            value_data = value_item.data(Qt.UserRole)
+
+            # Handle ChoicesType format
+            if isinstance(value_data, dict) and 'value' in value_data:
+                new_locale = value_data['value']
+            else:
+                new_locale = value_item.data(Qt.DisplayRole) if value_item else None
+
+            if new_locale:
+                logger.info(f"LANGUAGE changed to: {new_locale}")
+
+                # Access the FilterMate plugin instance to reload the translator
+                try:
+                    from qgis.utils import plugins
+                    plugin = plugins.get('filter_mate')
+                    if plugin and hasattr(plugin, 'reload_translator'):
+                        plugin.reload_translator(new_locale)
+                        changes_summary.append(f"Language: {new_locale}")
+                        from ...infrastructure.feedback import show_info
+                        show_info(
+                            "FilterMate",
+                            self.dockwidget.tr(
+                                "Language changed to '{0}'. "
+                                "Some UI elements may require reopening the panel."
+                            ).format(new_locale)
+                        )
+                    else:
+                        logger.warning("FilterMate plugin instance not found for language reload")
+                except Exception as e:
+                    logger.warning(f"Could not reload translator: {e}")
+
+        except Exception as e:
+            logger.error(f"Error applying LANGUAGE change: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+
     def _apply_icon_change(
         self,
         change: Dict[str, Any],
@@ -620,6 +686,8 @@ class ConfigController(BaseController):
 
             with open(config_json_path, 'r') as infile:
                 self.dockwidget.CONFIG_DATA = json.load(infile)
+            # Sync ENV_VARS so all code reading from it sees reverted values
+            ENV_VARS["CONFIG_DATA"] = self.dockwidget.CONFIG_DATA
 
             # Recreate model with original data
             self.dockwidget.config_model = JsonModel(

@@ -681,7 +681,7 @@ class BackendController(BaseController):
         """)
 
         # Header
-        header = menu.addAction("Select Backend:")
+        header = menu.addAction(self._tr("Select Backend:"))
         header.setEnabled(False)
         menu.addSeparator()
 
@@ -697,7 +697,7 @@ class BackendController(BaseController):
         menu.addSeparator()
 
         # Auto option
-        auto_action = menu.addAction("⚙️ Auto (Default)")
+        auto_action = menu.addAction("⚙️ " + self._tr("Auto (Default)"))
         auto_action.setData(None)
         if not current_forced:
             auto_action.setText(auto_action.text() + " ✓")
@@ -705,18 +705,18 @@ class BackendController(BaseController):
         menu.addSeparator()
 
         # Auto-select all
-        auto_all_action = menu.addAction("🎯 Auto-select Optimal for All Layers")
+        auto_all_action = menu.addAction("🎯 " + self._tr("Auto-select Optimal for All Layers"))
         auto_all_action.setData('__AUTO_ALL__')
 
         # Force all
         current_backend = self.get_current_backend(layer)
-        force_all_action = menu.addAction(f"🔒 Force {current_backend.upper()} for All Layers")
+        force_all_action = menu.addAction("🔒 " + self._tr("Force {0} for All Layers").format(current_backend.upper()))
         force_all_action.setData('__FORCE_ALL__')
 
         menu.addSeparator()
 
         # Cleanup Temp Tables submenu
-        cleanup_menu = menu.addMenu("🧹 Clear Temp Tables")
+        cleanup_menu = menu.addMenu("🧹 " + self._tr("Clear Temp Tables"))
 
         # Project cleanup
         project_cleanup_action = cleanup_menu.addAction(self._tr("📁 Current Project"))

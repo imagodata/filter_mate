@@ -699,6 +699,10 @@
     "OPTIONS": {
       "LAYERS": {
         "LINK_LEGEND_LAYERS_AND_CURRENT_LAYER_FLAG": true,
+        "DEFAULT_IS_LINKING": {
+          "value": true,
+          "description": "Default state of the 'Link exploring widgets' button for all layers (synchronizes single/multiple selection expressions)"
+        },
         "LAYER_PROPERTIES_COUNT": 35,
         "FEATURE_COUNT_LIMIT": 10000
       },

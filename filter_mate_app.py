@@ -2196,6 +2196,8 @@ class FilterMateApp:
             fresh_reload=fresh_reload,
             config_json_path=ENV_VARS["CONFIG_JSON_PATH"]
         )
+        # Sync ENV_VARS in case initialize_database returned a new dict
+        ENV_VARS["CONFIG_DATA"] = self.CONFIG_DATA
 
         if success:
             # Sync db_file_path and project_uuid from DatabaseManager

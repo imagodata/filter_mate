@@ -11,8 +11,10 @@ from typing import Optional, Callable, Any
 
 try:
     from qgis.core import QgsVectorLayer
+    from qgis.PyQt.QtCore import QCoreApplication
 except ImportError:
     QgsVectorLayer = None
+    QCoreApplication = None
 
 try:
     from ...infrastructure.utils import is_layer_source_available, safe_set_subset_string
@@ -99,7 +101,7 @@ class FilterApplicationService:
             logger.warning("apply_subset_filter called on invalid/missing-source layer; skipping.")
             self._show_warning(
                 "FilterMate",
-                "La couche est invalide ou sa source est introuvable. Opération annulée."
+                QCoreApplication.translate("FilterApplicationService", "Layer is invalid or its source cannot be found. Operation cancelled.")
             )
             return False
 

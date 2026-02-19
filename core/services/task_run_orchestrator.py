@@ -374,6 +374,14 @@ class TaskRunOrchestrator:
             logger.info(f"Export completed in {elapsed_time:.1f}s (no performance warning for exports)")
             return warnings
 
+        # Skip if optimization hints are disabled in config
+        try:
+            from .auto_optimizer import get_auto_optimization_config
+            if not get_auto_optimization_config().get('show_optimization_hints', True):
+                return warnings
+        except Exception:
+            pass
+
         if elapsed_time >= VERY_LONG_QUERY_WARNING_THRESHOLD:
             # Very long query (>30s): Critical warning
             if context.get_contextual_performance_warning_callback:

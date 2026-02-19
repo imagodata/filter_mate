@@ -402,13 +402,13 @@ class HistoryWidget(QWidget):
         menu = QMenu(self)
 
         # Undo action
-        undo_action = menu.addAction("↶ Undo")
+        undo_action = menu.addAction("↶ " + self._tr("Undo"))
         undo_action.setEnabled(self._undo_btn.isEnabled())
         if PYQT_AVAILABLE:
             undo_action.triggered.connect(self._on_undo_clicked)
 
         # Redo action
-        redo_action = menu.addAction("↷ Redo")
+        redo_action = menu.addAction("↷ " + self._tr("Redo"))
         redo_action.setEnabled(self._redo_btn.isEnabled())
         if PYQT_AVAILABLE:
             redo_action.triggered.connect(self._on_redo_clicked)
@@ -416,7 +416,7 @@ class HistoryWidget(QWidget):
         menu.addSeparator()
 
         # Clear history action
-        clear_action = menu.addAction("🗑 Clear History")
+        clear_action = menu.addAction("🗑 " + self._tr("Clear History"))
         history = self._get_current_history()
         clear_action.setEnabled(history is not None and len(history._states) > 0)
         if PYQT_AVAILABLE:
@@ -425,7 +425,7 @@ class HistoryWidget(QWidget):
         menu.addSeparator()
 
         # Browse history action (for future expansion)
-        browse_action = menu.addAction("📋 Browse History...")
+        browse_action = menu.addAction("📋 " + self._tr("Browse History..."))
         browse_action.setEnabled(history is not None and len(history._states) > 0)
         if PYQT_AVAILABLE:
             browse_action.triggered.connect(self._on_browse_history)

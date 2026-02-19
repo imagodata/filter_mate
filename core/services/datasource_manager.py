@@ -143,7 +143,9 @@ class DatasourceManager(QObject):
         db_file_path = self._get_db_file_path()
 
         if not os.path.exists(db_file_path):
-            error_msg = f"Database file does not exist: {db_file_path}"
+            error_msg = self.tr(
+                "Database file does not exist: {db_file_path}"
+            ).format(db_file_path=db_file_path)
             logger.error(error_msg)
             self._show_error(error_msg)
             return None
@@ -152,7 +154,9 @@ class DatasourceManager(QObject):
             conn = spatialite_connect(db_file_path)
             return conn
         except Exception as error:
-            error_msg = f"Failed to connect to database {db_file_path}: {error}"
+            error_msg = self.tr(
+                "Failed to connect to database {db_file_path}: {error}"
+            ).format(db_file_path=db_file_path, error=error)
             logger.error(error_msg)
             self._show_error(error_msg)
             return None
@@ -175,13 +179,13 @@ class DatasourceManager(QObject):
         """
         if not PROCESSING_AVAILABLE:
             logger.warning("Processing module not available, cannot create spatial index")
-            self._show_warning("Module de traitement QGIS non disponible pour créer l'index spatial")
+            self._show_warning(self.tr("QGIS processing module not available to create spatial index"))
             return
 
         # Guard invalid/missing-source layers
         if not is_layer_source_available(layer):
             logger.warning("create_spatial_index_for_layer: layer invalid or source missing; skipping.")
-            self._show_warning("Impossible de créer un index spatial: couche invalide ou source introuvable.")
+            self._show_warning(self.tr("Cannot create spatial index: layer invalid or source not found."))
             return
 
         alg_params_createspatialindex = {
@@ -392,9 +396,11 @@ class DatasourceManager(QObject):
             config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""
             config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = False
             self._show_warning(
-                "PostgreSQL layers detected but psycopg2 is not installed. "
-                "Using local Spatialite backend. "
-                "For better performance with large datasets, install psycopg2."
+                self.tr(
+                    "PostgreSQL layers detected but psycopg2 is not installed. "
+                    "Using local Spatialite backend. "
+                    "For better performance with large datasets, install psycopg2."
+                )
             )
         else:
             config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""

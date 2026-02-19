@@ -147,6 +147,33 @@ class FilterMate:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('FilterMate', message)
 
+    def reload_translator(self, locale: str):
+        """Reload the translator for a new locale without restarting the plugin.
+
+        Args:
+            locale: Language code (e.g. 'fr', 'en', 'de') or 'auto' to use QGIS locale.
+        """
+        if locale == 'auto':
+            locale_setting = QSettings().value('locale/userLocale')
+            if locale_setting:
+                locale = locale_setting.split('_')[0] if '_' in locale_setting else locale_setting[0:2]
+            else:
+                locale = 'en'
+
+        locale_path = os.path.join(self.plugin_dir, 'i18n', f'FilterMate_{locale}.qm')
+
+        # Remove old translator if present
+        if hasattr(self, 'translator') and self.translator:
+            QCoreApplication.removeTranslator(self.translator)
+
+        if os.path.exists(locale_path):
+            self.translator = QTranslator()
+            self.translator.load(locale_path)
+            QCoreApplication.installTranslator(self.translator)
+            logger.info(f"Reloaded translation: {locale}")
+        else:
+            logger.warning(f"Translation file not found: {locale_path}")
+
     def add_action(
         self,
         icon_path,
@@ -294,7 +321,7 @@ class FilterMate:
             logger.error(f"Traceback: {traceback_msg}")
             self.iface.messageBar().pushCritical(
                 "FilterMate",
-                f"Initialization error: {str(e)}"
+                self.tr("Initialization error: {0}").format(str(e))
             )
             # Re-raise to prevent partial initialization
             raise
@@ -1354,7 +1381,7 @@ class FilterMate:
             except Exception as e:
                 self.iface.messageBar().pushCritical(
                     "FilterMate",
-                    f"Error loading plugin: {str(e)}. Check QGIS Python console for details."
+                    self.tr("Error loading plugin: {0}. Check QGIS Python console for details.").format(str(e))
                 )
                 import traceback
                 logger.error(f"Error loading plugin: {traceback.format_exc()}")
