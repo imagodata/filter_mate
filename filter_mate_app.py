@@ -12,7 +12,7 @@ FilterMate Application Orchestrator
     This module is kept for backward compatibility. See docs/architecture.md.
 """
 
-from qgis.PyQt.QtCore import Qt, QTimer
+from qgis.PyQt.QtCore import Qt, QTimer, QCoreApplication
 import weakref
 import sip
 from qgis.core import (
@@ -28,7 +28,7 @@ except ImportError:
 from qgis.utils import iface
 
 import os.path
-from .config.config import init_env_vars, ENV_VARS  # noqa: F401 - ENV_VARS used via global
+from .config.config import init_env_vars, ENV_VARS, _get_option_value  # noqa: F401 - ENV_VARS used via global
 import json
 
 # Core tasks (migrated from modules/tasks/)
@@ -267,8 +267,8 @@ class FilterMateApp:
         # Identify PostgreSQL layers
         all_postgres = [l for l in layers if isinstance(l, QgsVectorLayer) and l.providerType() == 'postgres']
         if all_postgres and not POSTGRESQL_AVAILABLE:
-            names = ', '.join([l.name() for l in all_postgres[:3]]) + (f" (+{len(all_postgres) - 3} autres)" if len(all_postgres) > 3 else "")
-            show_warning(f"Couches PostgreSQL détectées ({names}) mais psycopg2 n'est pas installé.")
+            names = ', '.join([l.name() for l in all_postgres[:3]]) + (" (+{0} more)".format(len(all_postgres) - 3) if len(all_postgres) > 3 else "")
+            show_warning(QCoreApplication.translate("FilterMateApp", "PostgreSQL layers detected ({0}) but psycopg2 is not installed.").format(names))
             logger.warning(f"FilterMate: Cannot use {len(all_postgres)} PostgreSQL layer(s) - psycopg2 not available")
 
         filtered = self._filter_usable_layers(layers)
@@ -357,7 +357,7 @@ class FilterMateApp:
             if iface and should_show_message('info'):
                 iface.messageBar().pushSuccess(
                     "FilterMate",
-                    f"Cleared {cleared_count} caches"
+                    QCoreApplication.translate("FilterMateApp", "Cleared {0} caches").format(cleared_count)
                 )
 
             return cleared_count
@@ -383,9 +383,21 @@ class FilterMateApp:
             "add_layers": None, "remove_layers": None, "remove_all_layers": None,
             "new_project": None, "project_read": None
         }
-        self.tasks_descriptions = {'filter': 'Filtering data', 'unfilter': 'Unfiltering data', 'reset': 'Reseting data', 'export': 'Exporting data',
-                                    'undo': 'Undo filter', 'redo': 'Redo filter', 'add_layers': 'Adding layers', 'remove_layers': 'Removing layers',
-                                    'remove_all_layers': 'Removing all layers', 'new_project': 'New project', 'project_read': 'Existing project loaded', 'reload_layers': 'Reloading layers'}
+        _tr = lambda msg: QCoreApplication.translate("FilterMateApp", msg)
+        self.tasks_descriptions = {
+            'filter': _tr('Filtering data'),
+            'unfilter': _tr('Unfiltering data'),
+            'reset': _tr('Reseting data'),
+            'export': _tr('Exporting data'),
+            'undo': _tr('Undo filter'),
+            'redo': _tr('Redo filter'),
+            'add_layers': _tr('Adding layers'),
+            'remove_layers': _tr('Removing layers'),
+            'remove_all_layers': _tr('Removing all layers'),
+            'new_project': _tr('New project'),
+            'project_read': _tr('Existing project loaded'),
+            'reload_layers': _tr('Reloading layers'),
+        }
 
         # History & Favorites
         history_max_size = self._get_history_max_size_from_config()
@@ -754,7 +766,7 @@ class FilterMateApp:
                 import traceback
                 logger.error(f"Traceback: {traceback.format_exc()}")
                 traceback.print_exc()
-                show_error("FilterMate", f"Failed to create dockwidget: {e}")
+                show_error("FilterMate", QCoreApplication.translate("FilterMateApp", "Failed to create dockwidget: {0}").format(e))
                 return
 
         # Show the dockwidget
@@ -764,7 +776,7 @@ class FilterMateApp:
             logger.info("Dockwidget displayed (legacy mode)")
         except Exception as e:
             logger.error(f"Failed to show dockwidget: {e}")
-            show_error("FilterMate", f"Failed to display dockwidget: {e}")
+            show_error("FilterMate", QCoreApplication.translate("FilterMateApp", "Failed to display dockwidget: {0}").format(e))
 
         # CRITICAL: Ensure signal connections are established
         # This is the simplified direct connection system (v4.5)
@@ -1214,7 +1226,7 @@ class FilterMateApp:
                 logger.warning(f"_legacy_dispatch_task: Unknown task {task_name}")
         except Exception as e:
             logger.error(f"_legacy_dispatch_task failed for {task_name}: {e}", exc_info=True)
-            iface.messageBar().pushCritical("FilterMate", f"Error executing {task_name}: {str(e)}")
+            iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error executing {0}: {1}").format(task_name, str(e)))
 
     def _show_degraded_mode_warning(self):
         """Show one-time warning that plugin is running in degraded mode."""
@@ -1228,8 +1240,9 @@ class FilterMateApp:
         try:
             iface.messageBar().pushWarning(
                 "FilterMate",
-                "Plugin running in degraded mode (hexagonal services unavailable). "
-                "Performance may be reduced."
+                QCoreApplication.translate("FilterMateApp",
+                    "Plugin running in degraded mode (hexagonal services unavailable). "
+                    "Performance may be reduced.")
             )
             logger.warning("FilterMate running in DEGRADED MODE - hexagonal services unavailable")
         except Exception as e:
@@ -1355,8 +1368,8 @@ class FilterMateApp:
                 if retry_count >= 10:  # Max 10 retries = 5 seconds
                     logger.error(f"❌ GIVING UP: Task '{task_name}' not ready after {retry_count} retries")
                     iface.messageBar().pushCritical(
-                        "FilterMate ERROR",
-                        f"Impossible d'exécuter {task_name}: initialisation des widgets échouée."
+                        QCoreApplication.translate("FilterMateApp", "FilterMate ERROR"),
+                        QCoreApplication.translate("FilterMateApp", "Cannot execute {0}: widget initialization failed.").format(task_name)
                     )
                     self._filter_retry_count[retry_key] = 0
                     # EMERGENCY FALLBACK
@@ -1903,8 +1916,9 @@ class FilterMateApp:
                 layers = data if isinstance(data, list) else [data]
                 # Safely check has_loaded_layers - default to False if dockwidget not available
                 has_loaded = self.dockwidget.has_loaded_layers if self.dockwidget else False
-                reset_flag = (self.CONFIG_DATA["APP"]["OPTIONS"]["FRESH_RELOAD_FLAG"] and
-                             not has_loaded)
+                reset_flag = (_get_option_value(
+                    self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("FRESH_RELOAD_FLAG"), False
+                ) and not has_loaded)
                 return self._build_layer_management_params(layers, reset_flag)
 
     def _refresh_layers_and_canvas(self, source_layer):
@@ -1977,7 +1991,7 @@ class FilterMateApp:
         # Guard: ensure layer is usable
         if not is_layer_source_available(source_layer):
             logger.warning(f"handle_{action_name}: source layer invalid or source missing; aborting.")
-            show_warning(f"Impossible de {action_name}: couche invalide ou source introuvable.")
+            show_warning(QCoreApplication.translate("FilterMateApp", "Cannot {0}: layer invalid or source not found.").format(action_name))
             return
 
         # STABILITY FIX: Verify layer exists in PROJECT_LAYERS before access
@@ -2114,14 +2128,14 @@ class FilterMateApp:
         feature_count = source_layer.featureCount()
         show_success_with_backend(provider_type, task_name, layer_count, is_fallback=is_fallback)
         if should_show_message('filter_count'):
-            prefix = "All filters cleared - " if task_name == 'unfilter' else ""
-            show_info(f"{prefix}{feature_count:,} features visible in main layer")
+            prefix = QCoreApplication.translate("FilterMateApp", "All filters cleared - ") if task_name == 'unfilter' else ""
+            show_info(QCoreApplication.translate("FilterMateApp", "{0}{1} features visible in main layer").format(prefix, "{:,}".format(feature_count)))
 
     def filter_engine_task_completed(self, task_name, source_layer, task_parameters):
         """Handle completion of filtering operations via FilterResultHandler."""
         if not self._filter_result_handler:
             logger.error("FilterResultHandler not available")
-            iface.messageBar().pushCritical("FilterMate", "Error: result handler missing")
+            iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error: result handler missing"))
             return
 
         try:
@@ -2134,7 +2148,7 @@ class FilterMateApp:
             )
         except Exception as e:
             logger.error(f"FilterResultHandler failed: {e}")
-            iface.messageBar().pushCritical("FilterMate", f"Error during filtering: {str(e)}")
+            iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error during filtering: {0}").format(str(e)))
 
     def apply_subset_filter(self, task_name, layer):
         """Apply or remove subset filter expression on a layer. Delegates to FilterApplicationService."""
@@ -2174,7 +2188,9 @@ class FilterMateApp:
             logger.error("DatabaseManager not available, cannot initialize database")
             return
 
-        fresh_reload = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("FRESH_RELOAD_FLAG", False)
+        fresh_reload = _get_option_value(
+            self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("FRESH_RELOAD_FLAG"), False
+        )
         success, self.CONFIG_DATA = self._database_manager.initialize_database(
             config_data=self.CONFIG_DATA,
             fresh_reload=fresh_reload,
@@ -2263,7 +2279,7 @@ class FilterMateApp:
                 if should_show_message('success'):
                     iface.messageBar().pushSuccess(
                         "FilterMate",
-                        f"Recovered {migrated_count} orphan favorite(s): {names_preview}"
+                        QCoreApplication.translate("FilterMateApp", "Recovered {0} orphan favorite(s): {1}").format(migrated_count, names_preview)
                     )
                 logger.info(f"✓ Auto-migrated {migrated_count} orphan favorites to current project")
 
@@ -2397,7 +2413,7 @@ class FilterMateApp:
                     "font-weight:600;padding:3px 10px;border-radius:12px;"
                     "border:none;background-color:#fadbd8;}"
                 )
-                self.dockwidget.backend_indicator_label.setToolTip("Layer loading failed - click to retry")
+                self.dockwidget.backend_indicator_label.setToolTip(QCoreApplication.translate("FilterMateApp", "Layer loading failed - click to retry"))
             return
 
         if len(self.PROJECT_LAYERS) == 0:
@@ -2444,7 +2460,7 @@ class FilterMateApp:
         # Show success notification if requested
         if show_success and should_show_message('layer_loaded'):
             from qgis.utils import iface
-            iface.messageBar().pushSuccess("FilterMate", f"{len(self.PROJECT_LAYERS)} layer(s) loaded successfully")
+            iface.messageBar().pushSuccess("FilterMate", QCoreApplication.translate("FilterMateApp", "{0} layer(s) loaded successfully").format(len(self.PROJECT_LAYERS)))
 
     def _force_ui_refresh_after_reload(self):
         """Force UI refresh after force_reload_layers."""

@@ -148,8 +148,15 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
             header = menu.addAction(f"📋 Saved Favorites ({len(favorites)})")
             header.setEnabled(False)
 
-            # Show recent/most used first (up to 10)
-            recent_favs = self._favorites_manager.get_recent_favorites(limit=10)
+            # Show recent/most used first (configurable via APP.OPTIONS.FAVORITES.recent_favorites_limit)
+            try:
+                from ...config.config import ENV_VARS
+                _fav_cfg = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('FAVORITES', {})
+                _limit = _fav_cfg.get('recent_favorites_limit', {})
+                _recent_limit = _limit.get('value', 10) if isinstance(_limit, dict) else 10
+            except (ImportError, AttributeError, TypeError):
+                _recent_limit = 10
+            recent_favs = self._favorites_manager.get_recent_favorites(limit=_recent_limit)
             for fav in recent_favs:
                 layers_count = fav.get_layers_count() if hasattr(fav, 'get_layers_count') else 1
                 fav_text = f"  ★ {fav.get_display_name(25)}"
@@ -175,19 +182,19 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
                 more_action = menu.addAction(f"  ... {len(favorites) - 10} more favorites")
                 more_action.setData('__SHOW_ALL__')
         else:
-            no_favs = menu.addAction("(No favorites saved)")
+            no_favs = menu.addAction(self._tr("(No favorites saved)"))
             no_favs.setEnabled(False)
 
         menu.addSeparator()
 
         # === MANAGEMENT OPTIONS ===
-        manage_action = menu.addAction("⚙️ Manage Favorites...")
+        manage_action = menu.addAction("⚙️ " + self._tr("Manage Favorites..."))
         manage_action.setData('__MANAGE__')
 
-        export_action = menu.addAction("📤 Export Favorites...")
+        export_action = menu.addAction("📤 " + self._tr("Export Favorites..."))
         export_action.setData('__EXPORT__')
 
-        import_action = menu.addAction("📥 Import Favorites...")
+        import_action = menu.addAction("📥 " + self._tr("Import Favorites..."))
         import_action.setData('__IMPORT__')
 
         # Show menu and handle selection
@@ -317,7 +324,7 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
         desc_edit.setMaximumHeight(120)
         desc_edit.setText(auto_description)
         desc_edit.setPlaceholderText(self._tr("Description (auto-generated, you can modify it)"))
-        form_layout.addRow("Description:", desc_edit)
+        form_layout.addRow(self._tr("Description:"), desc_edit)
 
         layout.addLayout(form_layout)
 
@@ -398,7 +405,7 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
 
         filepath, _ = QFileDialog.getSaveFileName(
             self,
-            "Export Favorites",
+            self._tr("Export Favorites"),
             "filtermate_favorites.json",
             "JSON Files (*.json)"
         )
@@ -419,7 +426,7 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
 
         filepath, _ = QFileDialog.getOpenFileName(
             self,
-            "Import Favorites",
+            self._tr("Import Favorites"),
             "",
             "JSON Files (*.json)"
         )
@@ -427,10 +434,10 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
         if filepath:
             result = QMessageBox.question(
                 self,
-                "Import Favorites",
-                "Merge with existing favorites?\n\n"
-                "Yes = Add to existing\n"
-                "No = Replace all existing",
+                self._tr("Import Favorites"),
+                self._tr("Merge with existing favorites?\n\n"
+                          "Yes = Add to existing\n"
+                          "No = Replace all existing"),
                 QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
             )
 

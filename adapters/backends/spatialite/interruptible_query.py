@@ -31,9 +31,24 @@ logger = logging.getLogger('FilterMate.Adapters.Backends.Spatialite.Interruptibl
 
 # Performance and timeout constants for complex geometric filters
 # These prevent QGIS freezing on large datasets
-SPATIALITE_QUERY_TIMEOUT = 120  # Maximum seconds for SQLite queries
-SPATIALITE_BATCH_SIZE = 5000    # Process FIDs in batches to avoid memory issues
-SPATIALITE_PROGRESS_INTERVAL = 1000  # Report progress every N features
+# Defaults are overridden by APP.OPTIONS.SPATIALITE config if available
+def _get_spatialite_config():
+    """Read SpatiaLite config from ENV_VARS, fallback to hardcoded defaults."""
+    try:
+        from ....config.config import ENV_VARS, _get_option_value
+        cfg = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('SPATIALITE', {})
+        return {
+            'timeout': _get_option_value(cfg.get('query_timeout_seconds'), 120),
+            'batch_size': _get_option_value(cfg.get('batch_size'), 5000),
+            'progress_interval': _get_option_value(cfg.get('progress_interval'), 1000),
+        }
+    except (ImportError, AttributeError, TypeError):
+        return {'timeout': 120, 'batch_size': 5000, 'progress_interval': 1000}
+
+_sl_cfg = _get_spatialite_config()
+SPATIALITE_QUERY_TIMEOUT = _sl_cfg['timeout']
+SPATIALITE_BATCH_SIZE = _sl_cfg['batch_size']
+SPATIALITE_PROGRESS_INTERVAL = _sl_cfg['progress_interval']
 SPATIALITE_INTERRUPT_CHECK_INTERVAL = 0.5  # Check for cancellation every N seconds
 
 # WKT simplification thresholds to prevent GeomFromText freeze on complex geometries

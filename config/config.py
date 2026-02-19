@@ -33,15 +33,28 @@ FALLBACK_CONFIG = {
                 "value": "auto",
                 "description": "Interface language"
             },
-            "THEME": {
-                "value": "auto",
-                "choices": ["auto", "light", "dark"],
-                "description": "UI theme"
+            "COLORS": {
+                "ACTIVE_THEME": {
+                    "value": "default",
+                    "choices": ["auto", "default", "dark", "light"],
+                    "description": "Color theme for UI"
+                },
+                "THEME_SOURCE": {
+                    "value": "config",
+                    "choices": ["config", "qgis", "system"],
+                    "description": "Theme source"
+                }
             }
         },
         "OPTIONS": {
-            "APP_SQLITE_PATH": "",
-            "FRESH_RELOAD_FLAG": False
+            "APP_SQLITE_PATH": {
+                "value": "",
+                "description": "Directory for SQLite databases"
+            },
+            "FRESH_RELOAD_FLAG": {
+                "value": False,
+                "description": "Force fresh reload on next startup"
+            }
         }
     },
     "POSTGRESQL": {
@@ -53,6 +66,41 @@ FALLBACK_CONFIG = {
         }
     }
 }
+
+
+def _get_option_value(option, default=""):
+    """Extract value from a config option, handling both wrapped and raw formats.
+
+    Wrapped format: {"value": "...", "description": "..."}
+    Raw format (legacy): "..." or False etc.
+
+    Args:
+        option: The config option (dict with 'value' key, or raw value)
+        default: Default value if option is None
+
+    Returns:
+        The extracted value
+    """
+    if option is None:
+        return default
+    if isinstance(option, dict) and 'value' in option:
+        return option['value']
+    return option
+
+
+def _set_option_value(options_dict, key, new_value):
+    """Set value in a config option, handling both wrapped and raw formats.
+
+    Args:
+        options_dict: The parent dict containing the option
+        key: The option key
+        new_value: The new value to set
+    """
+    option = options_dict.get(key)
+    if isinstance(option, dict) and 'value' in option:
+        option['value'] = new_value
+    else:
+        options_dict[key] = new_value
 
 
 def get_fallback_config():
@@ -141,13 +189,13 @@ def init_env_vars():
             import shutil
             shutil.copy2(config_default_path, config_json_path)
             QgsMessageLog.logMessage(
-                "FilterMate: Configuration créée avec les valeurs par défaut",
+                "FilterMate: Configuration created with default values",
                 "FilterMate",
                 Qgis.Info
             )
         except Exception as e:
             QgsMessageLog.logMessage(
-                f"FilterMate: Impossible de copier la configuration par défaut: {e}",
+                f"FilterMate: Cannot copy default configuration: {e}",
                 "FilterMate",
                 Qgis.Warning
             )
@@ -205,7 +253,7 @@ def init_env_vars():
     has_app_config = isinstance(CONFIG_DATA, dict) and ("APP" in CONFIG_DATA or "app" in CONFIG_DATA)
     if not has_app_config:
         QgsMessageLog.logMessage(
-            "FilterMate: Configuration invalide détectée, utilisation de la configuration de secours",
+            "FilterMate: Invalid configuration detected, using fallback configuration",
             "FilterMate",
             Qgis.Warning
         )
@@ -218,13 +266,13 @@ def init_env_vars():
             with open(config_json_path, 'w') as outfile:
                 outfile.write(json.dumps(CONFIG_DATA, indent=4))
             QgsMessageLog.logMessage(
-                f"FilterMate: Configuration de secours sauvegardée: {config_json_path}",
+                f"FilterMate: Fallback configuration saved: {config_json_path}",
                 "FilterMate",
                 Qgis.Info
             )
         except Exception as e:
             QgsMessageLog.logMessage(
-                f"FilterMate: Impossible de sauvegarder la configuration de secours: {e}",
+                f"FilterMate: Cannot save fallback configuration: {e}",
                 "FilterMate",
                 Qgis.Warning
             )
@@ -232,8 +280,8 @@ def init_env_vars():
     # Log if using fallback configuration
     if using_fallback:
         QgsMessageLog.logMessage(
-            "FilterMate: Plugin démarré avec configuration de secours. "
-            "Certains paramètres peuvent être réinitialisés aux valeurs par défaut.",
+            "FilterMate: Plugin started with fallback configuration. "
+            "Some settings may be reset to default values.",
             "FilterMate",
             Qgis.Warning
         )
@@ -243,10 +291,15 @@ def init_env_vars():
     if app_key not in CONFIG_DATA:
         CONFIG_DATA[app_key] = {}
     if "OPTIONS" not in CONFIG_DATA.get(app_key, {}):
-        CONFIG_DATA[app_key]["OPTIONS"] = {"APP_SQLITE_PATH": "", "FRESH_RELOAD_FLAG": False}
+        CONFIG_DATA[app_key]["OPTIONS"] = {
+            "APP_SQLITE_PATH": {"value": "", "description": "Directory for SQLite databases"},
+            "FRESH_RELOAD_FLAG": {"value": False, "description": "Force fresh reload on next startup"}
+        }
 
     # Validate APP_SQLITE_PATH from config
-    app_sqlite_path = CONFIG_DATA.get(app_key, {}).get("OPTIONS", {}).get("APP_SQLITE_PATH", "")
+    app_sqlite_path = _get_option_value(
+        CONFIG_DATA.get(app_key, {}).get("OPTIONS", {}).get("APP_SQLITE_PATH"), ""
+    )
     if app_sqlite_path != '':
         configured_path = os.path.normpath(app_sqlite_path)
 
@@ -287,18 +340,21 @@ def init_env_vars():
     options = CONFIG_DATA.get(app_key, {}).get("OPTIONS", {})
     config_dirty = False
     for key in ("GITHUB_PAGE", "GITHUB_REPOSITORY", "DISCORD_INVITE", "QGIS_PLUGIN_REPOSITORY"):
-        val = options.get(key, "")
+        val = _get_option_value(options.get(key), "")
         if "sducournau" in val:
-            options[key] = val.replace("sducournau", "imagodata")
+            _set_option_value(options, key, val.replace("sducournau", "imagodata"))
             config_dirty = True
-    if not options.get("GITHUB_PAGE", "").endswith("index.html"):
-        options["GITHUB_PAGE"] = "https://imagodata.github.io/filter_mate/index.html"
+    github_page_val = _get_option_value(options.get("GITHUB_PAGE"), "")
+    if not github_page_val.endswith("index.html"):
+        _set_option_value(options, "GITHUB_PAGE", "https://imagodata.github.io/filter_mate/index.html")
         config_dirty = True
 
     # Update APP_SQLITE_PATH in config if needed
-    current_sqlite_path = CONFIG_DATA.get(app_key, {}).get("OPTIONS", {}).get("APP_SQLITE_PATH", "")
+    current_sqlite_path = _get_option_value(
+        CONFIG_DATA.get(app_key, {}).get("OPTIONS", {}).get("APP_SQLITE_PATH"), ""
+    )
     if current_sqlite_path != PLUGIN_CONFIG_DIRECTORY:
-        CONFIG_DATA[app_key]["OPTIONS"]["APP_SQLITE_PATH"] = PLUGIN_CONFIG_DIRECTORY
+        _set_option_value(CONFIG_DATA[app_key]["OPTIONS"], "APP_SQLITE_PATH", PLUGIN_CONFIG_DIRECTORY)
         config_dirty = True
 
     if config_dirty:

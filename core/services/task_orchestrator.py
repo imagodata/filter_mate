@@ -46,8 +46,11 @@ class TaskContext:
 
 
 class StabilityConstants:
-    """Constants for stability-related behavior."""
-    MAX_ADD_LAYERS_QUEUE = 10
+    """Constants for stability-related behavior.
+
+    Note: MAX_ADD_LAYERS_QUEUE aligned with infrastructure.constants (50).
+    """
+    MAX_ADD_LAYERS_QUEUE = 50  # Aligned with infrastructure.constants.MAX_ADD_LAYERS_QUEUE
     LAYER_RETRY_DELAY_MS = 500
     WIDGET_INIT_DELAY_MS = 500
     STALE_FLAG_TIMEOUT_SECONDS = 60

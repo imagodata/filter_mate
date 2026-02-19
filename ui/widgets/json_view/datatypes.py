@@ -5,6 +5,7 @@ import os
 from shutil import copyfile
 
 from qgis.PyQt import QtCore, QtGui, QtWidgets
+from qgis.PyQt.QtCore import QCoreApplication
 from qgis.gui import QgsColorButton
 from . import themes
 
@@ -470,7 +471,8 @@ class UrlType(DataType):
         return False
 
     def actions(self, index):
-        explore = QtWidgets.QAction('Explore ...', None)
+        explore = QtWidgets.QAction(
+            QCoreApplication.translate("UrlType", "Explore ..."), None)
         explore.triggered.connect(
             partial(webbrowser.open, index.data(QtCore.Qt.DisplayRole)))
         return [explore]
@@ -501,8 +503,10 @@ class FilepathType(DataType):
         return value_item
 
     def actions(self, index):
-        view = QtWidgets.QAction('View', None)
-        self.change = QtWidgets.QAction('Change', None)
+        view = QtWidgets.QAction(
+            QCoreApplication.translate("FilepathType", "View"), None)
+        self.change = QtWidgets.QAction(
+            QCoreApplication.translate("FilepathType", "Change"), None)
         path = index.data(QtCore.Qt.DisplayRole)
         view.triggered.connect(partial(webbrowser.open, path))
         self.change.triggered.connect(partial(self.change_path, path, index))
@@ -512,15 +516,26 @@ class FilepathType(DataType):
         new_path = None
         filename = None
         if os.path.isdir(input_path):
-            new_path = os.path.normcase(str(QtWidgets.QFileDialog.getExistingDirectory(None, 'Select a folder', input_path)))
+            new_path = os.path.normcase(str(QtWidgets.QFileDialog.getExistingDirectory(
+                None,
+                QCoreApplication.translate("FilepathType", "Select a folder"),
+                input_path)))
         else:
             if os.path.exists(input_path):
                 extension = os.path.basename(input_path).split('.')[-1]
-                new_path = os.path.normcase(str(QtWidgets.QFileDialog.getOpenFileName(None, 'Select a file', input_path, '*.{extension}'.format(extension=extension))[0]))
+                new_path = os.path.normcase(str(QtWidgets.QFileDialog.getOpenFileName(
+                    None,
+                    QCoreApplication.translate("FilepathType", "Select a file"),
+                    input_path,
+                    '*.{extension}'.format(extension=extension))[0]))
                 filename = os.path.basename(new_path)
             else:
                 extension = os.path.basename(input_path).split('.')[-1]
-                new_path = os.path.normcase(str(QtWidgets.QFileDialog.getSaveFileName(None, 'Save to a file', input_path, '*.{extension}'.format(extension=extension))[0]))
+                new_path = os.path.normcase(str(QtWidgets.QFileDialog.getSaveFileName(
+                    None,
+                    QCoreApplication.translate("FilepathType", "Save to a file"),
+                    input_path,
+                    '*.{extension}'.format(extension=extension))[0]))
                 filename = os.path.basename(new_path)
         if new_path is not None:
             if filename is not None:
@@ -548,8 +563,10 @@ class FilepathTypeImages(DataType):
         return value_item
 
     def actions(self, index):
-        view = QtWidgets.QAction('View', None)
-        self.change = QtWidgets.QAction('Change', None)
+        view = QtWidgets.QAction(
+            QCoreApplication.translate("FilepathTypeImages", "View"), None)
+        self.change = QtWidgets.QAction(
+            QCoreApplication.translate("FilepathTypeImages", "Change"), None)
         path_view = index.data(QtCore.Qt.UserRole)
         path_change = os.path.normcase(os.path.join(PLUGIN_DIR, "icons"))
         view.triggered.connect(partial(webbrowser.open, path_view))
@@ -557,7 +574,11 @@ class FilepathTypeImages(DataType):
         return [view, self.change]
 
     def change_icon(self, folder_path, index):
-        filepath = os.path.normcase(str(QtWidgets.QFileDialog.getOpenFileName(None, 'Select an icon', folder_path, 'Images (*.png *.jpg *.jpeg *.gif)')[0]))
+        filepath = os.path.normcase(str(QtWidgets.QFileDialog.getOpenFileName(
+            None,
+            QCoreApplication.translate("FilepathTypeImages", "Select an icon"),
+            folder_path,
+            'Images (*.png *.jpg *.jpeg *.gif)')[0]))
         if filepath:
             new_filepath = filepath
             filename = os.path.basename(filepath)
@@ -685,20 +706,30 @@ class ConfigValueType(DataType):
                 cbx.setToolTip(str(data['description']))
             return cbx
         elif isinstance(value, int) and not isinstance(value, bool):
-            # Use spinbox for integers
+            # Use spinbox for integers with min/max from config metadata
             spinbox = QtWidgets.QSpinBox(parent)
-            spinbox.setMinimum(-2147483648)
-            spinbox.setMaximum(2147483647)
+            spinbox.setMinimum(int(data['min']) if 'min' in data else -2147483648)
+            spinbox.setMaximum(int(data['max']) if 'max' in data else 2147483647)
             spinbox.setValue(value)
             if 'description' in data:
                 spinbox.setToolTip(str(data['description']))
             return spinbox
         elif isinstance(value, float):
-            # Use double spinbox for floats
+            # Use double spinbox for floats with min/max from config metadata
             spinbox = QtWidgets.QDoubleSpinBox(parent)
-            spinbox.setDecimals(6)
-            spinbox.setMinimum(-1e10)
-            spinbox.setMaximum(1e10)
+            min_val = data.get('min')
+            max_val = data.get('max')
+            # Infer decimals from min/max precision
+            decimals = 6
+            for ref in (min_val, max_val, value):
+                if ref is not None:
+                    s = str(ref)
+                    if '.' in s:
+                        decimals = max(decimals, len(s.split('.')[1]))
+                    break
+            spinbox.setDecimals(decimals)
+            spinbox.setMinimum(float(min_val) if min_val is not None else -1e10)
+            spinbox.setMaximum(float(max_val) if max_val is not None else 1e10)
             spinbox.setValue(value)
             if 'description' in data:
                 spinbox.setToolTip(str(data['description']))

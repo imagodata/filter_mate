@@ -576,9 +576,15 @@ class ExpressionBuilder:
                 filtered_count = self.source_layer.featureCount()
                 logger.info(f"   Filtered feature count: {filtered_count}")
 
-                # Optimization thresholds
-                MAX_INLINE_FEATURES = 1000  # Max features for inline IN clause
-                MAX_EXPRESSION_LENGTH = 10000  # Max expression length in chars
+                # Optimization thresholds (configurable via APP.OPTIONS.EXPRESSION_BUILDER)
+                try:
+                    from ...config.config import ENV_VARS, _get_option_value
+                    _eb_cfg = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('EXPRESSION_BUILDER', {})
+                    MAX_INLINE_FEATURES = _get_option_value(_eb_cfg.get('max_inline_features'), 1000)
+                    MAX_EXPRESSION_LENGTH = _get_option_value(_eb_cfg.get('max_expression_length'), 10000)
+                except (ImportError, AttributeError, TypeError):
+                    MAX_INLINE_FEATURES = 1000
+                    MAX_EXPRESSION_LENGTH = 10000
 
                 if filtered_count > MAX_INLINE_FEATURES:
                     # OPTIMIZATION: Use original source_subset as-is for distant layers
@@ -1345,9 +1351,15 @@ class ExpressionBuilder:
         Returns:
             str: Inline FID filter SQL (possibly with OR for large selections)
         """
-        # FIXED v4.2.10: Size limit protection
-        MAX_FIDS_PER_CLAUSE = 5000  # Limit to prevent huge expressions
-        MAX_TOTAL_FIDS = 50000  # Absolute limit with warning
+        # FIXED v4.2.10: Size limit protection (configurable via APP.OPTIONS.EXPRESSION_BUILDER)
+        try:
+            from ...config.config import ENV_VARS, _get_option_value
+            _eb_cfg = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('EXPRESSION_BUILDER', {})
+            MAX_FIDS_PER_CLAUSE = _get_option_value(_eb_cfg.get('max_fids_per_in_clause'), 5000)
+            MAX_TOTAL_FIDS = _get_option_value(_eb_cfg.get('absolute_fid_limit'), 50000)
+        except (ImportError, AttributeError, TypeError):
+            MAX_FIDS_PER_CLAUSE = 5000
+            MAX_TOTAL_FIDS = 50000
 
         if len(fids) > MAX_TOTAL_FIDS:
             logger.warning(

@@ -472,14 +472,28 @@ _postgresql_breaker: Optional[CircuitBreaker] = None
 _spatialite_breaker: Optional[CircuitBreaker] = None
 
 
+def _get_query_timeouts():
+    """Read query timeouts from config, fallback to defaults."""
+    try:
+        from ..config.config import ENV_VARS, _get_option_value
+        cfg = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('QUERY_TIMEOUTS', {})
+        return {
+            'postgresql': _get_option_value(cfg.get('postgresql_timeout_seconds'), 60.0),
+            'local': _get_option_value(cfg.get('local_timeout_seconds'), 30.0),
+        }
+    except (ImportError, AttributeError, TypeError):
+        return {'postgresql': 60.0, 'local': 30.0}
+
+
 def get_postgresql_breaker() -> CircuitBreaker:
     """Get or create PostgreSQL circuit breaker."""
     global _postgresql_breaker
     if _postgresql_breaker is None:
+        timeouts = _get_query_timeouts()
         _postgresql_breaker = circuit_breakers.get_breaker(
             "postgresql_main",
             failure_threshold=5,
-            timeout=60.0,
+            timeout=timeouts['postgresql'],
             success_threshold=2
         )
     return _postgresql_breaker
@@ -489,10 +503,11 @@ def get_spatialite_breaker() -> CircuitBreaker:
     """Get or create Spatialite circuit breaker."""
     global _spatialite_breaker
     if _spatialite_breaker is None:
+        timeouts = _get_query_timeouts()
         _spatialite_breaker = circuit_breakers.get_breaker(
             "spatialite_main",
             failure_threshold=10,  # Higher threshold (local file)
-            timeout=30.0,          # Shorter timeout (local)
+            timeout=timeouts['local'],
             success_threshold=1
         )
     return _spatialite_breaker

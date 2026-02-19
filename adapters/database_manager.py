@@ -16,6 +16,8 @@ import uuid
 import logging
 from typing import Optional, Dict, Any, Tuple
 
+from qgis.PyQt.QtCore import QCoreApplication
+
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransformContext,
@@ -126,14 +128,14 @@ class DatabaseManager:
         """
         if not os.path.exists(self._db_file_path):
             logger.error(f"Database file does not exist: {self._db_file_path}")
-            show_error(f"Database file does not exist: {self._db_file_path}")
+            show_error(QCoreApplication.translate("DatabaseManager", "Database file does not exist: {0}").format(self._db_file_path))
             return None
 
         try:
             conn = sqlite_connect(self._db_file_path)
             return conn
         except Exception as error:
-            error_msg = f"Failed to connect to database {self._db_file_path}: {error}"
+            error_msg = QCoreApplication.translate("DatabaseManager", "Failed to connect to database {0}: {1}").format(self._db_file_path, error)
             logger.error(error_msg)
             show_error(error_msg)
             return None
@@ -152,7 +154,7 @@ class DatabaseManager:
                 logger.info(f"Created database directory: {db_dir}")
                 return True
             except OSError as error:
-                error_msg = f"Could not create database directory {db_dir}: {error}"
+                error_msg = QCoreApplication.translate("DatabaseManager", "Could not create database directory {0}: {1}").format(db_dir, error)
                 logger.error(error_msg)
                 show_error(error_msg)
                 return False
@@ -206,7 +208,7 @@ class DatabaseManager:
             del writer  # Ensure file is closed
             return True
         except Exception as error:
-            error_msg = f"Failed to create database file {self._db_file_path}: {error}"
+            error_msg = QCoreApplication.translate("DatabaseManager", "Failed to create database file {0}: {1}").format(self._db_file_path, error)
             logger.error(error_msg)
             show_error(error_msg)
             return False
@@ -462,7 +464,11 @@ class DatabaseManager:
         if fresh_reload:
             try:
                 os.remove(self._db_file_path)
-                config_data["APP"]["OPTIONS"]["FRESH_RELOAD_FLAG"] = False
+                flag = config_data["APP"]["OPTIONS"]["FRESH_RELOAD_FLAG"]
+                if isinstance(flag, dict) and 'value' in flag:
+                    flag['value'] = False
+                else:
+                    config_data["APP"]["OPTIONS"]["FRESH_RELOAD_FLAG"] = False
                 if config_json_path:
                     with open(config_json_path, 'w') as outfile:
                         outfile.write(json.dumps(config_data, indent=4))
@@ -479,12 +485,12 @@ class DatabaseManager:
         try:
             conn = self.get_connection()
             if conn is None:
-                error_msg = "Cannot initialize FilterMate database: connection failed"
+                error_msg = QCoreApplication.translate("DatabaseManager", "Cannot initialize FilterMate database: connection failed")
                 logger.error(error_msg)
                 show_error(error_msg)
                 return False, config_data
         except Exception as e:
-            error_msg = f"Critical error connecting to database: {str(e)}"
+            error_msg = QCoreApplication.translate("DatabaseManager", "Critical error connecting to database: {0}").format(str(e))
             logger.error(error_msg)
             show_error(error_msg)
             return False, config_data
@@ -518,7 +524,7 @@ class DatabaseManager:
             return True, config_data
 
         except Exception as e:
-            error_msg = f"Error during database initialization: {str(e)}"
+            error_msg = QCoreApplication.translate("DatabaseManager", "Error during database initialization: {0}").format(str(e))
             logger.error(error_msg)
             show_error(error_msg)
             return False, config_data

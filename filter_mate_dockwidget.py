@@ -250,7 +250,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         # FIX 2026-01-19 v3: Counter for skipping selectionChanged signals (2 = removeSelection + select)
         self._skip_selection_changed_count = 0
         self._expression_debounce_timer = QTimer()
-        self._expression_debounce_timer.setSingleShot(True); self._expression_debounce_timer.setInterval(450)
+        _debounce_ms = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("UI_RESPONSIVENESS", {}).get("expression_debounce_ms", {})
+        _debounce_val = _debounce_ms.get("value", 450) if isinstance(_debounce_ms, dict) else 450
+        self._expression_debounce_timer.setSingleShot(True); self._expression_debounce_timer.setInterval(_debounce_val)
         self._expression_debounce_timer.timeout.connect(self._execute_debounced_expression_change)
         self._pending_expression_change = self._last_expression_change_source = None
         self._expression_cache, self._expression_cache_max_age, self._expression_cache_max_size = {}, 60.0, 100
@@ -2561,7 +2563,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
             if ICON_THEME_AVAILABLE: IconThemeManager.set_theme(new_theme)
             StyleLoader.set_theme_from_config(self.dockWidgetContents, self.CONFIG_DATA, new_theme); self._refresh_icons_for_theme()
             if hasattr(self, 'config_view') and self.config_view: self.config_view.refresh_theme_stylesheet(force_dark=(new_theme == 'dark'))
-            show_info("FilterMate", f"Theme adapted: {'Dark mode' if new_theme == 'dark' else 'Light mode'}")
+            show_info("FilterMate", self.tr("Theme adapted: {0}").format(self.tr("Dark mode") if new_theme == 'dark' else self.tr("Light mode")))
         except Exception as e: logger.error(f"Error applying theme change: {e}")
 
     def _refresh_icons_for_theme(self):
@@ -3907,7 +3909,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                     from qgis.utils import iface
                     iface.messageBar().pushWarning(
                         "FilterMate - Identify",
-                        "Les features sélectionnées n'ont pas de géométrie."
+                        self.tr("Selected features have no geometry.")
                     )
                     return
 
@@ -3926,7 +3928,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                 from qgis.utils import iface
                 iface.messageBar().pushWarning(
                     "FilterMate - Identify",
-                    "Aucune feature sélectionnée. Sélectionnez une feature dans la liste déroulante."
+                    self.tr("No feature selected. Select a feature from the dropdown list.")
                 )
         except Exception as e:
             logger.error(f"exploring_identify_clicked error: {e}", exc_info=True)
@@ -4899,7 +4901,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         except RuntimeError: return (False, None, None)
         try:
             if not is_layer_source_available(layer):
-                show_warning("FilterMate", "The selected layer is invalid or its source cannot be found.")
+                show_warning("FilterMate", self.tr("The selected layer is invalid or its source cannot be found."))
                 return (False, None, None)
         except (RuntimeError, AttributeError, OSError):
             return (False, None, None)  # Layer source check failed
@@ -6086,7 +6088,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                 self._update_backend_indicator(infos['layer_provider_type'], infos.get('postgresql_connection_available'), actual_backend=forced)
 
         if was_empty and self.PROJECT_LAYERS:
-            show_success("FilterMate", f"Plugin activated with {len(self.PROJECT_LAYERS)} vector layer(s)")
+            show_success("FilterMate", self.tr("Plugin activated with {0} vector layer(s)").format(len(self.PROJECT_LAYERS)))
 
     def _refresh_layer_specific_widgets(self, layer):
         """v3.1 Sprint 12: Simplified - refresh UI widgets for active layer."""
@@ -6159,8 +6161,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
 
     def open_project_page(self):
         """v4.0 S18: Open project website page."""
+        from .config.config import _get_option_value
         options = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {})
-        url = options.get("GITHUB_PAGE", "") or options.get("DISCORD_INVITE", "")
+        url = _get_option_value(options.get("GITHUB_PAGE"), "") or _get_option_value(options.get("DISCORD_INVITE"), "")
         if url and url.startswith("http"): webbrowser.open(url)
 
     def reload_plugin(self):

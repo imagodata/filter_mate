@@ -348,8 +348,17 @@ def schedule_canvas_refresh(
                     has_complex_filter = True
                     break
 
-        # Use longer delay for complex filters
-        refresh_delay = 1500 if has_complex_filter else 500
+        # Use longer delay for complex filters (configurable via APP.OPTIONS.UI_RESPONSIVENESS)
+        try:
+            from ...config.config import ENV_VARS
+            _ui_resp = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('UI_RESPONSIVENESS', {})
+            _complex = _ui_resp.get('canvas_refresh_delay_complex_ms', {})
+            _simple = _ui_resp.get('canvas_refresh_delay_simple_ms', {})
+            delay_complex = _complex.get('value', 1500) if isinstance(_complex, dict) else 1500
+            delay_simple = _simple.get('value', 500) if isinstance(_simple, dict) else 500
+        except (ImportError, AttributeError, TypeError):
+            delay_complex, delay_simple = 1500, 500
+        refresh_delay = delay_complex if has_complex_filter else delay_simple
 
         # Schedule single comprehensive refresh
         QTimer.singleShot(refresh_delay, single_refresh_fn)

@@ -1274,7 +1274,13 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
             if str(feature.geometry().type()) == 'GeometryType.Point':
                 # Points need a buffer since they have no bounding box
-                buffer_distance = 50  # 50 meters for all points
+                # Configurable via APP.OPTIONS.EXPLORATION.point_buffer_distance_m
+                try:
+                    from ...config.config import ENV_VARS, _get_option_value
+                    _exp_cfg = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('EXPLORATION', {})
+                    buffer_distance = _get_option_value(_exp_cfg.get('point_buffer_distance_m'), 50)
+                except (ImportError, AttributeError, TypeError):
+                    buffer_distance = 50
                 box = geom.buffer(buffer_distance, 5).boundingBox()
             else:
                 # IMPROVED: For polygons/lines, zoom to the actual feature bounding box

@@ -211,21 +211,21 @@ class QgsCheckableComboBoxLayer(QComboBox):
         """Create the context menu with selection actions."""
         self.context_menu = QMenu(self)
 
-        self.action_check_all = QAction('Select All', self)
+        self.action_check_all = QAction(self.tr('Select All'), self)
         self.action_check_all.triggered.connect(self.select_all)
-        self.action_uncheck_all = QAction('De-select All', self)
+        self.action_uncheck_all = QAction(self.tr('De-select All'), self)
         self.action_uncheck_all.triggered.connect(self.deselect_all)
-        self.action_check_all_geometry_line = QAction('Select all layers by geometry type (Lines)', self)
+        self.action_check_all_geometry_line = QAction(self.tr('Select all layers by geometry type (Lines)'), self)
         self.action_check_all_geometry_line.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Line', Qt.Checked))
-        self.action_uncheck_all_geometry_line = QAction('De-Select all layers by geometry type (Lines)', self)
+        self.action_uncheck_all_geometry_line = QAction(self.tr('De-Select all layers by geometry type (Lines)'), self)
         self.action_uncheck_all_geometry_line.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Line', Qt.Unchecked))
-        self.action_check_all_geometry_point = QAction('Select all layers by geometry type (Points)', self)
+        self.action_check_all_geometry_point = QAction(self.tr('Select all layers by geometry type (Points)'), self)
         self.action_check_all_geometry_point.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Point', Qt.Checked))
-        self.action_uncheck_all_geometry_point = QAction('De-Select all layers by geometry type (Points)', self)
+        self.action_uncheck_all_geometry_point = QAction(self.tr('De-Select all layers by geometry type (Points)'), self)
         self.action_uncheck_all_geometry_point.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Point', Qt.Unchecked))
-        self.action_check_all_geometry_polygon = QAction('Select all layers by geometry type (Polygons)', self)
+        self.action_check_all_geometry_polygon = QAction(self.tr('Select all layers by geometry type (Polygons)'), self)
         self.action_check_all_geometry_polygon.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Polygon', Qt.Checked))
-        self.action_uncheck_all_geometry_polygon = QAction('De-Select all layers by geometry type (Polygon)', self)
+        self.action_uncheck_all_geometry_polygon = QAction(self.tr('De-Select all layers by geometry type (Polygons)'), self)
         self.action_uncheck_all_geometry_polygon.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Polygon', Qt.Unchecked))
 
         self.context_menu.addAction(self.action_check_all)
@@ -422,7 +422,13 @@ class ListWidgetWrapper(QListWidget):
         self.filter_expression_features_id_list = []
         self.visible_features_list = []
         self.selected_features_list = []
-        self.limit = 1000
+        # Configurable via APP.OPTIONS.EXPLORATION.feature_picker_limit
+        try:
+            from ...config.config import ENV_VARS, _get_option_value
+            _exp_cfg = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('EXPLORATION', {})
+            self.limit = _get_option_value(_exp_cfg.get('feature_picker_limit'), 1000)
+        except (ImportError, AttributeError, TypeError):
+            self.limit = 1000
         self.total_features_list_count = 0
 
     def setFilterExpression(self, filter_expression):
@@ -637,7 +643,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(2)
         self.filter_le = QLineEdit(self)
-        self.filter_le.setPlaceholderText('Type to filter...')
+        self.filter_le.setPlaceholderText(self.tr('Type to filter...'))
         self.items_le = QLineEdit(self)
         self.items_le.setReadOnly(True)
 
@@ -646,17 +652,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         # Context menu
         self.context_menu = QMenu(self)
-        self.action_check_all = QAction('Select All', self)
+        self.action_check_all = QAction(self.tr('Select All'), self)
         self.action_check_all.triggered.connect(lambda state, x='Select All': self.select_all(x))
-        self.action_check_all_non_subset = QAction('Select All (non subset)', self)
+        self.action_check_all_non_subset = QAction(self.tr('Select All (non subset)'), self)
         self.action_check_all_non_subset.triggered.connect(lambda state, x='Select All (non subset)': self.select_all(x))
-        self.action_check_all_subset = QAction('Select All (subset)', self)
+        self.action_check_all_subset = QAction(self.tr('Select All (subset)'), self)
         self.action_check_all_subset.triggered.connect(lambda state, x='Select All (subset)': self.select_all(x))
-        self.action_uncheck_all = QAction('De-select All', self)
+        self.action_uncheck_all = QAction(self.tr('De-select All'), self)
         self.action_uncheck_all.triggered.connect(lambda state, x='De-select All': self.deselect_all(x))
-        self.action_uncheck_all_non_subset = QAction('De-select All (non subset)', self)
+        self.action_uncheck_all_non_subset = QAction(self.tr('De-select All (non subset)'), self)
         self.action_uncheck_all_non_subset.triggered.connect(lambda state, x='De-select All (non subset)': self.deselect_all(x))
-        self.action_uncheck_all_subset = QAction('De-select All (subset)', self)
+        self.action_uncheck_all_subset = QAction(self.tr('De-select All (subset)'), self)
         self.action_uncheck_all_subset.triggered.connect(lambda state, x='De-select All (subset)': self.deselect_all(x))
 
         self.context_menu.addAction(self.action_check_all)
@@ -703,10 +709,16 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self._sort_order = 'ASC'
         self._sort_field = None
 
-        # Debounce timer for filter text input
+        # Debounce timer for filter text input (configurable via APP.OPTIONS.UI_RESPONSIVENESS.filter_debounce_ms)
+        try:
+            _ui_resp = (config_data or {}).get("APP", {}).get("OPTIONS", {}).get("UI_RESPONSIVENESS", {})
+            _fd = _ui_resp.get("filter_debounce_ms", {})
+            self._filter_debounce_ms = _fd.get("value", 300) if isinstance(_fd, dict) else 300
+        except (AttributeError, TypeError):
+            self._filter_debounce_ms = 300
         self._filter_debounce_timer = QTimer(self)
         self._filter_debounce_timer.setSingleShot(True)
-        self._filter_debounce_timer.setInterval(300)  # 300ms debounce delay
+        self._filter_debounce_timer.setInterval(self._filter_debounce_ms)
         self._filter_debounce_timer.timeout.connect(self._execute_filter)
 
     def setSortOrder(self, order='ASC', field=None):

@@ -236,12 +236,30 @@
       }
     },
     "OPTIONS": {
-      "DISCORD_INVITE": "https://discord.gg/9DNbuVYQ",
-      "GITHUB_PAGE": "https://imagodata.github.io/filter_mate/index.html",
-      "GITHUB_REPOSITORY": "https://github.com/imagodata/filter_mate/",
-      "QGIS_PLUGIN_REPOSITORY": "https://plugins.qgis.org/plugins/filter_mate/",
-      "APP_SQLITE_PATH": "",
-      "FRESH_RELOAD_FLAG": false,
+      "DISCORD_INVITE": {
+        "value": "https://discord.gg/9DNbuVYQ",
+        "description": "Discord community invite link"
+      },
+      "GITHUB_PAGE": {
+        "value": "https://imagodata.github.io/filter_mate/index.html",
+        "description": "Plugin documentation website URL"
+      },
+      "GITHUB_REPOSITORY": {
+        "value": "https://github.com/imagodata/filter_mate/",
+        "description": "GitHub source code repository URL"
+      },
+      "QGIS_PLUGIN_REPOSITORY": {
+        "value": "https://plugins.qgis.org/plugins/filter_mate/",
+        "description": "QGIS official plugin repository page URL"
+      },
+      "APP_SQLITE_PATH": {
+        "value": "",
+        "description": "Directory path for SQLite database storage (auto-set to plugin config directory if empty)"
+      },
+      "FRESH_RELOAD_FLAG": {
+        "value": false,
+        "description": "Force a fresh reload of the plugin on next startup (automatically reset to false after reload)"
+      },
       "SMALL_DATASET_OPTIMIZATION": {
         "description": "For PostgreSQL layers with fewer features than threshold, use OGR memory backend for faster filtering (avoids network overhead)",
         "enabled": {
@@ -543,6 +561,120 @@
           "value": true,
           "choices": [true, false],
           "description": "Show warning messages when geometry is simplified"
+        }
+      },
+      "UI_RESPONSIVENESS": {
+        "description": "User interface responsiveness settings (debounce timers, refresh delays)",
+        "expression_debounce_ms": {
+          "value": 450,
+          "min": 100,
+          "max": 2000,
+          "description": "Delay in milliseconds before evaluating expression changes while typing (higher = less CPU, slower feedback)"
+        },
+        "filter_debounce_ms": {
+          "value": 300,
+          "min": 50,
+          "max": 1000,
+          "description": "Delay in milliseconds before applying text search filter in list widgets (higher = less CPU, slower search)"
+        },
+        "canvas_refresh_delay_simple_ms": {
+          "value": 500,
+          "min": 100,
+          "max": 5000,
+          "description": "Canvas refresh delay after simple filter operations in milliseconds"
+        },
+        "canvas_refresh_delay_complex_ms": {
+          "value": 1500,
+          "min": 500,
+          "max": 10000,
+          "description": "Canvas refresh delay after complex filter operations in milliseconds (longer to let provider process)"
+        }
+      },
+      "FAVORITES": {
+        "description": "Favorites management settings",
+        "recent_favorites_limit": {
+          "value": 10,
+          "min": 3,
+          "max": 50,
+          "description": "Maximum number of recent favorites shown in the quick access menu"
+        }
+      },
+      "SPATIALITE": {
+        "description": "SpatiaLite backend processing settings",
+        "batch_size": {
+          "value": 5000,
+          "min": 500,
+          "max": 50000,
+          "description": "Number of features processed per batch in SpatiaLite queries (higher = faster but more memory)"
+        },
+        "progress_interval": {
+          "value": 1000,
+          "min": 100,
+          "max": 10000,
+          "description": "Report progress every N features during SpatiaLite processing"
+        },
+        "query_timeout_seconds": {
+          "value": 120,
+          "min": 10,
+          "max": 600,
+          "description": "Maximum time in seconds for a single SpatiaLite query before cancellation"
+        }
+      },
+      "EXPRESSION_BUILDER": {
+        "description": "SQL expression construction limits",
+        "max_fids_per_in_clause": {
+          "value": 5000,
+          "min": 500,
+          "max": 50000,
+          "description": "Maximum number of feature IDs in a single SQL IN clause (higher = fewer queries but longer SQL)"
+        },
+        "absolute_fid_limit": {
+          "value": 50000,
+          "min": 5000,
+          "max": 500000,
+          "description": "Absolute maximum feature IDs for inline SQL expressions (above this, a warning is logged and IDs are truncated)"
+        },
+        "max_inline_features": {
+          "value": 1000,
+          "min": 100,
+          "max": 10000,
+          "description": "Maximum features for inline IN clause before switching to subquery strategy"
+        },
+        "max_expression_length": {
+          "value": 10000,
+          "min": 1000,
+          "max": 100000,
+          "description": "Maximum expression string length in characters before switching to optimized strategy"
+        }
+      },
+      "QUERY_TIMEOUTS": {
+        "description": "Backend query timeout settings",
+        "postgresql_timeout_seconds": {
+          "value": 60.0,
+          "min": 5.0,
+          "max": 300.0,
+          "description": "Circuit breaker timeout for PostgreSQL operations in seconds"
+        },
+        "local_timeout_seconds": {
+          "value": 30.0,
+          "min": 5.0,
+          "max": 120.0,
+          "description": "Circuit breaker timeout for local (SpatiaLite/OGR) operations in seconds"
+        }
+      },
+      "EXPLORATION": {
+        "description": "Layer exploration and feature identification settings",
+        "point_buffer_distance_m": {
+          "value": 50,
+          "min": 1,
+          "max": 10000,
+          "description": "Buffer distance in meters applied to point features for zoom-to-feature (points have no bounding box)"
+        },
+        "feature_picker_limit": {
+          "value": 1000,
+          "min": 100,
+          "max": 50000,
+          "description": "Maximum number of features loaded in the feature picker list widget"
         }
       }
     }

@@ -59,6 +59,8 @@ SQLITE_TIMEOUT = 60.0
 SQLITE_MAX_RETRIES = 10
 
 # Initial delay between retries (will increase exponentially)
+# Note: Intentionally higher than infrastructure.constants.SQLITE_BASE_DELAY (0.1s)
+# because task-level retries are more forgiving than connection pool retries.
 SQLITE_RETRY_DELAY = 0.5
 
 # Maximum total retry time in seconds (prevents infinite waiting)
