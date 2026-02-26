@@ -696,6 +696,19 @@ class FilterOrchestrator:
         elif backend_name == PROVIDER_POSTGRES:
             logger.warning(f"⚠️ PostgreSQL backend FAILED for {layer.name()}")
             logger.warning("  → Query may have timed out or connection failed")
+            # FIX v4.9.0: Capture the actual PostgreSQL provider error before it is lost
+            try:
+                provider = layer.dataProvider()
+                if provider and hasattr(provider, 'error') and provider.error():
+                    pg_err = provider.error().message()
+                    if pg_err:
+                        logger.error(f"  → PostgreSQL provider error: {pg_err}")
+                        QgsMessageLog.logMessage(
+                            f"FilterMate PostgreSQL error ({layer.name()}): {pg_err[:200]}",
+                            "FilterMate", Qgis.Critical
+                        )
+            except Exception as _err_diag:
+                logger.debug(f"  → Could not read provider error: {_err_diag}")
         else:
             logger.warning(f"⚠️ {backend_name.upper()} backend FAILED for {layer.name()}")
 
@@ -706,6 +719,19 @@ class FilterOrchestrator:
         )
 
         try:
+            # FIX v4.9.0: Reload PostgreSQL layer before OGR fallback to reset any broken
+            # connection state.  When a complex PostGIS EXISTS query fails, the QGIS
+            # PostgreSQL provider leaves its internal connection in an aborted-transaction
+            # state.  Calling reload() forces the provider to start a fresh connection,
+            # so the subsequent setSubsetString() call in the OGR fallback can succeed.
+            if layer.providerType() == QGIS_PROVIDER_POSTGRES:
+                try:
+                    logger.info(f"🔄 Reloading PostgreSQL layer '{layer.name()}' to reset connection state...")
+                    layer.dataProvider().reloadData()
+                    logger.info("  ✓ Layer connection reset")
+                except Exception as _reload_err:
+                    logger.warning(f"  ⚠️ Could not reload layer (non-fatal): {_reload_err}")
+
             # Get OGR backend
             ogr_backend = BackendFactory.get_backend('ogr', layer, self.task_parameters, force_ogr=True)
             ogr_source_geom = source_geometries.get(PROVIDER_OGR)

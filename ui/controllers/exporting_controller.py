@@ -281,8 +281,9 @@ class ExportingController(BaseController):
             remote_layers = [l for l in qgis_layers if l.providerType() in REMOTE_PROVIDERS]
 
             # Find layers missing from PROJECT_LAYERS
-            missing_postgres = [l for l in postgres_layers if l.id() not in dockwidget.PROJECT_LAYERS]
-            missing_remote = [l for l in remote_layers if l.id() not in dockwidget.PROJECT_LAYERS]
+            # Exclude non-spatial layers: add_project_layer intentionally skips them (isSpatial() = False)
+            missing_postgres = [l for l in postgres_layers if l.id() not in dockwidget.PROJECT_LAYERS and l.isSpatial()]
+            missing_remote = [l for l in remote_layers if l.id() not in dockwidget.PROJECT_LAYERS and l.isSpatial()]
 
             if missing_postgres:
                 logger.warning(f"populate_export_combobox: {len(missing_postgres)} PostgreSQL layer(s) missing from PROJECT_LAYERS")

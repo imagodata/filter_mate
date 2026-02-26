@@ -193,6 +193,27 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
             with feature_picker_guard(layer):
                 result = layer.setSubsetString(subset_expression)
 
+            # FIX v4.9.0: Retry for PostgreSQL layers after connection reset.
+            # When a prior complex PostGIS EXISTS query fails, the QGIS PostgreSQL provider
+            # may leave its internal connection in an aborted-transaction state, causing
+            # all subsequent setSubsetString() calls to fail even with valid expressions.
+            # reloadData() forces a fresh connection so the retry has a clean state.
+            if not result and layer.providerType() == 'postgres':
+                logger.info(
+                    f"[SQL] 🔄 setSubsetString failed for PostgreSQL layer '{layer.name()}' "
+                    "- retrying once after reloadData()..."
+                )
+                try:
+                    layer.dataProvider().reloadData()
+                    with feature_picker_guard(layer):
+                        result = layer.setSubsetString(subset_expression)
+                    if result:
+                        logger.info("[SQL]   ✓ Retry succeeded after reloadData()")
+                    else:
+                        logger.warning("[SQL]   ✗ Retry also failed after reloadData()")
+                except Exception as _retry_err:
+                    logger.warning(f"[SQL]   ⚠️ Retry attempt raised exception: {_retry_err}")
+
             if not result:
                 logger.warning(f"setSubsetString returned False for layer {layer.name()}")
                 # Additional diagnostics for failure
@@ -201,11 +222,40 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                 logger.warning(f"[SQL]   Feature count before: {layer.featureCount()}")
                 logger.warning(f"[SQL]   Current subset: {layer.subsetString()[:200] if layer.subsetString() else 'None'}...")
 
-                # Try to get provider error
+                # FIX v4.9.0: Improved provider error capture for PostgreSQL layers
                 try:
                     provider = layer.dataProvider()
-                    if provider and hasattr(provider, 'error') and provider.error():
-                        logger.warning(f"[SQL]   Provider error: {provider.error().message()}")
+                    if provider:
+                        # Try QgsDataProvider.error() (returns QgsError)
+                        if hasattr(provider, 'error') and provider.error():
+                            pg_msg = provider.error().message()
+                            if pg_msg:
+                                logger.warning(f"[SQL]   Provider error: {pg_msg}")
+                        # Try errors() which returns a list of error messages (QGIS 3.x)
+                        if hasattr(provider, 'errors'):
+                            for err_item in (provider.errors() or []):
+                                logger.warning(f"[SQL]   Provider errors(): {err_item}")
+                        # For PostgreSQL, try executing a simple query to check connection state
+                        if layer.providerType() == 'postgres':
+                            try:
+                                from filter_mate.infrastructure.utils import get_datasource_connexion_from_layer
+                                conn, _ = get_datasource_connexion_from_layer(layer)
+                                if conn:
+                                    # Check if connection is in a broken/aborted transaction state
+                                    try:
+                                        with conn.cursor() as cur:
+                                            cur.execute("SELECT 1")
+                                        conn.rollback()  # Keep the connection clean after the probe
+                                        logger.info("[SQL]   PostgreSQL connection (psycopg2 probe): OK")
+                                    except Exception as probe_inner:
+                                        try:
+                                            conn.rollback()
+                                        except Exception:
+                                            pass
+                                        logger.warning(f"[SQL]   PostgreSQL connection BROKEN: {probe_inner}")
+                                        logger.warning("[SQL]   → Root cause: prior query may have aborted the transaction")
+                            except Exception as pg_probe_e:
+                                logger.debug(f"[SQL]   psycopg2 probe unavailable: {pg_probe_e}")
                 except Exception as diag_e:
                     logger.debug(f"[SQL]   Could not get provider error: {diag_e}")
 

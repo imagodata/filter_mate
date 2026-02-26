@@ -13,6 +13,7 @@ FilterMate Application Orchestrator
 """
 
 from qgis.PyQt.QtCore import Qt, QTimer, QCoreApplication
+from qgis.PyQt.QtWidgets import QMessageBox, QPushButton
 import weakref
 import sip
 from qgis.core import (
@@ -1406,6 +1407,13 @@ class FilterMateApp:
             self.PROJECT_LAYERS = self.dockwidget.PROJECT_LAYERS
             self.CONFIG_DATA = self.dockwidget.CONFIG_DATA
 
+        # Edit mode guard: cannot apply subset string on a layer being edited
+        if task_name in ('filter', 'unfilter'):
+            edit_mode_layers = self._get_edit_mode_layers_for_filter()
+            if edit_mode_layers:
+                if not self._handle_edit_mode_before_task(edit_mode_layers, task_name):
+                    return
+
         # Dispatch via TaskOrchestrator or fallback
         if self._task_orchestrator:
             try:
@@ -1519,6 +1527,145 @@ class FilterMateApp:
                 warmed = warm_cache_for_project(layers_info, ['equals', 'intersects', 'contains', 'within'])
                 if warmed > 0: logger.debug(f"Pre-warmed {warmed} cache entries for {len(layers_info)} layers")
         except Exception as e: logger.debug(f"Cache warmup skipped (optional): {e}")
+
+    def _get_edit_mode_layers_for_filter(self):
+        """
+        Return all layers currently in edit mode that block filtering/unfiltering.
+
+        Checks both the source (current) layer and all target (distant) layers.
+        QGIS does not allow applying setSubsetString on a layer in edit mode.
+
+        Returns:
+            list: List of QgsVectorLayer objects in edit mode (empty if none).
+        """
+        if not self.dockwidget:
+            return []
+
+        edit_layers = []
+
+        # Check source layer
+        current_layer = self.dockwidget.current_layer
+        if current_layer and hasattr(current_layer, 'isEditable') and current_layer.isEditable():
+            edit_layers.append(current_layer)
+
+        # Check target (distant) layers from PROJECT_LAYERS
+        if current_layer and current_layer.id() in self.PROJECT_LAYERS:
+            layer_params = self.PROJECT_LAYERS[current_layer.id()]
+            distant_ids = layer_params.get("distant_layers", {})
+            for layer_id in distant_ids:
+                layer = QgsProject.instance().mapLayer(layer_id)
+                if layer and hasattr(layer, 'isEditable') and layer.isEditable():
+                    if layer not in edit_layers:
+                        edit_layers.append(layer)
+
+        return edit_layers
+
+    def _get_edit_mode_layer_for_filter(self):
+        """
+        Legacy alias: return the first layer in edit mode, or None.
+
+        .. deprecated::
+            Use _get_edit_mode_layers_for_filter() instead.
+        """
+        layers = self._get_edit_mode_layers_for_filter()
+        return layers[0] if layers else None
+
+    def _handle_edit_mode_before_task(self, edit_layers, task_name):
+        """
+        Show an interactive dialog when layers are in edit mode before filtering/unfiltering.
+
+        Offers three choices:
+        - Save changes (commitChanges) then proceed with the task.
+        - Discard changes (rollBack) then proceed with the task.
+        - Cancel: abort the task, leaving layers in their current state.
+
+        Args:
+            edit_layers (list): QgsVectorLayer objects currently in edit mode.
+            task_name (str): 'filter' or 'unfilter', used to label the buttons.
+
+        Returns:
+            bool: True if the task can proceed, False to abort.
+        """
+        layer_names = '\n'.join(f'  • "{l.name()}"' for l in edit_layers)
+
+        if task_name == 'filter':
+            task_label = QCoreApplication.translate("FilterMateApp", "filter")
+        else:
+            task_label = QCoreApplication.translate("FilterMateApp", "unfilter")
+
+        msg = QMessageBox()
+        msg.setWindowTitle(QCoreApplication.translate("FilterMateApp", "FilterMate – Edit Mode Detected"))
+        msg.setIcon(QMessageBox.Warning)
+        msg.setText(
+            QCoreApplication.translate(
+                "FilterMateApp",
+                "The following layer(s) are currently in edit mode:\n"
+                "{0}\n\n"
+                "QGIS cannot apply filters while a layer is being edited.\n"
+                "What would you like to do?"
+            ).format(layer_names)
+        )
+
+        commit_btn = msg.addButton(
+            QCoreApplication.translate(
+                "FilterMateApp",
+                "Save Changes & {0}"
+            ).format(task_label.capitalize()),
+            QMessageBox.AcceptRole
+        )
+        rollback_btn = msg.addButton(
+            QCoreApplication.translate(
+                "FilterMateApp",
+                "Discard Changes & {0}"
+            ).format(task_label.capitalize()),
+            QMessageBox.DestructiveRole
+        )
+        cancel_btn = msg.addButton(
+            QCoreApplication.translate("FilterMateApp", "Cancel"),
+            QMessageBox.RejectRole
+        )
+        msg.setDefaultButton(cancel_btn)
+
+        msg.exec_()
+        clicked = msg.clickedButton()
+
+        if clicked == commit_btn:
+            for layer in edit_layers:
+                try:
+                    if hasattr(layer, 'isEditable') and layer.isEditable():
+                        if not layer.commitChanges():
+                            show_warning(
+                                QCoreApplication.translate(
+                                    "FilterMateApp",
+                                    "Could not save changes for layer \"{0}\". "
+                                    "Operation cancelled."
+                                ).format(layer.name())
+                            )
+                            return False
+                except Exception as e:
+                    logger.warning(f"commitChanges failed for '{layer.name()}': {e}")
+                    show_warning(
+                        QCoreApplication.translate(
+                            "FilterMateApp",
+                            "Could not save changes for layer \"{0}\". "
+                            "Operation cancelled."
+                        ).format(layer.name())
+                    )
+                    return False
+            return True
+
+        elif clicked == rollback_btn:
+            for layer in edit_layers:
+                try:
+                    if hasattr(layer, 'isEditable') and layer.isEditable():
+                        layer.rollBack()
+                except Exception as e:
+                    logger.warning(f"rollBack failed for '{layer.name()}': {e}")
+            return True
+
+        else:
+            # User clicked Cancel – abort the task
+            return False
 
     def _is_dockwidget_ready_for_filtering(self):
         """Check if dockwidget is fully ready for filtering."""

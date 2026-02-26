@@ -436,9 +436,10 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 logger.debug(f"✓ Source layer {layer.name()} (ID: {source_layer_id}) not in layers_to_filter (correct)")
 
             # Diagnostic logging
+            # Exclude non-spatial layers: add_project_layer intentionally skips them (isSpatial() = False)
             qgis_vector_layers = [l for l in project.mapLayers().values()
                                   if isinstance(l, QgsVectorLayer) and l.id() != layer.id()]
-            missing = [l for l in qgis_vector_layers if l.id() not in dockwidget.PROJECT_LAYERS]
+            missing = [l for l in qgis_vector_layers if l.id() not in dockwidget.PROJECT_LAYERS and l.isSpatial()]
             if missing:
                 logger.warning(f"populate_layers_checkable_combobox: {len(missing)} layer(s) NOT in PROJECT_LAYERS")
                 logger.warning(f"Layers in QGIS but NOT in PROJECT_LAYERS: {[l.name() for l in missing]}")
