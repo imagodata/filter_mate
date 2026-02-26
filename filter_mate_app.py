@@ -1549,9 +1549,10 @@ class FilterMateApp:
             edit_layers.append(current_layer)
 
         # Check target (distant) layers from PROJECT_LAYERS
+        # The correct path is PROJECT_LAYERS[id]["filtering"]["layers_to_filter"]
         if current_layer and current_layer.id() in self.PROJECT_LAYERS:
             layer_params = self.PROJECT_LAYERS[current_layer.id()]
-            distant_ids = layer_params.get("distant_layers", {})
+            distant_ids = layer_params.get("filtering", {}).get("layers_to_filter", [])
             for layer_id in distant_ids:
                 layer = QgsProject.instance().mapLayer(layer_id)
                 if layer and hasattr(layer, 'isEditable') and layer.isEditable():
