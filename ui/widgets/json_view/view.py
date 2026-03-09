@@ -17,7 +17,7 @@ class JsonView(QtWidgets.QTreeView):
         if model is not None:
             self.setModel(model)
 
-        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self._menu)
         self.setItemDelegate(delegate.JsonDelegate())
 
@@ -35,11 +35,11 @@ class JsonView(QtWidgets.QTreeView):
         header = self.header()
         header.setStretchLastSection(False)
         header.setVisible(True)
-        header.setDefaultAlignment(QtCore.Qt.AlignLeft)
+        header.setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         # Colonne Property (clé): largeur interactive avec minimum
-        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Interactive)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Interactive)
         # Colonne Value: largeur interactive
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Interactive)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Interactive)
         # Définir des largeurs initiales optimales
         header.resizeSection(0, 180)
         header.resizeSection(1, 240)
@@ -162,7 +162,7 @@ class JsonView(QtWidgets.QTreeView):
             qactions = []
             for action in actions:
                 if isinstance(action, str):
-                    qaction = QtWidgets.QAction(action, None)
+                    qaction = QtGui.QAction(action, None)
                     qactions.append(qaction)
                 else:
                     qactions.append(action)
@@ -175,10 +175,10 @@ class JsonView(QtWidgets.QTreeView):
             if action_data is not None:
                 if action.text() == "Change":
                     if len(action_data) == 2:
-                        item.setData(action_data[0], QtCore.Qt.DisplayRole)
+                        item.setData(action_data[0], QtCore.Qt.ItemDataRole.DisplayRole)
                     elif len(action_data) == 3:
-                        item.setData(action_data[0], QtCore.Qt.DisplayRole)
-                        item.setData(action_data[1], QtCore.Qt.UserRole)
+                        item.setData(action_data[0], QtCore.Qt.ItemDataRole.DisplayRole)
+                        item.setData(action_data[1], QtCore.Qt.ItemDataRole.UserRole)
 
             if action.text() == "Rename":
                 self.edit(index)

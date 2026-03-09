@@ -688,7 +688,7 @@ class TaskParameterBuilder:
             f"  buffer_value_expression: '{filtering.get('buffer_value_expression', '')}'\n"
             f"  use_centroids_source: {filtering.get('use_centroids_source_layer', False)}\n"
             f"  use_centroids_distant: {filtering.get('use_centroids_distant_layers', False)}",
-            "FilterMate", Qgis.Info
+            "FilterMate", Qgis.MessageLevel.Info
         )
 
         return task_parameters
@@ -897,14 +897,14 @@ class TaskParameterBuilder:
 
             QgsMessageLog.logMessage(
                 f"⚠️ CRITICAL: No source features selected! Groupbox: {dw.current_exploring_groupbox}",
-                "FilterMate", Qgis.Warning
+                "FilterMate", Qgis.MessageLevel.Warning
             )
 
             # v2.9.21: ABORT in single_selection mode (FILTER ONLY)
             if dw.current_exploring_groupbox == "single_selection":
                 QgsMessageLog.logMessage(
                     "   Aborting filter - single_selection mode requires a selected feature!",
-                    "FilterMate", Qgis.Warning
+                    "FilterMate", Qgis.MessageLevel.Warning
                 )
                 iface.messageBar().pushWarning(
                     "FilterMate",
@@ -918,7 +918,7 @@ class TaskParameterBuilder:
             else:
                 QgsMessageLog.logMessage(
                     "   The filter will use ALL features from source layer!",
-                    "FilterMate", Qgis.Warning
+                    "FilterMate", Qgis.MessageLevel.Warning
                 )
 
         return features, expression

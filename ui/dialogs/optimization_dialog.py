@@ -27,7 +27,7 @@ try:
         QFrame, QDialogButtonBox, QGroupBox, QTabWidget
     )
 except ImportError:
-    from PyQt5.QtCore import pyqtSignal
+    from PyQt6.QtCore import pyqtSignal
     from PyQt5.QtWidgets import (
         QDialog, QVBoxLayout, QHBoxLayout, QGridLayout,
         QLabel, QPushButton, QCheckBox, QSpinBox, QWidget,
@@ -242,11 +242,11 @@ class OptimizationDialog(QDialog):
 
         # Button box
         button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.RestoreDefaults
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.RestoreDefaults
         )
         button_box.accepted.connect(self._on_accept)
         button_box.rejected.connect(self.reject)
-        button_box.button(QDialogButtonBox.RestoreDefaults).clicked.connect(self._restore_defaults)
+        button_box.button(QDialogButtonBox.StandardButton.RestoreDefaults).clicked.connect(self._restore_defaults)
 
         layout.addWidget(button_box)
 

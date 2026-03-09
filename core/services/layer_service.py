@@ -18,7 +18,7 @@ from enum import Enum, auto
 try:
     from qgis.PyQt.QtCore import pyqtSignal, QObject
 except ImportError:
-    from PyQt5.QtCore import pyqtSignal, QObject
+    from PyQt6.QtCore import pyqtSignal, QObject
 
 if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer

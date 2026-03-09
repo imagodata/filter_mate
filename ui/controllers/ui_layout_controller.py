@@ -18,7 +18,7 @@ try:
         QWidget, QHBoxLayout, QLayout, QSizePolicy
     )
 except ImportError:
-    from PyQt5.QtCore import Qt, QSize
+    from PyQt6.QtCore import Qt, QSize
     from PyQt5.QtWidgets import (
         QWidget, QHBoxLayout, QLayout, QSizePolicy
     )
@@ -174,13 +174,13 @@ class UILayoutController(BaseController):
 
                 if item_pk_str in selected_pk_values:
                     # CHECK features selected in QGIS
-                    if item.checkState() != Qt.Checked:
-                        item.setCheckState(Qt.Checked)
+                    if item.checkState() != Qt.CheckState.Checked:
+                        item.setCheckState(Qt.CheckState.Checked)
                         checked_count += 1
                 else:
                     # UNCHECK features not selected in QGIS
-                    if item.checkState() != Qt.Unchecked:
-                        item.setCheckState(Qt.Unchecked)
+                    if item.checkState() != Qt.CheckState.Unchecked:
+                        item.setCheckState(Qt.CheckState.Unchecked)
                         unchecked_count += 1
 
             logger.debug(f"sync_multiple_selection_from_qgis: checked={checked_count}, unchecked={unchecked_count}")
@@ -355,7 +355,7 @@ class UILayoutController(BaseController):
         for button in checkable_buttons:
             try:
                 # Ensure button has proper size policy
-                button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+                button.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
 
                 # Set minimum height for consistency
                 if hasattr(button, 'setMinimumHeight'):

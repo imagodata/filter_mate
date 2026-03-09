@@ -84,7 +84,7 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
             return
 
         self.setObjectName("label_favorites_indicator")
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         # Initial update
         self.update_indicator()
@@ -330,13 +330,13 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
 
         # Buttons
         button_box = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
         )
         button_box.accepted.connect(dialog.accept)
         button_box.rejected.connect(dialog.reject)
         layout.addWidget(button_box)
 
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             name = name_edit.text().strip()
             description = desc_edit.toPlainText().strip()
             if name:
@@ -438,13 +438,13 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
                 self._tr("Merge with existing favorites?\n\n"
                           "Yes = Add to existing\n"
                           "No = Replace all existing"),
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
             )
 
-            if result == QMessageBox.Cancel:
+            if result == QMessageBox.StandardButton.Cancel:
                 return
 
-            merge = (result == QMessageBox.Yes)
+            merge = (result == QMessageBox.StandardButton.Yes)
             count = self._favorites_manager.import_from_file(filepath, merge=merge)
 
             if count > 0:

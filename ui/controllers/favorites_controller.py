@@ -441,11 +441,11 @@ class FavoritesController(BaseController):
                 self.tr("Merge with existing favorites?\n\n"
                          "Yes = Add to existing\n"
                          "No = Replace all existing"),
-                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
             )
-            if result == QMessageBox.Cancel:
+            if result == QMessageBox.StandardButton.Cancel:
                 return 0
-            merge = (result == QMessageBox.Yes)
+            merge = (result == QMessageBox.StandardButton.Yes)
 
         count = self._favorites_manager.import_from_file(filepath, merge=merge)
 
@@ -474,7 +474,7 @@ class FavoritesController(BaseController):
             # Connect the favoriteApplied signal to apply the favorite
             dialog.favoriteApplied.connect(self.apply_favorite)
 
-            dialog.exec_()
+            dialog.exec()
             # Refresh after dialog closes
             self.favorites_changed.emit()
             self.update_indicator()
@@ -815,9 +815,9 @@ class FavoritesController(BaseController):
                     self.tr("Duplicate Name"),
                     self.tr("A favorite named '{0}' already exists.\n"
                              "Do you want to replace it?").format(name),
-                    QMessageBox.Yes | QMessageBox.No
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
-                if result != QMessageBox.Yes:
+                if result != QMessageBox.StandardButton.Yes:
                     return False
                 # Remove existing
                 self._favorites_manager.remove_favorite(existing.id)

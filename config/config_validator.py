@@ -80,7 +80,7 @@ class ConfigValidator:
             QgsMessageLog.logMessage(
                 f"Schema file not found: {self.schema_path}",
                 "FilterMate",
-                Qgis.Warning
+                Qgis.MessageLevel.Warning
             )
             return False
 
@@ -92,14 +92,14 @@ class ConfigValidator:
             QgsMessageLog.logMessage(
                 f"Invalid JSON in schema file: {e}",
                 "FilterMate",
-                Qgis.Critical
+                Qgis.MessageLevel.Critical
             )
             return False
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Error loading schema: {e}",
                 "FilterMate",
-                Qgis.Critical
+                Qgis.MessageLevel.Critical
             )
             return False
 
@@ -295,7 +295,7 @@ def validate_config_file(config_path: str, config_dir: str) -> Tuple[bool, List[
     return validator.validate_config(config_data)
 
 
-def validate_and_log(config_data: Dict, config_dir: str, log_level: Qgis.MessageLevel = Qgis.Info) -> bool:
+def validate_and_log(config_data: Dict, config_dir: str, log_level: Qgis.MessageLevel = Qgis.MessageLevel.Info) -> bool:
     """
     Validate configuration and log results to QGIS message log.
 
@@ -318,7 +318,7 @@ def validate_and_log(config_data: Dict, config_dir: str, log_level: Qgis.Message
         )
     else:
         summary = validator.get_validation_summary()
-        level = Qgis.Warning if is_valid else Qgis.Critical
+        level = Qgis.MessageLevel.Warning if is_valid else Qgis.MessageLevel.Critical
         QgsMessageLog.logMessage(
             f"FilterMate: {summary}",
             "FilterMate",

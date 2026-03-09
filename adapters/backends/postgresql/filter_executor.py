@@ -185,7 +185,7 @@ def prepare_postgresql_source_geom(
                 QgsMessageLog.logMessage(
                     "⚠️ Centroid optimization was requested but is incompatible with buffer expressions. "
                     "The centroid option has been ignored. Consider using a static buffer value instead.",
-                    "FilterMate", Qgis.Warning
+                    "FilterMate", Qgis.MessageLevel.Warning
                 )
 
     elif buffer_value is not None and buffer_value != 0:

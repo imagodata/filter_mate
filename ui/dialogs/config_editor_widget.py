@@ -16,7 +16,7 @@ Usage:
 
     # Create dialog
     dialog = SimpleConfigDialog(config_data, parent_widget)
-    if dialog.exec_():
+    if dialog.exec():
         updated_config = dialog.get_config()
 
 Author: FilterMate Team
@@ -269,7 +269,7 @@ class ConfigEditorWidget(QWidget):
         checkbox = QCheckBox()
         checkbox.setChecked(bool(value))
         checkbox.stateChanged.connect(
-            lambda state: self._on_value_changed(config_path, state == Qt.Checked)
+            lambda state: self._on_value_changed(config_path, state == Qt.CheckState.Checked)
         )
         return checkbox
 
@@ -430,7 +430,7 @@ class SimpleConfigDialog(QDialog):
 
     Usage:
         dialog = SimpleConfigDialog(config_data, parent)
-        if dialog.exec_():
+        if dialog.exec():
             new_config = dialog.get_config()
     """
 
@@ -473,7 +473,7 @@ class SimpleConfigDialog(QDialog):
 
         # Standard buttons
         self._button_box = QDialogButtonBox(
-            QDialogButtonBox.Save | QDialogButtonBox.Cancel
+            QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
         )
         self._button_box.accepted.connect(self._on_save)
         self._button_box.rejected.connect(self.reject)
@@ -512,9 +512,9 @@ class SimpleConfigDialog(QDialog):
             self,
             self.tr("Reset Configuration"),
             self.tr("Reset all values to defaults?"),
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.StandardButton.Yes:
             self._editor.reset_to_defaults()
 
     def get_config(self) -> Dict[str, Any]:
@@ -572,7 +572,7 @@ class TabbedConfigDialog(QDialog):
         button_layout.addStretch()
 
         self._button_box = QDialogButtonBox(
-            QDialogButtonBox.Save | QDialogButtonBox.Cancel
+            QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
         )
         self._button_box.accepted.connect(self.accept)
         self._button_box.rejected.connect(self.reject)

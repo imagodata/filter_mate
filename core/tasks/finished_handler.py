@@ -362,7 +362,7 @@ class FinishedHandler:
         # Log to QGIS message log for visibility
         QgsMessageLog.logMessage(
             f"Task failed: {error_msg}",
-            "FilterMate", Qgis.Critical
+            "FilterMate", Qgis.MessageLevel.Critical
         )
 
         # Log additional diagnostic info to Python console
@@ -373,7 +373,7 @@ class FinishedHandler:
         iface.messageBar().pushMessage(
             message_category,
             error_msg,
-            Qgis.Critical)
+            Qgis.MessageLevel.Critical)
 
     def _display_success_message(
         self,
@@ -413,7 +413,7 @@ class FinishedHandler:
                 QCoreApplication.translate(
                     "FinishedHandler", "Filter task : {0}"
                 ).format(result_action),
-                Qgis.Success)
+                Qgis.MessageLevel.Success)
 
             # Restore source layer selection after filter/unfilter
             try:
@@ -434,7 +434,7 @@ class FinishedHandler:
                     QCoreApplication.translate(
                         "FinishedHandler", "Export task : {0}"
                     ).format(task_message),
-                    Qgis.Success)
+                    Qgis.MessageLevel.Success)
 
     def _handle_exception_result(
         self,
@@ -463,7 +463,7 @@ class FinishedHandler:
         iface.messageBar().pushMessage(
             message_category,
             error_msg,
-            Qgis.Critical)
+            Qgis.MessageLevel.Critical)
 
         # Only raise exception if task completely failed (result is False)
         # If result is True, some layers may have been processed successfully

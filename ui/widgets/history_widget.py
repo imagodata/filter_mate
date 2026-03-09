@@ -20,10 +20,10 @@ Date: January 2025
 try:
     from qgis.PyQt.QtWidgets import (
         QWidget, QPushButton, QHBoxLayout, QLabel,
-        QMenu, QAction, QToolButton, QSizePolicy
+        QMenu, QToolButton, QSizePolicy
     )
     from qgis.PyQt.QtCore import Qt, pyqtSignal
-    from qgis.PyQt.QtGui import QIcon, QCursor
+    from qgis.PyQt.QtGui import QAction, QIcon, QCursor
     PYQT_AVAILABLE = True
 except ImportError:
     # Stubs for testing without QGIS

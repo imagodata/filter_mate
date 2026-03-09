@@ -22,13 +22,11 @@
 """
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QSize, Qt, QUrl
-from qgis.PyQt.QtGui import QIcon, QDesktopServices, QPixmap
-from qgis.PyQt.QtWidgets import (QAction, QMessageBox, QCheckBox, QDialog,
+from qgis.PyQt.QtGui import QAction, QIcon, QDesktopServices, QPixmap
+from qgis.PyQt.QtWidgets import (QMessageBox, QCheckBox, QDialog,
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton)
 import weakref
 
-# Initialize Qt resources from file resources.py
-from .resources import *  # noqa: F401 - Qt resources must be imported with wildcard
 import os
 import os.path
 from .filter_mate_app import FilterMateApp
@@ -287,7 +285,7 @@ class FilterMate:
             self._check_geometry_validation_settings()
 
             logger.debug("FilterMate.initGui: Creating actions")
-            icon_path = ':/plugins/filter_mate/icon.png'
+            icon_path = os.path.join(self.plugin_dir, 'icon.png')
 
             # Main action to open FilterMate
             self.add_action(
@@ -298,7 +296,7 @@ class FilterMate:
                 status_tip=self.tr(u'Open FilterMate panel'))
 
             # Action to reset configuration and database
-            reset_icon_path = ':/plugins/filter_mate/icons/parameters.png'
+            reset_icon_path = os.path.join(self.plugin_dir, 'icons', 'parameters.png')
             self.add_action(
                 reset_icon_path,
                 text=self.tr(u'Reset configuration and database'),
@@ -401,11 +399,11 @@ class FilterMate:
             self.iface.mainWindow(),
             title,
             message,
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes
         )
 
-        return reply == QMessageBox.Yes
+        return reply == QMessageBox.StandardButton.Yes
 
     def _auto_migrate_config(self):
         """Auto-migrate configuration to latest version if needed.
@@ -637,11 +635,11 @@ class FilterMate:
                     self.iface.mainWindow(),
                     title,
                     message,
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.Yes
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.Yes
                 )
 
-                if reply == QMessageBox.Yes:
+                if reply == QMessageBox.StandardButton.Yes:
                     # Disable geometry validation
                     settings.setValue("qgis/digitizing/validate_geometries", 0)
                     logger.info("Geometry validation disabled by user via FilterMate startup check")
@@ -1201,11 +1199,11 @@ class FilterMate:
                    '- Restore default settings\n'
                    '- Delete the layer database\n\n'
                    'QGIS must be restarted to apply the changes.'),
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
         )
 
-        if reply != QMessageBox.Yes:
+        if reply != QMessageBox.StandardButton.Yes:
             return
 
         try:
@@ -1289,7 +1287,7 @@ class FilterMate:
         logo_label = QLabel()
         logo_path = os.path.join(self.plugin_dir, 'icons', 'icon.png')
         if os.path.exists(logo_path):
-            logo_label.setPixmap(QPixmap(logo_path).scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            logo_label.setPixmap(QPixmap(logo_path).scaled(48, 48, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         title_label = QLabel("<h2 style='margin:0;'>FilterMate</h2>")
         header.addWidget(logo_label)
         header.addWidget(title_label)
@@ -1318,7 +1316,7 @@ class FilterMate:
         if os.path.exists(discord_icon_path):
             discord_btn.setIcon(QIcon(discord_icon_path))
             discord_btn.setIconSize(QSize(22, 22))
-        discord_btn.setCursor(Qt.PointingHandCursor)
+        discord_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         discord_btn.setStyleSheet(
             "QPushButton {"
             "  background-color: #5865F2; color: white; border: none;"
@@ -1341,7 +1339,7 @@ class FilterMate:
         bottom.addWidget(close_btn)
         layout.addLayout(bottom)
 
-        dlg.exec_()
+        dlg.exec()
 
         if cb.isChecked():
             settings.setValue('FilterMate/discord_welcome_dismissed', True)

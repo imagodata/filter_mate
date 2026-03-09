@@ -125,7 +125,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         layout.addLayout(search_layout)
 
         # Main content with splitter
-        splitter = QSplitter(Qt.Horizontal)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setObjectName("mainSplitter")
         splitter.setHandleWidth(2)  # Minimal handle width
         splitter.setChildrenCollapsible(False)
@@ -363,7 +363,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._list_widget = QListWidget()
         self._list_widget.setMinimumWidth(180)
         self._list_widget.setMaximumWidth(250)
-        self._list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._list_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self._list_widget.currentItemChanged.connect(self._on_selection_changed)
 
         left_layout.addWidget(self._list_widget)
@@ -476,14 +476,14 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._remote_tree.setHeaderLabels([self.tr("Layer"), self.tr("Features"), self.tr("Expression")])
         self._remote_tree.setColumnCount(3)
         self._remote_tree.header().setStretchLastSection(True)
-        self._remote_tree.header().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self._remote_tree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self._remote_tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        self._remote_tree.header().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self._remote_tree.setAlternatingRowColors(True)
         remote_layout.addWidget(self._remote_tree)
 
         self._no_remote_label = QLabel(self.tr("<i>No remote layers in this favorite</i>"))
         self._no_remote_label.setObjectName("noRemoteLabel")
-        self._no_remote_label.setAlignment(Qt.AlignCenter)
+        self._no_remote_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         remote_layout.addWidget(self._no_remote_label)
 
         return remote_tab
@@ -538,7 +538,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 item_text += " 🏷️"
 
             item = QListWidgetItem(item_text)
-            item.setData(Qt.UserRole, fav.id)
+            item.setData(Qt.ItemDataRole.UserRole, fav.id)
 
             tooltip = f"Layer: {fav.layer_name}\nUsed: {fav.use_count} times"
             if fav.tags:
@@ -571,7 +571,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if not item or not self._favorites_manager:
             return
 
-        fav_id = item.data(Qt.UserRole)
+        fav_id = item.data(Qt.ItemDataRole.UserRole)
         fav = self._favorites_manager.get_favorite(fav_id)
 
         if not fav:
@@ -688,10 +688,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             self,
             self.tr("Delete Favorite"),
             self.tr("Delete favorite '{0}'?").format(fav.name),
-            QMessageBox.Yes | QMessageBox.No
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
-        if reply != QMessageBox.Yes:
+        if reply != QMessageBox.StandardButton.Yes:
             return
 
         deleted_id = self._current_fav_id
@@ -788,6 +788,6 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             applied_id[0] = fav_id
 
         dialog.favoriteApplied.connect(on_applied)
-        dialog.exec_()
+        dialog.exec()
 
         return applied_id[0]

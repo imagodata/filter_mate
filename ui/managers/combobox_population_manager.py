@@ -389,7 +389,7 @@ class ComboboxPopulationManager:
                         layers_widget.addItem(layer_icon, display_name, item_data)
                         item = layers_widget.model().item(item_index)
                         item.setCheckState(
-                            Qt.Checked if key in layers_to_export else Qt.Unchecked
+                            Qt.CheckState.Checked if key in layers_to_export else Qt.CheckState.Unchecked
                         )
                         item_index += 1
 
@@ -557,9 +557,9 @@ class ComboboxPopulationManager:
 
                     item = layers_widget.model().item(item_index)
                     if has_layers and layer_id in layers_to_filter:
-                        item.setCheckState(Qt.Checked)
+                        item.setCheckState(Qt.CheckState.Checked)
                     else:
-                        item.setCheckState(Qt.Unchecked)
+                        item.setCheckState(Qt.CheckState.Unchecked)
                     item_index += 1
 
             logger.info(

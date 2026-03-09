@@ -741,7 +741,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     "Query may take 10-60 seconds. A 2-minute timeout is set for protection.\n"
                     "Consider using static buffer values for better performance.",
                     "FilterMate",
-                    Qgis.Warning
+                    Qgis.MessageLevel.Warning
                 )
             except Exception as e:
                 self.log_debug(f"Could not display warning in QGIS UI: {e}")

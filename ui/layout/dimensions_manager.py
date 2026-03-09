@@ -77,13 +77,13 @@ class DimensionsManager(LayoutManagerBase):
 
     # Size policy mapping
     POLICY_MAP = {
-        'Fixed': QSizePolicy.Fixed,
-        'Minimum': QSizePolicy.Minimum,
-        'Maximum': QSizePolicy.Maximum,
-        'Preferred': QSizePolicy.Preferred,
-        'Expanding': QSizePolicy.Expanding,
-        'MinimumExpanding': QSizePolicy.MinimumExpanding,
-        'Ignored': QSizePolicy.Ignored
+        'Fixed': QSizePolicy.Policy.Fixed,
+        'Minimum': QSizePolicy.Policy.Minimum,
+        'Maximum': QSizePolicy.Policy.Maximum,
+        'Preferred': QSizePolicy.Policy.Preferred,
+        'Expanding': QSizePolicy.Policy.Expanding,
+        'MinimumExpanding': QSizePolicy.Policy.MinimumExpanding,
+        'Ignored': QSizePolicy.Policy.Ignored
     }
 
     def __init__(self, dockwidget: 'FilterMateDockWidget') -> None:
@@ -294,16 +294,16 @@ class DimensionsManager(LayoutManagerBase):
         if hasattr(self.dockwidget, 'frame_exploring'):
             self.dockwidget.frame_exploring.setMinimumHeight(exploring_min)
             self.dockwidget.frame_exploring.setMaximumHeight(exploring_max)
-            h_policy = self.POLICY_MAP.get(exploring_h_policy, QSizePolicy.Preferred)
-            v_policy = self.POLICY_MAP.get(exploring_v_policy, QSizePolicy.Minimum)
+            h_policy = self.POLICY_MAP.get(exploring_h_policy, QSizePolicy.Policy.Preferred)
+            v_policy = self.POLICY_MAP.get(exploring_v_policy, QSizePolicy.Policy.Minimum)
             self.dockwidget.frame_exploring.setSizePolicy(h_policy, v_policy)
 
         # Apply to frame_toolset with size policy
         if hasattr(self.dockwidget, 'frame_toolset'):
             self.dockwidget.frame_toolset.setMinimumHeight(toolset_min)
             self.dockwidget.frame_toolset.setMaximumHeight(toolset_max)
-            h_policy = self.POLICY_MAP.get(toolset_h_policy, QSizePolicy.Preferred)
-            v_policy = self.POLICY_MAP.get(toolset_v_policy, QSizePolicy.Expanding)
+            h_policy = self.POLICY_MAP.get(toolset_h_policy, QSizePolicy.Policy.Preferred)
+            v_policy = self.POLICY_MAP.get(toolset_v_policy, QSizePolicy.Policy.Expanding)
             self.dockwidget.frame_toolset.setSizePolicy(h_policy, v_policy)
 
         # Apply to frame_filtering (if it exists inside toolbox)
@@ -412,7 +412,7 @@ class DimensionsManager(LayoutManagerBase):
                         # button.setFlat(True)  # REMOVED - causes regression
 
                         # Set consistent size policy - Fixed for uniform sizing
-                        button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                        button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
                         checkable_buttons.append(button_name)
 
@@ -610,8 +610,8 @@ class DimensionsManager(LayoutManagerBase):
                                         nested_item.changeSize(
                                             spacer_width,
                                             target_spacer_height,
-                                            QSizePolicy.Minimum,
-                                            QSizePolicy.Expanding
+                                            QSizePolicy.Policy.Minimum,
+                                            QSizePolicy.Policy.Expanding
                                         )
                                         spacer_count += 1
 
@@ -647,37 +647,37 @@ class DimensionsManager(LayoutManagerBase):
             for widget in self.dockwidget.findChildren(QgsFeaturePickerWidget):
                 widget.setMinimumHeight(combobox_height)
                 widget.setMaximumHeight(combobox_height)
-                widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             # QgsFieldExpressionWidget
             for widget in self.dockwidget.findChildren(QgsFieldExpressionWidget):
                 widget.setMinimumHeight(input_height)
                 widget.setMaximumHeight(input_height)
-                widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             # QgsProjectionSelectionWidget
             for widget in self.dockwidget.findChildren(QgsProjectionSelectionWidget):
                 widget.setMinimumHeight(combobox_height)
                 widget.setMaximumHeight(combobox_height)
-                widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             # QgsMapLayerComboBox
             for widget in self.dockwidget.findChildren(QgsMapLayerComboBox):
                 widget.setMinimumHeight(combobox_height)
                 widget.setMaximumHeight(combobox_height)
-                widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             # QgsFieldComboBox
             for widget in self.dockwidget.findChildren(QgsFieldComboBox):
                 widget.setMinimumHeight(combobox_height)
                 widget.setMaximumHeight(combobox_height)
-                widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             # QgsCheckableComboBox (QGIS native)
             for widget in self.dockwidget.findChildren(QgsCheckableComboBox):
                 widget.setMinimumHeight(combobox_height)
                 widget.setMaximumHeight(combobox_height)
-                widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
             # QgsPropertyOverrideButton - size from UIConfig
             for widget in self.dockwidget.findChildren(QgsPropertyOverrideButton):
@@ -687,7 +687,7 @@ class DimensionsManager(LayoutManagerBase):
                 widget.setMinimumWidth(button_size)
                 widget.setMaximumWidth(button_size)
                 widget.setFixedSize(button_size, button_size)
-                widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                widget.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
             logger.debug(f"Applied QGIS widget dimensions: ComboBox={combobox_height}px, Input={input_height}px")
 
@@ -727,13 +727,13 @@ class DimensionsManager(LayoutManagerBase):
                     layout = getattr(self.dockwidget, layout_name)
                     layout.setSpacing(button_spacing)
                     layout.setContentsMargins(0, 0, 0, 0)
-                    layout.setAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
+                    layout.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter)
 
                     # Center each item horizontally within the layout
                     for i in range(layout.count()):
                         item = layout.itemAt(i)
                         if item and item.widget():
-                            layout.setAlignment(item.widget(), Qt.AlignHCenter)
+                            layout.setAlignment(item.widget(), Qt.AlignmentFlag.AlignHCenter)
 
             # Apply consistent styling to parent container layouts
             container_layouts = [
@@ -785,13 +785,13 @@ class DimensionsManager(LayoutManagerBase):
                     max_width = widget_keys_config.get('max_width', 40) if widget_keys_config else 40
                     widget.setMinimumWidth(min_width)
                     widget.setMaximumWidth(max_width)
-                    widget.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+                    widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
                     parent_layout = widget.layout()
                     if parent_layout:
                         parent_layout.setContentsMargins(widget_keys_padding, widget_keys_padding,
                                                         widget_keys_padding, widget_keys_padding)
-                        parent_layout.setAlignment(Qt.AlignTop)
+                        parent_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
             # Apply consistent spacing to content layouts
             content_layouts = [

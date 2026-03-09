@@ -17,7 +17,7 @@ from enum import Enum, auto
 try:
     from qgis.PyQt.QtCore import pyqtSignal
 except ImportError:
-    from PyQt5.QtCore import pyqtSignal
+    from PyQt6.QtCore import pyqtSignal
 
 from .base_controller import BaseController
 from ...infrastructure.signal_utils import SignalBlocker

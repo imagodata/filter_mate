@@ -155,7 +155,7 @@ class ConfigController(BaseController):
             # Build path to changed item
             items_keys_values_path = []
             while item_key is not None:
-                items_keys_values_path.append(item_key.data(Qt.DisplayRole))
+                items_keys_values_path.append(item_key.data(Qt.ItemDataRole.DisplayRole))
                 item_key = item_key.parent()
 
             items_keys_values_path.reverse()
@@ -306,13 +306,13 @@ class ConfigController(BaseController):
             value_item = self.dockwidget.config_view.model.itemFromIndex(
                 index.siblingAtColumn(1)
             )
-            value_data = value_item.data(Qt.UserRole)
+            value_data = value_item.data(Qt.ItemDataRole.UserRole)
 
             # Handle ChoicesType format (dict with 'value' and 'choices')
             if isinstance(value_data, dict) and 'value' in value_data:
                 new_theme_value = value_data['value']
             else:
-                new_theme_value = value_item.data(Qt.DisplayRole) if value_item else None
+                new_theme_value = value_item.data(Qt.ItemDataRole.DisplayRole) if value_item else None
 
             if new_theme_value:
                 logger.info(f"ACTIVE_THEME changed to: {new_theme_value}")
@@ -372,13 +372,13 @@ class ConfigController(BaseController):
             value_item = self.dockwidget.config_view.model.itemFromIndex(
                 index.siblingAtColumn(1)
             )
-            value_data = value_item.data(Qt.UserRole)
+            value_data = value_item.data(Qt.ItemDataRole.UserRole)
 
             # Handle ChoicesType format
             if isinstance(value_data, dict) and 'value' in value_data:
                 new_profile_value = value_data['value']
             else:
-                new_profile_value = value_item.data(Qt.DisplayRole) if value_item else None
+                new_profile_value = value_item.data(Qt.ItemDataRole.DisplayRole) if value_item else None
 
             if new_profile_value:
                 logger.info(f"UI_PROFILE changed to: {new_profile_value}")
@@ -445,13 +445,13 @@ class ConfigController(BaseController):
             value_item = self.dockwidget.config_view.model.itemFromIndex(
                 index.siblingAtColumn(1)
             )
-            value_data = value_item.data(Qt.UserRole)
+            value_data = value_item.data(Qt.ItemDataRole.UserRole)
 
             # Handle ChoicesType format
             if isinstance(value_data, dict) and 'value' in value_data:
                 new_value = value_data['value']
             else:
-                new_value = value_item.data(Qt.DisplayRole) if value_item else None
+                new_value = value_item.data(Qt.ItemDataRole.DisplayRole) if value_item else None
 
             if new_value:
                 if is_position_change:
@@ -494,13 +494,13 @@ class ConfigController(BaseController):
             value_item = self.dockwidget.config_view.model.itemFromIndex(
                 index.siblingAtColumn(1)
             )
-            value_data = value_item.data(Qt.UserRole)
+            value_data = value_item.data(Qt.ItemDataRole.UserRole)
 
             # Handle ChoicesType format
             if isinstance(value_data, dict) and 'value' in value_data:
                 new_style_value = value_data['value']
             else:
-                new_style_value = value_item.data(Qt.DisplayRole) if value_item else None
+                new_style_value = value_item.data(Qt.ItemDataRole.DisplayRole) if value_item else None
 
             widgets = getattr(self.dockwidget, 'widgets', {})
             if new_style_value and 'STYLES_TO_EXPORT' in widgets.get('EXPORTING', {}):
@@ -542,13 +542,13 @@ class ConfigController(BaseController):
             value_item = self.dockwidget.config_view.model.itemFromIndex(
                 index.siblingAtColumn(1)
             )
-            value_data = value_item.data(Qt.UserRole)
+            value_data = value_item.data(Qt.ItemDataRole.UserRole)
 
             # Handle ChoicesType format
             if isinstance(value_data, dict) and 'value' in value_data:
                 new_format_value = value_data['value']
             else:
-                new_format_value = value_item.data(Qt.DisplayRole) if value_item else None
+                new_format_value = value_item.data(Qt.ItemDataRole.DisplayRole) if value_item else None
 
             widgets = getattr(self.dockwidget, 'widgets', {})
             if new_format_value and 'DATATYPE_TO_EXPORT' in widgets.get('EXPORTING', {}):
@@ -591,13 +591,13 @@ class ConfigController(BaseController):
             value_item = self.dockwidget.config_view.model.itemFromIndex(
                 index.siblingAtColumn(1)
             )
-            value_data = value_item.data(Qt.UserRole)
+            value_data = value_item.data(Qt.ItemDataRole.UserRole)
 
             # Handle ChoicesType format
             if isinstance(value_data, dict) and 'value' in value_data:
                 new_locale = value_data['value']
             else:
-                new_locale = value_item.data(Qt.DisplayRole) if value_item else None
+                new_locale = value_item.data(Qt.ItemDataRole.DisplayRole) if value_item else None
 
             if new_locale:
                 logger.info(f"LANGUAGE changed to: {new_locale}")

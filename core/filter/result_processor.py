@@ -150,7 +150,7 @@ class ResultProcessor:
 
         QgsMessageLog.logMessage(
             f"📥 Applying {len(self._pending_subset_requests)} pending subset requests on main thread",
-            "FilterMate", Qgis.Info
+            "FilterMate", Qgis.MessageLevel.Info
         )
         logger.info(f"Applying {len(self._pending_subset_requests)} pending subset requests on main thread")
 
@@ -170,7 +170,7 @@ class ResultProcessor:
                     logger.warning("  ✗ Layer became invalid before filter could be applied")
                     QgsMessageLog.logMessage(
                         f"finished() ✗ Layer invalid: {layer.name() if layer else 'None'}",
-                        "FilterMate", Qgis.Warning
+                        "FilterMate", Qgis.MessageLevel.Warning
                     )
                     continue
 
@@ -188,7 +188,7 @@ class ResultProcessor:
                 logger.error(f"  ✗ Error applying subset string: {e}", exc_info=True)
                 QgsMessageLog.logMessage(
                     f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
-                    "FilterMate", Qgis.Critical
+                    "FilterMate", Qgis.MessageLevel.Critical
                 )
 
         # ==========================================
@@ -260,7 +260,7 @@ class ResultProcessor:
                     count_str = f"{feature_count} features"
                     QgsMessageLog.logMessage(
                         f"✓ Filter APPLIED: {layer.name()} → {feature_count} features",
-                        "FilterMate", Qgis.Info
+                        "FilterMate", Qgis.MessageLevel.Info
                     )
 
                     # Warn if 0 features
@@ -270,13 +270,13 @@ class ResultProcessor:
                         logger.warning("    → Check if expression is too complex or returns no results")
                         QgsMessageLog.logMessage(
                             f"⚠️ {layer.name()} → 0 features (filter may be too restrictive or expression error)",
-                            "FilterMate", Qgis.Warning
+                            "FilterMate", Qgis.MessageLevel.Warning
                         )
                 else:
                     count_str = "(count pending)"
                     QgsMessageLog.logMessage(
                         f"✓ Filter APPLIED: {layer.name()} → (count pending)",
-                        "FilterMate", Qgis.Info
+                        "FilterMate", Qgis.MessageLevel.Info
                     )
 
                 logger.debug(f"finished() ✓ Applied: {layer.name()} → {count_str}")
@@ -293,7 +293,7 @@ class ResultProcessor:
 
                 QgsMessageLog.logMessage(
                     f"finished() ✗ FAILED: {layer.name()} - {error_msg}",
-                    "FilterMate", Qgis.Critical
+                    "FilterMate", Qgis.MessageLevel.Critical
                 )
 
     def _reload_layer_after_filter(

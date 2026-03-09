@@ -655,7 +655,7 @@ class FilterResultHandler:
         # v3.0.16: DEBUG - Log current combobox state
         QgsMessageLog.logMessage(
             f"v3.0.16: 🔍 Combobox state: current='{combo_name}', should_be='{restored_name}'",
-            "FilterMate", Qgis.Info
+            "FilterMate", Qgis.MessageLevel.Info
         )
 
         if restored_layer and restored_layer.isValid():
@@ -664,7 +664,7 @@ class FilterResultHandler:
                 dockwidget.comboBox_filtering_current_layer.setLayer(restored_layer)
                 QgsMessageLog.logMessage(
                     f"v3.0.19: ✅ FORCED combobox to '{restored_layer.name()}' (signals STAY BLOCKED)",
-                    "FilterMate", Qgis.Info
+                    "FilterMate", Qgis.MessageLevel.Info
                 )
                 logger.info(f"v3.0.19: ✅ FINALLY - Forced combobox to '{restored_layer.name()}' (signals blocked)")
 
@@ -816,13 +816,13 @@ class FilterResultHandler:
                     # v3.0.16: Log every check to QGIS MessageLog
                     QgsMessageLog.logMessage(
                         f"v3.0.19: 🔄 DELAYED CHECK - combobox='{current_name}', expected='{saved_layer.name()}'",
-                        "FilterMate", Qgis.Info
+                        "FilterMate", Qgis.MessageLevel.Info
                     )
                     if not current_combo or current_combo.id() != saved_layer.id():
                         logger.info(f"v3.0.19: 🔧 DELAYED CHECK - Combobox was changed, restoring to '{saved_layer.name()}'")
                         QgsMessageLog.logMessage(
                             f"v3.0.19: 🔧 RESTORING combobox from '{current_name}' to '{saved_layer.name()}'",
-                            "FilterMate", Qgis.Warning
+                            "FilterMate", Qgis.MessageLevel.Warning
                         )
                         # Keep signals blocked during restore
                         dockwidget.comboBox_filtering_current_layer.setLayer(saved_layer)
@@ -851,7 +851,7 @@ class FilterResultHandler:
                 logger.debug("v3.0.19: ✅ Unblocked combobox, reconnected handler, and reset filtering flag after protection")
                 QgsMessageLog.logMessage(
                     "v3.0.19: ✅ Combobox protection ENDED - signals reconnected, filtering flag reset",
-                    "FilterMate", Qgis.Info
+                    "FilterMate", Qgis.MessageLevel.Info
                 )
             except Exception as e:
                 logger.error(f"v3.0.19: Error reconnecting combobox: {e}")

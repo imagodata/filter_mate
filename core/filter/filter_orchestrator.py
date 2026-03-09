@@ -193,7 +193,7 @@ class FilterOrchestrator:
                 # FIX v4.1.2: Log to QGIS message panel for visibility
                 QgsMessageLog.logMessage(
                     f"FilterMate: No source geometry for {geometry_provider} backend (layer: {layer.name()})",
-                    "FilterMate", Qgis.Critical
+                    "FilterMate", Qgis.MessageLevel.Critical
                 )
                 return False
 
@@ -306,7 +306,7 @@ class FilterOrchestrator:
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"orchestrate_geometric_filter EXCEPTION for {layer.name()}: {e}",
-                "FilterMate", Qgis.Critical
+                "FilterMate", Qgis.MessageLevel.Critical
             )
             logger.error(f"Error in orchestrate_geometric_filter for {layer.name()}: {e}", exc_info=True)
             raise BackendError(f"{layer.name()}: {e}") from e
@@ -683,7 +683,7 @@ class FilterOrchestrator:
             logger.error("  → Solutions: Reduce source count, increase timeout, add spatial index")
             QgsMessageLog.logMessage(
                 f"⚠️ {layer.name()}: PostgreSQL timeout on {feature_count:,} features",
-                "FilterMate", Qgis.Critical
+                "FilterMate", Qgis.MessageLevel.Critical
             )
             raise BackendError(
                 f"{layer.name()}: PostgreSQL failed on large table ({feature_count:,} features), "
@@ -705,7 +705,7 @@ class FilterOrchestrator:
                         logger.error(f"  → PostgreSQL provider error: {pg_err}")
                         QgsMessageLog.logMessage(
                             f"FilterMate PostgreSQL error ({layer.name()}): {pg_err[:200]}",
-                            "FilterMate", Qgis.Critical
+                            "FilterMate", Qgis.MessageLevel.Critical
                         )
             except Exception as _err_diag:
                 logger.debug(f"  → Could not read provider error: {_err_diag}")
@@ -715,7 +715,7 @@ class FilterOrchestrator:
         logger.warning("  → Attempting OGR fallback...")
         QgsMessageLog.logMessage(
             f"🔄 {layer.name()}: Attempting OGR fallback...",
-            "FilterMate", Qgis.Info
+            "FilterMate", Qgis.MessageLevel.Info
         )
 
         try:
@@ -767,7 +767,7 @@ class FilterOrchestrator:
                 logger.info(f"✓ OGR fallback SUCCEEDED for {layer.name()}")
                 QgsMessageLog.logMessage(
                     f"✓ OGR fallback SUCCEEDED for {layer.name()}",
-                    "FilterMate", Qgis.Info
+                    "FilterMate", Qgis.MessageLevel.Info
                 )
                 self.task_parameters['actual_backends'][layer.id()] = 'ogr'
                 return True
@@ -776,7 +776,7 @@ class FilterOrchestrator:
                 logger.error(f"✗ OGR fallback also FAILED for {layer.name()}: {ogr_error}")
                 QgsMessageLog.logMessage(
                     f"⚠️ OGR fallback FAILED for {layer.name()}: {ogr_error}",
-                    "FilterMate", Qgis.Warning
+                    "FilterMate", Qgis.MessageLevel.Warning
                 )
                 raise BackendError(
                     f"{layer.name()}: {backend_name} failed, OGR fallback also failed: {ogr_error}"
@@ -788,7 +788,7 @@ class FilterOrchestrator:
             logger.error(f"✗ OGR fallback exception: {e}", exc_info=True)
             QgsMessageLog.logMessage(
                 f"⚠️ OGR fallback exception for {layer.name()}: {str(e)[:100]}",
-                "FilterMate", Qgis.Warning
+                "FilterMate", Qgis.MessageLevel.Warning
             )
             raise BackendError(
                 f"{layer.name()}: {backend_name} failed, OGR fallback exception: {e}"
@@ -853,5 +853,5 @@ class FilterOrchestrator:
 
         QgsMessageLog.logMessage(
             f"orchestrate_geometric_filter ✗ {layer.name()} → backend returned FAILURE",
-            "FilterMate", Qgis.Warning
+            "FilterMate", Qgis.MessageLevel.Warning
         )

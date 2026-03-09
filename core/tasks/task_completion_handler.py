@@ -108,7 +108,7 @@ def apply_pending_subset_requests(
 
     QgsMessageLog.logMessage(
         f"📥 Applying {len(pending_requests)} pending subset requests on main thread",
-        "FilterMate", Qgis.Info
+        "FilterMate", Qgis.MessageLevel.Info
     )
     logger.info(f"finished(): Applying {len(pending_requests)} pending subset requests on main thread")
 
@@ -133,7 +133,7 @@ def apply_pending_subset_requests(
             if not layer or not is_valid_layer(layer):
                 QgsMessageLog.logMessage(
                     f"finished() ✗ Layer invalid: {layer.name() if layer else 'None'}",
-                    "FilterMate", Qgis.Warning
+                    "FilterMate", Qgis.MessageLevel.Warning
                 )
                 continue
 
@@ -181,7 +181,7 @@ def apply_pending_subset_requests(
                 logger.debug(f"  ✓ Filter already applied to {layer.name()}, triggered reload+repaint")
                 QgsMessageLog.logMessage(
                     f"finished() ✓ Repaint: {layer.name()} → {count_str} (filter already applied)",
-                    "FilterMate", Qgis.Info
+                    "FilterMate", Qgis.MessageLevel.Info
                 )
                 applied_count += 1
             else:
@@ -225,7 +225,7 @@ def apply_pending_subset_requests(
                     if feature_count >= 0:
                         QgsMessageLog.logMessage(
                             f"✓ Filter APPLIED: {layer.name()} → {feature_count} features",
-                            "FilterMate", Qgis.Info
+                            "FilterMate", Qgis.MessageLevel.Info
                         )
                         # Diagnostic for layers with 0 features
                         if feature_count == 0:
@@ -233,12 +233,12 @@ def apply_pending_subset_requests(
                             logger.warning(f"    → Expression length: {len(expression_str)} chars")
                             QgsMessageLog.logMessage(
                                 f"⚠️ {layer.name()} → 0 features (filter may be too restrictive)",
-                                "FilterMate", Qgis.Warning
+                                "FilterMate", Qgis.MessageLevel.Warning
                             )
                     else:
                         QgsMessageLog.logMessage(
                             f"✓ Filter APPLIED: {layer.name()} → (count pending)",
-                            "FilterMate", Qgis.Info
+                            "FilterMate", Qgis.MessageLevel.Info
                         )
 
                     applied_count += 1
@@ -253,7 +253,7 @@ def apply_pending_subset_requests(
                     logger.warning(f"    → Provider: {layer.providerType()}")
                     QgsMessageLog.logMessage(
                         f"finished() ✗ FAILED: {layer.name()} - {error_msg}",
-                        "FilterMate", Qgis.Critical
+                        "FilterMate", Qgis.MessageLevel.Critical
                     )
 
         except Exception as e:  # catch-all safety net: subset application must not crash finished()
@@ -262,7 +262,7 @@ def apply_pending_subset_requests(
             logger.error(f"    → Traceback: {traceback.format_exc()}")
             QgsMessageLog.logMessage(
                 f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
-                "FilterMate", Qgis.Critical
+                "FilterMate", Qgis.MessageLevel.Critical
             )
 
     # Handle large expressions with deferred application
@@ -296,7 +296,7 @@ def _schedule_deferred_filter_application(
                         lyr.triggerRepaint()
                         QgsMessageLog.logMessage(
                             f"finished() ✓ Deferred: {lyr.name()} → {lyr.featureCount()} features",
-                            "FilterMate", Qgis.Info
+                            "FilterMate", Qgis.MessageLevel.Info
                         )
                     else:
                         logger.error(f"Failed to apply deferred filter to {lyr.name()}")

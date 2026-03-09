@@ -148,7 +148,7 @@ class OptimizationManager:
                 location_type=layer_analysis.location_type.value,
                 parent=dw
             )
-            if dialog.exec_():
+            if dialog.exec():
                 self.apply_optimization_selections(
                     dialog.get_selected_optimizations(), dw.current_layer
                 )
@@ -209,7 +209,7 @@ class OptimizationManager:
                 OptimizationDialog as BackendOptimizationDialog
             )
             dialog = BackendOptimizationDialog(dw)
-            if dialog.exec_():
+            if dialog.exec():
                 self.apply_optimization_dialog_settings(dialog.get_settings())
         except ImportError:
             try:
@@ -217,7 +217,7 @@ class OptimizationManager:
                     OptimizationDialog as OptimizationSettingsDialog
                 )
                 dialog = OptimizationSettingsDialog(dw)
-                if dialog.exec_():
+                if dialog.exec():
                     s = dialog.get_settings()
                     dw._optimization_enabled = s.get('enabled', True)
                     dw._centroid_auto_enabled = s.get('auto_centroid_for_distant', True)
@@ -265,7 +265,7 @@ class OptimizationManager:
                 OptimizationDialog as BackendOptimizationDialog
             )
             dialog = BackendOptimizationDialog(dw)
-            if not dialog.exec_():
+            if not dialog.exec():
                 return
             all_settings = dialog.get_settings()
             global_s = all_settings.get('global', {})

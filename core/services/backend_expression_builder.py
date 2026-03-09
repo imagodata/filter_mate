@@ -489,7 +489,7 @@ class BackendExpressionBuilder:
             logger.debug(f"PostgreSQL simple mode: {source_feature_count} features, SRID={source_srid}")
             QgsMessageLog.logMessage(
                 f"v2.7.3: PostgreSQL will use WKT mode (count={source_feature_count}, wkt_len={len(source_wkt)}, srid={source_srid})",
-                "FilterMate", Qgis.Info
+                "FilterMate", Qgis.MessageLevel.Info
             )
         else:
             logger.debug(

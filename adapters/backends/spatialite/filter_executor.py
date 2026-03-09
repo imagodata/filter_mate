@@ -349,7 +349,7 @@ def resolve_spatialite_features(
         from qgis.core import QgsMessageLog, Qgis
         QgsMessageLog.logMessage(
             f"⚠️ FALLBACK MODE: Using ALL {source_layer.featureCount()} features",
-            "FilterMate", Qgis.Warning
+            "FilterMate", Qgis.MessageLevel.Warning
         )
         features = list(source_layer.getFeatures())
 
