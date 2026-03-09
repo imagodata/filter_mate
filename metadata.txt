@@ -8,11 +8,11 @@ name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector data with lightning-fast performance on ANY data source.
-version=4.6.0
+version=4.6.1
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🎯 FilterMate 4.6 - Your Swiss Army Knife for Spatial Data!
+about=🎯 FilterMate 4.6.1 - Your Swiss Army Knife for Spatial Data!
 
     Stop struggling with complex filters. FilterMate makes spatial queries intuitive, fast, and powerful.
 
@@ -32,9 +32,9 @@ about=🎯 FilterMate 4.6 - Your Swiss Army Knife for Spatial Data!
     🎨 Beautiful UI that adapts to your QGIS theme
     ⚡ Filter chaining with dynamic buffer expressions
 
+    💡 v4.6.1: QGIS 4 / Qt6 compatibility, edit mode popup, i18n 22 languages at 100%, config harmonization
     💡 v4.6.0: GPKG export now embeds a full QGIS project with layer groups, styles & CRS
     💡 v4.5.3: Fix GPKG export crash (thread-safety fix for GUI calls)
-    💡 v4.5.2: Fix square key buttons sizing, exploring sidebar layout alignment
 
     📖 Full docs: https://imagodata.github.io/filter_mate
 
@@ -46,7 +46,7 @@ repository=https://github.com/imagodata/filter_mate
 
 hasProcessingProvider=no
 
-changelog=v4.6.0 (2026-02-18): GPKG export now embeds a full QGIS project preserving layer group hierarchy, styles and CRS. Fix action buttons not disabled when switching to exporting tab. v4.5.3 (2026-02-18): Fix GPKG export crash caused by GUI calls from background thread. v4.5.2 (2026-02-12): Fix square key buttons sizing, exploring sidebar layout alignment. v4.5.1 (2026-02-11): Website launch, org migration, 600 tests, quality score 9.0/10.
+changelog=v4.6.1 (2026-03-09): QGIS 4 / Qt6 compatibility. Edit mode popup before filter/unfilter operations. i18n 22 languages at 100%. Config harmonization with single source of truth. v4.6.0 (2026-02-18): GPKG export now embeds a full QGIS project preserving layer group hierarchy, styles and CRS. Fix action buttons not disabled when switching to exporting tab. v4.5.3 (2026-02-18): Fix GPKG export crash caused by GUI calls from background thread. v4.5.2 (2026-02-12): Fix square key buttons sizing, exploring sidebar layout alignment. v4.5.1 (2026-02-11): Website launch, org migration, 600 tests, quality score 9.0/10.
 
 # Tags are comma separated with spaces allowed
 tags=python,filter,vector,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export

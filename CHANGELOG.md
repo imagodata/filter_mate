@@ -2,6 +2,26 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.6.1] - 2026-03-09
+
+### QGIS 4 / Qt6 Compatibility
+
+Full migration for QGIS 4 and Qt6 compatibility.
+
+#### New
+
+- **Edit mode popup**: Warning popup before filter/unfilter operations when a layer is in edit mode
+- **i18n**: All user-facing strings wrapped and translated, 22 languages at 100%
+- **Config harmonization**: Single source of truth config system with backward-compatible helpers
+
+#### Changes
+
+- Migrate plugin for QGIS 4 / Qt6 compatibility
+- Refactor filter orchestrator, app, SQL utils and controllers
+- Fix backward-compat guard for DEFAULT_IS_LINKING in exploring controller
+
+---
+
 ## [4.6.0] - 2026-02-18
 
 ### Feature - GPKG Embedded Project Export
