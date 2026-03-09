@@ -14,7 +14,7 @@ class InputWindow(QtWidgets.QDialog):
 
         self.layout = QtWidgets.QGridLayout(self)
 
-        QBtn = QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        QBtn = QtWidgets.QDialogButtonBox.StandardButton.Ok | QtWidgets.QDialogButtonBox.StandardButton.Cancel
         self.buttonBox = QtWidgets.QDialogButtonBox(QBtn)
 
         self.buttonBox.accepted.connect(self.accept)
@@ -73,7 +73,7 @@ class JsonModel(QtGui.QStandardItemModel):
     def addData(self, item, direction='insert', widgets=False):
         self.input = InputWindow()
 
-        if self.input.exec_() == QtWidgets.QDialog.Accepted:
+        if self.input.exec() == QtWidgets.QDialog.DialogCode.Accepted:
 
             key = self.input.key.text()
             try:

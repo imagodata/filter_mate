@@ -311,7 +311,7 @@ class ConfigModelManager:
                 )
             )
             dw.pushButton_reload_plugin.setCursor(
-                QtGui.QCursor(Qt.PointingHandCursor)
+                QtGui.QCursor(Qt.CursorShape.PointingHandCursor)
             )
             dw.pushButton_reload_plugin.clicked.connect(
                 dw._on_reload_button_clicked
@@ -338,7 +338,7 @@ class ConfigModelManager:
                 "Do you want to reload FilterMate to apply all "
                 "configuration changes?"
             ),
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes,
-        ) == QMessageBox.Yes:
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        ) == QMessageBox.StandardButton.Yes:
             dw.reload_plugin()

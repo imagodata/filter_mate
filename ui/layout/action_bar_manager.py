@@ -313,8 +313,8 @@ class ActionBarManager(LayoutManagerBase):
             if i < len(action_buttons) - 1:
                 spacer = QtWidgets.QSpacerItem(
                     4, 20,
-                    QtWidgets.QSizePolicy.Expanding,
-                    QtWidgets.QSizePolicy.Minimum
+                    QtWidgets.QSizePolicy.Policy.Expanding,
+                    QtWidgets.QSizePolicy.Policy.Minimum
                 )
                 new_layout.addItem(spacer)
 
@@ -339,7 +339,7 @@ class ActionBarManager(LayoutManagerBase):
 
         for btn in action_buttons:
             btn.setParent(self.dockwidget.frame_actions)
-            new_layout.addWidget(btn, 0, Qt.AlignHCenter)
+            new_layout.addWidget(btn, 0, Qt.AlignmentFlag.AlignHCenter)
 
         # Add stretch at end to push buttons to top
         new_layout.addStretch(1)
@@ -364,8 +364,8 @@ class ActionBarManager(LayoutManagerBase):
             frame.setMinimumWidth(0)
             frame.setMaximumWidth(16777215)
             frame.setSizePolicy(
-                QtWidgets.QSizePolicy.Expanding,
-                QtWidgets.QSizePolicy.Preferred
+                QtWidgets.QSizePolicy.Policy.Expanding,
+                QtWidgets.QSizePolicy.Policy.Preferred
             )
         else:
             # Vertical mode
@@ -375,8 +375,8 @@ class ActionBarManager(LayoutManagerBase):
             frame.setMinimumHeight(0)
             frame.setMaximumHeight(16777215)
             frame.setSizePolicy(
-                QtWidgets.QSizePolicy.Fixed,
-                QtWidgets.QSizePolicy.Expanding
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Expanding
             )
 
         logger.debug(f"ActionBarManager: Applied size constraints for {self._position}")
@@ -445,8 +445,8 @@ class ActionBarManager(LayoutManagerBase):
                 # Add spacer to actions container
                 self._vertical_action_spacer = QtWidgets.QSpacerItem(
                     spacer_width, 0,
-                    QtWidgets.QSizePolicy.Fixed,
-                    QtWidgets.QSizePolicy.Minimum
+                    QtWidgets.QSizePolicy.Policy.Fixed,
+                    QtWidgets.QSizePolicy.Policy.Minimum
                 )
                 if self._position == 'left':
                     container.insertItem(0, self._vertical_action_spacer)

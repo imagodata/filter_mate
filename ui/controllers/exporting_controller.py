@@ -365,7 +365,7 @@ class ExportingController(BaseController):
                     item_data = {"layer_id": key, "layer_geometry_type": layer_info["layer_geometry_type"]}
                     layers_widget.addItem(layer_icon, display_name, item_data)
                     item = layers_widget.model().item(item_index)
-                    item.setCheckState(Qt.Checked if key in layers_to_export else Qt.Unchecked)
+                    item.setCheckState(Qt.CheckState.Checked if key in layers_to_export else Qt.CheckState.Unchecked)
                     item_index += 1
 
             # Add missing PostgreSQL layers
@@ -378,7 +378,7 @@ class ExportingController(BaseController):
                     item_data = {"layer_id": pg_layer.id(), "layer_geometry_type": geom_type_str}
                     layers_widget.addItem(layer_icon, display_name, item_data)
                     item = layers_widget.model().item(item_index)
-                    item.setCheckState(Qt.Checked if pg_layer.id() in layers_to_export else Qt.Unchecked)
+                    item.setCheckState(Qt.CheckState.Checked if pg_layer.id() in layers_to_export else Qt.CheckState.Unchecked)
                     item_index += 1
                     logger.info(f"populate_export_combobox: Added missing PostgreSQL layer '{pg_layer.name()}'")
 
@@ -392,7 +392,7 @@ class ExportingController(BaseController):
                     item_data = {"layer_id": remote_layer.id(), "layer_geometry_type": geom_type_str}
                     layers_widget.addItem(layer_icon, display_name, item_data)
                     item = layers_widget.model().item(item_index)
-                    item.setCheckState(Qt.Checked if remote_layer.id() in layers_to_export else Qt.Unchecked)
+                    item.setCheckState(Qt.CheckState.Checked if remote_layer.id() in layers_to_export else Qt.CheckState.Unchecked)
                     item_index += 1
                     logger.info(f"populate_export_combobox: Added missing remote layer '{remote_layer.name()}'")
 

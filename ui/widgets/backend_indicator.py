@@ -115,8 +115,8 @@ class BackendIndicatorWidget(QLabel if HAS_QGIS else object):
             return
 
         self.setObjectName("label_backend_indicator")
-        self.setCursor(Qt.PointingHandCursor)
-        self.setAlignment(Qt.AlignCenter)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setMinimumWidth(40)
         self.setMaximumHeight(20)
 

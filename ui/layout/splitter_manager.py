@@ -59,13 +59,13 @@ class SplitterManager(LayoutManagerBase):
 
     # Policy string to Qt enum mapping
     POLICY_MAP: Dict[str, 'QSizePolicy.Policy'] = {
-        'Fixed': QSizePolicy.Fixed,
-        'Minimum': QSizePolicy.Minimum,
-        'Maximum': QSizePolicy.Maximum,
-        'Preferred': QSizePolicy.Preferred,
-        'Expanding': QSizePolicy.Expanding,
-        'MinimumExpanding': QSizePolicy.MinimumExpanding,
-        'Ignored': QSizePolicy.Ignored
+        'Fixed': QSizePolicy.Policy.Fixed,
+        'Minimum': QSizePolicy.Policy.Minimum,
+        'Maximum': QSizePolicy.Policy.Maximum,
+        'Preferred': QSizePolicy.Policy.Preferred,
+        'Expanding': QSizePolicy.Policy.Expanding,
+        'MinimumExpanding': QSizePolicy.Policy.MinimumExpanding,
+        'Ignored': QSizePolicy.Policy.Ignored
     }
 
     def __init__(self, dockwidget: 'FilterMateDockWidget') -> None:
@@ -280,11 +280,11 @@ class SplitterManager(LayoutManagerBase):
 
             h_policy = self.POLICY_MAP.get(
                 exploring_config.get('size_policy_h', 'Preferred'),
-                QSizePolicy.Preferred
+                QSizePolicy.Policy.Preferred
             )
             v_policy = self.POLICY_MAP.get(
                 exploring_config.get('size_policy_v', 'Minimum'),
-                QSizePolicy.Minimum
+                QSizePolicy.Policy.Minimum
             )
             self.dockwidget.frame_exploring.setSizePolicy(h_policy, v_policy)
             logger.debug(
@@ -305,11 +305,11 @@ class SplitterManager(LayoutManagerBase):
 
             h_policy = self.POLICY_MAP.get(
                 toolset_config.get('size_policy_h', 'Preferred'),
-                QSizePolicy.Preferred
+                QSizePolicy.Policy.Preferred
             )
             v_policy = self.POLICY_MAP.get(
                 toolset_config.get('size_policy_v', 'Expanding'),
-                QSizePolicy.Expanding
+                QSizePolicy.Policy.Expanding
             )
             self.dockwidget.frame_toolset.setSizePolicy(h_policy, v_policy)
             logger.debug(

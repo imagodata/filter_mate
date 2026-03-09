@@ -531,14 +531,14 @@ def prepare_geometries_by_provider(
                     logger.warning("Spatialite geometry preparation returned None")
                 QgsMessageLog.logMessage(
                     "v2.7.3: WARNING - Spatialite geometry preparation returned None!",
-                    "FilterMate", Qgis.Warning
+                    "FilterMate", Qgis.MessageLevel.Warning
                 )
         except Exception as e:
             if logger:
                 logger.warning(f"Spatialite geometry preparation failed: {e}")
             QgsMessageLog.logMessage(
                 f"v2.7.3: ERROR - Spatialite geometry preparation failed: {e}",
-                "FilterMate", Qgis.Critical
+                "FilterMate", Qgis.MessageLevel.Critical
             )
             if logger:
                 import traceback

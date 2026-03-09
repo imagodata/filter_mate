@@ -805,7 +805,7 @@ def prepare_ogr_source_geom(
         logger.info("[OGR]   Direct mode: using source layer as-is")
         QgsMessageLog.logMessage(
             f"OGR DIRECT MODE: Using {layer.featureCount()} features",
-            "FilterMate", Qgis.Warning
+            "FilterMate", Qgis.MessageLevel.Warning
         )
 
     # Step 1: Handle buffer CRS check
@@ -843,7 +843,7 @@ def prepare_ogr_source_geom(
         logger.error(f"[OGR] prepare_ogr_source_geom: {error_msg}")
         QgsMessageLog.logMessage(
             f"OGR source preparation FAILED: {error_msg}",
-            "FilterMate", Qgis.Critical
+            "FilterMate", Qgis.MessageLevel.Critical
         )
         return None
 
@@ -866,7 +866,7 @@ def prepare_ogr_source_geom(
             QgsMessageLog.logMessage(
                 "⚠️ Centroid optimization was requested but is not available for this layer type. "
                 "Using full geometries instead.",
-                "FilterMate", Qgis.Warning
+                "FilterMate", Qgis.MessageLevel.Warning
             )
 
     # Step 5: Prevent garbage collection for memory layers

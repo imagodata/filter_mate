@@ -226,7 +226,7 @@ class SourceGeometryPreparer:
             from qgis.core import QgsMessageLog, Qgis
             QgsMessageLog.logMessage(
                 f"Spatialite geometry preparation FAILED: {error_msg}",
-                "FilterMate", Qgis.Critical
+                "FilterMate", Qgis.MessageLevel.Critical
             )
             logger.error("  -> This will cause distant layer filtering to fail!")
             logger.error("  -> Check if source layer has valid geometry")

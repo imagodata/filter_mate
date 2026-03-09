@@ -710,7 +710,7 @@ class ConfigurationManager(QObject):
                             widget_obj.setIcon(QtGui.QIcon(icon_path))
                             widget_data["ICON"] = icon_path
 
-                widget_obj.setCursor(Qt.PointingHandCursor)
+                widget_obj.setCursor(Qt.CursorShape.PointingHandCursor)
                 if widget_group == "EXPLORING" and widget_name in exploring_tooltips:
                     widget_obj.setToolTip(exploring_tooltips[widget_name])
 
@@ -727,7 +727,7 @@ class ConfigurationManager(QObject):
                 widget_obj.setMinimumSize(h, h)
                 widget_obj.setMaximumSize(h, h)
                 widget_obj.setIconSize(QSize(s, s))
-                widget_obj.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                widget_obj.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
                 widget_obj.setFont(font)
 
     def configure_other_widgets(self, font):
@@ -745,7 +745,7 @@ class ConfigurationManager(QObject):
 
                 # Configure comboboxes and field widgets
                 if any(keyword in widget_type for keyword in ["ComboBox", "QgsFieldExpressionWidget", "QgsProjectionSelectionWidget"]):
-                    widget_obj.setCursor(Qt.PointingHandCursor)
+                    widget_obj.setCursor(Qt.CursorShape.PointingHandCursor)
                     widget_obj.setFont(font)
 
                 # Configure text inputs
@@ -755,7 +755,7 @@ class ConfigurationManager(QObject):
 
                 # Configure property override buttons
                 elif "PropertyOverrideButton" in widget_type:
-                    widget_obj.setCursor(Qt.PointingHandCursor)
+                    widget_obj.setCursor(Qt.CursorShape.PointingHandCursor)
                     widget_obj.setFont(font)
 
     def configure_key_widgets_sizes(self, icons_sizes):
@@ -778,7 +778,7 @@ class ConfigurationManager(QObject):
             for widget in [d.widget_exploring_keys, d.widget_filtering_keys, d.widget_exporting_keys]:
                 widget.setMinimumWidth(widget_keys_width)
                 widget.setMaximumWidth(widget_keys_width)
-                widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+                widget.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
             # Set frame actions size (convert to int to avoid float)
             action_button_height = UIConfig.get_button_height("action_button")
@@ -791,7 +791,7 @@ class ConfigurationManager(QObject):
             for widget in [d.widget_exploring_keys, d.widget_filtering_keys, d.widget_exporting_keys]:
                 widget.setMinimumWidth(80)
                 widget.setMaximumWidth(80)
-                widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+                widget.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
             # Set frame actions size
             icon_size = icons_sizes["ACTION"]
@@ -868,12 +868,12 @@ class ConfigurationManager(QObject):
         if hasattr(d, 'checkBox_filtering_use_centroids_distant_layers'):
             d.checkBox_filtering_use_centroids_distant_layers.setText("")
             d.checkBox_filtering_use_centroids_distant_layers.setToolTip(d.tr("Use centroids instead of full geometries for distant layers"))
-            d.checkBox_filtering_use_centroids_distant_layers.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+            d.checkBox_filtering_use_centroids_distant_layers.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
             if os.path.exists(icon_path):
                 icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
                 d.checkBox_filtering_use_centroids_distant_layers.setIcon(icon)
             d.checkBox_filtering_use_centroids_distant_layers.setLayoutDirection(QtCore.Qt.RightToLeft)
-            d.checkBox_filtering_use_centroids_distant_layers.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            d.checkBox_filtering_use_centroids_distant_layers.setSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 
         # Create horizontal layout and insert widgets
         d.horizontalLayout_filtering_distant_layers = QtWidgets.QHBoxLayout()
@@ -908,7 +908,7 @@ class ConfigurationManager(QObject):
             d.verticalLayout_exporting_values.insertWidget(0, d.checkableComboBoxLayer_exporting_layers)
             d.checkableComboBoxLayer_exporting_layers.show()
             logger.debug(f"Inserted exporting layers widget, visible: {d.checkableComboBoxLayer_exporting_layers.isVisible()}")
-            d.verticalLayout_exporting_values.insertItem(1, QtWidgets.QSpacerItem(20, 4, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding))
+            d.verticalLayout_exporting_values.insertItem(1, QtWidgets.QSpacerItem(20, 4, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding))
 
         try:
             from ..config import UIConfig

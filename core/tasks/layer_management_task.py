@@ -1860,7 +1860,7 @@ class LayersManagementEngineTask(QgsTask):
                 iface.messageBar().pushMessage(
                     "FilterMate",
                     warning_msg,
-                    Qgis.Warning,
+                    Qgis.MessageLevel.Warning,
                     duration=10
                 )
             self._deferred_warnings.clear()
@@ -1906,6 +1906,6 @@ class LayersManagementEngineTask(QgsTask):
             iface.messageBar().pushMessage(
                 message_category,
                 self.tr("Exception: {0}").format(self.exception),
-                Qgis.Critical
+                Qgis.MessageLevel.Critical
             )
             raise self.exception

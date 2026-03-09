@@ -80,7 +80,7 @@ class SearchableJsonView(QtWidgets.QWidget):
         # Match count label
         self._match_label = QtWidgets.QLabel("")
         self._match_label.setFixedWidth(60)
-        self._match_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self._match_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter)
         search_layout.addWidget(self._match_label)
 
         layout.addWidget(search_container)
@@ -231,14 +231,14 @@ class SearchableJsonView(QtWidgets.QWidget):
         for row in range(model.rowCount(parent)):
             # Check key column (0)
             key_index = model.index(row, 0, parent)
-            key_text = model.data(key_index, QtCore.Qt.DisplayRole)
+            key_text = model.data(key_index, QtCore.Qt.ItemDataRole.DisplayRole)
 
             if key_text and search_lower in str(key_text).lower():
                 matches.append(key_index)
 
             # Check value column (1)
             value_index = model.index(row, 1, parent)
-            value_text = model.data(value_index, QtCore.Qt.DisplayRole)
+            value_text = model.data(value_index, QtCore.Qt.ItemDataRole.DisplayRole)
 
             if value_text and search_lower in str(value_text).lower():
                 if key_index not in matches:

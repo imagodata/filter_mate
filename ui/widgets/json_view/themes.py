@@ -14,22 +14,22 @@ class Theme:
     def __init__(self, name):
         self.name = name
         self.colors = {
-            'none': QtCore.Qt.black,
-            'string': QtCore.Qt.black,
-            'integer': QtCore.Qt.black,
-            'float': QtCore.Qt.black,
-            'boolean': QtCore.Qt.black,
-            'list': QtCore.Qt.black,
-            'dict': QtCore.Qt.black,
-            'url': QtCore.Qt.black,
-            'filepath': QtCore.Qt.black,
-            'range': QtCore.Qt.black,
-            'choices': QtCore.Qt.black,
+            'none': QtCore.Qt.GlobalColor.black,
+            'string': QtCore.Qt.GlobalColor.black,
+            'integer': QtCore.Qt.GlobalColor.black,
+            'float': QtCore.Qt.GlobalColor.black,
+            'boolean': QtCore.Qt.GlobalColor.black,
+            'list': QtCore.Qt.GlobalColor.black,
+            'dict': QtCore.Qt.GlobalColor.black,
+            'url': QtCore.Qt.GlobalColor.black,
+            'filepath': QtCore.Qt.GlobalColor.black,
+            'range': QtCore.Qt.GlobalColor.black,
+            'choices': QtCore.Qt.GlobalColor.black,
         }
 
     def get_color(self, type_name):
         """Get color for a given data type."""
-        return self.colors.get(type_name.lower(), QtCore.Qt.black)
+        return self.colors.get(type_name.lower(), QtCore.Qt.GlobalColor.black)
 
 
 class DefaultTheme(Theme):

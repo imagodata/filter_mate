@@ -170,13 +170,13 @@ def init_env_vars():
             QgsMessageLog.logMessage(
                 f"Created plugin config directory: {PLUGIN_CONFIG_DIRECTORY}",
                 "FilterMate",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
         except OSError as error:
             QgsMessageLog.logMessage(
                 f"Could not create config directory {PLUGIN_CONFIG_DIRECTORY}: {error}",
                 "FilterMate",
-                Qgis.Critical
+                Qgis.MessageLevel.Critical
             )
 
     # Path to config.json in PLUGIN_CONFIG_DIRECTORY
@@ -191,13 +191,13 @@ def init_env_vars():
             QgsMessageLog.logMessage(
                 "FilterMate: Configuration created with default values",
                 "FilterMate",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"FilterMate: Cannot copy default configuration: {e}",
                 "FilterMate",
-                Qgis.Warning
+                Qgis.MessageLevel.Warning
             )
             # Fallback: use config.json from plugin directory
             config_json_path = os.path.join(DIR_CONFIG, 'config.json')
@@ -220,14 +220,14 @@ def init_env_vars():
             QgsMessageLog.logMessage(
                 f"FilterMate: Configuration validation skipped: {validation_error}",
                 "FilterMate",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
 
     except Exception as e:
         QgsMessageLog.logMessage(
             f"Failed to load config from {config_json_path}: {e}",
             "FilterMate",
-            Qgis.Warning
+            Qgis.MessageLevel.Warning
         )
         # Try to load default config as second option
         try:
@@ -236,13 +236,13 @@ def init_env_vars():
             QgsMessageLog.logMessage(
                 "FilterMate: Loaded default configuration file",
                 "FilterMate",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
         except Exception as e2:
             QgsMessageLog.logMessage(
                 f"Failed to load default config: {e2}. Using in-memory fallback configuration.",
                 "FilterMate",
-                Qgis.Warning
+                Qgis.MessageLevel.Warning
             )
             # Ultimate fallback: use hardcoded minimal config
             CONFIG_DATA = get_fallback_config()
@@ -255,7 +255,7 @@ def init_env_vars():
         QgsMessageLog.logMessage(
             "FilterMate: Invalid configuration detected, using fallback configuration",
             "FilterMate",
-            Qgis.Warning
+            Qgis.MessageLevel.Warning
         )
         # Use hardcoded fallback instead of raising
         CONFIG_DATA = get_fallback_config()
@@ -268,13 +268,13 @@ def init_env_vars():
             QgsMessageLog.logMessage(
                 f"FilterMate: Fallback configuration saved: {config_json_path}",
                 "FilterMate",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"FilterMate: Cannot save fallback configuration: {e}",
                 "FilterMate",
-                Qgis.Warning
+                Qgis.MessageLevel.Warning
             )
 
     # Log if using fallback configuration
@@ -283,7 +283,7 @@ def init_env_vars():
             "FilterMate: Plugin started with fallback configuration. "
             "Some settings may be reset to default values.",
             "FilterMate",
-            Qgis.Warning
+            Qgis.MessageLevel.Warning
         )
 
     # Ensure OPTIONS exists in APP (support both uppercase and lowercase keys)
@@ -316,19 +316,19 @@ def init_env_vars():
                     QgsMessageLog.logMessage(
                         f"Configured path parent directory is not writable: {parent_dir}. Using default profile.",
                         "FilterMate",
-                        Qgis.Warning
+                        Qgis.MessageLevel.Warning
                     )
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Cannot access configured path: {configured_path}. Error: {e}. Using default profile.",
                     "FilterMate",
-                    Qgis.Warning
+                    Qgis.MessageLevel.Warning
                 )
         else:
             QgsMessageLog.logMessage(
                 f"Configured path parent directory does not exist: {parent_dir}. Using default profile.",
                 "FilterMate",
-                Qgis.Warning
+                Qgis.MessageLevel.Warning
             )
 
         if path_is_valid:
@@ -365,7 +365,7 @@ def init_env_vars():
             QgsMessageLog.logMessage(
                 f"Could not update config.json: {e}",
                 "FilterMate",
-                Qgis.Warning
+                Qgis.MessageLevel.Warning
             )
 
     global ENV_VARS
@@ -396,7 +396,7 @@ def reset_config_to_default():
             QgsMessageLog.logMessage(
                 "Environment variables not initialized. Call init_env_vars() first.",
                 "FilterMate",
-                Qgis.Critical
+                Qgis.MessageLevel.Critical
             )
             return False
 
@@ -410,7 +410,7 @@ def reset_config_to_default():
             QgsMessageLog.logMessage(
                 f"Backed up existing config to: {backup_path}",
                 "FilterMate",
-                Qgis.Info
+                Qgis.MessageLevel.Info
             )
 
         # Copy default config
@@ -423,7 +423,7 @@ def reset_config_to_default():
         QgsMessageLog.logMessage(
             f"Configuration reset to default: {config_json_path}",
             "FilterMate",
-            Qgis.Info
+            Qgis.MessageLevel.Info
         )
 
         return True
@@ -432,7 +432,7 @@ def reset_config_to_default():
         QgsMessageLog.logMessage(
             f"Failed to reset configuration: {e}",
             "FilterMate",
-            Qgis.Critical
+            Qgis.MessageLevel.Critical
         )
         return False
 
@@ -463,7 +463,7 @@ def reload_config():
             QgsMessageLog.logMessage(
                 f"Config file not found: {config_json_path}",
                 "FilterMate",
-                Qgis.Warning
+                Qgis.MessageLevel.Warning
             )
             return False
 
@@ -475,7 +475,7 @@ def reload_config():
         QgsMessageLog.logMessage(
             f"Configuration reloaded from: {config_json_path}",
             "FilterMate",
-            Qgis.Info  # DEBUG
+            Qgis.MessageLevel.Info  # DEBUG
         )
 
         return True
@@ -484,6 +484,6 @@ def reload_config():
         QgsMessageLog.logMessage(
             f"Failed to reload configuration: {e}",
             "FilterMate",
-            Qgis.Critical
+            Qgis.MessageLevel.Critical
         )
         return False

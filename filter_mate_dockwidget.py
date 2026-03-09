@@ -103,7 +103,10 @@ except ImportError:
 from .config.config import get_optimization_thresholds
 
 from .infrastructure.cache import ExploringFeaturesCache
-from .filter_mate_dockwidget_base import Ui_FilterMateDockWidgetBase
+from qgis.PyQt import uic
+
+FORM_CLASS, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'filter_mate_dockwidget_base.ui'))
 
 # Import async expression evaluation for large layers (v2.5.10)
 # EPIC-1: Migrated to core/tasks/
@@ -185,7 +188,7 @@ class ClickableLabel(QtWidgets.QLabel):
         event.accept()
 
 
-class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
+class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     """Main dockwidget UI component for FilterMate QGIS plugin.
 
     Provides the user interface for:
@@ -999,10 +1002,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         """
         from .ui.config import UIConfig
         from qgis.PyQt.QtWidgets import QSizePolicy
-        policy_map = {'Fixed': QSizePolicy.Fixed, 'Minimum': QSizePolicy.Minimum,
-                      'Maximum': QSizePolicy.Maximum, 'Preferred': QSizePolicy.Preferred,
-                      'Expanding': QSizePolicy.Expanding, 'MinimumExpanding': QSizePolicy.MinimumExpanding,
-                      'Ignored': QSizePolicy.Ignored}
+        policy_map = {'Fixed': QSizePolicy.Policy.Fixed, 'Minimum': QSizePolicy.Policy.Minimum,
+                      'Maximum': QSizePolicy.Policy.Maximum, 'Preferred': QSizePolicy.Policy.Preferred,
+                      'Expanding': QSizePolicy.Policy.Expanding, 'MinimumExpanding': QSizePolicy.Policy.MinimumExpanding,
+                      'Ignored': QSizePolicy.Policy.Ignored}
         wk_min = UIConfig.get_config('widget_keys', 'min_width')
         wk_max = UIConfig.get_config('widget_keys', 'max_width')
         wk_cfg = UIConfig.get_config('widget_keys') or {}
@@ -1022,16 +1025,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         if hasattr(self, 'frame_exploring'):
             self.frame_exploring.setMinimumHeight(exp_min)
             self.frame_exploring.setMaximumHeight(exp_max)
-            self.frame_exploring.setSizePolicy(policy_map.get(exp_cfg.get('size_policy_h', 'Preferred'), QSizePolicy.Preferred),
-                                               policy_map.get(exp_v_policy, QSizePolicy.Minimum))
+            self.frame_exploring.setSizePolicy(policy_map.get(exp_cfg.get('size_policy_h', 'Preferred'), QSizePolicy.Policy.Preferred),
+                                               policy_map.get(exp_v_policy, QSizePolicy.Policy.Minimum))
         ts_cfg = UIConfig.get_config('frame_toolset') or {}
         ts_min = ts_cfg.get('min_height', 200)
         ts_v_policy = ts_cfg.get('size_policy_v', 'Expanding')
         if hasattr(self, 'frame_toolset'):
             self.frame_toolset.setMinimumHeight(ts_min)
             self.frame_toolset.setMaximumHeight(ts_cfg.get('max_height', 16777215))
-            self.frame_toolset.setSizePolicy(policy_map.get(ts_cfg.get('size_policy_h', 'Preferred'), QSizePolicy.Preferred),
-                                             policy_map.get(ts_v_policy, QSizePolicy.Expanding))
+            self.frame_toolset.setSizePolicy(policy_map.get(ts_cfg.get('size_policy_h', 'Preferred'), QSizePolicy.Policy.Preferred),
+                                             policy_map.get(ts_v_policy, QSizePolicy.Policy.Expanding))
         flt_cfg = UIConfig.get_config('frame_filtering') or {}
         if hasattr(self, 'frame_filtering'):
             self.frame_filtering.setMinimumHeight(flt_cfg.get('min_height', 180))
@@ -1075,7 +1078,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                         btn.setMaximumSize(max_size, max_size)
                         btn.setIconSize(QSize(icon_size, icon_size))
                         btn.setFlat(True)
-                        btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                        btn.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
                         checkable_buttons.append(name)
             logger.debug(f"Harmonized {len(checkable_buttons)} key pushbuttons in {mode_name} mode: {min_size}-{max_size}px (icon: {icon_size}px)")
         except Exception as e:
@@ -1148,7 +1151,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                             nested_layout = item.layout()
                             for j in range(nested_layout.count()):
                                 if (nested := nested_layout.itemAt(j)) and isinstance(nested, QSpacerItem):
-                                    nested.changeSize(20, target_h, QSizePolicy.Minimum, QSizePolicy.Expanding)
+                                    nested.changeSize(20, target_h, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
                                     spacer_count += 1
                             nested_layout.invalidate()
                 if spacer_count > 0:
@@ -1171,7 +1174,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
             button_size = UIConfig.get_config('property_override_button', 'size') or 22
             for w in self.findChildren(QgsPropertyOverrideButton):
                 w.setFixedSize(button_size, button_size)
-                w.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+                w.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
             logger.debug(f"PropertyOverrideButton sized to {button_size}px from UIConfig")
         except Exception as e:
             logger.debug(f"Could not apply dimensions to PropertyOverrideButton: {e}")
@@ -1264,11 +1267,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
     def _setup_backend_indicator(self):
         """v4.0 S16: Create header with indicators."""
         self.frame_header = QtWidgets.QFrame(self.dockWidgetContents)
-        self.frame_header.setObjectName("frame_header"); self.frame_header.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.frame_header.setObjectName("frame_header"); self.frame_header.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
         self.frame_header.setFixedHeight(13)  # v4.0: Compact layout, closer to frame_exploring
         hl = QtWidgets.QHBoxLayout(self.frame_header)
         hl.setContentsMargins(2, 0, 2, 0); hl.setSpacing(3)  # v4.0: Slight spacing increase for better visual
-        hl.addSpacerItem(QtWidgets.QSpacerItem(40, 6, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
+        hl.addSpacerItem(QtWidgets.QSpacerItem(40, 6, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum))
         self.plugin_title_label = None
         # v4.0: Softer "mousse" style with rounded corners
         bb = "color:white;font-size:8pt;font-weight:500;padding:2px 8px;border-radius:10px;border:none;"
@@ -1292,8 +1295,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         """v4.0 S16: Create indicator label with soft "mousse" style."""
         lbl = ClickableLabel(self.frame_header)
         lbl.setObjectName(name); lbl.setText(text); lbl.setStyleSheet(f"QLabel#{name}{{{style}}}QLabel#{name}:hover{{{hover_style}}}")
-        lbl.setAlignment(Qt.AlignCenter); lbl.setMinimumWidth(min_width); lbl.setFixedHeight(18)  # v4.0: Fixed height for proper text display with padding
-        lbl.setCursor(Qt.PointingHandCursor); lbl.setToolTip(tooltip)
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); lbl.setMinimumWidth(min_width); lbl.setFixedHeight(18)  # v4.0: Fixed height for proper text display with padding
+        lbl.setCursor(Qt.CursorShape.PointingHandCursor); lbl.setToolTip(tooltip)
         # CRITICAL: Enable the widget to receive mouse events
         lbl.setEnabled(True)
         lbl.setAttribute(Qt.WA_Hover, True)  # Enable hover events
@@ -1307,7 +1310,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
 
         if self._controller_integration and self._controller_integration.backend_controller:
             # Use QTimer to defer menu display after mouse event completes
-            # This prevents issues with QMenu.exec_() during mousePressEvent
+            # This prevents issues with QMenu.exec() during mousePressEvent
             from qgis.PyQt.QtCore import QTimer
             QTimer.singleShot(0, self._controller_integration.delegate_handle_backend_click)
         else:
@@ -1320,7 +1323,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
 
         if self._favorites_ctrl:
             # Use QTimer to defer menu display after mouse event completes
-            # This prevents issues with QMenu.exec_() during mousePressEvent
+            # This prevents issues with QMenu.exec() during mousePressEvent
             from qgis.PyQt.QtCore import QTimer
             QTimer.singleShot(0, self._favorites_ctrl.handle_indicator_clicked)
         else:
@@ -1440,7 +1443,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
             if other_count > 0:
                 msg = self.tr("Schema has {0} view(s) from other sessions.\nDrop anyway?").format(other_count)
                 if QMessageBox.question(self, self.tr("Other Sessions Active"), msg,
-                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
                     show_info("FilterMate", self.tr("Schema cleanup cancelled"))
                     return
 
@@ -1861,7 +1864,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         """v4.0 Sprint 16: Update loading state for expression widgets."""
         self._expression_loading = loading
         try:
-            cursor, widgets = (Qt.WaitCursor if loading else Qt.PointingHandCursor), []
+            cursor, widgets = (Qt.CursorShape.WaitCursor if loading else Qt.CursorShape.PointingHandCursor), []
             if groupbox in ("single_selection", None): widgets.extend([self.mFieldExpressionWidget_exploring_single_selection, self.mFeaturePickerWidget_exploring_single_selection])
             if groupbox in ("multiple_selection", None):
                 widgets.extend([
@@ -4145,7 +4148,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                         checked_count = 0
                         for i in range(lw.count()):
                             item = lw.item(i)
-                            if item and item.checkState() == Qt.Checked:
+                            if item and item.checkState() == Qt.CheckState.Checked:
                                 checked_count += 1
                         logger.info(f"     checked items count: {checked_count}")
                     else:
@@ -4577,9 +4580,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                                     item = list_widget.item(i)
                                     item_pk = str(item.data(3)) if item.data(3) is not None else ""
                                     should_check = item_pk in selected_pk_values
-                                    current_state = item.checkState() == Qt.Checked
+                                    current_state = item.checkState() == Qt.CheckState.Checked
                                     if should_check != current_state:
-                                        item.setCheckState(Qt.Checked if should_check else Qt.Unchecked)
+                                        item.setCheckState(Qt.CheckState.Checked if should_check else Qt.CheckState.Unchecked)
                                 logger.debug(f"_fallback_sync: Synced {len(selected_pk_values)} items in multiple picker")
                             finally:
                                 self._syncing_from_qgis = False
@@ -4858,8 +4861,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         checked = []
         w = self.widgets["FILTERING"]["LAYERS_TO_FILTER"]["WIDGET"]
         for i in range(w.count()):
-            if w.itemCheckState(i) == Qt.Checked:
-                d = w.itemData(i, Qt.UserRole)
+            if w.itemCheckState(i) == Qt.CheckState.Checked:
+                d = w.itemData(i, Qt.ItemDataRole.UserRole)
                 checked.append(d["layer_id"] if isinstance(d, dict) and "layer_id" in d else d if isinstance(d, str) else None)
         checked = [c for c in checked if c]
         if self._controller_integration: self._controller_integration.delegate_filtering_set_target_layer_ids(checked)
@@ -4885,8 +4888,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         checked = []
 
         for i in range(w.count()):
-            if w.itemCheckState(i) == Qt.Checked:
-                d = w.itemData(i, Qt.UserRole)
+            if w.itemCheckState(i) == Qt.CheckState.Checked:
+                d = w.itemData(i, Qt.ItemDataRole.UserRole)
 
                 # FIX 2026-01-22: Handle both dict and string data formats
                 if isinstance(d, dict) and 'layer_id' in d:
@@ -6546,7 +6549,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
                 logger.warning(f"Failed to sync export flags: {e}")
 
             # Show preserve groups dialog for GPKG / KML exports
-            # CRITICAL: QDialog.exec_() crashes QGIS 3.44 (access violation in
+            # CRITICAL: QDialog.exec() crashes QGIS 3.44 (access violation in
             # QgsCustomization::preNotify) because the nested event loop conflicts with
             # QGIS's event processing. Use dialog.open() (non-blocking, no nested loop)
             # with accepted/rejected signal connections instead.
@@ -6734,9 +6737,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, Ui_FilterMateDockWidgetBase):
         from qgis.PyQt.QtGui import QKeySequence
         self._reload_shortcut = QShortcut(QKeySequence("F5"), self)
         self._reload_shortcut.activated.connect(self._on_reload_layers_shortcut)
-        self._reload_shortcut.setContext(Qt.WidgetWithChildrenShortcut)
-        self._undo_shortcut = QShortcut(QKeySequence.Undo, self); self._undo_shortcut.activated.connect(self._on_undo_shortcut); self._undo_shortcut.setContext(Qt.WidgetWithChildrenShortcut)
-        self._redo_shortcut = QShortcut(QKeySequence.Redo, self); self._redo_shortcut.activated.connect(self._on_redo_shortcut); self._redo_shortcut.setContext(Qt.WidgetWithChildrenShortcut)
+        self._reload_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self._undo_shortcut = QShortcut(QKeySequence.Undo, self); self._undo_shortcut.activated.connect(self._on_undo_shortcut); self._undo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self._redo_shortcut = QShortcut(QKeySequence.Redo, self); self._redo_shortcut.activated.connect(self._on_redo_shortcut); self._redo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         logger.debug("Keyboard shortcuts initialized: F5 = Reload layers, Ctrl+Z = Undo, Ctrl+Y = Redo")
 
     def _on_reload_layers_shortcut(self):

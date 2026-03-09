@@ -26,7 +26,7 @@ try:
         QWidget, QFrame
     )
 except ImportError:
-    from PyQt5.QtCore import Qt
+    from PyQt6.QtCore import Qt
     from PyQt5.QtWidgets import (
         QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
         QLabel, QPushButton, QCheckBox, QGroupBox,
@@ -104,7 +104,7 @@ class PostgresInfoDialog(QDialog):
             self._setup_available_ui(layout)
 
         # Button box
-        button_box = QDialogButtonBox(QDialogButtonBox.Close)
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
 
@@ -113,7 +113,7 @@ class PostgresInfoDialog(QDialog):
         # Warning icon and message
         icon_label = QLabel("⚠️")
         icon_label.setStyleSheet("font-size: 32px;")
-        icon_label.setAlignment(Qt.AlignCenter)
+        icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(icon_label)
 
         message = QLabel(
@@ -124,7 +124,7 @@ class PostgresInfoDialog(QDialog):
                 "Then restart QGIS to apply changes."
             )
         )
-        message.setAlignment(Qt.AlignCenter)
+        message.setAlignment(Qt.AlignmentFlag.AlignCenter)
         message.setWordWrap(True)
         message.setTextFormat(Qt.RichText)
         message.setStyleSheet("color: #666; padding: 20px;")
@@ -245,7 +245,7 @@ class PostgresInfoDialog(QDialog):
         if not self._session_manager:
             return
 
-        enabled = state == Qt.Checked
+        enabled = state == Qt.CheckState.Checked
         self._session_manager.auto_cleanup = enabled
         logger.debug(f"Auto-cleanup set to {enabled}")
 
@@ -272,11 +272,11 @@ class PostgresInfoDialog(QDialog):
                 "Any unsaved filter results will be lost.\n\n"
                 "Continue?"
             ),
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
         )
 
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.StandardButton.Yes:
             try:
                 # Note: cleanup requires a database connection
                 # The session manager tracks views, but actual cleanup

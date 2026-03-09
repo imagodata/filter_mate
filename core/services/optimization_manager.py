@@ -410,7 +410,7 @@ class OptimizationManager:
             parent=self.dockwidget
         )
 
-        result = dialog.exec_()
+        result = dialog.exec()
 
         if result:
             selected = dialog.get_selected_optimizations()

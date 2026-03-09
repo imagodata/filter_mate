@@ -13,7 +13,7 @@ import logging
 try:
     from qgis.PyQt.QtCore import QObject
 except ImportError:
-    from PyQt5.QtCore import QObject
+    from PyQt6.QtCore import QObject
 
 logger = logging.getLogger('FilterMate.SignalUtils')
 

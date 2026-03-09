@@ -58,7 +58,6 @@ from .infrastructure.utils import (
     is_sip_deleted, is_layer_valid as is_valid_layer, is_qgis_alive
 )
 from .infrastructure.logging import get_app_logger
-from .resources import *  # noqa: F401,F403 - Qt resources must be imported with wildcard
 
 # Get FilterMate logger BEFORE importing hexagonal services
 logger = get_app_logger()
@@ -1596,7 +1595,7 @@ class FilterMateApp:
 
         msg = QMessageBox()
         msg.setWindowTitle(QCoreApplication.translate("FilterMateApp", "FilterMate – Edit Mode Detected"))
-        msg.setIcon(QMessageBox.Warning)
+        msg.setIcon(QMessageBox.Icon.Warning)
         msg.setText(
             QCoreApplication.translate(
                 "FilterMateApp",
@@ -1627,7 +1626,7 @@ class FilterMateApp:
         )
         msg.setDefaultButton(cancel_btn)
 
-        msg.exec_()
+        msg.exec()
         clicked = msg.clickedButton()
 
         if clicked == commit_btn:

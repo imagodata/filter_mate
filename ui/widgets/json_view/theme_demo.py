@@ -20,7 +20,7 @@ class ThemeDemoDialog(QDialog):
     Usage in QGIS Python console:
         from ui.widgets.json_view.theme_demo import ThemeDemoDialog
         demo = ThemeDemoDialog()
-        demo.exec_()
+        demo.exec()
     """
 
     def __init__(self, parent=None):
@@ -51,7 +51,7 @@ class ThemeDemoDialog(QDialog):
 
         # Current theme info
         self.info_label = QLabel()
-        self.info_label.setAlignment(Qt.AlignCenter)
+        self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.info_label)
 
         # Create JSON view with sample data
@@ -195,7 +195,7 @@ def show_theme_demo():
     from qgis.utils import iface
 
     dialog = ThemeDemoDialog(iface.mainWindow())
-    dialog.exec_()
+    dialog.exec()
 
 
 if __name__ == "__main__":

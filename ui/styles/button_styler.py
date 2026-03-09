@@ -211,12 +211,12 @@ class ButtonStyler(StylerBase):
                 continue
 
             # Set cursor to pointing hand
-            button.setCursor(QCursor(Qt.PointingHandCursor))
+            button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
             # Set size policy: expand horizontally, fixed vertically
             button.setSizePolicy(
-                QSizePolicy.Expanding,
-                QSizePolicy.Fixed
+                QSizePolicy.Policy.Expanding,
+                QSizePolicy.Policy.Fixed
             )
 
             # Set minimum height based on button type
@@ -227,7 +227,7 @@ class ButtonStyler(StylerBase):
 
         # Configure QToolButtons similarly
         for button in self.dockwidget.findChildren(QToolButton):
-            button.setCursor(QCursor(Qt.PointingHandCursor))
+            button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
             button.setMinimumHeight(self._get_height('tool'))
 
     def _harmonize_checkable_pushbuttons(self) -> None:

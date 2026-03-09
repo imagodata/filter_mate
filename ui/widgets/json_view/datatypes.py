@@ -10,13 +10,13 @@ from qgis.gui import QgsColorButton
 from . import themes
 
 
-TypeRole = QtCore.Qt.UserRole + 1
+TypeRole = QtCore.Qt.ItemDataRole.UserRole + 1
 PLUGIN_DIR = ''
 
 
 class DataType(object):
     """Base class for data types."""
-    COLOR = QtCore.Qt.black
+    COLOR = QtCore.Qt.GlobalColor.black
     THEME_COLOR_KEY = 'string'  # Default theme color key
 
     def get_color(self):
@@ -50,10 +50,10 @@ class DataType(object):
     def serialize(self, model, item, data, parent):
         """Serialize this data type."""
         value_item = parent.child(item.row(), 1)
-        value = value_item.data(QtCore.Qt.DisplayRole)
+        value = value_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
         if isinstance(data, dict):
             key_item = parent.child(item.row(), 0)
-            key = key_item.data(QtCore.Qt.DisplayRole)
+            key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
             data[key] = value
         elif isinstance(data, list):
             data.append(value)
@@ -62,28 +62,28 @@ class DataType(object):
         """Create an item for the key column for this data type."""
         key_item = QtGui.QStandardItem(key)
         key_item.setData(datatype, TypeRole)
-        key_item.setData(datatype.__class__.__name__, QtCore.Qt.ToolTipRole)
+        key_item.setData(datatype.__class__.__name__, QtCore.Qt.ItemDataRole.ToolTipRole)
         key_item.setData(
             QtGui.QBrush(self.get_color()), QtCore.Qt.ForegroundRole)
         key_item.setFlags(
-            QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+            QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
         if editable and model.editable_keys:
-            key_item.setFlags(key_item.flags() | QtCore.Qt.ItemIsEditable)
+            key_item.setFlags(key_item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
         return key_item
 
     def value_item(self, value, model, key=None):
         """Create an item for the value column for this data type."""
         display_value = value
         item = QtGui.QStandardItem(display_value)
-        item.setData(display_value, QtCore.Qt.DisplayRole)
-        item.setData(value, QtCore.Qt.UserRole)
+        item.setData(display_value, QtCore.Qt.ItemDataRole.DisplayRole)
+        item.setData(value, QtCore.Qt.ItemDataRole.UserRole)
         item.setData(self, TypeRole)
         item.setData(QtGui.QBrush(self.get_color()), QtCore.Qt.ForegroundRole)
         item.setFlags(
-            QtCore.Qt.ItemIsSelectable |
-            QtCore.Qt.ItemIsEnabled)
+            QtCore.Qt.ItemFlag.ItemIsSelectable |
+            QtCore.Qt.ItemFlag.ItemIsEnabled)
         if model.editable_values:
-            item.setFlags(item.flags() | QtCore.Qt.ItemIsEditable)
+            item.setFlags(item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
         return item
 
 
@@ -101,16 +101,16 @@ class NoneType(DataType):
 
     def value_item(self, value, model, key=None):
         item = super(NoneType, self).value_item(value, model, key)
-        item.setData('None', QtCore.Qt.DisplayRole)
+        item.setData('None', QtCore.Qt.ItemDataRole.DisplayRole)
         return item
 
     def serialize(self, model, item, data, parent):
         value_item = parent.child(item.row(), 1)
-        value = value_item.data(QtCore.Qt.DisplayRole)
+        value = value_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
         value = value if value != 'None' else None
         if isinstance(data, dict):
             key_item = parent.child(item.row(), 0)
-            key = key_item.data(QtCore.Qt.DisplayRole)
+            key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
             data[key] = value
         elif isinstance(data, list):
             data.append(value)
@@ -145,7 +145,7 @@ class ColorType(DataType):
         color_button.setMaximumHeight(30)
 
         # Set initial color from current value
-        current_color = index.data(QtCore.Qt.DisplayRole)
+        current_color = index.data(QtCore.Qt.ItemDataRole.DisplayRole)
         if current_color:
             qcolor = QtGui.QColor(current_color)
             if qcolor.isValid():
@@ -161,7 +161,7 @@ class ColorType(DataType):
     def setEditorData(self, editor, index):
         """Set the editor data from the model."""
         if isinstance(editor, QgsColorButton):
-            color_str = index.data(QtCore.Qt.DisplayRole)
+            color_str = index.data(QtCore.Qt.ItemDataRole.DisplayRole)
             if color_str:
                 qcolor = QtGui.QColor(color_str)
                 if qcolor.isValid():
@@ -177,14 +177,14 @@ class ColorType(DataType):
             else:
                 hex_color = color.name(QtGui.QColor.HexRgb)
 
-            model.setData(index, hex_color, QtCore.Qt.EditRole)
+            model.setData(index, hex_color, QtCore.Qt.ItemDataRole.EditRole)
 
     def paint(self, painter, option, index):
         """Paint a color preview rectangle next to the color value."""
         painter.save()
 
         # Get color value
-        color_str = index.data(QtCore.Qt.DisplayRole)
+        color_str = index.data(QtCore.Qt.ItemDataRole.DisplayRole)
         qcolor = QtGui.QColor(color_str)
 
         if qcolor.isValid():
@@ -197,7 +197,7 @@ class ColorType(DataType):
                 rect.height() - 4
             )
             painter.fillRect(color_rect, qcolor)
-            painter.setPen(QtGui.QPen(QtCore.Qt.black, 1))
+            painter.setPen(QtGui.QPen(QtCore.Qt.GlobalColor.black, 1))
             painter.drawRect(color_rect)
 
             # Draw text after color rectangle
@@ -210,7 +210,7 @@ class ColorType(DataType):
             painter.setPen(self.get_color())
             painter.drawText(
                 text_rect,
-                QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft,
+                QtCore.Qt.AlignmentFlag.AlignVCenter | QtCore.Qt.AlignmentFlag.AlignLeft,
                 color_str
             )
         else:
@@ -218,7 +218,7 @@ class ColorType(DataType):
             painter.setPen(self.get_color())
             painter.drawText(
                 option.rect,
-                QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft,
+                QtCore.Qt.AlignmentFlag.AlignVCenter | QtCore.Qt.AlignmentFlag.AlignLeft,
                 " " + color_str
             )
 
@@ -250,20 +250,20 @@ class BoolType(DataType):
 
     def value_item(self, value, model, key=None):
         item = super(BoolType, self).value_item(value, model, key)
-        item.setCheckState(QtCore.Qt.Checked if value else QtCore.Qt.Unchecked)
-        item.setData('', QtCore.Qt.DisplayRole)
+        item.setCheckState(QtCore.Qt.CheckState.Checked if value else QtCore.Qt.CheckState.Unchecked)
+        item.setData('', QtCore.Qt.ItemDataRole.DisplayRole)
         if model.editable_values:
             item.setFlags(
-                item.flags() | QtCore.Qt.ItemIsEditable |
-                QtCore.Qt.ItemIsUserCheckable)
+                item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable |
+                QtCore.Qt.ItemFlag.ItemIsUserCheckable)
         return item
 
     def serialize(self, model, item, data, parent):
         value_item = parent.child(item.row(), 1)
-        value = value_item.checkState() == QtCore.Qt.Checked
+        value = value_item.checkState() == QtCore.Qt.CheckState.Checked
         if isinstance(data, dict):
             key_item = parent.child(item.row(), 0)
-            key = key_item.data(QtCore.Qt.DisplayRole)
+            key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
             data[key] = value
         elif isinstance(data, list):
             data.append(value)
@@ -287,14 +287,14 @@ class ListType(DataType):
 
     def value_item(self, value, model, key):
         item = QtGui.QStandardItem()
-        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+        item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
         return item
 
     def serialize(self, model, item, data, parent):
         key_item = parent.child(item.row(), 0)
         if key_item:
             if isinstance(data, dict):
-                key = key_item.data(QtCore.Qt.DisplayRole)
+                key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
                 data[key] = []
                 data = data[key]
             elif isinstance(data, list):
@@ -325,14 +325,14 @@ class DictType(DataType):
 
     def value_item(self, value, model, key):
         item = QtGui.QStandardItem()
-        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+        item.setFlags(QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
         return item
 
     def serialize(self, model, item, data, parent):
         key_item = parent.child(item.row(), 0)
         if key_item:
             if isinstance(data, dict):
-                key = key_item.data(QtCore.Qt.DisplayRole)
+                key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
                 data[key] = {}
                 data = data[key]
             elif isinstance(data, list):
@@ -366,7 +366,7 @@ class RangeType(DataType):
         return False
 
     def paint(self, painter, option, index):
-        data = index.data(QtCore.Qt.UserRole)
+        data = index.data(QtCore.Qt.ItemDataRole.UserRole)
 
         painter.save()
 
@@ -390,13 +390,13 @@ class RangeType(DataType):
             value_rect = QtCore.QRectF(
                 spinbox_option.rect.adjusted(6, 1, -2, -2))
             value = metrics.elidedText(
-                value, QtCore.Qt.ElideRight, value_rect.width() - 20)
+                value, QtCore.Qt.TextElideMode.ElideRight, value_rect.width() - 20)
             painter.drawText(value_rect, value)
 
         painter.restore()
 
     def createEditor(self, parent, option, index):
-        data = index.data(QtCore.Qt.UserRole)
+        data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         wid = QtWidgets.QWidget(parent)
         wid.setLayout(QtWidgets.QHBoxLayout(parent))
         wid.layout().setContentsMargins(0, 0, 0, 0)
@@ -436,24 +436,24 @@ class RangeType(DataType):
         # if isinstance(model, QtWidgets.QAbstractProxyModel):
         #    index = model.mapToSource(index)
         #    model = model.sourceModel()
-        data = index.data(QtCore.Qt.UserRole)
+        data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         data['start'] = editor.layout().itemAt(0).widget().value()
         data['end'] = editor.layout().itemAt(1).widget().value()
         data['step'] = editor.layout().itemAt(2).widget().value()
-        model.itemFromIndex(index).setData(data, QtCore.Qt.UserRole)
+        model.itemFromIndex(index).setData(data, QtCore.Qt.ItemDataRole.UserRole)
 
     def value_item(self, value, model, key=None):
         """Item representing a value."""
         value_item = super(RangeType, self).value_item(None, model, key)
-        value_item.setData(value, QtCore.Qt.UserRole)
+        value_item.setData(value, QtCore.Qt.ItemDataRole.UserRole)
         return value_item
 
     def serialize(self, model, item, data, parent):
         value_item = parent.child(item.row(), 1)
-        value = value_item.data(QtCore.Qt.UserRole)
+        value = value_item.data(QtCore.Qt.ItemDataRole.UserRole)
         if isinstance(data, dict):
             key_item = parent.child(item.row(), 0)
-            key = key_item.data(QtCore.Qt.DisplayRole)
+            key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
             data[key] = value
         elif isinstance(data, list):
             data.append(value)
@@ -471,10 +471,10 @@ class UrlType(DataType):
         return False
 
     def actions(self, index):
-        explore = QtWidgets.QAction(
+        explore = QtGui.QAction(
             QCoreApplication.translate("UrlType", "Explore ..."), None)
         explore.triggered.connect(
-            partial(webbrowser.open, index.data(QtCore.Qt.DisplayRole)))
+            partial(webbrowser.open, index.data(QtCore.Qt.ItemDataRole.DisplayRole)))
         return [explore]
 
 
@@ -496,18 +496,18 @@ class FilepathType(DataType):
         value_item = super(FilepathType, self).value_item(value, model, key)
         if os.path.exists(value):
             if os.path.isdir(value):
-                value_item.setData(value, QtCore.Qt.DisplayRole)
+                value_item.setData(value, QtCore.Qt.ItemDataRole.DisplayRole)
             elif os.path.isfile(value):
-                value_item.setData(os.path.basename(value), QtCore.Qt.DisplayRole)
-                value_item.setData(os.path.normcase(value), QtCore.Qt.UserRole)
+                value_item.setData(os.path.basename(value), QtCore.Qt.ItemDataRole.DisplayRole)
+                value_item.setData(os.path.normcase(value), QtCore.Qt.ItemDataRole.UserRole)
         return value_item
 
     def actions(self, index):
-        view = QtWidgets.QAction(
+        view = QtGui.QAction(
             QCoreApplication.translate("FilepathType", "View"), None)
-        self.change = QtWidgets.QAction(
+        self.change = QtGui.QAction(
             QCoreApplication.translate("FilepathType", "Change"), None)
-        path = index.data(QtCore.Qt.DisplayRole)
+        path = index.data(QtCore.Qt.ItemDataRole.DisplayRole)
         view.triggered.connect(partial(webbrowser.open, path))
         self.change.triggered.connect(partial(self.change_path, path, index))
         return [view, self.change]
@@ -558,16 +558,16 @@ class FilepathTypeImages(DataType):
     def value_item(self, value, model, key):
         """Item representing a value."""
         value_item = super(FilepathTypeImages, self).value_item(value, model, key)
-        value_item.setData(value, QtCore.Qt.DisplayRole)
-        value_item.setData(os.path.normcase(os.path.join(PLUGIN_DIR, "icons", value)), QtCore.Qt.UserRole)
+        value_item.setData(value, QtCore.Qt.ItemDataRole.DisplayRole)
+        value_item.setData(os.path.normcase(os.path.join(PLUGIN_DIR, "icons", value)), QtCore.Qt.ItemDataRole.UserRole)
         return value_item
 
     def actions(self, index):
-        view = QtWidgets.QAction(
+        view = QtGui.QAction(
             QCoreApplication.translate("FilepathTypeImages", "View"), None)
-        self.change = QtWidgets.QAction(
+        self.change = QtGui.QAction(
             QCoreApplication.translate("FilepathTypeImages", "Change"), None)
-        path_view = index.data(QtCore.Qt.UserRole)
+        path_view = index.data(QtCore.Qt.ItemDataRole.UserRole)
         path_change = os.path.normcase(os.path.join(PLUGIN_DIR, "icons"))
         view.triggered.connect(partial(webbrowser.open, path_view))
         self.change.triggered.connect(partial(self.change_icon, path_change, index))
@@ -622,7 +622,7 @@ class ChoicesType(DataType):
         return False
 
     def createEditor(self, parent, option, index):
-        data = index.data(QtCore.Qt.UserRole)
+        data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         cbx = QtWidgets.QComboBox(parent)
         cbx.addItems([str(d) for d in data['choices']])
         cbx.setCurrentIndex(cbx.findText(str(data['value'])))
@@ -632,26 +632,26 @@ class ChoicesType(DataType):
         return cbx
 
     def setModelData(self, editor, model, index):
-        data = index.data(QtCore.Qt.UserRole)
+        data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         data['value'] = data['choices'][editor.currentIndex()]
-        model.itemFromIndex(index).setData(data['value'], QtCore.Qt.DisplayRole)
-        model.itemFromIndex(index).setData(data, QtCore.Qt.UserRole)
+        model.itemFromIndex(index).setData(data['value'], QtCore.Qt.ItemDataRole.DisplayRole)
+        model.itemFromIndex(index).setData(data, QtCore.Qt.ItemDataRole.UserRole)
 
     def value_item(self, value, model, key=None):
         """Item representing a value with optional tooltip from description."""
         value_item = super(ChoicesType, self).value_item(value['value'], model, key)
-        value_item.setData(value, QtCore.Qt.UserRole)
+        value_item.setData(value, QtCore.Qt.ItemDataRole.UserRole)
         # Set tooltip from description if available
         if 'description' in value:
-            value_item.setData(str(value['description']), QtCore.Qt.ToolTipRole)
+            value_item.setData(str(value['description']), QtCore.Qt.ItemDataRole.ToolTipRole)
         return value_item
 
     def serialize(self, model, item, data, parent):
         value_item = parent.child(item.row(), 1)
-        value = value_item.data(QtCore.Qt.UserRole)
+        value = value_item.data(QtCore.Qt.ItemDataRole.UserRole)
         if isinstance(data, dict):
             key_item = parent.child(item.row(), 0)
-            key = key_item.data(QtCore.Qt.DisplayRole)
+            key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
             data[key] = value
         elif isinstance(data, list):
             data.append(value)
@@ -695,7 +695,7 @@ class ConfigValueType(DataType):
 
     def createEditor(self, parent, option, index):
         """Create appropriate editor based on value type."""
-        data = index.data(QtCore.Qt.UserRole)
+        data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         value = data.get('value')
 
         if isinstance(value, bool):
@@ -744,7 +744,7 @@ class ConfigValueType(DataType):
 
     def setModelData(self, editor, model, index):
         """Set model data based on editor type."""
-        data = index.data(QtCore.Qt.UserRole)
+        data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         original_value = data.get('value')
 
         if isinstance(editor, QtWidgets.QCheckBox):
@@ -776,8 +776,8 @@ class ConfigValueType(DataType):
         display_text = str(new_value)
         if isinstance(new_value, bool):
             display_text = 'true' if new_value else 'false'
-        model.itemFromIndex(index).setData(display_text, QtCore.Qt.DisplayRole)
-        model.itemFromIndex(index).setData(data, QtCore.Qt.UserRole)
+        model.itemFromIndex(index).setData(display_text, QtCore.Qt.ItemDataRole.DisplayRole)
+        model.itemFromIndex(index).setData(data, QtCore.Qt.ItemDataRole.UserRole)
 
     def value_item(self, value, model, key=None):
         """Item representing a value with optional tooltip from description."""
@@ -789,29 +789,29 @@ class ConfigValueType(DataType):
             display_text = str(actual_value) if actual_value is not None else ''
 
         value_item = QtGui.QStandardItem(display_text)
-        value_item.setData(display_text, QtCore.Qt.DisplayRole)
-        value_item.setData(value, QtCore.Qt.UserRole)
+        value_item.setData(display_text, QtCore.Qt.ItemDataRole.DisplayRole)
+        value_item.setData(value, QtCore.Qt.ItemDataRole.UserRole)
         value_item.setData(self, TypeRole)
         value_item.setData(QtGui.QBrush(self.get_color()), QtCore.Qt.ForegroundRole)
         value_item.setFlags(
-            QtCore.Qt.ItemIsSelectable |
-            QtCore.Qt.ItemIsEnabled)
+            QtCore.Qt.ItemFlag.ItemIsSelectable |
+            QtCore.Qt.ItemFlag.ItemIsEnabled)
         if model.editable_values:
-            value_item.setFlags(value_item.flags() | QtCore.Qt.ItemIsEditable)
+            value_item.setFlags(value_item.flags() | QtCore.Qt.ItemFlag.ItemIsEditable)
 
         # Set tooltip from description if available
         if isinstance(value, dict) and 'description' in value:
-            value_item.setData(str(value['description']), QtCore.Qt.ToolTipRole)
+            value_item.setData(str(value['description']), QtCore.Qt.ItemDataRole.ToolTipRole)
 
         return value_item
 
     def serialize(self, model, item, data, parent):
         """Serialize the full dict structure back."""
         value_item = parent.child(item.row(), 1)
-        value = value_item.data(QtCore.Qt.UserRole)
+        value = value_item.data(QtCore.Qt.ItemDataRole.UserRole)
         if isinstance(data, dict):
             key_item = parent.child(item.row(), 0)
-            key = key_item.data(QtCore.Qt.DisplayRole)
+            key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
             data[key] = value
         elif isinstance(data, list):
             data.append(value)

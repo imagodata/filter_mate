@@ -522,9 +522,9 @@ class FilteringController(BaseController, LayerSelectionMixin):
 
                 item = layers_widget.model().item(item_index)
                 if has_layers and layer_id in layers_to_filter:
-                    item.setCheckState(Qt.Checked)
+                    item.setCheckState(Qt.CheckState.Checked)
                 else:
-                    item.setCheckState(Qt.Unchecked)
+                    item.setCheckState(Qt.CheckState.Unchecked)
                 item_index += 1
 
             # DIAGNOSTIC v4.0.5: Log skipped layers
@@ -551,7 +551,7 @@ class FilteringController(BaseController, LayerSelectionMixin):
                     layers_widget.addItem(layer_icon, display_name, item_data)
                     item = layers_widget.model().item(item_index)
                     # Check if this layer was previously selected for filtering
-                    item.setCheckState(Qt.Checked if missing_layer.id() in layers_to_filter else Qt.Unchecked)
+                    item.setCheckState(Qt.CheckState.Checked if missing_layer.id() in layers_to_filter else Qt.CheckState.Unchecked)
                     item_index += 1
                     logger.info(f"✓ populate_layers_checkable_combobox: Added missing layer '{missing_layer.name()}'")
 

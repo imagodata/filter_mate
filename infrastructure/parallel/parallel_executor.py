@@ -382,7 +382,7 @@ class ParallelFilterExecutor:
         from qgis.core import QgsMessageLog, Qgis
         QgsMessageLog.logMessage(
             f"🔄 Filtering: {layer_name} ({provider_type})",
-            "FilterMate", Qgis.Info
+            "FilterMate", Qgis.MessageLevel.Info
         )
 
         try:
@@ -461,7 +461,7 @@ class ParallelFilterExecutor:
         from qgis.core import QgsMessageLog, Qgis
         QgsMessageLog.logMessage(
             f"🔄 Using SEQUENTIAL filtering for {layer_count} layers",
-            "FilterMate", Qgis.Info
+            "FilterMate", Qgis.MessageLevel.Info
         )
 
         # FIX v3.0.8: Log layer names to be processed
@@ -474,7 +474,7 @@ class ParallelFilterExecutor:
         logger.info(f"🔄 Layers to process: {layer_names}")
         QgsMessageLog.logMessage(
             f"📋 Layers queue: {', '.join(layer_names)}",
-            "FilterMate", Qgis.Info
+            "FilterMate", Qgis.MessageLevel.Info
         )
 
         # FIX v3.0.8: Check cancel_check status at start
@@ -485,7 +485,7 @@ class ParallelFilterExecutor:
                 logger.warning("⚠️ cancel_check() is already True at start - this will skip all layers!")
                 QgsMessageLog.logMessage(
                     "⚠️ Task already cancelled before filtering started!",
-                    "FilterMate", Qgis.Warning
+                    "FilterMate", Qgis.MessageLevel.Warning
                 )
 
         # STABILITY FIX v2.4.2: Track SQLite database file paths for inter-layer delay
@@ -562,7 +562,7 @@ class ParallelFilterExecutor:
         from qgis.core import QgsMessageLog, Qgis
         QgsMessageLog.logMessage(
             f"✓ Sequential filtering completed: {len(results)}/{len(layers)} layers",
-            "FilterMate", Qgis.Info
+            "FilterMate", Qgis.MessageLevel.Info
         )
 
         return results
