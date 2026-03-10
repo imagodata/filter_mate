@@ -148,6 +148,9 @@ class QFieldCloudExtension(BaseExtension):
             btn.setMaximumSize(export_btn.maximumSize())
             btn.setSizePolicy(export_btn.sizePolicy())
 
+        # Start disabled — enabled only when EXPORTING panel is active
+        btn.setEnabled(False)
+
         # Register as dockwidget attribute so ActionBarManager can find it
         dockwidget.pushButton_action_qfieldcloud = btn
 

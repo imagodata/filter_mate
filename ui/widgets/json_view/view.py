@@ -21,29 +21,32 @@ class JsonView(QtWidgets.QTreeView):
         self.customContextMenuRequested.connect(self._menu)
         self.setItemDelegate(delegate.JsonDelegate())
 
-        # Amélioration de la visibilité avec support du thème dark
+        # Apply theme-aware stylesheet
         self._apply_theme_stylesheet()
 
-        # Configuration additionnelle pour la lisibilité
+        # Visual configuration
         self.setAlternatingRowColors(True)
-        self.setUniformRowHeights(False)
+        self.setUniformRowHeights(True)
+        self.setAnimated(True)
+        self.setIndentation(18)
+        self.setRootIsDecorated(True)
+        self.setExpandsOnDoubleClick(True)
+        self.setWordWrap(False)
+
         font = self.font()
         font.setPointSize(9)
         self.setFont(font)
 
-        # Configuration des colonnes pour meilleure visibilité
+        # Column configuration
         header = self.header()
-        header.setStretchLastSection(False)
+        header.setStretchLastSection(True)
         header.setVisible(True)
-        header.setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
-        # Colonne Property (clé): largeur interactive avec minimum
+        header.setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.Interactive)
-        # Colonne Value: largeur interactive
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Interactive)
-        # Définir des largeurs initiales optimales
-        header.resizeSection(0, 180)
-        header.resizeSection(1, 240)
-        header.setMinimumSectionSize(120)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
+        header.resizeSection(0, 200)
+        header.setMinimumSectionSize(100)
+        header.setHighlightSections(False)
 
     def _apply_theme_stylesheet(self):
         """Apply stylesheet based on detected theme (dark/light)."""
@@ -61,90 +64,241 @@ class JsonView(QtWidgets.QTreeView):
                 is_dark = False
 
         if is_dark:
-            # Thème sombre optimisé
-            self.setStyleSheet("""
-                QTreeView {
-                    font-size: 9pt;
-                    background-color: #1E1E1E;
-                    alternate-background-color: #252526;
-                    selection-background-color: #264F78;
-                    selection-color: #FFFFFF;
-                    border: 1px solid #3E3E42;
-                    gridline-color: #3E3E42;
-                    color: #D4D4D4;
-                }
-                QTreeView::item {
-                    padding: 3px;
-                    min-height: 22px;
-                    border-bottom: 1px solid #2D2D30;
-                }
-                QTreeView::item:hover {
-                    background-color: #2A2D2E;
-                }
-                QTreeView::item:selected {
-                    background-color: #264F78;
-                    color: #FFFFFF;
-                }
-                QTreeView::item:selected:hover {
-                    background-color: #094771;
-                }
-                QTreeView::branch {
-                    background-color: transparent;
-                }
-                QHeaderView::section {
-                    background-color: #252526;
-                    padding: 4px;
-                    border: 1px solid #3E3E42;
-                    border-left: none;
-                    font-weight: bold;
-                    font-size: 9pt;
-                    min-height: 24px;
-                    color: #CCCCCC;
-                }
-                QHeaderView::section:first {
-                    border-left: 1px solid #3E3E42;
-                }
-            """)
+            self.setStyleSheet(self._dark_stylesheet())
         else:
-            # Thème clair
-            self.setStyleSheet("""
-                QTreeView {
-                    font-size: 9pt;
-                    background-color: #ffffff;
-                    alternate-background-color: #f5f5f5;
-                    selection-background-color: #0078d4;
-                    selection-color: white;
-                    border: 2px solid #999999;
-                    gridline-color: #d0d0d0;
-                }
-                QTreeView::item {
-                    padding: 3px;
-                    min-height: 22px;
-                    border-bottom: 1px solid #e0e0e0;
-                }
-                QTreeView::item:hover {
-                    background-color: #e5f3ff;
-                }
-                QTreeView::item:selected {
-                    background-color: #0078d4;
-                    color: white;
-                }
-                QTreeView::branch {
-                    background-color: transparent;
-                }
-                QHeaderView::section {
-                    background-color: #f0f0f0;
-                    padding: 4px;
-                    border: 1px solid #c0c0c0;
-                    border-left: none;
-                    font-weight: bold;
-                    font-size: 9pt;
-                    min-height: 24px;
-                }
-                QHeaderView::section:first {
-                    border-left: 1px solid #c0c0c0;
-                }
-            """)
+            self.setStyleSheet(self._light_stylesheet())
+
+    @staticmethod
+    def _dark_stylesheet():
+        """Dark theme stylesheet with enhanced tree indicators."""
+        return """
+            QTreeView {
+                font-size: 9pt;
+                background-color: #1E1E1E;
+                alternate-background-color: #232324;
+                selection-background-color: #264F78;
+                selection-color: #FFFFFF;
+                border: 1px solid #3E3E42;
+                color: #D4D4D4;
+                outline: none;
+            }
+            QTreeView::item {
+                padding: 2px 4px;
+                min-height: 24px;
+                border: none;
+                border-bottom: 1px solid #2A2A2D;
+            }
+            QTreeView::item:hover {
+                background-color: #2A2D2E;
+            }
+            QTreeView::item:selected {
+                background-color: #264F78;
+                color: #FFFFFF;
+            }
+            QTreeView::item:selected:hover {
+                background-color: #1B3A5C;
+            }
+
+            /* Tree branch indicators */
+            QTreeView::branch {
+                background-color: transparent;
+            }
+            QTreeView::branch:has-siblings:!adjoins-item {
+                border-image: none;
+                background: transparent;
+            }
+            QTreeView::branch:has-siblings:adjoins-item {
+                border-image: none;
+            }
+            QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+                border-image: none;
+            }
+            QTreeView::branch:has-children:!has-siblings:closed,
+            QTreeView::branch:closed:has-children:has-siblings {
+                image: none;
+                border-image: none;
+            }
+            QTreeView::branch:open:has-children:!has-siblings,
+            QTreeView::branch:open:has-children:has-siblings {
+                image: none;
+                border-image: none;
+            }
+
+            /* Indentation guide lines */
+            QTreeView::branch:has-siblings:!adjoins-item {
+                border-left: 1px solid #3E3E42;
+            }
+            QTreeView::branch:has-siblings:adjoins-item {
+                border-left: 1px solid #3E3E42;
+            }
+
+            /* Header */
+            QHeaderView::section {
+                background-color: #2D2D30;
+                padding: 5px 8px;
+                border: none;
+                border-bottom: 2px solid #007ACC;
+                border-right: 1px solid #3E3E42;
+                font-weight: bold;
+                font-size: 9pt;
+                min-height: 26px;
+                color: #CCCCCC;
+            }
+            QHeaderView::section:first {
+                border-left: none;
+            }
+            QHeaderView::section:last {
+                border-right: none;
+            }
+            QHeaderView::section:hover {
+                background-color: #353539;
+            }
+
+            /* Scrollbar */
+            QScrollBar:vertical {
+                background-color: #1E1E1E;
+                width: 10px;
+                margin: 0;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #424242;
+                min-height: 30px;
+                border-radius: 4px;
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #555555;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0;
+            }
+            QScrollBar:horizontal {
+                background-color: #1E1E1E;
+                height: 10px;
+                margin: 0;
+            }
+            QScrollBar::handle:horizontal {
+                background-color: #424242;
+                min-width: 30px;
+                border-radius: 4px;
+                margin: 2px;
+            }
+            QScrollBar::handle:horizontal:hover {
+                background-color: #555555;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0;
+            }
+        """
+
+    @staticmethod
+    def _light_stylesheet():
+        """Light theme stylesheet with enhanced tree indicators."""
+        return """
+            QTreeView {
+                font-size: 9pt;
+                background-color: #FFFFFF;
+                alternate-background-color: #F8F9FA;
+                selection-background-color: #0078D4;
+                selection-color: #FFFFFF;
+                border: 1px solid #D0D0D0;
+                color: #333333;
+                outline: none;
+            }
+            QTreeView::item {
+                padding: 2px 4px;
+                min-height: 24px;
+                border: none;
+                border-bottom: 1px solid #EEEEEE;
+            }
+            QTreeView::item:hover {
+                background-color: #E8F0FE;
+            }
+            QTreeView::item:selected {
+                background-color: #0078D4;
+                color: #FFFFFF;
+            }
+            QTreeView::item:selected:hover {
+                background-color: #106EBE;
+            }
+
+            /* Tree branch indicators */
+            QTreeView::branch {
+                background-color: transparent;
+            }
+            QTreeView::branch:has-siblings:!adjoins-item {
+                border-left: 1px solid #D0D0D0;
+            }
+            QTreeView::branch:has-siblings:adjoins-item {
+                border-left: 1px solid #D0D0D0;
+            }
+            QTreeView::branch:has-children:!has-siblings:closed,
+            QTreeView::branch:closed:has-children:has-siblings {
+                image: none;
+            }
+            QTreeView::branch:open:has-children:!has-siblings,
+            QTreeView::branch:open:has-children:has-siblings {
+                image: none;
+            }
+
+            /* Header */
+            QHeaderView::section {
+                background-color: #F3F3F3;
+                padding: 5px 8px;
+                border: none;
+                border-bottom: 2px solid #0078D4;
+                border-right: 1px solid #E0E0E0;
+                font-weight: bold;
+                font-size: 9pt;
+                min-height: 26px;
+                color: #444444;
+            }
+            QHeaderView::section:first {
+                border-left: none;
+            }
+            QHeaderView::section:last {
+                border-right: none;
+            }
+            QHeaderView::section:hover {
+                background-color: #E8E8E8;
+            }
+
+            /* Scrollbar */
+            QScrollBar:vertical {
+                background-color: #F5F5F5;
+                width: 10px;
+                margin: 0;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #C0C0C0;
+                min-height: 30px;
+                border-radius: 4px;
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #A0A0A0;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0;
+            }
+            QScrollBar:horizontal {
+                background-color: #F5F5F5;
+                height: 10px;
+                margin: 0;
+            }
+            QScrollBar::handle:horizontal {
+                background-color: #C0C0C0;
+                min-width: 30px;
+                border-radius: 4px;
+                margin: 2px;
+            }
+            QScrollBar::handle:horizontal:hover {
+                background-color: #A0A0A0;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0;
+            }
+        """
 
     # def leaveEvent(self, QEvent):
     #     self.onLeaveEvent.emit()

@@ -719,12 +719,28 @@ class FilterMate:
 
             registry = get_extension_registry()
             dw_results = registry.create_all_dockwidget_ui(self.app.dockwidget)
-            for ext_id, widgets in dw_results.items():
-                if widgets:
+            for ext_id, widgets_list in dw_results.items():
+                if widgets_list:
                     logger.debug(
                         "FilterMate: Extension '%s' added %d dockwidget widget(s)",
-                        ext_id, len(widgets),
+                        ext_id, len(widgets_list),
                     )
+
+            # Register dynamically-injected extension buttons in widgets dict
+            dw = self.app.dockwidget
+            if (hasattr(dw, 'pushButton_action_qfieldcloud')
+                    and hasattr(dw, 'widgets')
+                    and 'ACTION' in dw.widgets
+                    and 'QFIELDCLOUD' not in dw.widgets['ACTION']):
+                dw.widgets['ACTION']['QFIELDCLOUD'] = {
+                    'TYPE': 'PushButton',
+                    'WIDGET': dw.pushButton_action_qfieldcloud,
+                    'SIGNALS': [],
+                    'ICON': None,
+                }
+                # Sync enabled state with current panel
+                if hasattr(dw, 'select_tabTools_index'):
+                    dw.select_tabTools_index()
         except Exception as e:
             logger.warning("FilterMate: Extension dockwidget UI error: %s", e)
 

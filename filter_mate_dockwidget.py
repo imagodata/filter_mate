@@ -834,6 +834,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             ("ACTION", "UNFILTER"): "pushButton_action_unfilter",
             ("ACTION", "EXPORT"): "pushButton_action_export",
             ("ACTION", "ABOUT"): "pushButton_action_about",
+            ("ACTION", "QFIELDCLOUD"): "pushButton_action_qfieldcloud",
             ("EXPLORING", "IDENTIFY"): "pushButton_exploring_identify",
             ("EXPLORING", "ZOOM"): "pushButton_exploring_zoom",
             ("EXPLORING", "IS_SELECTING"): "pushButton_checkable_exploring_selecting",
@@ -3282,11 +3283,18 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.debug("select_tabTools_index: SKIPPED (widgets not initialized)")
             return
         self.tabTools_current_index = self.widgets["DOCK"]["TOOLS"]["WIDGET"].currentIndex()
-        states = {0: (True, True, True, True, False), 1: (False, False, False, False, True), 2: (False,) * 5}
-        s = states.get(self.tabTools_current_index, (False,) * 5)
+        #                           FILTER  UNDO   REDO   UNFILT EXPORT QFCLOUD
+        states = {
+            0: (True,  True,  True,  True,  False, False),  # FILTERING
+            1: (False, False, False, False, True,  True),    # EXPORTING
+            2: (False, False, False, False, False, False),   # EXPLORING
+        }
+        s = states.get(self.tabTools_current_index, (False,) * 6)
         logger.info(f"select_tabTools_index: index={self.tabTools_current_index}, EXPORT enabled={s[4]}")
-        for i, name in enumerate(['FILTER', 'UNDO_FILTER', 'REDO_FILTER', 'UNFILTER', 'EXPORT']):
-            self.widgets["ACTION"][name]["WIDGET"].setEnabled(s[i])
+        for i, name in enumerate(['FILTER', 'UNDO_FILTER', 'REDO_FILTER', 'UNFILTER', 'EXPORT', 'QFIELDCLOUD']):
+            widget_info = self.widgets["ACTION"].get(name)
+            if widget_info and widget_info.get("WIDGET"):
+                widget_info["WIDGET"].setEnabled(s[i])
         self.widgets["ACTION"]["ABOUT"]["WIDGET"].setEnabled(True)
         self.set_exporting_properties()
         self.undoRedoStateRequested.emit()
