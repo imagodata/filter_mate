@@ -223,11 +223,28 @@ class CredentialsManager:
         return self.get_url(), self.get_username(), self.get_token()
 
     def has_credentials(self) -> bool:
-        """Check if minimal credentials are configured (URL + username + token)."""
+        """Check if minimal credentials are configured.
+
+        First checks FilterMate's own storage, then falls back to
+        checking QFieldSync's stored auth (if the plugin is installed).
+        """
         url = self.get_url()
         username = self.get_username()
         token = self.get_token()
-        return bool(url and username and token)
+        if url and username and token:
+            return True
+
+        # Fallback: check if QFieldSync has stored credentials
+        return self._has_qfieldsync_credentials()
+
+    def _has_qfieldsync_credentials(self) -> bool:
+        """Check if QFieldSync plugin has stored credentials."""
+        try:
+            from qfieldsync.core.cloud_api import CloudNetworkAccessManager
+            nam = CloudNetworkAccessManager()
+            return nam.is_authenticated() or nam.has_token()
+        except Exception:
+            return False
 
     def clear(self) -> None:
         """Remove all stored credentials."""

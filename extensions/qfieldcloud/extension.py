@@ -15,19 +15,19 @@ from ..base import BaseExtension, ExtensionMetadata, ExtensionState
 logger = logging.getLogger('FilterMate.Extensions.QFieldCloud')
 
 # Lazy availability flag — set on first check_dependencies() call
-_SDK_AVAILABLE: Optional[bool] = None
+_QFIELDSYNC_AVAILABLE: Optional[bool] = None
 
 
-def _check_sdk_available() -> bool:
-    """Check if qfieldcloud-sdk is importable."""
-    global _SDK_AVAILABLE
-    if _SDK_AVAILABLE is None:
+def _check_qfieldsync_available() -> bool:
+    """Check if qfieldsync plugin is installed and importable."""
+    global _QFIELDSYNC_AVAILABLE
+    if _QFIELDSYNC_AVAILABLE is None:
         try:
-            import qfieldcloud_sdk  # noqa: F401
-            _SDK_AVAILABLE = True
+            from qfieldsync.core.cloud_api import CloudNetworkAccessManager  # noqa: F401
+            _QFIELDSYNC_AVAILABLE = True
         except ImportError:
-            _SDK_AVAILABLE = False
-    return _SDK_AVAILABLE
+            _QFIELDSYNC_AVAILABLE = False
+    return _QFIELDSYNC_AVAILABLE
 
 
 class QFieldCloudExtension(BaseExtension):
@@ -53,6 +53,8 @@ class QFieldCloudExtension(BaseExtension):
         self._sdk_adapter = None
         self._qfc_service = None
         self._signals = None
+        self._qfc_button = None
+        self._dockwidget = None
 
     @property
     def metadata(self) -> ExtensionMetadata:
@@ -63,74 +65,42 @@ class QFieldCloudExtension(BaseExtension):
             description="Export filtered layers to QFieldCloud in one click",
             author="FilterMate Team / WYRE FTTH",
             min_qgis_version="3.28",
-            dependencies=["qfieldcloud_sdk"],
+            dependencies=["qfieldsync"],
             optional_dependencies=["keyring"],
             icon_name="qfieldcloud.png",
         )
 
     def check_dependencies(self) -> bool:
-        """Check if qfieldcloud-sdk is installed."""
-        available = _check_sdk_available()
-        if not available:
-            logger.info(
-                "QFieldCloud extension disabled: qfieldcloud-sdk not installed. "
-                "Install with: pip install qfieldcloud-sdk"
-            )
-        return available
+        """Check if QFieldSync plugin is installed."""
+        return _check_qfieldsync_available()
 
     def initialize(self, iface: Any) -> None:
         """
         Initialize QFieldCloud services.
 
-        Creates credentials manager, SDK adapter, project builder,
-        and the orchestration service.
+        Creates credentials manager and signals. SDK adapter and push
+        service are created lazily when needed (and only if SDK is available).
         """
         self._iface = iface
 
-        # Import here to avoid import errors when SDK is absent
+        # These modules have no SDK dependency
         from .credentials_manager import CredentialsManager
         from .signals import QFieldCloudSignals
 
-        # Initialize credentials manager
         self._credentials_manager = CredentialsManager()
         self.register_service('credentials', self._credentials_manager)
 
-        # Initialize signals
         self._signals = QFieldCloudSignals()
         self.register_service('signals', self._signals)
 
-        # SDK adapter and service are created lazily (need credentials first)
         logger.info("QFieldCloud extension initialized")
 
     def create_ui(self, toolbar: Any, menu_name: str) -> List[Any]:
-        """Create QFieldCloud toolbar button and menu entries."""
-        from qgis.PyQt.QtGui import QAction, QIcon
-        from qgis.PyQt.QtWidgets import QMenu
+        """Create QFieldCloud menu entries (button is in dockwidget)."""
+        from qgis.PyQt.QtGui import QAction
 
         actions = []
-        plugin_dir = os.path.dirname(os.path.dirname(os.path.dirname(
-            os.path.abspath(__file__)
-        )))
-        icon_path = os.path.join(plugin_dir, 'icons', 'qfieldcloud.png')
-
-        # Fallback icon if custom icon doesn't exist
-        if not os.path.isfile(icon_path):
-            icon_path = os.path.join(plugin_dir, 'icons', 'export.png')
-        if not os.path.isfile(icon_path):
-            icon = QIcon()
-        else:
-            icon = QIcon(icon_path)
-
-        # Main push action
         parent = self._iface.mainWindow()
-        push_action = QAction(icon, "Export QFieldCloud", parent)
-        push_action.setToolTip(
-            "Export filtered layers to QFieldCloud"
-        )
-        push_action.triggered.connect(self._on_push_triggered)
-        push_action.setEnabled(True)
-        toolbar.addAction(push_action)
-        actions.append(push_action)
 
         # Settings action (menu only)
         settings_action = QAction("QFieldCloud Settings...", parent)
@@ -141,11 +111,89 @@ class QFieldCloudExtension(BaseExtension):
         self._actions = actions
         return actions
 
+    def create_dockwidget_ui(self, dockwidget: Any) -> List[Any]:
+        """Inject QFieldCloud export button into the dockwidget action bar."""
+        from qgis.PyQt.QtCore import QSize, Qt
+        from qgis.PyQt.QtGui import QCursor, QIcon
+        from qgis.PyQt.QtWidgets import QPushButton
+
+        plugin_dir = os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(__file__)
+        )))
+        icon_path = os.path.join(plugin_dir, 'icons', 'qfield.png')
+        if not os.path.isfile(icon_path):
+            icon_path = os.path.join(plugin_dir, 'icons', 'export.png')
+
+        # Copy size from existing export button for consistency
+        export_btn = getattr(dockwidget, 'pushButton_action_export', None)
+        icon_size = QSize(35, 35)
+        if export_btn:
+            icon_size = export_btn.iconSize()
+
+        # Create the push button matching the style of existing action buttons
+        btn = QPushButton(dockwidget)
+        btn.setObjectName("pushButton_action_qfieldcloud")
+        btn.setToolTip("Export filtered layers to QFieldCloud")
+        btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        if os.path.isfile(icon_path):
+            btn.setIcon(QIcon(icon_path))
+        btn.setIconSize(icon_size)
+        btn.setFlat(True)
+        btn.setText("")
+        btn.clicked.connect(self._on_push_triggered)
+
+        # Copy size policy and constraints from export button
+        if export_btn:
+            btn.setMinimumSize(export_btn.minimumSize())
+            btn.setMaximumSize(export_btn.maximumSize())
+            btn.setSizePolicy(export_btn.sizePolicy())
+
+        # Register as dockwidget attribute so ActionBarManager can find it
+        dockwidget.pushButton_action_qfieldcloud = btn
+
+        # Find the action bar layout and insert after the export button
+        layout = getattr(dockwidget, 'horizontalLayout_actions_bottom', None)
+
+        if layout and export_btn:
+            for i in range(layout.count()):
+                item = layout.itemAt(i)
+                if item and item.widget() == export_btn:
+                    layout.insertWidget(i + 1, btn)
+                    break
+            else:
+                layout.addWidget(btn)
+        elif layout:
+            layout.addWidget(btn)
+        else:
+            logger.warning("QFieldCloud: Could not find action bar layout in dockwidget")
+            return []
+
+        # Store reference for teardown
+        self._qfc_button = btn
+        self._dockwidget = dockwidget
+
+        logger.info("QFieldCloud: Export button added to dockwidget action bar")
+        return [btn]
+
     def teardown(self) -> None:
         """Cleanup all QFieldCloud resources."""
-        # Remove UI actions
+        # Remove dockwidget button and attribute
+        if self._qfc_button is not None:
+            if hasattr(self, '_dockwidget') and self._dockwidget is not None:
+                try:
+                    delattr(self._dockwidget, 'pushButton_action_qfieldcloud')
+                except AttributeError:
+                    pass
+                self._dockwidget = None
+            self._qfc_button.setParent(None)
+            self._qfc_button.deleteLater()
+            self._qfc_button = None
+
+        # Remove UI actions (menu entries)
         for action in self._actions:
-            if action.parent():
+            if hasattr(action, 'removeAction'):
+                continue
+            if hasattr(action, 'parent') and callable(action.parent) and action.parent():
                 action.parent().removeAction(action)
         self._actions.clear()
 
@@ -177,14 +225,15 @@ class QFieldCloudExtension(BaseExtension):
         if self._sdk_adapter is not None:
             return self._sdk_adapter
 
-        if not self._credentials_manager or not self._credentials_manager.has_credentials():
-            return None
-
         from .sdk_adapter import QFieldCloudAdapter
 
-        url = self._credentials_manager.get_url()
-        token = self._credentials_manager.get_token()
-        self._sdk_adapter = QFieldCloudAdapter(url=url, token=token)
+        # Create adapter using QFieldSync's CloudNetworkAccessManager
+        self._sdk_adapter = QFieldCloudAdapter()
+
+        # Try auto-login with QFieldSync's stored credentials
+        if not self._sdk_adapter.is_authenticated:
+            self._sdk_adapter.auto_login()
+
         self.register_service('adapter', self._sdk_adapter)
         return self._sdk_adapter
 
@@ -227,7 +276,10 @@ class QFieldCloudExtension(BaseExtension):
 
     def _on_push_triggered(self) -> None:
         """Handle 'Export QFieldCloud' button click."""
-        if not self._credentials_manager.has_credentials():
+        # Try to get adapter and auto-login
+        adapter = self.get_sdk_adapter()
+        if adapter is None or not adapter.is_authenticated:
+            # No QFieldSync credentials either — open settings
             self._on_settings_triggered()
             return
 

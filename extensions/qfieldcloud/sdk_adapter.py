@@ -1,20 +1,27 @@
 # -*- coding: utf-8 -*-
 """
-Adapter wrapping qfieldcloud-sdk Client for FilterMate.
+Adapter wrapping QFieldSync's CloudNetworkAccessManager for FilterMate.
+
+Uses the already-installed QFieldSync QGIS plugin instead of requiring
+a separate pip install of qfieldcloud-sdk. This means zero additional
+dependencies — if QFieldSync is installed in QGIS, this works.
 
 Responsibilities:
-- Authentication (login/token)
+- Authentication (reuses QFieldSync credentials or login)
 - Project CRUD
 - File upload with retry and backoff
 - Job management (trigger + poll status)
 
-Thread safety: NOT thread-safe. Use from main thread or QgsTask only.
+Note: QFieldSync's API is async (QNetworkReply-based). This adapter
+provides synchronous wrappers using QEventLoop for FilterMate's use.
 """
 
 import logging
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from qgis.PyQt.QtCore import QEventLoop, QTimer
 
 from .exceptions import (
     QFieldCloudAuthError,
@@ -27,70 +34,105 @@ from .exceptions import (
 logger = logging.getLogger('FilterMate.Extensions.QFieldCloud.Adapter')
 
 
+def _wait_for_reply(reply, timeout_ms=30000):
+    """Wait synchronously for a QNetworkReply to finish."""
+    if reply is None:
+        return None
+    if reply.isFinished():
+        return reply
+
+    loop = QEventLoop()
+    reply.finished.connect(loop.quit)
+    # Safety timeout
+    timer = QTimer()
+    timer.setSingleShot(True)
+    timer.timeout.connect(loop.quit)
+    timer.start(timeout_ms)
+    loop.exec()
+    timer.stop()
+    return reply
+
+
 class QFieldCloudAdapter:
     """
-    Adapter for qfieldcloud-sdk Client.
+    Adapter wrapping QFieldSync's CloudNetworkAccessManager.
 
-    Wraps the SDK with retry logic, structured error handling,
-    and FilterMate-specific exception types.
+    Reuses QFieldSync's existing auth system (QgsAuthManager) and
+    network infrastructure. No additional pip packages needed.
     """
 
     MAX_RETRIES = 3
     BACKOFF_BASE = 2  # seconds
-    CONNECTION_TIMEOUT = 30  # seconds
-    UPLOAD_TIMEOUT = 300  # seconds
 
-    def __init__(self, url: str, token: Optional[str] = None):
-        from qfieldcloud_sdk import sdk
+    def __init__(self, network_manager=None):
+        """
+        Initialize adapter.
 
-        self._client = sdk.Client(url=url)
-        self._url = url
-        self._token = token
-        self._authenticated = False
+        Args:
+            network_manager: Optional CloudNetworkAccessManager instance.
+                If None, creates one from QFieldSync.
+        """
+        if network_manager is not None:
+            self._nam = network_manager
+        else:
+            from qfieldsync.core.cloud_api import CloudNetworkAccessManager
+            self._nam = CloudNetworkAccessManager()
+
         self._username: Optional[str] = None
-
-        # If token provided, set it directly
-        if token:
-            self._client.token = token
-            self._authenticated = True
 
     @property
     def is_authenticated(self) -> bool:
-        """Check if currently authenticated."""
-        return self._authenticated
+        """Check if currently authenticated via QFieldSync."""
+        return self._nam.is_authenticated()
 
     @property
     def username(self) -> Optional[str]:
         """Get authenticated username."""
-        return self._username
+        if self._username:
+            return self._username
+        return self._nam.get_username()
+
+    @property
+    def server_url(self) -> str:
+        """Get current server URL."""
+        return self._nam.server_url
 
     # ------------------------------------------------------------------
     # Authentication
     # ------------------------------------------------------------------
 
-    def login(self, username: str, password: str) -> str:
+    def login(self, username: str, password: str) -> bool:
         """
-        Authenticate with username/password and return JWT token.
+        Authenticate with username/password via QFieldSync.
 
         Args:
             username: QFieldCloud username
             password: QFieldCloud password
 
         Returns:
-            JWT token string
+            True if login succeeded
 
         Raises:
             QFieldCloudAuthError: If authentication fails
         """
         try:
-            token = self._client.login(username, password)
-            self._authenticated = True
-            self._username = username
-            self._token = token
-            logger.info("Authenticated as '%s'", username)
-            return token
+            reply = self._nam.login_with_credentials(username, password)
+            if reply is not None:
+                _wait_for_reply(reply, timeout_ms=30000)
+
+            if self._nam.is_authenticated():
+                self._username = username
+                logger.info("Authenticated as '%s' via QFieldSync", username)
+                return True
+            else:
+                error = self._nam.get_last_login_error()
+                raise QFieldCloudAuthError(
+                    f"Authentication failed for user '{username}'",
+                    details=error or "Unknown error",
+                )
+        except QFieldCloudAuthError:
+            raise
         except Exception as e:
-            self._authenticated = False
             raise QFieldCloudAuthError(
                 f"Authentication failed for user '{username}'",
                 details=str(e),
@@ -98,10 +140,10 @@ class QFieldCloudAdapter:
 
     def login_with_token(self, token: str) -> bool:
         """
-        Authenticate with existing JWT token.
+        Authenticate with existing token.
 
         Args:
-            token: JWT token
+            token: QFieldCloud API token
 
         Returns:
             True if token is valid
@@ -110,20 +152,48 @@ class QFieldCloudAdapter:
             QFieldCloudAuthError: If token is invalid
         """
         try:
-            self._client.token = token
-            # Validate token by listing projects (lightweight call)
-            self._client.list_projects()
-            self._authenticated = True
-            self._token = token
-            logger.info("Authenticated with token")
-            return True
+            self._nam.set_token(token)
+            # Validate by fetching projects
+            projects = self._nam.get_projects_not_async()
+            if self._nam.is_authenticated():
+                logger.info("Authenticated with token via QFieldSync")
+                return True
+            raise QFieldCloudAuthError(
+                "Token authentication failed",
+                details="Token rejected by server",
+            )
+        except QFieldCloudAuthError:
+            raise
         except Exception as e:
-            self._authenticated = False
-            self._client.token = None
             raise QFieldCloudAuthError(
                 "Token authentication failed",
                 details=str(e),
             ) from e
+
+    def auto_login(self) -> bool:
+        """
+        Try to auto-login using QFieldSync's stored credentials.
+
+        Returns:
+            True if already authenticated or auto-login succeeded
+        """
+        if self._nam.is_authenticated():
+            return True
+
+        try:
+            self._nam.auto_login_attempt()
+            # Wait briefly for async login to complete
+            from qgis.PyQt.QtCore import QCoreApplication
+            for _ in range(50):  # 5 seconds max
+                QCoreApplication.processEvents()
+                if self._nam.is_authenticated():
+                    logger.info("Auto-login succeeded via QFieldSync")
+                    return True
+                time.sleep(0.1)
+        except Exception as e:
+            logger.debug("Auto-login failed: %s", e)
+
+        return self._nam.is_authenticated()
 
     # ------------------------------------------------------------------
     # Projects
@@ -131,7 +201,7 @@ class QFieldCloudAdapter:
 
     def list_projects(self) -> List[Dict[str, Any]]:
         """
-        List accessible projects.
+        List accessible projects (synchronous).
 
         Returns:
             List of project dictionaries
@@ -141,7 +211,7 @@ class QFieldCloudAdapter:
         """
         self._require_auth()
         try:
-            return list(self._client.list_projects())
+            return self._nam.get_projects_not_async()
         except Exception as e:
             raise QFieldCloudError(
                 "Failed to list projects", details=str(e)
@@ -157,12 +227,6 @@ class QFieldCloudAdapter:
         """
         Create a new QFieldCloud project.
 
-        Args:
-            name: Project name
-            description: Project description
-            owner: Owner username (defaults to authenticated user)
-            is_public: Whether project is publicly visible
-
         Returns:
             Project dict with 'id' key
 
@@ -171,12 +235,15 @@ class QFieldCloudAdapter:
         """
         self._require_auth()
         try:
-            result = self._client.create_project(
+            project_owner = owner or self.username or ""
+            reply = self._nam.create_project(
                 name=name,
-                owner=owner or self._username or "",
+                owner=project_owner,
                 description=description,
-                is_public=is_public,
+                private=not is_public,
             )
+            _wait_for_reply(reply, timeout_ms=30000)
+            result = self._nam.json_object(reply)
             project_id = result.get('id', '')
             logger.info("Created project '%s' (id: %s)", name, project_id)
             return result
@@ -187,15 +254,7 @@ class QFieldCloudAdapter:
             ) from e
 
     def find_project_by_name(self, name: str) -> Optional[Dict[str, Any]]:
-        """
-        Find a project by name.
-
-        Args:
-            name: Project name to search for
-
-        Returns:
-            Project dict or None if not found
-        """
+        """Find a project by name."""
         projects = self.list_projects()
         for project in projects:
             if project.get('name') == name:
@@ -232,8 +291,7 @@ class QFieldCloudAdapter:
         """
         self._require_auth()
 
-        files_to_upload = list(local_dir.glob(filter_glob))
-        files_to_upload = [f for f in files_to_upload if f.is_file()]
+        files_to_upload = [f for f in local_dir.glob(filter_glob) if f.is_file()]
 
         if not files_to_upload:
             logger.warning("No files found in %s matching '%s'", local_dir, filter_glob)
@@ -241,21 +299,24 @@ class QFieldCloudAdapter:
 
         total = len(files_to_upload)
         uploaded = 0
-        last_error = None
 
         for i, file_path in enumerate(files_to_upload):
             relative_path = file_path.relative_to(local_dir)
 
             for attempt in range(self.MAX_RETRIES):
                 try:
-                    self._client.upload_files(
-                        project_id=project_id,
-                        upload_type="project",
-                        project_path=str(local_dir),
-                        filter_glob=str(relative_path),
+                    # Upload single file via QFieldSync
+                    uri = ["files", project_id, str(relative_path)]
+                    reply = self._nam.cloud_upload_files(
+                        uri=uri,
+                        filenames=[str(file_path)],
                     )
-                    uploaded += 1
+                    _wait_for_reply(reply, timeout_ms=300000)
 
+                    # Check for errors
+                    self._nam.handle_response(reply, should_parse_json=False)
+
+                    uploaded += 1
                     if progress_callback:
                         percent = int((i + 1) / total * 100)
                         progress_callback(
@@ -265,7 +326,6 @@ class QFieldCloudAdapter:
                     break
 
                 except Exception as e:
-                    last_error = e
                     if attempt < self.MAX_RETRIES - 1:
                         wait = self.BACKOFF_BASE ** (attempt + 1)
                         logger.warning(
@@ -294,9 +354,6 @@ class QFieldCloudAdapter:
         """
         Trigger QGIS packaging job on the server.
 
-        Args:
-            project_id: QFieldCloud project ID
-
         Returns:
             Job ID
 
@@ -305,10 +362,11 @@ class QFieldCloudAdapter:
         """
         self._require_auth()
         try:
-            result = self._client.job_trigger(
-                project_id=project_id,
-                job_type="package",
+            reply = self._nam.cloud_post(
+                ["jobs", project_id, "package"]
             )
+            _wait_for_reply(reply, timeout_ms=30000)
+            result = self._nam.json_object(reply)
             job_id = result.get('id', '')
             logger.info(
                 "Triggered packaging job %s for project %s", job_id, project_id
@@ -330,18 +388,11 @@ class QFieldCloudAdapter:
         """
         Poll job status until finished or timeout.
 
-        Args:
-            job_id: Job ID to poll
-            timeout: Maximum wait time in seconds
-            interval: Poll interval in seconds
-            progress_callback: Optional callable(percent, message)
-
         Returns:
             Final job status dict
 
         Raises:
             QFieldCloudTimeoutError: If timeout exceeded
-            QFieldCloudError: On API error
         """
         self._require_auth()
         start_time = time.time()
@@ -349,7 +400,9 @@ class QFieldCloudAdapter:
 
         while time.time() - start_time < timeout:
             try:
-                status = self._client.job_status(job_id)
+                reply = self._nam.cloud_get(["jobs", job_id])
+                _wait_for_reply(reply, timeout_ms=30000)
+                status = self._nam.json_object(reply)
                 current_status = status.get('status', 'unknown')
 
                 if current_status != last_status:
@@ -359,9 +412,7 @@ class QFieldCloudAdapter:
                 if progress_callback:
                     elapsed = int(time.time() - start_time)
                     percent = min(int(elapsed / timeout * 100), 99)
-                    progress_callback(
-                        percent, f"Packaging: {current_status}"
-                    )
+                    progress_callback(percent, f"Packaging: {current_status}")
 
                 if current_status in ('finished', 'stopped', 'failed'):
                     return status
@@ -376,47 +427,12 @@ class QFieldCloudAdapter:
         )
 
     # ------------------------------------------------------------------
-    # Collaborators
-    # ------------------------------------------------------------------
-
-    def add_collaborator(
-        self, project_id: str, username: str, role: str = "editor"
-    ) -> None:
-        """
-        Add a collaborator to a project.
-
-        Args:
-            project_id: QFieldCloud project ID
-            username: Collaborator username
-            role: Role (reader, reporter, editor, manager, admin)
-
-        Raises:
-            QFieldCloudError: On failure
-        """
-        self._require_auth()
-        try:
-            self._client.add_project_collaborator(
-                project_id=project_id,
-                username=username,
-                role=role,
-            )
-            logger.info(
-                "Added collaborator '%s' (%s) to project %s",
-                username, role, project_id,
-            )
-        except Exception as e:
-            raise QFieldCloudError(
-                f"Failed to add collaborator '{username}' to {project_id}",
-                details=str(e),
-            ) from e
-
-    # ------------------------------------------------------------------
     # URL helpers
     # ------------------------------------------------------------------
 
     def get_project_url(self, project_id: str) -> str:
         """Return the web URL for a project."""
-        base = self._url.rstrip('/')
+        base = self._nam.server_url.rstrip('/')
         # Strip /api/v1 if present to get web URL
         if base.endswith('/api/v1'):
             base = base[:-7]
@@ -428,5 +444,7 @@ class QFieldCloudAdapter:
 
     def _require_auth(self) -> None:
         """Raise if not authenticated."""
-        if not self._authenticated:
-            raise QFieldCloudAuthError("Not authenticated. Call login() first.")
+        if not self.is_authenticated:
+            raise QFieldCloudAuthError(
+                "Not authenticated. Login via QFieldSync or call login() first."
+            )

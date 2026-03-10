@@ -706,6 +706,28 @@ class FilterMate:
             logger.warning("FilterMate: Extension system error: %s", e)
             # Extension failure must never block core FilterMate
 
+    def _init_extensions_dockwidget_ui(self):
+        """Inject extension UI into the FilterMate dockwidget.
+
+        Called after the dockwidget is created and shown, allowing extensions
+        to add buttons/widgets inside the dockwidget (e.g., in the action bar).
+        """
+        if not self.app or not self.app.dockwidget:
+            return
+        try:
+            from .extensions import get_extension_registry
+
+            registry = get_extension_registry()
+            dw_results = registry.create_all_dockwidget_ui(self.app.dockwidget)
+            for ext_id, widgets in dw_results.items():
+                if widgets:
+                    logger.debug(
+                        "FilterMate: Extension '%s' added %d dockwidget widget(s)",
+                        ext_id, len(widgets),
+                    )
+        except Exception as e:
+            logger.warning("FilterMate: Extension dockwidget UI error: %s", e)
+
     def _teardown_extensions(self):
         """Teardown all extensions on plugin unload."""
         try:
@@ -1421,6 +1443,7 @@ class FilterMate:
                     if self.app.dockwidget:
                         self.app.dockwidget.closingPlugin.connect(self.onClosePlugin)
                         self._show_discord_welcome()
+                        self._init_extensions_dockwidget_ui()
                 else:
                     # App already exists, call run() which will show the dockwidget
                     # and refresh layers if needed

@@ -146,6 +146,22 @@ class BaseExtension(ABC):
         """
         return []
 
+    def create_dockwidget_ui(self, dockwidget: Any) -> List[Any]:
+        """
+        Create UI elements inside the FilterMate dockwidget.
+
+        Override to inject buttons/widgets into the dockwidget (e.g.,
+        next to the export button in the action bar). Called after the
+        dockwidget is created and shown.
+
+        Args:
+            dockwidget: FilterMate dockwidget instance
+
+        Returns:
+            List of QWidget instances created
+        """
+        return []
+
     @abstractmethod
     def teardown(self) -> None:
         """

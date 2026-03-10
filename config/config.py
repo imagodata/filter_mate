@@ -64,6 +64,18 @@ FALLBACK_CONFIG = {
                 "description": "Use materialized views for filtering"
             }
         }
+    },
+    "EXTENSIONS": {
+        "qfieldcloud": {
+            "enabled": {
+                "value": True,
+                "description": "Enable/disable the QFieldCloud extension"
+            },
+            "dismiss_missing_deps_warning": {
+                "value": False,
+                "description": "Do not show the missing dependencies warning"
+            }
+        }
     }
 }
 
