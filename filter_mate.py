@@ -309,6 +309,11 @@ class FilterMate:
             # Note: layersAdded signal is NOT connected to avoid freeze issues
             logger.debug("FilterMate.initGui: Connecting auto-activation signals")
             self._connect_auto_activation_signals()
+
+            # v5.0: Discover and initialize extensions (QFieldCloud, etc.)
+            logger.debug("FilterMate.initGui: Initializing extension system")
+            self._init_extensions()
+
             logger.debug("FilterMate.initGui: Completed successfully")
 
         except Exception as e:
@@ -661,6 +666,55 @@ class FilterMate:
         except Exception as e:
             logger.warning(f"Error checking geometry validation settings: {e}")
             # Don't block plugin initialization if check fails
+
+    def _init_extensions(self):
+        """Discover and initialize FilterMate extensions (v5.0).
+
+        Extensions are optional modules (e.g., QFieldCloud) that add
+        functionality without modifying core FilterMate code.
+        If no extensions are found or all fail, FilterMate works normally.
+        """
+        try:
+            from .extensions import get_extension_registry
+
+            registry = get_extension_registry()
+            discovered = registry.discover_extensions()
+
+            if discovered:
+                logger.info("FilterMate: Discovered %d extension(s): %s",
+                           len(discovered), ', '.join(discovered))
+
+                # Initialize all available extensions
+                results = registry.initialize_all(self.iface)
+                for ext_id, success in results.items():
+                    if success:
+                        logger.info("FilterMate: Extension '%s' initialized", ext_id)
+                    else:
+                        logger.debug("FilterMate: Extension '%s' not available", ext_id)
+
+                # Create UI for initialized extensions
+                ui_results = registry.create_all_ui(self.toolbar, self.menu)
+                for ext_id, actions in ui_results.items():
+                    if actions:
+                        self.actions.extend(actions)
+                        logger.debug("FilterMate: Extension '%s' added %d UI action(s)",
+                                    ext_id, len(actions))
+            else:
+                logger.debug("FilterMate: No extensions found")
+
+        except Exception as e:
+            logger.warning("FilterMate: Extension system error: %s", e)
+            # Extension failure must never block core FilterMate
+
+    def _teardown_extensions(self):
+        """Teardown all extensions on plugin unload."""
+        try:
+            from .extensions import get_extension_registry
+            registry = get_extension_registry()
+            registry.teardown_all()
+            logger.debug("FilterMate: Extensions torn down")
+        except Exception as e:
+            logger.debug("FilterMate: Extension teardown error: %s", e)
 
     def _connect_auto_activation_signals(self):
         """Connect signals to handle project changes and reload layers.
@@ -1164,6 +1218,9 @@ class FilterMate:
                     logger.debug("FilterMate: FeaturePickerWidget cleared during unload")
             except Exception as e:
                 logger.debug(f"FilterMate: Error clearing FeaturePickerWidget during unload: {e}")
+
+        # v5.0: Teardown extensions before core cleanup
+        self._teardown_extensions()
 
         # Nettoyer les ressources de l'application FilterMate
         if self.app:
