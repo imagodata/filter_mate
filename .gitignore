@@ -86,3 +86,17 @@ coverage/
 # PML (per-project config and state)
 .pml.json
 .pml/
+
+# OpenClaw workspace state
+.openclaw/
+
+# OpenClaw agent files
+AGENTS.md
+SOUL.md
+IDENTITY.md
+USER.md
+TOOLS.md
+HEARTBEAT.md
+MEMORY.md
+memory/
+BOOTSTRAP.md
