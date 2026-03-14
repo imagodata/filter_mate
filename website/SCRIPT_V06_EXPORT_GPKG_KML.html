@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SCRIPT_V06_EXPORT_GPKG_KML.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="filtermate--video-06--export-geopackage--kml-pro">FilterMate — VIDEO 06 : Export GeoPackage &amp; KML Pro</h1>
+<p><strong>Version</strong> : 4.6.1 | <strong>Date</strong> : 14 Mars 2026
+<strong>Niveau</strong> : Intermediaire | <strong>Duree</strong> : 8-10 min | <strong>Prerequis</strong> : V02 (Filtrage Geometrique : Les Bases)
+<strong>Langue</strong> : Francais (sous-titres EN disponibles)</p>
+<blockquote>
+<p><strong>Objectifs pedagogiques :</strong></p>
+<ul>
+<li>Comprendre le dialogue ExportGroupRecapDialog (confirmation avant export)</li>
+<li>Choisir entre GPKG et KML selon le cas d'usage</li>
+<li>Comprendre QML (fidelite QGIS) vs SLD (portabilite OGC) pour les styles</li>
+<li>Preserver la hierarchie de groupes dans le GPKG (Preserve group structure)</li>
+<li>Utiliser le batch mode (un fichier par couche)</li>
+<li>Export streaming pour volumes &gt; 10 000 entites</li>
+<li>Cas d'usage : livrable client QGIS-to-QGIS vs partage Google Earth</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="plan-de-la-video">Plan de la video</h2>
+<table>
+<thead>
+<tr>
+<th>Temps</th>
+<th>Contenu</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0:00</td>
+<td>Pourquoi exporter ? Deux cas : livrable QGIS-to-QGIS vs partage Google Earth</td>
+<td>Diagramme</td>
+</tr>
+<tr>
+<td>0:30</td>
+<td>Onglet Export — vue d'ensemble des 6 toggles</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>1:00</td>
+<td>ExportGroupRecapDialog : arborescence QTreeWidget, resume N couches / M groupes, chemin de sortie</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>1:45</td>
+<td>Checkbox &quot;Preserve group structure in GPKG&quot; + bouton Export vert #27ae60</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>2:15</td>
+<td>GPKG : format recommande pour livrable QGIS-to-QGIS complet</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>3:00</td>
+<td>KML : format recommande pour partage Google Earth / utilisateurs non-QGIS</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>3:30</td>
+<td>QML vs SLD : QML = fidelite QGIS totale ; SLD = standard OGC portable — les deux activables simultanement</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>4:15</td>
+<td>Preserve group structure : la vraie valeur ajoutee — hierarchie reconstruite a l'ouverture</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>5:00</td>
+<td>Batch mode : un fichier par couche (vs tout dans un GPKG)</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>5:45</td>
+<td>Streaming 10k+ : FilterMate fragmente et reassemble pour eviter les timeout memoire</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>6:30</td>
+<td>Ouvrir le GPKG resultant — projet embarque, styles et groupes intacts</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>7:30</td>
+<td>Recapitulatif : GPKG pour equipe QGIS, KML pour livraison terrain / client non-SIG</td>
+<td>Schema</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Piege : Export = features visibles (filtrees). Faire Unfilter avant si on veut tout exporter.</td>
+<td>Info</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-0--hook--contexte-000---030">SEQUENCE 0 — HOOK &amp; CONTEXTE (0:00 - 0:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran splitte en deux : a gauche, un projet QGIS avec 8 couches, symbologie complexe, groupes imbriques. A droite, un seul fichier <code>.gpkg</code> de 12 Mo. Transition : double-clic sur le GPKG, QGIS reconstruit tout automatiquement — groupes, styles, projection.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Vous avez passe des heures a organiser votre projet QGIS. Des groupes bien structures, de la symbologie aux petits oignons, des filtres precis. Et maintenant, il faut livrer tout ca a un collegue ou a un client. Comment faire sans perdre votre travail ?&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate peut emballer tout votre projet — couches, styles, hierarchie de groupes — dans un seul fichier GeoPackage. Et si votre destinataire utilise Google Earth plutot que QGIS, le format KML est la en alternative. C'est ce qu'on va voir dans cette video.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme-1--gpkg-vs-kml--arbre-de-decision">Diagramme 1 — GPKG vs KML : arbre de decision</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    EXPORT["FilterMate Export Engine"]
+    EXPORT --> GPKG_PATH["GeoPackage .gpkg"]
+    EXPORT --> KML_PATH["KML/KMZ"]
+    GPKG_PATH --> GPKG_USE["Usage : Livrable QGIS-to-QGIS<br/>Projet embarque, Styles QML, Hierarchie groupes, Multi-couches"]
+    KML_PATH --> KML_USE["Usage : Partage Google Earth<br/>Ouverture universelle, Styles SLD, Partage terrain"]
+    style GPKG_PATH fill:#1565C0,color:#fff
+    style KML_PATH fill:#E65100,color:#fff
+    style EXPORT fill:#F57C00,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-1--onglet-export--vue-densemble-030---100">SEQUENCE 1 — ONGLET EXPORT : VUE D'ENSEMBLE (0:30 - 1:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Zoom sur l'onglet EXPORTING du Toolbox Zone. Annotation numerotee de chaque toggle de la barre laterale gauche (1 a 6). Surbrillance progressive de chaque zone au fur et a mesure de la narration.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;On passe dans l'onglet EXPORTING du Toolbox. C'est le deuxieme onglet, juste a cote du filtrage. La structure est la meme que pour le filtrage : une barre laterale de 6 boutons a gauche, et la zone de configuration a droite.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Chaque bouton-toggle active ou desactive une section. Si un toggle est eteint, la section correspondante est grisee — pas cachee, grisee. Vous pouvez donc toujours voir ce qui existe, meme si ce n'est pas actif.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;De haut en bas : Layers, pour selectionner les couches a exporter. Projection, pour choisir le CRS de sortie. Styles, pour embarquer la symbologie. Datatype, pour le format de sortie. Output Folder, pour le dossier de destination. Et Zip, pour compresser le resultat.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme-2--structure-de-longlet-exporting-barre-laterale">Diagramme 2 — Structure de l'onglet EXPORTING (barre laterale)</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    subgraph SIDEBAR["Barre laterale EXPORTING<br/>(6 toggles)"]
+        direction TB
+        T1["1. Layers<br/>layers.png<br/>Couches a exporter"]
+        T2["2. Projection<br/>projection_black.png<br/>CRS de sortie"]
+        T3["3. Styles<br/>styles_black.png<br/>QML / SLD"]
+        T4["4. Datatype<br/>datatype.png<br/>Format (GPKG, KML...)"]
+        T5["5. Output Folder<br/>folder_black.png<br/>Dossier + Batch"]
+        T6["6. Zip<br/>zip.png<br/>Compression + Batch"]
+        T1 --- T2 --- T3 --- T4 --- T5 --- T6
+    end
+
+    subgraph WIDGETS["Zone de configuration (droite)"]
+        direction TB
+        W1["Checkable ComboBox<br/>cocher les couches"]
+        W2["QgsProjectionSelectionWidget<br/>ex: EPSG:4326"]
+        W3["ComboBox Styles<br/>QML / SLD / Les deux"]
+        W4["ComboBox Format<br/>GeoPackage, KML, SHP..."]
+        W5["LineEdit + Browse<br/>+ Checkbox Batch"]
+        W6["LineEdit + Browse<br/>+ Checkbox Batch"]
+    end
+
+    T1 --> W1
+    T2 --> W2
+    T3 --> W3
+    T4 --> W4
+    T5 --> W5
+    T6 --> W6
+
+    style SIDEBAR fill:#F57C00,color:#fff
+    style WIDGETS fill:#1565C0,color:#fff
+    style T1 fill:#E65100,color:#fff
+    style T2 fill:#E65100,color:#fff
+    style T3 fill:#E65100,color:#fff
+    style T4 fill:#E65100,color:#fff
+    style T5 fill:#E65100,color:#fff
+    style T6 fill:#E65100,color:#fff
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Astuce : vous n'etes pas oblige d'activer tous les toggles. Le minimum pour exporter, c'est Layers — pour choisir quoi exporter — et Output Folder ou Zip — pour dire ou le mettre. Tout le reste est optionnel.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-2--exportgrouprecapdialog--confirmation-avant-export-100---145">SEQUENCE 2 — EXPORTGROUPRECAPDIALOG : CONFIRMATION AVANT EXPORT (1:00 - 1:45)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Clic sur le bouton Export de l'Action Bar. Le dialogue ExportGroupRecapDialog s'ouvre. Annotation de chaque element : titre, arborescence QTreeWidget (icones dossier pour les groupes, icones fichier pour les couches), resume &quot;N couches dans M groupes + K hors groupe&quot;, chemin de destination, checkbox, boutons Annuler / Exporter.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Quand vous cliquez sur le bouton Export dans la barre d'action, FilterMate ne lance pas l'export directement. D'abord, il affiche une boite de dialogue de confirmation — le ExportGroupRecapDialog.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est un resume visuel de ce qui va etre exporte. En haut, le titre vous indique le format — 'Export GeoPackage' ou 'Export KML'. En dessous, une ligne de resume : par exemple, '7 couches dans 3 groupes + 2 hors groupe'.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Au centre, l'arborescence. C'est un QTreeWidget qui reproduit la hierarchie de vos groupes QGIS. Les dossiers representent les groupes, les fichiers representent les couches. Tout est deploye par defaut pour que vous puissiez verifier d'un coup d'oeil.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En bas, le chemin de destination. Et la fameuse checkbox 'Preserve group structure in GPKG'. On y revient juste apres.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Deux boutons : Annuler a gauche, Exporter a droite. Notez le bouton Exporter : il est vert — exactement la teinte #27ae60 — avec le texte en gras et un padding genereux. C'est volontaire. C'est l'action principale, elle doit sauter aux yeux.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-3--checkbox-preserve-group-structure-145---215">SEQUENCE 3 — CHECKBOX PRESERVE GROUP STRUCTURE (1:45 - 2:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Zoom sur la checkbox &quot;Preserve group structure in GPKG&quot;. Montrer les deux etats : activee (quand des groupes existent) et grisee (quand toutes les couches sont a la racine). Tooltip visible : &quot;Embeds a QGIS project in the GeoPackage that restores the group tree structure on opening&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Cette checkbox est le coeur de l'export intelligent de FilterMate. Quand elle est cochee, FilterMate ne se contente pas d'ecrire les donnees dans le GeoPackage. Il embarque aussi un projet QGIS complet — un QGZ — directement dans une table speciale du fichier.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;A l'ouverture du GPKG, QGIS lit cette table, et reconstruit automatiquement votre arborescence : groupes, sous-groupes, ordre des couches, symbologie, tout.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Attention : cette checkbox est intelligente. Si vos couches n'appartiennent a aucun groupe — si tout est a la racine — la checkbox se grise automatiquement. Le tooltip change aussi pour vous l'indiquer : 'No group detected — all layers are at the root level'. Pas de groupe, pas besoin de preservation.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour le format KML, le texte change : 'Group layers in a single KML file with folders'. La logique est la meme, mais adaptee au format.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-4--geopackage--le-format-pour-les-equipes-qgis-215---300">SEQUENCE 4 — GEOPACKAGE : LE FORMAT POUR LES EQUIPES QGIS (2:15 - 3:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema anime montrant le contenu interne d'un fichier GeoPackage : tables de donnees vecteur, table <code>layer_styles</code>, table <code>qgis_projects</code>. Parallele visuel avec un projet QGIS classique.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le GeoPackage, c'est un conteneur SQLite. Mais vu par FilterMate, c'est bien plus qu'une base de donnees. C'est un livrable complet.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Quand vous exportez en GPKG, voici ce qui est ecrit dans le fichier. D'abord, les tables de donnees — une par couche. Vos entites, vos attributs, vos geometries, tout est la. Si un filtre est actif, seules les entites visibles sont exportees. C'est un point important — on y revient en fin de video.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ensuite, la table <code>layer_styles</code>. Elle contient la symbologie QML de chaque couche. Quand QGIS ouvre le GPKG, il applique automatiquement ces styles. Vos categories, vos graduations, vos etiquettes — tout est restaure.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Enfin, la table <code>qgis_projects</code>. C'est ici que FilterMate stocke le projet embarque. Ce mini-QGZ contient l'arborescence des groupes, l'ordre des couches, et les references vers les tables du GPKG. Un double-clic sur le fichier, et QGIS reconstruit votre projet a l'identique.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est le format ideal pour le livrable QGIS-to-QGIS. Tout dans un seul fichier, zero dependance externe.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme-3--pipeline-dexport-geopackage">Diagramme 3 — Pipeline d'export GeoPackage</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    subgraph INPUT["Projet QGIS actuel"]
+        L1["Couche 1 (filtree)"]
+        L2["Couche 2 (filtree)"]
+        L3["Couche 3 (non filtree)"]
+        G1["Groupe Transport"]
+        G2["Groupe Bati"]
+        STYLES["Styles / Symbologie"]
+        CRS_IN["CRS : EPSG:2154"]
+    end
+    INPUT --> ENGINE["FilterMate Export Engine"]
+    ENGINE --> STEP1["1. Extraction entites filtrees"]
+    ENGINE --> STEP2["2. Copie des styles QML"]
+    ENGINE --> STEP3["3. Reconstruction arborescence"]
+    ENGINE --> STEP4["4. Reprojection CRS"]
+    ENGINE --> STEP5["5. Generation projet QGZ"]
+    STEP1 --> GPKG["GeoPackage .gpkg"]
+    STEP2 --> GPKG
+    STEP3 --> GPKG
+    STEP4 --> GPKG
+    STEP5 --> GPKG
+    GPKG --> TABLE1["Table : couche_1"]
+    GPKG --> TABLE2["Table : couche_2"]
+    GPKG --> TABLE_PROJ["Table : qgis_projects"]
+    GPKG --> TABLE_STYLE["Table : layer_styles"]
+    TABLE_PROJ --> OPEN["Double-clic → QGIS ouvre le projet → Tout est reconstruit"]
+    style ENGINE fill:#F57C00,color:#fff
+    style GPKG fill:#1565C0,color:#fff
+    style OPEN fill:#388E3C,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-5--kml--le-format-pour-google-earth-300---330">SEQUENCE 5 — KML : LE FORMAT POUR GOOGLE EARTH (3:00 - 3:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Meme projet que precedemment, mais exporte en KML. Ouverture dans Google Earth (ou Google Earth Pro). Les couches apparaissent avec une symbologie simplifiee, organisees en dossiers <code>&lt;Folder&gt;</code>.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Maintenant, imaginons un autre scenario. Votre client n'a pas QGIS. Il utilise Google Earth, ou il veut simplement visualiser les donnees sur un fond satellite sans rien installer de complexe.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est la que le KML entre en jeu. KML — Keyhole Markup Language — c'est le format natif de Google Earth. Quand vous exportez en KML, FilterMate ecrit vos geometries et attributs dans un fichier XML structure avec des balises <code>&lt;Folder&gt;</code> pour reproduire les groupes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le KML est plus limite que le GPKG : pas de projet embarque, pas de styles QML, moins de metadonnees. Mais il a un avantage decisif : l'ouverture universelle. Google Earth, Google Maps, ArcGIS Online, et des dizaines d'autres outils lisent le KML sans configuration.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Regle simple : equipe SIG → GPKG. Client terrain ou non-SIG → KML.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-6--qml-vs-sld--choisir-ses-styles-330---415">SEQUENCE 6 — QML VS SLD : CHOISIR SES STYLES (3:30 - 4:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran splitte en trois : a gauche, le rendu QGIS original. Au centre, le rendu avec style QML reimporte (identique). A droite, le rendu avec style SLD (differences mineures visibles : certaines etiquettes, certains renderers specifiques QGIS manquants).</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;L'onglet Styles vous propose deux formats de symbologie. C'est un choix qui a un vrai impact sur la fidelite de votre export.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Premier format : QML. C'est le format natif de QGIS. Il capture absolument tout : les categories, les graduations, les rule-based, les etiquettes, les effets de dessin, les echelles de visibilite. Si votre destinataire ouvre le fichier dans QGIS, il retrouve exactement le meme rendu que vous. Fidelite totale, zero perte.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Deuxieme format : SLD — Styled Layer Descriptor. C'est un standard OGC, c'est-a-dire un format inter-logiciel. GeoServer, MapServer, ArcGIS, QGIS — tous lisent le SLD. Mais la conversion n'est pas parfaite. Certains renderers specifiques QGIS n'ont pas d'equivalent SLD, donc il y a une perte possible.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et voila la bonne nouvelle : vous n'avez pas a choisir. Activez les deux en meme temps. FilterMate exporte les deux formats cote a cote. Le destinataire QGIS utilisera le QML, le destinataire GeoServer utilisera le SLD.&quot;</em></p>
+</blockquote>
+<h3 id="tableau-comparatif-a-afficher-a-lecran">Tableau comparatif (a afficher a l'ecran)</h3>
+<table>
+<thead>
+<tr>
+<th>Critere</th>
+<th>QML</th>
+<th>SLD</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fidelite QGIS</td>
+<td>Totale (100%)</td>
+<td>Partielle (~80%)</td>
+</tr>
+<tr>
+<td>Portabilite</td>
+<td>QGIS uniquement</td>
+<td>OGC standard (multi-logiciel)</td>
+</tr>
+<tr>
+<td>Categories / Graduations</td>
+<td>Oui</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td>Rule-based renderers</td>
+<td>Oui</td>
+<td>Partiel</td>
+</tr>
+<tr>
+<td>Effets de dessin (draw effects)</td>
+<td>Oui</td>
+<td>Non</td>
+</tr>
+<tr>
+<td>Etiquettes avancees</td>
+<td>Oui</td>
+<td>Partiel</td>
+</tr>
+<tr>
+<td>Exportables simultanement</td>
+<td>Oui</td>
+<td>Oui</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-7--preserve-group-structure--la-valeur-ajoutee-415---500">SEQUENCE 7 — PRESERVE GROUP STRUCTURE : LA VALEUR AJOUTEE (4:15 - 5:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo en deux temps. Premier temps : export GPKG sans preservation → ouverture dans QGIS → couches en vrac a la racine. Deuxieme temps : export GPKG avec preservation → ouverture dans QGIS → groupes et sous-groupes reconstruits, ordre des couches identique.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour bien comprendre la valeur de la checkbox 'Preserve group structure', voyons la difference.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Sans la preservation : j'exporte mes 7 couches en GPKG. J'ouvre le fichier dans QGIS. Les donnees sont la, les styles aussi, mais les couches sont empilees a la racine. Plus de groupes, plus de hierarchie. Pour un projet avec 3 couches, ca va. Pour un projet avec 20 couches organisees en 5 groupes et sous-groupes, c'est la catastrophe.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Avec la preservation : meme export, meme ouverture. Cette fois, QGIS lit la table <code>qgis_projects</code> du GPKG, detecte le projet embarque, et reconstruit toute l'arborescence. Groupe 'Transport' avec ses 3 couches. Groupe 'Bati' avec ses 4 couches. Sous-groupe 'Bati historique' a l'interieur. Exactement comme dans votre projet original.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est ca, la vraie valeur ajoutee de FilterMate sur l'export. Ce n'est pas juste un export de donnees — c'est un export de projet.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-8--batch-mode--un-fichier-par-couche-500---545">SEQUENCE 8 — BATCH MODE : UN FICHIER PAR COUCHE (5:00 - 5:45)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Interface FilterMate avec la checkbox &quot;Batch&quot; cochee a cote de Output Folder. Puis l'explorateur de fichiers montrant le dossier de sortie avec un fichier par couche : <code>routes.gpkg</code>, <code>batiments.gpkg</code>, <code>communes.gpkg</code>, etc.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Par defaut, FilterMate ecrit toutes les couches selectionnees dans un seul fichier GPKG. C'est le mode combine. Mais parfois, on a besoin de fichiers separes — un par couche.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est le batch mode. Cochez la case 'Batch' a cote du toggle Output Folder, et FilterMate va generer un fichier distinct pour chaque couche. Les noms sont derives du nom de la couche, automatiquement nettoyes pour etre compatibles avec le systeme de fichiers.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le batch mode existe aussi pour le Zip : un ZIP par couche, au lieu d'une seule archive.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Quand utiliser le batch ? Quand chaque couche a un destinataire different. Quand vous integrez les exports dans un pipeline automatise qui attend un fichier par couche. Ou quand vous voulez partager uniquement certaines couches, sans donner acces aux autres.&quot;</em></p>
+</blockquote>
+<h3 id="tableau--batch-vs-combine">Tableau — Batch vs Combine</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Output Folder</th>
+<th>Zip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Combine</strong> (defaut)</td>
+<td>1 fichier GPKG contenant toutes les couches</td>
+<td>1 archive ZIP</td>
+</tr>
+<tr>
+<td><strong>Batch</strong></td>
+<td>1 fichier GPKG par couche</td>
+<td>1 archive ZIP par couche</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-9--streaming-export--10-000-entites-545---630">SEQUENCE 9 — STREAMING EXPORT : 10 000+ ENTITES (5:45 - 6:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Export d'une couche PostGIS de 50 000 batiments. La barre de progression avance par paliers. Annotation &quot;Chunk 1/10 : 5 000 features&quot;, &quot;Chunk 2/10 : 5 000 features&quot;, etc. L'utilisation memoire reste stable (graphique RAM en surimpression, optionnel).</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour les petites couches — quelques centaines, quelques milliers d'entites — l'export est instantane. Mais que se passe-t-il quand vous avez 50 000 batiments, ou 200 000 points d'interet ?&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate detecte automatiquement les volumes. A partir de 10 000 entites, il bascule en mode streaming. Au lieu de charger toutes les entites en memoire d'un coup, il les traite par paquets de 5 000.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Chunk 1 : les 5 000 premieres entites sont lues, ecrites dans le GPKG, puis liberees de la memoire. Chunk 2 : les 5 000 suivantes. Et ainsi de suite. Le resultat est exactement le meme qu'un export standard — la fragmentation est totalement transparente.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pourquoi c'est important ? Parce que sur un poste avec 8 Go de RAM, un export brut de 200 000 entites avec geometries complexes peut consommer 2 a 3 Go de memoire d'un coup. Le streaming maintient la consommation constante, autour de 200-300 Mo, quel que soit le volume.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Vous n'avez rien a configurer. C'est automatique.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-10--ouvrir-le-gpkg-resultant-630---730">SEQUENCE 10 — OUVRIR LE GPKG RESULTANT (6:30 - 7:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo en 3 etapes. Etape 1 : naviguer vers le fichier GPKG dans l'explorateur de fichiers. Etape 2 : double-clic. Etape 3 : QGIS ouvre un nouveau projet avec toutes les couches, tous les groupes, tous les styles. Comparaison cote a cote avec le projet original (split screen).</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Voila le moment de verite. J'ai exporte mon projet avec 7 couches dans 3 groupes, styles QML, CRS EPSG:2154. Le fichier fait 12 Mo.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Double-clic sur le fichier. QGIS detecte le projet embarque dans la table <code>qgis_projects</code>. Il ouvre un nouveau projet, charge les couches depuis les tables du GPKG, applique les styles depuis <code>layer_styles</code>, et reconstruit l'arborescence de groupes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Mettons cote a cote : a gauche, mon projet original. A droite, le projet restaure depuis le GPKG. Les groupes sont la. Les sous-groupes aussi. L'ordre des couches est respecte. La symbologie est identique — memes categories, memes couleurs, memes etiquettes. Le CRS est correct.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est exactement ce qu'on veut d'un livrable. Un seul fichier, zero dependance, fidelite totale.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour le KML, l'experience est differente mais tout aussi satisfaisante. Ouvrez le fichier dans Google Earth : vos couches apparaissent comme des dossiers, les geometries sont projetees sur le globe, et les styles SLD sont appliques. Moins de fidelite que le QML, mais une ouverture universelle.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-11--recapitulatif--piege-a-eviter-730---830">SEQUENCE 11 — RECAPITULATIF &amp; PIEGE A EVITER (7:30 - 8:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema recapitulatif avec les deux colonnes GPKG et KML. Puis encadre d'alerte rouge pour le piege du filtrage actif.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Recapitulons. Deux formats, deux cas d'usage.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;GeoPackage : c'est le format recommande quand vous livrez a une equipe qui utilise QGIS. Projet embarque, styles QML avec fidelite totale, hierarchie de groupes preservee, multi-couches dans un seul fichier. C'est le livrable complet.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;KML : c'est le format recommande quand vous partagez avec des utilisateurs non-SIG — un client terrain, un decideur qui n'a que Google Earth, un partenaire qui utilise ArcGIS Online. Ouverture universelle, styles SLD, partage immediat.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et maintenant, le piege que tout le monde fait au moins une fois.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'export de FilterMate exporte les entites actuellement visibles. Si vous avez un filtre actif — par exemple, vous avez filtre les batiments a moins de 200 metres d'une route — l'export ne contiendra que ces batiments filtres. Pas les 50 000 batiments de la couche complete.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ce n'est pas un bug, c'est le comportement voulu. C'est tres utile pour livrer un sous-ensemble precis. Mais si vous voulez exporter la totalite de vos donnees, pensez a cliquer sur Unfilter avant de lancer l'export.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans la prochaine video, on plonge dans les coulisses : le multi-backend et l'optimisation automatique. A bientot !&quot;</em></p>
+</blockquote>
+<h3 id="tableau-recapitulatif-a-afficher-a-lecran">Tableau recapitulatif (a afficher a l'ecran)</h3>
+<table>
+<thead>
+<tr>
+<th>Critere</th>
+<th>GeoPackage (.gpkg)</th>
+<th>KML (.kml)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Destinataire ideal</td>
+<td>Equipe QGIS</td>
+<td>Client terrain / non-SIG</td>
+</tr>
+<tr>
+<td>Projet embarque</td>
+<td>Oui (table <code>qgis_projects</code>)</td>
+<td>Non</td>
+</tr>
+<tr>
+<td>Styles QML (fidelite totale)</td>
+<td>Oui</td>
+<td>Non</td>
+</tr>
+<tr>
+<td>Styles SLD (portabilite OGC)</td>
+<td>Oui</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td>Hierarchie de groupes</td>
+<td>Oui (Preserve group structure)</td>
+<td>Oui (dossiers <code>&lt;Folder&gt;</code>)</td>
+</tr>
+<tr>
+<td>Multi-couches dans 1 fichier</td>
+<td>Oui</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td>Ouverture universelle</td>
+<td>QGIS uniquement</td>
+<td>Google Earth, ArcGIS, etc.</td>
+</tr>
+<tr>
+<td>Streaming (&gt;10k entites)</td>
+<td>Oui (chunks de 5 000)</td>
+<td>Oui (chunks de 5 000)</td>
+</tr>
+<tr>
+<td>Batch mode</td>
+<td>Oui (1 fichier par couche)</td>
+<td>Oui (1 fichier par couche)</td>
+</tr>
+<tr>
+<td>Reprojection CRS</td>
+<td>Oui</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td>Compression ZIP</td>
+<td>Oui</td>
+<td>Oui</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="diagrammes-supplementaires">DIAGRAMMES SUPPLEMENTAIRES</h2>
+<h3 id="diagramme-4--arborescence-du-exportgrouprecapdialog">Diagramme 4 — Arborescence du ExportGroupRecapDialog</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    subgraph DIALOG["ExportGroupRecapDialog"]
+        direction TB
+        TITLE["Titre : 'Export GeoPackage'<br/>ou 'Export KML'"]
+        SUMMARY["Resume : '7 couches dans 3 groupes + 2 hors groupe'"]
+        PATH["Destination : /home/user/export/mon_projet.gpkg"]
+
+        subgraph TREE["QTreeWidget — Arborescence"]
+            direction TB
+            G1_FOLDER["Groupe Transport"]
+            G1_L1["  Routes nationales"]
+            G1_L2["  Routes departementales"]
+            G1_L3["  Autoroutes"]
+            G2_FOLDER["Groupe Bati"]
+            G2_L1["  Batiments publics"]
+            G2_L2["  Batiments prives"]
+            G2_SUB["  Sous-groupe Bati historique"]
+            G2_SUB_L1["    Monuments"]
+            UNG1["Communes (hors groupe)"]
+            UNG2["Points d'interet (hors groupe)"]
+        end
+
+        CHECKBOX["Checkbox : 'Preserve group structure in GPKG'<br/>Activee si groupes existent / Grisee sinon"]
+
+        subgraph BUTTONS["Boutons"]
+            direction LR
+            BTN_CANCEL["Annuler<br/>(style standard)"]
+            BTN_EXPORT["Exporter<br/>(#27ae60, bold, blanc)"]
+        end
+
+        TITLE --- SUMMARY --- PATH --- TREE --- CHECKBOX --- BUTTONS
+    end
+
+    style DIALOG fill:#fff,stroke:#333
+    style TREE fill:#f5f5f5,stroke:#999
+    style G1_FOLDER fill:#FFC107,color:#000
+    style G2_FOLDER fill:#FFC107,color:#000
+    style G2_SUB fill:#FFE082,color:#000
+    style BTN_EXPORT fill:#27ae60,color:#fff
+    style BTN_CANCEL fill:#ccc,color:#333
+    style CHECKBOX fill:#E3F2FD,stroke:#1565C0
+</div></code></pre>
+<h3 id="diagramme-5--streaming-export--fragmentation-et-reassemblage">Diagramme 5 — Streaming export : fragmentation et reassemblage</h3>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    actor U as Utilisateur
+    participant FM as FilterMate Export Engine
+    participant MEM as Memoire (RAM)
+    participant GPKG as Fichier GeoPackage
+
+    U->>FM: Lancer l'export (50 000 entites)
+    FM->>FM: Detecte volume > 10 000 → mode streaming
+
+    loop Chunk 1..10 (par 5 000)
+        FM->>MEM: Charge chunk N (5 000 features)
+        MEM->>GPKG: Ecrit chunk N dans la table
+        FM->>MEM: Libere chunk N de la memoire
+        FM->>U: Progression : N/10
+    end
+
+    FM->>GPKG: Ecrit styles (layer_styles)
+    FM->>GPKG: Ecrit projet embarque (qgis_projects)
+    FM->>U: Export termine (50 000 features)
+
+    Note over MEM: Consommation RAM<br/>constante ~200-300 Mo<br/>quel que soit le volume
+</div></code></pre>
+<hr>
+<h2 id="captures-qgis-requises">CAPTURES QGIS REQUISES</h2>
+<ol>
+<li>Onglet EXPORTING avec les 6 toggles visibles et annotes</li>
+<li>Toggle Layers actif : checkable combobox avec couches cochees</li>
+<li>Toggle Styles actif : combobox avec options QML / SLD / Les deux</li>
+<li>Toggle Output Folder actif : chemin + checkbox Batch</li>
+<li>ExportGroupRecapDialog — arborescence QTreeWidget avec groupes et couches (icones dossier/fichier)</li>
+<li>ExportGroupRecapDialog — resume, checkbox &quot;Preserve group structure&quot;, bouton vert Exporter</li>
+<li>ExportGroupRecapDialog en mode KML — texte adapte (&quot;Group layers in a single KML file with folders&quot;)</li>
+<li>Checkbox &quot;Preserve group structure&quot; grisee (pas de groupes) avec tooltip visible</li>
+<li>Barre de progression pendant un export streaming (&gt;10 000 entites)</li>
+<li>Explorateur de fichiers montrant le resultat batch : un fichier par couche</li>
+<li>GPKG ouvert dans QGIS — hierarchie de groupes reconstruite (comparaison split screen)</li>
+<li>KML ouvert dans Google Earth — couches en dossiers, styles SLD appliques</li>
+<li>Comparaison QML (rendu QGIS fidele) vs SLD (rendu OGC standard) en split screen</li>
+<li>Encadre d'alerte : &quot;Filtre actif → export partiel. Utilisez Unfilter pour tout exporter.&quot;</li>
+</ol>
+<hr>
+<h2 id="donnees-de-demo">DONNEES DE DEMO</h2>
+<ul>
+<li>Couche PostGIS ou GeoPackage <strong>batiments</strong> (polygones, ~50 000 entites) — pour demo streaming</li>
+<li>Couche <strong>routes</strong> (lignes, ~5 000 entites)</li>
+<li>Couche <strong>communes</strong> (polygones, ~100 entites)</li>
+<li>Couche <strong>points d'interet</strong> (points, ~2 000 entites)</li>
+<li>Couche <strong>monuments</strong> (polygones, ~200 entites) — pour demo sous-groupe</li>
+<li>Organiser en <strong>3 groupes</strong> dans le projet : &quot;Transport&quot; (routes), &quot;Bati&quot; (batiments, monuments en sous-groupe &quot;Bati historique&quot;), &quot;Administration&quot; (communes)</li>
+<li>2 couches hors groupe : points d'interet + une couche auxiliaire</li>
+<li>Un filtre actif sur la couche batiments (pour illustrer le piege)</li>
+</ul>
+<hr>
+<h2 id="liens-a-afficher-a-lecran">LIENS A AFFICHER A L'ECRAN</h2>
+<ul>
+<li><strong>GitHub</strong> : <code>https://github.com/imagodata/filter_mate</code></li>
+<li><strong>QGIS Plugins</strong> : <code>https://plugins.qgis.org/plugins/filter_mate</code></li>
+<li><strong>Documentation</strong> : <code>https://imagodata.github.io/filter_mate</code></li>
+</ul>
+<hr>
+<h2 id="musique-suggeree">MUSIQUE SUGGEREE</h2>
+<ul>
+<li>Intro (0:00 - 0:30) : Beat dynamique, transition nette</li>
+<li>Demo (0:30 - 7:30) : Ambiance neutre, fond leger, non intrusif</li>
+<li>Recapitulatif (7:30 - 8:30) : Montee legere, conclusion energique</li>
+</ul>
+<hr>
+<h2 id="transitions-suggerees">TRANSITIONS SUGGEREES</h2>
+<table>
+<thead>
+<tr>
+<th>De</th>
+<th>Vers</th>
+<th>Transition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hook (split screen GPKG)</td>
+<td>Onglet Export</td>
+<td>Fondu enchaine</td>
+</tr>
+<tr>
+<td>Chaque toggle sidebar</td>
+<td>Zone de configuration</td>
+<td>Surbrillance progressive</td>
+</tr>
+<tr>
+<td>ExportGroupRecapDialog</td>
+<td>GPKG explications</td>
+<td>Coupe franche</td>
+</tr>
+<tr>
+<td>GPKG vs KML</td>
+<td>Tableau comparatif</td>
+<td>Slide horizontal</td>
+</tr>
+<tr>
+<td>Streaming (chunks)</td>
+<td>GPKG ouvert</td>
+<td>Time-lapse (acceleration)</td>
+</tr>
+<tr>
+<td>Recapitulatif</td>
+<td>Outro</td>
+<td>Fondu au noir</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="points-cles-a-mettre-en-avant">POINTS CLES A METTRE EN AVANT</h2>
+<ol>
+<li><strong>Livrable complet</strong> : GPKG embarque projet, styles, groupes — tout dans un seul fichier</li>
+<li><strong>Ouverture universelle</strong> : KML pour Google Earth et les non-SIG</li>
+<li><strong>Double style</strong> : QML + SLD exportables simultanement</li>
+<li><strong>Hierarchie preservee</strong> : la checkbox &quot;Preserve group structure&quot; fait la difference</li>
+<li><strong>Robustesse</strong> : streaming automatique au-dela de 10 000 entites</li>
+<li><strong>Piege a eviter</strong> : export = entites visibles (filtrees). Penser a Unfilter pour tout exporter</li>
+</ol>
+<hr>
+<p><em>Script cree le 14 Mars 2026 — FilterMate v4.6.1</em>
+<em>Video 06 de la serie de 10 tutoriels — Niveau Intermediaire</em></p>
+
+</body>
+</html>

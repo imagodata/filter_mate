@@ -384,57 +384,60 @@ graph TD
 
 ### Diagramme — JSON TreeView UI
 
-```mermaid
-graph TD
-    subgraph SEARCHABLE["SearchableJsonView"]
-        direction TB
-        SEARCH["Barre de recherche<br/>Ctrl+F / Escape<br/>Compteur de resultats"]
-        TREE["QTreeView JSON<br/>2 colonnes :<br/>Property (180px) | Value (240px)"]
-        ACTIONS["Save | Cancel"]
-    end
-
-    SEARCH --> TREE
-    TREE --> ACTIONS
-
-    subgraph EDITORS["Editeurs adaptatifs"]
-        direction LR
-        SPIN["QSpinBox<br/>Entiers avec min/max<br/>Ex: timeout 10-600"]
-        DSPIN["QDoubleSpinBox<br/>Flottants avec decimales<br/>Ex: tolerance 0.1-100.0"]
-        COMBO["QComboBox<br/>Enumerations<br/>Ex: minimal/normal/verbose"]
-        CHECK["Bool toggle<br/>true / false"]
-    end
-
-    subgraph CONTEXT["Menu contextuel (clic droit)"]
-        direction LR
-        CHG["Change<br/>(enumerations)"]
-        REN["Rename"]
-        ADD["Add child"]
-        INS_UP["Insert sibling up"]
-        INS_DN["Insert sibling down"]
-        REM["Remove"]
-    end
-
-    TREE --> EDITORS
-    TREE --> CONTEXT
-
-    subgraph TYPES["Types de donnees (code couleur)"]
-        direction LR
-        STR["Chaines"]
-        NUM["Nombres"]
-        BOOL["Booleens"]
-        ARR["Tableaux"]
-        OBJ["Objets"]
-    end
-
-    TREE --> TYPES
-
-    style SEARCH fill:#1976D2,color:#fff
-    style TREE fill:#2D2D30,color:#D4D4D4
-    style ACTIONS fill:#388E3C,color:#fff
-    style COMBO fill:#E65100,color:#fff
-    style SPIN fill:#6A1B9A,color:#fff
-    style DSPIN fill:#6A1B9A,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif; border: 2px solid #333; border-radius: 8px;">
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 10px; background: #37474F; color: #fff; font-weight: bold; border-radius: 8px 8px 0 0;">
+      <img src="../icons/parameters.png" width="24"/>&nbsp; SearchableJsonView
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="padding: 8px; background: #1976D2; color: #fff; text-align: center;">
+      <img src="../icons/identify_alt.png" width="16"/>&nbsp; Barre de recherche (Ctrl+F / Escape) — Compteur de resultats
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="padding: 10px; background: #2D2D30; color: #D4D4D4; text-align: center;">
+      <strong>QTreeView JSON</strong> — 2 colonnes : Property (180px) | Value (240px)
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="padding: 6px; background: #37474F; color: #B0BEC5; text-align: center; font-weight: bold;">
+      Editeurs adaptatifs
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #6A1B9A; color: #fff; width: 25%; border: 1px solid #4A148C;">
+      <strong>QSpinBox</strong><br/><small>Entiers avec min/max<br/>Ex: timeout 10-600</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #6A1B9A; color: #fff; width: 25%; border: 1px solid #4A148C;">
+      <strong>QDoubleSpinBox</strong><br/><small>Flottants avec decimales<br/>Ex: tolerance 0.1-100.0</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; width: 25%; border: 1px solid #BF360C;">
+      <strong>QComboBox</strong><br/><small>Enumerations<br/>Ex: minimal/normal/verbose</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #455A64; color: #fff; width: 25%; border: 1px solid #37474F;">
+      <strong>Bool toggle</strong><br/><small>true / false</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="padding: 6px; background: #37474F; color: #B0BEC5; text-align: center; font-weight: bold;">
+      Menu contextuel (clic droit)
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="padding: 8px 16px; background: #455A64; color: #fff; text-align: center; font-size: 13px;">
+      Change (enumerations) | Rename | <img src="../icons/add.png" width="14"/>&nbsp;Add child | Insert sibling up/down | Remove
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 10px; background: #388E3C; color: #fff; font-weight: bold; border-radius: 0 0 0 8px;">
+      <img src="../icons/save.png" width="20"/>&nbsp; Save
+    </td>
+    <td colspan="2" style="text-align: center; padding: 10px; background: #D32F2F; color: #fff; font-weight: bold; border-radius: 0 0 8px 0;">
+      Cancel
+    </td>
+  </tr>
+</table>
 
 ### Captures QGIS requises
 1. Recherche "timeout" avec 3 resultats trouves, branches depliees

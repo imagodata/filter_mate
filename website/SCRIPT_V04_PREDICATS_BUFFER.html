@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SCRIPT_V04_PREDICATS_BUFFER.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="filtermate--video-04--predicats-spatiaux--buffer-dynamique">FilterMate — VIDEO 04 : Predicats Spatiaux &amp; Buffer Dynamique</h1>
+<p><strong>Version</strong> : 4.6.1 | <strong>Date</strong> : 14 Mars 2026
+<strong>Niveau</strong> : Intermediaire | <strong>Duree</strong> : 10-12 min | <strong>Prerequis</strong> : V02
+<strong>Langue</strong> : Francais (sous-titres EN disponibles)
+<strong>Ton</strong> : Pedagogique, progressif, illustre</p>
+<hr>
+<h2 id="plan-de-la-video">Plan de la video</h2>
+<table>
+<thead>
+<tr>
+<th>Sequence</th>
+<th>Titre</th>
+<th>Duree</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Rappel : qu'est-ce qu'un predicat spatial ?</td>
+<td>0:45</td>
+<td>Diagramme anime</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Touches — quand l'utiliser ?</td>
+<td>0:45</td>
+<td>Demo + schema</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Intersects — le plus polyvalent</td>
+<td>0:45</td>
+<td>Demo + schema</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Contains — source contient cible</td>
+<td>0:45</td>
+<td>Demo + schema</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Within — cible a l'interieur de source</td>
+<td>0:45</td>
+<td>Demo + schema</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Overlaps — chevauchement partiel</td>
+<td>0:30</td>
+<td>Demo + schema</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Crosses — ligne coupe un polygone</td>
+<td>0:30</td>
+<td>Demo + schema</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Disjoint — aucun contact spatial</td>
+<td>0:30</td>
+<td>Demo + schema</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Is Within Distance — buffer implicite</td>
+<td>0:30</td>
+<td>Demo + schema</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Seuils auto-centroide</td>
+<td>0:30</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Buffer explicite (50m, 200m, 1km)</td>
+<td>1:15</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Buffer dynamique avec expression QGIS</td>
+<td>1:00</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Buffer negatif (filtrage inverse)</td>
+<td>0:30</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Buffer Segments : performance</td>
+<td>0:30</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Cas d'usage : zones tampon reglementaires</td>
+<td>1:30</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Comparaison visuelle des 8 predicats</td>
+<td>1:30</td>
+<td>Recapitulatif</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="donnees-de-demonstration">Donnees de demonstration</h2>
+<table>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Type</th>
+<th>Source</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Routes BDTopo</td>
+<td>Lignes, Shapefile/PG</td>
+<td>BDTopo IGN</td>
+<td>Source pour Crosses, Touches</td>
+</tr>
+<tr>
+<td>Batiments BDTopo</td>
+<td>Polygones, PostGIS</td>
+<td>BDTopo IGN</td>
+<td>Cible principale</td>
+</tr>
+<tr>
+<td>Zones inondables</td>
+<td>Polygones</td>
+<td>Georisques</td>
+<td>Source pour Contains, Within, Buffer</td>
+</tr>
+<tr>
+<td>Riviere</td>
+<td>Lignes</td>
+<td>BD Carthage</td>
+<td>Source pour Crosses, Is Within Distance</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-0--rappel--quest-ce-quun-predicat-spatial--000---045">SEQUENCE 0 — RAPPEL : QU'EST-CE QU'UN PREDICAT SPATIAL ? (0:00 - 0:45)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Fond sombre. Deux geometries (un carre bleu, un cercle orange) apparaissent sur un canvas neutre. Elles bougent l'une vers l'autre. A chaque position, un texte s'affiche : &quot;Disjoint&quot;, &quot;Touches&quot;, &quot;Intersects&quot;, &quot;Contains&quot;. Animation fluide, style motion design.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Avant de plonger dans FilterMate, prenons 30 secondes pour comprendre ce qu'est un predicat spatial. C'est un test geometrique : on prend deux geometries, et on pose une question simple. Est-ce qu'elles se touchent ? Est-ce que l'une contient l'autre ? Est-ce qu'elles se chevauchent ?&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La reponse est toujours oui ou non — vrai ou faux. Et c'est exactement ce que FilterMate utilise pour filtrer vos couches : il garde uniquement les entites pour lesquelles la reponse est 'oui'.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme-1--les-8-predicats-spatiaux-illustres">Diagramme 1 — Les 8 Predicats Spatiaux Illustres</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph TOUCHES["TOUCHES"]
+        direction LR
+        T_A["Polygone A"] ---|"bord commun"| T_B["Polygone B"]
+    end
+    subgraph INTERSECTS["INTERSECTS"]
+        direction LR
+        I_A["Polygone A"] ---|"tout contact spatial"| I_B["Polygone B"]
+    end
+    subgraph CONTAINS["CONTAINS"]
+        direction TB
+        C_A["Polygone A (englobant)"]
+        C_B["Polygone B (a l'interieur)"]
+    end
+    subgraph WITHIN["WITHIN"]
+        direction TB
+        W_A["Polygone A (a l'interieur)"]
+        W_B["Polygone B (englobant)"]
+    end
+    subgraph OVERLAPS["OVERLAPS"]
+        direction LR
+        O_A["Polygone A"] ---|"zone commune partielle"| O_B["Polygone B"]
+    end
+    subgraph CROSSES["CROSSES"]
+        direction LR
+        CR_A["Ligne A"] ---|"coupe le polygone B"| CR_B["Polygone B"]
+    end
+    subgraph DISJOINT["DISJOINT"]
+        direction LR
+        DJ_A["Geom A"] -.-|"aucun contact spatial"| DJ_B["Geom B"]
+    end
+    subgraph DWITHIN["IS WITHIN DISTANCE"]
+        direction LR
+        D_A["Polygone A"] -.-|"distance < N m"| D_B["Polygone B"]
+    end
+</div></code></pre>
+<blockquote>
+<p><em>&quot;FilterMate propose ces 8 predicats, accessibles directement depuis l'interface de filtrage. Voyons-les un par un.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-1--touches-045---130">SEQUENCE 1 — TOUCHES (0:45 - 1:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>QGIS ouvert. Couche source : departements (polygones). Couche cible : communes. L'utilisateur active le toggle &quot;Geometric Predicates&quot; dans la barre laterale de l'onglet FILTERING. La combobox a coches apparait. Il coche uniquement &quot;Touch&quot;.</p>
+</blockquote>
+<blockquote>
+<p>Schema en incrustation : deux carres qui se touchent par un bord, le bord commun est surligne en rouge.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Premier predicat : Touches. Deux geometries se 'touchent' quand elles partagent un bord ou un point de contact, mais sans se chevaucher. En urbanisme, c'est la relation entre deux parcelles mitoyennes : elles ont une limite commune, mais aucune surface en commun.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans FilterMate, je vais dans l'onglet Filtrage, j'active le toggle 'Geometric Predicates' dans la barre laterale — voyez, la combobox a coches apparait. Je selectionne uniquement 'Touch'.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Onglet FILTERING → barre laterale → activer &quot;Geometric Predicates&quot;</li>
+<li>Combobox a coches → decocher tout → cocher uniquement &quot;Touch&quot;</li>
+<li>Source : <code>departements</code> (polygone Ile-de-France)</li>
+<li>Cible : <code>communes</code></li>
+<li>Clic &quot;Filtrer&quot; → seules les communes limitrophes du departement source sont conservees</li>
+<li>Zoom sur le resultat : les communes touchent le bord du departement</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Resultat : FilterMate ne conserve que les communes qui touchent le contour du departement selectionne. Celles qui sont completement a l'interieur ou completement a l'exterieur sont filtrees.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-2--intersects-130---215">SEQUENCE 2 — INTERSECTS (1:30 - 2:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Meme projet. On change le predicat dans la combobox : on decoche &quot;Touch&quot;, on coche &quot;Intersect&quot;. Schema en incrustation : deux formes qui se chevauchent partiellement, la zone d'intersection est coloree.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Intersects est le predicat le plus polyvalent — et c'est celui que FilterMate selectionne par defaut. Deux geometries s'intersectent si elles ont un contact spatial quelconque : un bord en commun, une surface en commun, ou meme un simple point de contact. En fait, Intersects retourne vrai pour tout ce qui n'est pas Disjoint.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est le predicat 'fourre-tout' : en cas de doute, commencez par lui.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Combobox predicats → decocher &quot;Touch&quot; → cocher &quot;Intersect&quot;</li>
+<li>Source : meme departement Ile-de-France</li>
+<li>Cible : <code>communes</code></li>
+<li>Clic &quot;Filtrer&quot; → toutes les communes qui touchent OU chevauchent OU sont contenues dans le departement</li>
+<li>Comparer le nombre d'entites avec le resultat de Touches : plus d'entites (inclut les mitoyennes ET les interieures)</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Vous voyez la difference : avec Intersects, on obtient plus de resultats qu'avec Touches. C'est logique — Intersects est plus permissif. Il inclut les communes limitrophes ET celles qui sont a l'interieur du departement.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-3--contains-215---300">SEQUENCE 3 — CONTAINS (2:15 - 3:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema en incrustation : un grand carre bleu contenant un petit cercle orange entierement a l'interieur. Le grand carre est etiquete &quot;Source (englobant)&quot;, le petit cercle &quot;Cible (a l'interieur)&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Contains teste si la geometrie source contient entierement la geometrie cible. Pas de debordement, pas de contact avec le bord exterieur — la cible doit etre completement a l'interieur.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Cas d'usage typique : quels batiments sont entierement situes dans une zone inondable ? Quels points de vente sont contenus dans ma zone de chalandise ?&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Combobox predicats → &quot;Contain&quot;</li>
+<li>Source : <code>zones_inondables</code> (polygone d'une zone inondable)</li>
+<li>Cible : <code>batiments_bdtopo</code></li>
+<li>Clic &quot;Filtrer&quot; → seuls les batiments dont l'emprise est 100% a l'interieur de la zone inondable</li>
+<li>Zoom : montrer qu'un batiment qui depasse meme d'un metre n'est PAS retenu</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Attention, Contains est strict : si un batiment deborde ne serait-ce que d'un centimetre hors de la zone, il n'est pas retenu. Pour un filtrage plus souple, combinez Intersects avec un buffer, ou utilisez Overlaps.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-4--within-300---345">SEQUENCE 4 — WITHIN (3:00 - 3:45)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema en incrustation : inversion du schema Contains. Le petit cercle est la &quot;Source&quot;, le grand carre est la &quot;Cible&quot;. Fleche : &quot;la source est-elle a l'interieur de la cible ?&quot;</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Within est l'inverse de Contains. Au lieu de demander 'la source contient-elle la cible ?', on demande 'la cible est-elle a l'interieur de la source ?' — ou plus exactement, la source est-elle a l'interieur de la cible.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En pratique, c'est une question de perspective. Contains et Within repondent a la meme relation spatiale, mais dans le sens oppose. Choisissez celui qui correspond a votre logique metier.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Combobox predicats → &quot;Are within&quot;</li>
+<li>Source : <code>batiments_bdtopo</code> (un batiment selectionne)</li>
+<li>Cible : <code>zones_inondables</code></li>
+<li>Clic &quot;Filtrer&quot; → les zones inondables qui contiennent entierement le batiment source</li>
+<li>Comparer avec le resultat Contains precedent : meme relation, sens inverse</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ici, FilterMate conserve les zones inondables qui englobent completement le batiment source. C'est la meme relation que Contains, mais vue depuis l'autre cote.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-5--overlaps-345---415">SEQUENCE 5 — OVERLAPS (3:45 - 4:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema : deux carres qui se chevauchent partiellement. La zone d'intersection est hachuree. Chaque carre a aussi une partie non partagee. Texte : &quot;Zone commune + zones exclusives = Overlaps&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Overlaps detecte les chevauchements partiels : les deux geometries partagent une zone commune, mais chacune a aussi une partie qui ne se superpose pas. C'est le chevauchement classique entre deux zonages, par exemple une zone commerciale qui depasse sur deux communes.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Combobox predicats → &quot;Overlap&quot;</li>
+<li>Source : <code>zones_inondables</code> (un zonage qui chevauche plusieurs communes)</li>
+<li>Cible : <code>communes</code></li>
+<li>Clic &quot;Filtrer&quot; → communes partiellement recouvertes par la zone inondable</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Overlaps est parfait pour identifier les entites 'a cheval' sur votre zone source. Ni completement dedans, ni completement dehors — elles chevauchent.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-6--crosses-415---445">SEQUENCE 6 — CROSSES (4:15 - 4:45)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema : une ligne (en rouge) qui traverse un polygone (en bleu). La ligne entre d'un cote et sort de l'autre. Point d'entree et point de sortie marques.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Crosses est le predicat de la traversee. Il s'applique typiquement quand une ligne coupe un polygone — la ligne entre d'un cote et ressort de l'autre. C'est la relation entre une route et une commune : la route traverse la commune.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Combobox predicats → &quot;Cross&quot;</li>
+<li>Source : <code>communes</code> (un polygone communal)</li>
+<li>Cible : <code>routes_bdtopo</code> (couche de lignes)</li>
+<li>Clic &quot;Filtrer&quot; → toutes les routes qui traversent la commune selectionnee</li>
+<li>Zoom : montrer les lignes qui entrent et sortent du polygone</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Crosses est indispensable pour les analyses de reseaux : quelles routes traversent ma zone d'etude ? Quels cours d'eau coupent ma parcelle ?&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-7--disjoint-445---515">SEQUENCE 7 — DISJOINT (4:45 - 5:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema : deux geometries completement separees, avec un espace vide entre elles. Texte : &quot;Aucun contact spatial&quot;. Pointilles entre les deux pour montrer l'absence de relation.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Disjoint est l'inverse exact de Intersects. Il retourne vrai quand deux geometries n'ont aucun contact spatial — ni bord commun, ni surface commune, ni point de tangence. Rien.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Cas d'usage : quels batiments sont situes en dehors de toute zone inondable ? Quelles parcelles n'ont aucun contact avec le reseau routier ?&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Combobox predicats → &quot;Disjoint&quot;</li>
+<li>Source : <code>zones_inondables</code></li>
+<li>Cible : <code>batiments_bdtopo</code></li>
+<li>Clic &quot;Filtrer&quot; → seuls les batiments qui n'ont aucun contact avec la zone inondable</li>
+<li>Resultat : le complement exact du resultat Intersects</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est le predicat du 'filtrage par exclusion'. Tres utile pour identifier ce qui se trouve hors d'une zone donnee.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-8--is-within-distance-515---545">SEQUENCE 8 — IS WITHIN DISTANCE (5:15 - 5:45)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema : deux polygones separes par un espace. Un halo (cercle pointille) apparait autour du premier polygone, representant la distance. Le second polygone est a l'interieur du halo. Texte : &quot;Distance &lt; N metres&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Is Within Distance — ou 'Are within' dans l'interface FilterMate — est un predicat special. Il verifie si deux geometries sont distantes de moins de N metres. C'est comme un Intersects, mais avec un buffer implicite : 'est-ce que la cible se trouve dans un rayon de X metres autour de la source ?'&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans la combobox de FilterMate, vous le trouverez sous le nom 'Are within'. C'est le pont entre les predicats purs et le systeme de buffer que nous allons voir juste apres.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Combobox predicats → &quot;Are within&quot;</li>
+<li>Source : <code>batiments_bdtopo</code> (un batiment)</li>
+<li>Cible : <code>routes_bdtopo</code></li>
+<li>Clic &quot;Filtrer&quot; → routes situees dans un rayon autour du batiment</li>
+<li>Comparer visuellement avec un Intersects simple : Are within capture des entites plus eloignees</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est le predicat ideal quand vous cherchez 'ce qui se trouve a proximite' sans avoir besoin de creer un buffer explicite.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-9--seuils-auto-centroide-545---615">SEQUENCE 9 — SEUILS AUTO-CENTROIDE (5:45 - 6:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran QGIS. A cote de la combobox source, une case a cocher &quot;Centroid&quot; est visible. A cote de la combobox des couches cibles, une autre case &quot;Centroid&quot;. L'une se coche automatiquement quand la couche depasse un certain nombre d'entites. Infobulle affichee.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Avant de passer au buffer, parlons optimisation. FilterMate dispose d'un systeme de centroide automatique. L'idee : quand une couche contient beaucoup d'entites, tester les predicats sur des polygones complets devient couteux. FilterMate peut alors utiliser le centroide — le point central — de chaque geometrie a la place.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Deux seuils sont configures par defaut :&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour les couches distantes — typiquement PostgreSQL ou WFS — le centroide s'active automatiquement au-dela de 5 000 entites.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour les couches locales — Shapefile, GeoPackage — le seuil est plus haut : 50 000 entites.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Charger une couche PostGIS avec 8 000 batiments</li>
+<li>La selectionner comme cible → la case &quot;Centroid&quot; se coche automatiquement</li>
+<li>Observer l'infobulle : &quot;Layer has X features. Using centroids will significantly reduce processing time.&quot;</li>
+<li>Decocher manuellement → le filtrage fonctionne toujours, mais plus lentement</li>
+<li>Recocher → retour a la performance optimale</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Vous pouvez toujours forcer le centroide ON ou OFF manuellement. Mais dans la majorite des cas, laissez FilterMate decider — il sait quand c'est necessaire.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-10--buffer-explicite--50m-200m-1km-615---730">SEQUENCE 10 — BUFFER EXPLICITE : 50m, 200m, 1km (6:15 - 7:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>L'utilisateur active le toggle &quot;Buffer Value&quot; dans la barre laterale. Un <code>QgsDoubleSpinBox</code> apparait avec un petit bouton jaune a cote (le <code>QgsPropertyOverrideButton</code>). Il saisit 50, puis 200, puis 1000, et filtre a chaque fois. Le nombre d'entites augmente progressivement.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Passons au buffer — l'une des fonctionnalites les plus puissantes de FilterMate. Le buffer etend ou retrecit la geometrie source avant d'appliquer le predicat spatial.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour l'activer, il faut d'abord que le toggle 'Geometric Predicates' soit active — c'est une dependance : sans predicat, pas de buffer. Ensuite, activez le toggle 'Buffer Value' dans la barre laterale. Un champ numerique apparait, avec une petite icone jaune a sa droite.&quot;</em></p>
+</blockquote>
+<h3 id="demo--50-metres">Demo — 50 metres</h3>
+<blockquote>
+<ol>
+<li>Onglet FILTERING → barre laterale → toggle &quot;Geometric Predicates&quot; ON</li>
+<li>Barre laterale → toggle &quot;Buffer Value&quot; ON → le <code>QgsDoubleSpinBox</code> apparait</li>
+<li>Predicat : &quot;Intersect&quot;</li>
+<li>Source : une route BDTopo</li>
+<li>Cible : <code>batiments_bdtopo</code></li>
+<li>Buffer : <code>50</code> (metres)</li>
+<li>Clic &quot;Filtrer&quot; → les batiments dans un rayon de 50m autour de la route</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Avec un buffer de 50 metres, FilterMate cree une zone tampon de 50 metres autour de la route source, puis applique le predicat Intersects. Resultat : tous les batiments situes a moins de 50 metres de la route.&quot;</em></p>
+</blockquote>
+<h3 id="demo--200-metres">Demo — 200 metres</h3>
+<blockquote>
+<ol start="8">
+<li>Changer la valeur du buffer : <code>200</code></li>
+<li>Clic &quot;Filtrer&quot; → plus de batiments</li>
+<li>Comparer le nombre d'entites : augmentation significative</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;On passe a 200 metres. Le rayon de recherche s'elargit, et logiquement, on obtient plus de resultats.&quot;</em></p>
+</blockquote>
+<h3 id="demo--1-kilometre">Demo — 1 kilometre</h3>
+<blockquote>
+<ol start="11">
+<li>Changer la valeur du buffer : <code>1000</code></li>
+<li>Clic &quot;Filtrer&quot; → encore plus de batiments</li>
+<li>Vue carte : la zone tampon est nettement visible autour de la route</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et a 1 kilometre, la zone tampon couvre un perimetre considerable. Notez que FilterMate gere les unites en metres — si votre couche est dans un CRS geographique, la reprojection est geree automatiquement.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-11--buffer-dynamique-avec-expression-qgis-730---830">SEQUENCE 11 — BUFFER DYNAMIQUE AVEC EXPRESSION QGIS (7:30 - 8:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Gros plan sur le petit bouton jaune (<code>QgsPropertyOverrideButton</code>) a droite du spinbox buffer. L'utilisateur clique dessus → un menu apparait avec &quot;Edit expression...&quot;. L'editeur d'expressions QGIS s'ouvre. Il saisit une expression qui utilise un attribut de la couche.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le buffer statique, c'est bien. Mais FilterMate va plus loin avec le buffer dynamique. Voyez cette petite icone jaune a droite du champ buffer ? C'est le QgsPropertyOverrideButton — le meme widget que QGIS utilise pour ses rendu conditionnel et ses etiquettes dynamiques.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Cliquez dessus, selectionnez 'Editer l'expression', et vous pouvez ecrire n'importe quelle expression QGIS. Le buffer sera alors calcule dynamiquement, entite par entite.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Clic sur le bouton jaune → menu → &quot;Edit expression...&quot;</li>
+<li>Editeur d'expression QGIS s'ouvre</li>
+<li>Saisir l'expression : <code>&quot;largeur&quot; * 10</code></li>
+<li>Valider → le bouton jaune devient orange (indicateur d'expression active)</li>
+<li>Source : <code>routes_bdtopo</code> (chaque route a un attribut &quot;largeur&quot;)</li>
+<li>Cible : <code>batiments_bdtopo</code></li>
+<li>Clic &quot;Filtrer&quot; → chaque route utilise un buffer proportionnel a sa largeur</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ici, j'utilise l'attribut 'largeur' de chaque route, multiplie par 10. Une route de 5 metres de large aura un buffer de 50 metres. Une autoroute de 20 metres aura un buffer de 200 metres. Le filtrage s'adapte a chaque entite de la couche source.&quot;</em></p>
+</blockquote>
+<h3 id="exemple-dexpressions-utiles">Exemple d'expressions utiles</h3>
+<blockquote>
+<p>Afficher a l'ecran :</p>
+<ul>
+<li><code>&quot;largeur&quot; * 10</code> — buffer proportionnel a un attribut</li>
+<li><code>if(&quot;type&quot; = 'autoroute', 300, 50)</code> — buffer conditionnel par type</li>
+<li><code>$area / 1000</code> — buffer proportionnel a la surface</li>
+<li><code>100 + (&quot;population&quot; / 100)</code> — formule composite</li>
+</ul>
+</blockquote>
+<blockquote>
+<p><em>&quot;Les possibilites sont infinies. Tout ce que l'editeur d'expressions QGIS sait faire, le buffer dynamique de FilterMate sait l'exploiter.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-12--buffer-negatif-830---900">SEQUENCE 12 — BUFFER NEGATIF (8:30 - 9:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Le spinbox buffer avec une valeur negative (-50). Le spinbox change de style : fond jaune avec bordure orange (mode erosion). L'infobulle affiche &quot;Negative buffer (erosion): shrinks polygons inward&quot;. Animation : un polygone qui retrecit vers l'interieur.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Et si au lieu d'elargir, on retrecissait ? C'est le buffer negatif — aussi appele erosion. Saisissez une valeur negative dans le champ buffer, par exemple -50.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Regardez : le spinbox change de style — fond jaune, bordure orange — pour vous signaler visuellement que vous etes en mode erosion. L'infobulle confirme : 'Negative buffer (erosion): shrinks polygons inward'.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Buffer : <code>-50</code> (metres negatif)</li>
+<li>Observer le changement de style du spinbox (fond <code>#FFF3CD</code>, bordure <code>#FFC107</code>)</li>
+<li>Source : <code>zones_inondables</code> (grand polygone)</li>
+<li>Predicat : &quot;Intersect&quot;</li>
+<li>Cible : <code>batiments_bdtopo</code></li>
+<li>Clic &quot;Filtrer&quot; → les batiments sont filtres selon la zone inondable retrecis de 50m</li>
+<li>Comparer avec un buffer de 0 : moins de resultats (la zone source est plus petite)</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le buffer negatif est parfait pour les analyses de marge de securite. Au lieu de dire 'quels batiments sont dans la zone inondable ?', vous demandez 'quels batiments sont dans le coeur de la zone inondable, a plus de 50 metres du bord ?' C'est une nuance importante dans les etudes reglementaires.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-13--buffer-segments--performance-900---930">SEQUENCE 13 — BUFFER SEGMENTS : PERFORMANCE (9:00 - 9:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>L'utilisateur active le toggle &quot;Buffer Type&quot;. Deux widgets apparaissent : une combobox pour le type de buffer (Source / Target / Both) et un spinbox pour le nombre de segments. Schema anime : un cercle avec 32 segments (lisse) vs un cercle avec 4 segments (anguleux). Texte : &quot;Moins de segments = geometrie plus simple = filtrage plus rapide&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Quand FilterMate calcule un buffer, il cree un polygone autour de la geometrie source. Ce polygone est compose de segments — plus il y a de segments, plus le cercle est lisse, mais plus le calcul est lourd.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Activez le toggle 'Buffer Type' dans la barre laterale. Vous obtenez deux controles : le type de buffer — Source, Target ou Both — et le nombre de segments.&quot;</em></p>
+</blockquote>
+<h3 id="demo">Demo</h3>
+<blockquote>
+<ol>
+<li>Barre laterale → toggle &quot;Buffer Type&quot; ON</li>
+<li>Combobox : selectionner &quot;Source&quot;</li>
+<li>Spinbox segments : 32 (defaut) → Filtrer → noter le temps</li>
+<li>Spinbox segments : 8 → Filtrer → comparer le temps (plus rapide)</li>
+<li>Spinbox segments : 4 → Filtrer → encore plus rapide, mais geometrie plus anguleuse</li>
+<li>Vue carte : comparer visuellement les 3 resultats</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Avec 32 segments, le buffer est un quasi-cercle parfait. Avec 4 segments, c'est un losange. En pratique, pour du filtrage, la difference geometrique est negligeable — mais le gain de performance peut etre significatif sur des couches de plusieurs dizaines de milliers d'entites.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-14--cas-dusage--zones-tampon-reglementaires-930---1100">SEQUENCE 14 — CAS D'USAGE : ZONES TAMPON REGLEMENTAIRES (9:30 - 11:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Scenario complet, du debut a la fin. Contexte : un bureau d'etudes doit identifier les batiments situes dans differentes zones tampon autour d'une riviere, pour une etude d'impact environnemental.</p>
+</blockquote>
+<h3 id="narration--mise-en-contexte-015">Narration — Mise en contexte (0:15)</h3>
+<blockquote>
+<p><em>&quot;Mettons tout ca ensemble avec un cas d'usage reel. Imaginez : vous etes charge d'une etude d'impact environnemental. Vous devez identifier les batiments situes dans 3 zones tampon reglementaires autour d'une riviere : 50 metres, 200 metres et 500 metres.&quot;</em></p>
+</blockquote>
+<h3 id="demo--zone-50m-020">Demo — Zone 50m (0:20)</h3>
+<blockquote>
+<ol>
+<li>Source : <code>riviere</code> (couche de lignes, BD Carthage)</li>
+<li>Cible : <code>batiments_bdtopo</code></li>
+<li>Predicat : &quot;Intersect&quot;</li>
+<li>Buffer : <code>50</code></li>
+<li>Clic &quot;Filtrer&quot; → batiments a moins de 50m de la riviere</li>
+<li>Resultat : N entites → noter le nombre</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Premier filtre : 50 metres. Ce sont les batiments en zone de danger immediat. FilterMate me donne le resultat en une fraction de seconde.&quot;</em></p>
+</blockquote>
+<h3 id="demo--zone-200m-020">Demo — Zone 200m (0:20)</h3>
+<blockquote>
+<ol start="7">
+<li>Buffer : <code>200</code></li>
+<li>Clic &quot;Filtrer&quot; → plus de batiments</li>
+<li>Comparer avec le precedent</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Deuxieme zone : 200 metres. Le nombre de batiments concernes augmente sensiblement.&quot;</em></p>
+</blockquote>
+<h3 id="demo--zone-500m-avec-buffer-dynamique-025">Demo — Zone 500m avec buffer dynamique (0:25)</h3>
+<blockquote>
+<ol start="10">
+<li>Clic sur le bouton jaune → &quot;Edit expression...&quot;</li>
+<li>Expression : <code>if(&quot;type_riviere&quot; = 'fleuve', 500, 200)</code></li>
+<li>Clic &quot;Filtrer&quot; → buffer adapte au type de cours d'eau</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et pour la troisieme zone, j'utilise un buffer dynamique. Si le cours d'eau est un fleuve, le buffer passe a 500 metres. Pour un ruisseau, il reste a 200 metres. Une seule operation de filtrage, et le buffer s'adapte automatiquement.&quot;</em></p>
+</blockquote>
+<h3 id="demo--exclusion-avec-disjoint-015">Demo — Exclusion avec Disjoint (0:15)</h3>
+<blockquote>
+<ol start="13">
+<li>Predicat : &quot;Disjoint&quot;</li>
+<li>Buffer : <code>50</code></li>
+<li>Clic &quot;Filtrer&quot; → batiments HORS de la zone de 50m</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et si on a besoin de l'inverse — les batiments hors danger — on passe en Disjoint. Meme buffer, meme source, resultat inverse.&quot;</em></p>
+</blockquote>
+<h3 id="demo--sauvegarde-en-favori-015">Demo — Sauvegarde en favori (0:15)</h3>
+<blockquote>
+<ol start="16">
+<li>Clic sur l'etoile dans la barre laterale → sauvegarder le filtre courant</li>
+<li>Nom : &quot;Zones tampon riviere - 50m/200m/500m&quot;</li>
+</ol>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et pour retrouver ce filtre plus tard, je le sauvegarde en favori. Un clic, un nom, et c'est conserve pour les prochaines sessions.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-15--comparaison-visuelle-des-8-predicats-1100---1200">SEQUENCE 15 — COMPARAISON VISUELLE DES 8 PREDICATS (11:00 - 12:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran divise ou tableau anime. Les 8 predicats sont presentes cote a cote avec le meme jeu de donnees source/cible. Pour chacun, le nombre d'entites retournees est affiche. Animation finale : les 8 resultats se superposent pour montrer leur complementarite.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour conclure, voici une vue comparative des 8 predicats sur le meme jeu de donnees. Meme source, meme cible, seul le predicat change.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme-2--pipeline-buffer">Diagramme 2 — Pipeline Buffer</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    INPUT["Geometrie source"]
+    INPUT --> BUFFER["Buffer"]
+    BUFFER --> STATIC["Statique<br/>50m / 200m / 1km"]
+    BUFFER --> DYNAMIC["Dynamique<br/>Expression QGIS"]
+    BUFFER --> NEGATIVE["Negatif<br/>Retrecir le polygone"]
+    BUFFER --> SEGMENTS["Buffer Segments<br/>Moins = plus rapide"]
+    STATIC --> RESULT["Geometrie bufferisee"]
+    DYNAMIC --> RESULT
+    NEGATIVE --> RESULT
+    SEGMENTS --> RESULT
+    RESULT --> PREDICATE["Application du predicat spatial"]
+    style BUFFER fill:#1976D2,color:#fff
+    style DYNAMIC fill:#E65100,color:#fff
+    style NEGATIVE fill:#D32F2F,color:#fff
+    style SEGMENTS fill:#6A1B9A,color:#fff
+</div></code></pre>
+<h3 id="diagramme-3--tableau-comparatif-des-8-predicats">Diagramme 3 — Tableau Comparatif des 8 Predicats</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph RECAP["COMPARAISON DES 8 PREDICATS SPATIAUX"]
+        direction TB
+
+        subgraph CONTACT["PREDICATS DE CONTACT"]
+            direction LR
+            R_TOUCH["TOUCHES<br/>---<br/>Bord commun uniquement<br/>Interieur exclus<br/>---<br/>Parcelles mitoyennes"]
+            R_INTER["INTERSECTS<br/>---<br/>Tout contact spatial<br/>Le plus permissif<br/>---<br/>Choix par defaut"]
+        end
+
+        subgraph INCLUSION["PREDICATS D'INCLUSION"]
+            direction LR
+            R_CONT["CONTAINS<br/>---<br/>Source englobe cible<br/>100% a l'interieur<br/>---<br/>Zone contient batiment"]
+            R_WITH["WITHIN<br/>---<br/>Cible englobe source<br/>Inverse de Contains<br/>---<br/>Batiment dans zone"]
+        end
+
+        subgraph PARTIEL["PREDICATS PARTIELS"]
+            direction LR
+            R_OVER["OVERLAPS<br/>---<br/>Chevauchement partiel<br/>Zone commune + exclusive<br/>---<br/>Zonages a cheval"]
+            R_CROSS["CROSSES<br/>---<br/>Ligne traverse polygone<br/>Entre et sort<br/>---<br/>Route traverse commune"]
+        end
+
+        subgraph SPECIAL["PREDICATS SPECIAUX"]
+            direction LR
+            R_DISJ["DISJOINT<br/>---<br/>Aucun contact<br/>Inverse de Intersects<br/>---<br/>Hors zone de danger"]
+            R_DIST["IS WITHIN DISTANCE<br/>---<br/>Distance inferieure a N<br/>Buffer implicite<br/>---<br/>Proximite sans buffer"]
+        end
+    end
+
+    style CONTACT fill:#1565C0,color:#fff
+    style INCLUSION fill:#2E7D32,color:#fff
+    style PARTIEL fill:#E65100,color:#fff
+    style SPECIAL fill:#6A1B9A,color:#fff
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Retenez ceci : Intersects est votre predicat par defaut — il couvre la majorite des cas. Contains et Within traitent les inclusions strictes. Touches, Overlaps et Crosses gerent les relations partielles. Disjoint est l'exclusion. Et Is Within Distance ajoute la notion de proximite.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Combinez n'importe lequel de ces predicats avec un buffer — statique, dynamique ou negatif — et vous obtenez un outil de filtrage spatial extremement precis, directement dans QGIS, sans ecrire une seule ligne de code.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="recapitulatif--points-cles">RECAPITULATIF — POINTS CLES</h2>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>A retenir</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>8 predicats</td>
+<td>Touches, Intersects, Contains, Within, Overlaps, Crosses, Disjoint, Is Within Distance</td>
+</tr>
+<tr>
+<td>Predicat par defaut</td>
+<td>Intersects (le plus polyvalent)</td>
+</tr>
+<tr>
+<td>Centroide auto</td>
+<td>Distant &gt; 5 000 entites, Local &gt; 50 000 entites</td>
+</tr>
+<tr>
+<td>Buffer statique</td>
+<td>Valeur fixe en metres dans le QgsDoubleSpinBox</td>
+</tr>
+<tr>
+<td>Buffer dynamique</td>
+<td>Expression QGIS via le bouton jaune (PropertyOverrideButton)</td>
+</tr>
+<tr>
+<td>Buffer negatif</td>
+<td>Valeur negative = erosion (spinbox jaune/orange)</td>
+</tr>
+<tr>
+<td>Buffer Segments</td>
+<td>Moins de segments = geometrie plus simple = plus rapide</td>
+</tr>
+<tr>
+<td>Dependance UI</td>
+<td>Buffer Value et Buffer Type sont desactives tant que Geometric Predicates n'est pas coche</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="aide-memoire-interface">AIDE-MEMOIRE INTERFACE</h2>
+<h3 id="activation-des-controles-chaine-de-dependance">Activation des controles (chaine de dependance)</h3>
+<pre class="hljs"><code><div>1. Onglet FILTERING → barre laterale → toggle &quot;Geometric Predicates&quot; ON
+   └── Combobox a coches : Intersect, Contain, Disjoint, Equal, Touch, Overlap, Are within, Cross
+
+2. Barre laterale → toggle &quot;Buffer Value&quot; ON (necesssite Geometric Predicates)
+   ├── QgsDoubleSpinBox : valeur du buffer en metres (positif ou negatif)
+   └── QgsPropertyOverrideButton (icone jaune) : expression QGIS dynamique
+
+3. Barre laterale → toggle &quot;Buffer Type&quot; ON (necessite Geometric Predicates)
+   ├── Combobox : Source / Target / Both
+   └── QgsSpinBox : nombre de segments du buffer
+
+4. Cases &quot;Centroid&quot; :
+   ├── A cote de la combobox source (toujours visible)
+   └── A cote de la combobox cibles (visible quand &quot;Layers to Filter&quot; ON)
+</div></code></pre>
+<h3 id="noms-des-widgets-reference-technique">Noms des widgets (reference technique)</h3>
+<table>
+<thead>
+<tr>
+<th>Widget</th>
+<th>Nom interne</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Toggle predicats</td>
+<td><code>pushButton_checkable_filtering_geometric_predicates</code></td>
+</tr>
+<tr>
+<td>Toggle buffer value</td>
+<td><code>pushButton_checkable_filtering_buffer_value</code></td>
+</tr>
+<tr>
+<td>Toggle buffer type</td>
+<td><code>pushButton_checkable_filtering_buffer_type</code></td>
+</tr>
+<tr>
+<td>Spinbox buffer</td>
+<td><code>mQgsDoubleSpinBox_filtering_buffer_value</code></td>
+</tr>
+<tr>
+<td>Bouton expression</td>
+<td><code>mPropertyOverrideButton_filtering_buffer_value_property</code></td>
+</tr>
+<tr>
+<td>Combobox buffer type</td>
+<td><code>comboBox_filtering_buffer_type</code></td>
+</tr>
+<tr>
+<td>Spinbox segments</td>
+<td><code>mQgsSpinBox_filtering_buffer_segments</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="captures-decran-requises">CAPTURES D'ECRAN REQUISES</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Contenu</th>
+<th>Sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Combobox predicats ouverte avec les 8 options cochables</td>
+<td>Seq. 0</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Schema Touches : deux polygones avec bord commun surligne</td>
+<td>Seq. 1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Resultat Contains : batiments strictement dans une zone</td>
+<td>Seq. 3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Toggle Buffer Value ON avec QgsDoubleSpinBox et bouton jaune</td>
+<td>Seq. 10</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Editeur d'expression QGIS ouvert depuis le PropertyOverrideButton</td>
+<td>Seq. 11</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Spinbox en mode erosion (fond jaune, bordure orange, valeur negative)</td>
+<td>Seq. 12</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Tableau comparatif final des 8 predicats (plein ecran)</td>
+<td>Seq. 15</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="transitions-suggerees">TRANSITIONS SUGGEREES</h2>
+<table>
+<thead>
+<tr>
+<th>De → Vers</th>
+<th>Type</th>
+<th>Duree</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Seq. 0 → 1</td>
+<td>Fondu enchaine depuis le diagramme vers QGIS</td>
+<td>0.5s</td>
+</tr>
+<tr>
+<td>Seq. 1 → 2 → ... → 8</td>
+<td>Cut direct (meme interface, seul le predicat change)</td>
+<td>0.3s</td>
+</tr>
+<tr>
+<td>Seq. 8 → 9</td>
+<td>Zoom sur la case Centroid</td>
+<td>0.5s</td>
+</tr>
+<tr>
+<td>Seq. 9 → 10</td>
+<td>Pan vers la barre laterale, toggle Buffer Value</td>
+<td>0.5s</td>
+</tr>
+<tr>
+<td>Seq. 13 → 14</td>
+<td>Transition &quot;cas pratique&quot; avec titre anime</td>
+<td>1.0s</td>
+</tr>
+<tr>
+<td>Seq. 14 → 15</td>
+<td>Fondu vers le tableau comparatif</td>
+<td>0.5s</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="liens-a-afficher">LIENS A AFFICHER</h2>
+<ul>
+<li><strong>GitHub</strong> : <code>https://github.com/imagodata/filter_mate</code></li>
+<li><strong>QGIS Plugins</strong> : <code>https://plugins.qgis.org/plugins/filter_mate</code></li>
+<li><strong>Documentation</strong> : <code>https://imagodata.github.io/filter_mate</code></li>
+<li><strong>Video precedente (V02)</strong> : Filtrage Geometrique — Les Bases</li>
+<li><strong>Video suivante (V05)</strong> : Favoris &amp; Historique</li>
+</ul>
+<hr>
+<h2 id="musique-suggeree">MUSIQUE SUGGEREE</h2>
+<table>
+<thead>
+<tr>
+<th>Moment</th>
+<th>Ambiance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Seq. 0 (intro diagramme)</td>
+<td>Beat leger, curiosite, montee progressive</td>
+</tr>
+<tr>
+<td>Seq. 1-8 (tour des predicats)</td>
+<td>Fond neutre, rythme regulier, pas de distraction</td>
+</tr>
+<tr>
+<td>Seq. 9-13 (buffer)</td>
+<td>Montee d'intensite progressive, tech</td>
+</tr>
+<tr>
+<td>Seq. 14 (cas d'usage)</td>
+<td>Ambiance &quot;mission&quot;, engagement</td>
+</tr>
+<tr>
+<td>Seq. 15 (recap)</td>
+<td>Resolution, satisfaction, outro propre</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Script cree le 14 Mars 2026 — FilterMate v4.6.1</em>
+<em>Video 04 de la serie de tutoriels (10 videos, ~75 min de contenu total)</em></p>
+
+</body>
+</html>

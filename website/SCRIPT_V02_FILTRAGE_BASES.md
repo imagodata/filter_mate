@@ -85,24 +85,21 @@
 
 ### Diagramme — Concept Source / Cible
 
-```mermaid
-flowchart LR
-    subgraph SOURCE["COUCHE SOURCE"]
-        S1["Selection geometrique<br/>(ex: une route)"]
-    end
-    subgraph PREDICAT["PREDICAT SPATIAL"]
-        P1["Intersects ?<br/>Contains ?<br/>Within ?<br/>Touches ?"]
-    end
-    subgraph CIBLE["COUCHE(S) CIBLE"]
-        T1["Toutes les entites<br/>testees contre la source"]
-        T2["Resultat : seules les<br/>entites correspondantes<br/>restent visibles"]
-    end
-    SOURCE --> PREDICAT
-    PREDICAT --> CIBLE
-    style SOURCE fill:#1565C0,color:#fff
-    style PREDICAT fill:#E65100,color:#fff
-    style CIBLE fill:#388E3C,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="text-align: center; padding: 16px; background: #1565C0; color: #fff; border-radius: 8px 0 0 8px; width: 30%;">
+      <img src="../icons/layer.png" width="32"/><br/><strong>COUCHE SOURCE</strong><br/><small>Selection geometrique<br/>(ex: une route)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1; font-size: 24px;">&#10132;</td>
+    <td style="text-align: center; padding: 16px; background: #E65100; color: #fff; width: 30%;">
+      <img src="../icons/geo_predicates.png" width="32"/><br/><strong>PREDICAT SPATIAL</strong><br/><small>Intersects ? Contains ?<br/>Within ? Touches ?</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1; font-size: 24px;">&#10132;</td>
+    <td style="text-align: center; padding: 16px; background: #388E3C; color: #fff; border-radius: 0 8px 8px 0; width: 30%;">
+      <img src="../icons/layers.png" width="32"/><br/><strong>COUCHE(S) CIBLE</strong><br/><small>Seules les entites<br/>correspondantes restent visibles</small>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -223,20 +220,33 @@ flowchart LR
 
 ### Diagramme — Les 6 Boutons de l'Action Bar
 
-```mermaid
-flowchart LR
-    subgraph ACTIONBAR["ACTION BAR — 6 boutons"]
-        B1["Filter<br/>Appliquer le filtre"]
-        B2["Undo<br/>Etape precedente"]
-        B3["Redo<br/>Etape suivante"]
-        B4["Unfilter<br/>Retirer le filtre"]
-        B5["Export<br/>Exporter les donnees"]
-        B6["About<br/>Informations plugin"]
-    end
-    style B1 fill:#388E3C,color:#fff
-    style B4 fill:#D32F2F,color:#fff
-    style B6 fill:#1565C0,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="6" style="background: #37474F; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      ACTION BAR — 6 boutons
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff; border: 1px solid #2E7D32;">
+      <img src="../icons/filter.png" width="32"/><br/><strong>Filter</strong><br/><small>Appliquer le filtre</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #455A64; color: #fff; border: 1px solid #37474F;">
+      <img src="../icons/undo.png" width="32"/><br/><strong>Undo</strong><br/><small>Etape precedente</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #455A64; color: #fff; border: 1px solid #37474F;">
+      <img src="../icons/redo.png" width="32"/><br/><strong>Redo</strong><br/><small>Etape suivante</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #D32F2F; color: #fff; border: 1px solid #B71C1C;">
+      <img src="../icons/unfilter.png" width="32"/><br/><strong>Unfilter</strong><br/><small>Retirer le filtre</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #455A64; color: #fff; border: 1px solid #37474F;">
+      <img src="../icons/export.png" width="32"/><br/><strong>Export</strong><br/><small>Exporter les donnees</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #1565C0; color: #fff; border: 1px solid #0D47A1; border-radius: 0 0 8px 0;">
+      <img src="../icons/icon.png" width="32"/><br/><strong>About</strong><br/><small>Informations plugin</small>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -354,19 +364,40 @@ flowchart TD
 
 ### Diagramme — Flux Edit Mode Conflict
 
-```mermaid
-flowchart TD
-    START["Clic sur Filter"] --> CHECK{"Couche cible en<br/>mode edition ?"}
-    CHECK -->|Non| FILTER["Filtrage normal"]
-    CHECK -->|Oui| POPUP["Popup de resolution<br/>Liste les couches en edition"]
-    POPUP --> ACCEPT["Accepter :<br/>quitter le mode edition"]
-    POPUP --> CANCEL["Annuler :<br/>revenir sans filtrer"]
-    ACCEPT --> FILTER
-    CANCEL --> IDLE["Retour a l'etat precedent"]
-    style CHECK fill:#E65100,color:#fff
-    style POPUP fill:#D32F2F,color:#fff
-    style FILTER fill:#388E3C,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="3" style="text-align: center; padding: 12px; background: #388E3C; color: #fff; border-radius: 8px 8px 0 0;">
+      <img src="../icons/filter.png" width="28"/>&nbsp; Clic sur <strong>Filter</strong>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="text-align: center; padding: 10px; background: #E65100; color: #fff; font-weight: bold;">
+      Couche cible en mode edition ?
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff; width: 33%;">
+      <strong>Non</strong><br/><small>&#8595; Filtrage normal</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #D32F2F; color: #fff; width: 34%;">
+      <strong>Oui</strong> &#8594; Popup de resolution<br/><small>Liste les couches en edition</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #78909C; color: #fff; width: 33%;">
+      &nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #66BB6A; color: #fff;">
+      <img src="../icons/filter.png" width="24"/><br/><small>Filtre applique</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #EF5350; color: #fff;">
+      <strong>Accepter</strong><br/><small>Quitter le mode edition<br/>&#8595; puis filtrage normal</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #BDBDBD; color: #333; border-radius: 0 0 8px 0;">
+      <strong>Annuler</strong><br/><small>Revenir sans filtrer</small>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -409,17 +440,33 @@ flowchart TD
 
 ### Diagramme — Workflow de l'exercice 1
 
-```mermaid
-flowchart LR
-    E1["1. Source :<br/>Departements"] --> E2["2. Feature :<br/>Herault"]
-    E2 --> E3["3. Cible :<br/>Communes"]
-    E3 --> E4["4. Predicat :<br/>Intersects"]
-    E4 --> E5["5. Filter"]
-    E5 --> RES["343 communes<br/>de l'Herault"]
-    style E1 fill:#1565C0,color:#fff
-    style E5 fill:#388E3C,color:#fff
-    style RES fill:#F57C00,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #1565C0; color: #fff; border-radius: 8px 0 0 8px;">
+      <img src="../icons/layer.png" width="24"/><br/><strong>1. Source</strong><br/><small>Departements</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #1976D2; color: #fff;">
+      <img src="../icons/pointing_black.png" width="24"/><br/><strong>2. Feature</strong><br/><small>Herault</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #42A5F5; color: #fff;">
+      <img src="../icons/layers.png" width="24"/><br/><strong>3. Cible</strong><br/><small>Communes</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #E65100; color: #fff;">
+      <img src="../icons/geo_predicates.png" width="24"/><br/><strong>4. Predicat</strong><br/><small>Intersects</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff;">
+      <img src="../icons/filter.png" width="24"/><br/><strong>5. Filter</strong>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #F57C00; color: #fff; border-radius: 0 8px 8px 0;">
+      <strong>343</strong><br/><small>communes<br/>de l'Herault</small>
+    </td>
+  </tr>
+</table>
 
 ---
 

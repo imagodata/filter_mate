@@ -67,25 +67,39 @@ A la fin de cette video, l'utilisateur saura :
 
 ### Diagramme — Cycle de Vie d'un Favori
 
-```mermaid
-stateDiagram-v2
-    [*] --> FilterActif : Appliquer un filtre
-    FilterActif --> Sauvegarde : Clic Sauvegarder
-    Sauvegarde --> FavoriStocke : Nom + contexte spatial
-    FavoriStocke --> Rappel : 1 clic Application
-    Rappel --> FilterActif
-    FavoriStocke --> Renommer : Edition du nom
-    Renommer --> FavoriStocke
-    FavoriStocke --> Dupliquer : Creer variante
-    Dupliquer --> FavoriStocke
-    FavoriStocke --> ExportJSON : Partager
-    ExportJSON --> Fichier : favorites.json
-    Fichier --> ImportJSON : Charger
-    ImportJSON --> FavoriStocke
-    FavoriStocke --> Supprimer : Action destructive
-    Supprimer --> [*]
-    note right of FavoriStocke : Stockage SQLite<br/>Persistant entre sessions<br/>Global ou par projet
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #455A64; color: #fff; border-radius: 8px 0 0 0;">
+      <img src="../icons/filter.png" width="24"/><br/><strong>Filtre actif</strong><br/><small>Appliquer un filtre</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #F57C00; color: #fff;">
+      <img src="../icons/save.png" width="24"/><br/><strong>Sauvegarder</strong><br/><small>Nom + contexte spatial</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff; border: 2px solid #2E7D32; border-radius: 0 8px 0 0;">
+      <img src="../icons/history.png" width="24"/><br/><strong>Favori stocke</strong><br/><small>SQLite, persistant<br/>Global ou par projet</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 8px; background: #E8F5E9;">
+      &#8593; <small>1 clic = Rappel</small>
+    </td>
+    <td style="padding: 4px;"></td>
+    <td colspan="2" style="text-align: center; padding: 8px; background: #E8F5E9;">
+      <small>Renommer | Dupliquer</small> &#8635;
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 10px; background: #1565C0; color: #fff; border-radius: 0 0 0 8px;">
+      <img src="../icons/export.png" width="20"/>&nbsp; <strong>Export JSON</strong><br/><small>Partager &#8594; favorites.json</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1;">&#8596;</td>
+    <td colspan="2" style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border-radius: 0 0 8px 0;">
+      <img src="../icons/add.png" width="20"/>&nbsp; <strong>Import JSON</strong><br/><small>Charger &#8592; favorites.json</small>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -214,46 +228,72 @@ stateDiagram-v2
 
 ### Diagramme — Structure du Favorites Manager Dialog (3 onglets)
 
-```mermaid
-graph TD
-    DIALOG["Favorites Manager Dialog<br/>(720 x 520 px, modal)"]
-
-    DIALOG --> LEFT["Panneau gauche (30%)<br/>Liste des favoris"]
-    DIALOG --> RIGHT["Panneau droit (70%)<br/>Details en 3 onglets"]
-    DIALOG --> SEARCH["Barre de recherche<br/>Filtre par nom, expression, tags, description"]
-    DIALOG --> BUTTONS["Barre de boutons"]
-
-    LEFT --> LIST["QListWidget<br/>Format : * Nom [nb_couches]<br/>Icone tag si tags presents"]
-
-    RIGHT --> TAB1["Onglet GENERAL"]
-    RIGHT --> TAB2["Onglet EXPRESSION"]
-    RIGHT --> TAB3["Onglet REMOTE"]
-
-    TAB1 --> G1["Nom (editable)"]
-    TAB1 --> G2["Description (editable, auto-generee)"]
-    TAB1 --> G3["Tags (virgules, ex: urbanisme, 2024)"]
-    TAB1 --> G4["Couche source (lecture seule)"]
-    TAB1 --> G5["Provider (lecture seule)"]
-    TAB1 --> G6["Compteur utilisation + Date creation"]
-
-    TAB2 --> E1["Expression source (monospace, editable)<br/>Police : Consolas / Monaco / Courier New"]
-
-    TAB3 --> R1["QTreeWidget : 3 colonnes<br/>Layer | Features | Expression"]
-    TAB3 --> R2["Message si aucune couche Remote"]
-
-    BUTTONS --> B1["Appliquer (vert #27ae60)"]
-    BUTTONS --> B2["Save Changes (bleu #3498db)"]
-    BUTTONS --> B3["Delete (rouge #e74c3c)"]
-    BUTTONS --> B4["Close (gris #ecf0f1)"]
-
-    style DIALOG fill:#f8f9fa,color:#2c3e50
-    style TAB1 fill:#f39c12,color:#fff
-    style TAB2 fill:#3498db,color:#fff
-    style TAB3 fill:#27ae60,color:#fff
-    style B1 fill:#27ae60,color:#fff
-    style B2 fill:#3498db,color:#fff
-    style B3 fill:#e74c3c,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif; border: 2px solid #333; border-radius: 8px;">
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 12px; background: #f8f9fa; font-weight: bold; font-size: 16px; border-bottom: 1px solid #ccc;">
+      <img src="../icons/history.png" width="28"/>&nbsp; Favorites Manager Dialog <small>(720 x 520 px, modal)</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="padding: 6px 16px; background: #ECEFF1; border-bottom: 1px solid #ccc;">
+      <img src="../icons/identify_alt.png" width="16"/>&nbsp; Barre de recherche — Filtre par nom, expression, tags, description
+    </td>
+  </tr>
+  <tr>
+    <td style="vertical-align: top; padding: 10px; background: #FAFAFA; width: 30%; border-right: 2px solid #ccc;">
+      <strong>Liste des favoris</strong><br/><small>(QListWidget, 30%)</small><br/><br/>
+      <img src="../icons/save.png" width="14"/>&nbsp; Batiments routes (2)<br/>
+      <img src="../icons/save.png" width="14"/>&nbsp; Zone PLU (1)<br/>
+      <img src="../icons/save.png" width="14"/>&nbsp; Proximite ecoles (3)<br/>
+    </td>
+    <td colspan="3" style="vertical-align: top; padding: 0; width: 70%;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="text-align: center; padding: 8px; background: #f39c12; color: #fff; font-weight: bold; width: 33%;">GENERAL</td>
+          <td style="text-align: center; padding: 8px; background: #3498db; color: #fff; font-weight: bold; width: 34%;">EXPRESSION</td>
+          <td style="text-align: center; padding: 8px; background: #27ae60; color: #fff; font-weight: bold; width: 33%;">REMOTE</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; padding: 8px; background: #FFF8E1; font-size: 13px;">
+            Nom (editable)<br/>
+            Description (auto-generee)<br/>
+            Tags (virgules)<br/>
+            <hr style="border: 0; border-top: 1px solid #ccc;"/>
+            <em>Lecture seule :</em><br/>
+            <img src="../icons/layer.png" width="14"/>&nbsp; Couche source<br/>
+            Provider (OGR, PG...)<br/>
+            Compteur + Date
+          </td>
+          <td style="vertical-align: top; padding: 8px; background: #E3F2FD; font-size: 13px;">
+            Expression source<br/>
+            <code style="font-size: 11px;">monospace, editable</code><br/>
+            <small>Consolas / Monaco</small>
+          </td>
+          <td style="vertical-align: top; padding: 8px; background: #E8F5E9; font-size: 13px;">
+            <img src="../icons/layers.png" width="14"/>&nbsp; QTreeWidget<br/>
+            3 colonnes :<br/>
+            Layer | Features | Expression<br/><br/>
+            <small><em>Message si aucune couche Remote</em></small>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 8px; background: #27ae60; color: #fff; font-weight: bold; border-radius: 0 0 0 8px;">
+      <img src="../icons/filter.png" width="16"/>&nbsp; Appliquer
+    </td>
+    <td style="text-align: center; padding: 8px; background: #3498db; color: #fff; font-weight: bold;">
+      <img src="../icons/save.png" width="16"/>&nbsp; Save Changes
+    </td>
+    <td style="text-align: center; padding: 8px; background: #e74c3c; color: #fff; font-weight: bold;">
+      Delete
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ecf0f1; color: #333; border-radius: 0 0 8px 0;">
+      Close
+    </td>
+  </tr>
+</table>
 
 ### Points cles a capturer
 1. Splitter horizontal 30/70 (liste / details)
@@ -373,22 +413,39 @@ graph TD
 
 ### Diagramme — Pile Undo/Redo
 
-```mermaid
-flowchart TD
-    subgraph STACK["Pile d'historique (max 100)"]
-        direction LR
-        S1["Etat 1<br/>Aucun filtre"]
-        S2["Etat 2<br/>Intersects routes"]
-        S3["Etat 3<br/>+ AND riviere"]
-        S4["Etat 4<br/>Buffer 200m"]
-        CURRENT["ETAT ACTUEL<br/>Buffer 500m"]
-    end
-    UNDO["Ctrl+Z UNDO"] --> |"Revient a"| S4
-    REDO["Ctrl+Y REDO"] --> |"Retablit"| CURRENT
-    style CURRENT fill:#388E3C,color:#fff
-    style UNDO fill:#D32F2F,color:#fff
-    style REDO fill:#1565C0,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="5" style="text-align: center; padding: 8px; background: #37474F; color: #fff; font-weight: bold; border-radius: 8px 8px 0 0;">
+      <img src="../icons/history.png" width="24"/>&nbsp; Pile d'historique (max 100)
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #78909C; color: #fff; width: 20%;">
+      <strong>Etat 1</strong><br/><small>Aucun filtre</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #607D8B; color: #fff; width: 20%;">
+      <strong>Etat 2</strong><br/><small>Intersects routes</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #546E7A; color: #fff; width: 20%;">
+      <strong>Etat 3</strong><br/><small>+ AND riviere</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #455A64; color: #fff; width: 20%;">
+      <strong>Etat 4</strong><br/><small>Buffer 200m</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #388E3C; color: #fff; width: 20%; border: 2px solid #2E7D32;">
+      <strong>ACTUEL</strong><br/><small>Buffer 500m</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #D32F2F; color: #fff; border-radius: 0 0 0 8px;">
+      <img src="../icons/undo.png" width="28"/>&nbsp; <strong>Ctrl+Z UNDO</strong><br/><small>&#8592; Revient a l'etat 4</small>
+    </td>
+    <td style="padding: 4px;"></td>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #1565C0; color: #fff; border-radius: 0 0 8px 0;">
+      <img src="../icons/redo.png" width="28"/>&nbsp; <strong>Ctrl+Y REDO</strong><br/><small>Retablit l'etat actuel &#8594;</small>
+    </td>
+  </tr>
+</table>
 
 ### Details techniques du History Widget
 - Boutons 28x28 px avec icones Unicode (fleche Undo / fleche Redo)

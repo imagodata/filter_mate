@@ -1,7 +1,7 @@
 # FilterMate — Script Video 01 : Installation & Premier Pas
 **Version 4.6.1 | QGIS Plugin | Mars 2026**
 
-> **Duree estimee :** 5-7 minutes
+> **Duree estimee :** 5-7 minutes (sans dependances externes)
 > **Niveau :** Debutant
 > **Public cible :** Utilisateurs QGIS, geomaticiens, urbanistes, etudiants SIG
 > **Ton :** Pedagogique, chaleureux, accessible — on accompagne un debutant pas a pas
@@ -17,19 +17,18 @@
 |----------|-------|-------|
 | 0 | Hook — "Filtrer 1 million d'entites en 2 secondes" | 0:15 |
 | 1 | Installation via le Plugin Manager | 0:30 |
-| 2 | Installation psycopg2 (optionnel) | 0:30 |
-| 3 | Premier lancement — le dock widget apparait | 0:30 |
-| 4 | Architecture de l'interface : les 3 zones | 1:15 |
-| 5 | Les 6 boutons de la barre laterale (Exploring Zone) | 0:30 |
-| 6 | Les 6 boutons de l'Action Bar | 0:30 |
-| 7 | Premier filtrage : Shapefile local | 1:30 |
-| 8 | Theme sombre automatique | 0:20 |
-| 9 | Changement de langue (22 langues) | 0:20 |
-| 10 | Mode verbose — votre outil d'apprentissage | 0:20 |
-| 11 | QGIS Log Messages Panel — onglet FilterMate | 0:20 |
-| 12 | Auto-detection du champ d'affichage | 0:20 |
-| 13 | Configuration sauvegardee automatiquement | 0:15 |
-| 14 | Ou trouver l'aide — Conclusion | 0:15 |
+| 2 | Premier lancement — le dock widget apparait | 0:30 |
+| 3 | Architecture de l'interface : les 3 zones | 1:15 |
+| 4 | Les 6 boutons de la barre laterale (Exploring Zone) | 0:30 |
+| 5 | Les 6 boutons de l'Action Bar | 0:30 |
+| 6 | Premier filtrage : Shapefile local | 1:30 |
+| 7 | Theme sombre automatique | 0:20 |
+| 8 | Changement de langue (22 langues) | 0:20 |
+| 9 | Mode verbose — votre outil d'apprentissage | 0:20 |
+| 10 | QGIS Log Messages Panel — onglet FilterMate | 0:20 |
+| 11 | Auto-detection du champ d'affichage | 0:20 |
+| 12 | Configuration sauvegardee automatiquement | 0:15 |
+| 13 | Ou trouver l'aide — Conclusion | 0:15 |
 
 ---
 
@@ -59,46 +58,49 @@
 
 ### Diagramme — Flux d'installation
 
-```mermaid
-graph TD
-    QGIS["QGIS Desktop"] --> INSTALL["Extensions > Gerer les extensions"]
-    INSTALL --> SEARCH["Rechercher 'FilterMate'"]
-    SEARCH --> CLICK["Installer"]
-    CLICK --> DOCK["FilterMate Dock Widget"]
-
-    DOCK --> EZ["Exploring Zone<br/>Parcourir les entites"]
-    DOCK --> TOOLBOX["Toolbox"]
-    TOOLBOX --> TAB_FILT["Onglet FILTERING<br/>Source + Cible + Predicat"]
-    TOOLBOX --> TAB_EXP["Onglet EXPORTING<br/>GeoPackage & KML"]
-    DOCK --> ACTIONBAR["Action Bar (6 boutons)<br/>dont About (toujours actif)"]
-
-    DOCK --> SIDEBAR["Barre laterale<br/>Identify / Zoom / Select<br/>Track / Link / Reset"]
-
-    style DOCK fill:#1976D2,color:#fff
-    style EZ fill:#7B1FA2,color:#fff
-    style TOOLBOX fill:#388E3C,color:#fff
-    style TAB_FILT fill:#388E3C,color:#fff
-    style TAB_EXP fill:#F57C00,color:#fff
-    style ACTIONBAR fill:#1565C0,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="3" style="text-align: center; padding: 12px; background: #455A64; color: #fff; border-radius: 8px 8px 0 0;">
+      QGIS Desktop &#8594; Extensions &#8594; Gerer les extensions &#8594; Rechercher 'FilterMate' &#8594; Installer
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="text-align: center; padding: 8px; background: #ECEFF1;">&#8595;</td>
+  </tr>
+  <tr>
+    <td colspan="3" style="text-align: center; padding: 12px; background: #1976D2; color: #fff; font-weight: bold;">
+      <img src="../icons/icon.png" width="28"/>&nbsp; FilterMate Dock Widget
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #7B1FA2; color: #fff; width: 33%;">
+      <img src="../icons/identify_alt.png" width="20"/> <img src="../icons/zoom.png" width="20"/> <img src="../icons/select_black.png" width="20"/> <img src="../icons/track.png" width="20"/> <img src="../icons/link.png" width="20"/> <img src="../icons/reset_properties.png" width="20"/><br/>
+      <strong>Exploring Zone</strong><br/><small>Parcourir les entites<br/>+ Barre laterale 6 boutons</small>
+    </td>
+    <td style="text-align: center; padding: 12px; width: 34%;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="text-align: center; padding: 8px; background: #388E3C; color: #fff; border: 1px solid #2E7D32;">
+            <img src="../icons/geo_predicates.png" width="20"/><br/><strong>FILTERING</strong><br/><small>Source + Cible + Predicat</small>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center; padding: 8px; background: #F57C00; color: #fff; border: 1px solid #E65100;">
+            <img src="../icons/export.png" width="20"/><br/><strong>EXPORTING</strong><br/><small>GeoPackage & KML</small>
+          </td>
+        </tr>
+      </table>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #1565C0; color: #fff; width: 33%; border-radius: 0 0 8px 0;">
+      <img src="../icons/filter.png" width="20"/> <img src="../icons/undo.png" width="20"/> <img src="../icons/redo.png" width="20"/> <img src="../icons/unfilter.png" width="20"/> <img src="../icons/export.png" width="20"/> <img src="../icons/icon.png" width="20"/><br/>
+      <strong>Action Bar</strong><br/><small>6 boutons<br/>dont About (toujours actif)</small>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## SEQUENCE 2 — INSTALLATION PSYCOPG2 (0:45 - 1:15)
-
-### Visuel suggere
-> Terminal (Windows CMD ou PowerShell) avec la commande `pip install psycopg2-binary`. Annotation : "Optionnel — uniquement si vous utilisez PostgreSQL / PostGIS".
-
-### Narration
-> *"Si vous travaillez avec des bases PostgreSQL ou PostGIS, il y a une etape supplementaire : installer la librairie Python `psycopg2`. Ouvrez un terminal et tapez : `pip install psycopg2-binary`."*
-
-> *"C'est completement optionnel. Si vous travaillez uniquement avec des Shapefiles, GeoPackages ou GeoJSON, FilterMate fonctionne directement sans rien installer de plus."*
-
-> *"Petit conseil : si la commande `pip` ne fonctionne pas, essayez `python -m pip install psycopg2-binary` ou utilisez la console Python OSGeo4W sur Windows."*
-
----
-
-## SEQUENCE 3 — PREMIER LANCEMENT (1:15 - 1:45)
+## SEQUENCE 2 — PREMIER LANCEMENT (0:45 - 1:15)
 
 ### Visuel suggere
 > Capture QGIS : cliquer sur l'icone FilterMate dans la barre d'outils (ou menu Extensions > FilterMate). Le dock widget s'ouvre et s'ancre a droite de l'ecran. Montrer le panneau vide — aucune couche chargee.
@@ -112,7 +114,7 @@ graph TD
 
 ---
 
-## SEQUENCE 4 — ARCHITECTURE DE L'INTERFACE (1:45 - 3:00)
+## SEQUENCE 3 — ARCHITECTURE DE L'INTERFACE (1:15 - 2:30)
 
 ### Visuel suggere
 > Capture annotee de l'interface FilterMate avec 3 zones clairement delimitees par des rectangles de couleur :
@@ -135,51 +137,93 @@ graph TD
 
 ---
 
-### Diagramme — Les 3 zones de l'interface
+### Visuel — Les 3 zones de l'interface
 
-```mermaid
-graph TB
-    subgraph HEADER["En-tete"]
-        direction LR
-        FAV["Pastille Favoris<br/>(orange)"]
-        BACK["Pastille Backend<br/>(bleu)"]
-    end
+> **[CAPTURE VIDEO QGIS]** Enregistrement ecran de l'interface FilterMate dans QGIS, avec mise en surbrillance successive des 3 zones.
+> Chaque zone s'eclaire a son tour pendant la narration (effet highlight/overlay anime).
 
-    subgraph ZONE_A["ZONE A — Exploring Zone"]
-        direction LR
-        SIDEBAR["Barre laterale<br/>6 boutons"]
-        CONTENT["Selecteurs<br/>Single / Multiple / Custom"]
-    end
-
-    subgraph ZONE_B["ZONE B — Toolbox (QToolBox)"]
-        direction LR
-        FILT["Onglet FILTERING<br/>Source + Cible + Predicat<br/>+ Buffer + Combine Ops"]
-        EXPO["Onglet EXPORTING<br/>Couches + Format<br/>+ Options + Dossier"]
-    end
-
-    subgraph ZONE_C["ZONE C — Action Bar"]
-        direction LR
-        B1["Filter"]
-        B2["Undo"]
-        B3["Redo"]
-        B4["Unfilter"]
-        B5["Export"]
-        B6["About"]
-    end
-
-    HEADER --> ZONE_A
-    ZONE_A --> ZONE_B
-    ZONE_B --> ZONE_C
-
-    style HEADER fill:#37474F,color:#fff
-    style ZONE_A fill:#7B1FA2,color:#fff
-    style ZONE_B fill:#388E3C,color:#fff
-    style ZONE_C fill:#1565C0,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="6" style="background: #37474F; color: #fff; text-align: center; padding: 10px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      En-tete — Pastille Favoris (orange) | Pastille Backend (bleu)
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="background: #7B1FA2; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      ZONE A — Exploring Zone
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/identify_alt.png" width="28"/><br/><small>Identify</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/zoom.png" width="28"/><br/><small>Zoom</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/select_black.png" width="28"/><br/><small>Select</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/track.png" width="28"/><br/><small>Track</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/link.png" width="28"/><br/><small>Link</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/reset_properties.png" width="28"/><br/><small>Reset</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="background: #E1BEE7; text-align: center; padding: 8px;">
+      Selecteurs : Single / Multiple / Custom
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="background: #388E3C; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      ZONE B — Toolbox
+    </td>
+    <td colspan="3" style="background: #388E3C; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      &nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="background: #4CAF50; color: #fff; text-align: center; padding: 10px;">
+      Onglet FILTERING<br/><small>Source + Cible + Predicat + Buffer</small>
+    </td>
+    <td colspan="3" style="background: #F57C00; color: #fff; text-align: center; padding: 10px;">
+      Onglet EXPORTING<br/><small>Couches + Format + Options</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="background: #1565C0; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      ZONE C — Action Bar
+    </td>
+  </tr>
+  <tr style="background: #1976D2;">
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/filter.png" width="32"/><br/><small>Filter</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/undo.png" width="32"/><br/><small>Undo</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/redo.png" width="32"/><br/><small>Redo</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/unfilter.png" width="32"/><br/><small>Unfilter</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/export.png" width="32"/><br/><small>Export</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; border-radius: 0 0 8px 0;">
+      <img src="../icons/icon.png" width="32"/><br/><small>About</small>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## SEQUENCE 5 — LES 6 BOUTONS DE LA BARRE LATERALE (3:00 - 3:30)
+## SEQUENCE 4 — LES 6 BOUTONS DE LA BARRE LATERALE (2:30 - 3:00)
 
 ### Visuel suggere
 > Zoom sur la barre laterale de la Zone d'Exploration. Chaque bouton est survole avec une annotation qui apparait a cote.
@@ -203,35 +247,71 @@ graph TB
 
 ### Diagramme — Barre laterale Exploring
 
-```mermaid
-graph LR
-    subgraph SIDEBAR["Barre laterale — 6 boutons"]
-        direction TB
-        I["Identify<br/>Inspecter les attributs"]
-        Z["Zoom<br/>Centrer sur l'entite"]
-        S["Select<br/>Surligner (bascule)"]
-        T["Track<br/>Suivi automatique (bascule)"]
-        L["Link<br/>Synchroniser selecteurs (bascule)"]
-        R["Reset<br/>Reinitialiser l'exploration"]
-    end
-
-    I --> |"1 clic"| RES1["Fenetre Identify Results"]
-    Z --> |"1 clic"| RES2["Carte centree + zoom"]
-    S --> |"ON/OFF"| RES3["Entite surlignee"]
-    T --> |"ON/OFF"| RES4["Navigation auto"]
-
-    style SIDEBAR fill:#7B1FA2,color:#fff
-    style I fill:#9C27B0,color:#fff
-    style Z fill:#9C27B0,color:#fff
-    style S fill:#9C27B0,color:#fff
-    style T fill:#9C27B0,color:#fff
-    style L fill:#9C27B0,color:#fff
-    style R fill:#9C27B0,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="3" style="background: #7B1FA2; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      Barre laterale — 6 boutons
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff; width: 20%;">
+      <img src="../icons/identify_alt.png" width="28"/><br/><strong>Identify</strong><br/><small>Inspecter les attributs</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff; width: 15%;"><em>1 clic</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Fenetre Identify Results
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff;">
+      <img src="../icons/zoom.png" width="28"/><br/><strong>Zoom</strong><br/><small>Centrer sur l'entite</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>1 clic</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Carte centree + zoom
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff;">
+      <img src="../icons/select_black.png" width="28"/><br/><strong>Select</strong><br/><small>Surligner (bascule)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>ON/OFF</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Entite surlignee
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff;">
+      <img src="../icons/track.png" width="28"/><br/><strong>Track</strong><br/><small>Suivi automatique (bascule)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>ON/OFF</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Navigation auto
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff;">
+      <img src="../icons/link.png" width="28"/><br/><strong>Link</strong><br/><small>Synchroniser selecteurs (bascule)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>ON/OFF</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Selecteurs synchronises
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff; border-radius: 0 0 0 8px;">
+      <img src="../icons/reset_properties.png" width="28"/><br/><strong>Reset</strong><br/><small>Reinitialiser l'exploration</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>1 clic</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px 6px 8px 6px;">
+      Retour a zero
+    </td>
+  </tr>
+</table>
 
 ---
 
-## SEQUENCE 6 — LES 6 BOUTONS DE L'ACTION BAR (3:30 - 4:00)
+## SEQUENCE 5 — LES 6 BOUTONS DE L'ACTION BAR (3:00 - 3:30)
 
 ### Visuel suggere
 > Zoom sur l'Action Bar. Chaque bouton s'eclaire avec un tooltip. Mettre en evidence que About est toujours actif (jamais grise), tandis que les 5 autres changent d'etat selon le contexte.
@@ -257,37 +337,63 @@ graph LR
 
 ### Diagramme — Activation des boutons selon l'onglet
 
-```mermaid
-graph TD
-    subgraph FILTERING_TAB["Onglet FILTERING actif"]
-        direction LR
-        F1["Filter ✅"]
-        F2["Undo ✅"]
-        F3["Redo ✅"]
-        F4["Unfilter ✅"]
-        F5["Export ❌"]
-        F6["About ✅"]
-    end
-
-    subgraph EXPORTING_TAB["Onglet EXPORTING actif"]
-        direction LR
-        E1["Filter ❌"]
-        E2["Undo ❌"]
-        E3["Redo ❌"]
-        E4["Unfilter ❌"]
-        E5["Export ✅"]
-        E6["About ✅"]
-    end
-
-    style FILTERING_TAB fill:#388E3C,color:#fff
-    style EXPORTING_TAB fill:#F57C00,color:#fff
-    style F6 fill:#1565C0,color:#fff
-    style E6 fill:#1565C0,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="6" style="background: #388E3C; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      Onglet FILTERING actif
+    </td>
+  </tr>
+  <tr style="background: #4CAF50;">
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/filter.png" width="32"/><br/><small>Filter</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/undo.png" width="32"/><br/><small>Undo</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/redo.png" width="32"/><br/><small>Redo</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/unfilter.png" width="32"/><br/><small>Unfilter</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/export.png" width="32"/><br/><small>Export</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1565C0; color: #fff;">
+      <img src="../icons/icon.png" width="32"/><br/><small>About</small><br/>✅
+    </td>
+  </tr>
+  <tr><td colspan="6" style="padding: 6px;"></td></tr>
+  <tr>
+    <td colspan="6" style="background: #F57C00; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      Onglet EXPORTING actif
+    </td>
+  </tr>
+  <tr style="background: #FF9800;">
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/filter.png" width="32"/><br/><small>Filter</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/undo.png" width="32"/><br/><small>Undo</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/redo.png" width="32"/><br/><small>Redo</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/unfilter.png" width="32"/><br/><small>Unfilter</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/export.png" width="32"/><br/><small>Export</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1565C0; color: #fff; border-radius: 0 0 8px 0;">
+      <img src="../icons/icon.png" width="32"/><br/><small>About</small><br/>✅
+    </td>
+  </tr>
+</table>
 
 ---
 
-## SEQUENCE 7 — PREMIER FILTRAGE : SHAPEFILE LOCAL (4:00 - 5:30)
+## SEQUENCE 6 — PREMIER FILTRAGE : SHAPEFILE LOCAL (3:30 - 5:00)
 
 ### Visuel suggere
 > Demo live en temps reel. Etapes visibles a l'ecran :
@@ -341,7 +447,7 @@ sequenceDiagram
 
 ---
 
-## SEQUENCE 8 — THEME SOMBRE AUTOMATIQUE (5:30 - 5:50)
+## SEQUENCE 7 — THEME SOMBRE AUTOMATIQUE (5:00 - 5:20)
 
 ### Visuel suggere
 > Capture QGIS : montrer FilterMate en theme clair, puis basculer QGIS en theme sombre (Preferences > General > Interface Theme > "Night Mapping"). FilterMate bascule automatiquement — les icones, les couleurs de fond, les bordures s'adaptent.
@@ -353,7 +459,7 @@ sequenceDiagram
 
 ---
 
-## SEQUENCE 9 — CHANGEMENT DE LANGUE (5:50 - 6:10)
+## SEQUENCE 8 — CHANGEMENT DE LANGUE (5:20 - 5:40)
 
 ### Visuel suggere
 > Capture QGIS : ouvrir la configuration FilterMate (bouton About > onglet Config ou JSON TreeView), naviguer jusqu'au parametre de langue, montrer le menu deroulant avec les 22 langues disponibles. Changer de francais vers anglais, puis vers japonais — l'interface se met a jour instantanement.
@@ -401,7 +507,7 @@ mindmap
 
 ---
 
-## SEQUENCE 10 — MODE VERBOSE (6:10 - 6:30)
+## SEQUENCE 9 — MODE VERBOSE (5:40 - 6:00)
 
 ### Visuel suggere
 > Capture QGIS : ouvrir la configuration (JSON TreeView), naviguer vers `APP > DOCKWIDGET > FEEDBACK_LEVEL`. Montrer les 3 choix dans le menu deroulant : "minimal", "normal", "verbose". Selectionner "verbose". Effectuer un filtrage et montrer les messages detailles qui apparaissent dans la barre de message QGIS.
@@ -438,7 +544,7 @@ graph LR
 
 ---
 
-## SEQUENCE 11 — QGIS LOG MESSAGES PANEL (6:30 - 6:50)
+## SEQUENCE 10 — QGIS LOG MESSAGES PANEL (6:00 - 6:20)
 
 ### Visuel suggere
 > Capture QGIS : menu Vue > Panneaux > Messages de log (ou View > Panels > Log Messages). Montrer le panneau qui s'ouvre en bas. Cliquer sur l'onglet "FilterMate". Effectuer un filtrage et montrer les logs detailles qui apparaissent : timestamp, niveau, message.
@@ -450,7 +556,7 @@ graph LR
 
 ---
 
-## SEQUENCE 12 — AUTO-DETECTION DU CHAMP D'AFFICHAGE (6:50 - 7:10)
+## SEQUENCE 11 — AUTO-DETECTION DU CHAMP D'AFFICHAGE (6:20 - 6:40)
 
 ### Visuel suggere
 > Demo live : charger une couche avec un champ "nom" ou "name". Montrer que FilterMate l'a automatiquement detecte et l'utilise pour afficher les entites dans le selecteur. Puis charger une couche avec des champs moins evidents — montrer que FilterMate cherche intelligemment le meilleur champ.
@@ -503,7 +609,7 @@ graph TD
 
 ---
 
-## SEQUENCE 13 — CONFIGURATION SAUVEGARDEE AUTOMATIQUEMENT (7:10 - 7:25)
+## SEQUENCE 12 — CONFIGURATION SAUVEGARDEE AUTOMATIQUEMENT (6:40 - 6:55)
 
 ### Visuel suggere
 > Schema anime : montrer les proprietes de la couche (champ d'affichage selectionne, derniere entite parcourue, etat des toggles) qui sont ecrites dans une base SQLite locale. Puis fermer QGIS, le rouvrir, et montrer que tout est restaure a l'identique.
@@ -550,7 +656,7 @@ flowchart LR
 
 ---
 
-## SEQUENCE 14 — CONCLUSION & RESSOURCES (7:25 - 7:40)
+## SEQUENCE 13 — CONCLUSION & RESSOURCES (6:55 - 7:10)
 
 ### Visuel suggere
 > Ecran de fin avec le logo FilterMate, les 3 liens (GitHub, QGIS Plugins, Documentation), et un appel a l'action. Musique legere en fond.
@@ -572,39 +678,37 @@ flowchart LR
 |--------|---------|
 | 0:00 | Hook — "1 million d'entites, 2 secondes" |
 | 0:15 | Installation via Plugin Manager |
-| 0:45 | Installation psycopg2 (optionnel) |
-| 1:15 | Premier lancement — dock widget |
-| 1:45 | Architecture de l'interface (3 zones) |
-| 3:00 | Barre laterale (6 boutons Exploring) |
-| 3:30 | Action Bar (6 boutons d'action) |
-| 4:00 | Premier filtrage : Shapefile local |
-| 5:30 | Theme sombre automatique |
-| 5:50 | Changement de langue (22 langues) |
-| 6:10 | Mode verbose (FEEDBACK_LEVEL) |
-| 6:30 | QGIS Log Messages Panel |
-| 6:50 | Auto-detection du champ d'affichage |
-| 7:10 | Config sauvegardee automatiquement (SQLite) |
-| 7:25 | Conclusion + Ressources |
+| 0:45 | Premier lancement — dock widget |
+| 1:15 | Architecture de l'interface (3 zones) |
+| 2:30 | Barre laterale (6 boutons Exploring) |
+| 3:00 | Action Bar (6 boutons d'action) |
+| 3:30 | Premier filtrage : Shapefile local |
+| 5:00 | Theme sombre automatique |
+| 5:20 | Changement de langue (22 langues) |
+| 5:40 | Mode verbose (FEEDBACK_LEVEL) |
+| 6:00 | QGIS Log Messages Panel |
+| 6:20 | Auto-detection du champ d'affichage |
+| 6:40 | Config sauvegardee automatiquement (SQLite) |
+| 6:55 | Conclusion + Ressources |
 
 ### Captures QGIS requises
 
 1. Plugin Manager avec "FilterMate" dans la barre de recherche
-2. Terminal avec `pip install psycopg2-binary`
-3. Icone FilterMate dans la barre d'outils QGIS
-4. Dock widget vide au premier lancement
-5. Dock widget avec couches chargees — vue d'ensemble annotee (3 zones)
-6. Zoom sur la barre laterale (6 boutons) avec annotations
-7. Zoom sur l'Action Bar (6 boutons) avec annotations
-8. Couches departements + communes chargees dans QGIS
-9. Zone d'Exploration avec "Gironde" selectionnee
-10. Onglet FILTERING avec source/cible/predicat configures
-11. Resultat du filtrage : communes de la Gironde uniquement visibles
-12. Basculement theme clair vers theme sombre
-13. Menu deroulant de selection de langue
-14. Parametre FEEDBACK_LEVEL dans le JSON TreeView
-15. Panneau Log Messages avec onglet FilterMate
-16. Selecteur d'entites montrant les noms (pas les IDs)
-17. Ecran de fin avec liens GitHub / QGIS Plugins / Documentation
+2. Icone FilterMate dans la barre d'outils QGIS
+3. Dock widget vide au premier lancement
+4. Dock widget avec couches chargees — vue d'ensemble annotee (3 zones)
+5. Zoom sur la barre laterale (6 boutons) avec annotations
+6. Zoom sur l'Action Bar (6 boutons) avec annotations
+7. Couches departements + communes chargees dans QGIS
+8. Zone d'Exploration avec "Gironde" selectionnee
+9. Onglet FILTERING avec source/cible/predicat configures
+10. Resultat du filtrage : communes de la Gironde uniquement visibles
+11. Basculement theme clair vers theme sombre
+12. Menu deroulant de selection de langue
+13. Parametre FEEDBACK_LEVEL dans le JSON TreeView
+14. Panneau Log Messages avec onglet FilterMate
+15. Selecteur d'entites montrant les noms (pas les IDs)
+16. Ecran de fin avec liens GitHub / QGIS Plugins / Documentation
 
 ### Donnees de demo
 

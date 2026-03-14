@@ -457,24 +457,42 @@ graph TD
 
 ### Diagramme 2 — Pipeline Buffer
 
-```mermaid
-flowchart LR
-    INPUT["Geometrie source"]
-    INPUT --> BUFFER["Buffer"]
-    BUFFER --> STATIC["Statique<br/>50m / 200m / 1km"]
-    BUFFER --> DYNAMIC["Dynamique<br/>Expression QGIS"]
-    BUFFER --> NEGATIVE["Negatif<br/>Retrecir le polygone"]
-    BUFFER --> SEGMENTS["Buffer Segments<br/>Moins = plus rapide"]
-    STATIC --> RESULT["Geometrie bufferisee"]
-    DYNAMIC --> RESULT
-    NEGATIVE --> RESULT
-    SEGMENTS --> RESULT
-    RESULT --> PREDICATE["Application du predicat spatial"]
-    style BUFFER fill:#1976D2,color:#fff
-    style DYNAMIC fill:#E65100,color:#fff
-    style NEGATIVE fill:#D32F2F,color:#fff
-    style SEGMENTS fill:#6A1B9A,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="text-align: center; padding: 14px; background: #455A64; color: #fff; border-radius: 8px 8px 0 0;" colspan="4">
+      <img src="../icons/layer.png" width="28"/>&nbsp; Geometrie source
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 8px; background: #1976D2; color: #fff; font-weight: bold;">
+      <img src="../icons/buffer_value.png" width="28"/>&nbsp; Buffer
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #1976D2; color: #fff; width: 25%; border: 1px solid #1565C0;">
+      <img src="../icons/buffer_value.png" width="24"/><br/><strong>Statique</strong><br/><small>50m / 200m / 1km</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #E65100; color: #fff; width: 25%; border: 1px solid #BF360C;">
+      <img src="../icons/buffer_type.png" width="24"/><br/><strong>Dynamique</strong><br/><small>Expression QGIS</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #D32F2F; color: #fff; width: 25%; border: 1px solid #B71C1C;">
+      <img src="../icons/buffer_value.png" width="24"/><br/><strong>Negatif</strong><br/><small>Retrecir le polygone</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #6A1B9A; color: #fff; width: 25%; border: 1px solid #4A148C;">
+      <img src="../icons/buffer_type.png" width="24"/><br/><strong>Segments</strong><br/><small>Moins = plus rapide</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 10px; background: #78909C; color: #fff;">
+      &#8595; Geometrie bufferisee
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 14px; background: #388E3C; color: #fff; border-radius: 0 0 8px 8px;">
+      <img src="../icons/geo_predicates.png" width="28"/>&nbsp; Application du predicat spatial
+    </td>
+  </tr>
+</table>
 
 ### Diagramme 3 — Tableau Comparatif des 8 Predicats
 

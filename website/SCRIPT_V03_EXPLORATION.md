@@ -46,32 +46,52 @@
 
 ### Diagramme — Vue d'ensemble de l'Exploring Zone
 
-```mermaid
-graph TD
-    DOCK["FilterMate Dock Widget"]
-
-    DOCK --> EXPLORING["EXPLORING ZONE<br/>(section superieure du dock)"]
-
-    EXPLORING --> SIDEBAR["Barre laterale<br/>6 boutons"]
-    EXPLORING --> GROUPBOXES["3 GroupBoxes<br/>mutuellement exclusifs"]
-
-    SIDEBAR --> B1["Identify<br/>(one-shot)"]
-    SIDEBAR --> B2["Zoom<br/>(one-shot)"]
-    SIDEBAR --> B3["Select<br/>(toggle)"]
-    SIDEBAR --> B4["Track<br/>(toggle)"]
-    SIDEBAR --> B5["Link<br/>(toggle)"]
-    SIDEBAR --> B6["Reset<br/>(one-shot)"]
-
-    GROUPBOXES --> GB1["SINGLE SELECTION<br/>(par defaut)"]
-    GROUPBOXES --> GB2["MULTIPLE SELECTION<br/>(checkboxes)"]
-    GROUPBOXES --> GB3["CUSTOM SELECTION<br/>(expression libre)"]
-
-    style EXPLORING fill:#7B1FA2,color:#fff
-    style SIDEBAR fill:#1976D2,color:#fff
-    style GB1 fill:#1976D2,color:#fff
-    style GB2 fill:#7B1FA2,color:#fff
-    style GB3 fill:#E65100,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="6" style="background: #7B1FA2; color: #fff; text-align: center; padding: 10px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      EXPLORING ZONE (section superieure du dock)
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="background: #9C27B0; color: #fff; text-align: center; padding: 6px; font-weight: bold;">
+      Barre laterale — 6 boutons
+    </td>
+  </tr>
+  <tr style="background: #AB47BC;">
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/identify_alt.png" width="28"/><br/><strong>Identify</strong><br/><small>(one-shot)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/zoom.png" width="28"/><br/><strong>Zoom</strong><br/><small>(one-shot)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/select_black.png" width="28"/><br/><strong>Select</strong><br/><small>(toggle)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/track.png" width="28"/><br/><strong>Track</strong><br/><small>(toggle)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/link.png" width="28"/><br/><strong>Link</strong><br/><small>(toggle)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/reset_properties.png" width="28"/><br/><strong>Reset</strong><br/><small>(one-shot)</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="padding: 6px; background: #F3E5F5;"></td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      <strong>SINGLE SELECTION</strong><br/><small>(par defaut)</small>
+    </td>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #7B1FA2; color: #fff; border: 1px solid #6A1B9A;">
+      <strong>MULTIPLE SELECTION</strong><br/><small>(checkboxes)</small>
+    </td>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #E65100; color: #fff; border: 1px solid #BF360C; border-radius: 0 0 8px 0;">
+      <strong>CUSTOM SELECTION</strong><br/><small>(expression libre)</small>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -189,20 +209,32 @@ graph TD
 
 ## DIAGRAMME — Outils de Navigation
 
-```mermaid
-graph LR
-    subgraph TOOLS["Outils Navigation"]
-        FLASH["Flash<br/>Surbrillance jaune<br/>temporaire"]
-        ZOOM["Zoom To<br/>Centrer + zoom<br/>sur l'entite"]
-        IDENTIFY["Identify<br/>Tous les attributs<br/>et proprietes"]
-        ZOOM_SEL["Zoom Selection<br/>Vue d'ensemble<br/>des selectionnes"]
-    end
-    TOOLS --> MAP["Canvas QGIS"]
-    style FLASH fill:#FFC107,color:#000
-    style ZOOM fill:#1976D2,color:#fff
-    style IDENTIFY fill:#388E3C,color:#fff
-    style ZOOM_SEL fill:#7B1FA2,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="4" style="background: #455A64; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      Outils Navigation
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #FFC107; color: #000; border: 1px solid #FFA000;">
+      <img src="../icons/track.png" width="28"/><br/><strong>Flash</strong><br/><small>Surbrillance jaune temporaire</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      <img src="../icons/zoom.png" width="28"/><br/><strong>Zoom To</strong><br/><small>Centrer + zoom sur l'entite</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff; border: 1px solid #2E7D32;">
+      <img src="../icons/identify_alt.png" width="28"/><br/><strong>Identify</strong><br/><small>Tous les attributs et proprietes</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #7B1FA2; color: #fff; border: 1px solid #6A1B9A;">
+      <img src="../icons/zoom_alt1.png" width="28"/><br/><strong>Zoom Selection</strong><br/><small>Vue d'ensemble des selectionnes</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 10px; background: #37474F; color: #fff; border-radius: 0 0 8px 8px;">
+      &#8594; Canvas QGIS
+    </td>
+  </tr>
+</table>
 
 ---
 

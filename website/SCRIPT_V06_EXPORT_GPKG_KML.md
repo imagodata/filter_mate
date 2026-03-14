@@ -48,17 +48,21 @@
 
 ### Diagramme 1 — GPKG vs KML : arbre de decision
 
-```mermaid
-flowchart TD
-    EXPORT["FilterMate Export Engine"]
-    EXPORT --> GPKG_PATH["GeoPackage .gpkg"]
-    EXPORT --> KML_PATH["KML/KMZ"]
-    GPKG_PATH --> GPKG_USE["Usage : Livrable QGIS-to-QGIS<br/>Projet embarque, Styles QML, Hierarchie groupes, Multi-couches"]
-    KML_PATH --> KML_USE["Usage : Partage Google Earth<br/>Ouverture universelle, Styles SLD, Partage terrain"]
-    style GPKG_PATH fill:#1565C0,color:#fff
-    style KML_PATH fill:#E65100,color:#fff
-    style EXPORT fill:#F57C00,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 14px; background: #F57C00; color: #fff; border-radius: 8px 8px 0 0;">
+      <img src="../icons/export.png" width="32"/>&nbsp; <strong>FilterMate Export Engine</strong>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 14px; background: #1565C0; color: #fff; width: 50%; border: 1px solid #0D47A1; border-radius: 0 0 0 8px;">
+      <img src="../icons/folder_black.png" width="28"/><br/><strong>GeoPackage .gpkg</strong><br/><br/><small>Livrable QGIS-to-QGIS<br/>Projet embarque, Styles QML<br/>Hierarchie groupes, Multi-couches</small>
+    </td>
+    <td style="text-align: center; padding: 14px; background: #E65100; color: #fff; width: 50%; border: 1px solid #BF360C; border-radius: 0 0 8px 0;">
+      <img src="../icons/datatype.png" width="28"/><br/><strong>KML / KMZ</strong><br/><br/><small>Partage Google Earth<br/>Ouverture universelle<br/>Styles SLD, Partage terrain</small>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -77,45 +81,64 @@ flowchart TD
 
 ### Diagramme 2 — Structure de l'onglet EXPORTING (barre laterale)
 
-```mermaid
-flowchart LR
-    subgraph SIDEBAR["Barre laterale EXPORTING<br/>(6 toggles)"]
-        direction TB
-        T1["1. Layers<br/>layers.png<br/>Couches a exporter"]
-        T2["2. Projection<br/>projection_black.png<br/>CRS de sortie"]
-        T3["3. Styles<br/>styles_black.png<br/>QML / SLD"]
-        T4["4. Datatype<br/>datatype.png<br/>Format (GPKG, KML...)"]
-        T5["5. Output Folder<br/>folder_black.png<br/>Dossier + Batch"]
-        T6["6. Zip<br/>zip.png<br/>Compression + Batch"]
-        T1 --- T2 --- T3 --- T4 --- T5 --- T6
-    end
-
-    subgraph WIDGETS["Zone de configuration (droite)"]
-        direction TB
-        W1["Checkable ComboBox<br/>cocher les couches"]
-        W2["QgsProjectionSelectionWidget<br/>ex: EPSG:4326"]
-        W3["ComboBox Styles<br/>QML / SLD / Les deux"]
-        W4["ComboBox Format<br/>GeoPackage, KML, SHP..."]
-        W5["LineEdit + Browse<br/>+ Checkbox Batch"]
-        W6["LineEdit + Browse<br/>+ Checkbox Batch"]
-    end
-
-    T1 --> W1
-    T2 --> W2
-    T3 --> W3
-    T4 --> W4
-    T5 --> W5
-    T6 --> W6
-
-    style SIDEBAR fill:#F57C00,color:#fff
-    style WIDGETS fill:#1565C0,color:#fff
-    style T1 fill:#E65100,color:#fff
-    style T2 fill:#E65100,color:#fff
-    style T3 fill:#E65100,color:#fff
-    style T4 fill:#E65100,color:#fff
-    style T5 fill:#E65100,color:#fff
-    style T6 fill:#E65100,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="background: #F57C00; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0; width: 35%;">
+      Barre laterale EXPORTING (6 toggles)
+    </td>
+    <td style="background: #1565C0; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      Zone de configuration (droite)
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../icons/layers.png" width="28"/><br/><strong>1. Layers</strong><br/><small>Couches a exporter</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      Checkable ComboBox — cocher les couches
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../icons/projection_black.png" width="28"/><br/><strong>2. Projection</strong><br/><small>CRS de sortie</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      QgsProjectionSelectionWidget — ex: EPSG:4326
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../icons/styles_black.png" width="28"/><br/><strong>3. Styles</strong><br/><small>QML / SLD</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      ComboBox Styles — QML / SLD / Les deux
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../icons/datatype.png" width="28"/><br/><strong>4. Datatype</strong><br/><small>Format (GPKG, KML...)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      ComboBox Format — GeoPackage, KML, SHP...
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../icons/folder_black.png" width="28"/><br/><strong>5. Output Folder</strong><br/><small>Dossier + Batch</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      LineEdit + Browse + Checkbox Batch
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C; border-radius: 0 0 0 8px;">
+      <img src="../icons/zip.png" width="28"/><br/><strong>6. Zip</strong><br/><small>Compression + Batch</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0; border-radius: 0 0 8px 0;">
+      LineEdit + Browse + Checkbox Batch
+    </td>
+  </tr>
+</table>
 
 > *"Astuce : vous n'etes pas oblige d'activer tous les toggles. Le minimum pour exporter, c'est Layers — pour choisir quoi exporter — et Output Folder ou Zip — pour dire ou le mettre. Tout le reste est optionnel."*
 
@@ -176,37 +199,79 @@ flowchart LR
 
 ### Diagramme 3 — Pipeline d'export GeoPackage
 
-```mermaid
-flowchart TD
-    subgraph INPUT["Projet QGIS actuel"]
-        L1["Couche 1 (filtree)"]
-        L2["Couche 2 (filtree)"]
-        L3["Couche 3 (non filtree)"]
-        G1["Groupe Transport"]
-        G2["Groupe Bati"]
-        STYLES["Styles / Symbologie"]
-        CRS_IN["CRS : EPSG:2154"]
-    end
-    INPUT --> ENGINE["FilterMate Export Engine"]
-    ENGINE --> STEP1["1. Extraction entites filtrees"]
-    ENGINE --> STEP2["2. Copie des styles QML"]
-    ENGINE --> STEP3["3. Reconstruction arborescence"]
-    ENGINE --> STEP4["4. Reprojection CRS"]
-    ENGINE --> STEP5["5. Generation projet QGZ"]
-    STEP1 --> GPKG["GeoPackage .gpkg"]
-    STEP2 --> GPKG
-    STEP3 --> GPKG
-    STEP4 --> GPKG
-    STEP5 --> GPKG
-    GPKG --> TABLE1["Table : couche_1"]
-    GPKG --> TABLE2["Table : couche_2"]
-    GPKG --> TABLE_PROJ["Table : qgis_projects"]
-    GPKG --> TABLE_STYLE["Table : layer_styles"]
-    TABLE_PROJ --> OPEN["Double-clic → QGIS ouvre le projet → Tout est reconstruit"]
-    style ENGINE fill:#F57C00,color:#fff
-    style GPKG fill:#1565C0,color:#fff
-    style OPEN fill:#388E3C,color:#fff
-```
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 10px; background: #455A64; color: #fff; border-radius: 8px 8px 0 0; font-weight: bold;">
+      <img src="../icons/layers.png" width="24"/>&nbsp; Projet QGIS actuel
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 8px; background: #546E7A; color: #fff; border: 1px solid #455A64;">
+      <img src="../icons/layer.png" width="20"/><br/><small>Couche 1 (filtree)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #546E7A; color: #fff; border: 1px solid #455A64;">
+      <img src="../icons/layer.png" width="20"/><br/><small>Couche 2 (filtree)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #546E7A; color: #fff; border: 1px solid #455A64;">
+      <img src="../icons/styles_black.png" width="20"/><br/><small>Styles / Symbologie</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #546E7A; color: #fff; border: 1px solid #455A64;">
+      <img src="../icons/projection_black.png" width="20"/><br/><small>CRS : EPSG:2154</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 8px; background: #ECEFF1;">&#8595;</td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 12px; background: #F57C00; color: #fff; font-weight: bold;">
+      <img src="../icons/export.png" width="28"/>&nbsp; FilterMate Export Engine
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 8px; background: #ECEFF1;">&#8595;</td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 8px; background: #FFB74D; color: #333; border: 1px solid #F57C00; font-size: 12px;">
+      1. Extraction entites filtrees
+    </td>
+    <td style="text-align: center; padding: 8px; background: #FFB74D; color: #333; border: 1px solid #F57C00; font-size: 12px;">
+      2. Copie des styles QML
+    </td>
+    <td style="text-align: center; padding: 8px; background: #FFB74D; color: #333; border: 1px solid #F57C00; font-size: 12px;">
+      3. Reprojection CRS
+    </td>
+    <td style="text-align: center; padding: 8px; background: #FFB74D; color: #333; border: 1px solid #F57C00; font-size: 12px;">
+      4. Generation projet QGZ
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 8px; background: #ECEFF1;">&#8595;</td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 12px; background: #1565C0; color: #fff; font-weight: bold;">
+      <img src="../icons/folder_black.png" width="28"/>&nbsp; GeoPackage .gpkg
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 8px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      <small>Table : couche_1</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      <small>Table : couche_2</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      <small>Table : qgis_projects</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      <small>Table : layer_styles</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 12px; background: #388E3C; color: #fff; border-radius: 0 0 8px 8px;">
+      Double-clic &#8594; QGIS ouvre le projet &#8594; Tout est reconstruit
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -378,49 +443,51 @@ flowchart TD
 
 ### Diagramme 4 — Arborescence du ExportGroupRecapDialog
 
-```mermaid
-flowchart TD
-    subgraph DIALOG["ExportGroupRecapDialog"]
-        direction TB
-        TITLE["Titre : 'Export GeoPackage'<br/>ou 'Export KML'"]
-        SUMMARY["Resume : '7 couches dans 3 groupes + 2 hors groupe'"]
-        PATH["Destination : /home/user/export/mon_projet.gpkg"]
-
-        subgraph TREE["QTreeWidget — Arborescence"]
-            direction TB
-            G1_FOLDER["Groupe Transport"]
-            G1_L1["  Routes nationales"]
-            G1_L2["  Routes departementales"]
-            G1_L3["  Autoroutes"]
-            G2_FOLDER["Groupe Bati"]
-            G2_L1["  Batiments publics"]
-            G2_L2["  Batiments prives"]
-            G2_SUB["  Sous-groupe Bati historique"]
-            G2_SUB_L1["    Monuments"]
-            UNG1["Communes (hors groupe)"]
-            UNG2["Points d'interet (hors groupe)"]
-        end
-
-        CHECKBOX["Checkbox : 'Preserve group structure in GPKG'<br/>Activee si groupes existent / Grisee sinon"]
-
-        subgraph BUTTONS["Boutons"]
-            direction LR
-            BTN_CANCEL["Annuler<br/>(style standard)"]
-            BTN_EXPORT["Exporter<br/>(#27ae60, bold, blanc)"]
-        end
-
-        TITLE --- SUMMARY --- PATH --- TREE --- CHECKBOX --- BUTTONS
-    end
-
-    style DIALOG fill:#fff,stroke:#333
-    style TREE fill:#f5f5f5,stroke:#999
-    style G1_FOLDER fill:#FFC107,color:#000
-    style G2_FOLDER fill:#FFC107,color:#000
-    style G2_SUB fill:#FFE082,color:#000
-    style BTN_EXPORT fill:#27ae60,color:#fff
-    style BTN_CANCEL fill:#ccc,color:#333
-    style CHECKBOX fill:#E3F2FD,stroke:#1565C0
-```
+<table style="border-collapse: collapse; width: 80%; margin: auto; font-family: sans-serif; border: 2px solid #333; border-radius: 8px;">
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #fff; font-weight: bold; font-size: 16px; border-bottom: 1px solid #ccc;">
+      <img src="../icons/export.png" width="28"/>&nbsp; ExportGroupRecapDialog
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="padding: 8px 16px; background: #FAFAFA; border-bottom: 1px solid #eee;">
+      <strong>Titre :</strong> 'Export GeoPackage' ou 'Export KML'<br/>
+      <strong>Resume :</strong> '7 couches dans 3 groupes + 2 hors groupe'<br/>
+      <strong>Destination :</strong> <code>/home/user/export/mon_projet.gpkg</code>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="padding: 8px 16px; background: #F5F5F5; border: 1px solid #999;">
+      <strong>QTreeWidget — Arborescence</strong><br/>
+      <table style="border: none; margin: 8px 0; width: 100%;">
+        <tr><td style="padding: 4px 8px; background: #FFC107; color: #000; border-radius: 4px;"><img src="../icons/folder_black.png" width="16"/>&nbsp; <strong>Groupe Transport</strong></td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../icons/layer.png" width="14"/>&nbsp; Routes nationales</td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../icons/layer.png" width="14"/>&nbsp; Routes departementales</td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../icons/layer.png" width="14"/>&nbsp; Autoroutes</td></tr>
+        <tr><td style="padding: 4px 8px; background: #FFC107; color: #000; border-radius: 4px;"><img src="../icons/folder_black.png" width="16"/>&nbsp; <strong>Groupe Bati</strong></td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../icons/layer.png" width="14"/>&nbsp; Batiments publics</td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../icons/layer.png" width="14"/>&nbsp; Batiments prives</td></tr>
+        <tr><td style="padding: 4px 32px; background: #FFE082; color: #000; border-radius: 4px;"><img src="../icons/folder_black.png" width="14"/>&nbsp; Sous-groupe Bati historique</td></tr>
+        <tr><td style="padding: 2px 48px;"><img src="../icons/layer.png" width="14"/>&nbsp; Monuments</td></tr>
+        <tr><td style="padding: 2px 16px; color: #666;"><img src="../icons/layer.png" width="14"/>&nbsp; Communes (hors groupe)</td></tr>
+        <tr><td style="padding: 2px 16px; color: #666;"><img src="../icons/layer.png" width="14"/>&nbsp; Points d'interet (hors groupe)</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="padding: 8px 16px; background: #E3F2FD; border: 1px solid #1565C0;">
+      &#9745; <em>Preserve group structure in GPKG</em> (activee si groupes existent / grisee sinon)
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #ccc; color: #333; width: 50%; border-radius: 0 0 0 8px;">
+      Annuler
+    </td>
+    <td style="text-align: center; padding: 10px; background: #27ae60; color: #fff; font-weight: bold; width: 50%; border-radius: 0 0 8px 0;">
+      <img src="../icons/export.png" width="20"/>&nbsp; Exporter
+    </td>
+  </tr>
+</table>
 
 ### Diagramme 5 — Streaming export : fragmentation et reassemblage
 
