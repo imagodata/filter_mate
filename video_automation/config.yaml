@@ -1,0 +1,104 @@
+obs:
+  host: "localhost"
+  port: 4455
+  password: ""  # OBS WebSocket password — set this after enabling in OBS Tools > WebSocket Server Settings
+  scenes:
+    qgis_fullscreen: "QGIS Fullscreen"
+    qgis_with_filtermate: "QGIS + FilterMate"
+    diagram_overlay: "Diagram Overlay"
+    intro_scene: "Intro"
+    outro_scene: "Outro"
+  output_dir: "C:/Users/Simon/Videos/FilterMate"
+  recording_format: "mkv"  # mkv for reliability, remux to mp4 after
+
+qgis:
+  window_title: "QGIS"       # Window title substring to find
+  filtermate_panel: "FilterMate"  # Dock widget title
+  startup_wait: 5            # seconds to wait after focusing QGIS
+
+  # Calibration points (auto-set via calibrate.py — do not edit manually)
+  regions:
+    filtermate_dock:
+      x: 0
+      y: 0
+      width: 400
+      height: 800
+    main_canvas:
+      x: 400
+      y: 0
+      width: 1520
+      height: 800
+    toolbar:
+      x: 0
+      y: 0
+      width: 1920
+      height: 40
+    # FilterMate UI element centers (calibrate.py fills these in)
+    source_layer_combo:
+      x: 200
+      y: 120
+    target_toggle_button:
+      x: 200
+      y: 200
+    predicate_combo:
+      x: 200
+      y: 280
+    buffer_enable_checkbox:
+      x: 100
+      y: 340
+    buffer_value_spinbox:
+      x: 200
+      y: 340
+    filter_button:
+      x: 80
+      y: 400
+    undo_button:
+      x: 150
+      y: 400
+    redo_button:
+      x: 220
+      y: 400
+    unfilter_button:
+      x: 290
+      y: 400
+    favorites_button:
+      x: 360
+      y: 400
+    tab_filtering:
+      x: 80
+      y: 60
+    tab_exploring:
+      x: 200
+      y: 60
+    tab_exporting:
+      x: 320
+      y: 60
+
+timing:
+  click_delay: 0.3          # seconds between clicks
+  type_delay: 0.05          # seconds between keystrokes
+  scroll_delay: 0.2         # seconds between scroll steps
+  action_pause: 1.0         # pause after significant actions
+  transition_pause: 2.0     # pause between sequences
+  mouse_move_duration: 0.5  # smooth mouse movement duration
+
+diagrams:
+  output_dir: "output/diagrams"
+  width: 1920
+  height: 1080
+  theme: "dark"             # dark or default
+  background_color: "#1a1a2e"
+  font_family: "Segoe UI"
+
+narration:
+  engine: "edge-tts"        # edge-tts (free) or elevenlabs
+  voice: "fr-FR-HenriNeural"  # Microsoft Edge TTS voice
+  output_dir: "output/narration"
+  speed: "+0%"
+
+output:
+  final_dir: "output/final"
+  resolution: "1920x1080"
+  fps: 30
+  codec: "libx264"
+  quality: "23"             # CRF value (lower = better quality, 18–28 reasonable)

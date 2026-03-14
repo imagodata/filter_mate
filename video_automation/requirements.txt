@@ -1,0 +1,9 @@
+pyautogui>=0.9.54
+obsws-python>=1.7.0
+Pillow>=10.0
+pyyaml>=6.0
+edge-tts>=6.1.0
+click>=8.1
+playwright>=1.40       # optional, for diagram PNG rendering
+mutagen>=1.47.0        # for audio duration detection
+pywin32>=306           # Windows window management (win32gui, win32con)
