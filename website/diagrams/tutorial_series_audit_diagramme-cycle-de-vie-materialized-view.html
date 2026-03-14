@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Cycle de Vie Materialized View</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Cycle de Vie Materialized View</h1>
+  <div class="source">website/TUTORIAL_SERIES_AUDIT.md</div>
+  <div class="mermaid">
+sequenceDiagram
+    actor U as Utilisateur
+    participant FM as FilterMate
+    participant PG as PostgreSQL
+
+    U->>FM: Appliquer filtre spatial
+    FM->>PG: CREATE MATERIALIZED VIEW fm_temp_mv_xxx AS ...
+    PG-->>FM: Vue creee (index GIST auto)
+
+    FM->>PG: SELECT ... FROM fm_temp_mv_xxx<br/>WHERE ST_Intersects(...)
+    PG-->>FM: Resultats (< 2s pour 1M)
+
+    FM->>FM: setSubsetString() sur couche QGIS
+
+    Note over FM,PG: A la fin de session ou<br/>manuellement
+
+    U->>FM: Cleanup (auto ou manuel)
+    FM->>PG: DROP MATERIALIZED VIEW fm_temp_mv_xxx
+    PG-->>FM: Vue supprimee
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

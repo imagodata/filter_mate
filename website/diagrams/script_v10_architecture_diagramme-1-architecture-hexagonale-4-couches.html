@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme 1 — Architecture hexagonale (4 couches)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme 1 — Architecture hexagonale (4 couches)</h1>
+  <div class="source">website/SCRIPT_V10_ARCHITECTURE.md</div>
+  <div class="mermaid">
+graph TB
+    subgraph UI_LAYER["UI LAYER — 32k LOC"]
+        direction TB
+        DW["Dockwidget<br/>PyQt5/6"]
+        CTRL["9 Controllers MVC<br/>BaseController (Template Method)<br/>ExploringController<br/>FilteringController<br/>ExportingController<br/>ConfigController<br/>BackendController<br/>FavoritesController<br/>LayerSyncController<br/>PropertyController"]
+        WDG["Widgets & Dialogs<br/>JSON TreeView<br/>Favorites Widget<br/>Custom Widgets"]
+        MT["Map Tools<br/>Select / Identify"]
+    end
+
+    subgraph CORE_LAYER["CORE DOMAIN — 50k LOC"]
+        direction TB
+        SVC["28 Services<br/>FilterService, ExportService<br/>HistoryService, FavoritesService<br/>LayerService, BackendService<br/>TaskOrchestrator, GeometryPreparer<br/>ExpressionBuilder, BufferService..."]
+        DOM["Domain Models (Pure Python)<br/>FilterExpression, FilterResult<br/>LayerInfo, ProviderType<br/>OptimizationConfig, Exceptions"]
+        FET["FilterEngineTask<br/>QgsTask async<br/>+ 12 Handlers (Chain of Resp.)"]
+        PORTS["Ports (Interfaces)<br/>BackendPort, CachePort<br/>RepositoryPort, QGISPort<br/>FilterExecutorPort<br/>MaterializedViewPort<br/>TaskManagementPort..."]
+    end
+
+    subgraph ADAPTER_LAYER["ADAPTERS — 33k LOC"]
+        direction TB
+        BE["4 Backends<br/>PostgreSQL (MV, Pool, Index)<br/>Spatialite (R-Tree, Cache)<br/>OGR (Shapefile, GPKG)<br/>Memory (in-memory layers)"]
+        REPO["Repositories<br/>Layer Properties<br/>Favorites Storage"]
+        BRIDGE["AppBridge (DI)<br/>QGIS API Adapter"]
+    end
+
+    subgraph INFRA_LAYER["INFRASTRUCTURE — 15k LOC"]
+        direction TB
+        CACHE["Cache LRU<br/>Geometry, Query,<br/>WKT, Exploring"]
+        DB["DB Connection Pool<br/>PostgreSQL, Spatialite<br/>Prepared Statements"]
+        LOG["Logging<br/>Rotation, Levels"]
+        CONST["Constants<br/>Providers, Messages"]
+        RES["Resilience<br/>Retry, Timeout"]
+        SIG["Signal Utils<br/>SignalBlocker<br/>ConnectionManager"]
+        DI["DI Container<br/>Providers, Registry"]
+    end
+
+    UI_LAYER -->|"depends on"| CORE_LAYER
+    ADAPTER_LAYER -->|"implements"| CORE_LAYER
+    INFRA_LAYER -->|"supports"| CORE_LAYER
+    UI_LAYER -->|"uses"| ADAPTER_LAYER
+
+    style UI_LAYER fill:#7B1FA2,color:#fff
+    style CORE_LAYER fill:#1565C0,color:#fff
+    style ADAPTER_LAYER fill:#388E3C,color:#fff
+    style INFRA_LAYER fill:#E65100,color:#fff
+    style PORTS fill:#0D47A1,color:#fff
+    style FET fill:#0D47A1,color:#fff
+    style BE fill:#2E7D32,color:#fff
+    style DI fill:#BF360C,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

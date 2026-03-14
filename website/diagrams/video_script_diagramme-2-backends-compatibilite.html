@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIAGRAMME 2 — Backends & Compatibilité</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>DIAGRAMME 2 — Backends & Compatibilité</h1>
+  <div class="source">website/VIDEO_SCRIPT.md</div>
+  <div class="mermaid">
+graph TD
+    QP["🧩 QGIS Plugin Manager"] --> FM["FilterMate 4.6.1"]
+
+    FM --> B1["🐘 PostgreSQL / PostGIS\n(avec psycopg2)"]
+    FM --> B2["🗄️ Spatialite\n(GeoPackage, SQLite)"]
+    FM --> B3["📁 OGR\n(Shapefile, GeoJSON, WFS...)"]
+    FM --> B4["💾 Memory\n(couches QGIS native)"]
+
+    B1 --> P1["< 2s pour 1M d'entités"]
+    B2 --> P2["~10s pour 100k entités"]
+    B3 --> P3["~30s pour 100k entités"]
+    B4 --> P4["< 0.5s pour 50k entités"]
+
+    style FM fill:#4CAF50,color:#fff,stroke:#388E3C
+    style B1 fill:#1565C0,color:#fff
+    style B2 fill:#6A1B9A,color:#fff
+    style B3 fill:#E65100,color:#fff
+    style B4 fill:#00695C,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

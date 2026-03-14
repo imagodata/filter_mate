@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Thread Safety QGIS</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Thread Safety QGIS</h1>
+  <div class="source">website/TUTORIAL_SERIES_AUDIT.md</div>
+  <div class="mermaid">
+flowchart TD
+    subgraph MAIN["THREAD PRINCIPAL (UI)"]
+        direction TB
+        M1["Emission de signaux"]
+        M2["Mise a jour UI"]
+        M3["Acces QgsVectorLayer"]
+    end
+
+    subgraph WORKER["WORKER THREAD (QgsTask)"]
+        direction TB
+        W1["FilterEngineTask.run()"]
+        W2["Requetes backend"]
+        W3["Traitement geometrie"]
+        W4["PAS d'acces QgsVectorLayer"]
+    end
+
+    RULE1["Regle 1 : Stocker URI dans __init__<br/>Recreer provider dans run()"]
+    RULE2["Regle 2 : QgsGeometry OK<br/>(cree depuis WKT/WKB)"]
+    RULE3["Regle 3 : Signals uniquement<br/>dans finished() callback"]
+
+    WORKER -.->|"INTERDIT"| M3
+    WORKER -->|"finished()"| MAIN
+
+    style MAIN fill:#388E3C,color:#fff
+    style WORKER fill:#1565C0,color:#fff
+    style RULE1 fill:#FFC107,color:#000
+    style RULE2 fill:#FFC107,color:#000
+    style RULE3 fill:#FFC107,color:#000
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

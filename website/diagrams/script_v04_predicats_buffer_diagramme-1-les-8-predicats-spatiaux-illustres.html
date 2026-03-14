@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme 1 — Les 8 Predicats Spatiaux Illustres</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme 1 — Les 8 Predicats Spatiaux Illustres</h1>
+  <div class="source">website/SCRIPT_V04_PREDICATS_BUFFER.md</div>
+  <div class="mermaid">
+graph TD
+    subgraph TOUCHES["TOUCHES"]
+        direction LR
+        T_A["Polygone A"] ---|"bord commun"| T_B["Polygone B"]
+    end
+    subgraph INTERSECTS["INTERSECTS"]
+        direction LR
+        I_A["Polygone A"] ---|"tout contact spatial"| I_B["Polygone B"]
+    end
+    subgraph CONTAINS["CONTAINS"]
+        direction TB
+        C_A["Polygone A (englobant)"]
+        C_B["Polygone B (a l'interieur)"]
+    end
+    subgraph WITHIN["WITHIN"]
+        direction TB
+        W_A["Polygone A (a l'interieur)"]
+        W_B["Polygone B (englobant)"]
+    end
+    subgraph OVERLAPS["OVERLAPS"]
+        direction LR
+        O_A["Polygone A"] ---|"zone commune partielle"| O_B["Polygone B"]
+    end
+    subgraph CROSSES["CROSSES"]
+        direction LR
+        CR_A["Ligne A"] ---|"coupe le polygone B"| CR_B["Polygone B"]
+    end
+    subgraph DISJOINT["DISJOINT"]
+        direction LR
+        DJ_A["Geom A"] -.-|"aucun contact spatial"| DJ_B["Geom B"]
+    end
+    subgraph DWITHIN["IS WITHIN DISTANCE"]
+        direction LR
+        D_A["Polygone A"] -.-|"distance < N m"| D_B["Polygone B"]
+    end
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIAGRAMME 3 — LES 4 OPTIMISEURS AVEC SEUILS PRECIS</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>DIAGRAMME 3 — LES 4 OPTIMISEURS AVEC SEUILS PRECIS</h1>
+  <div class="source">website/SCRIPT_V07_MULTI_BACKEND.md</div>
+  <div class="mermaid">
+flowchart TD
+    ANALYSER["Analyse de la requete<br/>par FilterMate"]
+
+    ANALYSER --> OPT1["QUERY CACHE<br/>TOUJOURS ACTIF<br/>LRU 100 entrees<br/>Stocke : expression + resultat + complexite"]
+    ANALYSER --> OPT2["PARALLEL FILTERING<br/>ACTIF si >= 2 couches cibles<br/>Auto-detect workers CPU<br/>Distribution round-robin"]
+    ANALYSER --> OPT3["PROGRESSIVE FILTERING<br/>ACTIF si backend = PostgreSQL<br/>ET complexite requete > 100<br/>Phase 1 : bbox pre-filter<br/>Phase 2 : filtre spatial precis"]
+    ANALYSER --> OPT4["GEOMETRY SIMPLIFICATION<br/>ACTIF si WKT source > 100 000 chars<br/>Simplification topology-preserving<br/>Reduction volume 3-5x"]
+
+    OPT4 --> EXISTS["EXISTS SUBQUERY<br/>ACTIF si FIDs source > 500<br/>Evite d'inliner le WKT geant<br/>Exploite les index spatiaux"]
+
+    OPT3 --> MATVIEW["MATERIALIZED VIEW<br/>ACTIF si FIDs source > 500<br/>ET backend = PostgreSQL<br/>Prefix : fm_temp_mv_*<br/>Index GIST automatique<br/>Cleanup auto en fin de session"]
+
+    OPT1 --> RESULT["Requete optimisee<br/>→ setSubsetString()"]
+    OPT2 --> RESULT
+    EXISTS --> RESULT
+    MATVIEW --> RESULT
+
+    style OPT1 fill:#27ae60,color:#fff,stroke:#1e8449,stroke-width:2px
+    style OPT2 fill:#2980b9,color:#fff,stroke:#1a5276,stroke-width:2px
+    style OPT3 fill:#8e44ad,color:#fff,stroke:#6c3483,stroke-width:2px
+    style OPT4 fill:#d35400,color:#fff,stroke:#a04000,stroke-width:2px
+    style EXISTS fill:#c0392b,color:#fff,stroke:#922b21,stroke-width:2px
+    style MATVIEW fill:#c0392b,color:#fff,stroke:#922b21,stroke-width:2px
+    style ANALYSER fill:#2c3e50,color:#fff,stroke:#1a252f,stroke-width:2px
+    style RESULT fill:#27ae60,color:#fff,stroke:#1e8449,stroke-width:2px
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

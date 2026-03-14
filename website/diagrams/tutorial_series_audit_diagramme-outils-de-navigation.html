@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Outils de Navigation</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Outils de Navigation</h1>
+  <div class="source">website/TUTORIAL_SERIES_AUDIT.md</div>
+  <div class="mermaid">
+graph LR
+    subgraph TOOLS["Outils Navigation"]
+        FLASH["Flash<br/>Surbrillance jaune<br/>temporaire"]
+        ZOOM["Zoom To<br/>Centrer + zoom<br/>sur l'entite"]
+        IDENTIFY["Identify<br/>Tous les attributs<br/>et proprietes"]
+        ZOOM_SEL["Zoom Selection<br/>Vue d'ensemble<br/>des selectionnes"]
+    end
+
+    TOOLS --> MAP["Canvas QGIS"]
+
+    style FLASH fill:#FFC107,color:#000
+    style ZOOM fill:#1976D2,color:#fff
+    style IDENTIFY fill:#388E3C,color:#fff
+    style ZOOM_SEL fill:#7B1FA2,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

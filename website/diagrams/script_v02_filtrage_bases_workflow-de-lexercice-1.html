@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Workflow de l'exercice 1</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .diagram-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Workflow de l'exercice 1</h1>
+  <div class="source">website/SCRIPT_V02_FILTRAGE_BASES.md</div>
+  <div class="diagram-container">
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #1565C0; color: #fff; border-radius: 8px 0 0 8px;">
+      <img src="../../icons/layer.png" width="24"/><br/><strong>1. Source</strong><br/><small>Departements</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #1976D2; color: #fff;">
+      <img src="../../icons/pointing_black.png" width="24"/><br/><strong>2. Feature</strong><br/><small>Herault</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #42A5F5; color: #fff;">
+      <img src="../../icons/layers.png" width="24"/><br/><strong>3. Cible</strong><br/><small>Communes</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #E65100; color: #fff;">
+      <img src="../../icons/geo_predicates.png" width="24"/><br/><strong>4. Predicat</strong><br/><small>Intersects</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff;">
+      <img src="../../icons/filter.png" width="24"/><br/><strong>5. Filter</strong>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #F57C00; color: #fff; border-radius: 0 8px 8px 0;">
+      <strong>343</strong><br/><small>communes<br/>de l'Herault</small>
+    </td>
+  </tr>
+</table>
+  </div>
+</body>
+</html>

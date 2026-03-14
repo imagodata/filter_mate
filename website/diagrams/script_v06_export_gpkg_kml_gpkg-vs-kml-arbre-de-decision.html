@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GPKG vs KML : arbre de decision</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .diagram-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>GPKG vs KML : arbre de decision</h1>
+  <div class="source">website/SCRIPT_V06_EXPORT_GPKG_KML.md</div>
+  <div class="diagram-container">
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 14px; background: #F57C00; color: #fff; border-radius: 8px 8px 0 0;">
+      <img src="../../icons/export.png" width="32"/>&nbsp; <strong>FilterMate Export Engine</strong>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 14px; background: #1565C0; color: #fff; width: 50%; border: 1px solid #0D47A1; border-radius: 0 0 0 8px;">
+      <img src="../../icons/folder_black.png" width="28"/><br/><strong>GeoPackage .gpkg</strong><br/><br/><small>Livrable QGIS-to-QGIS<br/>Projet embarque, Styles QML<br/>Hierarchie groupes, Multi-couches</small>
+    </td>
+    <td style="text-align: center; padding: 14px; background: #E65100; color: #fff; width: 50%; border: 1px solid #BF360C; border-radius: 0 0 8px 0;">
+      <img src="../../icons/datatype.png" width="28"/><br/><strong>KML / KMZ</strong><br/><br/><small>Partage Google Earth<br/>Ouverture universelle<br/>Styles SLD, Partage terrain</small>
+    </td>
+  </tr>
+</table>
+  </div>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIAGRAMME 11 — Système Undo/Redo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>DIAGRAMME 11 — Système Undo/Redo</h1>
+  <div class="source">website/VIDEO_SCRIPT.md</div>
+  <div class="mermaid">
+stateDiagram-v2
+    [*] --> Idle
+
+    Idle --> Filtering : Applique filtre
+    Filtering --> FilterApplied : Succès
+    FilterApplied --> HistorySaved : Sauvegarde état\n(FilterState)
+
+    HistorySaved --> Idle
+
+    Idle --> Undoing : Ctrl+Z / Bouton Undo
+    Undoing --> StatePeeked : Lecture historique
+    StatePeeked --> SingleLayer : 1 couche dans l'état
+    StatePeeked --> MultiLayer : Plusieurs couches\n(global state)
+    SingleLayer --> Restored : Restore layer filter
+    MultiLayer --> Restored : Restore all layers
+    Restored --> Idle
+
+    note right of HistorySaved : Stack max = 100 états\nFIFO quand plein
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

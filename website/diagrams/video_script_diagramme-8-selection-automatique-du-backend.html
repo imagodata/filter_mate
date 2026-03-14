@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIAGRAMME 8 — Sélection Automatique du Backend</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>DIAGRAMME 8 — Sélection Automatique du Backend</h1>
+  <div class="source">website/VIDEO_SCRIPT.md</div>
+  <div class="mermaid">
+flowchart TD
+    START["🔍 Requête de filtrage"]
+
+    START --> Q1{"Provider ?"}
+
+    Q1 -->|"postgres"| Q2{"< 5k entités ?"}
+    Q1 -->|"spatialite / GPKG"| SPAT["🗄️ Backend Spatialite\n→ R-tree index\n→ SQL spatial"]
+    Q1 -->|"ogr / shapefile / WFS"| OGR["📁 Backend OGR\n→ Expression filter\n→ Universel"]
+    Q1 -->|"memory"| MEM["💾 Backend Memory\n→ In-memory query\n→ Très rapide"]
+
+    Q2 -->|"Oui"| MEM2["💾 Memory optimization\n(petites PG layers)"]
+    Q2 -->|"Non"| PG["🐘 Backend PostgreSQL\n→ Materialized View\n→ Parallel queries\n→ Spatial indexes GIST"]
+
+    PG --> RES["✅ Expression QGIS\nsetSubsetString()"]
+    SPAT --> RES
+    OGR --> RES
+    MEM --> RES
+    MEM2 --> RES
+
+    style PG fill:#1565C0,color:#fff
+    style SPAT fill:#6A1B9A,color:#fff
+    style OGR fill:#E65100,color:#fff
+    style MEM fill:#00695C,color:#fff
+    style MEM2 fill:#00695C,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

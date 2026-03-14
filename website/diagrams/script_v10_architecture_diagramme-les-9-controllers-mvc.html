@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Les 9 Controllers MVC</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Les 9 Controllers MVC</h1>
+  <div class="source">website/SCRIPT_V10_ARCHITECTURE.md</div>
+  <div class="mermaid">
+graph TD
+    BC["BaseController<br/>(Abstract / Template Method)<br/>Signaux PyQt, Lifecycle,<br/>setup() / teardown()"]
+
+    BC --> EC["ExploringController<br/>Navigation entites<br/>Single / Multiple / Custom<br/>6 boutons barre laterale"]
+    BC --> FC["FilteringController<br/>Configuration filtre<br/>Source / Cible / Predicat<br/>Buffer / Combine Ops"]
+    BC --> XC["ExportingController<br/>Export GeoPackage / KML<br/>Format, Dossier, Styles"]
+    BC --> CC["ConfigController<br/>JSON TreeView<br/>Parametres en temps reel"]
+    BC --> BK["BackendController<br/>Selection backend<br/>Monitoring / Pastille"]
+    BC --> FV["FavoritesController<br/>CRUD Favoris<br/>Import / Export"]
+    BC --> LS["LayerSyncController<br/>Sync couches QGIS<br/>Add / Remove / Rename"]
+    BC --> PC["PropertyController<br/>Proprietes couches<br/>Persistence SQLite"]
+    BC --> UL["UILayoutController<br/>Layout / Spacing<br/>Action Bar positioning"]
+
+    style BC fill:#1565C0,color:#fff
+    style EC fill:#7B1FA2,color:#fff
+    style FC fill:#388E3C,color:#fff
+    style XC fill:#F57C00,color:#fff
+    style CC fill:#00838F,color:#fff
+    style BK fill:#AD1457,color:#fff
+    style FV fill:#FF6F00,color:#fff
+    style LS fill:#283593,color:#fff
+    style PC fill:#4E342E,color:#fff
+    style UL fill:#37474F,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

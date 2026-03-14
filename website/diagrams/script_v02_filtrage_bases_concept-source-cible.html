@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Concept Source / Cible</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .diagram-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Concept Source / Cible</h1>
+  <div class="source">website/SCRIPT_V02_FILTRAGE_BASES.md</div>
+  <div class="diagram-container">
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="text-align: center; padding: 16px; background: #1565C0; color: #fff; border-radius: 8px 0 0 8px; width: 30%;">
+      <img src="../../icons/layer.png" width="32"/><br/><strong>COUCHE SOURCE</strong><br/><small>Selection geometrique<br/>(ex: une route)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1; font-size: 24px;">&#10132;</td>
+    <td style="text-align: center; padding: 16px; background: #E65100; color: #fff; width: 30%;">
+      <img src="../../icons/geo_predicates.png" width="32"/><br/><strong>PREDICAT SPATIAL</strong><br/><small>Intersects ? Contains ?<br/>Within ? Touches ?</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1; font-size: 24px;">&#10132;</td>
+    <td style="text-align: center; padding: 16px; background: #388E3C; color: #fff; border-radius: 0 8px 8px 0; width: 30%;">
+      <img src="../../icons/layers.png" width="32"/><br/><strong>COUCHE(S) CIBLE</strong><br/><small>Seules les entites<br/>correspondantes restent visibles</small>
+    </td>
+  </tr>
+</table>
+  </div>
+</body>
+</html>

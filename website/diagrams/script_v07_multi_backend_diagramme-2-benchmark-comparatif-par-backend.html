@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme 2 — Benchmark comparatif par backend</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme 2 — Benchmark comparatif par backend</h1>
+  <div class="source">website/SCRIPT_V07_MULTI_BACKEND.md</div>
+  <div class="mermaid">
+xychart-beta
+    title "Temps de filtrage par backend (secondes) — Intersects + buffer 200m"
+    x-axis ["10k", "50k", "100k", "500k", "1M"]
+    y-axis "Temps (s)" 0 --> 120
+    bar "PostgreSQL" [0.5, 0.8, 1.2, 1.8, 2.5]
+    bar "Spatialite" [1.5, 5, 10, 35, 60]
+    bar "OGR" [5, 15, 30, 80, 120]
+    bar "Memory" [0.2, 0.3, 0.5, 2, 5]
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

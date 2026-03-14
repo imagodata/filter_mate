@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Workflow du premier filtrage</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Workflow du premier filtrage</h1>
+  <div class="source">website/SCRIPT_V01_INSTALLATION.md</div>
+  <div class="mermaid">
+sequenceDiagram
+    actor U as Utilisateur
+    participant EZ as Zone d'Exploration
+    participant TB as Toolbox (FILTERING)
+    participant AB as Action Bar
+    participant FM as FilterMate Engine
+    participant QGIS as Carte QGIS
+
+    U->>EZ: Selectionne couche "departements"
+    U->>EZ: Choisit entite "Gironde"
+    U->>TB: Verifie couche source (auto)
+    U->>TB: Selectionne cible "communes"
+    U->>TB: Choisit predicat "Intersects"
+    U->>AB: Clique "Filter"
+
+    AB->>FM: Lance FilterEngineTask (async)
+    FM->>FM: Detecte backend OGR (Shapefile)
+    FM->>FM: Construit expression spatiale
+    FM->>QGIS: setSubsetString(expression)
+    QGIS-->>U: Communes filtrees visibles
+    FM-->>AB: Sauvegarde etat dans l'historique
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

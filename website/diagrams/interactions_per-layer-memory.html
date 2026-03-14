@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Per-layer memory</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    pre {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 90vw;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+      color: #c9d1d9;
+    }
+    .arrow { color: #7ee787; }
+    .signal { color: #d2a8ff; }
+    .method { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Per-layer memory</h1>
+  <div class="source">knowledge/INTERACTIONS.md</div>
+  <pre>Switch from Layer A (Multiple active) → Layer B
+  → Layer B restores its saved GroupBox (e.g., Single)
+Switch back to Layer A
+  → Layer A restores Multiple Selection</pre>
+</body>
+</html>

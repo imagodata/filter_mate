@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Structure du Favorites Manager Dialog (3 onglets)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .diagram-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Structure du Favorites Manager Dialog (3 onglets)</h1>
+  <div class="source">website/SCRIPT_V05_FAVORIS_HISTORIQUE.md</div>
+  <div class="diagram-container">
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif; border: 2px solid #333; border-radius: 8px;">
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 12px; background: #f8f9fa; font-weight: bold; font-size: 16px; border-bottom: 1px solid #ccc;">
+      <img src="../../icons/history.png" width="28"/>&nbsp; Favorites Manager Dialog <small>(720 x 520 px, modal)</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="padding: 6px 16px; background: #ECEFF1; border-bottom: 1px solid #ccc;">
+      <img src="../../icons/identify_alt.png" width="16"/>&nbsp; Barre de recherche — Filtre par nom, expression, tags, description
+    </td>
+  </tr>
+  <tr>
+    <td style="vertical-align: top; padding: 10px; background: #FAFAFA; width: 30%; border-right: 2px solid #ccc;">
+      <strong>Liste des favoris</strong><br/><small>(QListWidget, 30%)</small><br/><br/>
+      <img src="../../icons/save.png" width="14"/>&nbsp; Batiments routes (2)<br/>
+      <img src="../../icons/save.png" width="14"/>&nbsp; Zone PLU (1)<br/>
+      <img src="../../icons/save.png" width="14"/>&nbsp; Proximite ecoles (3)<br/>
+    </td>
+    <td colspan="3" style="vertical-align: top; padding: 0; width: 70%;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="text-align: center; padding: 8px; background: #f39c12; color: #fff; font-weight: bold; width: 33%;">GENERAL</td>
+          <td style="text-align: center; padding: 8px; background: #3498db; color: #fff; font-weight: bold; width: 34%;">EXPRESSION</td>
+          <td style="text-align: center; padding: 8px; background: #27ae60; color: #fff; font-weight: bold; width: 33%;">REMOTE</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top; padding: 8px; background: #FFF8E1; font-size: 13px;">
+            Nom (editable)<br/>
+            Description (auto-generee)<br/>
+            Tags (virgules)<br/>
+            <hr style="border: 0; border-top: 1px solid #ccc;"/>
+            <em>Lecture seule :</em><br/>
+            <img src="../../icons/layer.png" width="14"/>&nbsp; Couche source<br/>
+            Provider (OGR, PG...)<br/>
+            Compteur + Date
+          </td>
+          <td style="vertical-align: top; padding: 8px; background: #E3F2FD; font-size: 13px;">
+            Expression source<br/>
+            <code style="font-size: 11px;">monospace, editable</code><br/>
+            <small>Consolas / Monaco</small>
+          </td>
+          <td style="vertical-align: top; padding: 8px; background: #E8F5E9; font-size: 13px;">
+            <img src="../../icons/layers.png" width="14"/>&nbsp; QTreeWidget<br/>
+            3 colonnes :<br/>
+            Layer | Features | Expression<br/><br/>
+            <small><em>Message si aucune couche Remote</em></small>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 8px; background: #27ae60; color: #fff; font-weight: bold; border-radius: 0 0 0 8px;">
+      <img src="../../icons/filter.png" width="16"/>&nbsp; Appliquer
+    </td>
+    <td style="text-align: center; padding: 8px; background: #3498db; color: #fff; font-weight: bold;">
+      <img src="../../icons/save.png" width="16"/>&nbsp; Save Changes
+    </td>
+    <td style="text-align: center; padding: 8px; background: #e74c3c; color: #fff; font-weight: bold;">
+      Delete
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ecf0f1; color: #333; border-radius: 0 0 8px 0;">
+      Close
+    </td>
+  </tr>
+</table>
+  </div>
+</body>
+</html>

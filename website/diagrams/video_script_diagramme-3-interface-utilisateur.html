@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DIAGRAMME 3 — Interface Utilisateur</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>DIAGRAMME 3 — Interface Utilisateur</h1>
+  <div class="source">website/VIDEO_SCRIPT.md</div>
+  <div class="mermaid">
+graph TD
+    DOCK["🖥️ FilterMate Dockwidget"]
+
+    DOCK --> T1["🔍 Onglet FILTRAGE"]
+    DOCK --> T2["🔬 Onglet EXPLORATION"]
+    DOCK --> T3["📦 Onglet EXPORT"]
+
+    T1 --> T1A["Sélection de couche source"]
+    T1 --> T1B["Sélection de couche cible"]
+    T1 --> T1C["Prédicats géométriques\n(touches, intersecte, contient...)"]
+    T1 --> T1D["Buffer dynamique (m/km)"]
+    T1 --> T1E["⭐ Favoris enregistrés"]
+    T1 --> T1F["↩️ Undo / Redo (100 états)"]
+
+    T2 --> T2A["🗺️ Vecteur : parcourir\nles entités"]
+    T2 --> T2B["🏔️ Raster : sélection\npar valeur / plage"]
+    T2 --> T2C["🔬 Pixel Picker\n⬛ Rectangle Range\n🔄 Sync Histogram"]
+
+    T3 --> T3A["Export GeoPackage\navec projet embarqué"]
+    T3 --> T3B["Styles préservés"]
+    T3 --> T3C["Hiérarchie de groupes\nreproduire"]
+    T3 --> T3D["22 formats de sortie"]
+
+    style DOCK fill:#1976D2,color:#fff
+    style T1 fill:#388E3C,color:#fff
+    style T2 fill:#7B1FA2,color:#fff
+    style T3 fill:#F57C00,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

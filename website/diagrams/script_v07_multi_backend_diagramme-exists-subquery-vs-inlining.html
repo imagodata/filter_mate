@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — EXISTS subquery vs inlining</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — EXISTS subquery vs inlining</h1>
+  <div class="source">website/SCRIPT_V07_MULTI_BACKEND.md</div>
+  <div class="mermaid">
+flowchart LR
+    subgraph NAIVE["Approche naive (< 500 FIDs)"]
+        direction TB
+        N1["WHERE ST_Intersects(<br/>target.geom,<br/>ST_GeomFromText('POLYGON(...<br/>50 000 caracteres...)')"]
+        N2["Requete compacte<br/>Execution directe"]
+        N1 --> N2
+    end
+
+    subgraph EXISTS["Approche EXISTS (>= 500 FIDs)"]
+        direction TB
+        E1["WHERE EXISTS (<br/>SELECT 1 FROM source<br/>WHERE source.fid IN (...)<br/>AND ST_Intersects(<br/>target.geom, source.geom))"]
+        E2["Requete compacte<br/>Index GIST exploite<br/>a pleine puissance"]
+        E1 --> E2
+    end
+
+    SEUIL{"FIDs source<br/>>= 500 ?"}
+    SEUIL -->|"Non"| NAIVE
+    SEUIL -->|"Oui"| EXISTS
+
+    style NAIVE fill:#5dade2,color:#fff,stroke:#3498db
+    style EXISTS fill:#58d68d,color:#fff,stroke:#27ae60
+    style SEUIL fill:#34495e,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

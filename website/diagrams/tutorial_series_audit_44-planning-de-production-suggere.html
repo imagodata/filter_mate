@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>4.4 Planning de Production Suggere</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>4.4 Planning de Production Suggere</h1>
+  <div class="source">website/TUTORIAL_SERIES_AUDIT.md</div>
+  <div class="mermaid">
+gantt
+    title Plan de production — Serie tutoriels FilterMate
+    dateFormat YYYY-MM-DD
+    axisFormat %b %d
+
+    section Preparation
+    Collecte donnees demo          :prep1, 2026-03-17, 5d
+    Generation diagrammes Mermaid  :prep2, 2026-03-17, 3d
+    Configuration QGIS + themes   :prep3, 2026-03-20, 2d
+
+    section Captures QGIS
+    V01-V03 Debutant              :cap1, 2026-03-24, 3d
+    V04-V06 Intermediaire         :cap2, after cap1, 4d
+    V07-V08 Avance                :cap3, after cap2, 4d
+    V09-V10 Expert                :cap4, after cap3, 3d
+
+    section Post-production
+    Montage V01-V03               :post1, after cap1, 5d
+    Montage V04-V06               :post2, after cap2, 5d
+    Montage V07-V08               :post3, after cap3, 4d
+    Montage V09-V10               :post4, after cap4, 4d
+
+    section Publication
+    V01-V03 en ligne              :milestone, after post1, 0d
+    V04-V06 en ligne              :milestone, after post2, 0d
+    V07-V08 en ligne              :milestone, after post3, 0d
+    V09-V10 en ligne              :milestone, after post4, 0d
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

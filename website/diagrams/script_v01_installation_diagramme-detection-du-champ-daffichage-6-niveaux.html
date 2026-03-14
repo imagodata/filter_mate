@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Detection du champ d'affichage (6 niveaux)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Detection du champ d'affichage (6 niveaux)</h1>
+  <div class="source">website/SCRIPT_V01_INSTALLATION.md</div>
+  <div class="mermaid">
+graph TD
+    START["Nouvelle couche chargee"] --> P1
+
+    P1{"1. Expression d'affichage<br/>configuree dans QGIS ?"}
+    P1 -->|"Oui"| R1["Utilise l'expression QGIS"]
+    P1 -->|"Non"| P2
+
+    P2{"2. Champ avec<br/>ValueRelation ?"}
+    P2 -->|"Oui"| R2["Utilise represent_value()<br/>(affichage lisible)"]
+    P2 -->|"Non"| P3
+
+    P3{"3. Champ correspondant<br/>a un pattern nom/name/label ?"}
+    P3 -->|"Oui + valeurs"| R3["Utilise ce champ"]
+    P3 -->|"Non"| P4
+
+    P4{"4. Premier champ texte<br/>non-ID avec valeurs ?"}
+    P4 -->|"Oui"| R4["Utilise ce champ texte"]
+    P4 -->|"Non"| P5
+
+    P5{"5. Cle primaire<br/>disponible ?"}
+    P5 -->|"Oui"| R5["Utilise la cle primaire"]
+    P5 -->|"Non"| P6
+
+    P6["6. Premier champ<br/>avec des valeurs"] --> R6["Utilise ce champ"]
+
+    style START fill:#1976D2,color:#fff
+    style R1 fill:#4CAF50,color:#fff
+    style R2 fill:#4CAF50,color:#fff
+    style R3 fill:#4CAF50,color:#fff
+    style R4 fill:#FF9800,color:#fff
+    style R5 fill:#FF9800,color:#fff
+    style R6 fill:#F44336,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

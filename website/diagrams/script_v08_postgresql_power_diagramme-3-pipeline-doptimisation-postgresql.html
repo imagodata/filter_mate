@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme 3 -- Pipeline d'optimisation PostgreSQL</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme 3 -- Pipeline d'optimisation PostgreSQL</h1>
+  <div class="source">website/SCRIPT_V08_POSTGRESQL_POWER.md</div>
+  <div class="mermaid">
+flowchart LR
+    subgraph ENTREE["Entree utilisateur"]
+        U1["Couche source\n(selection)"]
+        U2["Couche cible\n(1M entites)"]
+        U3["Predicat spatial\n(ST_Intersects)"]
+    end
+
+    subgraph SECURITE["Securite"]
+        S1["sanitize_sql_identifier()\nNom de schema"]
+        S2["sanitize_sql_identifier()\nNom de vue"]
+        S3["Parametres lies\n(anti-injection)"]
+    end
+
+    subgraph DECISION["Decisions d'optimisation"]
+        D1{"FIDs source\n> 500 ?"}
+        D2{"Dataset cible\n> 100k ?"}
+        D3{"WKT source\n> 100k chars ?"}
+    end
+
+    subgraph EXECUTION["Execution PostgreSQL"]
+        E1["CREATE SCHEMA\nfiltermate_temp"]
+        E2["CREATE MATERIALIZED VIEW\nfm_temp_mv_xxx"]
+        E3["CREATE INDEX GIST\ngeometrie"]
+        E4["SELECT ... WHERE\nST_Intersects(...)"]
+    end
+
+    subgraph RESULTAT["Resultat"]
+        R1["setSubsetString()\nsur couche QGIS"]
+        R2["Rafraichissement\ncarte"]
+    end
+
+    U1 --> S1
+    U2 --> S2
+    U3 --> S3
+
+    S1 --> D1
+    S2 --> D2
+    S3 --> D3
+
+    D1 -->|Oui| E2
+    D1 -->|Non| E4
+    D2 -->|Oui| E2
+    D3 -->|Oui| E2
+
+    E1 --> E2
+    E2 --> E3
+    E3 --> E4
+
+    E4 --> R1
+    R1 --> R2
+
+    style SECURITE fill:#C62828,color:#fff
+    style EXECUTION fill:#1565C0,color:#fff
+    style RESULTAT fill:#388E3C,color:#fff
+    style DECISION fill:#F57C00,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

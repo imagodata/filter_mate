@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Architecture Overview</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    pre {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 90vw;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+      color: #c9d1d9;
+    }
+    .arrow { color: #7ee787; }
+    .signal { color: #d2a8ff; }
+    .method { color: #79c0ff; }
+    .comment { color: #8b949e; font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>Architecture Overview</h1>
+  <div class="source">knowledge/THEMING.md</div>
+  <pre>QGISThemeWatcher (singleton)
+  │ watches QApplication.paletteChanged
+  │
+  ├──→ StyleLoader.detect_qgis_theme()
+  │      └→ luminance check: dark if &lt; 128, light otherwise
+  │
+  ├──→ ThemeManager.set_theme(new_theme)
+  │      ├→ loads QSS from resources/styles/{theme}.qss
+  │      ├→ replaces {color_*} placeholders with theme colors
+  │      ├→ applies stylesheet to dockWidgetContents (NOT the QDockWidget)
+  │      └→ notifies callbacks
+  │
+  ├──→ IconManager.on_theme_changed(new_theme)
+  │      ├→ swaps variant icons (_black ↔ _white)
+  │      ├→ inverts force-invert icons
+  │      ├→ skips never-invert icons (logo, icon.png)
+  │      └→ clears icon cache
+  │
+  └──→ ButtonStyler.on_theme_changed(new_theme)
+         └→ re-applies button QSS with new colors</pre>
+</body>
+</html>

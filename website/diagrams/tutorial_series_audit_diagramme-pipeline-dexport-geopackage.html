@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Pipeline d'Export GeoPackage</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Pipeline d'Export GeoPackage</h1>
+  <div class="source">website/TUTORIAL_SERIES_AUDIT.md</div>
+  <div class="mermaid">
+flowchart TD
+    subgraph INPUT["Projet QGIS actuel"]
+        L1["Couche 1 (filtree)"]
+        L2["Couche 2 (filtree)"]
+        L3["Couche 3 (non filtree)"]
+        G1["Groupe 'Transport'"]
+        G2["Groupe 'Bati'"]
+        STYLES["Styles / Symbologie"]
+        CRS_IN["CRS : EPSG:2154"]
+    end
+
+    INPUT --> ENGINE["FilterMate Export Engine"]
+
+    ENGINE --> STEP1["1. Extraction des entites filtrees"]
+    ENGINE --> STEP2["2. Copie des styles QML"]
+    ENGINE --> STEP3["3. Reconstruction arborescence"]
+    ENGINE --> STEP4["4. Reprojection CRS"]
+    ENGINE --> STEP5["5. Generation projet QGZ"]
+
+    STEP1 --> GPKG["GeoPackage .gpkg"]
+    STEP2 --> GPKG
+    STEP3 --> GPKG
+    STEP4 --> GPKG
+    STEP5 --> GPKG
+
+    GPKG --> TABLE1["Table : couche_1<br/>(donnees vecteur)"]
+    GPKG --> TABLE2["Table : couche_2<br/>(donnees vecteur)"]
+    GPKG --> TABLE_PROJ["Table : qgis_projects<br/>(projet QGZ embarque)"]
+    GPKG --> TABLE_STYLE["Table : layer_styles<br/>(symbologie)"]
+
+    TABLE_PROJ --> OPEN["Double-clic<br/>→ QGIS ouvre le projet<br/>→ Tout est reconstruit"]
+
+    style ENGINE fill:#F57C00,color:#fff
+    style GPKG fill:#1565C0,color:#fff
+    style OPEN fill:#388E3C,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

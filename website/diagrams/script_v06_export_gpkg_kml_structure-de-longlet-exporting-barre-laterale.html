@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Structure de l'onglet EXPORTING (barre laterale)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .diagram-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Structure de l'onglet EXPORTING (barre laterale)</h1>
+  <div class="source">website/SCRIPT_V06_EXPORT_GPKG_KML.md</div>
+  <div class="diagram-container">
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="background: #F57C00; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0; width: 35%;">
+      Barre laterale EXPORTING (6 toggles)
+    </td>
+    <td style="background: #1565C0; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      Zone de configuration (droite)
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../../icons/layers.png" width="28"/><br/><strong>1. Layers</strong><br/><small>Couches a exporter</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      Checkable ComboBox — cocher les couches
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../../icons/projection_black.png" width="28"/><br/><strong>2. Projection</strong><br/><small>CRS de sortie</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      QgsProjectionSelectionWidget — ex: EPSG:4326
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../../icons/styles_black.png" width="28"/><br/><strong>3. Styles</strong><br/><small>QML / SLD</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      ComboBox Styles — QML / SLD / Les deux
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../../icons/datatype.png" width="28"/><br/><strong>4. Datatype</strong><br/><small>Format (GPKG, KML...)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      ComboBox Format — GeoPackage, KML, SHP...
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C;">
+      <img src="../../icons/folder_black.png" width="28"/><br/><strong>5. Output Folder</strong><br/><small>Dossier + Batch</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      LineEdit + Browse + Checkbox Batch
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #E65100; color: #fff; border: 1px solid #BF360C; border-radius: 0 0 0 8px;">
+      <img src="../../icons/zip.png" width="28"/><br/><strong>6. Zip</strong><br/><small>Compression + Batch</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1976D2; color: #fff; border: 1px solid #1565C0; border-radius: 0 0 8px 0;">
+      LineEdit + Browse + Checkbox Batch
+    </td>
+  </tr>
+</table>
+  </div>
+</body>
+</html>

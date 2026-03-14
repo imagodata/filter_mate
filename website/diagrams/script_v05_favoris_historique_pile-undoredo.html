@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pile Undo/Redo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .diagram-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pile Undo/Redo</h1>
+  <div class="source">website/SCRIPT_V05_FAVORIS_HISTORIQUE.md</div>
+  <div class="diagram-container">
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="5" style="text-align: center; padding: 8px; background: #37474F; color: #fff; font-weight: bold; border-radius: 8px 8px 0 0;">
+      <img src="../../icons/history.png" width="24"/>&nbsp; Pile d'historique (max 100)
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #78909C; color: #fff; width: 20%;">
+      <strong>Etat 1</strong><br/><small>Aucun filtre</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #607D8B; color: #fff; width: 20%;">
+      <strong>Etat 2</strong><br/><small>Intersects routes</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #546E7A; color: #fff; width: 20%;">
+      <strong>Etat 3</strong><br/><small>+ AND riviere</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #455A64; color: #fff; width: 20%;">
+      <strong>Etat 4</strong><br/><small>Buffer 200m</small>
+    </td>
+    <td style="text-align: center; padding: 10px; background: #388E3C; color: #fff; width: 20%; border: 2px solid #2E7D32;">
+      <strong>ACTUEL</strong><br/><small>Buffer 500m</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #D32F2F; color: #fff; border-radius: 0 0 0 8px;">
+      <img src="../../icons/undo.png" width="28"/>&nbsp; <strong>Ctrl+Z UNDO</strong><br/><small>&#8592; Revient a l'etat 4</small>
+    </td>
+    <td style="padding: 4px;"></td>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #1565C0; color: #fff; border-radius: 0 0 8px 0;">
+      <img src="../../icons/redo.png" width="28"/>&nbsp; <strong>Ctrl+Y REDO</strong><br/><small>Retablit l'etat actuel &#8594;</small>
+    </td>
+  </tr>
+</table>
+  </div>
+</body>
+</html>
