@@ -18,7 +18,7 @@ Elle couvre : intro, installation, interface, demo filtrage, exploration, export
 |---|:---:|:---:|
 | Installation & premier lancement | Partiellement (30s) | Oui |
 | Filtrage geometrique basique | Oui (2 min) | Oui — approfondi |
-| Predicats spatiaux (6 types) | Mentionne | Oui — cas par cas |
+| Predicats spatiaux (8 types) | Mentionne | Oui — cas par cas |
 | Buffer dynamique & expressions | Mentionne | Oui |
 | Combine operators (AND/OR/REPLACE) | Non | Oui |
 | Exploration vecteur | Partiellement | Oui |
@@ -26,7 +26,7 @@ Elle couvre : intro, installation, interface, demo filtrage, exploration, export
 | Favoris (CRUD, import/export) | Mentionne | Oui |
 | Undo/Redo (100 etats) | Mentionne | Integrer |
 | Export GeoPackage avec projet | Oui (1 min) | Oui — approfondi |
-| Export multi-formats (22+) | Non | Oui |
+| Export GPKG + KML (avec styles QML/SLD) | Non | Oui |
 | Multi-backend & optimisation | Oui (45s) | Oui — approfondi |
 | PostgreSQL avance (MV, PK, cleanup) | Non | Oui |
 | Configuration & personnalisation | Non | Oui |
@@ -54,7 +54,7 @@ mindmap
     INTERMEDIAIRE
       V04 — Predicats Spatiaux & Buffer
       V05 — Favoris & Historique
-      V06 — Export GeoPackage Pro
+      V06 — Export GeoPackage & KML Pro
     AVANCE
       V07 — Multi-Backend & Optimisation
       V08 — PostgreSQL Power User
@@ -74,9 +74,13 @@ mindmap
 
 #### Objectifs pedagogiques
 - Installer FilterMate depuis le depot QGIS
-- Comprendre l'interface generale (3 onglets)
+- Comprendre l'architecture : Exploring Zone, Toolbox (Filtering/Exporting), Action Bar (6 boutons dont About)
+- Decouvrir les 6 boutons de l'Action Bar dont le bouton About (toujours actif)
 - Effectuer un premier filtrage simple
 - Decouvrir le theme sombre et le changement de langue
+- Activer le mode verbose comme outil d'apprentissage temps reel
+- Comprendre la persistence automatique de la configuration (SQLite)
+- Utiliser le panneau Log Messages de QGIS (onglet FilterMate)
 
 #### Plan sequence
 
@@ -86,11 +90,15 @@ mindmap
 | 0:15 | Installation via Plugin Manager | Capture QGIS |
 | 0:45 | Installation psycopg2 (optionnel) | Terminal |
 | 1:15 | Premier lancement — dock widget apparait | Capture QGIS |
-| 1:45 | Tour de l'interface : 3 onglets | Capture annotee |
+| 1:45 | Architecture : Exploring Zone + Toolbox (FILTERING/EXPORTING) + Action Bar (6 boutons) | Capture annotee |
 | 3:00 | Premier filtrage : Shapefile local | Demo live |
 | 4:30 | Theme sombre automatique | Capture QGIS |
 | 5:00 | Changement de langue (22 langues) | Capture QGIS |
-| 5:30 | Ou trouver l'aide / GitHub / docs | Ecran liens |
+| 5:20 | Activer le mode verbose pour l'apprentissage (FEEDBACK_LEVEL) | Capture QGIS |
+| 5:40 | QGIS Log Messages Panel → onglet FilterMate (View → Panels → Log Messages) | Capture QGIS |
+| 6:00 | Auto-detection du champ d'affichage (get_best_display_field, 6 niveaux) | Demo live |
+| 6:20 | Config sauvegardee automatiquement entre sessions (SQLite fm_project_layers_properties) | Voix + schema |
+| 6:30 | Ou trouver l'aide / GitHub / docs | Ecran liens |
 
 #### Diagramme — Interface Principale
 
@@ -101,22 +109,26 @@ graph TD
     SEARCH --> CLICK["Installer"]
     CLICK --> DOCK["FilterMate Dock Widget"]
 
-    DOCK --> TAB1["Onglet FILTRAGE<br/>Source + Cible + Predicat"]
-    DOCK --> TAB2["Onglet EXPLORATION<br/>Parcourir les entites"]
-    DOCK --> TAB3["Onglet EXPORT<br/>GeoPackage & 22 formats"]
+    DOCK --> EZ["Exploring Zone<br/>Parcourir les entites"]
+    DOCK --> TOOLBOX["Toolbox"]
+    TOOLBOX --> TAB_FILT["Onglet FILTERING<br/>Source + Cible + Predicat"]
+    TOOLBOX --> TAB_EXP["Onglet EXPORTING<br/>GeoPackage & KML"]
+    DOCK --> ACTIONBAR["Action Bar (6 boutons)<br/>dont About (toujours actif)"]
 
     DOCK --> SIDEBAR["Barre laterale<br/>Undo / Redo / Favoris<br/>Backend / Config"]
 
     style DOCK fill:#1976D2,color:#fff
-    style TAB1 fill:#388E3C,color:#fff
-    style TAB2 fill:#7B1FA2,color:#fff
-    style TAB3 fill:#F57C00,color:#fff
+    style EZ fill:#7B1FA2,color:#fff
+    style TOOLBOX fill:#388E3C,color:#fff
+    style TAB_FILT fill:#388E3C,color:#fff
+    style TAB_EXP fill:#F57C00,color:#fff
+    style ACTIONBAR fill:#1565C0,color:#fff
 ```
 
 #### Captures QGIS requises
 1. Plugin Manager avec FilterMate visible
 2. Dock widget vide au premier lancement
-3. Les 3 onglets en vue rapprochee
+3. Exploring Zone + Toolbox (FILTERING/EXPORTING) + Action Bar en vue rapprochee
 4. Barre laterale avec icones annotees
 5. Menu de selection de langue
 6. Basculement theme clair/sombre
@@ -134,8 +146,10 @@ graph TD
 #### Objectifs pedagogiques
 - Comprendre source vs cible
 - Appliquer un filtre geometrique simple (intersects)
-- Utiliser Unfilter et Reset
-- Comprendre la difference entre REPLACE / AND / OR
+- Comprendre quand le bouton Filter est desactive (onglet Export actif, aucune feature selectionnee, filtrage en cours)
+- Distinguer Unfilter (retire le filtre, utilise l'historique si disponible) et Reset (remet l'etat d'exploration FilterMate aux defaults, ≠ CRS ou styles QGIS)
+- Comprendre les deux niveaux de Combine Operators : Source layer operator (combiner plusieurs features sources) et Other layers operator (combiner entre couches cibles)
+- Gerer le conflit Edit Mode (popup de resolution quand la couche est en mode edition)
 
 #### Plan sequence
 
@@ -147,9 +161,11 @@ graph TD
 | 1:30 | Selectionner cible = batiments | Demo live |
 | 2:00 | Appliquer "Intersects" | Demo live |
 | 3:00 | Resultat : batiments filtres | Capture QGIS |
-| 3:30 | Bouton Unfilter — retour etat initial | Demo live |
-| 4:00 | Bouton Reset — efface tout | Demo live |
-| 4:30 | Combine operators : REPLACE vs AND vs OR | Demo live |
+| 3:30 | Bouton Unfilter — retire le filtre, utilise l'historique si disponible | Demo live |
+| 4:00 | Bouton Reset — remet l'etat d'exploration FilterMate aux defaults (≠ CRS ou styles QGIS) | Demo live |
+| 4:30 | Niveau 1 : Source layer operator (REPLACE/AND/OR) — combiner plusieurs features sources | Demo live |
+| 5:00 | Niveau 2 : Other layers operator — combiner entre les couches cibles | Demo live |
+| 5:30 | Edit Mode Conflict : si la couche est en edition, FilterMate affiche un popup de resolution | Demo live |
 | 6:00 | Exercice : filtrer communes d'un departement | Demo live |
 | 7:30 | Exercice : enchainer 2 filtres avec AND | Demo live |
 
@@ -181,24 +197,32 @@ flowchart LR
     style CIBLE fill:#388E3C,color:#fff
 ```
 
-#### Diagramme — Combine Operators
+#### Diagramme — Combine Operators (2 niveaux)
 
 ```mermaid
 flowchart TD
-    F1["Filtre 1 :<br/>Batiments proches Route A"]
-    F2["Filtre 2 :<br/>Batiments proches Riviere B"]
+    subgraph NIVEAU1["NIVEAU 1 — Source layer operator<br/>(combiner plusieurs features sources)"]
+        S1["Feature source A<br/>(ex: Route 1)"]
+        S2["Feature source B<br/>(ex: Route 2)"]
+        S1 --> SOP_R["REPLACE : seule la feature B active"]
+        S1 --> SOP_A["AND : intersection A et B"]
+        S1 --> SOP_O["OR : union A et B"]
+    end
 
-    F1 --> REPLACE["REPLACE<br/>Remplace F1 par F2<br/>Seul F2 actif"]
-    F1 --> AND["AND<br/>F1 ET F2<br/>Intersection des resultats"]
-    F1 --> OR["OR<br/>F1 OU F2<br/>Union des resultats"]
+    subgraph NIVEAU2["NIVEAU 2 — Other layers operator<br/>(combiner entre couches cibles)"]
+        T1["Couche cible 1<br/>(ex: Batiments)"]
+        T2["Couche cible 2<br/>(ex: Parcelles)"]
+        T1 --> TOP_R["REPLACE : seule la derniere couche filtree"]
+        T1 --> TOP_A["AND : entites dans les deux couches"]
+        T1 --> TOP_O["OR : entites dans l'une ou l'autre"]
+    end
 
-    REPLACE --> R1["Resultat : uniquement<br/>les batiments proches<br/>de la riviere"]
-    AND --> R2["Resultat : batiments<br/>proches de la route<br/>ET de la riviere"]
-    OR --> R3["Resultat : batiments<br/>proches de la route<br/>OU de la riviere"]
+    NIVEAU1 --> NIVEAU2
 
-    style REPLACE fill:#D32F2F,color:#fff
-    style AND fill:#1565C0,color:#fff
-    style OR fill:#388E3C,color:#fff
+    style NIVEAU1 fill:#1565C0,color:#fff
+    style NIVEAU2 fill:#388E3C,color:#fff
+    style SOP_R fill:#D32F2F,color:#fff
+    style TOP_R fill:#D32F2F,color:#fff
 ```
 
 #### Captures QGIS requises
@@ -207,8 +231,9 @@ flowchart TD
 3. Resultat apres filtrage (batiments filtres)
 4. Comparaison avant/apres (split screen)
 5. Interface avec combos source/cible annotes
-6. Boutons Unfilter / Reset en action
-7. Menu REPLACE / AND / OR
+6. Boutons Unfilter (retire filtre, historique si dispo) / Reset (defaults exploration FilterMate) en action avec annotations
+7. Menu Combine Operators niveau 1 (source) et niveau 2 (autres couches)
+8. Popup Edit Mode Conflict avec options de resolution
 
 #### Donnees de demo
 - Shapefile routes (lignes, ~5 000 entites)
@@ -231,8 +256,9 @@ flowchart TD
 | Temps | Contenu | Type |
 |-------|---------|------|
 | 0:00 | A quoi sert l'onglet Exploration ? | Voix + diagramme |
-| 0:30 | Selectionner une couche a explorer | Demo live |
-| 1:00 | Choisir un champ (nom, type, code...) | Demo live |
+| 0:30 | Auto Current Layer toggle — la combo Source suit automatiquement la couche selectionnee dans le Layers Panel | Demo live |
+| 0:50 | Selectionner une couche a explorer | Demo live |
+| 1:20 | Choisir un champ (nom, type, code...) | Demo live |
 | 1:30 | Liste des valeurs uniques | Demo live |
 | 2:00 | Flash Feature : surbrillance temporaire | Demo live |
 | 2:30 | Zoom to Feature : centrer la carte | Demo live |
@@ -300,11 +326,13 @@ graph LR
 **Niveau** : Intermediaire | **Duree** : 10-12 min | **Prerequis** : V02
 
 #### Objectifs pedagogiques
-- Maitriser les 6 predicats spatiaux
+- Maitriser les 8 predicats spatiaux (Touches, Intersects, Contains, Within, Overlaps, Crosses, Disjoint, Is Within Distance)
 - Comprendre quand utiliser chaque predicat
 - Configurer un buffer en metres/km
 - Utiliser les expressions dynamiques pour le buffer
 - Buffer negatif pour filtrage inverse
+- Comprendre les seuils d'auto-activation des centroïdes (cible > 5 000 features, source > 50 000 features)
+- Regler les Buffer Segments (moins = plus rapide pour geometries complexes)
 
 #### Plan sequence
 
@@ -316,14 +344,18 @@ graph LR
 | 2:15 | Contains — source contient cible | Demo + schema |
 | 3:00 | Within — cible a l'interieur de source | Demo + schema |
 | 3:45 | Overlaps — chevauchement partiel | Demo + schema |
-| 4:30 | Is Within Distance — buffer implicite | Demo + schema |
-| 5:15 | Ajouter un buffer explicite (50m, 200m, 1km) | Demo live |
-| 6:30 | Buffer dynamique avec expression QGIS | Demo live |
-| 7:30 | Buffer negatif (filtrage inverse) | Demo live |
-| 8:30 | Cas d'usage : zones tampon reglementaires | Demo live |
-| 10:00 | Comparaison visuelle des 6 predicats | Recapitulatif |
+| 4:15 | Crosses — ligne coupe un polygone | Demo + schema |
+| 4:45 | Disjoint — aucun contact spatial | Demo + schema |
+| 5:15 | Is Within Distance — buffer implicite | Demo + schema |
+| 5:45 | Seuils auto-centroide : cible > 5 000 → centroide auto ; source > 50 000 → centroide auto | Demo live |
+| 6:15 | Ajouter un buffer explicite (50m, 200m, 1km) | Demo live |
+| 7:30 | Buffer dynamique avec expression QGIS | Demo live |
+| 8:30 | Buffer negatif (filtrage inverse) | Demo live |
+| 9:00 | Buffer Segments : moins de segments = geometrie plus simple = filtrage plus rapide | Demo live |
+| 9:30 | Cas d'usage : zones tampon reglementaires | Demo live |
+| 11:00 | Comparaison visuelle des 8 predicats | Recapitulatif |
 
-#### Diagramme — Les 6 Predicats Illustres
+#### Diagramme — Les 8 Predicats Illustres
 
 ```mermaid
 graph TD
@@ -354,6 +386,16 @@ graph TD
         O_A["Polygone A"] ---|"zone commune<br/>partielle"| O_B["Polygone B"]
     end
 
+    subgraph CROSSES["CROSSES"]
+        direction LR
+        CR_A["Ligne A"] ---|"coupe le<br/>polygone B"| CR_B["Polygone B"]
+    end
+
+    subgraph DISJOINT["DISJOINT"]
+        direction LR
+        DJ_A["Geom A"] -.-|"aucun contact<br/>spatial"| DJ_B["Geom B"]
+    end
+
     subgraph DWITHIN["IS WITHIN DISTANCE"]
         direction LR
         D_A["Polygone A"] -.-|"distance < N m"| D_B["Polygone B"]
@@ -371,26 +413,30 @@ flowchart LR
     BUFFER --> STATIC["Statique<br/>50m / 200m / 1km"]
     BUFFER --> DYNAMIC["Dynamique<br/>Expression QGIS<br/>ex: $area * 0.01"]
     BUFFER --> NEGATIVE["Negatif<br/>Retrecir le polygone<br/>Filtrage inverse"]
+    BUFFER --> SEGMENTS["Buffer Segments<br/>Moins de segments =<br/>geometrie plus simple =<br/>filtrage plus rapide"]
 
     STATIC --> RESULT["Geometrie<br/>bufferisee"]
     DYNAMIC --> RESULT
     NEGATIVE --> RESULT
+    SEGMENTS --> RESULT
 
     RESULT --> PREDICATE["Application du<br/>predicat spatial<br/>sur la geometrie etendue"]
 
     style BUFFER fill:#1976D2,color:#fff
     style DYNAMIC fill:#E65100,color:#fff
     style NEGATIVE fill:#D32F2F,color:#fff
+    style SEGMENTS fill:#6A1B9A,color:#fff
 ```
 
 #### Captures QGIS requises
-1. Illustration de chaque predicat avec 2 polygones colores
+1. Illustration de chacun des 8 predicats avec 2 geometries coloriees
 2. Resultat de chaque predicat sur le meme jeu de donnees
 3. Configuration du buffer dans l'interface
 4. Comparaison buffer 50m vs 200m vs 1km
 5. Expression dynamique dans le champ buffer
 6. Buffer negatif avec geometrie retrecie visible
-7. Tableau comparatif des predicats (recapitulatif)
+7. Tableau comparatif des 8 predicats (recapitulatif)
+8. Badge centroide auto-active (cible > 5 000 ou source > 50 000 features)
 
 #### Donnees de demo
 - Couche zones inondables (polygones)
@@ -405,9 +451,11 @@ flowchart LR
 
 #### Objectifs pedagogiques
 - Sauvegarder un filtre en favori
-- Rappeler, renommer, dupliquer un favori
+- Rappeler un favori (1 clic = filtre applique automatiquement, sans clic supplementaire)
+- Renommer, dupliquer, supprimer un favori
+- Explorer le Favorites Manager Dialog (3 onglets : General, Expression, Remote)
 - Importer/exporter des favoris (JSON)
-- Naviguer dans l'historique (100 etats)
+- Naviguer dans l'historique (100 etats) — persistence optionnelle via APP.OPTIONS.HISTORY
 - Undo/Redo avec Ctrl+Z / Ctrl+Y
 
 #### Plan sequence
@@ -417,15 +465,18 @@ flowchart LR
 | 0:00 | Pourquoi sauvegarder ses filtres ? | Voix + diagramme |
 | 0:30 | Sauvegarder le filtre actuel en favori | Demo live |
 | 1:00 | Badge favori — indicateur visuel | Capture annotee |
-| 1:30 | Rappeler un favori (1 clic) | Demo live |
+| 1:30 | Rappeler un favori — 1 clic declenche automatiquement le filtre (pas de double clic) | Demo live |
 | 2:00 | Renommer, dupliquer, supprimer | Demo live |
 | 2:30 | Favoris globaux vs projet | Demo live |
-| 3:00 | Gestionnaire de favoris (dialogue) | Demo live |
-| 3:30 | Export JSON — partager avec l'equipe | Demo live |
-| 4:00 | Import JSON | Demo live |
-| 4:30 | Historique Undo/Redo — 100 etats | Demo live |
-| 5:30 | Undo multi-couches (global state) | Demo live |
-| 6:30 | Persistance de l'historique | Demo live |
+| 3:00 | Favorites Manager Dialog — onglet General (nom, description, tags, use_count, last_used_at) | Demo live |
+| 3:30 | Favorites Manager Dialog — onglet Expression (texte complet de l'expression) | Demo live |
+| 4:00 | Favorites Manager Dialog — onglet Remote (couches cibles + config spatiale) | Demo live |
+| 4:30 | Export JSON — partager avec l'equipe | Demo live |
+| 5:00 | Import JSON → dialog : Merge (ajouter) / Replace All (remplacer) / Cancel | Demo live |
+| 5:30 | History Widget : compteur "3/7" (position/total), tooltips "Undo: Filter on communes", right-click Clear History | Demo live |
+| 6:00 | Unfilter et historique : Unfilter utilise l'historique si disponible, sinon supprime le filtre directement | Demo live |
+| 6:15 | Undo multi-couches (global state) | Demo live |
+| 6:30 | Persistance historique : per-session par defaut, activer dans APP.OPTIONS.HISTORY | Demo live |
 
 #### Diagramme — Cycle de Vie d'un Favori
 
@@ -489,34 +540,35 @@ flowchart TD
 
 ---
 
-### VIDEO 06 — Export GeoPackage Pro
+### VIDEO 06 — Export GeoPackage & KML Pro
 **Niveau** : Intermediaire | **Duree** : 8-10 min | **Prerequis** : V02
 
 #### Objectifs pedagogiques
-- Exporter des couches filtrees en GeoPackage
-- Comprendre l'integration du projet QGIS dans le GPKG
-- Preserver styles, groupes et CRS
-- Export multi-formats (22+ formats)
-- Export streaming pour gros volumes
-- Cas d'usage : livrable client
+- Comprendre le dialogue ExportGroupRecapDialog (confirmation avant export)
+- Choisir entre GPKG et KML selon le cas d'usage
+- Comprendre QML (fidelite QGIS) vs SLD (portabilite OGC) pour les styles
+- Preserver la hierarchie de groupes dans le GPKG (Preserve group structure)
+- Utiliser le batch mode (un fichier par couche)
+- Export streaming pour volumes > 10k entites
+- Cas d'usage : livrable client QGIS-to-QGIS vs partage Google Earth
 
 #### Plan sequence
 
 | Temps | Contenu | Type |
 |-------|---------|------|
-| 0:00 | Pourquoi exporter ? Cas d'usage metier | Diagramme |
+| 0:00 | Pourquoi exporter ? Deux cas : livrable QGIS-to-QGIS vs partage Google Earth | Diagramme |
 | 0:30 | Onglet Export — vue d'ensemble | Demo live |
-| 1:00 | Selection des couches a exporter | Demo live |
-| 1:30 | Options : CRS, styles, groupes | Demo live |
-| 2:00 | Export simple → GeoPackage | Demo live |
-| 3:00 | Ouvrir le GPKG resultant | Demo live |
-| 3:30 | Projet embarque — reconstruction auto | Demo live |
-| 4:30 | Hierarchie de groupes preservee | Demo live |
-| 5:00 | Styles et renderers intacts | Demo live |
-| 5:30 | Export multi-formats : GeoJSON, KML, CSV | Demo live |
-| 6:30 | Export streaming (>10k entites) | Demo live |
-| 7:30 | Zip archive en sortie | Demo live |
-| 8:00 | Recapitulatif : livrable complet en 1 fichier | Schema |
+| 1:00 | ExportGroupRecapDialog : arborescence QTreeWidget, resume N couches / M groupes, chemin de sortie | Demo live |
+| 1:45 | Checkbox "Preserve group structure in GPKG" + bouton Export vert #27ae60 | Demo live |
+| 2:15 | GPKG : format recommande pour livrable QGIS-to-QGIS complet | Demo live |
+| 3:00 | KML : format recommande pour partage Google Earth / utilisateurs non-QGIS | Demo live |
+| 3:30 | QML vs SLD : QML = fidelite QGIS totale ; SLD = standard OGC portable — les deux activables simultanement | Demo live |
+| 4:15 | Preserve group structure : la vraie valeur ajoutee — hierarchie reconstruite a l'ouverture | Demo live |
+| 5:00 | Batch mode : un fichier par couche (vs tout dans un GPKG) | Demo live |
+| 5:45 | Streaming 10k+ : FilterMate fragmente et reassemble pour eviter les timeout memoire | Demo live |
+| 6:30 | Ouvrir le GPKG resultant — projet embarque, styles et groupes intacts | Demo live |
+| 7:30 | Recapitulatif : GPKG pour equipe QGIS, KML pour livraison terrain / client non-SIG | Schema |
+| — | ⚠️ Piege : Export = features visibles (filtrees). Faire Unfilter avant si on veut tout exporter. | Info |
 
 #### Diagramme — Pipeline d'Export GeoPackage
 
@@ -558,46 +610,41 @@ flowchart TD
     style OPEN fill:#388E3C,color:#fff
 ```
 
-#### Diagramme — Formats Supportes
+#### Diagramme — GPKG vs KML : Quand Utiliser Lequel
 
 ```mermaid
-graph LR
-    subgraph SPATIAL["Formats spatiaux"]
-        F1["GeoPackage .gpkg"]
-        F2["Shapefile .shp"]
-        F3["GeoJSON .geojson"]
-        F4["KML/KMZ"]
-        F5["GML"]
-        F6["SpatiaLite .sqlite"]
-        F7["DXF (AutoCAD)"]
-        F8["MapInfo TAB"]
-    end
+flowchart TD
+    EXPORT["FilterMate Export Engine"]
 
-    subgraph TABULAR["Formats tabulaires"]
-        F9["CSV/TSV"]
-        F10["XLSX (Excel)"]
-    end
+    EXPORT --> GPKG_PATH["GeoPackage .gpkg"]
+    EXPORT --> KML_PATH["KML/KMZ"]
 
-    subgraph DATABASE["Bases de donnees"]
-        F11["PostgreSQL"]
-    end
+    GPKG_PATH --> GPKG_USE["Usage : Livrable QGIS-to-QGIS<br/>✔ Projet embarque<br/>✔ Styles QML (fidelite totale)<br/>✔ Hierarchie de groupes preservee<br/>✔ Multi-couches dans 1 fichier"]
 
-    EXPORT["FilterMate Export"] --> SPATIAL
-    EXPORT --> TABULAR
-    EXPORT --> DATABASE
+    KML_PATH --> KML_USE["Usage : Partage Google Earth<br/>✔ Ouverture universelle<br/>✔ Styles SLD (standard OGC)<br/>✔ Partage terrain / clients non-SIG<br/>✗ Pas de projet embarque"]
 
-    style F1 fill:#1565C0,color:#fff
+    GPKG_USE --> STYLES["Styles exportes :"]
+    KML_USE --> STYLES
+
+    STYLES --> QML["QML — fidelite QGIS totale<br/>(QGIS-to-QGIS)"]
+    STYLES --> SLD["SLD — standard OGC portable<br/>(inter-outils)<br/>Les deux activables simultanement"]
+
+    style GPKG_PATH fill:#1565C0,color:#fff
+    style KML_PATH fill:#E65100,color:#fff
     style EXPORT fill:#F57C00,color:#fff
+    style QML fill:#388E3C,color:#fff
+    style SLD fill:#7B1FA2,color:#fff
 ```
 
 #### Captures QGIS requises
 1. Onglet Export avec options selectionnees
-2. Dialogue de selection de chemin de sortie
-3. Progress bar pendant l'export
-4. GeoPackage ouvert dans QGIS — arborescence reconstruite
-5. Comparaison cote a cote : projet original vs GPKG
-6. Export GeoJSON dans un editeur texte
-7. Export KML ouvert dans Google Earth (si possible)
+2. ExportGroupRecapDialog — arborescence QTreeWidget avec groupes et couches
+3. ExportGroupRecapDialog — resume N couches / M groupes + checkbox "Preserve group structure" + bouton vert
+4. Progress bar / streaming pendant l'export (>10k entites)
+5. GeoPackage ouvert dans QGIS — hierarchie de groupes reconstruite
+6. Comparaison cote a cote : projet original vs GPKG reconstruit
+7. KML ouvert dans Google Earth — rendu des styles SLD
+8. Comparaison QML (rendu QGIS fidele) vs SLD (rendu OGC standard)
 
 ---
 
@@ -605,8 +652,9 @@ graph LR
 **Niveau** : Avance | **Duree** : 10-12 min | **Prerequis** : V02, V04
 
 #### Objectifs pedagogiques
-- Comprendre les 4 backends et leurs performances
-- Voir le badge backend et le changement manuel
+- Identifier les 4 backends par leurs couleurs (vert=PG, violet=Spatialite, bleu=OGR, orange=Memory)
+- Forcer un backend et comprendre que c'est session-scoped (non persistant entre restarts)
+- Utiliser "Auto-select Optimal for All Layers" et "Force [X] for All Layers"
 - Configurer les optimisations automatiques
 - Comprendre la strategie centroide
 - Dialogue d'optimisation
@@ -620,14 +668,17 @@ graph LR
 | 0:45 | Badge backend — identification visuelle | Capture annotee |
 | 1:15 | Auto-selection : comment ca marche ? | Diagramme anime |
 | 2:00 | Demo : meme filtre sur 4 backends | Demo live chrono |
-| 3:30 | Forcer un backend manuellement | Demo live |
+| 3:30 | Forcer un backend manuellement (session-scoped : non persistant entre restarts) | Demo live |
+| 3:45 | Options menu : "Auto-select Optimal for All Layers" et "Force [X] for All Layers" | Demo live |
 | 4:00 | Memory optimization (PG < 5k → Memory) | Demo live |
-| 4:30 | Centroide auto-enable (>5k entites) | Demo live |
-| 5:30 | Dialogue d'optimisation | Demo live |
-| 6:30 | Seuils configurables | Demo live |
-| 7:30 | Strategie Attribute-First vs BBox-Prefilter | Diagramme |
-| 8:30 | Requetes progressives (progressive chunking) | Diagramme |
-| 9:30 | Benchmarks : tableau comparatif | Tableau anime |
+| 4:30 | Query Cache : toujours actif, LRU 100 entrees | Demo live |
+| 5:00 | Parallel Filtering : active des 2 couches cibles | Demo live |
+| 5:30 | Progressive Filtering : PostgreSQL + complexite > 100 | Demo live |
+| 6:00 | Geometry Simplification : WKT source > 100K chars | Demo live |
+| 6:30 | EXISTS subquery : si FIDs source > 500 → evite d'inliner le WKT geant | Diagramme |
+| 7:00 | Materialized View : si FIDs source > 500 sur PostgreSQL | Demo live |
+| 7:30 | Dialogue d'optimisation avec recommandations | Demo live |
+| 8:30 | Benchmarks : tableau comparatif par backend | Tableau anime |
 
 #### Diagramme — Selection Automatique du Backend
 
@@ -639,15 +690,15 @@ flowchart TD
     Q0 -->|Oui| FORCED["Utiliser le backend<br/>selectionne"]
     Q0 -->|Non| Q1{"Type de provider ?"}
 
-    Q1 -->|"memory"| MEM["Backend MEMORY<br/>In-memory query<br/>< 0.5s / 50k"]
+    Q1 -->|"memory"| MEM["💭 Backend MEMORY<br/>In-memory query<br/>< 0.5s / 50k"]
 
     Q1 -->|"postgres"| Q2{"< 5k entites ?"}
-    Q2 -->|Oui| MEM2["Backend MEMORY<br/>Optimisation petits PG"]
-    Q2 -->|Non| PG["Backend POSTGRESQL<br/>Materialized View<br/>Requetes paralleles<br/>Index GIST<br/>< 2s / 1M"]
+    Q2 -->|Oui| MEM2["💭 Backend MEMORY<br/>Optimisation petits PG"]
+    Q2 -->|Non| PG["🐘 Backend POSTGRESQL<br/>Materialized View<br/>Requetes paralleles<br/>Index GIST<br/>< 2s / 1M"]
 
-    Q1 -->|"spatialite<br/>GeoPackage"| SPAT["Backend SPATIALITE<br/>Index R-tree<br/>SQL spatial<br/>~10s / 100k"]
+    Q1 -->|"spatialite<br/>GeoPackage"| SPAT["💾 Backend SPATIALITE<br/>Index R-tree<br/>SQL spatial<br/>~10s / 100k"]
 
-    Q1 -->|"ogr / shapefile<br/>GeoJSON / WFS"| OGR["Backend OGR<br/>Expression QGIS<br/>Universel<br/>~30s / 100k"]
+    Q1 -->|"ogr / shapefile<br/>GeoJSON / WFS"| OGR["📁 Backend OGR<br/>Expression QGIS<br/>Universel<br/>~30s / 100k"]
 
     FORCED --> RESULT["Expression appliquee<br/>setSubsetString()"]
     MEM --> RESULT
@@ -656,11 +707,11 @@ flowchart TD
     SPAT --> RESULT
     OGR --> RESULT
 
-    style PG fill:#1565C0,color:#fff
-    style SPAT fill:#6A1B9A,color:#fff
-    style OGR fill:#E65100,color:#fff
-    style MEM fill:#00695C,color:#fff
-    style MEM2 fill:#00695C,color:#fff
+    style PG fill:#27ae60,color:#fff
+    style SPAT fill:#9b59b6,color:#fff
+    style OGR fill:#3498db,color:#fff
+    style MEM fill:#e67e22,color:#fff
+    style MEM2 fill:#e67e22,color:#fff
     style RESULT fill:#388E3C,color:#fff
 ```
 
@@ -677,30 +728,33 @@ xychart-beta
     bar "Memory" [0.2, 0.3, 0.5, 2, 5]
 ```
 
-#### Diagramme — Strategies d'Optimisation
+#### Diagramme — 4 Optimiseurs avec Seuils Precis
 
 ```mermaid
-flowchart LR
-    subgraph STRATEGIES["Strategies de filtrage"]
-        direction TB
-        S1["ATTRIBUTE-FIRST<br/>Pre-filtre attributaire<br/>puis geometrie"]
-        S2["BBOX-PREFILTER<br/>Enveloppe d'abord<br/>puis geometrie exacte"]
-        S3["PROGRESSIVE<br/>Traitement par lots<br/>de N entites"]
-        S4["CENTROIDE<br/>Point au lieu de<br/>geometrie complexe"]
-    end
+flowchart TD
+    ANALYSER["Analyse de la requete"]
 
-    ANALYSER["Analyse de complexite<br/>de la requete"] --> S1
-    ANALYSER --> S2
-    ANALYSER --> S3
-    ANALYSER --> S4
+    ANALYSER --> OPT1["Query Cache<br/>TOUJOURS ACTIF<br/>LRU 100 entrees"]
+    ANALYSER --> OPT2["Parallel Filtering<br/>ACTIVE si >= 2 couches cibles"]
+    ANALYSER --> OPT3["Progressive Filtering<br/>ACTIVE si PostgreSQL<br/>+ complexite requete > 100"]
+    ANALYSER --> OPT4["Geometry Simplification<br/>ACTIVE si WKT source > 100K chars"]
 
-    S1 --> OPTIMAL["Resultat optimal<br/>selon le contexte"]
-    S2 --> OPTIMAL
-    S3 --> OPTIMAL
-    S4 --> OPTIMAL
+    OPT4 --> EXISTS["Si FIDs source > 500<br/>→ EXISTS subquery<br/>(evite d'inliner le WKT)"]
 
+    OPT3 --> MATVIEW["Si FIDs source > 500<br/>→ Materialized View PostgreSQL<br/>(fm_temp_mv_*)"]
+
+    OPT1 --> RESULT["Requete optimisee"]
+    OPT2 --> RESULT
+    EXISTS --> RESULT
+    MATVIEW --> RESULT
+
+    style OPT1 fill:#388E3C,color:#fff
+    style OPT2 fill:#1565C0,color:#fff
+    style OPT3 fill:#6A1B9A,color:#fff
+    style OPT4 fill:#E65100,color:#fff
+    style EXISTS fill:#D32F2F,color:#fff
+    style MATVIEW fill:#D32F2F,color:#fff
     style ANALYSER fill:#F57C00,color:#fff
-    style OPTIMAL fill:#388E3C,color:#fff
 ```
 
 #### Captures QGIS requises
@@ -821,6 +875,8 @@ flowchart TD
 - Ajuster les seuils de performance
 - Configurer le cache d'expressions
 - Personnaliser le theme et les couleurs
+- Comprendre les profils UI : compact (width < 1920 ou height < 1080), normal, HiDPI (pixel ratio > 1.5 ou width > 3840)
+- Comprendre la migration automatique de config (mise a jour sans perte de configuration)
 - TreeView JSON pour reglages fins
 
 #### Plan sequence
@@ -832,7 +888,7 @@ flowchart TD
 | 1:00 | Feedback level : minimal / normal / verbose | Demo live |
 | 1:30 | Theme : auto / default / dark / light | Demo live |
 | 2:00 | Position du dock et de la barre d'actions | Demo live |
-| 2:30 | Profil UI : compact / normal / HiDPI | Demo live |
+| 2:30 | Profil UI : compact (width < 1920 ou height < 1080) / normal / HiDPI (pixel ratio > 1.5 ou width > 3840) | Demo live |
 | 3:00 | Debounce timers (expression, filtre, canvas) | Demo live |
 | 3:30 | Cache d'expressions (taille, TTL) | Demo live |
 | 4:00 | Seuils d'optimisation | Demo live |
@@ -842,6 +898,7 @@ flowchart TD
 | 6:00 | JSON TreeView pour reglages fins | Demo live |
 | 7:00 | config.default.json vs config.json | Diagramme |
 | 7:30 | Reset configuration | Demo live |
+| 8:00 | Migration automatique de config au demarrage : ajout cles manquantes, renommage, nettoyage — non-destructif | Demo live |
 
 #### Diagramme — Arborescence Configuration
 
@@ -1182,7 +1239,7 @@ filtermate-tutorial-v02-filtrage-bases.mp4
 filtermate-tutorial-v03-exploration.mp4
 filtermate-tutorial-v04-predicats-buffer.mp4
 filtermate-tutorial-v05-favoris-historique.mp4
-filtermate-tutorial-v06-export-gpkg.mp4
+filtermate-tutorial-v06-export-gpkg-kml.mp4
 filtermate-tutorial-v07-multi-backend.mp4
 filtermate-tutorial-v08-postgresql-power.mp4
 filtermate-tutorial-v09-configuration.mp4
@@ -1198,17 +1255,20 @@ Cette matrice garantit que **chaque fonctionnalite du plugin est couverte par au
 | Fonctionnalite | V01 | V02 | V03 | V04 | V05 | V06 | V07 | V08 | V09 | V10 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | Installation | X | | | | | | | | | |
-| Interface 3 onglets | X | | | | | | | | | |
+| Architecture Exploring/Toolbox/ActionBar | X | | | | | | | | | |
+| Action Bar 6 boutons | X | | | | | | | | | |
 | Theme sombre/clair | X | | | | | | | | X | |
 | 22 langues | X | | | | | | | | X | |
 | Filtrage simple | X | X | | | | | | | | |
 | Source / Cible | | X | | | | | | | | |
-| 6 predicats | | | | X | | | | | | |
+| 8 predicats (Touches, Intersects, Contains, Within, Overlaps, Crosses, Disjoint, DWithin) | | | | X | | | | | | |
 | Buffer m/km | | | | X | | | | | | |
 | Buffer dynamique | | | | X | | | | | | |
 | Buffer negatif | | | | X | | | | | | |
+| Buffer Segments | | | | X | | | | | | |
 | REPLACE / AND / OR | | X | | | | | | | | |
 | Unfilter / Reset | | X | | | | | | | | |
+| Filter button states | | X | | | | | | | | |
 | Exploration vecteur | | | X | | | | | | | |
 | Flash / Zoom / Identify | | | X | | | | | | | |
 | Selection simple | | | X | | | | | | | |
@@ -1220,26 +1280,45 @@ Cette matrice garantit que **chaque fonctionnalite du plugin est couverte par au
 | Favoris import/export | | | | | X | | | | | |
 | Badge favori | | | | | X | | | | | |
 | Undo/Redo 100 etats | | | | | X | | | | | |
+| History Widget (compteur, tooltips) | | | | | X | | | | | |
 | Historique persistant | | | | | X | | | | | |
 | Export GeoPackage | | | | | | X | | | | |
 | Projet embarque | | | | | | X | | | | |
 | Styles preserves | | | | | | X | | | | |
 | Groupes preserves | | | | | | X | | | | |
-| 22 formats export | | | | | | X | | | | |
+| Export GPKG + KML (styles QML/SLD) | | | | | | X | | | | |
 | Streaming export | | | | | | X | | | | |
+| ExportGroupRecapDialog | | | | | | X | | | | |
+| Styles QML vs SLD | | | | | | X | | | | |
 | 4 backends | | | | | | | X | | | |
 | Badge backend | | | | | | | X | | | |
 | Auto-selection | | | | | | | X | | | |
 | Forcer backend | | | | | | | X | | | |
 | Optimisation auto | | | | | | | X | | | |
-| Centroide auto | | | | | | | X | | | |
+| Centroide auto (seuils 5k/50k) | | | | X | | | X | | | |
+| Seuils auto-centroide | | | | X | | | | | | |
 | Strategies filtrage | | | | | | | X | | | |
+| Query Cache LRU | | | | | | | X | | | |
+| Parallel Filtering | | | | | | | X | | | |
+| Progressive Filtering | | | | | | | X | | | |
+| EXISTS subquery (WKT > 100K) | | | | | | | X | | | |
 | Materialized Views | | | | | | | | X | | |
 | PK auto-detection | | | | | | | | X | | |
 | Session cleanup | | | | | | | | X | | |
 | Filtrage parallele | | | | | | | | X | | |
 | BDTopo / OSM | | | | | | | | X | | |
 | Tuning PostgreSQL | | | | | | | | X | | |
+| Verbose mode (outil pedagogique) | X | | | | | | | | X | |
+| SQLite persistence config | X | | | | | | | | | |
+| Log Messages Panel FilterMate | X | | | | | | | | | |
+| Auto-detection champ affichage | X | | | | | | | | | |
+| Edit Mode Conflict popup | | X | | | | | | | | |
+| Auto Current Layer toggle | | | X | | | | | | | |
+| Favorites Apply = filtre auto | | | | | X | | | | | |
+| Historique persistence optionnelle | | | | | X | | | | | |
+| Favorites Manager 3 onglets | | | | | X | | | | | |
+| UI Profile HiDPI seuils | | | | | | | | | X | |
+| Config Migration auto | | | | | | | | | X | |
 | Config editor | | | | | | | | | X | |
 | Debounce timers | | | | | | | | | X | |
 | Cache expressions | | | | | | | | | X | |
@@ -1252,7 +1331,7 @@ Cette matrice garantit que **chaque fonctionnalite du plugin est couverte par au
 | CI/CD GitHub | | | | | | | | | | X |
 | Contribution | | | | | | | | | | X |
 
-**Couverture : 52/52 fonctionnalites = 100%**
+**Couverture : 76/76 fonctionnalites = 100%** *(+24 nouvelles fonctionnalites documentees dans la v3)*
 
 ---
 
@@ -1264,7 +1343,7 @@ Cette matrice garantit que **chaque fonctionnalite du plugin est couverte par au
 | Duree totale | ~75 min |
 | Diagrammes Mermaid | 21 |
 | Captures QGIS | 66 |
-| Fonctionnalites couvertes | 100% (52/52) |
+| Fonctionnalites couvertes | 100% (76/76) |
 | Langues sous-titres | 2 (FR, EN) |
 | Datasets demo | 9 |
 | Niveaux de difficulte | 4 (debutant, intermediaire, avance, expert) |
