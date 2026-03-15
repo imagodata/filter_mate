@@ -34,20 +34,20 @@ qgis:
       x: 2176
       y: 915
     btn_toggle_layers_to_filter:
-      x: 2002
-      y: 982
+      x: 1946
+      y: 998
     btn_toggle_geometric_predicates:
-      x: 2006
-      y: 1123
+      x: 1957
+      y: 1117
     btn_toggle_buffer:
-      x: 2004
-      y: 1193
+      x: 1956
+      y: 1192
     target_layer_combo:
       x: 2100
       y: 982
     predicate_combo:
-      x: 2115
-      y: 1226
+      x: 2044
+      y: 1124
     buffer_enable_checkbox:
       x: 2008
       y: 1190
@@ -55,32 +55,32 @@ qgis:
       x: 2119
       y: 1187
     filter_button:
-      x: 1998
-      y: 1427
+      x: 1939
+      y: 1432
     undo_button:
-      x: 2099
-      y: 1440
+      x: 2051
+      y: 1431
     redo_button:
-      x: 2199
-      y: 1437
+      x: 2166
+      y: 1430
     unfilter_button:
-      x: 2300
-      y: 1444
+      x: 2286
+      y: 1435
     export_button:
-      x: 2402
-      y: 1434
+      x: 2395
+      y: 1433
     favorites_button:
       x: 2407
       y: 300
     tab_filtering:
-      x: 2078
-      y: 846
+      x: 2004
+      y: 873
     tab_exploring:
       x: 2061
       y: 362
     tab_exporting:
-      x: 2061
-      y: 1303
+      x: 2009
+      y: 1302
     exploring_zone:
       x: 1941
       y: 307
@@ -105,11 +105,11 @@ qgis:
       x: 1961
       y: 610
     sidebar_link:
-      x: 1961
-      y: 680
+      x: 1952
+      y: 698
     sidebar_reset:
-      x: 1961
-      y: 750
+      x: 1951
+      y: 785
     toolbox_zone:
       x: 1941
       y: 810
@@ -135,35 +135,59 @@ qgis:
       x: 2494
       y: 295
     filtermate_toolbar_icon:
-      x: 500
-      y: 20
+      x: 166
+      y: 210
     menu_settings:
-      x: 350
-      y: 10
+      x: 296
+      y: 47
     menu_extensions:
-      x: 450
-      y: 0
+      x: 368
+      y: 50
     menu_view:
-      x: 200
-      y: 0
+      x: 158
+      y: 42
+    menu_extensions_manage:
+      x: 520
+      y: 58
+    menu_settings_options:
+      x: 293
+      y: 47
     menu_view_panels:
-      x: 200
-      y: 80
+      x: 270
+      y: 150
     menu_view_panels_log:
-      x: 350
-      y: 130
+      x: 420
+      y: 260
     log_panel_filtermate_tab:
       x: 600
       y: 850
     about_config_tab:
-      x: 700
-      y: 300
+      x: 911
+      y: 53
+    about_config_language_field:
+      x: 850
+      y: 420
+    about_config_feedback_level_field:
+      x: 850
+      y: 460
+    plugin_manager_search:
+      x: 1050
+      y: 245
+    plugin_manager_all_tab:
+      x: 709
+      y: 253
     plugin_manager_entry:
-      x: 640
-      y: 400
+      x: 1061
+      y: 280
     plugin_manager_install_btn:
-      x: 900
-      y: 700
+      x: 1797
+      y: 1277
+    settings_options_general_tab:
+      x: 350
+      y: 300
+    settings_options_theme_dropdown:
+      x: 1909
+      y: 657
 timing:
   click_delay: 0.3
   type_delay: 0.05
@@ -173,8 +197,8 @@ timing:
   mouse_move_duration: 0.5
 diagrams:
   output_dir: output/diagrams
-  width: 1920
-  height: 1080
+  width: 2560
+  height: 1440
   theme: dark
   background_color: '#1a1a2e'
   font_family: Segoe UI
@@ -186,7 +210,7 @@ narration:
 capture:
   fps: 10
   output_dir: output/captures
-  resolution: 1920x1080
+  resolution: 2560x1440
   display: :99
   method: import
   codec: libx264
@@ -200,7 +224,7 @@ capture:
     outro_scene: Outro
 output:
   final_dir: output/final
-  resolution: 1920x1080
+  resolution: 2560x1440
   fps: 30
   codec: libx264
   quality: '23'

@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import time
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -25,17 +26,7 @@ class V01S06FirstFilter(VideoSequence):
     duration_estimate = 90.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = ["v01_first_filter_workflow"]
-    narration_text = (
-        "Passons a la pratique. Nos deux couches sont chargees : les departements "
-        "et les communes. Dans la Zone d'Exploration, je selectionne la couche "
-        "departements. Je choisis Gironde. "
-        "Dans l'onglet FILTERING, FilterMate a reconnu ma selection. "
-        "En couche cible, je choisis communes. "
-        "Predicat spatial : Intersects. Je clique sur Filter. "
-        "Les 35 000 communes sont filtrees instantanement. "
-        "Seules celles qui intersectent la Gironde restent visibles. "
-        "FilterMate a detecte le backend OGR automatiquement."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s06"]
 
     def execute(self, obs, qgis, config):
         import pyautogui

@@ -6,6 +6,7 @@ Header bar avec pastilles Favoris + Backend.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -15,16 +16,7 @@ class V01S03Interface(VideoSequence):
     duration_estimate = 75.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = ["v01_interface_zones"]
-    narration_text = (
-        "Prenons un moment pour comprendre l'interface. "
-        "Elle est divisee en 3 zones principales, separees par un splitter vertical. "
-        "En haut, la Zone d'Exploration. C'est ici que vous parcourez et "
-        "selectionnez les entites de vos couches. "
-        "En bas, la Toolbox. Elle contient deux onglets : FILTERING et EXPORTING. "
-        "Et enfin, l'Action Bar. Ce sont les 6 boutons d'action. "
-        "Remarquez aussi le header : la pastille orange indique vos favoris, "
-        "et la pastille bleue affiche le backend actif."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s03"]
 
     def execute(self, obs, qgis, config):
         qgis.focus_qgis()

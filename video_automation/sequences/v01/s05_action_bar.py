@@ -6,6 +6,7 @@ Montrer le changement d'activation selon l'onglet FILTERING/EXPORTING.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -25,14 +26,7 @@ class V01S05ActionBar(VideoSequence):
     duration_estimate = 30.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = ["v01_action_bar_context"]
-    narration_text = (
-        "L'Action Bar est le coeur de FilterMate. Six boutons. "
-        "Filter applique le filtre. Undo annule, Redo retablit. "
-        "Unfilter retire tous les filtres. Export exporte en GeoPackage. "
-        "Et About, le seul bouton toujours actif. "
-        "Quand l'onglet EXPORTING est actif, les boutons Filter, Undo, Redo "
-        "et Unfilter se desactivent, et inversement avec Export."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s05"]
 
     def execute(self, obs, qgis, config):
         qgis.focus_filtermate()

@@ -6,6 +6,7 @@ Charger les donnees de demo (departements + communes).
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -15,16 +16,7 @@ class V01S02FirstLaunch(VideoSequence):
     duration_estimate = 30.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = []
-    narration_text = (
-        "Pour lancer FilterMate, cliquez sur son icone dans la barre d'outils, "
-        "ou allez dans le menu Extensions puis FilterMate. "
-        "Un panneau lateral s'ouvre, c'est le Dock Widget. "
-        "Pour l'instant, il est vide. C'est normal. "
-        "FilterMate detecte automatiquement les couches de votre projet. "
-        "Des qu'on va charger des donnees, l'interface va se remplir. "
-        "Chargeons nos donnees de demonstration : un Shapefile des departements "
-        "de France, environ 100 entites, et un Shapefile des communes, 35 000 entites."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s02"]
 
     def execute(self, obs, qgis, config):
         qgis.focus_qgis()

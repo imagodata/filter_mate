@@ -6,6 +6,7 @@ Charger une couche avec champ "nom"/"name" vs une couche generique.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -15,14 +16,14 @@ class V01S11AutoDisplay(VideoSequence):
     duration_estimate = 20.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = ["v01_display_field_detection"]
-    narration_text = (
-        "Le selecteur affiche directement le nom des departements, pas un identifiant "
-        "cryptique. C'est grace a la detection automatique du champ d'affichage. "
-        "FilterMate analyse votre couche et choisit intelligemment le meilleur champ "
-        "selon 6 niveaux de priorite. C'est automatique."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s11"]
 
     def execute(self, obs, qgis, config):
+        import pyautogui
+
+        regions = config["qgis"]["regions"]
+        move_dur = config["timing"].get("mouse_move_duration", 0.5)
+
         qgis.focus_filtermate()
         qgis.wait(0.5)
 
@@ -33,12 +34,11 @@ class V01S11AutoDisplay(VideoSequence):
 
         # 2. Open the feature selector to show readable names
         qgis.hover_region("exploring_feature_selector", duration=1.0)
-        import pyautogui
-        region = config["qgis"]["regions"].get("exploring_feature_selector")
+        region = regions.get("exploring_feature_selector")
         if region:
             pyautogui.click(
                 region["x"], region["y"],
-                duration=config["timing"].get("mouse_move_duration", 0.5),
+                duration=move_dur,
             )
         qgis.wait(1.5)
 

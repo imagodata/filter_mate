@@ -6,6 +6,7 @@ Effectuer un filtrage et montrer les messages detailles.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -15,15 +16,14 @@ class V01S09Verbose(VideoSequence):
     duration_estimate = 20.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = ["v01_feedback_levels"]
-    narration_text = (
-        "Astuce pour les debutants : activez le mode verbose. "
-        "Dans la configuration, changez FEEDBACK_LEVEL de normal a verbose. "
-        "En mode verbose, FilterMate vous explique tout ce qu'il fait. "
-        "Trois niveaux : minimal pour les erreurs, normal pour un retour equilibre, "
-        "et verbose pour tout voir."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s09"]
 
     def execute(self, obs, qgis, config):
+        import pyautogui
+
+        regions = config["qgis"]["regions"]
+        move_dur = config["timing"].get("mouse_move_duration", 0.5)
+
         qgis.focus_filtermate()
         qgis.wait(0.5)
 
@@ -32,27 +32,48 @@ class V01S09Verbose(VideoSequence):
         qgis.open_filtermate_config()
         qgis.wait(1.5)
 
-        # 2. Navigate to FEEDBACK_LEVEL parameter
-        #    (Scroll in JSON TreeView to APP > DOCKWIDGET > FEEDBACK_LEVEL)
-        qgis.wait(2.0)
+        # 2. Navigate to FEEDBACK_LEVEL field
+        feedback_field = regions.get("about_config_feedback_level_field")
+        if feedback_field:
+            self._log.info("Clicking FEEDBACK_LEVEL field")
+            pyautogui.click(
+                feedback_field["x"], feedback_field["y"],
+                duration=move_dur,
+            )
+            qgis.wait(0.5)
 
-        # 3. Show the 3 options
-        qgis.wait(2.0)
+            # 3. Double-click to edit and set to verbose
+            pyautogui.doubleClick(feedback_field["x"], feedback_field["y"])
+            qgis.wait(0.3)
+            pyautogui.hotkey("ctrl", "a")
+            pyautogui.typewrite("verbose", interval=0.05)
+            pyautogui.press("return")
+            qgis.wait(0.5)
+        else:
+            self._log.warning(
+                "about_config_feedback_level_field not calibrated — "
+                "skipping feedback level automation"
+            )
+            qgis.wait(2.0)
 
         # 4. Close config
         qgis.close_dialog()
         qgis.wait(0.5)
 
-        # 5. Ensure we are on the FILTERING tab (Filter button is disabled on other tabs)
+        # 5. Ensure FILTERING tab is active and filter is configured
+        #    (relies on filter setup from s06)
         qgis.select_tab("FILTERING")
         qgis.wait(0.5)
 
-        # 6. Perform a quick filter to show verbose messages
+        # 6. Verify a source layer is selected before filtering
+        qgis.hover_region("source_layer_combo", duration=1.0)
+
+        # 7. Perform filter to show verbose messages
         self._log.info("Performing filter to show verbose output")
         qgis.click_action_button("filter")
         qgis.wait(3.0)
 
-        # 7. Show feedback levels diagram
+        # 8. Show feedback levels diagram
         self.show_diagram(obs, "v01_feedback_levels", duration=5.0)
 
         qgis.focus_filtermate()

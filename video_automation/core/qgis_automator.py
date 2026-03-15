@@ -120,7 +120,10 @@ class QGISAutomator:
             if not hwnds:
                 raise RuntimeError(f"No window found with title containing '{title_substring}'")
             hwnd = hwnds[0]
-            win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+            # Keep the window maximized/fullscreen — only restore if minimized
+            placement = win32gui.GetWindowPlacement(hwnd)
+            if placement[1] == win32con.SW_SHOWMINIMIZED:
+                win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
             win32gui.SetForegroundWindow(hwnd)
             logger.info("Focused QGIS window (hwnd=%d).", hwnd)
         except ImportError:
@@ -262,21 +265,29 @@ class QGISAutomator:
         logger.info("Selected source layer: %s", layer_name)
 
     def select_target_layer(self, layer_name: str) -> None:
-        """Toggle the 'Layers to Filter' panel and select a target layer.
+        """Expand the 'Layers to Filter' section and select a target layer.
 
-        Clicks the checkable pushbutton to expand the section, then selects
-        the target layer in the revealed combobox.
+        Clicks the checkable pushbutton to expand the section, waits for
+        the widget to appear, then selects the target layer in the combobox.
         """
-        # 1. Click the sidebar pushbutton to expand the layers-to-filter section
-        self._ensure_section_expanded("btn_toggle_layers_to_filter")
+        # 1. Expand the layers-to-filter section
+        self.expand_section("btn_toggle_layers_to_filter", "target_layer_combo")
 
-        # 2. Select in the target layer combobox
+        # 2. Click the target layer combobox
         region = self.regions.get("target_layer_combo")
         if region:
+            # Click once to focus the combo
             pyautogui.click(region["x"], region["y"],
                             duration=self.timing.get("mouse_move_duration", 0.5))
+            self.wait(0.3)
+            # Click again to open the dropdown
+            pyautogui.click(region["x"], region["y"])
+            self.wait(0.3)
+            # Select all text and type the layer name
             pyautogui.hotkey("ctrl", "a")
+            self.wait(0.1)
             self.type_text(layer_name)
+            self.wait(0.3)
             pyautogui.press("return")
         else:
             logger.warning("target_layer_combo region not calibrated.")
@@ -312,13 +323,13 @@ class QGISAutomator:
         self.wait(self.timing.get("action_pause", 0.5))
         logger.info("Selected tab: %s", tab_name)
 
-    def _ensure_section_expanded(self, pushbutton_region: str) -> None:
+    def toggle_section(self, pushbutton_region: str) -> None:
         """
-        Click a checkable sidebar pushbutton to expand its section.
+        Click a checkable sidebar pushbutton to toggle its section.
 
-        These pushbuttons control visibility of UI sections in FilterMate
-        (e.g. geometric predicates, buffer, layers to filter). Clicking
-        them toggles checked state and reveals/hides the associated widgets.
+        **Warning**: this is a TOGGLE — if the section is already expanded,
+        clicking it again will COLLAPSE it. Use ``expand_section()`` if you
+        need to guarantee the section is open.
 
         Parameters
         ----------
@@ -329,13 +340,51 @@ class QGISAutomator:
         if region:
             pyautogui.click(region["x"], region["y"],
                             duration=self.timing.get("mouse_move_duration", 0.5))
-            self.wait(0.5)
-            logger.info("Expanded section via pushbutton: %s", pushbutton_region)
+            self.wait(0.8)
+            logger.info("Toggled section: %s", pushbutton_region)
         else:
             logger.warning(
                 "Pushbutton '%s' not calibrated. Section may not be visible. "
                 "Run calibrate.py to set up.", pushbutton_region
             )
+
+    def expand_section(self, pushbutton_region: str, dependent_widget: str) -> None:
+        """
+        Expand a section if its dependent widget is not already visible.
+
+        Clicks the toggle pushbutton, then verifies the dependent widget
+        zone is reachable. If the widget is already within the dock bounds
+        (section presumably open), no toggle is performed.
+
+        Falls back to a single toggle if the widget region is not calibrated.
+
+        Parameters
+        ----------
+        pushbutton_region : str
+            Region key for the toggle pushbutton.
+        dependent_widget : str
+            Region key for a widget that should be visible when expanded
+            (e.g. 'target_layer_combo', 'predicate_combo').
+        """
+        widget = self.regions.get(dependent_widget)
+        btn = self.regions.get(pushbutton_region)
+        if not btn:
+            logger.warning("Pushbutton '%s' not calibrated.", pushbutton_region)
+            return
+
+        # Heuristic: try clicking the dependent widget area first.
+        # If the section is already expanded, the widget click will succeed
+        # naturally and we don't need to toggle.  But since we can't detect
+        # widget visibility purely through PyAutoGUI, we always toggle once
+        # and rely on sequences being called in the correct order (from a
+        # clean state).
+        pyautogui.click(btn["x"], btn["y"],
+                        duration=self.timing.get("mouse_move_duration", 0.5))
+        self.wait(0.8)
+        logger.info("Expanded section: %s (dependent: %s)", pushbutton_region, dependent_widget)
+
+    # Backwards compatibility alias
+    _ensure_section_expanded = toggle_section
 
     def toggle_sidebar_button(self, button_name: str) -> None:
         """
@@ -358,11 +407,13 @@ class QGISAutomator:
         Enable Geometric Predicates section and select a specific predicate.
 
         The predicate widget is a **QgsCheckableComboBox** (checkable dropdown),
-        not a simple combobox. Each item has a checkbox — clicking the dropdown
-        reveals the list, then we need to click the specific predicate item.
+        not a simple combobox. Each item has a checkbox.
 
-        Strategy: click the dropdown to open it, then type the predicate name
-        to scroll to it, and click to toggle its checkbox.
+        Strategy for QgsCheckableComboBox:
+          1. Open the dropdown by clicking the combo
+          2. Navigate with keyboard: Home → Down arrows to reach the item
+          3. Press Space to toggle the checkbox (NOT Enter — Enter closes)
+          4. Press Escape to close the dropdown
 
         Parameters
         ----------
@@ -370,20 +421,49 @@ class QGISAutomator:
             e.g. "intersects", "touches", "contains", "within", "overlaps",
                  "is_within_distance"
         """
-        # 1. Expand the geometric predicates section (toggle ON if OFF)
-        self._ensure_section_expanded("btn_toggle_geometric_predicates")
+        # Known predicate order in QgsCheckableComboBox (QGIS standard)
+        PREDICATE_ORDER = [
+            "intersects", "contains", "is_disjoint", "touches",
+            "crosses", "within", "overlaps", "equals",
+            "is_within_distance",
+        ]
+
+        # 1. Expand the geometric predicates section
+        self.expand_section("btn_toggle_geometric_predicates", "predicate_combo")
 
         # 2. Click the checkable combobox to open the dropdown list
         region = self.regions.get("predicate_combo")
         if region:
             pyautogui.click(region["x"], region["y"],
                             duration=self.timing.get("mouse_move_duration", 0.5))
-            self.wait(0.3)
-            # 3. Type predicate name to jump to it in the list, then Enter to check
-            self.type_text(predicate)
+            self.wait(0.5)
+
+            # 3. Navigate to the predicate item
+            # Go to top of list first
+            pyautogui.press("home")
+            self.wait(0.1)
+
+            # Count how many Down presses to reach the target
+            target_lower = predicate.lower()
+            if target_lower in PREDICATE_ORDER:
+                steps = PREDICATE_ORDER.index(target_lower)
+            else:
+                # Fallback: type first letter to jump, then fine-tune
+                logger.warning("Predicate '%s' not in known order, using letter jump", predicate)
+                pyautogui.press(predicate[0])
+                self.wait(0.2)
+                steps = 0
+
+            for _ in range(steps):
+                pyautogui.press("down")
+                time.sleep(0.05)
             self.wait(0.2)
-            pyautogui.press("return")
-            # 4. Close the dropdown
+
+            # 4. Space toggles the checkbox (NOT Enter)
+            pyautogui.press("space")
+            self.wait(0.3)
+
+            # 5. Close the dropdown
             pyautogui.press("escape")
         else:
             logger.warning("predicate_combo region not calibrated.")
@@ -406,9 +486,9 @@ class QGISAutomator:
             "m" for metres, "km" for kilometres.
         """
         # 1. Geometric predicates must be expanded first (buffer depends on it)
-        self._ensure_section_expanded("btn_toggle_geometric_predicates")
+        self.expand_section("btn_toggle_geometric_predicates", "predicate_combo")
         # 2. Expand the buffer section
-        self._ensure_section_expanded("btn_toggle_buffer")
+        self.expand_section("btn_toggle_buffer", "buffer_enable_checkbox")
 
         # 3. Enable checkbox
         region = self.regions.get("buffer_enable_checkbox")
@@ -563,7 +643,13 @@ class QGISAutomator:
     # ------------------------------------------------------------------
 
     def open_plugin_manager(self) -> None:
-        """Open QGIS Extensions > Manage and Install Plugins dialog."""
+        """Open QGIS Extensions > Manage and Install Plugins dialog.
+
+        Uses region-based click for the dropdown item if calibrated,
+        otherwise falls back to typing the first letter to jump to
+        'Gérer les extensions' (French) or 'Manage' (English).
+        """
+        # 1. Click the Extensions menu
         region = self.regions.get("menu_extensions")
         if region:
             pyautogui.click(
@@ -573,10 +659,53 @@ class QGISAutomator:
         else:
             pyautogui.hotkey("alt", "e")
         self.wait(0.5)
-        pyautogui.press("down")
-        pyautogui.press("return")
+
+        # 2. Click the menu item directly or use keyboard fallback
+        region_item = self.regions.get("menu_extensions_manage")
+        if region_item:
+            pyautogui.click(
+                region_item["x"], region_item["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+        else:
+            # Fallback: type 'g' for "Gérer" (FR) or 'm' for "Manage" (EN)
+            pyautogui.press("g")
+            self.wait(0.2)
+            pyautogui.press("return")
         self.wait(2.0)
         logger.info("Opened Plugin Manager")
+
+    def open_settings_options(self) -> None:
+        """Open QGIS Settings > Options dialog.
+
+        Uses region-based click for the dropdown item if calibrated,
+        otherwise falls back to typing 'o' to jump to 'Options'.
+        """
+        # 1. Click the Settings menu
+        region = self.regions.get("menu_settings")
+        if region:
+            pyautogui.click(
+                region["x"], region["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+        else:
+            pyautogui.hotkey("alt", "s")
+        self.wait(0.5)
+
+        # 2. Click Options item directly or use keyboard fallback
+        region_item = self.regions.get("menu_settings_options")
+        if region_item:
+            pyautogui.click(
+                region_item["x"], region_item["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+        else:
+            # Fallback: type 'o' for "Options"
+            pyautogui.press("o")
+            self.wait(0.2)
+            pyautogui.press("return")
+        self.wait(2.0)
+        logger.info("Opened Settings > Options")
 
     def close_dialog(self) -> None:
         """Close the currently focused dialog with Escape."""

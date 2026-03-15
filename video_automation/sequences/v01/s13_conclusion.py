@@ -5,6 +5,7 @@ Ecran de fin : logo, liens GitHub / QGIS Plugins / Documentation, CTA.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -14,14 +15,7 @@ class V01S13Conclusion(VideoSequence):
     duration_estimate = 15.0
     obs_scene = "Outro"
     diagram_ids = []
-    narration_text = (
-        "Voila, vous avez installe FilterMate, decouvert les 3 zones de l'interface, "
-        "utilise les boutons de la barre laterale et de l'Action Bar, "
-        "et realise votre premier filtrage spatial. Pas mal pour 7 minutes ! "
-        "Retrouvez le code source sur GitHub, le plugin sur le depot officiel QGIS, "
-        "et la documentation complete sur le site dedie. Les liens sont dans la description. "
-        "Dans la prochaine video, on approfondit le filtrage geometrique. A tres vite !"
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s13"]
 
     def setup(self, obs, qgis, config):
         obs.switch_scene(config["obs"]["scenes"].get("outro_scene", "Outro"))

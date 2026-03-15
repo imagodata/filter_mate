@@ -5,6 +5,7 @@ Ouvrir la config FilterMate, changer la langue FR -> EN -> JA.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -14,14 +15,14 @@ class V01S08Language(VideoSequence):
     duration_estimate = 20.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = ["v01_languages"]
-    narration_text = (
-        "FilterMate parle 22 langues. Francais, anglais, espagnol, allemand, "
-        "chinois, japonais, arabe... La langue se change dans la configuration. "
-        "Changeons vers l'anglais... Toute l'interface se met a jour immediatement, "
-        "sans relancer le plugin."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s08"]
 
     def execute(self, obs, qgis, config):
+        import pyautogui
+
+        regions = config["qgis"]["regions"]
+        move_dur = config["timing"].get("mouse_move_duration", 0.5)
+
         qgis.focus_filtermate()
         qgis.wait(0.5)
 
@@ -30,19 +31,39 @@ class V01S08Language(VideoSequence):
         qgis.open_filtermate_config()
         qgis.wait(1.0)
 
-        # 2. Navigate to language parameter in JSON TreeView
-        #    (locale-specific — look for LANGUAGE or LANGUE)
-        qgis.wait(2.0)
+        # 2. Navigate to the language field in config
+        lang_field = regions.get("about_config_language_field")
+        if lang_field:
+            self._log.info("Clicking language field")
+            pyautogui.click(
+                lang_field["x"], lang_field["y"],
+                duration=move_dur,
+            )
+            qgis.wait(0.5)
 
-        # 3. Change to English
-        self._log.info("Changing language to English")
-        qgis.wait(2.0)
+            # 3. Double-click to edit, then type the new language code
+            pyautogui.doubleClick(lang_field["x"], lang_field["y"])
+            qgis.wait(0.3)
+            pyautogui.hotkey("ctrl", "a")
+            pyautogui.typewrite("en", interval=0.08)
+            pyautogui.press("return")
+            qgis.wait(1.0)
+        else:
+            self._log.warning(
+                "about_config_language_field not calibrated — "
+                "skipping language change automation"
+            )
+            qgis.wait(2.0)
 
-        # 4. Show interface updated
+        # 4. Close config dialog
+        qgis.close_dialog()
+        qgis.wait(0.5)
+
+        # 5. Show interface updated in English
         qgis.focus_filtermate()
         qgis.wait(2.0)
 
-        # 5. Show languages diagram
+        # 6. Show languages diagram
         self.show_diagram(obs, "v01_languages", duration=5.0)
 
         qgis.focus_filtermate()

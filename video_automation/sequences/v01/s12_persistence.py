@@ -5,6 +5,7 @@ Montrer le concept de persistence SQLite : config sauvee entre sessions.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -14,12 +15,7 @@ class V01S12Persistence(VideoSequence):
     duration_estimate = 15.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = ["v01_persistence"]
-    narration_text = (
-        "Tout ce que vous configurez dans FilterMate est sauvegarde automatiquement. "
-        "Le champ d'affichage, vos preferences, l'etat des toggles — tout est persiste "
-        "dans une base SQLite locale. "
-        "Fermez QGIS, rouvrez-le demain — FilterMate retrouve vos reglages."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s12"]
 
     def execute(self, obs, qgis, config):
         qgis.focus_filtermate()

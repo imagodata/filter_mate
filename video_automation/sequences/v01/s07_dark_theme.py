@@ -5,6 +5,7 @@ Basculer QGIS en theme sombre, montrer FilterMate qui s'adapte.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -14,15 +15,13 @@ class V01S07DarkTheme(VideoSequence):
     duration_estimate = 20.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = []
-    narration_text = (
-        "FilterMate s'adapte automatiquement au theme de QGIS. "
-        "Vous etes en mode sombre ? Le plugin le detecte et ajuste ses couleurs, "
-        "ses icones et ses bordures. Pas besoin de configurer quoi que ce soit. "
-        "Trois modes : automatique, theme clair force, ou theme sombre force."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s07"]
 
     def execute(self, obs, qgis, config):
         import pyautogui
+
+        regions = config["qgis"]["regions"]
+        move_dur = config["timing"].get("mouse_move_duration", 0.5)
 
         qgis.focus_qgis()
         qgis.wait(0.5)
@@ -31,32 +30,41 @@ class V01S07DarkTheme(VideoSequence):
         qgis.focus_filtermate()
         qgis.wait(1.5)
 
-        # 2. Open QGIS preferences: Settings > Options > General > UI Theme
-        self._log.info("Opening QGIS preferences for theme switch")
-        region = config["qgis"]["regions"].get("menu_settings")
-        if region:
-            pyautogui.click(
-                region["x"], region["y"],
-                duration=config["timing"].get("mouse_move_duration", 0.5),
-            )
-        else:
-            pyautogui.hotkey("alt", "s")  # Settings menu
-        qgis.wait(0.5)
-
-        # Navigate to Options
-        pyautogui.press("down")
-        pyautogui.press("return")
-        qgis.wait(2.0)
-
-        # 3. Theme change is hard to automate precisely
-        #    (depends on dialog layout) — pause for manual or pre-configured
-        qgis.wait(3.0)
-
-        # 4. Close preferences
-        qgis.close_dialog()
+        # 2. Open QGIS Settings > Options (robust navigation)
+        self._log.info("Opening QGIS Options for theme switch")
+        qgis.open_settings_options()
         qgis.wait(1.0)
 
-        # 5. Show FilterMate adapted to dark theme
+        # 3. Ensure General tab is selected (usually default)
+        general_tab = regions.get("settings_options_general_tab")
+        if general_tab:
+            pyautogui.click(
+                general_tab["x"], general_tab["y"],
+                duration=move_dur,
+            )
+            qgis.wait(0.5)
+
+        # 4. Click the UI Theme dropdown and select dark theme
+        self._log.info("Selecting dark theme in Options dialog")
+        theme_dropdown = regions.get("settings_options_theme_dropdown")
+        if theme_dropdown:
+            pyautogui.click(
+                theme_dropdown["x"], theme_dropdown["y"],
+                duration=move_dur,
+            )
+            qgis.wait(0.3)
+            # Type to search for "Night Mapping" theme
+            pyautogui.typewrite("Night", interval=0.05)
+            qgis.wait(0.3)
+            pyautogui.press("return")
+        qgis.wait(1.0)
+
+        # 5. Apply with OK (Alt+O or click OK button)
+        self._log.info("Applying theme change")
+        pyautogui.hotkey("enter")
+        qgis.wait(2.0)
+
+        # 6. Show FilterMate adapted to dark theme
         qgis.focus_filtermate()
         qgis.highlight_area("filtermate_dock", duration=2.0)
         qgis.wait(1.0)

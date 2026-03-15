@@ -6,6 +6,7 @@ Hover chaque bouton avec annotation.
 """
 from __future__ import annotations
 
+from core.narrator import V01_NARRATION_TEXTS
 from sequences.base import VideoSequence
 
 
@@ -25,14 +26,7 @@ class V01S04Sidebar(VideoSequence):
     duration_estimate = 30.0
     obs_scene = "QGIS + FilterMate"
     diagram_ids = ["v01_sidebar_buttons"]
-    narration_text = (
-        "La Zone d'Exploration possede 6 boutons dans sa barre laterale. "
-        "Identify ouvre la fenetre d'identification QGIS. "
-        "Zoom centre la carte sur l'entite. "
-        "Select surligne l'entite. Track active le suivi automatique. "
-        "Link synchronise les selecteurs. "
-        "Reset reinitialise toutes les proprietes d'exploration."
-    )
+    narration_text = V01_NARRATION_TEXTS["v01_s04"]
 
     def execute(self, obs, qgis, config):
         qgis.focus_filtermate()

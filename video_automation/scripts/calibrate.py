@@ -141,25 +141,76 @@ GROUPS: dict[str, dict] = {
         ],
     },
     "menus": {
-        "label": "Menus QGIS",
+        "label": "Menus QGIS (barre de menu)",
         "desc": "Positions des menus dans la barre de menu QGIS",
         "targets": [
-            ("menu_settings", "le menu SKETCHES / PREFERENCES QGIS", "point"),
-            ("menu_extensions", "le menu EXTENSIONS / PLUGINS", "point"),
-            ("menu_view", "le menu VUE / VIEW", "point"),
-            ("menu_view_panels", "le sous-menu PANNEAUX (apres clic sur Vue)", "point"),
-            ("menu_view_panels_log", "l'entree MESSAGES DE LOG (apres Vue > Panneaux)", "point"),
+            ("menu_settings", "le menu PARAMETRES / SETTINGS dans la barre de menu", "point"),
+            ("menu_extensions", "le menu EXTENSIONS / PLUGINS dans la barre de menu", "point"),
+            ("menu_view", "le menu VUE / VIEW dans la barre de menu", "point"),
         ],
     },
-    "dialogs": {
-        "label": "Toolbar + Dialogues",
-        "desc": "Icones toolbar et elements de dialogues QGIS",
+    "menu_items": {
+        "label": "Elements de menus deroulants",
+        "desc": "Chaque element necessite d'ouvrir un menu AVANT la capture.",
+        "timer": 3,
+        "targets": [
+            ("menu_extensions_manage", "l'entree GERER LES EXTENSIONS", "point",
+             "Ouvrez le menu EXTENSIONS dans la barre de menu QGIS"),
+            ("menu_settings_options", "l'entree OPTIONS...", "point",
+             "Ouvrez le menu PARAMETRES / SETTINGS dans la barre de menu QGIS"),
+            ("menu_view_panels", "le sous-menu PANNEAUX", "point",
+             "Ouvrez le menu VUE / VIEW dans la barre de menu QGIS"),
+            ("menu_view_panels_log", "l'entree MESSAGES DE LOG", "point",
+             "Ouvrez VUE > PANNEAUX (sous-menu deja ouvert)"),
+        ],
+    },
+    "toolbar": {
+        "label": "Toolbar QGIS",
+        "desc": "Icones dans la barre d'outils QGIS",
         "targets": [
             ("filtermate_toolbar_icon", "l'icone FilterMate dans la toolbar QGIS", "point"),
+        ],
+    },
+    "plugin_manager": {
+        "label": "Plugin Manager (dialogue)",
+        "desc": "Le dialogue Plugin Manager doit etre ouvert.",
+        "timer": 3,
+        "prereq": "Ouvrez le Plugin Manager : Extensions > Gerer les extensions",
+        "targets": [
+            ("plugin_manager_search", "la BARRE DE RECHERCHE en haut du Plugin Manager", "point"),
+            ("plugin_manager_all_tab", "l'onglet TOUTES / ALL dans le panneau gauche", "point"),
+            ("plugin_manager_entry", "l'entree FilterMate dans la LISTE des plugins", "point"),
+            ("plugin_manager_install_btn", "le bouton INSTALLER en bas a droite", "point"),
+        ],
+    },
+    "settings_dialog": {
+        "label": "Settings > Options (dialogue)",
+        "desc": "Le dialogue Options doit etre ouvert.",
+        "timer": 3,
+        "prereq": "Ouvrez le dialogue : Parametres > Options",
+        "targets": [
+            ("settings_options_general_tab", "l'onglet GENERAL dans le panneau gauche", "point"),
+            ("settings_options_theme_dropdown", "le menu deroulant THEME UI (section Interface utilisateur)", "point"),
+        ],
+    },
+    "about_config": {
+        "label": "About FilterMate > Config (dialogue)",
+        "desc": "Le dialogue About de FilterMate doit etre ouvert sur l'onglet Config.",
+        "timer": 3,
+        "prereq": "Ouvrez le dialogue About FilterMate, puis cliquez sur l'onglet Config",
+        "targets": [
+            ("about_config_tab", "l'onglet CONFIG dans le dialogue About FilterMate", "point"),
+            ("about_config_language_field", "le champ LANGUAGE dans le TreeView config", "point"),
+            ("about_config_feedback_level_field", "le champ FEEDBACK_LEVEL dans le TreeView config", "point"),
+        ],
+    },
+    "log_panel": {
+        "label": "Panneau Log Messages",
+        "desc": "Le panneau Messages de log doit etre visible.",
+        "timer": 3,
+        "prereq": "Ouvrez le panneau : Vue > Panneaux > Messages de log",
+        "targets": [
             ("log_panel_filtermate_tab", "l'onglet FilterMate dans le panneau Log Messages", "point"),
-            ("about_config_tab", "l'onglet Config dans le dialogue About FilterMate", "point"),
-            ("plugin_manager_entry", "l'entree FilterMate dans le Plugin Manager", "point"),
-            ("plugin_manager_install_btn", "le bouton Installer dans le Plugin Manager", "point"),
         ],
     },
 }
@@ -199,6 +250,156 @@ def get_mouse_position() -> tuple[int, int] | None:
     if pag:
         return pag.position()
     return None
+
+
+# ── Visual feedback helpers ──────────────────────────────────────────────
+
+def _show_position_circle(pag, cx: int, cy: int, radius: int = 25,
+                          loops: int = 2, duration: float = 0.8) -> None:
+    """Draw a circle around a point to highlight it visually."""
+    import math
+    steps = 30 * loops
+    step_delay = duration / steps
+    for i in range(steps + 1):
+        angle = 2 * math.pi * i / (steps // loops)
+        nx = int(cx + radius * math.cos(angle))
+        ny = int(cy + radius * math.sin(angle))
+        pag.moveTo(nx, ny, duration=step_delay, _pause=False)
+    # Return to center
+    pag.moveTo(cx, cy, duration=0.1, _pause=False)
+
+
+def _show_position_rect(pag, x: int, y: int, w: int, h: int,
+                        duration: float = 0.8) -> None:
+    """Trace the outline of a rectangle to highlight it visually."""
+    step_dur = duration / 4
+    pag.moveTo(x, y, duration=0.1, _pause=False)
+    pag.moveTo(x + w, y, duration=step_dur, _pause=False)
+    pag.moveTo(x + w, y + h, duration=step_dur, _pause=False)
+    pag.moveTo(x, y + h, duration=step_dur, _pause=False)
+    pag.moveTo(x, y, duration=step_dur, _pause=False)
+    # Move to center
+    pag.moveTo(x + w // 2, y + h // 2, duration=0.1, _pause=False)
+
+
+def _show_position_cross(pag, cx: int, cy: int, size: int = 20,
+                         duration: float = 0.4) -> None:
+    """Draw a + cross at a point to highlight it visually."""
+    step_dur = duration / 4
+    pag.moveTo(cx - size, cy, duration=0.05, _pause=False)
+    pag.moveTo(cx + size, cy, duration=step_dur, _pause=False)
+    pag.moveTo(cx, cy, duration=0.05, _pause=False)
+    pag.moveTo(cx, cy - size, duration=0.05, _pause=False)
+    pag.moveTo(cx, cy + size, duration=step_dur, _pause=False)
+    pag.moveTo(cx, cy, duration=0.05, _pause=False)
+
+
+def _countdown(seconds: int, message: str = "") -> None:
+    """Print a visible countdown (e.g. '3... 2... 1...')."""
+    if message:
+        sys.stdout.write(f"       >> {message} ")
+    for i in range(seconds, 0, -1):
+        sys.stdout.write(f"{i}... ")
+        sys.stdout.flush()
+        time.sleep(1)
+    sys.stdout.write("GO!\n")
+    sys.stdout.flush()
+
+
+def show_position(val: dict | None) -> None:
+    """Move the mouse to a calibrated position to show it visually.
+
+    - For point regions: draw a cross then circle.
+    - For rect regions: trace the rectangle outline then cross at center.
+    - Catches PyAutoGUI FailSafeException gracefully (mouse in corner).
+    """
+    if val is None:
+        return
+    pag = _get_pyautogui()
+    if pag is None:
+        return
+
+    try:
+        if "width" in val and val.get("width", 0) > 0:
+            _show_position_rect(pag, val["x"], val["y"],
+                                val["width"], val["height"], duration=0.6)
+            cx = val["x"] + val["width"] // 2
+            cy = val["y"] + val["height"] // 2
+            _show_position_cross(pag, cx, cy, size=15, duration=0.3)
+        else:
+            cx, cy = val["x"], val["y"]
+            pag.moveTo(cx, cy, duration=0.3, _pause=False)
+            _show_position_cross(pag, cx, cy, size=20, duration=0.3)
+            _show_position_circle(pag, cx, cy, radius=25, loops=1, duration=0.5)
+    except Exception:
+        # FailSafeException (mouse in corner) or other pyautogui errors
+        print(f"       ! Visualisation impossible (souris dans un coin ? deplacez-la)")
+
+
+def cmd_show_all(config_path: Path) -> None:
+    """Preview ALL calibrated positions visually, one by one.
+
+    Moves the mouse to each position with visual feedback.
+    Press Enter to advance, 'q' to quit.
+    """
+    config = load_config(config_path)
+    regions = config.get("qgis", {}).get("regions", {})
+    pag = _get_pyautogui()
+
+    if not pag:
+        print("  [ERREUR] pyautogui requis pour la visualisation.")
+        return
+
+    print()
+    print("=" * 65)
+    print("  VISUALISATION DES POSITIONS")
+    print("  ENTREE = suivant | q = quitter")
+    print("=" * 65)
+
+    for group_id, group in GROUPS.items():
+        group_keys = []
+        for target in group["targets"]:
+            if target[0] not in group_keys:
+                group_keys.append(target[0])
+
+        group_timer = group.get("timer", 0)
+        group_prereq = group.get("prereq", "")
+
+        print(f"\n  ━━━ {group['label']} ━━━")
+
+        # Prereq + countdown once per group if timer is set
+        if group_timer > 0:
+            prereq_text = group_prereq or group.get("desc", "")
+            if prereq_text:
+                print(f"       >> {prereq_text}")
+                print(f"       Appuyez sur ENTREE quand c'est pret (s = passer)")
+                ready = input("       pret ? ").strip().lower()
+                if ready == "q":
+                    print("  Visualisation terminee.")
+                    return
+                if ready == "s":
+                    continue
+            _countdown(group_timer, "Le curseur se deplace dans")
+
+        for key in group_keys:
+            val = regions.get(key)
+            if val is None or not _is_calibrated(val):
+                continue
+
+            status = _status_icon(val)
+            print(f"  [{status}] {key:38s} {_format_value(val)}  ", end="", flush=True)
+
+            # Show it visually
+            show_position(val)
+            time.sleep(0.3)
+
+            raw = input("")
+            if raw.strip().lower() == "q":
+                print("  Visualisation terminee.")
+                return
+
+    print("\n  Toutes les positions ont ete montrees !")
+    print()
 
 
 def record_position(prompt: str, current_value: dict | None = None) -> tuple[int, int]:
@@ -300,8 +501,8 @@ def cmd_list(config_path: Path) -> None:
         print(f"\n  [{group_id}] {group['label']}")
         print(f"  {'─' * 60}")
         group_keys = set()
-        for region_key, _prompt, _kind in group["targets"]:
-            group_keys.add(region_key)
+        for target in group["targets"]:
+            group_keys.add(target[0])
         for key in group_keys:
             known_keys.add(key)
             val = regions.get(key)
@@ -506,6 +707,59 @@ def cmd_validate(config_path: Path) -> None:
                         f">= {action_xvals[i + 1][0]} x={action_xvals[i + 1][1]}"
                     )
 
+    # Check menu bar items have consistent y (should all be on the same bar)
+    menu_bar_keys = ["menu_settings", "menu_extensions", "menu_view"]
+    menu_ys = []
+    for key in menu_bar_keys:
+        val = regions.get(key)
+        if val and _is_calibrated(val):
+            menu_ys.append((key, val["y"]))
+    if len(menu_ys) >= 2:
+        ys = [y for _, y in menu_ys]
+        if max(ys) - min(ys) > 10:
+            warnings.append(
+                f"Menus: les y de la barre de menu varient trop "
+                f"({min(ys)}-{max(ys)}), ils devraient etre alignes"
+            )
+
+    # Check menu bar items are above toolbar
+    toolbar_val = regions.get("toolbar")
+    if toolbar_val and _is_calibrated(toolbar_val):
+        for key in menu_bar_keys:
+            val = regions.get(key)
+            if val and _is_calibrated(val):
+                if val["y"] >= toolbar_val["y"]:
+                    errors.append(
+                        f"{key} y={val['y']} est EN DESSOUS de toolbar y={toolbar_val['y']}"
+                    )
+
+    # Check dropdown items are below their parent menu
+    dropdown_checks = [
+        ("menu_extensions", "menu_extensions_manage", "Extensions > Gerer"),
+        ("menu_settings", "menu_settings_options", "Parametres > Options"),
+        ("menu_view", "menu_view_panels", "Vue > Panneaux"),
+    ]
+    for parent_key, child_key, desc in dropdown_checks:
+        parent = regions.get(parent_key)
+        child = regions.get(child_key)
+        if parent and child and _is_calibrated(parent) and _is_calibrated(child):
+            if child["y"] <= parent["y"]:
+                errors.append(
+                    f"{desc}: {child_key} y={child['y']} devrait etre "
+                    f"en dessous de {parent_key} y={parent['y']}"
+                )
+
+    # Check toolbar icon is within toolbar area
+    toolbar_icon = regions.get("filtermate_toolbar_icon")
+    if toolbar_icon and toolbar_val and _is_calibrated(toolbar_icon) and _is_calibrated(toolbar_val):
+        ty = toolbar_val["y"]
+        tb = ty + toolbar_val.get("height", 168)
+        if toolbar_icon["y"] < ty - 5 or toolbar_icon["y"] > tb + 5:
+            warnings.append(
+                f"filtermate_toolbar_icon y={toolbar_icon['y']} "
+                f"est en dehors de toolbar ({ty}-{tb})"
+            )
+
     # Check for (0,0) positions
     for key, val in regions.items():
         if val.get("x", 0) == 0 and val.get("y", 0) == 0:
@@ -589,10 +843,9 @@ def cmd_calibrate_group(config_path: Path, group_id: str) -> None:
     print(f"  {len(group['targets'])} element(s) a calibrer")
     print()
 
-    _calibrate_targets(config, regions, group["targets"])
+    _calibrate_targets(config, regions, group["targets"], config_path=config_path)
 
-    save_config(config, config_path)
-    print(f"\n  Groupe '{group_id}' sauvegarde dans {config_path}")
+    print(f"\n  Groupe '{group_id}' termine.")
 
 
 def cmd_calibrate_all(config_path: Path) -> None:
@@ -627,11 +880,7 @@ def cmd_calibrate_all(config_path: Path) -> None:
         # Save state for undo
         undo_stack.append(copy.deepcopy(regions))
 
-        _calibrate_targets(config, regions, group["targets"])
-
-        # Auto-save after each group
-        save_config(config, config_path)
-        print(f"      (sauvegarde automatique)")
+        _calibrate_targets(config, regions, group["targets"], config_path=config_path)
 
     print()
     print("=" * 65)
@@ -640,11 +889,24 @@ def cmd_calibrate_all(config_path: Path) -> None:
     print()
 
 
-def _calibrate_targets(config: dict, regions: dict, targets: list) -> None:
-    """Calibrate a list of targets into regions dict."""
+def _calibrate_targets(config: dict, regions: dict, targets: list,
+                       config_path: Path | None = None) -> None:
+    """Calibrate a list of targets into regions dict.
+
+    Auto-saves to config_path after each real change.
+    """
     corners: dict[str, dict] = {}
 
-    for region_key, prompt, kind in targets:
+    def _auto_save(region_key: str, new_val: dict) -> None:
+        """Save only if value actually changed."""
+        old_val = regions.get(region_key)
+        regions[region_key] = new_val
+        if config_path and new_val != old_val:
+            save_config(config, config_path)
+            print(f"     (sauvegarde automatique)")
+
+    for target in targets:
+        region_key, prompt, kind = target[0], target[1], target[2]
         current = regions.get(region_key)
 
         if kind in ("tl", "br"):
@@ -653,17 +915,240 @@ def _calibrate_targets(config: dict, regions: dict, targets: list) -> None:
             if "tl" in corners.get(region_key, {}) and "br" in corners.get(region_key, {}):
                 tl = corners[region_key]["tl"]
                 br = corners[region_key]["br"]
-                regions[region_key] = {
+                new_val = {
                     "x": tl[0],
                     "y": tl[1],
                     "width": max(1, br[0] - tl[0]),
                     "height": max(1, br[1] - tl[1]),
                 }
-                print(f"     -> Region '{region_key}' : {_format_value(regions[region_key])}")
+                print(f"     -> Region '{region_key}' : {_format_value(new_val)}")
+                _auto_save(region_key, new_val)
 
         elif kind == "point":
             x, y = record_position(prompt, current)
-            regions[region_key] = {"x": x, "y": y}
+            new_val = {"x": x, "y": y}
+            _auto_save(region_key, new_val)
+
+
+def _review_single(key: str, val: dict | None, regions: dict,
+                   timer: int = 0, prereq: str = "") -> tuple[str, bool]:
+    """Review a single region. Returns (action, modified).
+
+    action: 'continue' | 'quit'
+    modified: True if the value was changed.
+    timer: seconds to count down before moving cursor (for dropdowns/dialogs).
+    prereq: instruction to display and wait for before starting countdown.
+    """
+    status = _status_icon(val)
+    val_str = _format_value(val) if val else "(non defini)"
+
+    print(f"\n  [{status}] {key}")
+    print(f"       Actuel : {val_str}")
+
+    # Prerequisite + countdown before moving cursor
+    if prereq and timer > 0 and val and _is_calibrated(val):
+        print(f"       ┌─ PREREQUIS ──────────────────────────────────")
+        print(f"       │  {prereq}")
+        print(f"       │  Appuyez sur ENTREE quand c'est pret (s = passer)")
+        print(f"       └──────────────────────────────────────────────")
+        ready = input("       pret ? ").strip().lower()
+        if ready == "q":
+            return "quit", False
+        if ready != "s":
+            _countdown(timer, "Le curseur se deplace dans")
+            show_position(val)
+        else:
+            print(f"       (visualisation sautee)")
+    elif timer > 0 and val and _is_calibrated(val):
+        # Timer without specific prereq text
+        _countdown(timer, "Le curseur se deplace dans")
+        show_position(val)
+    elif val and _is_calibrated(val):
+        # No timer needed — show immediately
+        show_position(val)
+
+    raw = input("       > ").strip()
+
+    if raw.lower() == "q":
+        return "quit", False
+
+    if raw.lower() == "d":
+        if key in regions:
+            del regions[key]
+            print(f"       - Supprime")
+        return "continue", True
+
+    if raw == "":
+        return "continue", False
+
+    if raw.lower() == "m":
+        pos = get_mouse_position()
+        if pos:
+            x, y = pos
+            if val and "width" in val:
+                regions[key] = {
+                    "x": x, "y": y,
+                    "width": val["width"], "height": val["height"],
+                }
+            else:
+                regions[key] = {"x": x, "y": y}
+            print(f"       + Modifie : {_format_value(regions[key])}")
+            # Show the new position
+            show_position(regions[key])
+            return "continue", True
+        else:
+            print("       ! pyautogui non disponible")
+            return "continue", False
+
+    # Manual coordinates
+    parts = raw.replace(",", " ").split()
+    if len(parts) >= 4 and val and "width" in val:
+        try:
+            regions[key] = {
+                "x": int(parts[0]), "y": int(parts[1]),
+                "width": int(parts[2]), "height": int(parts[3]),
+            }
+            print(f"       + Modifie : {_format_value(regions[key])}")
+            show_position(regions[key])
+            return "continue", True
+        except ValueError:
+            pass
+    if len(parts) >= 2:
+        try:
+            x, y = int(parts[0]), int(parts[1])
+            if val and "width" in val:
+                regions[key] = {
+                    "x": x, "y": y,
+                    "width": val["width"], "height": val["height"],
+                }
+            else:
+                regions[key] = {"x": x, "y": y}
+            print(f"       + Modifie : {_format_value(regions[key])}")
+            show_position(regions[key])
+            return "continue", True
+        except ValueError:
+            pass
+
+    print("       ! Format invalide, valeur conservee")
+    return "continue", False
+
+
+def cmd_review(config_path: Path) -> None:
+    """Review ALL positions one by one with visual feedback and correction.
+
+    The mouse cursor moves to each registered position (circle / rectangle
+    outline) so you can visually verify if it's correct, then:
+      Enter  = keep current value (OK)
+      m      = capture current mouse position
+      x y    = enter new coordinates manually
+      d      = delete this element
+      q      = quit review (saves changes)
+    """
+    config = load_config(config_path)
+    regions = config.setdefault("qgis", {}).setdefault("regions", {})
+
+    print()
+    print("=" * 72)
+    print("  REVUE DE TOUTES LES POSITIONS (avec visualisation)")
+    print("=" * 72)
+    print()
+    print("  Le curseur se deplace vers chaque position enregistree.")
+    print("  Verifiez visuellement si la position est correcte.")
+    print()
+    print("  Pour chaque element :")
+    print("    ENTREE       = garder la valeur actuelle (OK)")
+    print("    m + ENTREE   = capturer la position actuelle de la souris")
+    print("    x y          = entrer de nouvelles coordonnees")
+    print("    d            = supprimer cet element")
+    print("    q            = quitter la revue (sauvegarde les changements)")
+    print()
+
+    modified = 0
+    total = 0
+
+    for group_id, group in GROUPS.items():
+        # Build unique keys + per-element prereqs
+        group_keys = []
+        element_prereqs: dict[str, str] = {}
+        for target in group["targets"]:
+            region_key = target[0]
+            if region_key not in group_keys:
+                group_keys.append(region_key)
+            # Target can be (key, prompt, kind) or (key, prompt, kind, prereq)
+            if len(target) >= 4:
+                element_prereqs[region_key] = target[3]
+
+        print(f"\n  ━━━ {group['label']} ━━━")
+        if group.get("desc"):
+            print(f"      {group['desc']}")
+
+        group_timer = group.get("timer", 0)
+        group_prereq = group.get("prereq", "")
+
+        # For groups with a group-level prereq (not per-element),
+        # show the prereq once and wait before starting
+        if group_prereq and group_timer > 0:
+            print(f"\n       ┌─ PREREQUIS GROUPE ────────────────────────────")
+            print(f"       │  {group_prereq}")
+            print(f"       │  Appuyez sur ENTREE quand c'est pret (s = passer le groupe)")
+            print(f"       └──────────────────────────────────────────────")
+            ready = input("       pret ? ").strip().lower()
+            if ready == "q":
+                save_config(config, config_path)
+                print(f"\n  Revue interrompue. {modified} modification(s) sauvegardee(s).")
+                return
+            if ready == "s":
+                total += len(group_keys)
+                print(f"       (groupe saute)")
+                continue
+
+        for key in group_keys:
+            total += 1
+            val = regions.get(key)
+            # Per-element prereq (menu_items) or no prereq (group already handled)
+            elem_prereq = element_prereqs.get(key, "")
+            # If group has a group-level prereq, don't repeat per element
+            effective_timer = group_timer if (elem_prereq or not group_prereq) else 0
+            action, changed = _review_single(
+                key, val, regions,
+                timer=effective_timer, prereq=elem_prereq,
+            )
+            if changed:
+                modified += 1
+                save_config(config, config_path)
+                print(f"       (sauvegarde automatique)")
+            if action == "quit":
+                save_config(config, config_path)
+                print(f"\n  Revue interrompue. {modified} modification(s) sauvegardee(s).")
+                return
+
+    # Also review extra keys not in any group
+    known_keys = set()
+    for group in GROUPS.values():
+        for target in group["targets"]:
+            known_keys.add(target[0])
+
+    extra_keys = sorted(set(regions.keys()) - known_keys)
+    if extra_keys:
+        print(f"\n  ━━━ Elements supplementaires (hors groupes) ━━━")
+        for key in extra_keys:
+            total += 1
+            val = regions[key]
+            action, changed = _review_single(key, val, regions)
+            if changed:
+                modified += 1
+                save_config(config, config_path)
+                print(f"       (sauvegarde automatique)")
+            if action == "quit":
+                break
+
+    save_config(config, config_path)
+    print()
+    print("=" * 72)
+    print(f"  Revue terminee : {total} elements, {modified} modification(s)")
+    print(f"  Sauvegarde dans : {config_path}")
+    print("=" * 72)
+    print()
 
 
 def cmd_reset(config_path: Path) -> None:
@@ -704,6 +1189,8 @@ def cmd_interactive_menu(config_path: Path) -> None:
         print()
         print("  Commandes :")
         print("    list         Afficher toutes les positions")
+        print("    review       Passer en revue TOUTES les positions (corriger)")
+        print("    show         Visualiser toutes les positions (curseur)")
         print("    all          Calibrer TOUT (session complete)")
         print("    group <id>   Calibrer un groupe specifique")
         print("    edit <key>   Modifier une position manuellement")
@@ -728,6 +1215,10 @@ def cmd_interactive_menu(config_path: Path) -> None:
             break
         elif cmd in ("list", "ls", "l"):
             cmd_list(config_path)
+        elif cmd in ("review", "r"):
+            cmd_review(config_path)
+        elif cmd in ("show", "preview", "p"):
+            cmd_show_all(config_path)
         elif cmd in ("all", "a"):
             cmd_calibrate_all(config_path)
         elif cmd in ("group", "g"):
@@ -783,6 +1274,8 @@ Exemples:
     parser.add_argument("--live", action="store_true", help="Mode live (position souris en temps reel)")
     parser.add_argument("--validate", action="store_true", help="Verifier la coherence des positions")
     parser.add_argument("--all", action="store_true", help="Calibrer tout (session complete)")
+    parser.add_argument("--review", action="store_true", help="Passer en revue toutes les positions (avec visualisation)")
+    parser.add_argument("--show", action="store_true", help="Visualiser toutes les positions (curseur sur ecran)")
 
     args = parser.parse_args()
 
@@ -804,6 +1297,10 @@ Exemples:
         cmd_validate(args.config)
     elif args.all:
         cmd_calibrate_all(args.config)
+    elif args.review:
+        cmd_review(args.config)
+    elif args.show:
+        cmd_show_all(args.config)
     else:
         cmd_interactive_menu(args.config)
 
