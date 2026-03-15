@@ -52,7 +52,7 @@ class V01S09Verbose(VideoSequence):
         qgis.click_action_button("filter")
         qgis.wait(3.0)
 
-        # 6. Show feedback levels diagram
+        # 7. Show feedback levels diagram
         self.show_diagram(obs, "v01_feedback_levels", duration=5.0)
 
         qgis.focus_filtermate()

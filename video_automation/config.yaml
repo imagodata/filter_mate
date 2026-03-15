@@ -82,55 +82,55 @@ qgis:
       x: 2061
       y: 1303
     exploring_zone:
-      x: 0
-      y: 80
-      width: 400
-      height: 350
+      x: 1941
+      y: 307
+      width: 610
+      height: 503
     exploring_layer_combo:
-      x: 200
-      y: 100
+      x: 2160
+      y: 400
     exploring_feature_selector:
-      x: 200
-      y: 140
+      x: 2160
+      y: 445
     sidebar_identify:
-      x: 20
-      y: 160
+      x: 1961
+      y: 400
     sidebar_zoom:
-      x: 20
-      y: 200
+      x: 1961
+      y: 470
     sidebar_select:
-      x: 20
-      y: 240
+      x: 1961
+      y: 540
     sidebar_track:
-      x: 20
-      y: 280
+      x: 1961
+      y: 610
     sidebar_link:
-      x: 20
-      y: 320
+      x: 1961
+      y: 680
     sidebar_reset:
-      x: 20
-      y: 360
+      x: 1961
+      y: 750
     toolbox_zone:
-      x: 0
-      y: 430
-      width: 400
-      height: 300
+      x: 1941
+      y: 810
+      width: 610
+      height: 600
     action_bar_zone:
-      x: 0
-      y: 730
-      width: 400
-      height: 50
+      x: 1941
+      y: 1410
+      width: 610
+      height: 68
     about_button:
       x: 2506
       y: 1432
     header_bar:
-      x: 0
-      y: 40
-      width: 400
-      height: 30
+      x: 1941
+      y: 247
+      width: 610
+      height: 60
     badge_favorites:
-      x: 280
-      y: 55
+      x: 2250
+      y: 277
     badge_backend:
       x: 2494
       y: 295
@@ -138,8 +138,8 @@ qgis:
       x: 500
       y: 20
     menu_settings:
-      x: 0
-      y: 0
+      x: 350
+      y: 10
     menu_extensions:
       x: 450
       y: 0

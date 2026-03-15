@@ -15,7 +15,7 @@ REM
 REM  Le script va :
 REM    Etape 1  -  Verifier les prerequis
 REM    Etape 2  -  Generer la narration TTS (14 fichiers MP3)
-REM    Etape 3  -  Generer les diagrammes (21 HTML + 21 PNG)
+REM    Etape 3  -  Generer les diagrammes (24 HTML + 24 PNG)
 REM    Etape 4  -  Calibrer les positions UI (interactif)
 REM    Etape 5  -  Configurer OBS (scenes + sources)
 REM    Etape 6  -  Enregistrer les 14 sequences (QGIS + OBS)
@@ -150,7 +150,7 @@ echo.
 
 REM -- Etape 3 : Diagrammes ----------------------------------------
 
-echo  [3/7] Generation des diagrammes HTML + PNG (21 diagrammes)...
+echo  [3/7] Generation des diagrammes HTML + PNG (24 diagrammes)...
 echo.
 
 if exist "output\diagrams\v01_install_flow.png" (
@@ -237,7 +237,7 @@ echo.
 echo   Fichiers generes :
 echo.
 echo     Narration :  output\narration\v01\  (14 MP3)
-echo     Diagrammes : output\diagrams\       (21 HTML + 21 PNG)
+echo     Diagrammes : output\diagrams\       (24 HTML + 24 PNG)
 echo     Clips :      Voir dossier OBS
 echo     Video :      output\final\filtermate_v01_final.mp4
 echo.
