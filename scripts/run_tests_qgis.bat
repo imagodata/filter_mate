@@ -5,10 +5,11 @@ REM Phase 14.1 - BackendExpressionBuilder tests
 echo Running FilterMate tests with QGIS Python environment...
 echo.
 
-cd /d "%~dp0"
+REM Set working directory to plugin root (parent of scripts/)
+cd /d "%~dp0.."
 
 REM Set QGIS path
-set OSGEO4W_ROOT=C:\Program Files\QGIS 3.44.2
+set OSGEO4W_ROOT=C:\Program Files\QGIS 3.44.6
 set QGIS_PREFIX_PATH=%OSGEO4W_ROOT%\apps\qgis
 
 REM Initialize QGIS environment

@@ -84,6 +84,13 @@ class OBSController:
                     version_info.obs_version,
                     version_info.obs_web_socket_version,
                 )
+                # Log available scenes for diagnostic purposes
+                try:
+                    resp = self._client.get_scene_list()
+                    scene_names = [s["sceneName"] for s in resp.scenes]
+                    logger.info("Available OBS scenes: %s", scene_names)
+                except Exception:  # noqa: BLE001
+                    pass
                 return
             except Exception as exc:  # noqa: BLE001
                 logger.warning("Connection attempt %d failed: %s", attempt, exc)

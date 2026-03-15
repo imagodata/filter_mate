@@ -15,13 +15,16 @@ Notes
 -----
 - pyautogui.FAILSAFE is True: move mouse to top-left corner to abort immediately.
 - All coordinates are absolute screen pixels. Run calibrate.py first.
-- Designed for Windows; win32gui is used to bring QGIS to the foreground.
+- Supports both Windows (win32gui) and headless Linux (xdotool/Xvfb).
 """
 
 from __future__ import annotations
 
 import logging
 import math
+import os
+import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -37,9 +40,20 @@ except ImportError as exc:
     raise ImportError("pyautogui is not installed. Run: pip install pyautogui") from exc
 
 
+def _is_headless() -> bool:
+    """Detect if we're running in a headless/Docker environment."""
+    return (
+        os.environ.get("DISPLAY", "").startswith(":") and sys.platform != "win32"
+    )
+
+
 class QGISAutomator:
     """
     Automates QGIS + FilterMate interaction via PyAutoGUI.
+
+    Supports both:
+    - **Windows mode**: win32gui for window focus (original behavior)
+    - **Headless mode** (Docker/Xvfb): xdotool for window management
 
     Parameters
     ----------
@@ -54,10 +68,12 @@ class QGISAutomator:
         self.filtermate_panel: str = self.qgis_cfg.get("filtermate_panel", "FilterMate")
         self.regions: dict = self.qgis_cfg.get("regions", {})
         self._assets_dir = Path(__file__).parent.parent / "assets" / "buttons"
+        self.headless: bool = _is_headless()
 
         # Apply global timing from config
         pyautogui.PAUSE = self.timing.get("click_delay", 0.3)
-        logger.debug("QGISAutomator initialised (PAUSE=%.2fs)", pyautogui.PAUSE)
+        mode = "headless/xdotool" if self.headless else "desktop/win32"
+        logger.debug("QGISAutomator initialised (PAUSE=%.2fs, mode=%s)", pyautogui.PAUSE, mode)
 
     # ------------------------------------------------------------------
     # Window focus
@@ -65,10 +81,11 @@ class QGISAutomator:
 
     def focus_qgis(self) -> None:
         """Bring the QGIS window to the foreground."""
-        if sys.platform == "win32":
+        if self.headless:
+            self._focus_xdotool(self.window_title)
+        elif sys.platform == "win32":
             self._focus_win32(self.window_title)
         else:
-            # Fallback: user must ensure QGIS is focused
             logger.warning(
                 "Non-Windows platform detected. Please ensure QGIS is in the foreground."
             )
@@ -110,6 +127,47 @@ class QGISAutomator:
             logger.warning("pywin32 not available. Skipping win32 focus.")
         except Exception as exc:  # noqa: BLE001
             logger.error("Failed to focus QGIS: %s", exc)
+
+    def _focus_xdotool(self, title_substring: str) -> None:
+        """Use xdotool to find and bring window to front (headless/Linux)."""
+        if not shutil.which("xdotool"):
+            logger.warning("xdotool not available. Skipping focus.")
+            return
+        try:
+            result = subprocess.run(
+                ["xdotool", "search", "--name", title_substring],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            wids = result.stdout.strip().split("\n")
+            wids = [w for w in wids if w]
+            if not wids:
+                logger.warning("No window found with title containing '%s'", title_substring)
+                return
+            wid = wids[0]
+            subprocess.run(
+                ["xdotool", "windowactivate", "--sync", wid],
+                check=True,
+                timeout=5,
+            )
+            subprocess.run(
+                ["xdotool", "windowfocus", "--sync", wid],
+                check=True,
+                timeout=5,
+            )
+            # Maximize the window
+            subprocess.run(
+                ["xdotool", "windowsize", wid, "1920", "1080"],
+                timeout=5,
+            )
+            subprocess.run(
+                ["xdotool", "windowmove", wid, "0", "0"],
+                timeout=5,
+            )
+            logger.info("Focused QGIS window via xdotool (wid=%s).", wid)
+        except Exception as exc:  # noqa: BLE001
+            logger.error("Failed to focus QGIS via xdotool: %s", exc)
 
     # ------------------------------------------------------------------
     # Region-based clicks
@@ -204,12 +262,24 @@ class QGISAutomator:
         logger.info("Selected source layer: %s", layer_name)
 
     def select_target_layer(self, layer_name: str) -> None:
-        """Toggle the 'Layers to Filter' panel and select a target layer."""
-        self.toggle_sidebar_button("layers_to_filter")
-        self.wait(0.5)
-        # Type the layer name in the search box (if available) or select from list
-        self.type_text(layer_name)
-        pyautogui.press("return")
+        """Toggle the 'Layers to Filter' panel and select a target layer.
+
+        Clicks the checkable pushbutton to expand the section, then selects
+        the target layer in the revealed combobox.
+        """
+        # 1. Click the sidebar pushbutton to expand the layers-to-filter section
+        self._ensure_section_expanded("btn_toggle_layers_to_filter")
+
+        # 2. Select in the target layer combobox
+        region = self.regions.get("target_layer_combo")
+        if region:
+            pyautogui.click(region["x"], region["y"],
+                            duration=self.timing.get("mouse_move_duration", 0.5))
+            pyautogui.hotkey("ctrl", "a")
+            self.type_text(layer_name)
+            pyautogui.press("return")
+        else:
+            logger.warning("target_layer_combo region not calibrated.")
         self.wait(self.timing.get("action_pause", 1.0))
         logger.info("Selected target layer: %s", layer_name)
 
@@ -242,6 +312,31 @@ class QGISAutomator:
         self.wait(self.timing.get("action_pause", 0.5))
         logger.info("Selected tab: %s", tab_name)
 
+    def _ensure_section_expanded(self, pushbutton_region: str) -> None:
+        """
+        Click a checkable sidebar pushbutton to expand its section.
+
+        These pushbuttons control visibility of UI sections in FilterMate
+        (e.g. geometric predicates, buffer, layers to filter). Clicking
+        them toggles checked state and reveals/hides the associated widgets.
+
+        Parameters
+        ----------
+        pushbutton_region : str
+            Region key for the pushbutton, e.g. 'btn_toggle_geometric_predicates'.
+        """
+        region = self.regions.get(pushbutton_region)
+        if region:
+            pyautogui.click(region["x"], region["y"],
+                            duration=self.timing.get("mouse_move_duration", 0.5))
+            self.wait(0.5)
+            logger.info("Expanded section via pushbutton: %s", pushbutton_region)
+        else:
+            logger.warning(
+                "Pushbutton '%s' not calibrated. Section may not be visible. "
+                "Run calibrate.py to set up.", pushbutton_region
+            )
+
     def toggle_sidebar_button(self, button_name: str) -> None:
         """
         Click a sidebar toggle button (e.g., 'layers_to_filter', 'predicates').
@@ -260,7 +355,14 @@ class QGISAutomator:
 
     def select_predicate(self, predicate: str) -> None:
         """
-        Enable Geometric Predicates and select a specific predicate.
+        Enable Geometric Predicates section and select a specific predicate.
+
+        The predicate widget is a **QgsCheckableComboBox** (checkable dropdown),
+        not a simple combobox. Each item has a checkbox — clicking the dropdown
+        reveals the list, then we need to click the specific predicate item.
+
+        Strategy: click the dropdown to open it, then type the predicate name
+        to scroll to it, and click to toggle its checkbox.
 
         Parameters
         ----------
@@ -268,15 +370,21 @@ class QGISAutomator:
             e.g. "intersects", "touches", "contains", "within", "overlaps",
                  "is_within_distance"
         """
+        # 1. Expand the geometric predicates section (toggle ON if OFF)
+        self._ensure_section_expanded("btn_toggle_geometric_predicates")
+
+        # 2. Click the checkable combobox to open the dropdown list
         region = self.regions.get("predicate_combo")
         if region:
             pyautogui.click(region["x"], region["y"],
                             duration=self.timing.get("mouse_move_duration", 0.5))
-            pyautogui.hotkey("ctrl", "a")
+            self.wait(0.3)
+            # 3. Type predicate name to jump to it in the list, then Enter to check
             self.type_text(predicate)
-            # Optionally press Down to select from dropdown
-            pyautogui.press("down")
+            self.wait(0.2)
             pyautogui.press("return")
+            # 4. Close the dropdown
+            pyautogui.press("escape")
         else:
             logger.warning("predicate_combo region not calibrated.")
         self.wait(self.timing.get("action_pause", 0.5))
@@ -284,7 +392,11 @@ class QGISAutomator:
 
     def set_buffer_value(self, value: float, unit: str = "m") -> None:
         """
-        Enable buffer and set the buffer distance.
+        Enable buffer section and set the buffer distance.
+
+        The buffer controls are hidden behind a checkable pushbutton
+        (which itself is only enabled after geometric predicates are active).
+        This method expands both sections if needed.
 
         Parameters
         ----------
@@ -293,13 +405,18 @@ class QGISAutomator:
         unit : str
             "m" for metres, "km" for kilometres.
         """
-        # Enable checkbox
+        # 1. Geometric predicates must be expanded first (buffer depends on it)
+        self._ensure_section_expanded("btn_toggle_geometric_predicates")
+        # 2. Expand the buffer section
+        self._ensure_section_expanded("btn_toggle_buffer")
+
+        # 3. Enable checkbox
         region = self.regions.get("buffer_enable_checkbox")
         if region:
             pyautogui.click(region["x"], region["y"],
                             duration=self.timing.get("mouse_move_duration", 0.5))
             self.wait(0.3)
-        # Set value in spinbox
+        # 4. Set value in spinbox
         spinbox = self.regions.get("buffer_value_spinbox")
         if spinbox:
             pyautogui.triple_click(spinbox["x"], spinbox["y"])
@@ -321,8 +438,9 @@ class QGISAutomator:
             "undo": "undo_button",
             "redo": "redo_button",
             "unfilter": "unfilter_button",
+            "export": "export_button",
             "favorites": "favorites_button",
-            "export": "filter_button",  # remapped based on context
+            "about": "about_button",
         }
         region_key = region_map.get(action.lower())
         if region_key is None:
@@ -440,11 +558,190 @@ class QGISAutomator:
     # Screenshot
     # ------------------------------------------------------------------
 
+    # ------------------------------------------------------------------
+    # QGIS menu navigation
+    # ------------------------------------------------------------------
+
+    def open_plugin_manager(self) -> None:
+        """Open QGIS Extensions > Manage and Install Plugins dialog."""
+        region = self.regions.get("menu_extensions")
+        if region:
+            pyautogui.click(
+                region["x"], region["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+        else:
+            pyautogui.hotkey("alt", "e")
+        self.wait(0.5)
+        pyautogui.press("down")
+        pyautogui.press("return")
+        self.wait(2.0)
+        logger.info("Opened Plugin Manager")
+
+    def close_dialog(self) -> None:
+        """Close the currently focused dialog with Escape."""
+        pyautogui.press("escape")
+        self.wait(0.5)
+        logger.debug("Closed dialog")
+
+    def open_log_messages_panel(self) -> None:
+        """Open QGIS View > Panels > Log Messages panel."""
+        region = self.regions.get("menu_view")
+        if region:
+            pyautogui.click(
+                region["x"], region["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+        else:
+            pyautogui.hotkey("alt", "v")
+        self.wait(0.5)
+        # Navigate to Panels > Log Messages (locale-dependent)
+        region_panels = self.regions.get("menu_view_panels")
+        if region_panels:
+            pyautogui.click(
+                region_panels["x"], region_panels["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+            self.wait(0.3)
+            region_log = self.regions.get("menu_view_panels_log")
+            if region_log:
+                pyautogui.click(
+                    region_log["x"], region_log["y"],
+                    duration=self.timing.get("mouse_move_duration", 0.5),
+                )
+        self.wait(1.0)
+        logger.info("Opened Log Messages panel")
+
+    def open_filtermate_toolbar(self) -> None:
+        """Click the FilterMate toolbar icon to open/toggle the dock widget."""
+        region = self.regions.get("filtermate_toolbar_icon")
+        if region:
+            pyautogui.click(
+                region["x"], region["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+            self.wait(1.5)
+            logger.info("Clicked FilterMate toolbar icon")
+        else:
+            success = self.click_button("btn_filtermate_toolbar")
+            if not success:
+                logger.warning(
+                    "FilterMate toolbar icon not found. Calibrate or add button image."
+                )
+
+    def open_filtermate_config(self) -> None:
+        """Open FilterMate configuration via the About button."""
+        self.click_action_button("about")
+        self.wait(1.5)
+        region = self.regions.get("about_config_tab")
+        if region:
+            pyautogui.click(
+                region["x"], region["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+            self.wait(0.5)
+        logger.info("Opened FilterMate config")
+
+    # ------------------------------------------------------------------
+    # Exploring zone
+    # ------------------------------------------------------------------
+
+    def select_exploring_layer(self, layer_name: str) -> None:
+        """Select a layer in the exploring zone's layer combobox."""
+        region = self.regions.get("exploring_layer_combo")
+        if region:
+            pyautogui.click(
+                region["x"], region["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+            pyautogui.hotkey("ctrl", "a")
+            self.type_text(layer_name)
+            pyautogui.press("return")
+            self.wait(self.timing.get("action_pause", 1.0))
+            logger.info("Selected exploring layer: %s", layer_name)
+        else:
+            logger.warning("exploring_layer_combo region not calibrated.")
+
+    def navigate_feature(self, direction: str = "next") -> None:
+        """Navigate to next/previous feature in the exploring selector."""
+        region = self.regions.get("exploring_feature_selector")
+        if region:
+            pyautogui.click(
+                region["x"], region["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+        if direction == "next":
+            pyautogui.press("down")
+        else:
+            pyautogui.press("up")
+        pyautogui.press("return")
+        self.wait(self.timing.get("action_pause", 0.5))
+        logger.info("Navigated feature: %s", direction)
+
+    # ------------------------------------------------------------------
+    # Generic helpers
+    # ------------------------------------------------------------------
+
+    def hover_region(self, region_name: str, duration: float = 1.5) -> None:
+        """Move mouse to a region center and pause (no click)."""
+        region = self.regions.get(region_name)
+        if region is None:
+            logger.warning("hover_region: '%s' not found.", region_name)
+            return
+        if "width" in region:
+            cx = region["x"] + region["width"] // 2
+            cy = region["y"] + region["height"] // 2
+        else:
+            cx = region["x"]
+            cy = region["y"]
+        self.move_mouse_to(cx, cy)
+        self.wait(duration)
+        logger.debug("Hovered region '%s' for %.1fs", region_name, duration)
+
+    def select_combobox_item(self, region_name: str, item_text: str) -> None:
+        """Generic: click a combobox, clear, type item name, press Enter."""
+        region = self.regions.get(region_name)
+        if region:
+            pyautogui.click(
+                region["x"], region["y"],
+                duration=self.timing.get("mouse_move_duration", 0.5),
+            )
+            pyautogui.hotkey("ctrl", "a")
+            self.type_text(item_text)
+            pyautogui.press("return")
+            self.wait(self.timing.get("action_pause", 0.5))
+            logger.info("Selected '%s' in combobox '%s'", item_text, region_name)
+        else:
+            logger.warning("Combobox region '%s' not calibrated.", region_name)
+
+    # ------------------------------------------------------------------
+    # Screenshot
+    # ------------------------------------------------------------------
+
     def screenshot(self, filepath: str) -> str:
         """Capture a full-screen screenshot and save to filepath."""
-        from PIL import ImageGrab  # type: ignore
-
-        img = ImageGrab.grab()
-        img.save(filepath)
+        if self.headless:
+            # Use import (ImageMagick) for Xvfb capture
+            display = os.environ.get("DISPLAY", ":99")
+            try:
+                subprocess.run(
+                    ["import", "-display", display, "-window", "root", "-silent", filepath],
+                    check=True,
+                    capture_output=True,
+                    timeout=5,
+                )
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                # Fallback to scrot
+                subprocess.run(
+                    ["scrot", "-o", filepath],
+                    check=True,
+                    capture_output=True,
+                    timeout=5,
+                    env={**os.environ, "DISPLAY": display},
+                )
+        else:
+            from PIL import ImageGrab  # type: ignore
+            img = ImageGrab.grab()
+            img.save(filepath)
         logger.info("Screenshot saved: %s", filepath)
         return filepath

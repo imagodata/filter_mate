@@ -150,6 +150,7 @@ def setup_obs(config: dict, dry_run: bool = False) -> None:
 
     # ── Configure recording settings ───────────────────────────────────────
     output_dir = obs_cfg.get("output_dir", "C:/Users/Simon/Videos/FilterMate")
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
     try:
         client.set_record_directory(output_dir)
         logger.info("Recording output directory: %s", output_dir)

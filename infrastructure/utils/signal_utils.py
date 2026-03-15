@@ -38,10 +38,12 @@ except ImportError:
 # Import sip for C++ object deletion checks
 try:
     import sip
-    SIP_AVAILABLE = True
 except ImportError:
-    sip = None
-    SIP_AVAILABLE = False
+    try:
+        from PyQt6 import sip
+    except ImportError:
+        sip = None
+SIP_AVAILABLE = sip is not None
 
 # Import validation utilities from same package
 from .validation_utils import is_layer_valid

@@ -21,7 +21,10 @@ from qgis.PyQt.QtCore import QTimer, QCoreApplication
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsVectorLayer, QgsProject
 from qgis.utils import iface
-import sip
+try:
+    import sip
+except ImportError:
+    from PyQt6 import sip
 
 from ..ports.qgis_port import get_qgis_factory
 from ...infrastructure.logging import get_app_logger

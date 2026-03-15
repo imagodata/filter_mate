@@ -1,0 +1,10 @@
+# FilterMate Video Automation — Docker/headless dependencies
+# (no OBS, no win32 — frame capture via Xvfb + ImageMagick/scrot + FFmpeg)
+
+pyautogui>=0.9.54
+Pillow>=10.0
+pyyaml>=6.0
+click>=8.1
+edge-tts>=6.1.0
+mutagen>=1.47.0
+python-xlib>=0.33       # X11 support for pyautogui on Linux

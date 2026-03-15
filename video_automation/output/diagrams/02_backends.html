@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920" />
+  <title>Backends & Compatibilité</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: linear-gradient(
+        135deg,
+        #1a1a2e 0%,
+        #16213e 55%,
+        #0f3460 100%
+      );
+      font-family: 'Segoe UI', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      color: #e8e8f0;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────────────── */
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      display: grid;
+      grid-template-rows: 72px 1fr 44px;
+      grid-template-columns: 1fr;
+      position: relative;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────── */
+    .header {
+      background: rgba(76, 175, 80, 0.12);
+      border-bottom: 2px solid rgba(76, 175, 80, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 48px;
+      backdrop-filter: blur(4px);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+      box-shadow: 0 2px 12px rgba(76, 175, 80, 0.4);
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    }
+
+    .header-badge {
+      margin-left: auto;
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: 14px;
+      color: #81C784;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Diagram area ──────────────────────────────────────────────────── */
+    .diagram-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 64px;
+      overflow: hidden;
+      animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .mermaid {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────── */
+    .footer {
+      background: rgba(0, 0, 0, 0.35);
+      border-top: 1px solid rgba(76, 175, 80, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .footer-links a {
+      color: rgba(76, 175, 80, 0.7);
+      text-decoration: none;
+    }
+
+    /* ── Decorative glow circles ───────────────────────────────────────── */
+    .glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-green {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(76,175,80,0.08) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .glow-blue {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(25,118,210,0.1) 0%, transparent 70%);
+      bottom: -100px; left: -100px;
+    }
+
+    /* ── Animations ────────────────────────────────────────────────────── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+
+    <!-- Decorative glows (behind content) -->
+    <div class="glow glow-green"></div>
+    <div class="glow glow-blue"></div>
+
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">F</div>
+      <h1 class="header-title">Backends & Compatibilité</h1>
+      <span class="header-badge">FilterMate v4.6.1</span>
+    </header>
+
+    <!-- Diagram -->
+    <main class="diagram-area">
+      <div class="mermaid">
+graph TD
+    QP["🧩 QGIS Plugin Manager"] --> FM["FilterMate 4.6.1"]
+
+    FM --> B1["🐘 PostgreSQL / PostGIS\n(avec psycopg2)"]
+    FM --> B2["🗄️ Spatialite\n(GeoPackage, SQLite)"]
+    FM --> B3["📁 OGR\n(Shapefile, GeoJSON, WFS...)"]
+    FM --> B4["💾 Memory\n(couches QGIS native)"]
+
+    B1 --> P1["< 2s pour 1M d'entités"]
+    B2 --> P2["~10s pour 100k entités"]
+    B3 --> P3["~30s pour 100k entités"]
+    B4 --> P4["< 0.5s pour 50k entités"]
+
+    style FM fill:#4CAF50,color:#fff,stroke:#388E3C
+    style B1 fill:#1565C0,color:#fff
+    style B2 fill:#6A1B9A,color:#fff
+    style B3 fill:#E65100,color:#fff
+    style B4 fill:#00695C,color:#fff
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>FilterMate — QGIS Plugin | Architecture Hexagonale</span>
+      <div class="footer-links">
+        <a href="#">github.com/imagodata/filter_mate</a>
+        <a href="#">plugins.qgis.org/plugins/filter_mate</a>
+        <a href="#">imagodata.github.io/filter_mate</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        // Core palette — FilterMate brand
+        primaryColor:        '#1976D2',
+        primaryTextColor:    '#ffffff',
+        primaryBorderColor:  '#4CAF50',
+        lineColor:           '#4CAF50',
+        secondaryColor:      '#16213e',
+        tertiaryColor:       '#0f3460',
+        background:          '#1a1a2e',
+        mainBkg:             '#16213e',
+        nodeBorder:          '#4CAF50',
+        clusterBkg:          'rgba(76,175,80,0.08)',
+        clusterBorder:       'rgba(76,175,80,0.4)',
+        titleColor:          '#ffffff',
+        edgeLabelBackground: 'rgba(22,33,62,0.85)',
+        // Sequence diagram
+        actorBkg:            '#1976D2',
+        actorBorder:         '#4CAF50',
+        actorTextColor:      '#ffffff',
+        activationBkgColor:  'rgba(76,175,80,0.2)',
+        noteBkgColor:        'rgba(25,118,210,0.3)',
+        noteTextColor:       '#e0e0e0',
+        // Font
+        fontSize:            '18px',
+        fontFamily:          "'Segoe UI', 'Segoe UI', sans-serif",
+      },
+      flowchart: {
+        curve:   'basis',
+        padding: 20,
+        useMaxWidth: false,
+      },
+      sequence: {
+        actorMargin:  80,
+        mirrorActors: false,
+        useMaxWidth:  false,
+      },
+      mindmap: {
+        useMaxWidth: false,
+      },
+      fontFamily: "'Segoe UI', 'Segoe UI', sans-serif",
+    });
+  </script>
+</body>
+</html>

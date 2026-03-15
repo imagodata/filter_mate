@@ -13,11 +13,16 @@ from qgis.PyQt.QtCore import QObject
 # by creating a combined metaclass
 try:
     from sip import wrappertype
+except ImportError:
+    try:
+        from PyQt6.sip import wrappertype
+    except ImportError:
+        wrappertype = None
 
+if wrappertype is not None:
     class QObjectABCMeta(wrappertype, ABCMeta):
         """Combined metaclass for QObject + ABC compatibility."""
-except ImportError:
-    # Fallback for different sip versions
+else:
     class QObjectABCMeta(type(QObject), ABCMeta):
         """Combined metaclass for QObject + ABC compatibility."""
 

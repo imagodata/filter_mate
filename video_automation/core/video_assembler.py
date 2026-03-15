@@ -38,7 +38,7 @@ def _run_ffmpeg(*args: str, check: bool = True) -> subprocess.CompletedProcess:
     """Run an FFmpeg command and return the result."""
     cmd = ["ffmpeg", "-y", *args]
     logger.debug("FFmpeg command: %s", " ".join(cmd))
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
     if check and result.returncode != 0:
         logger.error("FFmpeg stderr:\n%s", result.stderr[-3000:])
         raise subprocess.CalledProcessError(result.returncode, cmd, result.stdout, result.stderr)

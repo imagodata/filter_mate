@@ -17,6 +17,15 @@ import sys
 import time
 from pathlib import Path
 
+# Windows: reconfigure stdout/stderr to UTF-8 to avoid UnicodeEncodeError
+# when printing box-drawing or special characters to cmd.exe consoles.
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except AttributeError:
+        pass
+
 # Add parent directory to path so we can import config helpers
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -38,20 +47,47 @@ CALIBRATION_TARGETS = [
     ("toolbar",            "top-left corner of the main QGIS toolbar area", "tl"),
     ("toolbar",            "bottom-right corner of the main QGIS toolbar area", "br"),
 
-    # FilterMate UI elements (single points)
-    ("source_layer_combo",      "the SOURCE LAYER dropdown / combobox", "point"),
-    ("target_toggle_button",    "the LAYERS TO FILTER toggle button", "point"),
-    ("predicate_combo",         "the GEOMETRIC PREDICATE dropdown", "point"),
-    ("buffer_enable_checkbox",  "the BUFFER ENABLE checkbox", "point"),
-    ("buffer_value_spinbox",    "the BUFFER VALUE spinbox", "point"),
-    ("filter_button",           "the FILTER button (green)", "point"),
-    ("undo_button",             "the UNDO button", "point"),
-    ("redo_button",             "the REDO button", "point"),
-    ("unfilter_button",         "the UNFILTER / REMOVE FILTER button", "point"),
-    ("favorites_button",        "the FAVORITES button (star)", "point"),
+    # FilterMate tabs (single points)
     ("tab_filtering",           "the FILTERING tab label", "point"),
     ("tab_exploring",           "the EXPLORING / EXPLORATION tab label", "point"),
     ("tab_exporting",           "the EXPORTING tab label", "point"),
+
+    # FilterMate UI elements (single points)
+    ("source_layer_combo",      "the SOURCE LAYER dropdown / combobox", "point"),
+
+    # ── Checkable sidebar pushbuttons (FILTERING tab) ─────────────────
+    # These buttons MUST be clicked (checked) to reveal the widgets below.
+    # Calibrate them FIRST, then click each one to expand the section.
+    ("btn_toggle_layers_to_filter",     "the LAYERS TO FILTER sidebar pushbutton (left side, checkable toggle)", "point"),
+    ("btn_toggle_geometric_predicates", "the GEOMETRIC PREDICATES sidebar pushbutton (left side, checkable toggle)", "point"),
+    ("btn_toggle_buffer",               "the BUFFER sidebar pushbutton (left side, checkable toggle)", "point"),
+
+    # ── Widgets INSIDE expanded sections ──────────────────────────────
+    # IMPORTANT: Before calibrating the next items, make sure you have
+    # CLICKED (checked) the corresponding sidebar pushbutton above
+    # to reveal the widget!
+
+    # After clicking "LAYERS TO FILTER" pushbutton:
+    ("target_layer_combo",      "[expand LAYERS TO FILTER first!] the TARGET LAYER combobox", "point"),
+
+    # After clicking "GEOMETRIC PREDICATES" pushbutton:
+    ("predicate_combo",         "[expand GEOMETRIC PREDICATES first!] the PREDICATE dropdown", "point"),
+
+    # After clicking "BUFFER" pushbutton:
+    ("buffer_enable_checkbox",  "[expand BUFFER first!] the BUFFER ENABLE checkbox", "point"),
+    ("buffer_value_spinbox",    "[expand BUFFER first!] the BUFFER VALUE spinbox", "point"),
+
+    # Action Bar buttons (always visible, 6 buttons)
+    ("filter_button",           "the FILTER button", "point"),
+    ("undo_button",             "the UNDO button", "point"),
+    ("redo_button",             "the REDO button", "point"),
+    ("unfilter_button",         "the UNFILTER / REMOVE FILTER button", "point"),
+    ("export_button",           "the EXPORT button", "point"),
+    ("about_button",            "the ABOUT button (FilterMate icon)", "point"),
+
+    # Header bar indicators
+    ("favorites_button",        "the FAVORITES indicator (star, in header bar)", "point"),
+    ("badge_backend",           "the BACKEND indicator (blue pill, in header bar)", "point"),
 ]
 
 
@@ -95,7 +131,12 @@ def calibrate(config_path: Path, targets: list) -> None:
     print("Before starting:")
     print("  1. Open QGIS with FilterMate loaded")
     print("  2. Make sure FilterMate dock is visible (not hidden)")
-    print("  3. Put your screen in its normal recording position")
+    print("  3. Select the FILTERING tab in the Toolbox zone")
+    print("  4. Put your screen in its normal recording position")
+    print()
+    print("IMPORTANT: Some widgets are hidden behind checkable sidebar buttons.")
+    print("The script will ask you to click the sidebar buttons FIRST, then")
+    print("to click on the revealed widgets. Follow the instructions carefully.")
     print()
     input("Press ENTER when ready to begin calibration… ")
 

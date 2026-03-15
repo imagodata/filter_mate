@@ -24,8 +24,10 @@ try:
     )
     import sip
 except ImportError:
-    # Mock for testing
-    sip = None
+    try:
+        from PyQt6 import sip
+    except ImportError:
+        sip = None
 
 try:
     from ..infrastructure.logging import get_logger

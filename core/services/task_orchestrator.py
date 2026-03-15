@@ -422,7 +422,10 @@ class TaskOrchestrator:
             try:
                 current_layer = dockwidget.current_layer
                 if current_layer:
-                    import sip
+                    try:
+                        import sip
+                    except ImportError:
+                        from PyQt6 import sip
                     if not sip.isdeleted(current_layer):
                         logger.info(f"  current_layer: {current_layer.name()}")
                         logger.info(f"  current_exploring_groupbox: {getattr(dockwidget, 'current_exploring_groupbox', 'unknown')}")

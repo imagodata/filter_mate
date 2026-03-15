@@ -7,8 +7,8 @@ echo FilterMate UI Compilation
 echo ============================================================
 echo.
 
-REM Get script directory (plugin root)
-cd /d "%~dp0"
+REM Get plugin root (parent of scripts/)
+cd /d "%~dp0.."
 
 echo Working directory: %CD%
 echo.

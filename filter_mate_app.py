@@ -15,7 +15,10 @@ FilterMate Application Orchestrator
 from qgis.PyQt.QtCore import Qt, QTimer, QCoreApplication
 from qgis.PyQt.QtWidgets import QMessageBox, QPushButton
 import weakref
-import sip
+try:
+    import sip
+except ImportError:
+    from PyQt6 import sip
 from qgis.core import (
     QgsApplication,
     QgsProject,

@@ -315,3 +315,133 @@ NARRATION_TEXTS: dict[str, str] = {
         "laissez une étoile sur GitHub. À bientôt !"
     ),
 }
+
+
+# ---------------------------------------------------------------------------
+# V01 Narration texts — Installation & Premier Pas (14 sequences)
+# Extracted from SCRIPT_V01_INSTALLATION.md and V01 sequence classes.
+# ---------------------------------------------------------------------------
+V01_NARRATION_TEXTS: dict[str, str] = {
+    "v01_s00": (
+        "Un million de batiments dans votre base de donnees. "
+        "Vous cherchez uniquement ceux qui touchent une route precise. "
+        "Temps de reponse ? Deux secondes. Bienvenue dans FilterMate. "
+        "Dans cette premiere video, on va installer le plugin ensemble, "
+        "decouvrir son interface, et realiser votre tout premier filtrage "
+        "en moins de 7 minutes."
+    ),
+    "v01_s01": (
+        "L'installation se fait en 3 clics depuis QGIS. "
+        "Allez dans le menu Extensions, puis Gerer les extensions. "
+        "Dans l'onglet Toutes, tapez FilterMate dans la barre de recherche. "
+        "Le plugin apparait. Cliquez sur Installer. C'est tout. "
+        "FilterMate est gratuit, open source, et disponible sur le depot officiel QGIS "
+        "Windows, Linux et macOS."
+    ),
+    "v01_s02": (
+        "Pour lancer FilterMate, cliquez sur son icone dans la barre d'outils, "
+        "ou allez dans le menu Extensions puis FilterMate. "
+        "Un panneau lateral s'ouvre, c'est le Dock Widget. "
+        "Pour l'instant, il est vide. C'est normal. "
+        "FilterMate detecte automatiquement les couches de votre projet. "
+        "Des qu'on va charger des donnees, l'interface va se remplir. "
+        "Chargeons nos donnees de demonstration : un Shapefile des departements "
+        "de France, environ 100 entites, et un Shapefile des communes, 35 000 entites."
+    ),
+    "v01_s03": (
+        "Prenons un moment pour comprendre l'interface. "
+        "Elle est divisee en 3 zones principales, separees par un splitter vertical. "
+        "En haut, la Zone d'Exploration. C'est ici que vous parcourez et "
+        "selectionnez les entites de vos couches. "
+        "En bas, la Toolbox. Elle contient deux onglets : FILTERING et EXPORTING. "
+        "Et enfin, l'Action Bar. Ce sont les 6 boutons d'action. "
+        "Remarquez aussi le header : la pastille orange indique vos favoris, "
+        "et la pastille bleue affiche le backend actif."
+    ),
+    "v01_s04": (
+        "La Zone d'Exploration possede 6 boutons dans sa barre laterale. "
+        "Identify ouvre la fenetre d'identification QGIS. "
+        "Zoom centre la carte sur l'entite. "
+        "Select surligne l'entite. Track active le suivi automatique. "
+        "Link synchronise les selecteurs. "
+        "Reset reinitialise toutes les proprietes d'exploration."
+    ),
+    "v01_s05": (
+        "L'Action Bar est le coeur de FilterMate. Six boutons. "
+        "Filter applique le filtre. Undo annule, Redo retablit. "
+        "Unfilter retire tous les filtres. Export exporte en GeoPackage. "
+        "Et About, le seul bouton toujours actif. "
+        "Quand l'onglet EXPORTING est actif, les boutons Filter, Undo, Redo "
+        "et Unfilter se desactivent, et inversement avec Export."
+    ),
+    "v01_s06": (
+        "Passons a la pratique. Nos deux couches sont chargees : les departements "
+        "et les communes. Dans la Zone d'Exploration, je selectionne la couche "
+        "departements. Je choisis Gironde. "
+        "Dans l'onglet FILTERING, FilterMate a reconnu ma selection. "
+        "En couche cible, je choisis communes. "
+        "Predicat spatial : Intersects. Je clique sur Filter. "
+        "Les 35 000 communes sont filtrees instantanement. "
+        "Seules celles qui intersectent la Gironde restent visibles. "
+        "FilterMate a detecte le backend OGR automatiquement."
+    ),
+    "v01_s07": (
+        "FilterMate s'adapte automatiquement au theme de QGIS. "
+        "Vous etes en mode sombre ? Le plugin le detecte et ajuste ses couleurs, "
+        "ses icones et ses bordures. Pas besoin de configurer quoi que ce soit. "
+        "Trois modes : automatique, theme clair force, ou theme sombre force."
+    ),
+    "v01_s08": (
+        "FilterMate parle 22 langues. Francais, anglais, espagnol, allemand, "
+        "chinois, japonais, arabe... La langue se change dans la configuration. "
+        "Changeons vers l'anglais... Toute l'interface se met a jour immediatement, "
+        "sans relancer le plugin."
+    ),
+    "v01_s09": (
+        "Astuce pour les debutants : activez le mode verbose. "
+        "Dans la configuration, changez FEEDBACK_LEVEL de normal a verbose. "
+        "En mode verbose, FilterMate vous explique tout ce qu'il fait. "
+        "Trois niveaux : minimal pour les erreurs, normal pour un retour equilibre, "
+        "et verbose pour tout voir."
+    ),
+    "v01_s10": (
+        "En complement du mode verbose, FilterMate ecrit ses logs dans le panneau "
+        "standard de QGIS. Allez dans Vue, Panneaux, Messages de log. "
+        "Vous trouverez un onglet dedie FilterMate. "
+        "C'est ici que vous pouvez suivre les requetes SQL generees, "
+        "les temps d'execution, les erreurs eventuelles."
+    ),
+    "v01_s11": (
+        "Le selecteur affiche directement le nom des departements, pas un identifiant "
+        "cryptique. C'est grace a la detection automatique du champ d'affichage. "
+        "FilterMate analyse votre couche et choisit intelligemment le meilleur champ "
+        "selon 6 niveaux de priorite. C'est automatique."
+    ),
+    "v01_s12": (
+        "Tout ce que vous configurez dans FilterMate est sauvegarde automatiquement. "
+        "Le champ d'affichage, vos preferences, l'etat des toggles — tout est persiste "
+        "dans une base SQLite locale. "
+        "Fermez QGIS, rouvrez-le demain — FilterMate retrouve vos reglages."
+    ),
+    "v01_s13": (
+        "Voila, vous avez installe FilterMate, decouvert les 3 zones de l'interface, "
+        "utilise les boutons de la barre laterale et de l'Action Bar, "
+        "et realise votre premier filtrage spatial. Pas mal pour 7 minutes ! "
+        "Retrouvez le code source sur GitHub, le plugin sur le depot officiel QGIS, "
+        "et la documentation complete sur le site dedie. Les liens sont dans la description. "
+        "Dans la prochaine video, on approfondit le filtrage geometrique. A tres vite !"
+    ),
+}
+
+
+def get_narration_texts(video: str | None = None) -> dict[str, str]:
+    """Return the narration texts dict for the given video script.
+
+    Parameters
+    ----------
+    video : str or None
+        Video identifier (e.g. "v01"). None returns original texts.
+    """
+    if video == "v01":
+        return V01_NARRATION_TEXTS
+    return NARRATION_TEXTS

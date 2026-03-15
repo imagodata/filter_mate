@@ -95,7 +95,10 @@ from ...infrastructure.utils import (
 try:
     import sip
 except ImportError:
-    sip = None
+    try:
+        from PyQt6 import sip
+    except ImportError:
+        sip = None
 
 # Import task utilities
 from ...infrastructure.database.spatialite_support import (

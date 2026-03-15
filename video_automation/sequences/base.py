@@ -3,6 +3,9 @@ Base Video Sequence
 ===================
 All sequence classes inherit from VideoSequence. The orchestrator calls
 setup() → execute() → teardown() in order.
+
+Works with both OBSController (desktop) and FrameCapturer (headless/Docker).
+Both implement the same recording interface (start/stop/switch_scene).
 """
 
 from __future__ import annotations
@@ -10,11 +13,14 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
+    from core.frame_capturer import FrameCapturer
     from core.obs_controller import OBSController
     from core.qgis_automator import QGISAutomator
+
+    Recorder = Union[OBSController, FrameCapturer]
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +62,7 @@ class VideoSequence(ABC):
     # Lifecycle
     # ------------------------------------------------------------------
 
-    def setup(self, obs: "OBSController", qgis: "QGISAutomator", config: dict) -> None:
+    def setup(self, obs: "Recorder", qgis: "QGISAutomator", config: dict) -> None:
         """
         Called before recording starts. Switch OBS scene, focus QGIS, etc.
         Override to add sequence-specific setup.
@@ -72,14 +78,14 @@ class VideoSequence(ABC):
         time.sleep(transition_pause)
 
     @abstractmethod
-    def execute(self, obs: "OBSController", qgis: "QGISAutomator", config: dict) -> None:
+    def execute(self, obs: "Recorder", qgis: "QGISAutomator", config: dict) -> None:
         """
         Main automation steps for this sequence.
         Must be implemented by each subclass.
         """
         ...
 
-    def teardown(self, obs: "OBSController", qgis: "QGISAutomator", config: dict) -> None:
+    def teardown(self, obs: "Recorder", qgis: "QGISAutomator", config: dict) -> None:
         """
         Called after the sequence finishes. Pause before next sequence.
         Override if cleanup is needed.
@@ -92,7 +98,7 @@ class VideoSequence(ABC):
     # Convenience helpers
     # ------------------------------------------------------------------
 
-    def run(self, obs: "OBSController", qgis: "QGISAutomator", config: dict) -> None:
+    def run(self, obs: "Recorder", qgis: "QGISAutomator", config: dict) -> None:
         """Run the full sequence: setup → execute → teardown."""
         self._start_time = time.time()
         self._log.info("Starting sequence: %s", self.name)
@@ -106,7 +112,7 @@ class VideoSequence(ABC):
         """Return elapsed seconds since sequence started."""
         return time.time() - self._start_time if self._start_time else 0.0
 
-    def show_diagram(self, obs: "OBSController", diagram_id: str, duration: float = 5.0) -> None:
+    def show_diagram(self, obs: "Recorder", diagram_id: str, duration: float = 5.0) -> None:
         """
         Switch to the Diagram Overlay scene, wait, then switch back.
 

@@ -2,6 +2,9 @@
 REM Script pour exécuter les tests avec l'environnement QGIS OSGeo4W
 REM Usage: run_tests_osgeo.bat [test_path]
 
+REM Set working directory to plugin root (parent of scripts/)
+cd /d "%~dp0.."
+
 set OSGEO4W_ROOT=C:\Program Files\QGIS 3.44.6
 set QGIS_PREFIX_PATH=%OSGEO4W_ROOT%\apps\qgis
 

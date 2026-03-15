@@ -12,7 +12,10 @@ See docs/architecture.md for migration guide.
 
 from .config.config import ENV_VARS
 import os
-import sip
+try:
+    import sip
+except ImportError:
+    from PyQt6 import sip
 import weakref
 
 # Import logging for error handling
@@ -5388,7 +5391,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if layer is None: return True
         try:
             if self._layer_sync_ctrl: return self._controller_integration.delegate_is_layer_truly_deleted(layer)
-            import sip
+            try:
+                import sip
+            except ImportError:
+                from PyQt6 import sip
             return sip.isdeleted(layer)
         except (ImportError, RuntimeError, AttributeError):
             return True  # Assume deleted if we can't check

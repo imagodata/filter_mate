@@ -379,7 +379,10 @@ class LayerSyncController(BaseController):
 
         # Perform the actual deletion check via sip
         try:
-            import sip
+            try:
+                import sip
+            except ImportError:
+                from PyQt6 import sip
             if sip.isdeleted(layer):
                 logger.debug("✅ Layer C++ object is truly deleted")
                 return True

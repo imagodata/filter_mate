@@ -1,0 +1,67 @@
+# =============================================================================
+# FilterMate Video Automation — Docker Compose
+# =============================================================================
+#
+# Usage:
+#   # Build the image
+#   docker compose build
+#
+#   # Run full video pipeline (v01)
+#   docker compose run --rm video --all --video v01
+#
+#   # Run a single sequence
+#   docker compose run --rm video --sequence 6 --video v01
+#
+#   # Generate diagrams only
+#   docker compose run --rm video --diagrams
+#
+#   # Generate narration only
+#   docker compose run --rm video --narration
+#
+#   # Assemble final video from captured frames
+#   docker compose run --rm video --assemble
+#
+#   # List all sequences
+#   docker compose run --rm video --list --video v01
+#
+#   # Dry run (preview without executing)
+#   docker compose run --rm video --all --video v01 --dry-run
+# =============================================================================
+
+services:
+  video:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: filtermate-video:latest
+
+    environment:
+      - DISPLAY=:99
+      - RESOLUTION=1920x1080x24
+      - CAPTURE_FPS=10
+      # Path to QGIS project file inside the container
+      - QGIS_PROJECT=/data/project.qgz
+
+    volumes:
+      # Output directory (frames, video, diagrams, narration)
+      - ./output:/app/output
+
+      # QGIS project + data files
+      - ./data:/data:ro
+
+      # FilterMate plugin (mount the parent plugin directory)
+      - ..:/root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/filter_mate:ro
+
+      # QGIS profile config (optional — for pre-configured profiles)
+      # - ./qgis-profile:/root/.local/share/QGIS/QGIS3/profiles/default:rw
+
+    # Shared memory for Xvfb
+    shm_size: '2gb'
+
+    # No GPU needed for headless capture
+    # For GPU-accelerated FFmpeg encoding, uncomment:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - capabilities: [gpu]

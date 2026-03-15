@@ -19,10 +19,14 @@ import logging
 
 try:
     from qgis.core import QgsApplication, QgsTask
-    import sip
+    try:
+        import sip
+    except ImportError:
+        from PyQt6 import sip
     QGIS_AVAILABLE = True
 except ImportError:
     QGIS_AVAILABLE = False
+    sip = None
     QgsTask = Any
 
 logger = logging.getLogger('FilterMate.TaskManagementService')

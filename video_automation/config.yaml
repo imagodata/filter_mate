@@ -1,104 +1,206 @@
 obs:
-  host: "localhost"
+  host: localhost
   port: 4455
-  password: ""  # OBS WebSocket password — set this after enabling in OBS Tools > WebSocket Server Settings
+  password: ''
   scenes:
-    qgis_fullscreen: "QGIS Fullscreen"
-    qgis_with_filtermate: "QGIS + FilterMate"
-    diagram_overlay: "Diagram Overlay"
-    intro_scene: "Intro"
-    outro_scene: "Outro"
-  output_dir: "C:/Users/Simon/Videos/FilterMate"
-  recording_format: "mkv"  # mkv for reliability, remux to mp4 after
-
+    qgis_fullscreen: QGIS Fullscreen
+    qgis_with_filtermate: QGIS + FilterMate
+    diagram_overlay: Diagram Overlay
+    intro_scene: Intro
+    outro_scene: Outro
+  output_dir: C:/Users/Simon/Videos/FilterMate
+  recording_format: mkv
 qgis:
-  window_title: "QGIS"       # Window title substring to find
-  filtermate_panel: "FilterMate"  # Dock widget title
-  startup_wait: 5            # seconds to wait after focusing QGIS
-
-  # Calibration points (auto-set via calibrate.py — do not edit manually)
+  window_title: QGIS
+  filtermate_panel: FilterMate
+  startup_wait: 5
   regions:
     filtermate_dock:
-      x: 0
-      y: 0
-      width: 400
-      height: 800
+      x: 1941
+      y: 247
+      width: 610
+      height: 1231
     main_canvas:
-      x: 400
-      y: 0
-      width: 1520
-      height: 800
+      x: 434
+      y: 236
+      width: 1500
+      height: 1246
     toolbar:
+      x: 3
+      y: 63
+      width: 2551
+      height: 168
+    source_layer_combo:
+      x: 2176
+      y: 915
+    btn_toggle_layers_to_filter:
+      x: 2002
+      y: 982
+    btn_toggle_geometric_predicates:
+      x: 2006
+      y: 1123
+    btn_toggle_buffer:
+      x: 2004
+      y: 1193
+    target_layer_combo:
+      x: 2100
+      y: 982
+    predicate_combo:
+      x: 2115
+      y: 1226
+    buffer_enable_checkbox:
+      x: 2008
+      y: 1190
+    buffer_value_spinbox:
+      x: 2119
+      y: 1187
+    filter_button:
+      x: 1998
+      y: 1427
+    undo_button:
+      x: 2099
+      y: 1440
+    redo_button:
+      x: 2199
+      y: 1437
+    unfilter_button:
+      x: 2300
+      y: 1444
+    export_button:
+      x: 2402
+      y: 1434
+    favorites_button:
+      x: 2407
+      y: 300
+    tab_filtering:
+      x: 2078
+      y: 846
+    tab_exploring:
+      x: 2061
+      y: 362
+    tab_exporting:
+      x: 2061
+      y: 1303
+    exploring_zone:
+      x: 0
+      y: 80
+      width: 400
+      height: 350
+    exploring_layer_combo:
+      x: 200
+      y: 100
+    exploring_feature_selector:
+      x: 200
+      y: 140
+    sidebar_identify:
+      x: 20
+      y: 160
+    sidebar_zoom:
+      x: 20
+      y: 200
+    sidebar_select:
+      x: 20
+      y: 240
+    sidebar_track:
+      x: 20
+      y: 280
+    sidebar_link:
+      x: 20
+      y: 320
+    sidebar_reset:
+      x: 20
+      y: 360
+    toolbox_zone:
+      x: 0
+      y: 430
+      width: 400
+      height: 300
+    action_bar_zone:
+      x: 0
+      y: 730
+      width: 400
+      height: 50
+    about_button:
+      x: 2506
+      y: 1432
+    header_bar:
+      x: 0
+      y: 40
+      width: 400
+      height: 30
+    badge_favorites:
+      x: 280
+      y: 55
+    badge_backend:
+      x: 2494
+      y: 295
+    filtermate_toolbar_icon:
+      x: 500
+      y: 20
+    menu_settings:
       x: 0
       y: 0
-      width: 1920
-      height: 40
-    # FilterMate UI element centers (calibrate.py fills these in)
-    source_layer_combo:
+    menu_extensions:
+      x: 450
+      y: 0
+    menu_view:
       x: 200
-      y: 120
-    target_toggle_button:
+      y: 0
+    menu_view_panels:
       x: 200
-      y: 200
-    predicate_combo:
-      x: 200
-      y: 280
-    buffer_enable_checkbox:
-      x: 100
-      y: 340
-    buffer_value_spinbox:
-      x: 200
-      y: 340
-    filter_button:
-      x: 80
+      y: 80
+    menu_view_panels_log:
+      x: 350
+      y: 130
+    log_panel_filtermate_tab:
+      x: 600
+      y: 850
+    about_config_tab:
+      x: 700
+      y: 300
+    plugin_manager_entry:
+      x: 640
       y: 400
-    undo_button:
-      x: 150
-      y: 400
-    redo_button:
-      x: 220
-      y: 400
-    unfilter_button:
-      x: 290
-      y: 400
-    favorites_button:
-      x: 360
-      y: 400
-    tab_filtering:
-      x: 80
-      y: 60
-    tab_exploring:
-      x: 200
-      y: 60
-    tab_exporting:
-      x: 320
-      y: 60
-
+    plugin_manager_install_btn:
+      x: 900
+      y: 700
 timing:
-  click_delay: 0.3          # seconds between clicks
-  type_delay: 0.05          # seconds between keystrokes
-  scroll_delay: 0.2         # seconds between scroll steps
-  action_pause: 1.0         # pause after significant actions
-  transition_pause: 2.0     # pause between sequences
-  mouse_move_duration: 0.5  # smooth mouse movement duration
-
+  click_delay: 0.3
+  type_delay: 0.05
+  scroll_delay: 0.2
+  action_pause: 1.0
+  transition_pause: 2.0
+  mouse_move_duration: 0.5
 diagrams:
-  output_dir: "output/diagrams"
+  output_dir: output/diagrams
   width: 1920
   height: 1080
-  theme: "dark"             # dark or default
-  background_color: "#1a1a2e"
-  font_family: "Segoe UI"
-
+  theme: dark
+  background_color: '#1a1a2e'
+  font_family: Segoe UI
 narration:
-  engine: "edge-tts"        # edge-tts (free) or elevenlabs
-  voice: "fr-FR-HenriNeural"  # Microsoft Edge TTS voice
-  output_dir: "output/narration"
-  speed: "+0%"
-
+  engine: edge-tts
+  voice: fr-FR-HenriNeural
+  output_dir: output/narration
+  speed: +0%
+capture:
+  fps: 10
+  output_dir: output/captures
+  resolution: 1920x1080
+  display: :99
+  method: import
+  codec: libx264
+  quality: 23
+  format: mp4
+  scenes:
+    qgis_fullscreen: QGIS Fullscreen
+    qgis_with_filtermate: QGIS + FilterMate
+    diagram_overlay: Diagram Overlay
+    intro_scene: Intro
+    outro_scene: Outro
 output:
-  final_dir: "output/final"
-  resolution: "1920x1080"
+  final_dir: output/final
+  resolution: 1920x1080
   fps: 30
-  codec: "libx264"
-  quality: "23"             # CRF value (lower = better quality, 18–28 reasonable)
+  codec: libx264
+  quality: '23'

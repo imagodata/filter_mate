@@ -77,10 +77,12 @@ except ImportError:
 
 try:
     import sip
-    SIP_AVAILABLE = True
 except ImportError:
-    sip = None
-    SIP_AVAILABLE = False
+    try:
+        from PyQt6 import sip
+    except ImportError:
+        sip = None
+SIP_AVAILABLE = sip is not None
 
 
 # =============================================================================
