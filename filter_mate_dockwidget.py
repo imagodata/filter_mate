@@ -4768,10 +4768,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def _reset_feature_picker_filter(self, fid):
         """Reset the feature picker's internal filter after a selection.
 
-        After the user types to search and selects a feature, the QComboBox
-        internal model still has the search filter active. This clears the
-        filter so the dropdown shows all values next time it opens, while
-        keeping the selected feature displayed.
+        After the user types to search and selects a feature, the internal
+        filter model still has the search text active. This clears it so
+        the dropdown shows all values next time it opens.
+
+        Strategy: Try multiple approaches to clear the filter:
+        1. Direct model setFilterValue (QgsFeaturePickerModelBase API)
+        2. QLineEdit clear + re-set feature (forces model reload)
+        3. Disconnect lineEdit textChanged, clear text, reconnect
         """
         try:
             if self.current_exploring_groupbox != "single_selection":
@@ -4780,25 +4784,66 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if not picker:
                 return
 
-            from qgis.PyQt.QtWidgets import QComboBox
-            combo = picker.findChild(QComboBox)
-            if not combo:
-                return
+            from qgis.PyQt.QtWidgets import QComboBox, QLineEdit
 
             # Block featureChanged signal to prevent re-triggering the debounce
             picker.blockSignals(True)
             try:
-                # Re-set the feature to ensure proper display text
+                cleared = False
+
+                # Strategy 1: Try the picker's own model (QgsFeaturePickerModelBase)
+                # The picker has an internal mModel that may be accessible
+                for child in picker.children():
+                    if hasattr(child, 'setFilterValue'):
+                        child.setFilterValue('')
+                        cleared = True
+                        logger.debug(f"_reset_feature_picker_filter: Cleared via model.setFilterValue (type={type(child).__name__})")
+                        break
+
+                # Strategy 2: Find QComboBox > QLineEdit and clear the typed text
+                combo = picker.findChild(QComboBox)
+                if combo:
+                    line_edit = combo.lineEdit()
+                    if line_edit:
+                        # Block combo signals to prevent model filter update during clear
+                        combo.blockSignals(True)
+                        line_edit.blockSignals(True)
+                        try:
+                            line_edit.clear()
+                        finally:
+                            line_edit.blockSignals(False)
+                            combo.blockSignals(False)
+                        cleared = True
+                        logger.debug("_reset_feature_picker_filter: Cleared via lineEdit.clear()")
+
+                    # Also try combo.model() for setFilterValue
+                    if not cleared:
+                        model = combo.model()
+                        if model and hasattr(model, 'setFilterValue'):
+                            model.setFilterValue('')
+                            cleared = True
+                            logger.debug("_reset_feature_picker_filter: Cleared via combo.model().setFilterValue")
+
+                # Strategy 3: Find any QLineEdit child directly on the picker
+                if not cleared:
+                    line_edit = picker.findChild(QLineEdit)
+                    if line_edit:
+                        line_edit.blockSignals(True)
+                        try:
+                            line_edit.clear()
+                        finally:
+                            line_edit.blockSignals(False)
+                        cleared = True
+                        logger.debug("_reset_feature_picker_filter: Cleared via direct QLineEdit.clear()")
+
+                # Re-set the selected feature to restore display text
                 picker.setFeature(fid)
-                # Clear the filter model so dropdown shows all values
-                model = combo.model()
-                if model and hasattr(model, 'setFilterValue'):
-                    model.setFilterValue('')
-                    logger.debug(f"_reset_feature_picker_filter: Cleared filter, feature {fid} selected")
+                logger.debug(f"_reset_feature_picker_filter: Re-set feature {fid}, cleared={cleared}")
+
             finally:
                 picker.blockSignals(False)
         except Exception as e:
-            logger.debug(f"_reset_feature_picker_filter: {e}")
+            logger.debug(f"_reset_feature_picker_filter error: {e}")
 
     def _handle_exploring_features_result(
         self,
