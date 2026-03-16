@@ -1,16 +1,14 @@
 """
-V01 Sequence 4 — EXPLORATION : NAVIGATION & BARRE LATÉRALE
-============================================================
-Démonstration contextuelle des outils d'exploration.
-Au lieu de lister les boutons, on raconte un scénario :
-  1. Navigation ← → (next/prev) dans le sélecteur d'entités
-  2. Track activé → chaque changement d'entité recentre la carte
-  3. Identify → flash visuel de l'entité courante
-  4. Zoom → centrage précis
-  5. Select → sélection QGIS persistante sur le canevas
-  6. Link → synchronisation des sélecteurs
-  7. Reset → réinitialisation
-  8. Diagramme récapitulatif
+V01 Sequence 4 — BARRE LATÉRALE : 6 BOUTONS (DÉMO LIVE)
+==========================================================
+Démonstration live de chaque bouton avec clic ou activation :
+  1. Identify → clic → flash rouge de l'entité
+  2. Zoom → clic → carte centrée
+  3. Select → ON, sélectionner Seine-et-Marne, OFF
+  4. Track → activation → suivi automatique
+  5. Link → déjà actif par défaut (pas de clic)
+  6. Reset → décrit seulement (pas déclenché)
+  7. Diagramme récapitulatif
 
 Uses TimelineSequence for narration-synchronized execution.
 """
@@ -23,7 +21,7 @@ from sequences.base import TimelineSequence
 
 
 class V01S04Sidebar(TimelineSequence):
-    name = "V01 — Exploration & Navigation"
+    name = "V01 — Barre latérale (6 boutons)"
     sequence_id = "v01_s04"
     duration_estimate = 55.0
     obs_scene = "QGIS + FilterMate"
@@ -35,37 +33,9 @@ class V01S04Sidebar(TimelineSequence):
         move_dur = config["timing"].get("mouse_move_duration", 0.5)
 
         def click_next_feature():
-            """Click the → button in the feature picker to go to next entity."""
             btn = regions.get("exploring_feature_next_btn")
             if btn:
                 pyautogui.click(btn["x"], btn["y"], duration=move_dur)
-
-        def click_prev_feature():
-            """Click the ← button in the feature picker to go to previous entity."""
-            btn = regions.get("exploring_feature_prev_btn")
-            if btn:
-                pyautogui.click(btn["x"], btn["y"], duration=move_dur)
-
-        def navigate_features_demo():
-            """Step through 3 features using → button to show browsing."""
-            click_next_feature()
-            qgis.wait(1.5)
-            click_next_feature()
-            qgis.wait(1.5)
-            click_next_feature()
-            qgis.wait(1.0)
-
-        def activate_track_and_navigate():
-            """Turn on Track, then use ← → to show auto-zoom in action."""
-            qgis.toggle_sidebar_button("sidebar_track")
-            qgis.wait(0.5)
-            # Navigate with auto-zoom active — map follows each selection
-            click_next_feature()
-            qgis.wait(2.0)
-            click_next_feature()
-            qgis.wait(2.0)
-            click_prev_feature()
-            qgis.wait(1.5)
 
         def demo_identify():
             """Identify: flash the current entity in red on the map."""
@@ -77,25 +47,35 @@ class V01S04Sidebar(TimelineSequence):
             qgis.toggle_sidebar_button("sidebar_zoom")
             qgis.wait(2.0)
 
-        def demo_select():
-            """Select: create a persistent QGIS selection on the canvas."""
+        def demo_select_seine_et_marne():
+            """Select ON, pick Seine-et-Marne, show highlight, then OFF."""
             qgis.toggle_sidebar_button("sidebar_select")
+            qgis.wait(0.5)
+            # Navigate to Seine-et-Marne
+            qgis.select_combobox_item(
+                "exploring_feature_selector", "Seine-et-Marne"
+            )
+            qgis.wait(2.0)
+            # Toggle off — highlight disappears
+            qgis.toggle_sidebar_button("sidebar_select")
+            qgis.wait(1.0)
+
+        def demo_track():
+            """Track ON, navigate to show auto-zoom."""
+            qgis.toggle_sidebar_button("sidebar_track")
+            qgis.wait(0.5)
+            click_next_feature()
+            qgis.wait(2.0)
+            click_next_feature()
             qgis.wait(2.0)
 
-        def demo_link():
-            """Link: show synchronization between single and multiple pickers."""
-            qgis.toggle_sidebar_button("sidebar_link")
-            qgis.wait(1.5)
-
         return [
-            # Cue 0: Introduction — set context from previous sequence
+            # Cue 0: Introduction
             NarrationCue(
-                label="Intro exploration",
+                label="Intro barre latérale",
                 text=(
-                    "Maintenant que l'interface est en place, "
-                    "voyons comment explorer vos données. "
-                    "Le sélecteur d'entités possède des boutons "
-                    "précédent et suivant pour naviguer une par une."
+                    "La Zone d'Exploration possède 6 boutons "
+                    "dans sa barre latérale. Voyons-les en action."
                 ),
                 sync="during",
                 actions=lambda: (
@@ -104,85 +84,84 @@ class V01S04Sidebar(TimelineSequence):
                 ),
                 post_delay=0.3,
             ),
-            # Cue 1: Next/Prev navigation demo
-            NarrationCue(
-                label="Navigation ← →",
-                text=(
-                    "Je clique sur suivant : l'entité change. "
-                    "Encore. Et encore. "
-                    "C'est la façon la plus rapide de parcourir vos données."
-                ),
-                sync="during",
-                actions=lambda: navigate_features_demo(),
-                post_delay=0.3,
-            ),
-            # Cue 2: Track + navigation combo — the killer feature
-            NarrationCue(
-                label="Track + Navigation",
-                text=(
-                    "Activons Track. "
-                    "Maintenant, à chaque changement d'entité, "
-                    "la carte se recentre automatiquement. "
-                    "Suivant… la carte suit. Précédent… elle revient."
-                ),
-                sync="during",
-                actions=lambda: activate_track_and_navigate(),
-                post_delay=0.5,
-            ),
-            # Cue 3: Identify — flash visual
+            # Cue 1: Identify — click → flash
             NarrationCue(
                 label="Bouton Identify",
                 text=(
-                    "Identify fait clignoter l'entité en rouge sur la carte. "
-                    "Un repère visuel immédiat."
+                    "Identify. Je clique : l'entité clignote en rouge "
+                    "sur la carte. Un flash visuel pour la repérer "
+                    "instantanément."
                 ),
                 sync="during",
                 actions=lambda: demo_identify(),
-                post_delay=0.2,
+                post_delay=0.3,
             ),
-            # Cue 4: Zoom — precise centering
+            # Cue 2: Zoom — click → center
             NarrationCue(
                 label="Bouton Zoom",
-                text="Zoom recentre la vue sur l'entité sélectionnée.",
+                text=(
+                    "Zoom. Je clique : la carte se centre "
+                    "et zoome sur l'entité en cours."
+                ),
                 sync="during",
                 actions=lambda: demo_zoom(),
-                post_delay=0.2,
+                post_delay=0.3,
             ),
-            # Cue 5: Select — QGIS persistent selection
+            # Cue 3: Select — ON, Seine-et-Marne, OFF
             NarrationCue(
                 label="Bouton Select",
                 text=(
-                    "Select crée une sélection QGIS persistante sur le canevas. "
-                    "L'entité reste surlignée tant que vous ne désélectionnez pas."
+                    "Select. J'active le bouton, puis je sélectionne "
+                    "la Seine-et-Marne dans le sélecteur. "
+                    "Le département apparaît en surbrillance sur la carte, "
+                    "juste à côté de Paris. "
+                    "Je désactive : la surbrillance disparaît."
                 ),
                 sync="during",
-                actions=lambda: demo_select(),
-                post_delay=0.2,
+                actions=lambda: demo_select_seine_et_marne(),
+                post_delay=0.3,
             ),
-            # Cue 6: Link — sync pickers
+            # Cue 4: Track — activate + navigate
+            NarrationCue(
+                label="Bouton Track",
+                text=(
+                    "Track. J'active le suivi automatique. "
+                    "Maintenant, à chaque changement d'entité "
+                    "dans le sélecteur, la carte se recentre "
+                    "automatiquement."
+                ),
+                sync="during",
+                actions=lambda: demo_track(),
+                post_delay=0.3,
+            ),
+            # Cue 5: Link — already active by default
             NarrationCue(
                 label="Bouton Link",
                 text=(
-                    "Link synchronise le sélecteur simple et le sélecteur multiple. "
-                    "Quand vous changez le champ d'affichage dans l'un, "
-                    "l'autre se met à jour."
+                    "Link. Celui-ci est déjà activé par défaut. "
+                    "Il synchronise les trois groupes de sélection, "
+                    "simple, multiple et personnalisé, "
+                    "entre eux automatiquement."
                 ),
                 sync="during",
-                actions=lambda: demo_link(),
-                post_delay=0.2,
+                actions=lambda: qgis.hover_region("sidebar_link", duration=2.5),
+                post_delay=0.3,
             ),
-            # Cue 7: Reset — hover only
+            # Cue 6: Reset — describe only, don't trigger
             NarrationCue(
                 label="Bouton Reset",
                 text=(
-                    "Et Reset réinitialise toutes les propriétés "
-                    "d'exploration de la couche."
+                    "Reset réinitialise toutes les propriétés "
+                    "d'exploration de la couche active. "
+                    "Un retour à zéro propre. "
+                    "On ne le déclenche pas maintenant "
+                    "pour garder notre contexte."
                 ),
                 sync="during",
-                actions=lambda: qgis.hover_region("sidebar_reset", duration=2.0),
+                actions=lambda: qgis.hover_region("sidebar_reset", duration=2.5),
                 post_delay=0.3,
             ),
-            # Cue 8: Diagram recap
+            # Cue 7: Diagram recap
             NarrationCue(
                 label="Diagramme sidebar",
                 text="",

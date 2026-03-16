@@ -222,6 +222,11 @@ narration:
   voice: fr-FR-HenriNeural
   output_dir: output/narration
   speed: +0%
+  # --- F5-TTS settings (used when engine: f5-tts) ---
+  # f5_ref_audio: output/narration/ref_voice.wav   # ~15s reference audio for voice cloning
+  # f5_ref_text: ""                                  # transcription of reference audio (optional but recommended)
+  # f5_model: F5TTS_v1_Base                          # model variant
+  # f5_speed: 1.0                                    # speech speed multiplier (0.5=slow, 1.0=normal, 2.0=fast)
 capture:
   fps: 10
   output_dir: output/captures

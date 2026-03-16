@@ -2,7 +2,8 @@
 Narrator — TTS Audio Generation
 =================================
 Generates narration audio files for each video sequence using either
-edge-tts (free, Microsoft voices) or ElevenLabs (paid, higher quality).
+edge-tts (free, Microsoft voices), ElevenLabs (paid, higher quality),
+or F5-TTS (open-source, zero-shot voice cloning).
 
 Usage:
     from core.narrator import Narrator
@@ -39,6 +40,14 @@ class Narrator:
         self.speed: str = config.get("speed", "+0%")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+        # F5-TTS specific config
+        self.f5_ref_audio: Optional[str] = config.get("f5_ref_audio")
+        self.f5_ref_text: str = config.get("f5_ref_text", "")
+        self.f5_model: str = config.get("f5_model", "F5TTS_v1_Base")
+        self.f5_speed: float = config.get("f5_speed", 1.0)
+        self.f5_conda_env: str = config.get("f5_conda_env", "f5-tts")
+        self.f5_remove_silence: bool = config.get("f5_remove_silence", False)
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -74,8 +83,10 @@ class Narrator:
             return self._generate_edge_tts(text, output_path, voice)
         elif self.engine == "elevenlabs":
             return self._generate_elevenlabs(text, output_path, voice)
+        elif self.engine == "f5-tts":
+            return self._generate_f5_tts(text, output_path)
         else:
-            raise ValueError(f"Unknown TTS engine: {self.engine}. Use 'edge-tts' or 'elevenlabs'.")
+            raise ValueError(f"Unknown TTS engine: {self.engine}. Use 'edge-tts', 'elevenlabs', or 'f5-tts'.")
 
     def generate_all_narrations(
         self,
@@ -199,6 +210,98 @@ class Narrator:
         save(audio, str(output_path))
         logger.info("ElevenLabs generated: %s", output_path.name)
         return output_path
+
+    def _generate_f5_tts(self, text: str, output_path: Path) -> Path:
+        """Generate audio using F5-TTS CLI via conda subprocess.
+
+        Calls ``conda run -n <env> f5-tts_infer-cli …`` so that f5-tts
+        runs in its own Python 3.11 conda environment, avoiding
+        incompatibilities with the host Python (e.g. 3.14).
+        """
+        if not self.f5_ref_audio:
+            raise ValueError(
+                "f5_ref_audio must be set in narration config when using f5-tts engine. "
+                "Provide a ~15s reference audio WAV file for voice cloning."
+            )
+
+        ref_audio_path = Path(self.f5_ref_audio).resolve()
+        if not ref_audio_path.exists():
+            raise FileNotFoundError(f"F5-TTS reference audio not found: {ref_audio_path}")
+
+        # F5-TTS CLI writes to output_dir/output_file (default: infer_cli_out.wav)
+        out_dir = output_path.parent.resolve()
+        wav_filename = output_path.stem + ".wav"
+
+        cmd = [
+            "conda", "run", "--no-banner", "-n", self.f5_conda_env,
+            "f5-tts_infer-cli",
+            "--model", self.f5_model,
+            "--ref_audio", str(ref_audio_path),
+            "--ref_text", self.f5_ref_text,
+            "--gen_text", text,
+            "--output_dir", str(out_dir),
+            "--output_file", wav_filename,
+            "--speed", str(self.f5_speed),
+        ]
+        if self.f5_remove_silence:
+            cmd.append("--remove_silence")
+
+        logger.info("F5-TTS generating: %s (conda env: %s)", output_path.name, self.f5_conda_env)
+        logger.debug("F5-TTS command: %s", " ".join(cmd))
+
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,  # 5 min max per segment
+            )
+        except FileNotFoundError:
+            raise RuntimeError(
+                "conda not found on PATH. Install Miniconda/Anaconda and create "
+                f"the '{self.f5_conda_env}' environment:\n"
+                f"  conda create -n {self.f5_conda_env} python=3.11 -y\n"
+                f"  conda activate {self.f5_conda_env}\n"
+                "  pip install f5-tts torch torchaudio"
+            )
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(f"F5-TTS timed out after 300s for: {output_path.name}")
+
+        if result.returncode != 0:
+            logger.error("F5-TTS stderr:\n%s", result.stderr)
+            raise RuntimeError(
+                f"F5-TTS CLI failed (exit {result.returncode}):\n{result.stderr[:500]}"
+            )
+
+        wav_output = out_dir / wav_filename
+        if not wav_output.exists() or wav_output.stat().st_size == 0:
+            raise RuntimeError(f"F5-TTS produced empty/missing file: {wav_output}")
+
+        # Convert to mp3 if the caller requested .mp3
+        if output_path.suffix.lower() == ".mp3":
+            self._wav_to_mp3(wav_output, output_path)
+            wav_output.unlink(missing_ok=True)
+        else:
+            output_path = wav_output
+
+        logger.info("F5-TTS generated: %s (%.1fs)", output_path.name,
+                    self.get_narration_duration(output_path))
+        return output_path
+
+    @staticmethod
+    def _wav_to_mp3(wav_path: Path, mp3_path: Path) -> None:
+        """Convert WAV to MP3 using ffmpeg."""
+        try:
+            subprocess.run(
+                ["ffmpeg", "-y", "-i", str(wav_path), "-q:a", "2", str(mp3_path)],
+                capture_output=True,
+                check=True,
+            )
+        except FileNotFoundError:
+            raise RuntimeError(
+                "ffmpeg not found. Install ffmpeg to convert F5-TTS WAV output to MP3, "
+                "or set output files to .wav format."
+            )
 
     # ------------------------------------------------------------------
     # Duration helpers

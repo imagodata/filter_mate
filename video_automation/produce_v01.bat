@@ -14,11 +14,11 @@ REM    3. Python 3.10+ dans le PATH
 REM
 REM  Le script va :
 REM    Etape 1  -  Verifier les prerequis
-REM    Etape 2  -  Generer la narration TTS (14 fichiers MP3)
-REM    Etape 3  -  Generer les diagrammes (24 HTML + 24 PNG)
+REM    Etape 2  -  Generer la narration TTS (13 fichiers MP3)
+REM    Etape 3  -  Generer les diagrammes (9 HTML + 9 PNG)
 REM    Etape 4  -  Calibrer les positions UI (interactif)
 REM    Etape 5  -  Configurer OBS (scenes + sources)
-REM    Etape 6  -  Enregistrer les 14 sequences (QGIS + OBS)
+REM    Etape 6  -  Enregistrer les 9 sequences (QGIS + OBS)
 REM    Etape 7  -  Assembler la video finale
 REM
 REM  Sortie : output\final\filtermate_v01_final.mp4
@@ -30,7 +30,7 @@ cd /d "%~dp0"
 echo.
 echo  ===================================================
 echo   FilterMate V01  -  Production Video Automatisee
-echo   Installation et Premier Pas (7 min, 14 sequences)
+echo   Installation et Premier Pas (7 min, 9 sequences)
 echo  ===================================================
 echo.
 
@@ -132,7 +132,7 @@ echo.
 
 REM -- Etape 2 : Narration TTS -------------------------------------
 
-echo  [2/7] Generation de la narration TTS (14 sequences)...
+echo  [2/7] Generation de la narration TTS (9 sequences, 13 MP3)...
 echo.
 
 if exist "output\narration\v01\v01_s00_narration.mp3" (
@@ -150,7 +150,7 @@ echo.
 
 REM -- Etape 3 : Diagrammes ----------------------------------------
 
-echo  [3/7] Generation des diagrammes HTML + PNG (24 diagrammes)...
+echo  [3/7] Generation des diagrammes HTML + PNG (9 diagrammes)...
 echo.
 
 if exist "output\diagrams\v01_install_flow.png" (
@@ -200,7 +200,7 @@ echo.
 
 REM -- Etape 6 : Enregistrement ------------------------------------
 
-echo  [6/7] Enregistrement des 14 sequences V01...
+echo  [6/7] Enregistrement des 9 sequences V01...
 echo.
 echo    ATTENTION : Ne touchez pas a la souris ni au clavier pendant
 echo    l'enregistrement ! PyAutoGUI va piloter QGIS automatiquement.
@@ -236,13 +236,13 @@ echo  ===================================================
 echo.
 echo   Fichiers generes :
 echo.
-echo     Narration :  output\narration\v01\  (14 MP3)
-echo     Diagrammes : output\diagrams\       (24 HTML + 24 PNG)
+echo     Narration :  output\narration\v01\  (13 MP3)
+echo     Diagrammes : output\diagrams\       (9 HTML + 9 PNG)
 echo     Clips :      Voir dossier OBS
 echo     Video :      output\final\filtermate_v01_final.mp4
 echo.
 echo   Duree totale narration : ~5m30
-echo   Sequences : 14 (Hook a Conclusion)
+echo   Sequences : 9 (s00 Hook a s08 Conclusion)
 echo.
 echo  ===================================================
 echo.

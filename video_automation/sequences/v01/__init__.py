@@ -1,7 +1,7 @@
 """
 Video V01 — Installation & Premier Pas
 =======================================
-13 sequences mapping the SCRIPT_V01_INSTALLATION.md tutorial.
+9 sequence files (s00-s08) covering the 12 sections of SCRIPT_V01_INSTALLATION.md.
 Auto-discovered from this package and sorted by sequence_id.
 """
 from __future__ import annotations

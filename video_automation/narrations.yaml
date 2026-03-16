@@ -119,12 +119,14 @@ v01:
   v01_s02: >-
     Pour lancer FilterMate, cliquez sur son icône dans la barre d'outils,
     ou allez dans le menu Extensions puis FilterMate.
-    Nos couches de démonstration sont déjà chargées dans le projet :
-    un Shapefile des départements de France et un Shapefile des communes.
-    FilterMate les détecte automatiquement.
-    Sélectionnons la couche départements comme source,
-    puis configurons le champ d'affichage sur NOM_DEPT
-    pour voir les noms des départements dans le sélecteur.
+    Pour l'instant, il est vide. C'est normal. FilterMate détecte automatiquement
+    les couches de votre projet. Chargeons nos données de démonstration :
+    un Shapefile des départements de France, environ 100 entités,
+    et un Shapefile des communes, 35 000 entités.
+    L'interface se remplit.
+    Après avoir changé le champ d'affichage, je tape Paris dans le sélecteur.
+    Le département apparaît. Avec le bouton suivant, je passe au département
+    d'après, puis précédent pour revenir sur Paris. La navigation est immédiate.
     Le sélecteur affiche directement le nom des départements, pas un identifiant
     cryptique. C'est grâce à la détection automatique du champ d'affichage.
     FilterMate analyse votre couche et choisit intelligemment le meilleur champ
@@ -136,36 +138,37 @@ v01:
     En haut, la Zone d'Exploration. C'est ici que vous parcourez et
     sélectionnez les entités de vos couches.
     En bas, la Toolbox. Elle contient deux onglets : FILTERING et EXPORTING.
-    Et enfin, l'Action Bar. Ce sont les 6 boutons d'action.
     Remarquez aussi le header : la pastille orange indique vos favoris,
     et la pastille bleue affiche le backend actif.
-
-  v01_s04: >-
-    Maintenant que l'interface est en place, voyons comment explorer vos données.
-    Le sélecteur d'entités possède des boutons précédent et suivant
-    pour naviguer une par une.
-    Je clique sur suivant : l'entité change. Encore. Et encore.
-    C'est la façon la plus rapide de parcourir vos données.
-    Activons Track. Maintenant, à chaque changement d'entité, la carte se
-    recentre automatiquement. Suivant… la carte suit. Précédent… elle revient.
-    Identify fait clignoter l'entité en rouge sur la carte. Un repère visuel immédiat.
-    Zoom recentre la vue sur l'entité sélectionnée.
-    Select crée une sélection QGIS persistante sur le canevas.
-    L'entité reste surlignée tant que vous ne désélectionnez pas.
-    Link synchronise le sélecteur simple et le sélecteur multiple.
-    Quand vous changez le champ d'affichage dans l'un, l'autre se met à jour.
-    Et Reset réinitialise toutes les propriétés d'exploration de la couche.
-
-  v01_s05: >-
-    L'Action Bar est le centre de commande de FilterMate. Six boutons, toujours accessibles.
-    Filter lance le filtrage spatial avec votre configuration actuelle.
-    Undo annule le dernier filtre, Redo le rétablit.
-    FilterMate conserve jusqu'à 100 états d'historique.
+    Et enfin, l'Action Bar. C'est le cœur de l'interaction : tout le reste
+    de l'interface sert à configurer ce que ces 6 boutons vont exécuter.
+    Filter applique le filtre que vous avez configuré. C'est le bouton principal.
+    Undo annule le dernier filtre, Redo le rétablit. FilterMate conserve
+    jusqu'à 100 états d'historique.
     Unfilter retire tous les filtres actifs de toutes les couches.
     Export exporte vos données filtrées en GeoPackage, avec le projet QGIS embarqué.
-    About est le seul bouton toujours actif, quel que soit l'onglet.
+    Et About, le seul bouton toujours actif, quel que soit l'état du plugin.
     Les boutons s'adaptent à l'onglet actif. En EXPORTING, Filter, Undo, Redo
     et Unfilter se désactivent. En FILTERING, c'est Export qui se grise.
+
+  v01_s04: >-
+    La Zone d'Exploration possède 6 boutons dans sa barre latérale.
+    Voyons-les en action.
+    Identify. Je clique : l'entité clignote en rouge sur la carte.
+    Un flash visuel pour la repérer instantanément.
+    Zoom. Je clique : la carte se centre et zoome sur l'entité en cours.
+    Select. J'active le bouton, puis je sélectionne la Seine-et-Marne
+    dans le sélecteur. Le département apparaît en surbrillance sur la carte,
+    juste à côté de Paris. Je désactive : la surbrillance disparaît.
+    Track. J'active le suivi automatique. Maintenant, à chaque changement
+    d'entité dans le sélecteur, la carte se recentre automatiquement.
+    Link. Celui-ci est déjà activé par défaut. Il synchronise les trois groupes
+    de sélection, simple, multiple et personnalisé, entre eux automatiquement.
+    Reset réinitialise toutes les propriétés d'exploration de la couche active.
+    Un retour à zéro propre. On ne le déclenche pas maintenant pour garder
+    notre contexte.
+
+  v01_s05: ""
 
   v01_s06: >-
     Passons à la pratique. Nos deux couches sont chargées : les départements
