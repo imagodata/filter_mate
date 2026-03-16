@@ -231,6 +231,13 @@ narration:
   voice: fr-FR-HenriNeural
   output_dir: output/narration
   speed: +0%
+  # --- F5-TTS settings (used when engine: f5-tts) ---
+  f5_ref_audio: output/narration/ref_voice.wav
+  f5_ref_text: "de trouver sa véritable vocation, l'art ou plutôt la critique et l'histoire de l'art. Blunt, qui a vécu une partie de son enfance à Paris, où son père était le pasteur de la communauté anglaise, s'est en effet entiché d'un peintre français, Nicolas Poussin."
+  f5_model: F5TTS_v1_Base
+  f5_speed: 1.0
+  f5_conda_env: f5-tts
+  f5_remove_silence: false
 capture:
   fps: 10
   output_dir: output/captures
