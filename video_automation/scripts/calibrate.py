@@ -88,6 +88,9 @@ GROUPS: dict[str, dict] = {
             ("tab_exploring", "l'onglet EXPLORING / EXPLORATION", "point"),
             ("exploring_layer_combo", "le combo COUCHE dans la Zone d'Exploration", "point"),
             ("exploring_feature_selector", "le combo ENTITE / FEATURE dans la Zone d'Exploration", "point"),
+            ("exploring_display_field_combo", "le combo CHAMP D'AFFICHAGE dans la Zone d'Exploration", "point"),
+            ("exploring_feature_prev_btn", "le bouton PRECEDENT (fleche gauche) du selecteur d'entites", "point"),
+            ("exploring_feature_next_btn", "le bouton SUIVANT (fleche droite) du selecteur d'entites", "point"),
         ],
     },
     "sidebar": {
@@ -152,7 +155,7 @@ GROUPS: dict[str, dict] = {
     "menu_items": {
         "label": "Elements de menus deroulants",
         "desc": "Chaque element necessite d'ouvrir un menu AVANT la capture.",
-        "timer": 3,
+        "timer": 5,
         "targets": [
             ("menu_extensions_manage", "l'entree GERER LES EXTENSIONS", "point",
              "Ouvrez le menu EXTENSIONS dans la barre de menu QGIS"),
@@ -174,7 +177,7 @@ GROUPS: dict[str, dict] = {
     "plugin_manager": {
         "label": "Plugin Manager (dialogue)",
         "desc": "Le dialogue Plugin Manager doit etre ouvert.",
-        "timer": 3,
+        "timer": 5,
         "prereq": "Ouvrez le Plugin Manager : Extensions > Gerer les extensions",
         "targets": [
             ("plugin_manager_search", "la BARRE DE RECHERCHE en haut du Plugin Manager", "point"),
@@ -186,7 +189,7 @@ GROUPS: dict[str, dict] = {
     "settings_dialog": {
         "label": "Settings > Options (dialogue)",
         "desc": "Le dialogue Options doit etre ouvert.",
-        "timer": 3,
+        "timer": 5,
         "prereq": "Ouvrez le dialogue : Parametres > Options",
         "targets": [
             ("settings_options_general_tab", "l'onglet GENERAL dans le panneau gauche", "point"),
@@ -196,7 +199,7 @@ GROUPS: dict[str, dict] = {
     "about_config": {
         "label": "About FilterMate > Config (dialogue)",
         "desc": "Le dialogue About de FilterMate doit etre ouvert sur l'onglet Config.",
-        "timer": 3,
+        "timer": 5,
         "prereq": "Ouvrez le dialogue About FilterMate, puis cliquez sur l'onglet Config",
         "targets": [
             ("about_config_tab", "l'onglet CONFIG dans le dialogue About FilterMate", "point"),
@@ -207,10 +210,18 @@ GROUPS: dict[str, dict] = {
     "log_panel": {
         "label": "Panneau Log Messages",
         "desc": "Le panneau Messages de log doit etre visible.",
-        "timer": 3,
+        "timer": 5,
         "prereq": "Ouvrez le panneau : Vue > Panneaux > Messages de log",
         "targets": [
             ("log_panel_filtermate_tab", "l'onglet FilterMate dans le panneau Log Messages", "point"),
+        ],
+    },
+    "layer_panel": {
+        "label": "Panneau Couches (Layers)",
+        "desc": "Checkboxes de visibilite des couches dans le panneau Layers",
+        "targets": [
+            ("layer_panel_visibility_departements", "la checkbox de visibilite de la couche DEPARTEMENTS", "point"),
+            ("layer_panel_visibility_communes", "la checkbox de visibilite de la couche COMMUNES", "point"),
         ],
     },
 }
@@ -612,6 +623,8 @@ def cmd_validate(config_path: Path) -> None:
             "redo_button", "unfilter_button", "export_button", "about_button",
             "favorites_button", "badge_backend", "badge_favorites",
             "exploring_layer_combo", "exploring_feature_selector",
+            "exploring_display_field_combo",
+            "exploring_feature_prev_btn", "exploring_feature_next_btn",
             "sidebar_identify", "sidebar_zoom", "sidebar_select",
             "sidebar_track", "sidebar_link", "sidebar_reset",
             "btn_toggle_layers_to_filter", "btn_toggle_geometric_predicates",
@@ -843,7 +856,12 @@ def cmd_calibrate_group(config_path: Path, group_id: str) -> None:
     print(f"  {len(group['targets'])} element(s) a calibrer")
     print()
 
-    _calibrate_targets(config, regions, group["targets"], config_path=config_path)
+    _calibrate_targets(
+        config, regions, group["targets"],
+        config_path=config_path,
+        group_timer=group.get("timer", 0),
+        group_prereq=group.get("prereq", ""),
+    )
 
     print(f"\n  Groupe '{group_id}' termine.")
 
@@ -880,7 +898,12 @@ def cmd_calibrate_all(config_path: Path) -> None:
         # Save state for undo
         undo_stack.append(copy.deepcopy(regions))
 
-        _calibrate_targets(config, regions, group["targets"], config_path=config_path)
+        _calibrate_targets(
+            config, regions, group["targets"],
+            config_path=config_path,
+            group_timer=group.get("timer", 0),
+            group_prereq=group.get("prereq", ""),
+        )
 
     print()
     print("=" * 65)
@@ -890,12 +913,29 @@ def cmd_calibrate_all(config_path: Path) -> None:
 
 
 def _calibrate_targets(config: dict, regions: dict, targets: list,
-                       config_path: Path | None = None) -> None:
+                       config_path: Path | None = None,
+                       group_timer: int = 0,
+                       group_prereq: str = "") -> None:
     """Calibrate a list of targets into regions dict.
 
     Auto-saves to config_path after each real change.
+
+    Parameters
+    ----------
+    group_timer : int
+        Countdown seconds before each target (for menus/dropdowns that
+        need to be opened first).
+    group_prereq : str
+        Instruction displayed once at the start for the whole group
+        (e.g. "Ouvrez le Plugin Manager").
     """
     corners: dict[str, dict] = {}
+
+    # Show group prereq once if present
+    if group_prereq:
+        print(f"\n  ┌─ PREREQUIS ──────────────────────────────────")
+        print(f"  │  {group_prereq}")
+        print(f"  └──────────────────────────────────────────────")
 
     def _auto_save(region_key: str, new_val: dict) -> None:
         """Save only if value actually changed."""
@@ -907,10 +947,52 @@ def _calibrate_targets(config: dict, regions: dict, targets: list,
 
     for target in targets:
         region_key, prompt, kind = target[0], target[1], target[2]
+        # Per-target prereq (4th element in tuple, if present)
+        target_prereq = target[3] if len(target) > 3 else ""
         current = regions.get(region_key)
 
-        if kind in ("tl", "br"):
+        # For targets that need a menu/dialog open first:
+        # show prereq, wait for user, countdown, then capture mouse directly
+        auto_capture = False
+        if target_prereq:
+            print(f"\n     ┌─ PREREQUIS ─────────────────────────────")
+            print(f"     │  {target_prereq}")
+            print(f"     │  Puis placez la souris sur : {prompt}")
+            print(f"     │  Appuyez sur ENTREE quand c'est pret (s = passer)")
+            print(f"     └─────────────────────────────────────────")
+            ready = input("     pret ? ").strip().lower()
+            if ready == "s":
+                print(f"     (passe)")
+                continue
+            if group_timer > 0:
+                _countdown(group_timer, "Capture dans")
+                auto_capture = True
+        elif group_timer > 0:
+            print(f"\n  >> {prompt}")
+            print(f"     Placez la souris sur l'element.")
+            print(f"     Appuyez sur ENTREE quand c'est pret (s = passer)")
+            ready = input("     pret ? ").strip().lower()
+            if ready == "s":
+                print(f"     (passe)")
+                continue
+            _countdown(group_timer, "Capture dans")
+            auto_capture = True
+
+        if auto_capture:
+            # Capture mouse position directly after countdown
+            pos = get_mouse_position()
+            if pos:
+                x, y = pos
+                print(f"     + Enregistre : ({x}, {y})")
+            else:
+                print(f"     ! pyautogui non disponible, saisie manuelle requise")
+                x, y = record_position(prompt, current)
+        elif kind in ("tl", "br"):
             x, y = record_position(prompt, current)
+        else:
+            x, y = record_position(prompt, current)
+
+        if kind in ("tl", "br"):
             corners.setdefault(region_key, {})[kind] = (x, y)
             if "tl" in corners.get(region_key, {}) and "br" in corners.get(region_key, {}):
                 tl = corners[region_key]["tl"]
@@ -925,7 +1007,6 @@ def _calibrate_targets(config: dict, regions: dict, targets: list,
                 _auto_save(region_key, new_val)
 
         elif kind == "point":
-            x, y = record_position(prompt, current)
             new_val = {"x": x, "y": y}
             _auto_save(region_key, new_val)
 

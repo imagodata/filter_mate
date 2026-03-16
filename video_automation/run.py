@@ -8,6 +8,7 @@ and FFmpeg assembly.
 
 Usage (Desktop/OBS mode):
     python run.py --all                    # Run complete pipeline with OBS
+    python run.py --all --from 5           # Resume from sequence 5 (skip 0–4)
     python run.py --sequence 4             # Run only sequence 4
     python run.py --setup-obs              # Auto-configure OBS
 
@@ -78,6 +79,8 @@ def load_config(config_path: Path) -> dict:
               help="Video script to use (e.g. 'v01'). Defaults to original sequences.")
 @click.option("--sequence", "-s", type=int, default=None, metavar="N",
               help="Run only sequence N (0–10 for original, 0–13 for v01)")
+@click.option("--from", "start_from", type=int, default=None, metavar="N",
+              help="Resume pipeline from sequence N, skipping earlier ones")
 @click.option("--diagrams", is_flag=True, help="Generate Mermaid diagram HTML/PNG files")
 @click.option("--narration", is_flag=True, help="Generate TTS narration audio files")
 @click.option("--calibrate", is_flag=True, help="Run interactive UI calibration")
@@ -90,7 +93,7 @@ def load_config(config_path: Path) -> dict:
 @click.option("--list", "list_seqs", is_flag=True, help="List all sequences with details")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose (DEBUG) logging")
 @click.pass_context
-def cli(ctx, config, video, run_all, sequence, diagrams, narration, calibrate,
+def cli(ctx, config, video, run_all, sequence, start_from, diagrams, narration, calibrate,
         setup_obs, assemble, capture, capture_fps, dry_run, list_seqs, verbose):
     """FilterMate Video Automation — orchestrates QGIS + OBS/FrameCapture + FFmpeg."""
     if verbose:
@@ -138,7 +141,7 @@ def cli(ctx, config, video, run_all, sequence, diagrams, narration, calibrate,
         return
 
     if run_all:
-        cmd_run_all(cfg, dry_run, video=video, use_capture=capture)
+        cmd_run_all(cfg, dry_run, video=video, use_capture=capture, start_from=start_from)
         return
 
     # No flag given — show help
@@ -291,13 +294,50 @@ def cmd_run_sequence(
             click.echo(f"\n  Recording saved: {output_path}")
 
 
+def _find_existing_clips(config: dict, video: str | None = None) -> dict[int, str]:
+    """Scan the output directory for already-recorded clips.
+
+    Returns a dict mapping sequence index to clip file path.
+    Clips are expected to follow the naming pattern ``seq_NN_*.mkv`` or
+    ``seq_NN_*.mp4`` (where NN is the zero-padded sequence index).
+    If the recorder just dumps files without a predictable name, we fall
+    back to sorted-order matching.
+    """
+    import re
+
+    default_obs_dir = Path.home() / "Videos" / "FilterMate"
+    obs_output = Path(config.get("obs", {}).get("output_dir", str(default_obs_dir)))
+
+    existing: dict[int, str] = {}
+    if not obs_output.exists():
+        return existing
+
+    clips = sorted(obs_output.glob("*.mkv")) + sorted(obs_output.glob("*.mp4"))
+    for clip in clips:
+        # Try to extract sequence index from filename (e.g. seq_03_interface.mkv)
+        m = re.search(r"seq[_-]?(\d+)", clip.stem, re.IGNORECASE)
+        if m:
+            existing[int(m.group(1))] = str(clip)
+
+    return existing
+
+
 def cmd_run_all(
     config: dict,
     dry_run: bool,
     video: str | None = None,
     use_capture: bool = False,
+    start_from: int | None = None,
 ) -> None:
-    """Run the complete video production pipeline."""
+    """Run the complete video production pipeline.
+
+    Parameters
+    ----------
+    start_from : int | None
+        If set, skip all sequences before this index.  Already-recorded
+        clips found on disk are collected so that the final assembly
+        still includes them.
+    """
     SEQUENCES = _load_sequences(video)
     backend = "FrameCapture" if use_capture else "OBS"
 
@@ -305,11 +345,19 @@ def cmd_run_all(
     click.echo(f"  FilterMate — Complete Video Production ({backend})")
     click.echo("=" * 65)
 
+    # Validate --from range
+    if start_from is not None:
+        if start_from < 0 or start_from >= len(SEQUENCES):
+            click.echo(f"Error: --from {start_from} out of range (0–{len(SEQUENCES) - 1})")
+            sys.exit(1)
+
     if dry_run:
         click.echo(f"\n[DRY-RUN] Would run these sequences (backend: {backend}):\n")
         for i, SeqClass in enumerate(SEQUENCES):
             seq = SeqClass()
-            click.echo(f"  [{i}] {seq.name:<40} {seq.duration_estimate:.0f}s")
+            skipped = start_from is not None and i < start_from
+            marker = "SKIP" if skipped else " RUN"
+            click.echo(f"  [{marker}] [{i}] {seq.name:<40} {seq.duration_estimate:.0f}s")
         return
 
     # Check prerequisites
@@ -318,8 +366,27 @@ def cmd_run_all(
     recorder, qgis = _init_controllers(config, use_capture=use_capture)
 
     recording_files: list[str] = []
+    # Collect timeline results for narration timecode assembly
+    all_timeline_results: list[tuple[str, object]] = []  # (clip_path, TimelineResult|None)
+
+    # When resuming, collect existing clips for skipped sequences
+    if start_from and start_from > 0:
+        existing_clips = _find_existing_clips(config, video)
+        for i in range(start_from):
+            seq = SEQUENCES[i]()
+            if i in existing_clips:
+                clip = existing_clips[i]
+                recording_files.append(clip)
+                all_timeline_results.append((clip, None))
+                click.echo(f"\n[{i}/{len(SEQUENCES)-1}] {seq.name}  -- SKIP (existing: {Path(clip).name})")
+            else:
+                click.echo(f"\n[{i}/{len(SEQUENCES)-1}] {seq.name}  -- SKIP (no existing clip found)")
+
     with recorder:
         for i, SeqClass in enumerate(SEQUENCES):
+            if start_from is not None and i < start_from:
+                continue
+
             seq = SeqClass()
             click.echo(f"\n[{i}/{len(SEQUENCES)-1}] {seq.name}")
 
@@ -332,6 +399,7 @@ def cmd_run_all(
                 output_path = recorder.stop_recording()
                 if output_path:
                     recording_files.append(output_path)
+                    all_timeline_results.append((output_path, seq.timeline_result))
                 break
             except Exception as exc:
                 logger.error("Sequence %d failed: %s", i, exc)
@@ -341,6 +409,10 @@ def cmd_run_all(
                 if output_path:
                     recording_files.append(output_path)
                     click.echo(f"  ok Saved: {output_path}")
+                    # Collect timeline result if this was a TimelineSequence
+                    all_timeline_results.append((output_path, seq.timeline_result))
+                    if seq.timeline_result:
+                        click.echo(f"       Timeline: {len(seq.timeline_result.narration_timecodes)} narration segments")
                 # OBS needs time to finalize the file before starting a new recording
                 time.sleep(3)
 
@@ -348,7 +420,10 @@ def cmd_run_all(
 
     if recording_files:
         click.echo("\nProceeding to assembly...")
-        cmd_assemble(config, dry_run=False, clips=recording_files, video=video)
+        cmd_assemble(
+            config, dry_run=False, clips=recording_files, video=video,
+            timeline_results=all_timeline_results,
+        )
 
 
 def cmd_assemble(
@@ -356,8 +431,14 @@ def cmd_assemble(
     dry_run: bool,
     clips: list[str] | None = None,
     video: str | None = None,
+    timeline_results: list[tuple[str, object]] | None = None,
 ) -> None:
-    """Assemble final video from recorded clips + narration + diagrams."""
+    """Assemble final video from recorded clips + narration + diagrams.
+
+    If *timeline_results* are provided (from TimelineSequence runs), uses
+    precise timecode-based narration placement.  Otherwise falls back to
+    the legacy approach (concatenating narration files).
+    """
     from core.video_assembler import VideoAssembler
 
     out_cfg = config.get("output", {})
@@ -376,22 +457,38 @@ def cmd_assemble(
             click.echo(f"No MKV clips found in {obs_output}. Record first with --all or --sequence N.")
             return
 
-    # Find narration files (support both original seq* and v01 patterns)
-    narration_files = sorted(narr_dir.glob("*_narration.mp3"))
-
     output_name = f"filtermate_{video}_final.mp4" if video else "filtermate_final.mp4"
 
+    # Check if we have timeline results with timecodes
+    has_timecodes = (
+        timeline_results
+        and any(tr is not None for _, tr in timeline_results)
+    )
+
     if dry_run:
-        click.echo(f"[DRY-RUN] Would assemble {len(clips)} clips + {len(narration_files)} narrations")
+        mode = "timecode-based" if has_timecodes else "legacy concat"
+        click.echo(f"[DRY-RUN] Would assemble {len(clips)} clips ({mode})")
         click.echo(f"          Output: {final_dir / output_name}")
         return
 
-    click.echo(f"\nAssembling {len(clips)} clips…")
-    final_path = assembler.create_final_video(
-        clips=clips,
-        narrations=list(narration_files),
-        output_path=final_dir / output_name,
-    )
+    if has_timecodes:
+        # Timecode-based assembly: narration placed at exact positions
+        click.echo(f"\nAssembling {len(clips)} clips with timecode-based narration…")
+        final_path = assembler.create_final_video_with_timecodes(
+            clips=clips,
+            timeline_results=[tr for _, tr in timeline_results],
+            output_path=final_dir / output_name,
+        )
+    else:
+        # Legacy: find narration files and concatenate
+        narration_files = sorted(narr_dir.glob("*_narration.mp3"))
+        click.echo(f"\nAssembling {len(clips)} clips + {len(narration_files)} narrations (legacy)…")
+        final_path = assembler.create_final_video(
+            clips=clips,
+            narrations=list(narration_files),
+            output_path=final_dir / output_name,
+        )
+
     click.echo(f"\n  ok Final video: {final_path}\n")
 
 

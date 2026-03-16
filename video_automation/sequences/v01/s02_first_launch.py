@@ -1,43 +1,130 @@
 """
-V01 Sequence 2 — PREMIER LANCEMENT (0:45 - 1:15)
-=================================================
+V01 Sequence 2 — PREMIER LANCEMENT + AUTO-DETECTION CHAMP D'AFFICHAGE
+======================================================================
 Cliquer sur l'icone FilterMate, le dock widget s'ouvre.
-Charger les donnees de demo (departements + communes).
+Selectionner la couche departements, configurer le champ d'affichage NOM_DEPT.
+Montrer la detection automatique du champ d'affichage (6 niveaux de priorite).
+
+Uses TimelineSequence for narration-synchronized execution.
 """
 from __future__ import annotations
 
-from core.narrator import V01_NARRATION_TEXTS
-from sequences.base import VideoSequence
+import pyautogui
+
+from core.timeline import NarrationCue
+from sequences.base import TimelineSequence
 
 
-class V01S02FirstLaunch(VideoSequence):
-    name = "V01 — Premier lancement"
+class V01S02FirstLaunch(TimelineSequence):
+    name = "V01 — Premier lancement + Auto-détection affichage"
     sequence_id = "v01_s02"
-    duration_estimate = 30.0
+    duration_estimate = 45.0
     obs_scene = "QGIS + FilterMate"
-    diagram_ids = []
-    narration_text = V01_NARRATION_TEXTS["v01_s02"]
+    diagram_ids = ["v01_display_field_detection"]
+    narration_text = ""  # Narration is now in the cues
 
-    def execute(self, obs, qgis, config):
-        qgis.focus_qgis()
-        qgis.wait(1.0)
+    def build_timeline(self, obs, qgis, config):
+        regions = config["qgis"]["regions"]
+        move_dur = config["timing"].get("mouse_move_duration", 0.5)
 
-        # 1. Click FilterMate toolbar icon
-        qgis.open_filtermate_toolbar()
-        qgis.wait(2.0)
+        def open_feature_selector_and_scroll():
+            """Open feature selector to show readable names, scroll to demo."""
+            selector = regions.get("exploring_feature_selector")
+            if selector:
+                qgis.hover_region("exploring_feature_selector", duration=1.0)
+                pyautogui.click(selector["x"], selector["y"], duration=move_dur)
+            qgis.wait(1.0)
+            qgis.scroll_down(3)
+            qgis.wait(0.8)
+            qgis.scroll_up(3)
+            qgis.wait(0.5)
+            pyautogui.press("escape")
 
-        # 2. Show the empty dock widget
-        qgis.focus_filtermate()
-        qgis.wait(2.0)
-
-        # 3. Hover over the empty panel to show it's blank
-        qgis.hover_region("filtermate_dock", duration=1.5)
-
-        # 4. Load demo data — drag & drop or use Layer > Add Vector Layer
-        # (Data should be pre-loaded in the demo project)
-        # Here we simulate the layers appearing after project load
-        qgis.wait(2.0)
-
-        # 5. Show that the dock widget now has content
-        qgis.focus_filtermate()
-        qgis.wait(2.0)
+        return [
+            # Cue 0: Open FilterMate
+            NarrationCue(
+                label="Lancement FilterMate",
+                text=(
+                    "Pour lancer FilterMate, cliquez sur son icône "
+                    "dans la barre d'outils, "
+                    "ou allez dans le menu Extensions puis FilterMate."
+                ),
+                sync="during",
+                actions=lambda: (
+                    qgis.focus_qgis(),
+                    qgis.open_filtermate_toolbar(),
+                ),
+                post_delay=0.5,
+            ),
+            # Cue 1: Switch to FILTERING tab
+            NarrationCue(
+                label="Onglet FILTERING",
+                text="Sélectionnons la couche départements comme source,",
+                sync="during",
+                actions=lambda: (
+                    self._log.info("Switching to FILTERING tab"),
+                    qgis.select_tab("FILTERING"),
+                ),
+                post_delay=0.5,
+            ),
+            # Cue 2: Layers already loaded
+            NarrationCue(
+                label="Couches détectées",
+                text=(
+                    "Nos couches de démonstration sont déjà chargées dans le projet : "
+                    "un Shapefile des départements de France et un Shapefile des communes. "
+                    "FilterMate les détecte automatiquement."
+                ),
+                sync="during",
+                actions=lambda: qgis.wait(1.0),
+                post_delay=0.5,
+            ),
+            # Cue 3: Select source layer
+            NarrationCue(
+                label="Sélection couche départements",
+                text="",
+                actions=lambda: (
+                    self._log.info("Selecting source layer 'departements'"),
+                    qgis.select_combobox_by_arrow("source_layer_combo", 2),
+                ),
+                post_delay=0.3,
+            ),
+            # Cue 4: Configure display field
+            NarrationCue(
+                label="Champ affichage NOM_DEPT",
+                text=(
+                    "puis configurons le champ d'affichage sur NOM_DEPT "
+                    "pour voir les noms des départements dans le sélecteur."
+                ),
+                sync="during",
+                actions=lambda: (
+                    self._log.info("Setting display field to 'NOM_DEPT'"),
+                    qgis.select_combobox_item("exploring_display_field_combo", "NOM_DEPT"),
+                ),
+                post_delay=0.8,
+            ),
+            # Cue 5: Show auto-detection — scroll through readable names
+            NarrationCue(
+                label="Auto-détection champ d'affichage",
+                text=(
+                    "Le sélecteur affiche directement le nom des départements, "
+                    "pas un identifiant cryptique. "
+                    "C'est grâce à la détection automatique du champ d'affichage. "
+                    "FilterMate analyse votre couche et choisit intelligemment "
+                    "le meilleur champ selon 6 niveaux de priorité."
+                ),
+                sync="during",
+                actions=lambda: open_feature_selector_and_scroll(),
+                post_delay=0.5,
+            ),
+            # Cue 6: Diagram
+            NarrationCue(
+                label="Diagramme auto-détection",
+                text="C'est automatique.",
+                sync="during",
+                actions=lambda: self.show_diagram(
+                    obs, "v01_display_field_detection", duration=5.0
+                ),
+                post_delay=0.5,
+            ),
+        ]

@@ -31,11 +31,11 @@ qgis:
       width: 2551
       height: 168
     source_layer_combo:
-      x: 2176
-      y: 915
+      x: 2162
+      y: 891
     btn_toggle_layers_to_filter:
-      x: 1946
-      y: 998
+      x: 1957
+      y: 967
     btn_toggle_geometric_predicates:
       x: 1957
       y: 1117
@@ -43,11 +43,11 @@ qgis:
       x: 1956
       y: 1192
     target_layer_combo:
-      x: 2100
-      y: 982
+      x: 2105
+      y: 956
     predicate_combo:
-      x: 2044
-      y: 1124
+      x: 2052
+      y: 1110
     buffer_enable_checkbox:
       x: 2008
       y: 1190
@@ -73,8 +73,8 @@ qgis:
       x: 2407
       y: 300
     tab_filtering:
-      x: 2004
-      y: 873
+      x: 1984
+      y: 834
     tab_exploring:
       x: 2061
       y: 362
@@ -84,14 +84,23 @@ qgis:
     exploring_zone:
       x: 1941
       y: 307
-      width: 610
-      height: 503
+      width: 1
+      height: 1
     exploring_layer_combo:
-      x: 2160
-      y: 400
+      x: 2042
+      y: 392
     exploring_feature_selector:
-      x: 2160
-      y: 445
+      x: 2026
+      y: 262
+    exploring_display_field_combo:
+      x: 2078
+      y: 483
+    exploring_feature_prev_btn:
+      x: 2438
+      y: 426
+    exploring_feature_next_btn:
+      x: 2484
+      y: 432
     sidebar_identify:
       x: 1961
       y: 400
@@ -99,17 +108,17 @@ qgis:
       x: 1961
       y: 470
     sidebar_select:
-      x: 1961
-      y: 540
+      x: 1959
+      y: 521
     sidebar_track:
-      x: 1961
-      y: 610
+      x: 1956
+      y: 593
     sidebar_link:
-      x: 1952
-      y: 698
+      x: 1953
+      y: 665
     sidebar_reset:
-      x: 1951
-      y: 785
+      x: 1953
+      y: 734
     toolbox_zone:
       x: 1941
       y: 810
@@ -138,32 +147,32 @@ qgis:
       x: 166
       y: 210
     menu_settings:
-      x: 296
-      y: 47
+      x: 295
+      y: 43
     menu_extensions:
-      x: 368
-      y: 50
+      x: 386
+      y: 49
     menu_view:
-      x: 158
-      y: 42
+      x: 156
+      y: 46
     menu_extensions_manage:
-      x: 520
-      y: 58
+      x: 397
+      y: 80
     menu_settings_options:
-      x: 293
-      y: 47
+      x: 335
+      y: 267
     menu_view_panels:
-      x: 270
-      y: 150
+      x: 264
+      y: 992
     menu_view_panels_log:
-      x: 420
-      y: 260
+      x: 695
+      y: 1220
     log_panel_filtermate_tab:
       x: 600
       y: 850
     about_config_tab:
-      x: 911
-      y: 53
+      x: 2018
+      y: 1355
     about_config_language_field:
       x: 850
       y: 420
@@ -171,8 +180,8 @@ qgis:
       x: 850
       y: 460
     plugin_manager_search:
-      x: 1050
-      y: 245
+      x: 1068
+      y: 248
     plugin_manager_all_tab:
       x: 709
       y: 253
@@ -183,11 +192,17 @@ qgis:
       x: 1797
       y: 1277
     settings_options_general_tab:
-      x: 350
-      y: 300
+      x: 620
+      y: 291
     settings_options_theme_dropdown:
-      x: 1909
-      y: 657
+      x: 1913
+      y: 640
+    layer_panel_visibility_departements:
+      x: 46
+      y: 354
+    layer_panel_visibility_communes:
+      x: 44
+      y: 325
 timing:
   click_delay: 0.3
   type_delay: 0.05

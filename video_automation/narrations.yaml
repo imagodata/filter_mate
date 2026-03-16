@@ -1,0 +1,219 @@
+# ─────────────────────────────────────────────────────────────
+# Narration texts for video automation sequences
+# ─────────────────────────────────────────────────────────────
+# Each key maps a sequence_id to its TTS narration text.
+# Used by Narrator.generate_all_narrations() and run.py --narration.
+
+# ═══════════════════════════════════════════════════════════════
+# Original sequences (seq00–seq10)
+# ═══════════════════════════════════════════════════════════════
+original:
+  seq00: >-
+    Vous avez 1 million de bâtiments dans votre PostGIS ?
+    Vous cherchez juste ceux à 200 mètres d'une route spécifique ?
+    Et vous voulez ça en moins de 2 secondes ?
+    C'est exactement ce que fait FilterMate.
+
+  seq01: >-
+    En SIG, le filtrage est une tâche centrale.
+    Mais QGIS native a ses limites : expressions complexes, aucun historique,
+    aucun système de favoris, performance dégradée sur les grosses sources.
+    FilterMate résout tout ça. C'est un plugin open source,
+    entièrement intégré à QGIS 3 et 4, avec une architecture multi-backend
+    qui choisit automatiquement la meilleure stratégie selon votre données source.
+
+  seq02: >-
+    Installation en 3 clics depuis le dépôt officiel QGIS.
+    Pour les bases PostgreSQL, un simple pip install psycopg2-binary suffit.
+    FilterMate fonctionne sur Windows, Linux et macOS.
+
+  seq03: >-
+    L'interface se présente sous forme d'un panneau ancré dans QGIS,
+    organisé en 3 onglets principaux : Filtrage, Exploration des données, et Export.
+    Support du thème sombre automatique, 22 langues disponibles.
+
+  seq04_part1: >-
+    Voilà un jeu de données BDTopo — 1 million de bâtiments dans PostgreSQL.
+    Je sélectionne ma couche source : les routes.
+    Ma couche cible : les bâtiments.
+
+  seq04_part2: >-
+    Je choisis le prédicat géométrique touches,
+    j'ajoute un buffer de 50 mètres... et j'applique.
+    FilterMate détecte automatiquement que c'est une couche PostgreSQL,
+    crée une vue matérialisée optimisée et renvoie le résultat :
+    1 milliseconde. Exactement.
+
+  seq04_part3: >-
+    Je peux annuler avec l'undo — 100 états conservés.
+    Ou rappeler un filtre favori enregistré précédemment.
+    Tout ça sans jamais écrire une seule ligne de SQL.
+
+  seq05: >-
+    L'onglet Exploration vous permet de parcourir vos entités une à une,
+    avec centrage automatique sur la carte.
+    Pour les couches raster, 5 outils interactifs sont disponibles :
+    sélection par clic, rectangle, synchronisation histogramme,
+    affichage multi-bandes, et réinitialisation de plage.
+
+  seq06: >-
+    L'export GeoPackage est l'une des fonctionnalités les plus puissantes.
+    FilterMate ne se contente pas d'exporter vos données —
+    il embarque votre projet QGIS complet dans le fichier.
+    Hiérarchie des groupes, styles des couches, système de coordonnées — tout est préservé.
+    À l'ouverture, QGIS reconstitue automatiquement votre arborescence.
+    Idéal pour partager un livrable complet en un seul fichier.
+
+  seq07: >-
+    Derrière l'interface simple, FilterMate embarque 4 backends optimisés.
+    Il choisit automatiquement le meilleur selon le type de votre source de données.
+    Pour PostgreSQL : vues matérialisées et requêtes parallèles.
+    Pour Spatialite : index R-tree.
+    Et pour tout le reste : le backend OGR universel.
+
+  seq08: >-
+    FilterMate est construit sur une architecture hexagonale —
+    aussi appelée Ports & Adapters.
+    Le domaine métier pur est au centre, totalement indépendant de QGIS,
+    de la base de données ou de l'interface graphique.
+    Cela rend le code testable à 75%, maintenable,
+    et extensible pour de futurs backends.
+
+  seq09: >-
+    FilterMate va plus loin : filtrage chaîné avec buffers dynamiques,
+    détection automatique de la clé primaire PostgreSQL
+    pour les tables BDTopo et OSM,
+    100 états undo/redo, et un système de favoris avec contexte spatial.
+    396 tests automatisés. 22 langues. Compatible QGIS 3 et 4.
+
+  seq10: >-
+    FilterMate est disponible gratuitement sur le dépôt officiel QGIS.
+    Le code source est sur GitHub, la documentation sur le site dédié.
+    Installez-le, essayez-le, et si ça vous est utile —
+    laissez une étoile sur GitHub. À bientôt !
+
+
+# ═══════════════════════════════════════════════════════════════
+# V01 — Installation & Premier Pas (9 sequences)
+# ═══════════════════════════════════════════════════════════════
+v01:
+  v01_s00: >-
+    Un million de bâtiments dans votre base de données.
+    Vous cherchez uniquement ceux qui touchent une route précise.
+    Temps de réponse ? Deux secondes. Bienvenue dans FilterMate.
+    Dans cette première vidéo, on va installer le plugin ensemble,
+    découvrir son interface, et réaliser votre tout premier filtrage
+    en moins de 7 minutes.
+
+  v01_s01: >-
+    Notre projet QGIS contient déjà deux couches :
+    les départements de France et les communes.
+    Activons-les dans le panneau de couches
+    pour les rendre visibles sur la carte.
+    L'installation se fait en 3 clics depuis QGIS.
+    Allez dans le menu Extensions, puis Gérer les extensions.
+    Dans l'onglet Toutes, tapez FilterMate dans la barre de recherche.
+    Le plugin apparaît. Cliquez sur Installer. C'est tout.
+    FilterMate est gratuit, open source, et disponible sur le dépôt officiel QGIS.
+
+  v01_s02: >-
+    Pour lancer FilterMate, cliquez sur son icône dans la barre d'outils,
+    ou allez dans le menu Extensions puis FilterMate.
+    Nos couches de démonstration sont déjà chargées dans le projet :
+    un Shapefile des départements de France et un Shapefile des communes.
+    FilterMate les détecte automatiquement.
+    Sélectionnons la couche départements comme source,
+    puis configurons le champ d'affichage sur NOM_DEPT
+    pour voir les noms des départements dans le sélecteur.
+    Le sélecteur affiche directement le nom des départements, pas un identifiant
+    cryptique. C'est grâce à la détection automatique du champ d'affichage.
+    FilterMate analyse votre couche et choisit intelligemment le meilleur champ
+    selon 6 niveaux de priorité. C'est automatique.
+
+  v01_s03: >-
+    Prenons un moment pour comprendre l'interface.
+    Elle est divisée en 3 zones principales, séparées par un splitter vertical.
+    En haut, la Zone d'Exploration. C'est ici que vous parcourez et
+    sélectionnez les entités de vos couches.
+    En bas, la Toolbox. Elle contient deux onglets : FILTERING et EXPORTING.
+    Et enfin, l'Action Bar. Ce sont les 6 boutons d'action.
+    Remarquez aussi le header : la pastille orange indique vos favoris,
+    et la pastille bleue affiche le backend actif.
+
+  v01_s04: >-
+    Maintenant que l'interface est en place, voyons comment explorer vos données.
+    Le sélecteur d'entités possède des boutons précédent et suivant
+    pour naviguer une par une.
+    Je clique sur suivant : l'entité change. Encore. Et encore.
+    C'est la façon la plus rapide de parcourir vos données.
+    Activons Track. Maintenant, à chaque changement d'entité, la carte se
+    recentre automatiquement. Suivant… la carte suit. Précédent… elle revient.
+    Identify fait clignoter l'entité en rouge sur la carte. Un repère visuel immédiat.
+    Zoom recentre la vue sur l'entité sélectionnée.
+    Select crée une sélection QGIS persistante sur le canevas.
+    L'entité reste surlignée tant que vous ne désélectionnez pas.
+    Link synchronise le sélecteur simple et le sélecteur multiple.
+    Quand vous changez le champ d'affichage dans l'un, l'autre se met à jour.
+    Et Reset réinitialise toutes les propriétés d'exploration de la couche.
+
+  v01_s05: >-
+    L'Action Bar est le centre de commande de FilterMate. Six boutons, toujours accessibles.
+    Filter lance le filtrage spatial avec votre configuration actuelle.
+    Undo annule le dernier filtre, Redo le rétablit.
+    FilterMate conserve jusqu'à 100 états d'historique.
+    Unfilter retire tous les filtres actifs de toutes les couches.
+    Export exporte vos données filtrées en GeoPackage, avec le projet QGIS embarqué.
+    About est le seul bouton toujours actif, quel que soit l'onglet.
+    Les boutons s'adaptent à l'onglet actif. En EXPORTING, Filter, Undo, Redo
+    et Unfilter se désactivent. En FILTERING, c'est Export qui se grise.
+
+  v01_s06: >-
+    Passons à la pratique. Nos deux couches sont chargées : les départements
+    et les communes. Dans la Zone d'Exploration, je sélectionne la couche
+    départements. Je choisis Gironde.
+    J'utilise les boutons de la barre latérale.
+    Identify fait clignoter la Gironde en rouge sur la carte. Zoom centre la vue dessus.
+    J'active le suivi automatique avec Track.
+    Désormais, la carte suivra chaque sélection.
+    Avec le bouton suivant, je passe au département voisin. La carte suit automatiquement.
+    Je reviens sur la Gironde.
+    Dans l'onglet FILTERING, FilterMate a reconnu ma sélection.
+    En couche cible, je choisis communes.
+    Prédicat spatial : Intersects.
+    Je clique sur Filter.
+    Les 35 000 communes sont filtrées instantanément.
+    Seules celles qui intersectent la Gironde restent visibles.
+    La carte s'est recentrée automatiquement.
+    Undo annule le filtre. Les communes réapparaissent.
+    Redo le rétablit immédiatement. 100 états d'historique sont conservés.
+    Et Unfilter retire tous les filtres d'un coup. Chaque action est réversible.
+    FilterMate a détecté le backend OGR automatiquement.
+
+  v01_s07: >-
+    FilterMate parle 22 langues. Français, anglais, espagnol, allemand,
+    chinois, japonais, arabe... La langue se change dans la configuration.
+    Changeons vers l'anglais... Toute l'interface se met à jour immédiatement,
+    sans relancer le plugin.
+    Astuce pour les débutants : activez le mode verbose.
+    Dans la configuration, changez FEEDBACK_LEVEL de normal à verbose.
+    En mode verbose, FilterMate vous explique tout ce qu'il fait.
+    Trois niveaux : minimal pour les erreurs, normal pour un retour équilibré,
+    et verbose pour tout voir.
+    En complément, FilterMate écrit ses logs dans le panneau standard de QGIS.
+    Allez dans Vue, Panneaux, Messages de log.
+    Vous trouverez un onglet dédié FilterMate.
+    C'est ici que vous pouvez suivre les requêtes SQL générées,
+    les temps d'exécution, les erreurs éventuelles.
+
+  v01_s08: >-
+    Tout ce que vous configurez dans FilterMate est sauvegardé automatiquement.
+    Le champ d'affichage, vos préférences, l'état des toggles — tout est persisté
+    dans une base SQLite locale.
+    Fermez QGIS, rouvrez-le demain — FilterMate retrouve vos réglages.
+    Voilà, vous avez installé FilterMate, découvert les 3 zones de l'interface,
+    navigué entre vos entités avec les boutons précédent et suivant,
+    exploré la carte avec le suivi automatique,
+    et réalisé votre premier filtrage spatial avec undo et redo. Pas mal pour 7 minutes !
+    Retrouvez le code source sur GitHub, le plugin sur le dépôt officiel QGIS,
+    et la documentation complète sur le site dédié. Les liens sont dans la description.
+    Dans la prochaine vidéo, on approfondit le filtrage géométrique. À très vite !

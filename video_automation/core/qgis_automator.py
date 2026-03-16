@@ -247,51 +247,14 @@ class QGISAutomator:
     # ------------------------------------------------------------------
 
     def select_layer(self, layer_name: str) -> None:
-        """
-        Select a layer in the source layer combobox.
-        Strategy: click the combobox, clear it, type the name, press Enter.
-        """
-        region = self.regions.get("source_layer_combo")
-        if region:
-            pyautogui.click(region["x"], region["y"],
-                            duration=self.timing.get("mouse_move_duration", 0.5))
-        else:
-            self.click_at("filtermate_dock")
-
-        pyautogui.hotkey("ctrl", "a")
-        self.type_text(layer_name)
-        pyautogui.press("return")
-        self.wait(self.timing.get("action_pause", 1.0))
+        """Select a layer in the source layer combobox."""
+        self.select_combobox_item("source_layer_combo", layer_name)
         logger.info("Selected source layer: %s", layer_name)
 
     def select_target_layer(self, layer_name: str) -> None:
-        """Expand the 'Layers to Filter' section and select a target layer.
-
-        Clicks the checkable pushbutton to expand the section, waits for
-        the widget to appear, then selects the target layer in the combobox.
-        """
-        # 1. Expand the layers-to-filter section
+        """Expand the 'Layers to Filter' section and select a target layer."""
         self.expand_section("btn_toggle_layers_to_filter", "target_layer_combo")
-
-        # 2. Click the target layer combobox
-        region = self.regions.get("target_layer_combo")
-        if region:
-            # Click once to focus the combo
-            pyautogui.click(region["x"], region["y"],
-                            duration=self.timing.get("mouse_move_duration", 0.5))
-            self.wait(0.3)
-            # Click again to open the dropdown
-            pyautogui.click(region["x"], region["y"])
-            self.wait(0.3)
-            # Select all text and type the layer name
-            pyautogui.hotkey("ctrl", "a")
-            self.wait(0.1)
-            self.type_text(layer_name)
-            self.wait(0.3)
-            pyautogui.press("return")
-        else:
-            logger.warning("target_layer_combo region not calibrated.")
-        self.wait(self.timing.get("action_pause", 1.0))
+        self.select_combobox_item("target_layer_combo", layer_name, double_click=True)
         logger.info("Selected target layer: %s", layer_name)
 
     def select_tab(self, tab_name: str) -> None:
@@ -382,9 +345,6 @@ class QGISAutomator:
                         duration=self.timing.get("mouse_move_duration", 0.5))
         self.wait(0.8)
         logger.info("Expanded section: %s (dependent: %s)", pushbutton_region, dependent_widget)
-
-    # Backwards compatibility alias
-    _ensure_section_expanded = toggle_section
 
     def toggle_sidebar_button(self, button_name: str) -> None:
         """
@@ -635,10 +595,6 @@ class QGISAutomator:
             time.sleep(seconds)
 
     # ------------------------------------------------------------------
-    # Screenshot
-    # ------------------------------------------------------------------
-
-    # ------------------------------------------------------------------
     # QGIS menu navigation
     # ------------------------------------------------------------------
 
@@ -775,21 +731,25 @@ class QGISAutomator:
     # Exploring zone
     # ------------------------------------------------------------------
 
-    def select_exploring_layer(self, layer_name: str) -> None:
-        """Select a layer in the exploring zone's layer combobox."""
-        region = self.regions.get("exploring_layer_combo")
-        if region:
-            pyautogui.click(
-                region["x"], region["y"],
-                duration=self.timing.get("mouse_move_duration", 0.5),
-            )
-            pyautogui.hotkey("ctrl", "a")
-            self.type_text(layer_name)
-            pyautogui.press("return")
-            self.wait(self.timing.get("action_pause", 1.0))
-            logger.info("Selected exploring layer: %s", layer_name)
+    def select_exploring_layer(self, layer_name: str, index: int | None = None) -> None:
+        """Select a layer in the exploring zone's layer combobox.
+
+        Parameters
+        ----------
+        layer_name : str
+            Name of the layer (used for logging).
+        index : int | None
+            1-based position of the layer in the dropdown list.
+            When provided, the combobox is opened with a click on the
+            dropdown arrow area and the item is reached via arrow-key
+            navigation (needed for non-editable comboboxes).
+            When *None*, falls back to the type-and-enter approach.
+        """
+        if index is not None:
+            self.select_combobox_by_arrow("exploring_layer_combo", index)
         else:
-            logger.warning("exploring_layer_combo region not calibrated.")
+            self.select_combobox_item("exploring_layer_combo", layer_name)
+        logger.info("Selected exploring layer: %s", layer_name)
 
     def navigate_feature(self, direction: str = "next") -> None:
         """Navigate to next/previous feature in the exploring selector."""
@@ -827,19 +787,70 @@ class QGISAutomator:
         self.wait(duration)
         logger.debug("Hovered region '%s' for %.1fs", region_name, duration)
 
-    def select_combobox_item(self, region_name: str, item_text: str) -> None:
-        """Generic: click a combobox, clear, type item name, press Enter."""
+    def select_combobox_by_arrow(
+        self, region_name: str, index: int,
+    ) -> None:
+        """Select an item in a non-editable combobox using arrow-key navigation.
+
+        Parameters
+        ----------
+        region_name : str
+            Calibrated region key for the combobox.
+        index : int
+            1-based position of the desired item in the dropdown list.
+        """
+        region = self.regions.get(region_name)
+        if region is None:
+            logger.warning("Combobox region '%s' not calibrated.", region_name)
+            return
+        # First click to focus/activate the combobox
+        pyautogui.click(
+            region["x"], region["y"],
+            duration=self.timing.get("mouse_move_duration", 0.5),
+        )
+        self.wait(0.3)
+        # Second click to open the dropdown
+        pyautogui.click(region["x"], region["y"])
+        self.wait(0.5)
+        # Navigate down to the desired item
+        for _ in range(index):
+            pyautogui.press("down")
+            self.wait(0.15)
+        pyautogui.press("return")
+        self.wait(self.timing.get("action_pause", 0.5))
+        logger.debug("Selected index %d in combobox '%s'", index, region_name)
+
+    def select_combobox_item(
+        self, region_name: str, item_text: str, double_click: bool = False,
+    ) -> None:
+        """Generic: click a combobox, clear, type item name, press Enter.
+
+        Parameters
+        ----------
+        region_name : str
+            Calibrated region key for the combobox.
+        item_text : str
+            Text to type in the combobox.
+        double_click : bool
+            If True, click twice (focus + open dropdown) before typing.
+            Useful for comboboxes that need two clicks to activate.
+        """
         region = self.regions.get(region_name)
         if region:
             pyautogui.click(
                 region["x"], region["y"],
                 duration=self.timing.get("mouse_move_duration", 0.5),
             )
+            if double_click:
+                self.wait(0.3)
+                pyautogui.click(region["x"], region["y"])
+                self.wait(0.3)
             pyautogui.hotkey("ctrl", "a")
-            self.type_text(item_text)
+            self.type_text_unicode(item_text)
+            self.wait(0.8)  # Let Qt completer process the pasted text
             pyautogui.press("return")
             self.wait(self.timing.get("action_pause", 0.5))
-            logger.info("Selected '%s' in combobox '%s'", item_text, region_name)
+            logger.debug("Selected '%s' in combobox '%s'", item_text, region_name)
         else:
             logger.warning("Combobox region '%s' not calibrated.", region_name)
 
