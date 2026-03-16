@@ -1745,12 +1745,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     except (TypeError, RuntimeError):
                         pass
 
-                    # Clear any existing filter and reset
-                    if hasattr(picker, 'setFilterExpression'):
-                        picker.setFilterExpression(None)
-
-                    # Set layer to reload the feature model
+                    # FIX 2026-03-16: Force full model rebuild by setting layer to None first
+                    # setLayer(same_layer) may be ignored by the widget if already set
+                    picker.setLayer(None)
                     picker.setLayer(self.current_layer)
+                    # Reconnect willBeDeleted signal after setLayer reset
+                    self._connect_feature_picker_layer_deletion(self.current_layer)
 
                     # Set display expression - this controls how features are displayed in dropdown
                     picker.setDisplayExpression(field_or_expression)
@@ -1759,10 +1759,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     picker.setFetchGeometry(True)
                     picker.setShowBrowserButtons(True)
                     picker.setAllowNull(True)
-
-                    # Force model to reload by clearing filter expression
-                    if hasattr(picker, 'setFilterExpression'):
-                        picker.setFilterExpression("")
 
                     # Reconnect signal
                     picker.featureChanged.connect(self._debounced_exploring_features_changed)
