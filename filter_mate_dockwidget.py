@@ -262,7 +262,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._feature_picker_debounce_timer.setSingleShot(True)
         self._feature_picker_debounce_timer.setInterval(300)
         self._feature_picker_debounce_timer.timeout.connect(self._execute_debounced_feature_change)
-        self._pending_feature_change = None
+        self._pending_feature_change_fid = None
         self._expression_debounce_timer = QTimer()
         _debounce_ms = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("UI_RESPONSIVENESS", {}).get("expression_debounce_ms", {})
         _debounce_val = _debounce_ms.get("value", 450) if isinstance(_debounce_ms, dict) else 450
@@ -4741,21 +4741,45 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         FIX 2026-03-16: Debounced version of exploring_features_changed for QgsFeaturePickerWidget.
 
         When the user types in the feature picker, the completer fires featureChanged
-        on each keystroke as it highlights matching items. This debounced handler waits
-        300ms after the last change before processing, allowing the user to type freely
-        and select from the dropdown without interference from heavy processing.
+        as it matches items. This debounced handler waits 300ms after the last change
+        before processing, allowing the user to type freely and select from the dropdown
+        without interference from heavy processing (QGIS selection sync, zoom, etc.).
+
+        CRITICAL: We store the feature ID (int), NOT the QgsFeature C++ object.
+        The C++ object may be destroyed by the widget's internal model before the
+        debounce timer fires, causing a crash or corrupted state.
         """
         from qgis.core import QgsFeature
-        # Save the pending feature and restart the debounce timer
-        self._pending_feature_change = input
+        if isinstance(input, QgsFeature):
+            try:
+                if input.isValid():
+                    self._pending_feature_change_fid = input.id()
+                else:
+                    self._pending_feature_change_fid = None
+            except RuntimeError:
+                # C++ object already deleted
+                self._pending_feature_change_fid = None
+        else:
+            self._pending_feature_change_fid = None
         self._feature_picker_debounce_timer.start()
 
     def _execute_debounced_feature_change(self):
-        """Execute the pending feature change after debounce delay."""
-        input = self._pending_feature_change
-        self._pending_feature_change = None
-        if input is not None:
-            self.exploring_features_changed(input)
+        """Execute the pending feature change after debounce delay.
+
+        Reloads the feature from the layer using the stored FID to get a
+        fresh, valid C++ object.
+        """
+        fid = getattr(self, '_pending_feature_change_fid', None)
+        self._pending_feature_change_fid = None
+        if fid is not None and self._is_layer_valid():
+            try:
+                feature = self.current_layer.getFeature(fid)
+                if feature.isValid():
+                    self.exploring_features_changed(feature)
+                else:
+                    logger.debug(f"_execute_debounced_feature_change: Feature {fid} no longer valid")
+            except Exception as e:
+                logger.debug(f"_execute_debounced_feature_change: Error reloading feature {fid}: {e}")
 
     def _handle_exploring_features_result(
         self,
