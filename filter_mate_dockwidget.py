@@ -4751,11 +4751,54 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._feature_picker_debounce_timer.start()
 
     def _execute_debounced_feature_change(self):
-        """Execute the pending feature change after debounce delay."""
+        """Execute the pending feature change after debounce delay.
+
+        After processing, resets the feature picker's internal filter so the
+        dropdown shows all values on next open (not just the search results).
+        """
+        from qgis.core import QgsFeature
         input = self._pending_feature_change
         self._pending_feature_change = None
         if input is not None:
             self.exploring_features_changed(input)
+            # FIX 2026-03-16: After valid selection, reset picker filter to show all values
+            if isinstance(input, QgsFeature) and input.isValid():
+                QTimer.singleShot(50, lambda fid=input.id(): self._reset_feature_picker_filter(fid))
+
+    def _reset_feature_picker_filter(self, fid):
+        """Reset the feature picker's internal filter after a selection.
+
+        After the user types to search and selects a feature, the QComboBox
+        internal model still has the search filter active. This clears the
+        filter so the dropdown shows all values next time it opens, while
+        keeping the selected feature displayed.
+        """
+        try:
+            if self.current_exploring_groupbox != "single_selection":
+                return
+            picker = self.widgets.get("EXPLORING", {}).get("SINGLE_SELECTION_FEATURES", {}).get("WIDGET")
+            if not picker:
+                return
+
+            from qgis.PyQt.QtWidgets import QComboBox
+            combo = picker.findChild(QComboBox)
+            if not combo:
+                return
+
+            # Block featureChanged signal to prevent re-triggering the debounce
+            picker.blockSignals(True)
+            try:
+                # Re-set the feature to ensure proper display text
+                picker.setFeature(fid)
+                # Clear the filter model so dropdown shows all values
+                model = combo.model()
+                if model and hasattr(model, 'setFilterValue'):
+                    model.setFilterValue('')
+                    logger.debug(f"_reset_feature_picker_filter: Cleared filter, feature {fid} selected")
+            finally:
+                picker.blockSignals(False)
+        except Exception as e:
+            logger.debug(f"_reset_feature_picker_filter: {e}")
 
     def _handle_exploring_features_result(
         self,
