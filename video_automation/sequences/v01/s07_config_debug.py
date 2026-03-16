@@ -39,6 +39,13 @@ class V01S07ConfigDebug(TimelineSequence):
             qgis.focus_filtermate()
             qgis.wait(1.5)
 
+        def restore_language_to_fr():
+            qgis.open_filtermate_config()
+            qgis.wait(1.0)
+            self.edit_config_value(qgis, config, "about_config_language_field", "fr")
+            qgis.close_dialog()
+            qgis.wait(0.5)
+
         def change_feedback_to_verbose():
             qgis.open_filtermate_config()
             qgis.wait(1.0)
@@ -120,8 +127,16 @@ class V01S07ConfigDebug(TimelineSequence):
                 ),
                 post_delay=0.3,
             ),
+            # Cue 4: Restore French
+            NarrationCue(
+                label="Retour au français",
+                text="Repassons en français pour la suite.",
+                sync="during",
+                actions=lambda: restore_language_to_fr(),
+                post_delay=0.3,
+            ),
             # --- VERBOSE MODE ---
-            # Cue 4: Intro verbose
+            # Cue 5: Intro verbose
             NarrationCue(
                 label="Intro mode verbose",
                 text=(
@@ -132,7 +147,7 @@ class V01S07ConfigDebug(TimelineSequence):
                 actions=lambda: change_feedback_to_verbose(),
                 post_delay=0.3,
             ),
-            # Cue 5: Show verbose messages
+            # Cue 6: Show verbose messages
             NarrationCue(
                 label="Démo verbose",
                 text=(
@@ -144,7 +159,7 @@ class V01S07ConfigDebug(TimelineSequence):
                 actions=lambda: trigger_filter_verbose(),
                 post_delay=0.3,
             ),
-            # Cue 6: Verbose diagram
+            # Cue 7: Verbose diagram
             NarrationCue(
                 label="Diagramme feedback levels",
                 text="",
@@ -154,7 +169,7 @@ class V01S07ConfigDebug(TimelineSequence):
                 post_delay=0.3,
             ),
             # --- LOG PANEL ---
-            # Cue 7: Open log panel
+            # Cue 8: Open log panel
             NarrationCue(
                 label="Panneau de logs",
                 text=(
@@ -167,7 +182,7 @@ class V01S07ConfigDebug(TimelineSequence):
                 actions=lambda: open_log_panel(),
                 post_delay=0.3,
             ),
-            # Cue 8: Show log entries
+            # Cue 9: Show log entries
             NarrationCue(
                 label="Entrées de log",
                 text=(

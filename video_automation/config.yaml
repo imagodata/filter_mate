@@ -90,8 +90,8 @@ qgis:
       x: 2042
       y: 392
     exploring_feature_selector:
-      x: 2026
-      y: 262
+      x: 2067
+      y: 424
     exploring_display_field_combo:
       x: 2078
       y: 483
@@ -197,11 +197,20 @@ qgis:
     settings_options_theme_dropdown:
       x: 1913
       y: 640
+    btn_auto_current_layer:
+      x: 1954
+      y: 894
     layer_panel_visibility_departements:
       x: 46
       y: 354
+    layer_panel_name_departements:
+      x: 139
+      y: 353
     layer_panel_visibility_communes:
       x: 44
+      y: 325
+    layer_panel_name_communes:
+      x: 134
       y: 325
 timing:
   click_delay: 0.3
@@ -222,11 +231,6 @@ narration:
   voice: fr-FR-HenriNeural
   output_dir: output/narration
   speed: +0%
-  # --- F5-TTS settings (used when engine: f5-tts) ---
-  # f5_ref_audio: output/narration/ref_voice.wav   # ~15s reference audio for voice cloning
-  # f5_ref_text: ""                                  # transcription of reference audio (optional but recommended)
-  # f5_model: F5TTS_v1_Base                          # model variant
-  # f5_speed: 1.0                                    # speech speed multiplier (0.5=slow, 1.0=normal, 2.0=fast)
 capture:
   fps: 10
   output_dir: output/captures

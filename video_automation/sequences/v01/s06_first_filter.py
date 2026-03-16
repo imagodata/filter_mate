@@ -94,16 +94,8 @@ class V01S06FirstFilter(TimelineSequence):
             self._log.info("Switching to FILTERING tab")
             qgis.select_tab("FILTERING")
             qgis.wait(0.5)
-            # Click source layer combo + press Down to select the layer
-            src = regions.get("source_layer_combo")
-            if src:
-                pyautogui.click(src["x"], src["y"], duration=move_dur)
-                qgis.wait(0.3)
-                pyautogui.press("down")
-                qgis.wait(0.2)
-                pyautogui.press("down")
-                qgis.wait(0.3)
-                pyautogui.press("enter")
+            # Select source layer by name
+            qgis.select_layer("departements")
             qgis.wait(0.5)
 
         def select_target():

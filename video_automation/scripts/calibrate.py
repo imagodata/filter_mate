@@ -218,10 +218,19 @@ GROUPS: dict[str, dict] = {
     },
     "layer_panel": {
         "label": "Panneau Couches (Layers)",
-        "desc": "Checkboxes de visibilite des couches dans le panneau Layers",
+        "desc": "Checkboxes de visibilite et noms des couches dans le panneau Layers",
         "targets": [
             ("layer_panel_visibility_departements", "la checkbox de visibilite de la couche DEPARTEMENTS", "point"),
             ("layer_panel_visibility_communes", "la checkbox de visibilite de la couche COMMUNES", "point"),
+            ("layer_panel_name_departements", "le NOM 'departements' (texte) dans le panneau Layers", "point"),
+            ("layer_panel_name_communes", "le NOM 'communes' (texte) dans le panneau Layers", "point"),
+        ],
+    },
+    "filtering_sync": {
+        "label": "Bouton synchro couche source",
+        "desc": "Le pushbutton Auto Current Layer (synchro avec l'arbre des couches QGIS)",
+        "targets": [
+            ("btn_auto_current_layer", "le pushbutton AUTO CURRENT LAYER (a gauche du combo couche source, onglet FILTERING)", "point"),
         ],
     },
 }
@@ -630,6 +639,7 @@ def cmd_validate(config_path: Path) -> None:
             "btn_toggle_layers_to_filter", "btn_toggle_geometric_predicates",
             "btn_toggle_buffer", "target_layer_combo", "predicate_combo",
             "buffer_enable_checkbox", "buffer_value_spinbox",
+            "btn_auto_current_layer",
         ]
         for key in dock_elements:
             val = regions.get(key)
@@ -800,7 +810,7 @@ def cmd_validate(config_path: Path) -> None:
 
 
 def cmd_edit(config_path: Path, region_key: str) -> None:
-    """Edit a single region's coordinates manually."""
+    """Edit a single region's coordinates with mouse capture support."""
     config = load_config(config_path)
     regions = config.setdefault("qgis", {}).setdefault("regions", {})
 
@@ -812,32 +822,23 @@ def cmd_edit(config_path: Path, region_key: str) -> None:
         print(f"  (non defini)")
 
     if val and "width" in val:
-        print("  Entrez : x y width height")
-        raw = input("  > ").strip().replace(",", " ").split()
-        if len(raw) >= 4:
-            try:
-                regions[region_key] = {
-                    "x": int(raw[0]), "y": int(raw[1]),
-                    "width": int(raw[2]), "height": int(raw[3]),
-                }
-                save_config(config, config_path)
-                print(f"  + Sauvegarde : {_format_value(regions[region_key])}")
-                return
-            except ValueError:
-                pass
-        print("  ! Format invalide.")
+        print("  Placez la souris sur le coin HAUT-GAUCHE, puis ENTREE")
+        print("  (ou tapez : x y width height / 's' = garder)")
+        tl_x, tl_y = record_position("coin HAUT-GAUCHE", val)
+        print("  Placez la souris sur le coin BAS-DROITE, puis ENTREE")
+        br_x, br_y = record_position("coin BAS-DROITE", None)
+        regions[region_key] = {
+            "x": tl_x, "y": tl_y,
+            "width": max(1, br_x - tl_x),
+            "height": max(1, br_y - tl_y),
+        }
+        save_config(config, config_path)
+        print(f"  + Sauvegarde : {_format_value(regions[region_key])}")
     else:
-        print("  Entrez : x y")
-        raw = input("  > ").strip().replace(",", " ").split()
-        if len(raw) >= 2:
-            try:
-                regions[region_key] = {"x": int(raw[0]), "y": int(raw[1])}
-                save_config(config, config_path)
-                print(f"  + Sauvegarde : {_format_value(regions[region_key])}")
-                return
-            except ValueError:
-                pass
-        print("  ! Format invalide.")
+        x, y = record_position(region_key, val)
+        regions[region_key] = {"x": x, "y": y}
+        save_config(config, config_path)
+        print(f"  + Sauvegarde : {_format_value(regions[region_key])}")
 
 
 def cmd_calibrate_group(config_path: Path, group_id: str) -> None:

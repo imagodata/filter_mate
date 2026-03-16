@@ -59,6 +59,7 @@ class V01S08Conclusion(TimelineSequence):
                     "découvert les 3 zones de l'interface, "
                     "navigué entre vos entités avec les boutons précédent et suivant, "
                     "exploré la carte avec le suivi automatique, "
+                    "synchronisé la couche source avec le panneau de couches QGIS, "
                     "et réalisé votre premier filtrage spatial avec undo et redo. "
                     "Pas mal pour 7 minutes !"
                 ),
