@@ -2875,6 +2875,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.error("❌ pushButton_exploring_identify does NOT exist!")
             return
 
+        # FIX 2026-03-16: Connect modelUpdated signal to ensure browser buttons (next/prev)
+        # are properly initialized after the model finishes loading features asynchronously.
+        picker = getattr(self, 'mFeaturePickerWidget_exploring_single_selection', None)
+        if picker and hasattr(picker, 'modelUpdated'):
+            try:
+                picker.modelUpdated.disconnect(self._on_feature_picker_model_updated)
+            except (TypeError, RuntimeError):
+                pass
+            picker.modelUpdated.connect(self._on_feature_picker_model_updated)
+            logger.debug("✓ Connected mFeaturePickerWidget modelUpdated signal")
+
         # FIX 2026-01-15: Connect IDENTIFY and ZOOM buttons FIRST
         # These must be connected directly, NOT via changeSignalState which can break them
         try:
@@ -4776,6 +4787,18 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     logger.debug(f"_execute_debounced_feature_change: Feature {fid} no longer valid")
             except Exception as e:
                 logger.debug(f"_execute_debounced_feature_change: Error reloading feature {fid}: {e}")
+
+    def _on_feature_picker_model_updated(self):
+        """FIX 2026-03-16: Re-enable browser buttons after model finishes loading.
+
+        QgsFeaturePickerWidget loads features asynchronously. The next/previous
+        browser buttons only work when the model has data. This handler ensures
+        they are properly enabled once the model has loaded.
+        """
+        picker = getattr(self, 'mFeaturePickerWidget_exploring_single_selection', None)
+        if picker:
+            picker.setShowBrowserButtons(True)
+            logger.debug("_on_feature_picker_model_updated: Re-enabled browser buttons")
 
     def _handle_exploring_features_result(
         self,
