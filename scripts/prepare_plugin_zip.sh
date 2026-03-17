@@ -84,6 +84,14 @@ rsync -a --quiet \
     --exclude='build/**' \
     --exclude='scripts' \
     --exclude='scripts/**' \
+    --exclude='video_automation' \
+    --exclude='video_automation/**' \
+    --exclude='knowledge' \
+    --exclude='knowledge/**' \
+    --exclude='website' \
+    --exclude='website/**' \
+    --exclude='tests' \
+    --exclude='tests/**' \
     --exclude='*.egg-info' \
     --exclude='*.egg-info/**' \
     --exclude='.pytest_cache' \

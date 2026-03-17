@@ -645,9 +645,11 @@ class ExploringController(BaseController, LayerSelectionMixin):
         self._selected_features.clear()
 
         # v3.1: Also clear QGIS layer selection
+        # FIX 2026-03-17: Block selectionChanged during programmatic deselection
         if self._current_layer and self.is_layer_valid(self._current_layer):
             try:
-                self._current_layer.removeSelection()
+                with SignalBlocker(self._current_layer):
+                    self._current_layer.removeSelection()
                 logger.debug("ExploringController: Cleared layer selection")
             except Exception as e:
                 logger.warning(f"ExploringController: Failed to clear layer selection: {e}")

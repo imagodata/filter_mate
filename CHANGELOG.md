@@ -2,6 +2,21 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.6.2] - 2026-03-17
+
+### Bug Fixes - Feature Picker & Exploring
+
+Multiple fixes to the feature picker widget and exploring sidebar for improved stability and usability.
+
+#### Bug Fixes
+
+- **Feature picker debounce**: Store FID instead of C++ QgsFeature object to prevent crashes from dangling references
+- **Feature picker refresh**: Properly refresh picker when display field changes
+- **Feature picker browser buttons**: Fix next/prev browser buttons initialization
+- **Exploring sidebar**: Always-enabled identify/zoom buttons + debounce feature picker typing
+
+---
+
 ## [4.6.1] - 2026-03-09
 
 ### QGIS 4 / Qt6 Compatibility

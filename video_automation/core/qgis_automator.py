@@ -246,16 +246,86 @@ class QGISAutomator:
     # FilterMate-specific interactions
     # ------------------------------------------------------------------
 
-    def select_layer(self, layer_name: str) -> None:
-        """Select a layer in the source layer combobox."""
-        self.select_combobox_item("source_layer_combo", layer_name)
-        logger.info("Selected source layer: %s", layer_name)
+    def select_layer(self, layer_name: str, index: int = 0) -> None:
+        """Select a layer in the source layer QgsMapLayerComboBox.
 
-    def select_target_layer(self, layer_name: str) -> None:
-        """Expand the 'Layers to Filter' section and select a target layer."""
+        This is a non-editable combobox — text typing does not work.
+        Uses Home + Down*index + Enter for deterministic selection.
+
+        Parameters
+        ----------
+        layer_name : str
+            Layer name (used only for logging).
+        index : int
+            0-based position of the desired layer in the dropdown list.
+        """
+        region = self.regions.get("source_layer_combo")
+        if not region:
+            logger.warning("source_layer_combo region not calibrated.")
+            return
+
+        # Click to focus + open dropdown
+        pyautogui.click(
+            region["x"], region["y"],
+            duration=self.timing.get("mouse_move_duration", 0.5),
+        )
+        self.wait(0.3)
+        pyautogui.click(region["x"], region["y"])
+        self.wait(0.5)
+
+        # Start from top, navigate to desired item
+        pyautogui.press("home")
+        self.wait(0.1)
+        for _ in range(index):
+            pyautogui.press("down")
+            self.wait(0.15)
+        pyautogui.press("return")
+        self.wait(self.timing.get("action_pause", 0.5))
+        logger.info("Selected source layer: %s (index %d)", layer_name, index)
+
+    def select_target_layer(self, layer_name: str, index: int = 0) -> None:
+        """Check a target layer in the CheckableComboBox.
+
+        The 'Layers to Filter' widget is a QgsCheckableComboBox (checkable
+        dropdown).  Items are toggled with Space, not selected with Enter.
+
+        Parameters
+        ----------
+        layer_name : str
+            Layer name (used only for logging).
+        index : int
+            0-based position of the item to check in the dropdown list.
+        """
         self.expand_section("btn_toggle_layers_to_filter", "target_layer_combo")
-        self.select_combobox_item("target_layer_combo", layer_name, double_click=True)
-        logger.info("Selected target layer: %s", layer_name)
+
+        region = self.regions.get("target_layer_combo")
+        if not region:
+            logger.warning("target_layer_combo region not calibrated.")
+            return
+
+        # Open the dropdown
+        pyautogui.click(
+            region["x"], region["y"],
+            duration=self.timing.get("mouse_move_duration", 0.5),
+        )
+        self.wait(0.5)
+
+        # Navigate to the desired item
+        pyautogui.press("home")
+        self.wait(0.1)
+        for _ in range(index):
+            pyautogui.press("down")
+            time.sleep(0.05)
+        self.wait(0.2)
+
+        # Toggle checkbox
+        pyautogui.press("space")
+        self.wait(0.3)
+
+        # Close dropdown
+        pyautogui.press("escape")
+        self.wait(self.timing.get("action_pause", 0.5))
+        logger.info("Checked target layer: %s (index %d)", layer_name, index)
 
     def select_tab(self, tab_name: str) -> None:
         """
@@ -270,12 +340,13 @@ class QGISAutomator:
             "filtering": "tab_filtering",
             "exploring": "tab_exploring",
             "exporting": "tab_exporting",
+            "configuration": "tab_configuration",
         }
         key = tab_name.lower()
         region_key = tab_map.get(key)
         if region_key is None:
             raise ValueError(
-                f"Unknown tab: '{tab_name}'. Valid values: FILTERING, EXPLORING, EXPORTING"
+                f"Unknown tab: '{tab_name}'. Valid values: FILTERING, EXPLORING, EXPORTING, CONFIGURATION"
             )
         region = self.regions.get(region_key)
         if region:

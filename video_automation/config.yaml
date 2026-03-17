@@ -31,8 +31,8 @@ qgis:
       width: 2551
       height: 168
     source_layer_combo:
-      x: 2162
-      y: 891
+      x: 2190
+      y: 894
     btn_toggle_layers_to_filter:
       x: 1957
       y: 967
@@ -69,18 +69,18 @@ qgis:
     export_button:
       x: 2395
       y: 1433
-    favorites_button:
-      x: 2407
-      y: 300
     tab_filtering:
-      x: 1984
-      y: 834
+      x: 1981
+      y: 832
     tab_exploring:
       x: 2061
       y: 362
     tab_exporting:
-      x: 2009
-      y: 1302
+      x: 1980
+      y: 1307
+    tab_configuration:
+      x: 1984
+      y: 1351
     exploring_zone:
       x: 1941
       y: 307
@@ -102,11 +102,11 @@ qgis:
       x: 2484
       y: 432
     sidebar_identify:
-      x: 1961
-      y: 400
+      x: 1953
+      y: 376
     sidebar_zoom:
-      x: 1961
-      y: 470
+      x: 1954
+      y: 442
     sidebar_select:
       x: 1959
       y: 521
@@ -120,10 +120,10 @@ qgis:
       x: 1953
       y: 734
     toolbox_zone:
-      x: 1941
-      y: 810
-      width: 610
-      height: 600
+      x: 1919
+      y: 816
+      width: 612
+      height: 551
     action_bar_zone:
       x: 1941
       y: 1410
@@ -133,16 +133,16 @@ qgis:
       x: 2506
       y: 1432
     header_bar:
-      x: 1941
-      y: 247
-      width: 610
-      height: 60
+      x: 1881
+      y: 239
+      width: 667
+      height: 94
     badge_favorites:
-      x: 2250
-      y: 277
-    badge_backend:
-      x: 2494
+      x: 2449
       y: 295
+    badge_backend:
+      x: 2505
+      y: 302
     filtermate_toolbar_icon:
       x: 166
       y: 210
@@ -231,9 +231,10 @@ narration:
   voice: fr-FR-HenriNeural
   output_dir: output/narration
   speed: +0%
-  # --- F5-TTS settings (used when engine: f5-tts) ---
   f5_ref_audio: output/narration/ref_voice.wav
-  f5_ref_text: "de trouver sa véritable vocation, l'art ou plutôt la critique et l'histoire de l'art. Blunt, qui a vécu une partie de son enfance à Paris, où son père était le pasteur de la communauté anglaise, s'est en effet entiché d'un peintre français, Nicolas Poussin."
+  f5_ref_text: et de la noblesse de leurs petites façons ; il avait besoin de laver
+    son imagination de toutes les façons d'agir vulgaires, de toutes les pensées désagréables
+    au milieu desquelles il respirait à Verrières.
   f5_model: F5TTS_v1_Base
   f5_speed: 1.0
   f5_conda_env: f5-tts

@@ -1,7 +1,7 @@
 """
 Video V01 — Installation & Premier Pas
 =======================================
-9 sequence files (s00-s08) covering the 12 sections of SCRIPT_V01_INSTALLATION.md.
+7 sequence files (s00-s06) — 57 cues, ~6min25.
 Auto-discovered from this package and sorted by sequence_id.
 """
 from __future__ import annotations

@@ -74,7 +74,6 @@ GROUPS: dict[str, dict] = {
         "targets": [
             ("header_bar", "coin HAUT-GAUCHE du header FilterMate", "tl"),
             ("header_bar", "coin BAS-DROITE du header FilterMate", "br"),
-            ("favorites_button", "le bouton FAVORIS (etoile, dans le header)", "point"),
             ("badge_favorites", "la pastille FAVORIS (orange, dans le header)", "point"),
             ("badge_backend", "la pastille BACKEND (bleue, dans le header)", "point"),
         ],
@@ -97,12 +96,12 @@ GROUPS: dict[str, dict] = {
         "label": "Barre laterale Exploring (6 boutons)",
         "desc": "Les 6 boutons icones a gauche de la Zone d'Exploration",
         "targets": [
-            ("sidebar_identify", "le bouton IDENTIFY (1er, en haut)", "point"),
-            ("sidebar_zoom", "le bouton ZOOM (2eme)", "point"),
-            ("sidebar_select", "le bouton SELECT (3eme)", "point"),
-            ("sidebar_track", "le bouton TRACK (4eme)", "point"),
-            ("sidebar_link", "le bouton LINK (5eme)", "point"),
-            ("sidebar_reset", "le bouton RESET (6eme, en bas)", "point"),
+            ("sidebar_identify", "le bouton IDENTIFY (1er, en haut)", "rect"),
+            ("sidebar_zoom", "le bouton ZOOM (2eme)", "rect"),
+            ("sidebar_select", "le bouton SELECT (3eme)", "rect"),
+            ("sidebar_track", "le bouton TRACK (4eme)", "rect"),
+            ("sidebar_link", "le bouton LINK (5eme)", "rect"),
+            ("sidebar_reset", "le bouton RESET (6eme, en bas)", "rect"),
         ],
     },
     "toolbox": {
@@ -113,6 +112,7 @@ GROUPS: dict[str, dict] = {
             ("toolbox_zone", "coin BAS-DROITE de la Toolbox", "br"),
             ("tab_filtering", "l'onglet FILTERING", "point"),
             ("tab_exporting", "l'onglet EXPORTING", "point"),
+            ("tab_configuration", "l'onglet CONFIGURATION", "point"),
             ("source_layer_combo", "le combo COUCHE SOURCE", "point"),
         ],
     },
@@ -627,10 +627,10 @@ def cmd_validate(config_path: Path) -> None:
 
         # Check that dock-internal elements are within dock bounds
         dock_elements = [
-            "tab_filtering", "tab_exploring", "tab_exporting",
+            "tab_filtering", "tab_exploring", "tab_exporting", "tab_configuration",
             "source_layer_combo", "filter_button", "undo_button",
             "redo_button", "unfilter_button", "export_button", "about_button",
-            "favorites_button", "badge_backend", "badge_favorites",
+            "badge_backend", "badge_favorites",
             "exploring_layer_combo", "exploring_feature_selector",
             "exploring_display_field_combo",
             "exploring_feature_prev_btn", "exploring_feature_next_btn",
@@ -659,6 +659,7 @@ def cmd_validate(config_path: Path) -> None:
             ("toolbox_zone", "action_bar_zone", "toolbox au-dessus de action bar"),
             ("tab_exploring", "tab_filtering", "onglet exploring avant filtering (y)"),
             ("tab_filtering", "tab_exporting", "onglet filtering avant exporting (y)"),
+            ("tab_exporting", "tab_configuration", "onglet exporting avant configuration (y)"),
         ]
         for key_a, key_b, desc in order_checks:
             va = regions.get(key_a)

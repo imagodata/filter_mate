@@ -4645,9 +4645,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not self._is_layer_valid():
             return
 
-        # Clear selection
-        if not (self._controller_integration and self._controller_integration.delegate_exploring_clear_selection()):
-            self.current_layer.removeSelection()
+        # FIX 2026-03-17: Block selectionChanged during programmatic deselection
+        # to prevent _sync_widgets_from_qgis_selection → model reload → browser buttons disabled
+        with SignalBlocker(self.current_layer):
+            if not (self._controller_integration and self._controller_integration.delegate_exploring_clear_selection()):
+                self.current_layer.removeSelection()
 
         # FIX 2026-01-15: Switch to pan tool when deselecting
         try:
@@ -4689,8 +4691,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         if features:
             try:
-                self.current_layer.removeSelection()
-                self.current_layer.select([f.id() for f in features])
+                # FIX 2026-03-17: Block selectionChanged signal during programmatic selection.
+                # Without this, removeSelection()+select() triggers selectionChanged →
+                # _sync_widgets_from_qgis_selection → feature_picker.setFeature() → model reload
+                # → browser buttons (next/prev) get disabled, breaking subsequent navigation.
+                with SignalBlocker(self.current_layer):
+                    self.current_layer.removeSelection()
+                    self.current_layer.select([f.id() for f in features])
                 logger.info(f"exploring_select_features: ✓ Selected {len(features)} features on canvas")
             except Exception as e:
                 logger.warning(f"exploring_select_features: ✗ Failed to select features: {e}")
@@ -4755,6 +4762,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         CRITICAL: We store the feature ID (int), NOT the QgsFeature C++ object.
         The C++ object may be destroyed by the widget's internal model before the
         debounce timer fires, causing a crash or corrupted state.
+
+        NOTE 2026-03-17: pyautogui automation cannot reliably trigger featureChanged
+        on QgsFeaturePickerWidget. Select/Track demos must be captured manually.
         """
         from qgis.core import QgsFeature
         if isinstance(input, QgsFeature):

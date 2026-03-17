@@ -212,11 +212,11 @@ class Narrator:
         return output_path
 
     def _generate_f5_tts(self, text: str, output_path: Path) -> Path:
-        """Generate audio using F5-TTS CLI via conda subprocess.
+        """Generate audio using F5-TTS via the bridge script in a conda env.
 
-        Calls ``conda run -n <env> f5-tts_infer-cli …`` so that f5-tts
-        runs in its own Python 3.11 conda environment, avoiding
-        incompatibilities with the host Python (e.g. 3.14).
+        Calls the ``f5_tts_bridge.py`` script using the Python interpreter
+        from the conda environment, avoiding DLL/import conflicts with the
+        host Python (e.g. 3.14).
         """
         if not self.f5_ref_audio:
             raise ValueError(
@@ -228,19 +228,41 @@ class Narrator:
         if not ref_audio_path.exists():
             raise FileNotFoundError(f"F5-TTS reference audio not found: {ref_audio_path}")
 
-        # F5-TTS CLI writes to output_dir/output_file (default: infer_cli_out.wav)
-        out_dir = output_path.parent.resolve()
-        wav_filename = output_path.stem + ".wav"
+        # F5-TTS outputs .wav natively
+        wav_output = output_path.with_suffix(".wav").resolve()
+
+        # Bridge script path (next to this package's video_automation dir)
+        bridge_script = Path(__file__).parent.parent / "f5_tts_bridge.py"
+        if not bridge_script.exists():
+            raise FileNotFoundError(f"F5-TTS bridge script not found: {bridge_script}")
+
+        # Use the conda env's Python directly (avoids 'conda run' issues)
+        conda_python = Path.home() / "miniconda3" / "envs" / self.f5_conda_env / "python.exe"
+        if not conda_python.exists():
+            raise RuntimeError(
+                f"Conda env Python not found: {conda_python}\n"
+                f"Create the environment:\n"
+                f"  conda create -n {self.f5_conda_env} python=3.11 -y\n"
+                f"  conda activate {self.f5_conda_env}\n"
+                "  pip install f5-tts torch torchaudio"
+            )
+
+        # Write texts to temp files to avoid Windows CLI encoding issues (UTF-8)
+        import tempfile
+        gen_text_file = Path(tempfile.mktemp(suffix="_gen.txt"))
+        ref_text_file = Path(tempfile.mktemp(suffix="_ref.txt"))
+        gen_text_file.write_text(text, encoding="utf-8")
+        ref_text_file.write_text(self.f5_ref_text, encoding="utf-8")
 
         cmd = [
-            "conda", "run", "--no-banner", "-n", self.f5_conda_env,
-            "f5-tts_infer-cli",
+            str(conda_python),
+            "-X", "utf8",
+            str(bridge_script),
             "--model", self.f5_model,
             "--ref_audio", str(ref_audio_path),
-            "--ref_text", self.f5_ref_text,
-            "--gen_text", text,
-            "--output_dir", str(out_dir),
-            "--output_file", wav_filename,
+            "--ref_text_file", str(ref_text_file),
+            "--gen_text_file", str(gen_text_file),
+            "--output_file", str(wav_output),
             "--speed", str(self.f5_speed),
         ]
         if self.f5_remove_silence:
@@ -256,16 +278,11 @@ class Narrator:
                 text=True,
                 timeout=300,  # 5 min max per segment
             )
-        except FileNotFoundError:
-            raise RuntimeError(
-                "conda not found on PATH. Install Miniconda/Anaconda and create "
-                f"the '{self.f5_conda_env}' environment:\n"
-                f"  conda create -n {self.f5_conda_env} python=3.11 -y\n"
-                f"  conda activate {self.f5_conda_env}\n"
-                "  pip install f5-tts torch torchaudio"
-            )
         except subprocess.TimeoutExpired:
             raise RuntimeError(f"F5-TTS timed out after 300s for: {output_path.name}")
+        finally:
+            gen_text_file.unlink(missing_ok=True)
+            ref_text_file.unlink(missing_ok=True)
 
         if result.returncode != 0:
             logger.error("F5-TTS stderr:\n%s", result.stderr)
@@ -273,7 +290,6 @@ class Narrator:
                 f"F5-TTS CLI failed (exit {result.returncode}):\n{result.stderr[:500]}"
             )
 
-        wav_output = out_dir / wav_filename
         if not wav_output.exists() or wav_output.stat().st_size == 0:
             raise RuntimeError(f"F5-TTS produced empty/missing file: {wav_output}")
 
