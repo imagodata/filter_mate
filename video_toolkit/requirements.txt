@@ -1,0 +1,55 @@
+# Video Toolkit — Python Dependencies
+# =====================================
+# Install all dependencies:
+#   pip install -r requirements.txt
+#
+# System dependencies (install separately):
+#   - FFmpeg: https://ffmpeg.org/download.html
+#   - OBS Studio: https://obsproject.com (for desktop recording)
+#   - Xvfb: apt install xvfb (for headless recording)
+#   - ImageMagick: apt install imagemagick (for headless capture)
+#   - xdotool: apt install xdotool (for Linux window focus)
+
+# ── Core automation ────────────────────────────────────────────────────────
+pyautogui>=0.9.54       # Desktop GUI automation (mouse, keyboard)
+pynput>=1.7.6           # Keyboard listener (used by calibration tool)
+
+# ── OBS WebSocket controller ──────────────────────────────────────────────
+obsws-python>=1.7.2     # OBS WebSocket 5.x client
+
+# ── TTS narration ─────────────────────────────────────────────────────────
+edge-tts>=6.1.9         # Microsoft edge-tts (free, 400+ voices)
+mutagen>=1.47.0         # Audio duration detection
+
+# ── Diagram generation ────────────────────────────────────────────────────
+playwright>=1.42.0      # Headless Chromium for PNG rendering
+# After installing: playwright install chromium
+
+# ── Video assembly ────────────────────────────────────────────────────────
+# FFmpeg is required (not a Python package — install separately):
+#   Windows: https://ffmpeg.org/download.html
+#   Linux:   apt install ffmpeg
+#   Mac:     brew install ffmpeg
+
+# ── CLI framework ─────────────────────────────────────────────────────────
+click>=8.1.7            # Command-line interface
+pyyaml>=6.0.1           # YAML config file parsing
+
+# ── Optional: Unicode clipboard paste ─────────────────────────────────────
+pyperclip>=1.9.0        # Clipboard access (needed for type_text_unicode on non-Windows)
+
+# ── Optional: Windows window focus ────────────────────────────────────────
+# pywin32>=308           # Windows-only: win32gui for window focus
+#                        # Install: pip install pywin32
+
+# ── Optional: Linux window screenshots ────────────────────────────────────
+# Pillow>=10.0.0         # PIL for screenshots on Linux (ImageGrab)
+#                        # Install: pip install Pillow
+
+# ── Optional: ElevenLabs TTS ──────────────────────────────────────────────
+# elevenlabs>=1.0.0      # Paid TTS service
+#                        # Requires: ELEVENLABS_API_KEY env var
+
+# ── Optional: F5-TTS voice cloning ────────────────────────────────────────
+# F5-TTS is installed in a separate conda environment to avoid DLL conflicts.
+# See README.md for setup instructions.

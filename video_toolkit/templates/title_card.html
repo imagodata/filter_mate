@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920" />
+  <title>{{TITLE}}</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: linear-gradient(135deg, {{BG_COLOR}} 0%, #0f0f1a 60%, #1a0f3a 100%);
+      font-family: '{{FONT_FAMILY}}', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      color: #e8e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      width: 1920px;
+      height: 1080px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      text-align: center;
+      padding: 80px;
+    }
+
+    /* Decorative accent line */
+    .accent-line {
+      width: 120px;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, {{ACCENT_COLOR}}, transparent);
+      border-radius: 2px;
+      margin-bottom: 40px;
+      animation: expand 1s ease-out both;
+    }
+
+    .app-name {
+      font-size: 96px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -2px;
+      text-shadow: 0 4px 32px rgba(0,0,0,0.5);
+      animation: fadeUp 0.8s ease-out both;
+      animation-delay: 0.1s;
+    }
+
+    .title {
+      font-size: 42px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 20px;
+      letter-spacing: 1px;
+      animation: fadeUp 0.8s ease-out both;
+      animation-delay: 0.25s;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: {{ACCENT_COLOR}};
+      margin-top: 16px;
+      font-style: italic;
+      animation: fadeUp 0.8s ease-out both;
+      animation-delay: 0.4s;
+    }
+
+    .version-badge {
+      margin-top: 48px;
+      display: inline-block;
+      padding: 8px 28px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 30px;
+      font-size: 18px;
+      color: rgba(255,255,255,0.5);
+      animation: fadeUp 0.8s ease-out both;
+      animation-delay: 0.55s;
+    }
+
+    /* Corner decorations */
+    .corner {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-color: {{ACCENT_COLOR}};
+      border-style: solid;
+      opacity: 0.3;
+    }
+    .corner-tl { top: 40px; left: 40px; border-width: 2px 0 0 2px; }
+    .corner-tr { top: 40px; right: 40px; border-width: 2px 2px 0 0; }
+    .corner-bl { bottom: 40px; left: 40px; border-width: 0 0 2px 2px; }
+    .corner-br { bottom: 40px; right: 40px; border-width: 0 2px 2px 0; }
+
+    /* Glow circles */
+    .glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+    }
+    .glow-1 {
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(76,175,80,0.06) 0%, transparent 70%);
+      top: -300px; right: -200px;
+    }
+    .glow-2 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(25,118,210,0.08) 0%, transparent 70%);
+      bottom: -200px; left: -100px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes expand {
+      from { width: 0; opacity: 0; }
+      to   { width: 120px; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <div class="accent-line"></div>
+    <div class="app-name">{{APP_NAME}}</div>
+    <div class="title">{{TITLE}}</div>
+    <div class="subtitle">{{SUBTITLE}}</div>
+    <div class="version-badge">{{APP_VERSION}}</div>
+  </div>
+</body>
+</html>
