@@ -1123,6 +1123,13 @@ class FilterMate:
 
         # print "** UNLOAD FilterMate"
 
+        # v4.7.0: Emit about_to_unload signal for inter-plugin communication
+        if hasattr(self, '_public_api') and self._public_api is not None:
+            try:
+                self._public_api.about_to_unload.emit()
+            except Exception:
+                pass  # Best-effort during shutdown
+
         # Disconnect project change signals using dedicated method
         self._disconnect_auto_activation_signals()
 
@@ -1343,6 +1350,28 @@ class FilterMate:
 
         if cb.isChecked():
             settings.setValue('FilterMate/discord_welcome_dismissed', True)
+
+    def get_public_api(self):
+        """Get the public API instance for inter-plugin communication.
+
+        Returns a singleton FilterMatePublicAPI that external plugins
+        (e.g., Narractive) can use to apply/clear filters and subscribe
+        to filter change signals.
+
+        Returns:
+            FilterMatePublicAPI: The public API adapter instance.
+
+        Example from another plugin:
+            from qgis.utils import plugins
+            fm = plugins.get('filter_mate')
+            if fm:
+                api = fm.get_public_api()
+                api.apply_filter('communes', 'population > 10000', 'narractive')
+        """
+        if not hasattr(self, '_public_api') or self._public_api is None:
+            from .adapters.public_api.filter_mate_public_api import FilterMatePublicAPI
+            self._public_api = FilterMatePublicAPI(self)
+        return self._public_api
 
     def run(self):
         """Run method that loads and starts the plugin"""

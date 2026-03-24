@@ -16,6 +16,7 @@ Ports:
 - ConfigRepositoryPort: Interface for configuration storage
 - HistoryRepositoryPort: Interface for history persistence
 - CachePort: Interface for caching services
+- IFilterMatePublicAPI: Interface for inter-plugin communication
 """
 from .backend_port import (  # noqa: F401
     BackendPort,
@@ -66,6 +67,11 @@ from .materialized_view_port import (  # noqa: F401
     ViewConfig,
 )
 
+# Public API Port (v4.7.0 - Sprint 1 Narractive Integration)
+from .public_api_port import (  # noqa: F401
+    IFilterMatePublicAPI,
+)
+
 __all__ = [
     # Backend
     'BackendPort',
@@ -102,4 +108,6 @@ __all__ = [
     'ViewType',
     'ViewInfo',
     'ViewConfig',
+    # Public API (v4.7.0 - Narractive Integration)
+    'IFilterMatePublicAPI',
 ]
