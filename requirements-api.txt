@@ -1,0 +1,4 @@
+# FilterMate API dependencies
+# Install with: pip install -r requirements-api.txt
+fastapi>=0.110.0,<1.0.0
+uvicorn[standard]>=0.29.0,<1.0.0
