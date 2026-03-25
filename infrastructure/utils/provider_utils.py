@@ -16,7 +16,7 @@ except ImportError:
     HAS_QGIS = False
     QgsVectorLayer = None
 
-# Import canonical ProviderType from domain layer
+# v4.1.5: Import canonical ProviderType from domain layer
 from ...core.domain.filter_expression import ProviderType
 
 

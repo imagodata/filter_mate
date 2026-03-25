@@ -19,6 +19,7 @@ Created: January 2026 (EPIC-1 Phase 14.8)
 import logging
 from qgis.utils import iface
 from ..ports.qgis_port import get_qgis_factory
+from ...infrastructure.signal_utils import SignalBlocker
 
 logger = logging.getLogger('FilterMate.Core.Services.CanvasRefreshService')
 
@@ -121,8 +122,8 @@ class CanvasRefreshService:
             # Last resort fallback
             try:
                 iface.mapCanvas().refresh()
-            except Exception as e:
-                logger.debug(f"Ignored in last resort canvas refresh: {e}")
+            except Exception:
+                pass
 
     def delayed_canvas_refresh(self):
         """
@@ -165,27 +166,23 @@ class CanvasRefreshService:
                     # PostgreSQL: Force reload for complex filters
                     if provider_type == 'postgres':
                         if is_complex_filter(subset, provider_type):
-                            try:
-                                layer.blockSignals(True)
-                                layer.dataProvider().reloadData()
-                                logger.debug(f"  → Forced reloadData() for {layer.name()} (postgres, complex filter)")
-                            except Exception as reload_err:
-                                logger.debug(f"  → reloadData() failed for {layer.name()}: {reload_err}")
+                            with SignalBlocker(layer):
                                 try:
-                                    layer.reload()
-                                except Exception as e:
-                                    logger.debug(f"Ignored in fallback reload for {layer.name()}: {e}")
-                            finally:
-                                layer.blockSignals(False)
+                                    layer.dataProvider().reloadData()
+                                    logger.debug(f"  → Forced reloadData() for {layer.name()} (postgres, complex filter)")
+                                except Exception as reload_err:
+                                    logger.debug(f"  → reloadData() failed for {layer.name()}: {reload_err}")
+                                    try:
+                                        layer.reload()
+                                    except Exception:
+                                        pass
                             layers_refreshed['postgres'] += 1
                         else:
-                            try:
-                                layer.blockSignals(True)
-                                layer.reload()
-                            except Exception as e:
-                                logger.debug(f"Ignored in postgres layer reload: {e}")
-                            finally:
-                                layer.blockSignals(False)
+                            with SignalBlocker(layer):
+                                try:
+                                    layer.reload()
+                                except Exception:
+                                    pass
 
                     # For OGR/Spatialite: just triggerRepaint - NO reloadData()
                     # Skip updateExtents for large layers
@@ -239,8 +236,8 @@ class CanvasRefreshService:
                         if subset:
                             layer.triggerRepaint()
                             layers_repainted += 1
-                except Exception as e:
-                    logger.debug(f"Ignored in final repaint loop: {e}")
+                except Exception:
+                    pass
 
             # Final canvas refresh
             iface.mapCanvas().refresh()
@@ -267,8 +264,8 @@ class CanvasRefreshService:
                     subset = layer.subsetString() or ''
                     if subset:
                         return True
-            except Exception as e:
-                logger.debug(f"Ignored in postgres filtered layers check: {e}")
+            except Exception:
+                pass
         return False
 
     def _refresh_filtered_layers(self) -> tuple:
@@ -297,38 +294,32 @@ class CanvasRefreshService:
                 # PostgreSQL: Force reload for complex filters
                 if provider_type == 'postgres':
                     if is_complex_filter(subset, provider_type):
-                        try:
-                            layer.blockSignals(True)
-                            layer.dataProvider().reloadData()
-                            layers_reloaded += 1
-                        except Exception as reload_err:
-                            logger.debug(f"reloadData() failed for {layer.name()}: {reload_err}")
+                        with SignalBlocker(layer):
+                            try:
+                                layer.dataProvider().reloadData()
+                                layers_reloaded += 1
+                            except Exception as reload_err:
+                                logger.debug(f"reloadData() failed for {layer.name()}: {reload_err}")
+                                try:
+                                    layer.reload()
+                                except Exception:
+                                    pass
+                    else:
+                        with SignalBlocker(layer):
                             try:
                                 layer.reload()
-                            except Exception as e:
-                                logger.debug(f"Ignored in fallback reload for {layer.name()}: {e}")
-                        finally:
-                            layer.blockSignals(False)
-                    else:
-                        try:
-                            layer.blockSignals(True)
-                            layer.reload()
-                        except Exception as e:
-                            logger.debug(f"Ignored in simple reload for {layer.name()}: {e}")
-                        finally:
-                            layer.blockSignals(False)
+                            except Exception:
+                                pass
 
                 # Spatialite: Use reload() for proper feature display
                 elif provider_type == 'spatialite':
-                    try:
-                        layer.blockSignals(True)
-                        layer.reload()
-                        layers_reloaded += 1
-                        logger.debug(f"Forced reload() for Spatialite layer {layer.name()}")
-                    except Exception as reload_err:
-                        logger.debug(f"reload() failed for {layer.name()}: {reload_err}")
-                    finally:
-                        layer.blockSignals(False)
+                    with SignalBlocker(layer):
+                        try:
+                            layer.reload()
+                            layers_reloaded += 1
+                            logger.debug(f"Forced reload() for Spatialite layer {layer.name()}")
+                        except Exception as reload_err:
+                            logger.debug(f"reload() failed for {layer.name()}: {reload_err}")
 
                 # For OGR: just triggerRepaint() - NO reloadData()
                 # Skip updateExtents for large layers

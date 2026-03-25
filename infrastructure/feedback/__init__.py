@@ -12,14 +12,10 @@ Usage:
     show_error("Connection failed")
 """
 
-import logging
-
 from qgis.core import Qgis  # noqa: F401
 from qgis.PyQt.QtCore import QCoreApplication
 
 _tr = QCoreApplication.translate
-
-logger = logging.getLogger(__name__)
 
 try:
     from ...config.feedback_config import should_show_message  # noqa: F401
@@ -53,8 +49,8 @@ def show_info(message: str, title: str = "FilterMate"):
         from qgis.utils import iface  # noqa: F401
         if iface and should_show_message('info'):
             iface.messageBar().pushInfo(title, message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_info: {e}")
+    except Exception:
+        pass
 
 
 def show_warning(message: str, title: str = "FilterMate"):
@@ -63,8 +59,8 @@ def show_warning(message: str, title: str = "FilterMate"):
         from qgis.utils import iface  # noqa: F401
         if iface and should_show_message('warning'):
             iface.messageBar().pushWarning(title, message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_warning: {e}")
+    except Exception:
+        pass
 
 
 def show_error(message: str, title: str = "FilterMate"):
@@ -73,8 +69,8 @@ def show_error(message: str, title: str = "FilterMate"):
         from qgis.utils import iface  # noqa: F401
         if iface and should_show_message('error'):
             iface.messageBar().pushCritical(title, message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_error: {e}")
+    except Exception:
+        pass
 
 
 def show_success(message: str, title: str = "FilterMate"):
@@ -83,8 +79,8 @@ def show_success(message: str, title: str = "FilterMate"):
         from qgis.utils import iface  # noqa: F401
         if iface and should_show_message('success'):
             iface.messageBar().pushSuccess(title, message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_success: {e}")
+    except Exception:
+        pass
 
 
 def show_progress_message(message: str, current: int = None, total: int = None):
@@ -98,8 +94,8 @@ def show_progress_message(message: str, current: int = None, total: int = None):
 
         if iface and should_show_message('progress_info'):
             iface.messageBar().pushInfo("FilterMate", full_message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_progress_message: {e}")
+    except Exception:
+        pass
 
 
 def show_backend_info(provider_type: str, layer_count: int = 1,
@@ -123,8 +119,8 @@ def show_backend_info(provider_type: str, layer_count: int = 1,
 
         if iface and should_show_message('backend_info'):
             iface.messageBar().pushInfo("FilterMate", message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_backend_info: {e}")
+    except Exception:
+        pass
 
 
 def show_success_with_backend(provider_type: str, operation: str = 'filter',
@@ -148,8 +144,8 @@ def show_success_with_backend(provider_type: str, operation: str = 'filter',
 
         if iface:
             iface.messageBar().pushSuccess("FilterMate", message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_success_with_backend: {e}")
+    except Exception:
+        pass
 
 
 def show_performance_warning(provider_type: str, feature_count: int):
@@ -184,8 +180,8 @@ def show_performance_warning(provider_type: str, feature_count: int):
             ).format("{:,}".format(feature_count), backend_name)
             if iface:
                 iface.messageBar().pushInfo("FilterMate - Performance", message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_performance_warning: {e}")
+    except Exception:
+        pass
 
 
 def show_error_with_context(error_message: str, provider_type: str = None,
@@ -210,8 +206,8 @@ def show_error_with_context(error_message: str, provider_type: str = None,
 
         if iface:
             iface.messageBar().pushCritical("FilterMate", message)
-    except Exception as e:
-        logger.debug(f"Ignored in show_error_with_context: {e}")
+    except Exception:
+        pass
 
 
 def format_backend_summary(provider_counts: dict) -> str:

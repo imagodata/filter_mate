@@ -85,8 +85,8 @@ class QGISThemeWatcher:
             app = QgsApplication.instance()
             if app:
                 app.paletteChanged.disconnect(self._on_palette_changed)
-        except Exception as e:
-            logger.debug(f"Ignored in theme watcher signal disconnect: {e}")
+        except Exception:
+            pass
 
         self._is_watching = False
         logger.info("QGISThemeWatcher stopped")

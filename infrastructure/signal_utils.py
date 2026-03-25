@@ -320,8 +320,8 @@ class SafeSignalEmitter:
             if self.error_handler:
                 try:
                     self.error_handler(e)
-                except Exception as e2:
-                    logger.debug(f"Ignored in signal error_handler callback: {e2}")
+                except Exception:
+                    pass
             return False
 
 

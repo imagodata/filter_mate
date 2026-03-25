@@ -35,7 +35,7 @@ class OGRFilterExecutor(FilterExecutorPort):
             try:
                 from .backend import OGRBackend
                 self._backend = OGRBackend()
-            except (ImportError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning(f"[OGR] Could not initialize OGR backend: {e}")
         return self._backend
 
@@ -101,11 +101,8 @@ class OGRFilterExecutor(FilterExecutorPort):
                     backend='ogr'
                 )
 
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             logger.error(f"[OGR] OGR filter execution failed: {e}")
-            return FilterExecutionResult.failed(str(e), backend='ogr')
-        except Exception as e:  # catch-all safety net
-            logger.error(f"[OGR] OGR filter unexpected error: {e}")
             return FilterExecutionResult.failed(str(e), backend='ogr')
 
     def prepare_source_geometry(
@@ -132,7 +129,7 @@ class OGRFilterExecutor(FilterExecutorPort):
 
             return result, None
 
-        except (RuntimeError, AttributeError, ImportError) as e:
+        except Exception as e:
             logger.error(f"[OGR] OGR geometry preparation failed: {e}")
             return None, str(e)
 
@@ -145,7 +142,7 @@ class OGRFilterExecutor(FilterExecutorPort):
         try:
             from ....infrastructure.database.sql_utils import safe_set_subset_string
             return safe_set_subset_string(layer, expression)
-        except (RuntimeError, ImportError) as e:
+        except Exception as e:
             logger.error(f"[OGR] Failed to apply OGR subset: {e}")
             return False
 
@@ -155,7 +152,7 @@ class OGRFilterExecutor(FilterExecutorPort):
             from .filter_executor import cleanup_ogr_temp_layers
             cleanup_ogr_temp_layers()
             logger.debug("[OGR] OGR temp layers cleaned up")
-        except (RuntimeError, ImportError) as e:
+        except Exception as e:
             logger.warning(f"[OGR] OGR cleanup failed: {e}")
 
     @property

@@ -74,7 +74,7 @@ def cleanup_ogr_temp_layers() -> int:
                 project.removeMapLayer(layer_id)
                 removed_count += 1
                 logger.debug(f"[OGR] Cleaned up temp layer: {layer_id}")
-        except RuntimeError as e:
+        except Exception as e:
             logger.warning(f"[OGR] Failed to cleanup temp layer {layer_id}: {e}")
 
     if removed_count > 0:
@@ -123,7 +123,7 @@ def build_ogr_filter_from_selection(
         try:
             from qgis.core import QgsFeatureRequest
             selected_fids = list(layer.selectedFeatureIds())
-        except (RuntimeError, AttributeError):
+        except Exception:
             selected_fids = []
 
     if not selected_fids:
@@ -141,7 +141,7 @@ def build_ogr_filter_from_selection(
             else:
                 pk_value = feature[param_distant_primary_key_name]
                 features_ids.append(str(pk_value))
-    except (RuntimeError, KeyError, AttributeError) as e:
+    except Exception as e:
         logger.warning(f"[OGR] Error extracting feature IDs: {e}")
         # Fallback to fids directly
         features_ids = [str(fid) for fid in selected_fids]
@@ -167,14 +167,14 @@ def build_ogr_filter_from_selection(
 
     if param_distant_schema:
         full_expression = (
-            f'SELECT "{param_distant_table}"."{param_distant_primary_key_name}", '  # nosec B608 - identifiers from QGIS layer metadata (schema/table/pk from QgsDataSourceUri, OGR: no parameterized DDL)
+            f'SELECT "{param_distant_table}"."{param_distant_primary_key_name}", '  # nosec B608
             f'{geom_expr} FROM "{param_distant_schema}"."{param_distant_table}" '
             f'WHERE {param_expression}'
         )
     else:
         # OGR doesn't use schemas
         full_expression = (
-            f'SELECT "{param_distant_primary_key_name}", '  # nosec B608 - identifiers from QGIS layer metadata (table/pk from QgsDataSourceUri, OGR: no parameterized DDL)
+            f'SELECT "{param_distant_primary_key_name}", '  # nosec B608
             f'{geom_expr} FROM "{param_distant_table}" '
             f'WHERE {param_expression}'
         )
@@ -311,7 +311,7 @@ def apply_ogr_subset(
         # Direct application (only safe from main thread)
         try:
             return layer.setSubsetString(subset_string)
-        except RuntimeError as e:
+        except Exception as e:
             logger.error(f"[OGR] Failed to apply OGR subset: {e}")
             return False
 
@@ -389,7 +389,7 @@ def execute_reset_action_ogr(
         logger.debug(f"[OGR] OGR Reset completed for layer: {layer.name()}")
         return True
 
-    except (RuntimeError, AttributeError) as e:
+    except Exception as e:
         logger.error(f"[OGR] Failed to execute OGR reset: {e}")
         return False
 
@@ -442,7 +442,7 @@ def execute_unfilter_action_ogr(
 
         return True
 
-    except (RuntimeError, AttributeError) as e:
+    except Exception as e:
         logger.error(f"[OGR] Failed to execute OGR unfilter: {e}")
         return False
 
@@ -526,10 +526,10 @@ def validate_task_features(
     valid_features = []
     invalid_count = 0
     recovered_via_fids = False
-    cancel_check_interval = 100  # Check every 100 features
+    cancel_check_interval = 100  # v4.2.8: Check every 100 features
 
     for i, f in enumerate(task_features):
-        # Periodic cancellation check
+        # v4.2.8: Periodic cancellation check
         if cancel_check and i > 0 and i % cancel_check_interval == 0:
             if cancel_check():
                 logger.info(f"[OGR] Feature validation canceled at {i}/{len(task_features)} features")
@@ -585,7 +585,7 @@ def recover_features_from_fids(
         if recovered_features:
             logger.debug(f"[OGR]   ✓ Recovered {len(recovered_features)} features using FIDs")
         return recovered_features
-    except (RuntimeError, AttributeError) as e:
+    except Exception as e:
         logger.error(f"[OGR]   ❌ FID recovery failed: {e}")
         return []
 
@@ -759,13 +759,13 @@ def prepare_ogr_source_geom(
                 valid_features, layer.crs(), "source_from_task"
             )
             if layer:
-                logger.debug(f"[OGR]   ✓ Memory layer created with {layer.featureCount()} features")  # nosec B608 - false positive: logger statement, no SQL execution
+                logger.debug(f"[OGR]   ✓ Memory layer created with {layer.featureCount()} features")  # nosec B608
             else:
-                logger.error("[OGR]   ✗ Failed to create memory layer")  # nosec B608 - false positive: logger statement, no SQL execution
+                logger.error("[OGR]   ✗ Failed to create memory layer")  # nosec B608
                 layer = context.source_layer
 
     elif mode == "SELECTION":
-        logger.info("[OGR]   Copying selected features to memory")  # nosec B608 - false positive: logger statement, no SQL execution
+        logger.info("[OGR]   Copying selected features to memory")  # nosec B608
         if context.copy_selected_features_to_memory:
             layer = context.copy_selected_features_to_memory(layer, "source_selection")
 
@@ -798,7 +798,7 @@ def prepare_ogr_source_geom(
                     )
                     if layer:
                         logger.info(f"[OGR]   ✓ Filtered to {layer.featureCount()} features")
-        except (RuntimeError, ValueError, AttributeError) as e:
+        except Exception as e:
             logger.error(f"[OGR]   Expression filtering failed: {e}")
 
     elif mode == "DIRECT":
@@ -860,7 +860,7 @@ def prepare_ogr_source_geom(
             else:
                 logger.warning("[OGR]   ⚠️ Centroid conversion failed - using original geometries")
         else:
-            # Warn if centroid requested but callback not provided
+            # v4.1.3: Warn if centroid requested but callback not provided
             logger.warning("[OGR]   ⚠️ Centroid optimization requested but convert_layer_to_centroids callback not provided!")
             from qgis.core import QgsMessageLog, Qgis
             QgsMessageLog.logMessage(
@@ -870,7 +870,7 @@ def prepare_ogr_source_geom(
             )
 
     # Step 5: Prevent garbage collection for memory layers
-    # Register layer for cleanup after filtering completes
+    # FIX v4.1.1: Register layer for cleanup after filtering completes
     if layer and layer.isValid() and layer.providerType() == 'memory':
         logger.debug("[OGR]   Adding memory layer to project (prevent GC)")
         QgsProject.instance().addMapLayer(layer, addToLegend=False)
@@ -955,7 +955,7 @@ def execute_ogr_spatial_selection(
 
     # Validate source geometry
     if not ogr_source_geom:
-        logger.error("[OGR] ogr_source_geom is None - cannot execute spatial selection")  # nosec B608 - false positive: logger statement, no SQL execution
+        logger.error("[OGR] ogr_source_geom is None - cannot execute spatial selection")  # nosec B608
         raise Exception("Source geometry layer is not available for spatial selection")
 
     if not isinstance(ogr_source_geom, QgsVectorLayer):
@@ -968,7 +968,7 @@ def execute_ogr_spatial_selection(
 
     feature_count = ogr_source_geom.featureCount()
     if feature_count is None or feature_count == 0:
-        logger.warning("[OGR] ogr_source_geom has no features - spatial selection will return no results")  # nosec B608 - false positive: logger statement, no SQL execution
+        logger.warning("[OGR] ogr_source_geom has no features - spatial selection will return no results")  # nosec B608
         return
 
     # Validate at least one geometry
@@ -1000,7 +1000,7 @@ def execute_ogr_spatial_selection(
         safe_source_geom = ogr_source_geom
 
     if safe_source_geom is None:
-        logger.warning("[OGR] create_geos_safe_layer returned None, using original")  # nosec B608 - false positive: logger statement, no SQL execution
+        logger.warning("[OGR] create_geos_safe_layer returned None, using original")  # nosec B608
         safe_source_geom = ogr_source_geom
 
     if not safe_source_geom.isValid() or safe_source_geom.featureCount() == 0:
@@ -1027,13 +1027,13 @@ def execute_ogr_spatial_selection(
     #   - Des codes numériques comme clés: {0: 'ST_Intersects'}  # DEPRECATED v2.10.0
     # Pour processing.run("qgis:selectbylocation"), on a besoin des codes numériques
     #
-    # Numeric predicates are now stored separately in filter_task.numeric_predicates
+    # v2.10.0 NOTE: Numeric predicates are now stored separately in filter_task.numeric_predicates
     # to prevent duplicate EXISTS generation in PostgreSQL backend. This code still supports
     # both old format (numeric+string keys mixed) and new format (string keys only) via fallback.
 
     # DIAGNOSTIC 2026-01-16: Trace predicates received in OGR executor
     logger.info("=" * 70)
-    logger.info("[OGR] 🔍 DIAGNOSTIC: execute_ogr_spatial_selection - PREDICATE ANALYSIS")  # nosec B608 - false positive: logger statement, no SQL execution
+    logger.info("[OGR] 🔍 DIAGNOSTIC: execute_ogr_spatial_selection - PREDICATE ANALYSIS")  # nosec B608
     logger.info(f"[OGR]    context.current_predicates = {context.current_predicates}")
     logger.info(f"[OGR]    predicates type = {type(context.current_predicates).__name__}")
     if context.current_predicates:
@@ -1081,7 +1081,7 @@ def execute_ogr_spatial_selection(
 
     # DIAGNOSTIC LOGS 2026-01-15: Trace OGR spatial selection execution
     logger.info("=" * 70)
-    logger.info("[OGR] 🚀 execute_ogr_spatial_selection STARTING")  # nosec B608 - false positive: logger statement, no SQL execution
+    logger.info("[OGR] 🚀 execute_ogr_spatial_selection STARTING")  # nosec B608
     logger.info(f"[OGR]    Layer: {current_layer.name() if hasattr(current_layer, 'name') else 'unknown'}")
     logger.info(f"[OGR]    Source geom: {ogr_source_geom.name() if hasattr(ogr_source_geom, 'name') else 'unknown'}")
     logger.info(f"[OGR]    Source features: {ogr_source_geom.featureCount() if hasattr(ogr_source_geom, 'featureCount') else 'unknown'}")
@@ -1098,7 +1098,7 @@ def execute_ogr_spatial_selection(
             selected_fids = list(safe_current_layer.selectedFeatureIds())
             if selected_fids:
                 current_layer.selectByIds(selected_fids)
-                logger.debug(f"[OGR] Mapped {len(selected_fids)} features to original layer")  # nosec B608 - false positive: logger statement, no SQL execution
+                logger.debug(f"[OGR] Mapped {len(selected_fids)} features to original layer")  # nosec B608
 
     work_layer = safe_current_layer if use_safe_current else current_layer
     verify_index = context.verify_and_create_spatial_index

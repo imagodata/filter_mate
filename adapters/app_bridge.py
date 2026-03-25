@@ -79,7 +79,7 @@ def initialize_services(config: Optional[Dict[str, Any]] = None) -> None:
     config = config or {}
 
     try:
-        # CRITICAL Use existing QGIS factory (already initialized in filter_mate.py)
+        # CRITICAL v4.0: Use existing QGIS factory (already initialized in filter_mate.py)
         from ..core.ports.qgis_port import get_qgis_factory
 
         try:
@@ -118,8 +118,8 @@ def initialize_services(config: Optional[Dict[str, Any]] = None) -> None:
                 backend = _backend_factory.get_backend_for_provider(provider_type)
                 if backend:
                     backends[provider_type] = backend
-            except Exception as e:
-                logger.debug(f"Ignored in backend initialization for {provider_type}: {e}")
+            except Exception:
+                pass
 
         _filter_service = FilterService(
             backends=backends,
@@ -144,7 +144,7 @@ def cleanup_services() -> None:
     global _backend_factory, _initialized
 
     try:
-        # CRITICAL Reset QGIS factory
+        # CRITICAL v4.0: Reset QGIS factory
         from ..core.ports.qgis_port import set_qgis_factory
         set_qgis_factory(None)
         logger.debug("QGIS factory reset")
@@ -321,8 +321,8 @@ def _check_spatial_index(layer: 'QgsVectorLayer') -> bool:
         provider = layer.dataProvider()
         if hasattr(provider, 'hasSpatialIndex'):
             return provider.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresent
-    except Exception as e:
-        logger.debug(f"Ignored in spatial index check: {e}")
+    except Exception:
+        pass
     return False
 
 
@@ -405,8 +405,8 @@ def _extract_primary_key(layer: 'QgsVectorLayer') -> str:
             if field.type() in [2, 4]:  # Integer types in QVariant
                 return field.name()
 
-    except Exception as e:
-        logger.debug(f"Ignored in primary key extraction: {e}")
+    except Exception:
+        pass
 
     return ""
 

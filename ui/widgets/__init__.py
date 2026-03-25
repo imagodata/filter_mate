@@ -12,7 +12,6 @@ from .custom_widgets import (  # noqa: F401
     QgsCheckableComboBoxLayer,
     QgsCheckableComboBoxFeaturesListPickerWidget
 )
-from .raster_histogram_widget import RasterHistogramWidget  # noqa: F401
 
 __all__ = [
     'FavoritesWidget',
@@ -22,5 +21,4 @@ __all__ = [
     'ListWidgetWrapper',
     'QgsCheckableComboBoxLayer',
     'QgsCheckableComboBoxFeaturesListPickerWidget',
-    'RasterHistogramWidget',
 ]

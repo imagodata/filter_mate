@@ -7,12 +7,8 @@ This module provides centralized UI configuration for FilterMate,
 including responsive sizing, spacing, and theme settings.
 """
 
-import logging
-
 from typing import Any, Dict, Optional  # noqa: F401
 from enum import Enum  # noqa: F401
-
-logger = logging.getLogger(__name__)
 
 
 class DisplayProfile(Enum):
@@ -32,7 +28,7 @@ class UIConfig:
     """
 
     # Current active profile - Use Enum for proper comparisons
-    # Restored COMPACT as default (NORMAL was causing -12% usable space on laptops)
+    # v4.0.1 FIX #3: Restored COMPACT as default (NORMAL was causing -12% usable space on laptops)
     # AppInitializer._initialize_ui_profile() will upgrade to NORMAL for large screens (≥2560x1440)
     _active_profile: DisplayProfile = DisplayProfile.COMPACT
 
@@ -901,8 +897,8 @@ class UIConfig:
                     return DisplayProfile.EXPANDED
                 else:
                     return DisplayProfile.NORMAL
-        except Exception as e:
-            logger.debug(f"Ignored in detect_profile_from_screen: {e}")
+        except Exception:
+            pass
 
         return DisplayProfile.NORMAL
 

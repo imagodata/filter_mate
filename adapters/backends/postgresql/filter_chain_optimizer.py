@@ -41,12 +41,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
 
-try:
-    import psycopg2
-except ImportError:
-    psycopg2 = None
-
-from ....core.domain.exceptions import PostgreSQLError
+from ....infrastructure.database.sql_utils import sanitize_sql_identifier
 
 logger = logging.getLogger('FilterMate.Backend.PostgreSQL.FilterChainOptimizer')
 
@@ -225,13 +220,15 @@ class FilterChainOptimizer:
         # Execute MV creation
         try:
             cursor = self._connection.cursor()
+            safe_schema = sanitize_sql_identifier(self.MV_SCHEMA)
+            safe_mv = sanitize_sql_identifier(mv_name)
 
             # Ensure schema exists
-            cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{self.MV_SCHEMA}"')
+            cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{safe_schema}"')
 
             # Drop if exists (for refresh)
             cursor.execute(
-                f'DROP MATERIALIZED VIEW IF EXISTS "{self.MV_SCHEMA}"."{mv_name}" CASCADE'
+                f'DROP MATERIALIZED VIEW IF EXISTS "{safe_schema}"."{safe_mv}" CASCADE'
             )
 
             # Create MV
@@ -240,10 +237,10 @@ class FilterChainOptimizer:
             cursor.execute(create_sql)
 
             # Create spatial index
-            f"idx_{mv_name}_geom"
-            cursor.execute('''
+            index_name = f"idx_{safe_mv}_geom"
+            cursor.execute(f'''
                 CREATE INDEX IF NOT EXISTS "{index_name}"
-                ON "{self.MV_SCHEMA}"."{mv_name}"
+                ON "{safe_schema}"."{safe_mv}"
                 USING GIST ("{context.source_geom_column}")
             ''')
 
@@ -255,11 +252,11 @@ class FilterChainOptimizer:
             logger.info(f"✅ Chain MV created: {self.MV_SCHEMA}.{mv_name}")
             return mv_name
 
-        except (psycopg2.Error if psycopg2 else Exception) as e:
+        except Exception as e:
             logger.error(f"Failed to create chain MV: {e}")
             try:
                 self._connection.rollback()
-            except (psycopg2.Error if psycopg2 else Exception):
+            except Exception:
                 pass  # Rollback may fail if connection is broken
             return None
 
@@ -297,7 +294,7 @@ class FilterChainOptimizer:
         # Build source geometry reference (with buffer if needed)
         source_geom = f'__source."{context.source_geom_column}"'
 
-        # Handle dynamic buffer expression
+        # v4.3.5: Handle dynamic buffer expression
         if context.buffer_expression:
             # Convert buffer expression to use __source alias instead of table name
             # Example: "demand_points"."homecount" -> __source."homecount"
@@ -414,12 +411,12 @@ class FilterChainOptimizer:
                     )
                     count += 1
                     del self._created_mvs[chain_hash]
-                except (psycopg2.Error if psycopg2 else Exception) as e:
+                except Exception as e:
                     logger.warning(f"Failed to drop MV {mv_name}: {e}")
 
             self._connection.commit()
 
-        except (psycopg2.Error if psycopg2 else Exception) as e:
+        except Exception as e:
             logger.error(f"Cleanup failed: {e}")
 
         logger.info(f"Cleaned up {count} chain MVs")
@@ -504,7 +501,7 @@ WITH DATA
                 src_geom = f"ST_Buffer({src_geom}, {filter_buffer}, 'quad_segs=5')"
 
             # Build EXISTS
-            exists_sql = '''EXISTS (SELECT 1 FROM "{filter_schema}"."{filter_table}" AS __source WHERE {predicate}("{distant_table}"."{distant_geom_column}", {src_geom})'''  # nosec B608 - identifiers from QGIS layer metadata (schema/table from QgsDataSourceUri)
+            exists_sql = '''EXISTS (SELECT 1 FROM "{filter_schema}"."{filter_table}" AS __source WHERE {predicate}("{distant_table}"."{distant_geom_column}", {src_geom})'''  # nosec B608
 
             if filter_condition:
                 exists_sql += f' AND ({filter_condition})'
@@ -523,7 +520,7 @@ WITH DATA
             chain_str += f"{f.get('predicate', '')}|{f.get('buffer', '')}|"
             chain_str += f"{f.get('condition', '')}|"
 
-        # Include buffer_value OR buffer_expression in hash
+        # v4.3.5: Include buffer_value OR buffer_expression in hash
         if context.buffer_expression:
             chain_str += f"buffer_expr={context.buffer_expression}"
         elif context.buffer_value:
@@ -546,7 +543,7 @@ WITH DATA
             """, (self.MV_SCHEMA, mv_name))
             result = cursor.fetchone()
             return result[0] if result else False
-        except (psycopg2.Error if psycopg2 else Exception):
+        except Exception:
             return False  # Assume MV doesn't exist if query fails
 
     def _generate_session_id(self) -> str:
@@ -587,7 +584,7 @@ def optimize_filter_chain(
     distant_schema: str,
     distant_geom_column: str = "geom",
     buffer_value: Optional[float] = None,
-    buffer_expression: Optional[str] = None,  # Dynamic buffer support
+    buffer_expression: Optional[str] = None,  # v4.3.5: Dynamic buffer support
     session_id: Optional[str] = None
 ) -> OptimizedChain:
     """
@@ -636,7 +633,7 @@ def optimize_filter_chain(
         source_geom_column=source_geom_column,
         spatial_filters=spatial_filters,
         buffer_value=buffer_value,
-        buffer_expression=buffer_expression,
+        buffer_expression=buffer_expression,  # v4.3.5
         session_id=session_id
     )
 

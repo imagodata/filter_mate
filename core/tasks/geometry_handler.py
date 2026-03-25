@@ -48,11 +48,6 @@ logger = setup_logger(
     level=logging.INFO
 )
 
-# Lazy-load constants
-from ...infrastructure.constants import (
-    PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR
-)
-
 
 class GeometryHandler:
     """Handles geometry preparation and spatial operations for FilterEngineTask.
@@ -206,7 +201,7 @@ class GeometryHandler:
         except ImportError as e:
             logger.error(f"core.geometry module not available: {e}")
             raise Exception(f"Buffer operation requires core.geometry module: {e}")
-        except Exception as e:
+        except (RuntimeError, ValueError, AttributeError) as e:
             logger.error(f"Buffer operation failed: {e}")
             raise
 
@@ -259,9 +254,9 @@ class GeometryHandler:
             )
             if result is None or not result.isValid() or result.featureCount() == 0:
                 logger.warning("_apply_qgis_buffer returned invalid/empty result, trying manual buffer")
-                raise Exception("QGIS buffer returned invalid result")
+                raise ValueError("QGIS buffer returned invalid result")
 
-        except Exception as e:
+        except (RuntimeError, ValueError, AttributeError) as e:
             logger.warning(f"QGIS buffer algorithm failed: {str(e)}, using manual buffer approach")
             try:
                 result = self.create_buffered_memory_layer(
@@ -271,7 +266,7 @@ class GeometryHandler:
                 if result is None or not result.isValid() or result.featureCount() == 0:
                     logger.error("Manual buffer also returned invalid/empty result")
                     return None
-            except Exception as manual_error:
+            except (RuntimeError, ValueError, AttributeError) as manual_error:
                 logger.error(f"Both buffer methods failed. QGIS: {str(e)}, Manual: {str(manual_error)}")
                 return None
 
@@ -338,12 +333,12 @@ class GeometryHandler:
             return geometry
 
         try:
-            adapter = self._backend_services.get_geometry_preparation_adapter()
-            if adapter is None:
+            AdapterClass = self._backend_services.get_geometry_preparation_adapter()
+            if AdapterClass is None:
                 logger.warning("GeometryPreparationAdapter not available, returning original geometry")
                 return geometry
 
-            result = adapter.simplify_geometry_adaptive(
+            result = AdapterClass().simplify_geometry_adaptive(
                 geometry=geometry,
                 max_wkt_length=max_wkt_length,
                 crs_authid=crs_authid,
@@ -359,7 +354,7 @@ class GeometryHandler:
         except ImportError as e:
             logger.error(f"GeometryPreparationAdapter not available: {e}")
             return geometry
-        except Exception as e:
+        except (RuntimeError, ValueError, AttributeError) as e:
             logger.error(f"GeometryPreparationAdapter simplify error: {e}")
             return geometry
 

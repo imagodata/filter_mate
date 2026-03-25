@@ -9,9 +9,51 @@ Migrated from modules/appUtils.py to infrastructure/database/sql_utils.py
 
 import re
 import logging
-import sqlite3
+from contextlib import contextmanager
+
+try:
+    from qgis.PyQt.QtCore import QCoreApplication
+except ImportError:
+    QCoreApplication = None
 
 logger = logging.getLogger('FilterMate.Infrastructure.Database.SQLUtils')
+
+
+@contextmanager
+def feature_picker_guard(layer):
+    """
+    FIX 2026-02-11: Temporarily detach QgsFeaturePickerWidget to prevent crash during subset change.
+
+    QgsFeaturePickerWidget's internal model iterates features on a background thread.
+    If setSubsetString() is called while iteration is in progress, it causes an access
+    violation in sqlite3_bind_int64. Detaching the widget (setLayer(None)) stops the
+    background thread before the subset string changes.
+
+    Args:
+        layer: QgsVectorLayer whose subset string is about to change
+    """
+    picker = None
+    try:
+        from filter_mate_dockwidget import _active_dockwidget
+        if _active_dockwidget is not None:
+            widget = getattr(_active_dockwidget, 'mFeaturePickerWidget_exploring_single_selection', None)
+            if widget is not None and hasattr(widget, 'layer') and widget.layer() == layer:
+                widget.setLayer(None)
+                picker = widget
+                logger.debug("FIX-2026-02-11: FeaturePickerWidget detached before subset change")
+    except (ImportError, RuntimeError, Exception) as e:
+        logger.debug(f"FIX-2026-02-11: feature_picker_guard detach skipped: {e}")
+
+    try:
+        yield
+    finally:
+        if picker is not None:
+            try:
+                if layer and hasattr(layer, 'isValid') and layer.isValid():
+                    picker.setLayer(layer)
+                    logger.debug("FIX-2026-02-11: FeaturePickerWidget reattached after subset change")
+            except (RuntimeError, Exception) as e:
+                logger.debug(f"FIX-2026-02-11: feature_picker_guard reattach failed: {e}")
 
 
 def sanitize_sql_identifier(identifier: str) -> str:
@@ -81,12 +123,12 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
 
     try:
         if hasattr(layer, 'setSubsetString'):
-            # Enhanced diagnostics for setSubsetString failures
+            # FIX v4.2.13: Enhanced diagnostics for setSubsetString failures
             logger.debug(f"[SQL] Applying subset to layer '{layer.name()}':")
             logger.debug(f"[SQL]   Provider: {layer.providerType()}")
             logger.debug(f"[SQL]   Expression length: {len(subset_expression) if subset_expression else 0} chars")
 
-            # Detect type mismatches BEFORE applying to PostgreSQL
+            # FIX v4.8.2: Detect type mismatches BEFORE applying to PostgreSQL
             # Prevents "operator does not exist: character varying < integer" errors
             if subset_expression and layer.providerType() == 'postgres':
                 try:
@@ -106,19 +148,23 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                         try:
                             from qgis.utils import iface
                             if iface:
-                                message = f"Type mismatch in filter: {warnings[0][:100]}..."
-                                iface.messageBar().pushWarning(
-                                    "FilterMate - PostgreSQL Type Warning",
-                                    message
+                                title = QCoreApplication.translate(
+                                    "SqlUtils",
+                                    "FilterMate - PostgreSQL Type Warning"
                                 )
+                                message = QCoreApplication.translate(
+                                    "SqlUtils",
+                                    "Type mismatch in filter: {warning_detail}..."
+                                ).format(warning_detail=warnings[0][:100])
+                                iface.messageBar().pushWarning(title, message)
                         except (ImportError, AttributeError):
                             pass  # No UI available (testing environment)
 
                         logger.info("💡 FilterMate will auto-apply type casting to fix this.")
-                except (TypeError, ValueError, ImportError) as type_check_err:
+                except Exception as type_check_err:
                     logger.debug(f"Type mismatch detection failed (non-critical): {type_check_err}")
 
-            # Apply PostgreSQL type casting for PostgreSQL layers
+            # FIX v4.8.1: Apply PostgreSQL type casting for PostgreSQL layers
             # This ensures numeric comparisons have ::numeric casting
             if subset_expression and layer.providerType() == 'postgres':
                 try:
@@ -143,7 +189,30 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                     preview += f"... ({len(subset_expression) - 500} more chars)"
                 logger.debug(f"[SQL]   Expression: {preview}")
 
-            result = layer.setSubsetString(subset_expression)
+            # FIX 2026-02-11: Detach FeaturePickerWidget before subset change to prevent crash
+            with feature_picker_guard(layer):
+                result = layer.setSubsetString(subset_expression)
+
+            # FIX v4.9.0: Retry for PostgreSQL layers after connection reset.
+            # When a prior complex PostGIS EXISTS query fails, the QGIS PostgreSQL provider
+            # may leave its internal connection in an aborted-transaction state, causing
+            # all subsequent setSubsetString() calls to fail even with valid expressions.
+            # reloadData() forces a fresh connection so the retry has a clean state.
+            if not result and layer.providerType() == 'postgres':
+                logger.info(
+                    f"[SQL] 🔄 setSubsetString failed for PostgreSQL layer '{layer.name()}' "
+                    "- retrying once after reloadData()..."
+                )
+                try:
+                    layer.dataProvider().reloadData()
+                    with feature_picker_guard(layer):
+                        result = layer.setSubsetString(subset_expression)
+                    if result:
+                        logger.info("[SQL]   ✓ Retry succeeded after reloadData()")
+                    else:
+                        logger.warning("[SQL]   ✗ Retry also failed after reloadData()")
+                except Exception as _retry_err:
+                    logger.warning(f"[SQL]   ⚠️ Retry attempt raised exception: {_retry_err}")
 
             if not result:
                 logger.warning(f"setSubsetString returned False for layer {layer.name()}")
@@ -153,12 +222,41 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                 logger.warning(f"[SQL]   Feature count before: {layer.featureCount()}")
                 logger.warning(f"[SQL]   Current subset: {layer.subsetString()[:200] if layer.subsetString() else 'None'}...")
 
-                # Try to get provider error
+                # FIX v4.9.0: Improved provider error capture for PostgreSQL layers
                 try:
                     provider = layer.dataProvider()
-                    if provider and hasattr(provider, 'error') and provider.error():
-                        logger.warning(f"[SQL]   Provider error: {provider.error().message()}")
-                except Exception as diag_e:  # catch-all safety net (QGIS provider diagnostic)
+                    if provider:
+                        # Try QgsDataProvider.error() (returns QgsError)
+                        if hasattr(provider, 'error') and provider.error():
+                            pg_msg = provider.error().message()
+                            if pg_msg:
+                                logger.warning(f"[SQL]   Provider error: {pg_msg}")
+                        # Try errors() which returns a list of error messages (QGIS 3.x)
+                        if hasattr(provider, 'errors'):
+                            for err_item in (provider.errors() or []):
+                                logger.warning(f"[SQL]   Provider errors(): {err_item}")
+                        # For PostgreSQL, try executing a simple query to check connection state
+                        if layer.providerType() == 'postgres':
+                            try:
+                                from filter_mate.infrastructure.utils import get_datasource_connexion_from_layer
+                                conn, _ = get_datasource_connexion_from_layer(layer)
+                                if conn:
+                                    # Check if connection is in a broken/aborted transaction state
+                                    try:
+                                        with conn.cursor() as cur:
+                                            cur.execute("SELECT 1")
+                                        conn.rollback()  # Keep the connection clean after the probe
+                                        logger.info("[SQL]   PostgreSQL connection (psycopg2 probe): OK")
+                                    except Exception as probe_inner:
+                                        try:
+                                            conn.rollback()
+                                        except Exception:
+                                            pass
+                                        logger.warning(f"[SQL]   PostgreSQL connection BROKEN: {probe_inner}")
+                                        logger.warning("[SQL]   → Root cause: prior query may have aborted the transaction")
+                            except Exception as pg_probe_e:
+                                logger.debug(f"[SQL]   psycopg2 probe unavailable: {pg_probe_e}")
+                except Exception as diag_e:
                     logger.debug(f"[SQL]   Could not get provider error: {diag_e}")
 
                 # Log the full expression to a separate line for easy copy/paste
@@ -170,7 +268,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
         else:
             logger.error(f"Layer {layer.name()} does not have setSubsetString method")
             return False
-    except Exception as e:  # catch-all safety net
+    except Exception as e:
         logger.error(f"Error setting subset string on layer {layer.name()}: {e}")
         logger.error(f"[SQL] Exception details - Expression:\n{subset_expression}")
         return False
@@ -221,7 +319,7 @@ def create_temp_spatialite_table(
         except sqlite3.OperationalError:
             try:
                 conn.load_extension('mod_spatialite.dll')  # Windows fallback
-            except sqlite3.OperationalError as e:
+            except Exception as e:
                 logger.error(f"Failed to load Spatialite extension: {e}")
                 conn.close()
                 return False
@@ -229,16 +327,16 @@ def create_temp_spatialite_table(
         cursor = conn.cursor()
 
         # Drop existing table if exists
-        cursor.execute(f"DROP TABLE IF EXISTS {sanitize_sql_identifier(table_name)}")  # nosec B608 - identifier sanitized via sanitize_sql_identifier()
+        cursor.execute(f"DROP TABLE IF EXISTS {sanitize_sql_identifier(table_name)}")  # nosec B608
 
         # Create table from query
-        create_sql = f"CREATE TABLE {sanitize_sql_identifier(table_name)} AS {sql_query}"  # nosec B608 - identifier sanitized via sanitize_sql_identifier()
+        create_sql = f"CREATE TABLE {sanitize_sql_identifier(table_name)} AS {sql_query}"  # nosec B608
         cursor.execute(create_sql)
 
         # Create spatial index
         try:
             # Register geometry column
-            cursor.execute(f"""
+            cursor.execute("""
                 SELECT RecoverGeometryColumn(
                     '{sanitize_sql_identifier(table_name)}',
                     '{sanitize_sql_identifier(geom_field)}',
@@ -249,13 +347,13 @@ def create_temp_spatialite_table(
             """)
 
             # Create R-tree spatial index
-            cursor.execute(f"""
+            cursor.execute("""
                 SELECT CreateSpatialIndex(
                     '{sanitize_sql_identifier(table_name)}',
                     '{sanitize_sql_identifier(geom_field)}'
                 )
             """)
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.warning(f"Could not create spatial index: {e}")
             # Continue anyway - table is still usable without index
 
@@ -265,7 +363,7 @@ def create_temp_spatialite_table(
         logger.info(f"Created temporary Spatialite table: {table_name}")
         return True
 
-    except sqlite3.Error as e:
+    except Exception as e:
         logger.error(f"Error creating Spatialite temp table {table_name}: {e}")
         return False
 
@@ -326,8 +424,8 @@ def format_pk_values_for_sql(
             if all_numeric_values:
                 pk_is_numeric = True
                 logger.debug(f"PK '{pk_field}' detected as numeric from VALUES (all int/float)")
-        except (TypeError, ValueError) as e:
-            logger.debug(f"Ignored in PK numeric detection (strategy 1): {e}")
+        except Exception:
+            pass
 
     # Strategy 2: Check if string values look like integers
     if pk_is_numeric is None:
@@ -340,8 +438,8 @@ def format_pk_values_for_sql(
             if all_look_numeric:
                 pk_is_numeric = True
                 logger.debug(f"PK '{pk_field}' detected as numeric from string VALUES")
-        except (TypeError, ValueError) as e:
-            logger.debug(f"Ignored in PK numeric detection (strategy 2): {e}")
+        except Exception:
+            pass
 
     # Strategy 3: Check field schema (may be unreliable for OGR)
     if pk_is_numeric is None and layer and pk_field:
@@ -354,7 +452,7 @@ def format_pk_values_for_sql(
                 pk_is_text = 'char' in field_type or 'text' in field_type or 'string' in field_type
                 pk_is_numeric = field.isNumeric()
                 logger.debug(f"PK '{pk_field}' from schema: uuid={pk_is_uuid}, text={pk_is_text}, numeric={pk_is_numeric}")
-        except Exception as e:  # catch-all safety net (QGIS field schema)
+        except Exception as e:
             logger.debug(f"Could not get field schema: {e}")
 
     # Strategy 4: Fallback based on common PK names

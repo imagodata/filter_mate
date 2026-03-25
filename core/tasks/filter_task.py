@@ -30,21 +30,14 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 from qgis.core import (
-    Qgis,
     QgsCoordinateReferenceSystem,
     QgsFeature,
-    QgsFeatureRequest,
     QgsGeometry,
-    QgsProcessing,
-    QgsProcessingContext,
-    QgsProcessingFeedback,
     QgsProject,
-    QgsProperty,
     QgsTask,
     QgsVectorLayer
 )
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis import processing
 
 # Import logging configuration (migrated to infrastructure.logging)
 from ...infrastructure.logging import setup_logger
@@ -76,7 +69,8 @@ POSTGRESQL_AVAILABLE = _pg_availability.postgresql_available
 
 # Import constants (migrated to infrastructure)
 from ...infrastructure.constants import (
-    PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR
+    PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR,
+    QGIS_PROVIDER_POSTGRES,
 )
 
 # Backend architecture (migrated to adapters.backends)
@@ -100,32 +94,11 @@ from ...infrastructure.database.prepared_statements import create_prepared_state
 from ...infrastructure.utils import (
     spatialite_connect,
     ensure_db_directory_exists,
-    get_best_metric_crs,
     MESSAGE_TASKS_CATEGORIES
 )
 
-# Import geometry safety module (v2.3.9 - stability fix, migrated to core/geometry)
-
-# Import CRS utilities (v2.5.7 - improved CRS compatibility, migrated to core/geometry)
-try:
-    from ..geometry.crs_utils import (
-        is_geographic_crs,
-        is_metric_crs,
-        get_optimal_metric_crs,
-        get_layer_crs_info
-    )
-    CRS_UTILS_AVAILABLE = True
-except ImportError:
-    CRS_UTILS_AVAILABLE = False
-    logger.warning("crs_utils module not available - using legacy CRS handling")
-
 # Import from infrastructure (EPIC-1 migration)
 from ...infrastructure.cache import SourceGeometryCache
-from ...infrastructure.streaming import StreamingExporter, StreamingConfig
-from ...infrastructure.parallel import ParallelFilterExecutor, ParallelConfig
-
-# Import from core (EPIC-1 migration - relative import now that we're in core/)
-from ..optimization import get_combined_query_optimizer
 
 # Phase 3 C1: Import extracted handlers (February 2026)
 from .cleanup_handler import CleanupHandler
@@ -136,6 +109,10 @@ from .source_geometry_preparer import SourceGeometryPreparer
 from .subset_management_handler import SubsetManagementHandler
 from .filtering_orchestrator import FilteringOrchestrator
 from .finished_handler import FinishedHandler
+from .materialized_view_handler import MaterializedViewHandler
+from .expression_facade_handler import ExpressionFacadeHandler
+from .spatial_query_handler import SpatialQueryHandler
+from .v3_bridge_handler import V3BridgeHandler
 
 # Phase E13: Import extracted classes (January 2026)
 from .executors.attribute_filter_executor import AttributeFilterExecutor
@@ -147,15 +124,6 @@ from .builders.subset_string_builder import SubsetStringBuilder
 from .collectors.feature_collector import FeatureCollector
 from .dispatchers.action_dispatcher import (
     create_dispatcher_for_task, create_action_context_from_task
-)
-
-# E6: Task completion handler functions (relative import, same package)
-from .task_completion_handler import (
-    display_warning_messages as tch_display_warnings,
-    should_skip_subset_application,
-    apply_pending_subset_requests,
-    schedule_canvas_refresh,
-    cleanup_memory_layer
 )
 
 # EPIC-1 Phase E4-S9: Centralized history repository
@@ -398,7 +366,7 @@ class FilterEngineTask(QgsTask):
                 self._task_bridge = get_task_bridge()
                 if self._task_bridge:
                     logger.debug("TaskBridge initialized - v3 backends available")
-            except Exception as e:
+            except (ImportError, RuntimeError, AttributeError) as e:
                 logger.debug(f"TaskBridge not available: {e}")
 
         # Store subset string requests to apply on main thread
@@ -437,6 +405,18 @@ class FilterEngineTask(QgsTask):
 
         # Phase 3 C1 US-C1.3.3: Task completion handler
         self._finished_handler = FinishedHandler()
+
+        # Pass 3: Materialized view handler
+        self._mv_handler = MaterializedViewHandler(self)
+
+        # Pass 3: Expression facade handler
+        self._expr_facade = ExpressionFacadeHandler(self)
+
+        # Pass 3: Spatial query handler
+        self._spatial_query = SpatialQueryHandler(self)
+
+        # Pass 3: V3 bridge handler (Strangler Fig pattern)
+        self._v3_bridge = V3BridgeHandler(self)
 
     # ========================================================================
     # FIX 2026-01-16: Early Predicate Initialization
@@ -728,7 +708,7 @@ class FilterEngineTask(QgsTask):
             executor = self._get_backend_executor(layer_info)
             if executor:
                 return executor.apply_subset_string(layer, expression)
-        except Exception as e:
+        except (RuntimeError, AttributeError, ValueError) as e:
             logger.debug(f"Executor.apply_subset_string failed: {e}")
 
         return False
@@ -839,7 +819,7 @@ class FilterEngineTask(QgsTask):
                         return connexion
                     else:
                         logger.warning("ACTIVE_POSTGRESQL connection is closed, will obtain new connection")
-            except Exception as e:
+            except (AttributeError, TypeError, RuntimeError) as e:
                 logger.warning(f"Error checking ACTIVE_POSTGRESQL connection: {e}")
 
         # Connection is invalid (string, None, or closed) - try to get fresh connection from source layer
@@ -852,7 +832,7 @@ class FilterEngineTask(QgsTask):
                     # Track this connection for cleanup
                     self.active_connections.append(connexion)
                     return connexion
-            except Exception as e:
+            except (RuntimeError, OSError, AttributeError) as e:
                 logger.error(f"Failed to get connection from source layer: {e}")
 
         # Last resort: try from infos layer_id
@@ -860,12 +840,12 @@ class FilterEngineTask(QgsTask):
             layer_id = self.task_parameters.get("infos", {}).get("layer_id")
             if layer_id:
                 layer = self.PROJECT.mapLayer(layer_id)
-                if layer and layer.providerType() == 'postgres':
+                if layer and layer.providerType() == QGIS_PROVIDER_POSTGRES:
                     connexion, source_uri = get_datasource_connexion_from_layer(layer)
                     if connexion is not None:
                         self.active_connections.append(connexion)
                         return connexion
-        except Exception as e:
+        except (RuntimeError, OSError, AttributeError, KeyError) as e:
             logger.error(f"Failed to get connection from layer by ID: {e}")
 
         raise Exception(
@@ -988,8 +968,7 @@ class FilterEngineTask(QgsTask):
 
             return result.success
 
-        except Exception as e:
-            # Fallback to legacy routing if dispatcher fails
+        except Exception as e:  # catch-all safety net: fallback to legacy routing
             logger.warning(f"ActionDispatcher failed, using legacy routing: {e}")
             return self._execute_task_action_legacy()
 
@@ -1033,7 +1012,7 @@ class FilterEngineTask(QgsTask):
 
             logger.warning(f"  ⚠️ Unknown task_action: {self.task_action}")
             return False
-        except Exception as e:
+        except Exception as e:  # catch-all safety net: captures any action failure
             logger.error(f"  ❌ _execute_task_action_legacy FAILED: {e}", exc_info=True)
             self.exception = e
             return False
@@ -1181,8 +1160,7 @@ class FilterEngineTask(QgsTask):
 
             return result.success
 
-        except Exception as e:
-            # Catch-all exception handler with full traceback
+        except Exception as e:  # catch-all safety net: QgsTask.run() must not propagate exceptions
             run_elapsed = time.time() - run_start_time
             self.exception = e
             logger.error(f"{'=' * 60}")
@@ -1198,238 +1176,20 @@ class FilterEngineTask(QgsTask):
     # ========================================================================
 
     def _try_v3_attribute_filter(self, task_expression, task_features):
-        """
-        Try v3 TaskBridge attribute filter.
-
-        Phase E13: Delegates to AttributeFilterExecutor.
-
-        Returns:
-            True/False/None (fallback to legacy)
-        """
-        executor = self._get_attribute_executor()
-
-        result = executor.try_v3_attribute_filter(
-            task_expression=task_expression,
-            task_features=task_features,
-            task_bridge=self._task_bridge,
-            source_layer=self.source_layer,
-            primary_key_name=self.primary_key_name,
-            task_parameters=self.task_parameters
-        )
-
-        # Update task state from executor result
-        if result is True and hasattr(executor, '_last_expression'):
-            self.expression = executor._last_expression
-
-        return result
+        """Try v3 attribute filter. Delegates to V3BridgeHandler."""
+        return self._v3_bridge.try_v3_attribute_filter(task_expression, task_features)
 
     def _try_v3_spatial_filter(self, layer, layer_props, predicates):
-        """
-        Try v3 TaskBridge spatial filter.
-
-        Phase E13: Delegates to SpatialFilterExecutor.
-
-        Returns:
-            True/False/None (fallback to legacy)
-        """
-        executor = self._get_spatial_executor()
-
-        result = executor.try_v3_spatial_filter(
-            layer=layer,
-            layer_props=layer_props,
-            predicates=predicates,
-            task_bridge=self._task_bridge,
-            source_layer=self.source_layer,
-            task_parameters=self.task_parameters,
-            combine_operator=self._get_combine_operator() or 'AND'
-        )
-
-        return result
+        """Try v3 spatial filter. Delegates to V3BridgeHandler."""
+        return self._v3_bridge.try_v3_spatial_filter(layer, layer_props, predicates)
 
     def _try_v3_multi_step_filter(self, layers_dict, progress_callback=None):
-        """Try v3 TaskBridge multi-step filter. Returns True/None (fallback to legacy)."""
-        if not self._task_bridge:
-            return None
-
-        # Check if TaskBridge supports multi-step
-        if not self._task_bridge.supports_multi_step():
-            logger.debug("TaskBridge: multi-step not supported - using legacy code")
-            return None
-
-        # CRITICAL v4.1.1 (2026-01-17): Disable V3 for PostgreSQL spatial filtering
-        # The V3 PostgreSQLBackend does not generate proper EXISTS subqueries.
-        # It sends raw SQL placeholders like "SPATIAL_FILTER(intersects)" which fail.
-        # Use legacy PostgreSQLGeometricFilter which properly generates EXISTS clauses.
-        if 'postgresql' in layers_dict and len(layers_dict.get('postgresql', [])) > 0:
-            logger.debug("TaskBridge: PostgreSQL spatial filtering - using legacy code (V3 not ready)")
-            return None
-
-        # CRITICAL v4.1.2 (2026-01-19): Disable V3 for OGR spatial filtering
-        # Same issue as PostgreSQL: V3 sends "SPATIAL_FILTER(intersects)" placeholder
-        # which is not a valid QGIS expression function, causing:
-        # "La fonction SPATIAL_FILTER est inconnue" error
-        # Use legacy OGRExpressionBuilder.apply_filter() which uses QGIS processing
-        if 'ogr' in layers_dict and len(layers_dict.get('ogr', [])) > 0:
-            logger.debug("TaskBridge: OGR spatial filtering - using legacy code (V3 not ready)")
-            return None
-
-        # Skip multi-step for complex scenarios
-        # Check for buffers which require special handling (both positive and negative)
-        # Handle negative buffers (erosion) as well as positive buffers
-        buffer_value = self.task_parameters.get("task", {}).get("buffer_value", 0)
-        if buffer_value and buffer_value != 0:
-            buffer_type = "expansion" if buffer_value > 0 else "erosion"
-            logger.debug(f"TaskBridge: buffer active ({buffer_value}m {buffer_type}) - using legacy multi-step code")
-            return None
-
-        # Count total layers
-        total_layers = sum(len(layer_list) for layer_list in layers_dict.values())
-        if total_layers == 0:
-            return True  # Nothing to filter
-
-        try:
-            logger.info("=" * 70)
-            logger.info("🚀 V3 TASKBRIDGE: Attempting multi-step filter")
-            logger.info("=" * 70)
-            logger.info(f"   Total distant layers: {total_layers}")
-
-            # Build step configurations for each layer
-            steps = []
-            for provider_type, layer_list in layers_dict.items():
-                for layer, layer_props in layer_list:
-                    # Get predicates from layer_props or default to intersects
-                    predicates = layer_props.get('predicates', ['intersects'])
-
-                    # Build spatial expression from predicates
-                    # Format: SPATIAL_FILTER(predicate1, predicate2, ...)
-                    predicate_str = ', '.join(predicates) if predicates else 'intersects'
-                    spatial_expression = f"SPATIAL_FILTER({predicate_str})"
-
-                    step_config = {
-                        'expression': spatial_expression,  # Required by TaskBridge
-                        'target_layer_ids': [layer.id()],
-                        'predicates': predicates,
-                        'step_name': f"Filter {layer.name()}",
-                        'use_previous_result': False  # Each layer filtered independently
-                    }
-                    steps.append(step_config)
-                    logger.debug(f"   Step for {layer.name()}: predicates={predicates}, expression={spatial_expression}")
-
-            # FIX 2026-01-16: Log source geometry diagnostic
-            logger.info("=" * 70)
-            logger.info("🔍 MULTI-STEP SOURCE GEOMETRY DIAGNOSTIC")
-            logger.debug(f"   Source layer: {self.source_layer.name()} (provider: {self.param_source_provider_type})")
-            logger.info(f"   Source feature count: {self.source_layer.featureCount()}")
-            logger.info(f"   Source CRS: {self.source_layer.crs().authid() if self.source_layer.crs() else 'UNKNOWN'}")
-            logger.info(f"   Target layers: {len(steps)}")
-            for idx, (provider_type, layer_list) in enumerate(layers_dict.items(), 1):
-                for layer, layer_props in layer_list:
-                    logger.info(f"   {idx}. {layer.name()}:")
-                    logger.info(f"      - Provider: {layer.providerType()}")
-                    logger.info(f"      - CRS: {layer.crs().authid() if layer.crs() else 'UNKNOWN'}")
-                    logger.info(f"      - Geometry column: {layer_props.get('layer_geometry_field', 'UNKNOWN')}")
-                    logger.info(f"      - Primary key: {layer_props.get('layer_key_column_name', 'UNKNOWN')}")
-            logger.info("=" * 70)
-
-            # Define progress callback adapter
-            def bridge_progress(step_num, total_steps, step_name):
-                if progress_callback:
-                    progress_callback(step_num, total_steps, step_name)
-                self.setDescription(f"V3 Multi-step: {step_name}")
-                self.setProgress(int((step_num / total_steps) * 100))
-
-            # Execute via TaskBridge
-            bridge_result = self._task_bridge.execute_multi_step_filter(
-                source_layer=self.source_layer,
-                steps=steps,
-                progress_callback=bridge_progress
-            )
-
-            if bridge_result.status == BridgeStatus.SUCCESS and bridge_result.success:
-                logger.info("=" * 70)
-                logger.info("✅ V3 TaskBridge MULTI-STEP SUCCESS")
-                logger.info(f"   Backend used: {bridge_result.backend_used}")
-                logger.info(f"   Final feature count: {bridge_result.feature_count}")
-                logger.debug(f"   Total execution time: {bridge_result.execution_time_ms:.1f}ms")
-                logger.info("=" * 70)
-
-                # Store metrics
-                if 'actual_backends' not in self.task_parameters:
-                    self.task_parameters['actual_backends'] = {}
-                self.task_parameters['actual_backends']['_multi_step'] = f"v3_{bridge_result.backend_used}"
-
-                return True
-
-            elif bridge_result.status == BridgeStatus.FALLBACK:
-                logger.info("⚠️ V3 TaskBridge MULTI-STEP: FALLBACK requested")
-                logger.info(f"   Reason: {bridge_result.error_message}")
-                return None
-
-            else:
-                logger.debug(f"TaskBridge multi-step: status={bridge_result.status}, falling back")
-                return None
-
-        except Exception as e:
-            logger.warning(f"TaskBridge multi-step delegation failed: {e}")
-            import traceback
-            logger.debug(f"Traceback: {traceback.format_exc()}")
-            return None
+        """Try v3 multi-step filter. Delegates to V3BridgeHandler."""
+        return self._v3_bridge.try_v3_multi_step_filter(layers_dict, progress_callback)
 
     def _try_v3_export(self, layer, output_path, format_type, progress_callback=None):
-        """Try v3 TaskBridge streaming export. Returns True/None (fallback to legacy)."""
-        if not self._task_bridge:
-            return None
-            return None
-
-        # Check if TaskBridge supports export
-        if not self._task_bridge.supports_export():
-            logger.debug("TaskBridge: export not supported - using legacy code")
-            return None
-
-        try:
-            logger.info("=" * 60)
-            logger.info("🚀 V3 TASKBRIDGE: Attempting streaming export")
-            logger.info("=" * 60)
-            logger.info(f"   Layer: '{layer.name()}'")
-            logger.info(f"   Format: {format_type}")
-            logger.info(f"   Output: {output_path}")
-
-            # Define cancel check
-            def cancel_check():
-                return self.isCanceled()
-
-            bridge_result = self._task_bridge.execute_export(
-                source_layer=layer,
-                output_path=output_path,
-                format=format_type,
-                progress_callback=progress_callback,
-                cancel_check=cancel_check
-            )
-
-            if bridge_result.status == BridgeStatus.SUCCESS and bridge_result.success:
-                logger.info("✅ V3 TaskBridge EXPORT SUCCESS")
-                logger.info(f"   Features exported: {bridge_result.feature_count}")
-                logger.debug(f"   Execution time: {bridge_result.execution_time_ms:.1f}ms")
-
-                # Store in task_parameters for metrics
-                if 'actual_backends' not in self.task_parameters:
-                    self.task_parameters['actual_backends'] = {}
-                self.task_parameters['actual_backends'][f'export_{layer.id()}'] = 'v3_streaming'
-
-                return True
-
-            elif bridge_result.status == BridgeStatus.FALLBACK:
-                logger.info("⚠️ V3 TaskBridge EXPORT: FALLBACK requested")
-                logger.info(f"   Reason: {bridge_result.error_message}")
-                return None
-
-            else:
-                logger.debug(f"TaskBridge export: status={bridge_result.status}")
-                return None
-
-        except Exception as e:
-            logger.warning(f"TaskBridge export delegation failed: {e}")
-            return None
+        """Try v3 streaming export. Delegates to V3BridgeHandler."""
+        return self._v3_bridge.try_v3_export(layer, output_path, format_type, progress_callback)
 
     def _initialize_source_filtering_parameters(self):
         """Extract and initialize all parameters. Delegates to InitializationHandler."""
@@ -1458,174 +1218,44 @@ class FilterEngineTask(QgsTask):
         self.task_parameters['param_source_schema'] = result['schema']
 
     def _sanitize_subset_string(self, subset_string):
-        """
-        Remove non-boolean display expressions and fix type casting issues in subset string.
-
-        v4.7 E6-S2: Pure delegation to core.services.expression_service.sanitize_subset_string
-
-        Args:
-            subset_string (str): The original subset string
-
-        Returns:
-            str: Sanitized subset string with non-boolean expressions removed
-        """
-        from ..services.expression_service import sanitize_subset_string
-        return sanitize_subset_string(subset_string, logger=logger)
+        """Sanitize subset string. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.sanitize_subset_string(subset_string)
 
     def _extract_spatial_clauses_for_exists(self, filter_expr, source_table=None):
-        """Delegates to core.filter.expression_sanitizer.extract_spatial_clauses_for_exists()."""
-        from ..filter.expression_sanitizer import extract_spatial_clauses_for_exists
-
-        return extract_spatial_clauses_for_exists(filter_expr, source_table)
+        """Extract spatial clauses. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.extract_spatial_clauses_for_exists(filter_expr, source_table)
 
     def _apply_postgresql_type_casting(self, expression, layer=None):
-        """Delegates to pg_executor.apply_postgresql_type_casting()."""
-        if PG_EXECUTOR_AVAILABLE:
-            return pg_executor.apply_postgresql_type_casting(expression, layer)
-        # If pg_executor unavailable, return expression unchanged
-        return expression
+        """Apply PostgreSQL type casting. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.apply_postgresql_type_casting(expression, layer)
 
     def _process_qgis_expression(self, expression):
-        """
-        Process and validate a QGIS expression, converting it to appropriate SQL.
-
-        Phase E13: Delegates to AttributeFilterExecutor.
-
-        Returns:
-            tuple: (processed_expression, is_field_expression) or (None, None) if invalid
-        """
-        executor = self._get_attribute_executor()
-
-        # FIX 2026-01-18: AttributeFilterExecutor.process_qgis_expression only accepts expression
-        # Other context is already available in the executor instance
-        result = executor.process_qgis_expression(expression=expression)
-
-        # Update task state if field expression detected
-        if result[1] and isinstance(result[1], tuple) and result[1][0]:
-            self.is_field_expression = result[1]
-        elif result[1]:
-            self.is_field_expression = result[1]
-
-        return result
+        """Process QGIS expression. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.process_qgis_expression(expression)
 
     def _combine_with_old_subset(self, expression):
-        """
-        Combine new expression with old subset.
-
-        Phase E13: Delegates to AttributeFilterExecutor.
-        The executor already has old_subset, combine_operator, and provider_type
-        set during initialization, so we only pass the expression.
-        """
-        executor = self._get_attribute_executor()
-
-        # FIX 2026-01-18: AttributeFilterExecutor.combine_with_old_subset() only takes
-        # the expression parameter - other values are stored in the executor instance
-        return executor.combine_with_old_subset(expression)
+        """Combine with old subset. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.combine_with_old_subset(expression)
 
     def _build_feature_id_expression(self, features_list):
-        """
-        Build expression from feature IDs.
-
-        Phase E13: Delegates to AttributeFilterExecutor.
-
-        FIX 2026-01-15: AttributeFilterExecutor.build_feature_id_expression()
-        only accepts features_list and is_numeric. Other parameters come from
-        the executor's constructor (stored in self).
-        """
-        executor = self._get_attribute_executor()
-
-        result = executor.build_feature_id_expression(
-            features_list=features_list,
-            is_numeric=self.task_parameters["infos"]["primary_key_is_numeric"]
-        )
-
-        # FIX 2026-01-16: Log expression to diagnose WHERE prefix
-        logger.info(f"🔍 _build_feature_id_expression result: '{result[:100] if result else None}...'")
-        if result and result.strip().startswith('WHERE'):
-            logger.error("❌ BUG: Expression starts with WHERE! Should NOT have WHERE prefix for setSubsetString")
-
-        return result
+        """Build feature ID expression. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.build_feature_id_expression(features_list)
 
     def _is_pk_numeric(self, layer=None, pk_field=None):
-        """Check if the primary key field is numeric. Delegated to pg_executor."""
-        check_layer = layer or self.source_layer
-        check_pk = pk_field or getattr(self, 'primary_key_name', None)
-        if PG_EXECUTOR_AVAILABLE:
-            return pg_executor._is_pk_numeric(check_layer, check_pk)
-        return True  # Default assumption
+        """Check if PK is numeric. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.is_pk_numeric(layer, pk_field)
 
     def _format_pk_values_for_sql(self, values, is_numeric=None, layer=None, pk_field=None):
-        """Format primary key values for SQL IN clause. Delegated to pg_executor."""
-        if PG_EXECUTOR_AVAILABLE:
-            return pg_executor.format_pk_values_for_sql(values, is_numeric, layer, pk_field)
-        # Minimal fallback for non-PostgreSQL
-        if not values:
-            return ''
-        return ', '.join(str(v) for v in values)
+        """Format PK values for SQL. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.format_pk_values_for_sql(values, is_numeric, layer, pk_field)
 
     def _optimize_duplicate_in_clauses(self, expression):
-        """Delegates to core.filter.expression_sanitizer.optimize_duplicate_in_clauses()."""
-        from ..filter.expression_sanitizer import optimize_duplicate_in_clauses
-
-        return optimize_duplicate_in_clauses(expression)
+        """Optimize duplicate IN clauses. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.optimize_duplicate_in_clauses(expression)
 
     def _apply_filter_and_update_subset(self, expression):
-        """
-        Queue filter expression for application on main thread.
-
-        CRITICAL: setSubsetString must be called from main thread to avoid
-        access violation crashes. This method now only queues the expression
-        for application in finished() which runs on the main thread.
-
-        Returns:
-            bool: True if expression was queued successfully
-        """
-        # Apply type casting for PostgreSQL to fix varchar/numeric comparison issues
-        # Use param_source_provider_type instead of providerType()
-        # providerType() returns 'postgres' even when using OGR fallback (psycopg2 unavailable)
-        # param_source_provider_type correctly accounts for OGR fallback
-        if self.param_source_provider_type == PROVIDER_POSTGRES:
-            expression = self._apply_postgresql_type_casting(expression, self.source_layer)
-
-        # Do NOT call setSubsetString from worker thread!
-        # This causes "access violation" crashes on Windows because QGIS layer
-        # operations are not thread-safe.
-        # Instead, queue the expression for application in finished() which
-        # runs on the main Qt thread.
-
-        # Queue source layer for filter application in finished()
-        if hasattr(self, '_pending_subset_requests'):
-            self._pending_subset_requests.append((self.source_layer, expression))
-            logger.info(f"Queued source layer {self.source_layer.name()} for filter application in finished()")
-
-        # Only build PostgreSQL SELECT for PostgreSQL providers
-        # OGR and Spatialite use subset strings directly
-        # Use param_source_provider_type instead of providerType()
-        # providerType() returns 'postgres' even when using OGR fallback
-        if self.param_source_provider_type == PROVIDER_POSTGRES:
-            # FIX 2026-01-16: Strip leading "WHERE " from expression to prevent "WHERE WHERE" syntax error
-            clean_expression = expression.lstrip()
-            if clean_expression.upper().startswith('WHERE '):
-                clean_expression = clean_expression[6:].lstrip()
-                logger.debug("Stripped WHERE prefix from expression in _apply_filter_and_update_subset")
-
-            # Build full SELECT expression for subset management (PostgreSQL only)
-            full_expression = (
-                f'SELECT "{self.param_source_table}"."{self.primary_key_name}", '  # nosec B608 - identifiers from QGIS layer metadata (task parameters)
-                f'"{self.param_source_table}"."{self.param_source_geom}" '
-                f'FROM "{self.param_source_schema}"."{self.param_source_table}" '
-                f'WHERE {clean_expression}'
-            )
-            self.manage_layer_subset_strings(
-                self.source_layer,
-                full_expression,
-                self.primary_key_name,
-                self.param_source_geom,
-                False
-            )
-
-        # Return True to indicate expression was queued successfully
-        return True
+        """Queue filter expression for main thread. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.apply_filter_and_update_subset(expression)
 
     def execute_source_layer_filtering(self) -> bool:
         """
@@ -1750,53 +1380,12 @@ class FilterEngineTask(QgsTask):
         )
 
     def qgis_expression_to_postgis(self, expression: str) -> str:
-        """Convert a QGIS expression to PostGIS-compatible SQL.
-
-        Transforms QGIS expression syntax to PostgreSQL/PostGIS SQL, handling:
-        - Function name mapping (e.g., $area → ST_Area)
-        - Operator conversions
-        - Geometry column references
-
-        Args:
-            expression: QGIS expression string to convert.
-
-        Returns:
-            PostGIS-compatible SQL expression, or original if empty.
-
-        Example:
-            >>> task.qgis_expression_to_postgis('$area > 1000')
-            'ST_Area("geometry") > 1000'
-        """
-        if not expression:
-            return expression
-        geom_col = getattr(self, 'param_source_geom', None) or 'geometry'
-        from ..services.expression_service import ExpressionService
-        from ..domain.filter_expression import ProviderType
-        return ExpressionService().to_sql(expression, ProviderType.POSTGRESQL, geom_col)
+        """Convert QGIS expression to PostGIS SQL. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.qgis_expression_to_postgis(expression)
 
     def qgis_expression_to_spatialite(self, expression: str) -> str:
-        """Convert a QGIS expression to Spatialite-compatible SQL.
-
-        Transforms QGIS expression syntax to Spatialite SQL, handling:
-        - Function name mapping (e.g., $area → ST_Area)
-        - Operator conversions
-        - Geometry column references
-
-        Args:
-            expression: QGIS expression string to convert.
-
-        Returns:
-            Spatialite-compatible SQL expression, or original if empty.
-
-        Note:
-            Spatialite spatial functions are ~90% compatible with PostGIS.
-        """
-        if not expression:
-            return expression
-        geom_col = getattr(self, 'param_source_geom', None) or 'geometry'
-        from ..services.expression_service import ExpressionService
-        from ..domain.filter_expression import ProviderType
-        return ExpressionService().to_sql(expression, ProviderType.SPATIALITE, geom_col)
+        """Convert QGIS expression to Spatialite SQL. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.qgis_expression_to_spatialite(expression)
 
     def prepare_postgresql_source_geom(self) -> str:
         """Prepare PostgreSQL source geometry. Delegates to SourceGeometryPreparer."""
@@ -2011,597 +1600,64 @@ class FilterEngineTask(QgsTask):
         return self._geometry_handler.verify_and_create_spatial_index(layer, layer_name)
 
     def _get_source_reference(self, sub_expression):
-        """Determine the source reference for spatial joins (MV or direct table)."""
-        if self.current_materialized_view_name:
-            # Fm_temp_mv_ prefix for new MVs
-            return f'"{self.current_materialized_view_schema}"."fm_temp_mv_{self.current_materialized_view_name}_dump"'
-        return sub_expression
+        """Get source reference for spatial joins. Delegates to SpatialQueryHandler."""
+        return self._spatial_query.get_source_reference(sub_expression)
 
     def _build_spatial_join_query(self, layer_props, param_postgis_sub_expression, sub_expression):
-        """Build SELECT query with spatial JOIN for filtering. Delegates to pg_executor."""
-        if PG_EXECUTOR_AVAILABLE:
-            return pg_executor.build_spatial_join_query(
-                layer_props=layer_props,
-                param_postgis_sub_expression=param_postgis_sub_expression,
-                sub_expression=sub_expression,
-                current_materialized_view_name=self.current_materialized_view_name,
-                current_materialized_view_schema=self.current_materialized_view_schema,
-                source_schema=self.param_source_schema,
-                source_table=self.param_source_table,
-                expression=self.expression,
-                has_combine_operator=self.has_combine_operator
-            )
-        # Minimal fallback for non-PG environments
-        param_distant_primary_key_name = layer_props["primary_key_name"]
-        param_distant_schema = layer_props["layer_schema"]
-        param_distant_table = layer_props["layer_name"]
-        source_ref = self._get_source_reference(sub_expression)
-        return (
-            f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608 - identifiers from QGIS layer metadata (task parameters)
-            f'FROM "{param_distant_schema}"."{param_distant_table}" '
-            f'INNER JOIN {source_ref} ON {param_postgis_sub_expression})'
+        """Build spatial JOIN query. Delegates to SpatialQueryHandler."""
+        return self._spatial_query.build_spatial_join_query(
+            layer_props, param_postgis_sub_expression, sub_expression
         )
 
     def _apply_combine_operator(self, primary_key_name, param_expression, param_old_subset, param_combine_operator):
-        """Apply SQL set operator to combine with existing subset. Delegated to pg_executor."""
-        if PG_EXECUTOR_AVAILABLE:
-            return pg_executor.apply_combine_operator(
-                primary_key_name, param_expression, param_old_subset, param_combine_operator
-            )
-        # Minimal fallback
-        if param_old_subset and param_combine_operator:
-            return f'"{primary_key_name}" IN ( {param_old_subset} {param_combine_operator} {param_expression} )'
-        return f'"{primary_key_name}" IN {param_expression}'
+        """Apply SQL set operator. Delegates to SpatialQueryHandler."""
+        return self._spatial_query.apply_combine_operator(
+            primary_key_name, param_expression, param_old_subset, param_combine_operator
+        )
 
     def _build_postgis_filter_expression(self, layer_props, param_postgis_sub_expression, sub_expression, param_old_subset, param_combine_operator):
-        """
-        Build complete PostGIS filter expression for subset string.
-        Delegates to pg_executor.build_postgis_filter_expression().
-
-        Args:
-            layer_props: Layer properties dict
-            param_postgis_sub_expression: PostGIS spatial predicate expression
-            sub_expression: Source layer subset expression
-            param_old_subset: Existing subset string from layer
-            param_combine_operator: SQL set operator (UNION, INTERSECT, EXCEPT)
-
-        Returns:
-            tuple: (expression, param_expression) - Complete filter and subquery
-        """
-        if PG_EXECUTOR_AVAILABLE:
-            return pg_executor.build_postgis_filter_expression(
-                layer_props=layer_props,
-                param_postgis_sub_expression=param_postgis_sub_expression,
-                sub_expression=sub_expression,
-                param_old_subset=param_old_subset,
-                param_combine_operator=param_combine_operator,
-                current_materialized_view_name=self.current_materialized_view_name,
-                current_materialized_view_schema=self.current_materialized_view_schema,
-                source_schema=self.param_source_schema,
-                source_table=self.param_source_table,
-                expression=self.expression,
-                has_combine_operator=self.has_combine_operator
-            )
-        # Minimal fallback
-        param_expression = self._build_spatial_join_query(
-            layer_props, param_postgis_sub_expression, sub_expression
+        """Build PostGIS filter expression. Delegates to SpatialQueryHandler."""
+        return self._spatial_query.build_postgis_filter_expression(
+            layer_props, param_postgis_sub_expression, sub_expression, param_old_subset, param_combine_operator
         )
-        expression = self._apply_combine_operator(
-            layer_props["primary_key_name"], param_expression, param_old_subset, param_combine_operator
-        )
-        return expression, param_expression
 
     def _execute_ogr_spatial_selection(self, layer, current_layer, param_old_subset):
-        """Delegates to ogr_executor.execute_ogr_spatial_selection()."""
-        if not OGR_EXECUTOR_AVAILABLE:
-            raise ImportError("ogr_executor module not available - cannot execute OGR spatial selection")
-
-        if not hasattr(ogr_executor, 'OGRSpatialSelectionContext'):
-            raise ImportError("ogr_executor.OGRSpatialSelectionContext not available")
-
-        context = ogr_executor.OGRSpatialSelectionContext(
-            ogr_source_geom=self.ogr_source_geom,
-            current_predicates=self.current_predicates,
-            has_combine_operator=self.has_combine_operator,
-            param_other_layers_combine_operator=self.param_other_layers_combine_operator,
-            verify_and_create_spatial_index=self._verify_and_create_spatial_index,
-        )
-        ogr_executor.execute_ogr_spatial_selection(
-            layer, current_layer, param_old_subset, context
-        )
-        logger.debug("_execute_ogr_spatial_selection: delegated to ogr_executor")
+        """Execute OGR spatial selection. Delegates to SpatialQueryHandler."""
+        return self._spatial_query.execute_ogr_spatial_selection(layer, current_layer, param_old_subset)
 
     def _build_ogr_filter_from_selection(self, current_layer, layer_props, param_distant_geom_expression):
-        """Delegates to ogr_executor.build_ogr_filter_from_selection()."""
-        if not OGR_EXECUTOR_AVAILABLE:
-            raise ImportError("ogr_executor module not available - cannot build OGR filter from selection")
-
-        return ogr_executor.build_ogr_filter_from_selection(
-            layer=current_layer,
-            layer_props=layer_props,
-            distant_geom_expression=param_distant_geom_expression
+        """Build OGR filter from selection. Delegates to SpatialQueryHandler."""
+        return self._spatial_query.build_ogr_filter_from_selection(
+            current_layer, layer_props, param_distant_geom_expression
         )
 
     def _normalize_column_names_for_postgresql(self, expression, field_names):
-        """
-        Normalize column names in expression to match actual PostgreSQL column names.
-
-        v4.7 E6-S1: Pure delegation to pg_executor.normalize_column_names_for_postgresql (legacy fallback removed).
-        """
-        if not PG_EXECUTOR_AVAILABLE:
-            raise ImportError("pg_executor module not available - cannot normalize column names for PostgreSQL")
-
-        return pg_executor.normalize_column_names_for_postgresql(expression, field_names)
+        """Normalize column names for PostgreSQL. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.normalize_column_names_for_postgresql(expression, field_names)
 
     def _qualify_field_names_in_expression(self, expression, field_names, primary_key_name, table_name, is_postgresql):
-        """
-        Qualify field names with table prefix for PostgreSQL/Spatialite expressions.
-
-        EPIC-1 Phase E7.5: Legacy code removed - fully delegates to core.filter.expression_builder.
-
-        Args:
-            expression: Raw QGIS expression string
-            field_names: List of field names to qualify
-            primary_key_name: Primary key field name
-            table_name: Source table name
-            is_postgresql: Whether target is PostgreSQL (True) or other provider (False)
-
-        Returns:
-            str: Expression with qualified field names
-        """
-        from ..filter.expression_builder import qualify_field_names_in_expression
-
-        return qualify_field_names_in_expression(
-            expression=expression,
-            field_names=field_names,
-            primary_key_name=primary_key_name,
-            table_name=table_name,
-            is_postgresql=is_postgresql,
-            provider_type=self.param_source_provider_type,
-            normalize_columns_fn=self._normalize_column_names_for_postgresql if is_postgresql else None
+        """Qualify field names in expression. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.qualify_field_names_in_expression(
+            expression, field_names, primary_key_name, table_name, is_postgresql
         )
 
     def _build_combined_filter_expression(self, new_expression, old_subset, combine_operator, layer_props=None):
-        """
-        Combine new filter expression with existing subset using specified operator.
-
-        Phase E13 Step 4: Delegates to SubsetStringBuilder.combine_expressions().
-
-        OPTIMIZATION v2.8.0: Uses CombinedQueryOptimizer to detect and reuse
-        materialized views from previous filter operations, providing 10-50x
-        speedup for successive filters on large datasets.
-
-        v2.9.0: Creates source MV with pre-computed buffer when FID count exceeds
-        SOURCE_FID_MV_THRESHOLD (50), providing up to 20x additional speedup.
-
-        Args:
-            new_expression: New filter expression to apply
-            old_subset: Existing subset string from layer
-            combine_operator: SQL operator ('AND', 'OR', 'NOT')
-            layer_props: Optional layer properties for optimization context
-
-        Returns:
-            str: Combined filter expression (optimized when possible)
-        """
-        builder = self._get_subset_builder()
-        result = builder.combine_expressions(
-            new_expression=new_expression,
-            old_subset=old_subset,
-            combine_operator=combine_operator,
-            layer_props=layer_props
+        """Build combined filter expression. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.build_combined_filter_expression(
+            new_expression, old_subset, combine_operator, layer_props
         )
 
-        # Handle source MV creation (kept here as it's task-specific)
-        # The builder returns optimization info but doesn't create MVs
-        if result.optimization_applied:
-            try:
-                optimizer = get_combined_query_optimizer()
-                opt_result = optimizer.optimize_combined_expression(
-                    old_subset=self._sanitize_subset_string(old_subset) if old_subset else "",
-                    new_expression=new_expression,
-                    combine_operator=combine_operator,
-                    layer_props=layer_props
-                )
-                if opt_result.success and hasattr(opt_result, 'source_mv_info') and opt_result.source_mv_info is not None:
-                    self._create_source_mv_if_needed(opt_result.source_mv_info)
-            except Exception as e:
-                logger.debug(f"MV creation skipped: {e}")
-
-        return result.expression
-
     def _create_source_mv_if_needed(self, source_mv_info):
-        """Create source materialized view with pre-computed buffer (v2.9.0 optimization)."""
-        if not source_mv_info or not source_mv_info.create_sql:
-            return False
-
-        try:
-            import time
-            start_time = time.time()
-
-            connexion = self._get_valid_postgresql_connection()
-            if not connexion:
-                logger.warning("No PostgreSQL connection available for source MV creation")
-                return False
-
-            # Build commands: drop if exists, create, add spatial index
-            schema = source_mv_info.schema
-            view_name = source_mv_info.view_name
-
-            commands = [
-                f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."{view_name}" CASCADE;',
-                source_mv_info.create_sql,
-                f'CREATE INDEX IF NOT EXISTS idx_{view_name}_geom ON "{schema}"."{view_name}" USING GIST (geom);',
-                f'CREATE INDEX IF NOT EXISTS idx_{view_name}_buff ON "{schema}"."{view_name}" USING GIST (geom_buffered);',
-                f'ANALYZE "{schema}"."{view_name}";'
-            ]
-
-            self._execute_postgresql_commands(connexion, commands)
-
-            # Register MV references to prevent premature cleanup
-            from ...adapters.backends.postgresql.mv_reference_tracker import get_mv_reference_tracker
-            tracker = get_mv_reference_tracker()
-
-            # Register references for source layer and all distant layers
-            if hasattr(self, 'source_layer') and self.source_layer:
-                tracker.add_reference(view_name, self.source_layer.id())
-
-            # Register for all distant layers that will use this source MV
-            if hasattr(self, 'param_all_layers'):
-                for layer in self.param_all_layers:
-                    if layer and hasattr(layer, 'id'):
-                        if not self.source_layer or layer.id() != self.source_layer.id():
-                            tracker.add_reference(view_name, layer.id())
-
-            elapsed = time.time() - start_time
-            fid_count = len(source_mv_info.fid_list)
-            logger.info(
-                f"✓ v2.9.0: Source MV '{view_name}' created in {elapsed:.2f}s "
-                f"({fid_count} FIDs with pre-computed buffer)"
-            )
-            logger.info("   FIX v4.2.8: Registered references for multiple layers")
-            return True
-
-        except Exception as e:
-            logger.warning(f"Failed to create source MV '{source_mv_info.view_name}': {e}")
-            # Don't raise - the optimization can still work with inline subquery
-            return False
+        """Create source materialized view with pre-computed buffer. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.create_source_mv_if_needed(source_mv_info)
 
     def _ensure_buffer_expression_mv_exists(self):
-        """
-        FIX v4.2.1 (2026-01-21): Ensure buffer expression MVs exist BEFORE distant layer filtering.
-        FIX v4.2.7 (2026-01-22): Only create MVs if feature count exceeds threshold.
-
-        When using custom buffer expression (set to field), this function creates the
-        materialized views (mv_<session>_<table>_buffer_expr and mv_<session>_<table>_buffer_expr_dump)
-        BEFORE prepare_postgresql_source_geom() generates references to them.
-
-        The problem was:
-        - prepare_postgresql_source_geom() generates postgresql_source_geom pointing to MV _dump
-        - But the MV was only created when filtering the source layer itself
-        - If the source layer was already filtered (re-filtering), the MV didn't exist
-        - Distant layers failed with "relation does not exist" error
-
-        The fix:
-        - Create the MVs upfront in manage_distant_layers_geometric_filtering()
-        - This ensures the MV exists before any reference to it is generated
-
-        FIX v4.2.7: Only create MVs if feature count > BUFFER_EXPR_MV_THRESHOLD (100).
-        For small datasets, prepare_postgresql_source_geom() uses inline ST_Buffer() instead
-        of referencing MVs, so creating MVs is unnecessary overhead.
-        """
-        import time
-        from ...infrastructure.database.sql_utils import sanitize_sql_identifier
-        from ...adapters.backends.postgresql.filter_executor import BUFFER_EXPR_MV_THRESHOLD
-
-        logger.info("=" * 60)
-        logger.info("🔧 FIX v4.2.1/v4.2.7: Checking buffer expression MV requirements...")
-        logger.info(f"   param_buffer_expression: {self.param_buffer_expression}")
-        logger.info(f"   session_id: {self.session_id}")
-        logger.info(f"   source_table: {self.param_source_table}")
-
-        # Use cached feature count for consistent threshold decisions
-        source_feature_count = getattr(self, '_cached_source_feature_count', None)
-        if source_feature_count is None:
-            # Fallback if not cached (should not happen in normal flow)
-            source_feature_count = self.source_layer.featureCount() if self.source_layer else 0
-            logger.warning(f"   ⚠️ Using fresh featureCount (not cached): {source_feature_count}")
-        logger.info(f"   source_feature_count: {source_feature_count}")
-        logger.info(f"   BUFFER_EXPR_MV_THRESHOLD: {BUFFER_EXPR_MV_THRESHOLD}")
-
-        if source_feature_count is not None and source_feature_count <= BUFFER_EXPR_MV_THRESHOLD:
-            logger.info(f"   ✓ SKIP MV creation: {source_feature_count} features <= {BUFFER_EXPR_MV_THRESHOLD} threshold")
-            logger.info("   → prepare_postgresql_source_geom() will use INLINE ST_Buffer() instead")
-            logger.info("=" * 60)
-            return True  # Success - no MV needed
-
-        logger.info(f"   → Creating MV: {source_feature_count} features > {BUFFER_EXPR_MV_THRESHOLD} threshold")
-        logger.info("=" * 60)
-
-        start_time = time.time()
-
-        try:
-            # Get PostgreSQL connection
-            connexion = self._get_valid_postgresql_connection()
-            if not connexion:
-                logger.warning("No PostgreSQL connection available for buffer expression MV creation")
-                return False
-
-            # Generate MV name (must match prepare_postgresql_source_geom logic)
-            base_mv_name = sanitize_sql_identifier(self.param_source_table + '_buffer_expr')
-            if self.session_id:
-                mv_name = f"{self.session_id}_{base_mv_name}"
-            else:
-                mv_name = base_mv_name
-                logger.warning("No session_id - using base MV name (may conflict with other sessions)")
-
-            schema = self.current_materialized_view_schema
-            geom_field = self.param_source_geom
-
-            # Get source layer's current subset (the features to include in MV)
-            source_subset = self.source_layer.subsetString() if self.source_layer else ""
-
-            # Build the buffer expression for PostGIS
-            buffer_expr = self.param_buffer_expression
-            if buffer_expr:
-                # Convert QGIS expression to PostGIS
-                buffer_expr = self.qgis_expression_to_postgis(buffer_expr)
-                # Adjust field references to include table name
-                if buffer_expr.find('"') == 0 and self.param_source_table not in buffer_expr[:50]:
-                    buffer_expr = f'"{self.param_source_table}".' + buffer_expr
-
-            # Build ST_Buffer style parameters
-            buffer_type_mapping = {"Round": "round", "Flat": "flat", "Square": "square"}
-            buffer_type_str = self.task_parameters.get("filtering", {}).get("buffer_type", "Round")
-            endcap_style = buffer_type_mapping.get(buffer_type_str, "round")
-            quad_segs = getattr(self, 'param_buffer_segments', 5)
-            style_params = f"quad_segs={quad_segs}"
-            if endcap_style != 'round':
-                style_params += f" endcap={endcap_style}"
-
-            # Build source geometry reference
-            f'"{self.param_source_schema}"."{self.param_source_table}"."{geom_field}"'
-
-            # Build WHERE clause for source features
-            if source_subset:
-                f" WHERE {source_subset}"
-
-            # SQL commands (fm_temp_mv_ prefix)
-            sql_drop = f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."fm_temp_mv_{mv_name}_dump" CASCADE;'
-            sql_drop_main = f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."fm_temp_mv_{mv_name}" CASCADE;'
-
-            # Create main MV with buffered geometries
-            sql_create_main = '''
-                CREATE MATERIALIZED VIEW IF NOT EXISTS "{schema}"."fm_temp_mv_{mv_name}" AS
-                SELECT
-                    "{self.param_source_table}"."{self.primary_key_name}",
-                    ST_Buffer({source_geom_ref}, {buffer_expr}, '{style_params}') as {geom_field}
-                FROM "{self.param_source_schema}"."{self.param_source_table}"
-                {where_clause}
-                WITH DATA;
-            '''
-
-            # Create dump MV (union of all buffered geometries)
-            sql_create_dump = '''
-                CREATE MATERIALIZED VIEW IF NOT EXISTS "{schema}"."fm_temp_mv_{mv_name}_dump" AS
-                SELECT ST_Union("{geom_field}") as {geom_field}
-                FROM "{schema}"."fm_temp_mv_{mv_name}"
-                WITH DATA;
-            '''
-
-            # Index for main MV
-            sql_index = f'CREATE INDEX IF NOT EXISTS idx_{mv_name}_geom ON "{schema}"."fm_temp_mv_{mv_name}" USING GIST ({geom_field});'
-
-            # Ensure temp schema exists
-            schema = self._ensure_temp_schema_exists(connexion, schema)
-
-            # Execute commands
-            commands = [sql_drop, sql_drop_main, sql_create_main, sql_index, sql_create_dump]
-            self._execute_postgresql_commands(connexion, commands)
-
-            # Register MV references to prevent premature cleanup
-            from ...adapters.backends.postgresql.mv_reference_tracker import get_mv_reference_tracker
-            tracker = get_mv_reference_tracker()
-
-            # Register references for source layer and all distant layers (fm_temp_mv_ prefix)
-            if self.source_layer:
-                tracker.add_reference(f"fm_temp_mv_{mv_name}", self.source_layer.id())
-                tracker.add_reference(f"fm_temp_mv_{mv_name}_dump", self.source_layer.id())
-
-            # Register for all distant layers that will use this MV
-            if hasattr(self, 'param_all_layers'):
-                for layer in self.param_all_layers:
-                    if layer and hasattr(layer, 'id') and layer.id() != (self.source_layer.id() if self.source_layer else None):
-                        tracker.add_reference(f"fm_temp_mv_{mv_name}", layer.id())
-                        tracker.add_reference(f"fm_temp_mv_{mv_name}_dump", layer.id())
-
-            elapsed = time.time() - start_time
-            logger.info(f"✓ FIX v4.2.1: Buffer expression MVs created in {elapsed:.2f}s")
-            logger.info(f"   fm_temp_mv_{mv_name} and fm_temp_mv_{mv_name}_dump ready for distant layer filtering")
-            logger.info(f"   FIX v4.2.8: Registered references for {len(self.param_all_layers) if hasattr(self, 'param_all_layers') else 1} layer(s)")
-
-            return True
-
-        except Exception as e:
-            logger.error(f"❌ Failed to create buffer expression MV: {e}")
-            import traceback
-            logger.debug(f"Traceback: {traceback.format_exc()}")
-            # Don't raise - let the original code path try
-            return False
+        """Ensure buffer expression MVs exist. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.ensure_buffer_expression_mv_exists()
 
     def _try_create_filter_chain_mv(self):
-        """
-        v4.2.10: Try to create optimized MV for filter chaining.
-
-        When multiple spatial filters are chained (e.g., zone_pop AND demand_points with buffer),
-        this creates a single MV containing pre-filtered source features. This reduces
-        N×M EXISTS queries to a single EXISTS per distant layer.
-
-        Optimization triggers when:
-        - Source layer has an existing subsetString containing EXISTS clause(s)
-        - Current filter adds another spatial constraint (buffer or additional EXISTS)
-        - At least 2 spatial filters are being combined
-
-        The MV is stored in self._filter_chain_mv_name and used by expression builders.
-
-        v4.2.10b: DISABLED - Feature causes blocking on large datasets.
-        Will be re-enabled after adding:
-        - Query timeout protection
-        - Feature count threshold for spatial_filters tables
-        - Configuration option to enable/disable
-        """
-        # DISABLED - Causes task blocking at 14%
-        # The MV creation with complex EXISTS subqueries can take very long on large tables
-        # without proper indexes. Need to add timeout and better threshold checks.
-        logger.info("=" * 60)
-        logger.info("🚀 v4.2.10b: Filter chain MV optimization DISABLED")
-        logger.info("   → Feature temporarily disabled to prevent blocking")
-        logger.info("   → Will be re-enabled with timeout protection")
-        logger.info("=" * 60)
-        return False
-
-        # Original code below - keep for reference
-        """
-        import time
-
-        logger.info("=" * 60)
-        logger.info("🚀 v4.2.10: Checking filter chain MV optimization...")
-
-        # Check prerequisites
-        source_subset = self.source_layer.subsetString() if self.source_layer else ""
-        if not source_subset:
-            logger.info("   ✗ No source subset - skipping filter chain optimization")
-            logger.info("=" * 60)
-            return False
-
-        # Check if source_subset contains EXISTS clauses
-        if 'EXISTS' not in source_subset.upper():
-            logger.info("   ✗ No EXISTS in source subset - skipping filter chain optimization")
-            logger.info("=" * 60)
-            return False
-
-        # Check if we're adding another spatial filter
-        has_buffer = bool(self.param_buffer_expression or self.param_buffer_value)
-        if not has_buffer:
-            logger.info("   ✗ No buffer expression - filter chain MV not needed")
-            logger.info("=" * 60)
-            return False
-
-        logger.info("   ✓ Prerequisites met for filter chain optimization:")
-        logger.info("      - source_subset contains EXISTS")
-        logger.info(f"      - buffer_expression/value: {self.param_buffer_expression or self.param_buffer_value}")
-
-        start_time = time.time()
-
-        try:
-            # Import filter chain optimizer
-            from ...adapters.backends.postgresql.filter_chain_optimizer import (
-                FilterChainOptimizer,
-                FilterChainContext,
-                OptimizationStrategy
-            )
-            from ..filter.expression_combiner import extract_exists_clauses
-
-            # Extract spatial filters from source_subset
-            exists_clauses = extract_exists_clauses(source_subset)
-            if len(exists_clauses) < 1:
-                logger.info("   ✗ Could not extract EXISTS clauses from source subset")
-                logger.info("=" * 60)
-                return False
-
-            # Build spatial_filters list from extracted EXISTS
-            spatial_filters = []
-            for clause in exists_clauses:
-                spatial_filters.append({
-                    'table': clause.get('table', 'unknown'),
-                    'schema': clause.get('schema', 'public'),
-                    'geom_column': 'geom',  # Default
-                    'predicate': 'ST_Intersects',
-                    'sql': clause.get('sql')  # Original SQL for reference
-                })
-
-            # Add current source layer as another filter (with buffer)
-            buffer_val = self.param_buffer_value
-            if self.param_buffer_expression:
-                # For expression buffers, use average estimate
-                buffer_val = 10.0  # Placeholder, actual value from expression
-
-            spatial_filters.append({
-                'table': self.param_source_table,
-                'schema': self.param_source_schema,
-                'geom_column': self.param_source_geom,
-                'predicate': 'ST_Intersects',
-                'buffer': buffer_val
-            })
-
-            logger.info(f"   → Detected {len(spatial_filters)} spatial filters to chain:")
-            for i, f in enumerate(spatial_filters):
-                buf_str = f" (buffer={f.get('buffer')})" if f.get('buffer') else ""
-                logger.info(f"      {i+1}. {f.get('schema')}.{f.get('table')}{buf_str}")
-
-            # Get PostgreSQL connection
-            connexion = self._get_valid_postgresql_connection()
-            if not connexion:
-                logger.warning("   ✗ No PostgreSQL connection for filter chain MV")
-                logger.info("=" * 60)
-                return False
-
-            # Create filter chain context
-            context = FilterChainContext(
-                source_schema=self.param_source_schema,
-                source_table=self.param_source_table,
-                source_geom_column=self.param_source_geom,
-                spatial_filters=spatial_filters,
-                buffer_value=self.param_buffer_value,
-                buffer_expression=self.param_buffer_expression,  # Include dynamic expression
-                feature_count_estimate=getattr(self, '_cached_source_feature_count', 0),
-                session_id=self.session_id
-            )
-
-            # Create optimizer and analyze
-            optimizer = FilterChainOptimizer(connexion, self.session_id)
-            strategy = optimizer.analyze_chain(context)
-
-            if strategy == OptimizationStrategy.NONE:
-                logger.info("   ✗ Optimizer recommends no MV (strategy=NONE)")
-                logger.info("=" * 60)
-                return False
-
-            # Create chain MV
-            mv_name = optimizer.create_chain_mv(context, strategy)
-
-            if mv_name:
-                elapsed = time.time() - start_time
-                logger.info(f"   ✓ Filter chain MV created: {mv_name}")
-                logger.info(f"   ✓ Strategy: {strategy.value}")
-                logger.info(f"   ✓ Time: {elapsed:.2f}s")
-
-                # Store for use by expression builders
-                self._filter_chain_mv_name = mv_name
-                self._filter_chain_optimizer = optimizer
-                self._filter_chain_context = context
-
-                # Inject MV name into task_parameters for ExpressionBuilder access
-                self.task_parameters['_filter_chain_mv_name'] = mv_name
-                logger.info("   ✓ Injected _filter_chain_mv_name into task_parameters")
-
-                logger.info("=" * 60)
-                return True
-            else:
-                logger.warning("   ✗ MV creation failed")
-                logger.info("=" * 60)
-                return False
-
-        except ImportError as e:
-            logger.debug(f"   ✗ Filter chain optimizer not available: {e}")
-            logger.info("=" * 60)
-            return False
-        except Exception as e:
-            logger.warning(f"   ✗ Filter chain optimization failed: {e}")
-            import traceback
-            logger.debug(f"Traceback: {traceback.format_exc()}")
-            logger.info("=" * 60)
-            return False
-        """  # End of disabled code block
+        """Try to create filter chain MV optimization. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.try_create_filter_chain_mv()
 
     def _validate_layer_properties(self, layer_props, layer_name):
         """Validate required fields in layer properties. Returns tuple or (None,)*4 on error."""
@@ -2684,17 +1740,8 @@ class FilterEngineTask(QgsTask):
         return self._build_backend_expression_v2(backend, layer_props, source_geom)
 
     def _combine_with_old_filter(self, expression, layer):
-        """Delegates to core.filter.expression_combiner.combine_with_old_filter()."""
-        from ..filter.expression_combiner import combine_with_old_filter
-
-        old_subset = layer.subsetString() if layer.subsetString() != '' else None
-
-        return combine_with_old_filter(
-            new_expression=expression,
-            old_subset=old_subset,
-            combine_operator=self._get_combine_operator(),
-            sanitize_fn=self._sanitize_subset_string
-        )
+        """Combine with old filter. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.combine_with_old_filter(expression, layer)
 
     def execute_geometric_filtering(self, layer_provider_type: str, layer: QgsVectorLayer, layer_props: Dict[str, Any]) -> bool:
         """Execute geometric filtering on a single layer using spatial predicates.
@@ -2774,7 +1821,7 @@ class FilterEngineTask(QgsTask):
             )
             logger.info(f"✅ orchestrate_geometric_filter returned: {result}")
             return result
-        except Exception as e:
+        except Exception as e:  # catch-all safety net: geometric filtering must not crash the task
             logger.error("=" * 70)
             logger.error("❌ EXCEPTION in execute_geometric_filtering:")
             logger.error(f"   Layer: {layer.name()}")
@@ -2794,99 +1841,16 @@ class FilterEngineTask(QgsTask):
             raise  # Re-raise pour que finished() puisse le capturer
 
     def _get_source_combine_operator(self):
-        """
-        Get logical operator for combining with source layer's existing filter.
-
-        Returns logical operators (AND, AND NOT, OR) directly from UI.
-        These are used in simple SQL WHERE clause combinations.
-
-        Returns:
-            str: 'AND', 'AND NOT', 'OR', or None
-        """
-        if not hasattr(self, 'has_combine_operator') or not self.has_combine_operator:
-            return None
-
-        # Return source layer operator, normalized to English SQL keyword
-        source_op = getattr(self, 'param_source_layer_combine_operator', None)
-        return self._normalize_sql_operator(source_op)
+        """Get source combine operator. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.get_source_combine_operator()
 
     def _normalize_sql_operator(self, operator):
-        """
-        Normalize translated SQL operators to English SQL keywords.
-
-        FIX v2.5.12: Handle cases where translated operator values (ET, OU, NON)
-        are stored in layer properties or project files from older versions.
-
-        Args:
-            operator: The operator string (possibly translated)
-
-        Returns:
-            str: Normalized SQL operator ('AND', 'OR', 'AND NOT', 'NOT') or None
-        """
-        if not operator:
-            return None
-
-        op_upper = operator.upper().strip()
-
-        # Mapping of translated operators to SQL keywords
-        translations = {
-            # French
-            'ET': 'AND',
-            'OU': 'OR',
-            'ET NON': 'AND NOT',
-            'NON': 'NOT',
-            # German
-            'UND': 'AND',
-            'ODER': 'OR',
-            'UND NICHT': 'AND NOT',
-            'NICHT': 'NOT',
-            # Spanish
-            'Y': 'AND',
-            'O': 'OR',
-            'Y NO': 'AND NOT',
-            'NO': 'NOT',
-            # Italian
-            'E': 'AND',
-            'E NON': 'AND NOT',
-            # Portuguese
-            'E NÃO': 'AND NOT',
-            'NÃO': 'NOT',
-            # Already English - just return as-is
-            'AND': 'AND',
-            'OR': 'OR',
-            'AND NOT': 'AND NOT',
-            'NOT': 'NOT',
-        }
-
-        normalized = translations.get(op_upper, operator)
-
-        if normalized != operator:
-            logger.debug(f"Normalized operator '{operator}' to '{normalized}'")
-
-        return normalized
+        """Normalize SQL operator. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.normalize_sql_operator(operator)
 
     def _get_combine_operator(self):
-        """
-        Get operator for combining with distant layers' existing filters.
-
-        Returns the operator directly from UI for use in WHERE clauses:
-        - 'AND': Logical AND (intersection)
-        - 'AND NOT': Logical AND NOT (exclusion)
-        - 'OR': Logical OR (union)
-
-        Note: These operators are used directly in SQL WHERE clauses for all backends
-        (PostgreSQL, Spatialite, OGR). For PostgreSQL set operations (UNION, INTERSECT, EXCEPT),
-        use a different method when combining subqueries.
-
-        Returns:
-            str: 'AND', 'OR', 'AND NOT', or None
-        """
-        if not hasattr(self, 'has_combine_operator') or not self.has_combine_operator:
-            return None
-
-        # Get operator and normalize to English SQL keyword
-        other_op = getattr(self, 'param_other_layers_combine_operator', None)
-        return self._normalize_sql_operator(other_op)
+        """Get combine operator. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.get_combine_operator()
 
     def _simplify_source_for_ogr_fallback(self, source_layer):
         """
@@ -2973,7 +1937,7 @@ class FilterEngineTask(QgsTask):
                             self.spatialite_source_geom = wkt.replace("'", "''")
                             logger.info(f"✓ Generated WKT from OGR layer ({len(self.spatialite_source_geom)} chars)")
                             return self.spatialite_source_geom
-                except Exception as e:
+                except (RuntimeError, AttributeError, ValueError) as e:
                     logger.error(f"Failed to generate WKT from OGR layer: {e}")
 
         # OGR backend needs QgsVectorLayer
@@ -3267,68 +2231,42 @@ class FilterEngineTask(QgsTask):
             )
 
     def _create_simple_materialized_view_sql(self, schema: str, name: str, sql_subset_string: str) -> str:
-        """Create simple MV SQL. Delegates to CleanupHandler."""
-        return self._cleanup_handler.create_simple_materialized_view_sql(schema, name, sql_subset_string)
+        """Create simple MV SQL. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.create_simple_materialized_view_sql(schema, name, sql_subset_string)
 
     def _parse_where_clauses(self) -> Any:
-        """Parse WHERE clauses. Delegates to CleanupHandler."""
-        return self._cleanup_handler.parse_where_clauses(self.where_clause)
+        """Parse WHERE clauses. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.parse_where_clauses()
 
     def _create_custom_buffer_view_sql(self, schema, name, geom_key_name, where_clause_fields_arr, last_subset_id, sql_subset_string):
-        """Create SQL for custom buffer MV. Delegates to CleanupHandler."""
-        return self._cleanup_handler.create_custom_buffer_view_sql(
-            schema=schema, name=name, geom_key_name=geom_key_name,
-            where_clause_fields_arr=where_clause_fields_arr,
-            last_subset_id=last_subset_id, sql_subset_string=sql_subset_string,
-            postgresql_source_geom=self.postgresql_source_geom,
-            has_to_reproject_source_layer=self.has_to_reproject_source_layer,
-            source_layer_crs_authid=self.source_layer_crs_authid,
-            task_parameters=self.task_parameters,
-            param_buffer_segments=self.param_buffer_segments,
-            param_source_schema=self.param_source_schema,
-            param_source_table=self.param_source_table,
-            primary_key_name=self.primary_key_name,
-            source_layer=self.source_layer,
-            param_buffer=self.param_buffer,
-            where_clause=self.where_clause,
+        """Create SQL for custom buffer MV. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.create_custom_buffer_view_sql(
+            schema, name, geom_key_name, where_clause_fields_arr, last_subset_id, sql_subset_string
         )
 
     def _ensure_temp_schema_exists(self, connexion, schema_name):
-        """Ensure temp schema exists in PostgreSQL. Delegates to CleanupHandler."""
-        result = self._cleanup_handler.ensure_temp_schema_exists(connexion, schema_name)
-        if result == 'public' and schema_name != 'public':
-            self._last_schema_error = f"Using 'public' schema as fallback (could not create '{schema_name}')"
-        return result
+        """Ensure temp schema exists. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.ensure_temp_schema_exists(connexion, schema_name)
 
     def _get_session_prefixed_name(self, base_name: str) -> str:
-        """Generate a session-unique MV name. Delegates to CleanupHandler."""
-        return self._cleanup_handler.get_session_prefixed_name(base_name, self.session_id)
+        """Generate session-unique MV name. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.get_session_prefixed_name(base_name)
 
     def _cleanup_session_materialized_views(self, connexion: Any, schema_name: str) -> Any:
-        """Clean up session MVs. Delegates to CleanupHandler."""
-        return self._cleanup_handler.cleanup_session_materialized_views(
-            connexion, schema_name, self.session_id,
-            pg_executor=pg_executor, pg_executor_available=PG_EXECUTOR_AVAILABLE,
-        )
+        """Clean up session MVs. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.cleanup_session_materialized_views(connexion, schema_name)
 
     def _cleanup_orphaned_materialized_views(self, connexion: Any, schema_name: str, max_age_hours: int = 24) -> Any:
-        """Clean up orphaned MVs. Delegates to CleanupHandler."""
-        return self._cleanup_handler.cleanup_orphaned_materialized_views(
-            connexion, schema_name, self.session_id, max_age_hours
-        )
+        """Clean up orphaned MVs. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.cleanup_orphaned_materialized_views(connexion, schema_name, max_age_hours)
 
     def _execute_postgresql_commands(self, connexion: Any, commands: List[str]) -> bool:
-        """Execute PostgreSQL commands with reconnection. Delegates to CleanupHandler."""
-        return self._cleanup_handler.execute_postgresql_commands(
-            connexion, commands,
-            source_layer=self.source_layer,
-            psycopg2_module=psycopg2,
-            get_datasource_connexion_fn=get_datasource_connexion_from_layer,
-        )
+        """Execute PostgreSQL commands. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.execute_postgresql_commands(connexion, commands)
 
     def _ensure_source_table_stats(self, connexion: Any, schema: str, table: str, geom_field: str) -> bool:
-        """Ensure PostgreSQL statistics exist. Delegates to CleanupHandler."""
-        return self._cleanup_handler.ensure_source_table_stats(connexion, schema, table, geom_field)
+        """Ensure PostgreSQL statistics exist. Delegates to MaterializedViewHandler."""
+        return self._mv_handler.ensure_source_table_stats(connexion, schema, table, geom_field)
 
     def _insert_subset_history(self, cur, conn, layer, sql_subset_string, seq_order):
         """
@@ -3360,7 +2298,7 @@ class FilterEngineTask(QgsTask):
                     seq_order=seq_order,
                     subset_string=sql_subset_string
                 )
-            except Exception as e:
+            except (RuntimeError, OSError, AttributeError) as e:
                 logger.warning(f"Prepared statement failed, falling back to repository: {e}")
 
         # EPIC-1 E4-S9: Use centralized HistoryRepository instead of direct SQL
@@ -3522,7 +2460,7 @@ class FilterEngineTask(QgsTask):
             if self._ps_manager:
                 try:
                     self._ps_manager.delete_subset_history(self.project_uuid, layer.id())
-                except Exception as e:
+                except (RuntimeError, OSError, AttributeError) as e:
                     logger.warning(f"Prepared statement failed, falling back to repository: {e}")
                     history_repo.delete_for_layer(self.project_uuid, layer.id())
             else:
@@ -3538,12 +2476,14 @@ class FilterEngineTask(QgsTask):
             temp_conn = sqlite3.connect(self.db_file_path)
             temp_cur = temp_conn.cursor()
             # Try to drop both new (fm_temp_) and legacy (mv_) tables
-            temp_cur.execute(f"DROP TABLE IF EXISTS fm_temp_{session_name}")  # nosec B608 - session_name from _get_session_prefixed_name() (internal hash-based generation, SpatiaLite: no sql.Identifier equivalent)
-            temp_cur.execute(f"DROP TABLE IF EXISTS mv_{session_name}")  # nosec B608 - session_name from _get_session_prefixed_name() (internal hash-based generation, SpatiaLite: no sql.Identifier equivalent)
+            # nosec B608 - session_name from _get_session_prefixed_name()
+            # (internal hash-based generation, SpatiaLite: no sql.Identifier equivalent)
+            temp_cur.execute(f"DROP TABLE IF EXISTS fm_temp_{session_name}")  # nosec B608
+            temp_cur.execute(f"DROP TABLE IF EXISTS mv_{session_name}")  # nosec B608
             temp_conn.commit()
             temp_cur.close()
             temp_conn.close()
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error(f"Error dropping Spatialite temp table: {e}")
 
         # THREAD SAFETY: Queue subset clear for application in finished()
@@ -3573,7 +2513,7 @@ class FilterEngineTask(QgsTask):
             if self._ps_manager:
                 try:
                     self._ps_manager.delete_subset_history(self.project_uuid, layer.id())
-                except Exception as e:
+                except (RuntimeError, OSError, AttributeError) as e:
                     logger.warning(f"Prepared statement failed, falling back to repository: {e}")
                     history_repo.delete_for_layer(self.project_uuid, layer.id())
             else:
@@ -3783,22 +2723,12 @@ class FilterEngineTask(QgsTask):
         return result
 
     def _has_expensive_spatial_expression(self, sql_string: str) -> bool:
-        """
-        Detect if a SQL expression contains expensive spatial predicates.
-
-        EPIC-1 Phase E7.5: Legacy code removed - fully delegates to core.optimization.query_analyzer.
-        """
-        from ..optimization.query_analyzer import has_expensive_spatial_expression
-        return has_expensive_spatial_expression(sql_string)
+        """Detect expensive spatial predicates. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.has_expensive_spatial_expression(sql_string)
 
     def _is_complex_filter(self, subset: str, provider_type: str) -> bool:
-        """
-        Check if a filter expression is complex (requires longer refresh delay).
-
-        EPIC-1 Phase E7.5: Legacy code removed - fully delegates to core.optimization.query_analyzer.
-        """
-        from ..optimization.query_analyzer import is_complex_filter
-        return is_complex_filter(subset, provider_type)
+        """Check if filter is complex. Delegates to ExpressionFacadeHandler."""
+        return self._expr_facade.is_complex_filter(subset, provider_type)
 
     def _single_canvas_refresh(self):
         """
@@ -3856,7 +2786,7 @@ class FilterEngineTask(QgsTask):
                         if subset:
                             layer.triggerRepaint()
                             layers_repainted += 1
-                except Exception as e:
+                except (RuntimeError, AttributeError) as e:
                     logger.debug(f"Ignored in final canvas repaint loop: {e}")
 
             # Final canvas refresh
@@ -3868,20 +2798,12 @@ class FilterEngineTask(QgsTask):
                 logger.debug("Final canvas refresh completed (2s delay)")
             logger.debug("Final canvas refresh completed (2s delay)")
 
-        except Exception as e:
+        except Exception as e:  # catch-all safety net: canvas refresh must not crash finished()
             logger.debug(f"Final canvas refresh skipped: {e}")
 
     def _cleanup_postgresql_materialized_views(self):
-        """Cleanup PostgreSQL materialized views. Delegates to CleanupHandler."""
-        self._cleanup_handler.cleanup_postgresql_materialized_views(
-            postgresql_available=POSTGRESQL_AVAILABLE,
-            source_provider_type=self.param_source_provider_type,
-            source_layer=getattr(self, 'source_layer', None),
-            task_parameters=self.task_parameters,
-            param_all_layers=getattr(self, 'param_all_layers', None),
-            get_connection_fn=self._get_valid_postgresql_connection,
-            current_mv_schema=getattr(self, 'current_materialized_view_schema', 'filtermate_temp'),
-        )
+        """Cleanup PostgreSQL materialized views. Delegates to MaterializedViewHandler."""
+        self._mv_handler.cleanup_postgresql_materialized_views()
 
     def cancel(self) -> None:
         """Cancel the task and cleanup all resources.
@@ -3904,7 +2826,7 @@ class FilterEngineTask(QgsTask):
         for conn in self.active_connections[:]:
             try:
                 conn.close()
-            except Exception as e:
+            except (RuntimeError, OSError, AttributeError) as e:
                 # Log but don't fail - connection may already be closed
                 logger.debug(f"Connection cleanup failed (may already be closed): {e}")
         self.active_connections.clear()
@@ -3915,298 +2837,139 @@ class FilterEngineTask(QgsTask):
         # QgsMessageLog may be destroyed during QGIS shutdown, causing access violation
         try:
             logger.info(f'"{self.description()}" task was canceled')
-        except Exception:
-            pass  # Logger may be destroyed during QGIS shutdown - intentional silent catch
+        except Exception:  # catch-all safety net: logger may be destroyed during QGIS shutdown
+            pass  # Intentional silent catch
 
         super().cancel()
 
     def _restore_source_layer_selection(self):
-        """
-        v2.9.23: Restore the source layer selection after filter/unfilter.
-
-        This ensures the selected features remain visually highlighted on the map
-        after the filtering operation completes.
-
-        Phase E13 Step 5: Uses FeatureCollector.restore_layer_selection().
-        """
+        """Restore source layer selection after filter/unfilter. Delegates to FeatureCollector."""
         if not self.source_layer or not is_valid_layer(self.source_layer):
             return
 
-        # Phase E13: Use FeatureCollector for centralized feature management
         collector = self._get_feature_collector()
-
-        # Get feature FIDs from task parameters
         feature_fids = self.task_parameters.get("task", {}).get("feature_fids", [])
 
-        # Fallback: extract FIDs from features list if feature_fids not available
         if not feature_fids:
             task_features = self.task_parameters.get("task", {}).get("features", [])
             if task_features:
-                # Use collector to extract IDs
                 result = collector.collect_from_features(task_features)
                 feature_fids = result.feature_ids
 
         if feature_fids:
-            # Delegate selection restoration to FeatureCollector
-            collector.restore_layer_selection(feature_fids)
-            logger.info(f"✓ Restored source layer selection via FeatureCollector: {len(feature_fids)} feature(s)")
+            collector.restore_layer_selection(self.source_layer, feature_fids)
+            logger.info(f"Restored source layer selection via FeatureCollector: {len(feature_fids)} feature(s)")
 
     @main_thread_only
     def finished(self, result: Optional[bool]) -> None:
-        """Handle task completion with cleanup and user notifications.
-
-        Called by QGIS task manager when task completes. Performs:
-        1. Display warning messages collected during task execution
-        2. Apply pending subset string requests on main Qt thread
-        3. Cleanup PostgreSQL materialized views (for reset/unfilter/export only)
-        4. Show success/error message in QGIS message bar
-        5. Restore source layer selection
-
-        Args:
-            result: True if task succeeded, False if failed, None if canceled.
-
-        Note:
-            - Subset strings are applied here for thread safety
-            - MVs are NOT cleaned on 'filter' action as they're still referenced
-            - Warning messages are displayed before being cleared
-        """
-        from qgis.utils import iface
-        result_action: Optional[str] = None
+        """Handle task completion. Delegates to FinishedHandler."""
         message_category = MESSAGE_TASKS_CATEGORIES[self.task_action]
 
-        # E6: Delegate warning display to task_completion_handler
-        if hasattr(self, 'warning_messages') and self.warning_messages:
-            tch_display_warnings(self.warning_messages)
-            self.warning_messages = []  # Clear after display
-
-        # E6: Check if subset application should be skipped
-        has_pending = hasattr(self, '_pending_subset_requests')
-        pending_list = self._pending_subset_requests if has_pending else []
-
-        truly_canceled = should_skip_subset_application(
-            self.isCanceled(), has_pending, pending_list, result
+        cleared_warnings, cleared_pending, cleared_ogr = self._finished_handler.handle_finished(
+            result=result,
+            task_action=self.task_action,
+            message_category=message_category,
+            is_canceled_fn=self.isCanceled,
+            warning_messages=getattr(self, 'warning_messages', []),
+            pending_subset_requests=getattr(self, '_pending_subset_requests', []),
+            safe_set_subset_fn=safe_set_subset_string,
+            is_complex_filter_fn=self._is_complex_filter,
+            single_canvas_refresh_fn=self._single_canvas_refresh,
+            cleanup_mv_fn=self._cleanup_postgresql_materialized_views,
+            ogr_source_geom=getattr(self, 'ogr_source_geom', None),
+            exception=self.exception,
+            task_message=getattr(self, 'message', None),
+            source_layer=getattr(self, 'source_layer', None),
+            task_parameters=getattr(self, 'task_parameters', {}),
+            failed_layer_names=getattr(self, '_failed_layer_names', []),
+            layers_count=getattr(self, 'layers_count', None),
+            task_description=self.description(),
+            restore_selection_fn=self._restore_source_layer_selection,
+            task_bridge=getattr(self, '_task_bridge', None),
+            cleanup_safe_intersect_fn=self._cleanup_safe_intersect_layers,
         )
 
-        if truly_canceled and hasattr(self, '_pending_subset_requests') and not self._pending_subset_requests:
-            logger.info("Task was canceled - skipping pending subset requests to prevent partial filter application")
-            if hasattr(self, '_pending_subset_requests'):
-                self._pending_subset_requests = []  # Clear to prevent any application
+        # Update state from handler return values
+        self.warning_messages = cleared_warnings
+        self._pending_subset_requests = cleared_pending
+        self.ogr_source_geom = cleared_ogr
 
-        # Apply pending subset strings on main thread
-        # E6: Delegated to task_completion_handler.apply_pending_subset_requests()
-        if hasattr(self, '_pending_subset_requests') and self._pending_subset_requests:
-            applied_count = apply_pending_subset_requests(
-                self._pending_subset_requests,
-                safe_set_subset_string
-            )
-            logger.info(f"Applied {applied_count} pending subset requests")
-            # Clear the pending requests
-            self._pending_subset_requests = []
-
-            # E6: Delegated canvas refresh to task_completion_handler
-            schedule_canvas_refresh(
-                self._is_complex_filter,
-                self._single_canvas_refresh
-            )
-
-        # Only cleanup MVs on reset/unfilter actions, NOT on filter
-        # When filtering, materialized views are referenced by the layer's subsetString.
-        # Cleaning them up would invalidate the filter expression causing empty results.
-        # Cleanup should only happen when:
-        # - reset: User wants to remove all filters (MVs no longer needed)
-        # - unfilter: User wants to revert to previous state (MVs no longer needed)
-        # - export: After exporting data (MVs were temporary for export)
-        if self.task_action in ('reset', 'unfilter', 'export'):
-            self._cleanup_postgresql_materialized_views()
-
-        # E6: Delegate memory layer cleanup to task_completion_handler
-        if hasattr(self, 'ogr_source_geom'):
-            cleanup_memory_layer(self.ogr_source_geom)
-            self.ogr_source_geom = None
-
-        if self.exception is None:
-            # Only show error message if task was TRULY canceled by user
-            # When a new filter task starts, it cancels previous tasks. Those tasks call finished()
-            # with result=False and message="Filter task was canceled by user". We should NOT
-            # display this as a critical error since it's expected behavior when starting a new filter.
-            # However, we must NOT return early here as it would skip cleanup and signal reconnection.
-            task_was_canceled = self.isCanceled()
-
-            if result is None:
-                # Task was likely canceled by user - log only, no message bar notification
-                logger.info('Task completed with no result (likely canceled by user)')
-            elif result is False:
-                # Task failed without exception - only display error if NOT canceled
-                if task_was_canceled:
-                    # Task was canceled - don't show error message
-                    logger.info('Task was canceled - no error message displayed')
-                else:
-                    # Task really failed - display error message
-                    # Enhanced error message with failed layer names
-                    error_msg = self.message if hasattr(self, 'message') and self.message else 'Task failed'
-
-                    # Include failed layer names if available
-                    failed_layers = getattr(self, '_failed_layer_names', [])
-                    if failed_layers and error_msg == 'Task failed':
-                        error_msg = f"Filter failed for: {', '.join(failed_layers[:3])}"
-                        if len(failed_layers) > 3:
-                            error_msg += f" (+{len(failed_layers) - 3} more)"
-
-                    logger.error(f"Task finished with failure: {error_msg}")
-                    logger.error(f"   Task action: {self.task_action}")
-                    logger.error(f"   Source layer: {self.source_layer.name() if self.source_layer else 'None'}")
-                    logger.error(f"   Layers count: {getattr(self, 'layers_count', 'N/A')}")
-
-                    # Log to QGIS message log for visibility
-                    from qgis.core import QgsMessageLog
-                    QgsMessageLog.logMessage(
-                        f"❌ Task failed: {error_msg}",
-                        "FilterMate", Qgis.Critical
+        # GPKG layer tree write (sqlite3-based, no QgsProject/QgsVectorLayer creation)
+        if result and self.task_action == 'export':
+            pending = getattr(self._export_handler, '_pending_layer_tree_write', None)
+            if pending:
+                del self._export_handler._pending_layer_tree_write
+                try:
+                    from ..export.gpkg_layer_tree_writer import write_layer_tree_to_gpkg
+                    success = write_layer_tree_to_gpkg(
+                        pending['gpkg_path'],
+                        pending['layer_ids'],
+                        pending['project_title'],
+                        export_crs_authid=pending.get('export_crs_authid'),
+                        save_styles=pending.get('save_styles', False),
                     )
+                    if success:
+                        logger.info(f"Layer tree written to GPKG: {pending['gpkg_path']}")
+                    else:
+                        logger.warning("Failed to write layer tree to GPKG")
+                except Exception as e:
+                    logger.error(f"Error writing layer tree to GPKG: {e}")
 
-                    # Log additional diagnostic info to Python console
-                    if error_msg == 'Task failed':
-                        logger.error("   💡 TIP: Check the Python console for detailed error messages")
-                        logger.error("   💡 Common causes: no features selected, invalid layer, database connection issue")
+            # KML folder merge (pure Python xml.etree, runs on main thread for
+            # QgsProject.instance() access to resolve layer names & hierarchy)
+            pending_kml = getattr(self._export_handler, '_pending_kml_merge', None)
+            if pending_kml:
+                del self._export_handler._pending_kml_merge
+                try:
+                    self._execute_kml_folder_merge(pending_kml)
+                except Exception as e:
+                    logger.error(f"Error merging KML with folders: {e}")
 
-                    iface.messageBar().pushMessage(
-                        message_category,
-                        error_msg,
-                        Qgis.Critical)
-            else:
-                # Task succeeded
-                if message_category == 'FilterLayers':
+    def _execute_kml_folder_merge(self, pending: dict) -> None:
+        """Merge individual KML files into a single KML with Folder structure."""
+        import os
+        from qgis.core import QgsProject
+        from ..export.kml_folder_writer import merge_kml_with_folders, cleanup_individual_kmls
+        from ...infrastructure.utils.layer_tree_utils import get_layer_group_hierarchy
 
-                    if self.task_action == 'filter':
-                        result_action = 'Layer(s) filtered'
-                    elif self.task_action == 'unfilter':
-                        result_action = 'Layer(s) filtered to precedent state'
-                    elif self.task_action == 'reset':
-                        result_action = 'Layer(s) unfiltered'
+        output_folder = pending['output_folder']
+        layer_ids = pending['layer_ids']
+        project_title = pending['project_title']
 
-                    iface.messageBar().pushMessage(
-                        message_category,
-                        f'Filter task : {result_action}',
-                        Qgis.Success)
+        # Resolve layer_id → KML file path via QgsProject.instance()
+        source_project = QgsProject.instance()
+        kml_files = {}
+        for lid in layer_ids:
+            layer = source_project.mapLayer(lid)
+            if not layer:
+                continue
+            kml_path = os.path.join(output_folder, f"{layer.name()}.kml")
+            if os.path.isfile(kml_path):
+                kml_files[lid] = kml_path
 
-                    # Restore source layer selection after filter/unfilter
-                    # This keeps the selected features visually highlighted on the map
-                    try:
-                        self._restore_source_layer_selection()
-                    except Exception as sel_err:
-                        logger.debug(f"Could not restore source layer selection: {sel_err}")
+        if not kml_files:
+            logger.warning("No KML files found to merge")
+            return
 
-                    # Ensure canvas is refreshed after successful filter operation
-                    # This guarantees filtered features are visible on the map
-                    try:
-                        iface.mapCanvas().refresh()
-                    except Exception as e:
-                        logger.debug(f"Ignored in post-filter canvas refresh: {e}")
+        # Compute hierarchy from source project
+        hierarchy = get_layer_group_hierarchy(list(kml_files.keys()))
 
-                elif message_category == 'ExportLayers':
+        # Determine merged output path
+        merged_name = project_title.replace(' ', '_') if project_title else 'export'
+        merged_path = os.path.join(output_folder, f"{merged_name}.kml")
 
-                    if self.task_action == 'export':
-                        iface.messageBar().pushMessage(
-                            message_category,
-                            f'Export task : {self.message}',
-                            Qgis.Success)
-
+        success = merge_kml_with_folders(
+            kml_files, hierarchy, merged_path, project_title
+        )
+        if success:
+            deleted = cleanup_individual_kmls(kml_files)
+            logger.info(
+                f"KML folder merge complete: {merged_path} "
+                f"({len(kml_files)} layers merged, {deleted} individual files removed)"
+            )
         else:
-            # Exception occurred during task execution
-            error_msg = f"Exception: {self.exception}"
-            logger.error(f"Task finished with exception: {error_msg}")
-
-            # Display error to user
-            iface.messageBar().pushMessage(
-                message_category,
-                error_msg,
-                Qgis.Critical)
-
-            # Only raise exception if task completely failed (result is False)
-            # If result is True, some layers may have been processed successfully
-            if result is False:
-                raise self.exception
-            else:
-                # Partial success - log but don't raise
-                logger.warning(
-                    "Task completed with partial success. "
-                    f"Some operations succeeded but an exception occurred: {self.exception}"
-                )
-
-        # Clean up OGR backend temporary GEOS-safe layers
-        # These accumulate during multi-layer filtering and must be released after task completes
-        try:
-            # Import cleanup function from OGR backend
-            from ..backends.ogr_backend import cleanup_ogr_temp_layers
-
-            # Get OGR backend instances from task_parameters if they exist
-            # These may have been created during fallback from Spatialite
-            if hasattr(self, 'task_parameters'):
-                # Check for OGR backend instances stored in task params
-                ogr_backends = []
-
-                # Look for backend instances in different places
-                if '_backend_instances' in self.task_parameters:
-                    ogr_backends.extend(self.task_parameters['_backend_instances'])
-
-                # Clean up each backend instance
-                for backend in ogr_backends:
-                    if backend and hasattr(backend, '_temp_layers_keep_alive'):
-                        cleanup_ogr_temp_layers(backend)
-                        logger.debug(f"Cleaned up temp layers for backend: {type(backend).__name__}")
-        except Exception as cleanup_err:
-            logger.debug(f"OGR temp layer cleanup failed (non-critical): {cleanup_err}")
-
-        # MIG-023: Log TaskBridge metrics for migration validation
-        if hasattr(self, '_task_bridge') and self._task_bridge:
-            try:
-                metrics_report = self._task_bridge.get_metrics_report()
-                logger.info(metrics_report)
-            except Exception as metrics_err:
-                logger.debug(f"TaskBridge metrics logging failed: {metrics_err}")
-
-        # FIX 2026-01-17: Clean up orphaned safe_intersect layers from project
-        # These temporary layers should be removed after task completion
-        self._cleanup_safe_intersect_layers()
+            logger.warning("KML folder merge failed - individual files preserved")
 
     def _cleanup_safe_intersect_layers(self):
-        """
-        Clean up orphaned safe_intersect temporary layers from the project.
-
-        These layers are created during OGR/Spatialite filtering as GEOS-safe wrappers
-        and should be removed after task completion to prevent project pollution.
-        """
-        try:
-            import re
-            from qgis.core import QgsProject
-
-            project = QgsProject.instance()
-            layers_to_remove = []
-
-            # Patterns for temp layers created by FilterMate
-            temp_patterns = [
-                r'_safe_intersect_\d+',
-                r'_safe_source$',
-                r'_safe_target$',
-                r'_geos_safe$',
-                r'^source_from_task$',
-                r'^source_selection$',
-                r'^source_filtered$',
-                r'^source_field_based$',
-                r'^source_expr_filtered$',
-            ]
-
-            for layer_id, layer in project.mapLayers().items():
-                layer_name = layer.name()
-                for pattern in temp_patterns:
-                    if re.search(pattern, layer_name):
-                        layers_to_remove.append(layer_id)
-                        logger.debug(f"Marking for removal: {layer_name}")
-                        break
-
-            if layers_to_remove:
-                # Remove layers from project (not from legend - they were never added to legend)
-                project.removeMapLayers(layers_to_remove)
-                logger.debug(f"Cleaned up {len(layers_to_remove)} temporary safe_intersect layers")
-        except Exception as e:
-            logger.debug(f"safe_intersect cleanup failed (non-critical): {e}")
+        """Cleanup orphaned safe_intersect layers. Delegates to FinishedHandler."""
+        self._finished_handler.cleanup_safe_intersect_layers()

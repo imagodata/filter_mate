@@ -95,7 +95,7 @@ class BackendSelector:
             return ProviderType.MEMORY
 
         # Priority 3: PostgreSQL layers - ALWAYS use PostgreSQL backend (v4.0.8)
-        # PostgreSQL layers ALWAYS use PostgreSQL backend
+        # FIX v4.1.4 (2026-01-21): PostgreSQL layers ALWAYS use PostgreSQL backend
         # QGIS native API (setSubsetString) works without psycopg2.
         # psycopg2 is only needed for advanced features (materialized views, connection pooling)
         # but basic filtering always works via QGIS native provider.
@@ -200,14 +200,14 @@ class BackendFactory:
         Returns:
             Backend instance with apply_filter() and build_expression() methods
         """
-        # Try to use legacy adapters with feature flag for progressive migration
+        # v4.1.0: Try to use legacy adapters with feature flag for progressive migration
         try:
             from .legacy_adapter import get_legacy_adapter, is_new_backend_enabled
             USE_LEGACY_ADAPTERS = True
         except ImportError:
             USE_LEGACY_ADAPTERS = False
 
-        # Import expression builders from new locations (no more before_migration!)
+        # v4.1.0: Import expression builders from new locations (no more before_migration!)
         from .ogr.expression_builder import OGRExpressionBuilder
         from .spatialite.expression_builder import SpatialiteExpressionBuilder
 
@@ -231,7 +231,7 @@ class BackendFactory:
             logger.debug(f"🔧 BackendFactory.get_backend() called for '{layer.name() if layer else 'unknown'}'")
             logger.debug(f"   → provider_type (effective): '{provider_type}'")
 
-            # ALWAYS use LegacyAdapters for hexagonal architecture support
+            # v4.2.0: ALWAYS use LegacyAdapters for hexagonal architecture support
             # The adapters delegate to new ExpressionBuilders (v4.1.0)
             # This enables progressive migration via set_new_backend_enabled()
             if USE_LEGACY_ADAPTERS:
@@ -239,7 +239,7 @@ class BackendFactory:
                 logger.debug(f"   → Using LegacyAdapter (hexagonal: {'enabled' if new_backend_active else 'delegating to expression builder'})")
                 try:
                     return get_legacy_adapter(provider_type, task_params or {})
-                except (ImportError, AttributeError, RuntimeError) as e:
+                except Exception as e:
                     logger.warning(f"LegacyAdapter failed: {e}, falling back to direct expression builder")
 
             # Fallback: Return expression builders directly (v4.1.0)
@@ -431,7 +431,7 @@ class BackendFactory:
         except ImportError:
             logger.debug("QgsProject not available during initialization")
             return False
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             logger.debug(f"Could not detect project layers: {e}")
             return False
 
@@ -540,7 +540,7 @@ class BackendFactory:
         except ImportError as e:
             logger.warning(f"Failed to import backend for {provider_type}: {e}")
             return None
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             logger.error(f"Failed to create backend for {provider_type}: {e}")
             return None
 
@@ -578,7 +578,7 @@ class BackendFactory:
             try:
                 backend.cleanup()
                 logger.debug(f"Cleaned up {provider_type.value} backend")
-            except (RuntimeError, AttributeError) as e:
+            except Exception as e:
                 logger.warning(f"Error cleaning up {provider_type.value}: {e}")
 
         self._backends.clear()

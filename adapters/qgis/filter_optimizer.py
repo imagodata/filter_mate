@@ -9,7 +9,6 @@ to the hexagonal architecture.
 Part of FilterMate Hexagonal Architecture v3.0
 """
 
-import logging
 import time
 import sqlite3
 from typing import Dict, List, Optional, Tuple, Set, Any, Callable
@@ -37,8 +36,6 @@ from ...core.ports.filter_optimizer import (
     LayerStatistics,
     PlanBuilderConfig,
 )
-
-logger = logging.getLogger(__name__)
 
 # Singleton instances
 _optimizer_instance: Optional["QgisFilterOptimizer"] = None
@@ -224,8 +221,7 @@ class QgisSelectivityEstimator(ISelectivityEstimator):
 
             return matching / evaluated
 
-        except Exception as e:
-            logger.debug(f"Ignored in attribute selectivity estimation: {e}")
+        except Exception:
             return 0.5
 
     def estimate_spatial_selectivity(
@@ -501,8 +497,7 @@ class QgisFilterOptimizer(IFilterOptimizer):
 
             return matching_fids
 
-        except Exception as e:
-            logger.debug(f"Ignored in attribute prefilter execution: {e}")
+        except Exception:
             return matching_fids
 
     def execute_chunked_filter(
@@ -640,7 +635,7 @@ class SpatialiteQueryBuilder:
 
         where_clause = " AND ".join(where_clauses)
 
-        return f'SELECT rowid FROM "{table_name}" WHERE {where_clause}'  # nosec B608 - table_name from QGIS layer metadata (SpatiaLite path)
+        return f'SELECT rowid FROM "{table_name}" WHERE {where_clause}'  # nosec B608
 
     @staticmethod
     def get_sqlite_stats(db_path: str, table_name: str) -> Dict[str, Any]:
@@ -676,8 +671,8 @@ class SpatialiteQueryBuilder:
 
             conn.close()
 
-        except Exception as e:
-            logger.debug(f"Ignored in SQLite stats retrieval: {e}")
+        except Exception:
+            pass
 
         return stats
 
@@ -822,7 +817,7 @@ class MemorySpatialIndex:
                 if match:
                     matching.add(feat.id())
 
-            except Exception as e:
-                logger.debug(f"Ignored in spatial predicate evaluation: {e}")
+            except Exception:
+                pass
 
         return matching

@@ -20,11 +20,6 @@ Created: January 2026 (EPIC-1 Phase E4 - stub)
 
 import logging
 
-try:
-    import psycopg2
-except ImportError:
-    psycopg2 = None
-
 logger = logging.getLogger('FilterMate.Adapters.Backends.PostgreSQL.FilterExecutor')
 
 
@@ -100,7 +95,7 @@ def prepare_postgresql_source_geom(
 
     # CENTROID OPTIMIZATION: Wrap geometry in ST_Centroid if enabled for source layer
     # This significantly speeds up queries for complex polygons (e.g., buildings)
-    # CENTROID + BUFFER OPTIMIZATION Combine centroid and buffer when both are enabled
+    # CENTROID + BUFFER OPTIMIZATION v2.5.13: Combine centroid and buffer when both are enabled
     # Order: ST_Buffer(ST_Centroid(geom)) - buffer is applied to the centroid point
 
     if buffer_expression is not None and buffer_expression != '':
@@ -109,7 +104,7 @@ def prepare_postgresql_source_geom(
         # Convert QGIS expression to PostGIS FIRST (before any modifications)
         buffer_expr_postgis = qgis_expression_to_postgis(buffer_expression)
 
-        # Use inline buffer expression for small datasets (no MV)
+        # FIX v4.2.7: Use inline buffer expression for small datasets (no MV)
         # This avoids the overhead of creating a materialized view for few features
         logger.info(f"[PostgreSQL] 🔍 THRESHOLD CHECK: source_feature_count={source_feature_count}, threshold={BUFFER_EXPR_MV_THRESHOLD}")
         use_inline_buffer = (
@@ -163,7 +158,7 @@ def prepare_postgresql_source_geom(
             # This function only prepares the geometry expression
 
             # Use sanitize_sql_identifier to handle all special chars (em-dash, etc.)
-            # Apply session_id prefix to MV name for multi-client isolation
+            # FIX v4.2.0: Apply session_id prefix to MV name for multi-client isolation
             # The MV is created with session prefix in filter_actions.py, so we must use the same name here
             base_mv_name = sanitize_sql_identifier(source_table + '_buffer_expr')
             if session_id:
@@ -173,7 +168,7 @@ def prepare_postgresql_source_geom(
                 materialized_view_name = base_mv_name
                 logger.warning(f"[PostgreSQL] No session_id provided, using base MV name: {materialized_view_name}")
 
-            # Include schema in MV reference to avoid PostgreSQL using default 'public' schema
+            # FIX v4.2.0: Include schema in MV reference to avoid PostgreSQL using default 'public' schema
             postgresql_source_geom = '"{mv_schema}"."mv_{materialized_view_name}_dump"."{source_geom}"'.format(
                 mv_schema=mv_schema,
                 source_geom=source_geom,
@@ -185,7 +180,7 @@ def prepare_postgresql_source_geom(
             # ORDER OF APPLICATION: Buffer expression creates MV first, centroid cannot be applied after
             if use_centroids:
                 logger.warning("[PostgreSQL] ⚠️ PostgreSQL: Centroid option ignored when using buffer expression (materialized view)")
-                # Notify user via QGIS message log for visibility
+                # v4.1.3: Notify user via QGIS message log for visibility
                 from qgis.core import QgsMessageLog, Qgis
                 QgsMessageLog.logMessage(
                     "⚠️ Centroid optimization was requested but is incompatible with buffer expressions. "
@@ -230,7 +225,7 @@ def prepare_postgresql_source_geom(
         # Build base ST_Buffer expression with style parameters
         base_buffer_expr = f"ST_Buffer({geom_to_buffer}, {buffer_value}, '{style_params}')"
 
-        # Handle negative buffers (erosion) properly
+        # CRITICAL FIX v2.5.6: Handle negative buffers (erosion) properly
         # Negative buffers can produce empty geometries which must be handled
         # with ST_MakeValid() and ST_IsEmpty() to prevent matching issues
         if buffer_value < 0:
@@ -315,7 +310,7 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
         logger.debug(f"[PostgreSQL] Expression after IF conversion: {expression}")
 
     # 3. Add type casting for numeric operations
-    # Added * and / operators
+    # FIX v4.2.12: Added * and / operators
     expression = expression.replace('" >', '"::numeric >').replace('">', '"::numeric >')
     expression = expression.replace('" <', '"::numeric <').replace('"<', '"::numeric <')
     expression = expression.replace('" +', '"::numeric +').replace('"+', '"::numeric +')
@@ -329,7 +324,7 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
     expression = re.sub(r'\bis\b', ' IS ', expression, flags=re.IGNORECASE)
     expression = re.sub(r'\bthen\b', ' THEN ', expression, flags=re.IGNORECASE)
     expression = re.sub(r'\belse\b', ' ELSE ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bend\b', ' END ', expression, flags=re.IGNORECASE)  # Added END
+    expression = re.sub(r'\bend\b', ' END ', expression, flags=re.IGNORECASE)  # FIX v4.2.12: Added END
     expression = re.sub(r'\bilike\b', ' ILIKE ', expression, flags=re.IGNORECASE)
     expression = re.sub(r'\blike\b', ' LIKE ', expression, flags=re.IGNORECASE)
     expression = re.sub(r'\bnot\b', ' NOT ', expression, flags=re.IGNORECASE)
@@ -338,7 +333,7 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
     expression = expression.replace('" NOT ILIKE', '"::text NOT ILIKE').replace('" ILIKE', '"::text ILIKE')
     expression = expression.replace('" NOT LIKE', '"::text NOT LIKE').replace('" LIKE', '"::text LIKE')
 
-    # 6. Clean up multiple spaces
+    # 6. Clean up multiple spaces (FIX v4.2.12)
     expression = re.sub(r'\s+', ' ', expression).strip()
 
     return expression
@@ -381,13 +376,13 @@ def build_postgis_predicates(
     param_distant_table = layer_props["layer_name"]
     param_distant_geometry_field = layer_props.get("layer_geometry_field")
 
-    # Auto-detect geometry column if stored value is invalid
+    # FIX v4.0.7 (2026-01-16): Auto-detect geometry column if stored value is invalid
     # The stored value may be "NULL" (string literal) from stale config
     # Use QgsDataSourceUri directly (more reliable than dataProvider().geometryColumn())
     if not param_distant_geometry_field or param_distant_geometry_field in ('NULL', 'None', ''):
         layer = layer_props.get("layer")
         if layer:
-            # Check if this is a memory layer
+            # FIX v4.0.8 (2026-01-16): Check if this is a memory layer
             is_memory_layer = layer.providerType() == 'memory'
 
             if is_memory_layer:
@@ -401,8 +396,7 @@ def build_postgis_predicates(
                     else:
                         param_distant_geometry_field = 'geometry'
                         logger.debug(f"[PostgreSQL] Memory layer {param_distant_table}: using default 'geometry'")
-                except (AttributeError, RuntimeError) as e:
-                    logger.debug(f"Ignored in memory layer geometry column detection: {e}")
+                except Exception:
                     param_distant_geometry_field = 'geometry'
             else:
                 try:
@@ -413,7 +407,7 @@ def build_postgis_predicates(
                     if detected_geom:
                         param_distant_geometry_field = detected_geom
                         logger.info(f"[PostgreSQL] ✓ Auto-detected geometry column for {param_distant_table}: '{detected_geom}'")
-                except (AttributeError, RuntimeError, KeyError) as e:
+                except Exception as e:
                     logger.warning(f"[PostgreSQL] Could not auto-detect geometry column: {e}")
 
         # Final fallback to 'geom' (PostgreSQL default)
@@ -499,7 +493,7 @@ def apply_postgresql_type_casting(expression: str, layer=None) -> str:
     # This handles cases like "importance" < 4 → "importance"::numeric < 4
     # Pattern: "field" followed by comparison operator and number
     #
-    # Use negative lookahead (?!::) AFTER the closing quote to ONLY
+    # FIX v4.8.1: Use negative lookahead (?!::) AFTER the closing quote to ONLY
     # match fields that are NOT already casted. This allows the regex to apply
     # casting individually to each comparison in a combined expression.
     #
@@ -581,14 +575,14 @@ def build_spatial_join_query(
     if expression:
         try:
             is_field = QgsExpression(expression).isField()
-        except (RuntimeError, ValueError) as e:
-            logger.debug(f"Ignored in expression field check: {e}")
+        except Exception:
+            pass
 
     # Build query based on combine operator and expression type
     if has_combine_operator:
         # With combine operator - no WHERE clause needed
         query = (
-            f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608 - identifiers from QGIS layer metadata (schema/table/pk from QgsDataSourceUri)
+            f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608
             f'FROM "{param_distant_schema}"."{param_distant_table}" '
             f'INNER JOIN {source_ref} ON {param_postgis_sub_expression})'
         )
@@ -597,7 +591,7 @@ def build_spatial_join_query(
         if is_field:
             # For field expressions, use simple JOIN
             query = (
-                f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608 - identifiers from QGIS layer metadata
+                f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608
                 f'FROM "{param_distant_schema}"."{param_distant_table}" '
                 f'INNER JOIN {source_ref} ON {param_postgis_sub_expression})'
             )
@@ -606,7 +600,7 @@ def build_spatial_join_query(
             if current_materialized_view_name:
                 # Materialized view has WHERE embedded
                 query = (
-                    f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608 - identifiers from QGIS layer metadata
+                    f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608
                     f'FROM "{param_distant_schema}"."{param_distant_table}" '
                     f'INNER JOIN {source_ref} ON {param_postgis_sub_expression} '
                     f'WHERE {sub_expression})'
@@ -614,7 +608,7 @@ def build_spatial_join_query(
             else:
                 # Direct table JOIN with WHERE
                 query = (
-                    f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608 - identifiers from QGIS layer metadata
+                    f'(SELECT "{param_distant_table}"."{param_distant_primary_key_name}" '  # nosec B608
                     f'FROM "{param_distant_schema}"."{param_distant_table}" '
                     f'INNER JOIN "{source_schema}"."{source_table}" '
                     f'ON {param_postgis_sub_expression} WHERE {sub_expression})'
@@ -767,7 +761,7 @@ def ensure_source_table_stats(
 
             return True
 
-    except (psycopg2.Error if psycopg2 else Exception) as e:
+    except Exception as e:
         logger.warning(f"Could not check/create stats for \"{schema}\".\"{table}\": {e}")
         return False
 
@@ -985,8 +979,8 @@ def _is_pk_numeric(layer, pk_field: str) -> bool:
                 QVariant.ULongLong, QVariant.Double
             ]
             return field_type in numeric_types
-    except (AttributeError, RuntimeError) as e:
-        logger.debug(f"Ignored in PK numeric type check: {e}")
+    except Exception:
+        pass
 
     return True  # Default to numeric
 

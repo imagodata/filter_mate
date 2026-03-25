@@ -3,13 +3,10 @@ FilterMate Controller Registry.
 
 Registry pattern for managing controller lifecycle and centralized access.
 """
-import logging
 from enum import IntEnum
 from typing import Dict, Type, Optional, TypeVar, List
 
 from .base_controller import BaseController
-
-logger = logging.getLogger(__name__)
 
 T = TypeVar('T', bound=BaseController)
 
@@ -198,8 +195,8 @@ class ControllerRegistry:
                 try:
                     controller.setup()
                     count += 1
-                except Exception as e:
-                    logger.debug(f"Ignored in controller setup for '{name}': {e}")
+                except Exception:
+                    pass
         return count
 
     def teardown_all(self) -> int:

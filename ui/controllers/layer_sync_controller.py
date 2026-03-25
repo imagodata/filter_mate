@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 # Protection window after filter completes (seconds)
 # Must cover refresh_delay (1500ms) + layer.reload() + margin
-POST_FILTER_PROTECTION_WINDOW = 1.5  # Reduced from 5.0s for faster user interaction
+POST_FILTER_PROTECTION_WINDOW = 1.5  # v4.1.3: Reduced from 5.0s for faster user interaction
 
 
 class LayerSyncController(BaseController):
@@ -1077,7 +1077,7 @@ class LayerSyncController(BaseController):
             'filtering_layers_to_filter_state_changed',
             'filtering_combine_operator_state_changed',
             'filtering_geometric_predicates_state_changed',
-            'filtering_buffer_value_state_changed',  # Added - enables/disables buffer widgets
+            'filtering_buffer_value_state_changed',  # v4.0.7: Added - enables/disables buffer widgets
             'filtering_buffer_property_changed',
             'filtering_buffer_type_state_changed'
         ]
@@ -1127,16 +1127,21 @@ class LayerSyncController(BaseController):
                     dw.manageSignal(["QGIS", "LAYER_TREE_VIEW"], 'connect')
 
     def _connect_layer_selection_signal(self) -> None:
-        """
-        Connect selectionChanged signal for current layer.
-
-        FIX 2026-02-10 (C1): Delegates to centralized _connect_selection_signal.
-        """
+        """Connect selectionChanged signal for current layer."""
         dw = self.dockwidget
-        if hasattr(dw, '_connect_selection_signal'):
-            dw._connect_selection_signal()
-        else:
-            logger.warning("_connect_layer_selection_signal: _connect_selection_signal not available")
+        current_layer = getattr(dw, 'current_layer', None)
+
+        if current_layer is None:
+            return
+
+        try:
+            if hasattr(dw, 'on_layer_selection_changed'):
+                current_layer.selectionChanged.connect(dw.on_layer_selection_changed)
+                dw.current_layer_selection_connection = True
+        except (TypeError, RuntimeError) as e:
+            logger.warning(f"Could not connect selectionChanged signal: {e}")
+            if hasattr(dw, 'current_layer_selection_connection'):
+                dw.current_layer_selection_connection = None
 
     def _restore_exploring_groupbox_state(self, layer_props: dict) -> None:
         """

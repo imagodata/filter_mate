@@ -45,7 +45,7 @@ except ImportError:
             return False
         try:
             return layer.setSubsetString(expression)
-        except RuntimeError:
+        except Exception:
             return False
 
 # Thread safety for OGR operations
@@ -95,16 +95,16 @@ class CancellableFeedback(QgsProcessingFeedback if _HAS_PROCESSING_FEEDBACK else
         if _HAS_PROCESSING_FEEDBACK:
             try:
                 super().cancel()
-            except RuntimeError as e:
-                logger.debug(f"Ignored in feedback cancel: {e}")
+            except Exception:
+                pass
 
     def setProgress(self, progress: float):
         """Set progress (0-100)."""
         if _HAS_PROCESSING_FEEDBACK:
             try:
                 super().setProgress(progress)
-            except RuntimeError as e:
-                logger.debug(f"Ignored in feedback setProgress: {e}")
+            except Exception:
+                pass
 
 
 class OGRExpressionBuilder(GeometricFilterPort):
@@ -157,6 +157,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         self._temp_layers_keep_alive = []
         self._source_layer_keep_alive = []
         self._feedback = None
+        self.last_error = None
 
     def get_backend_name(self) -> str:
         """Get backend name."""
@@ -296,29 +297,33 @@ class OGRExpressionBuilder(GeometricFilterPort):
             source_layer = self.source_geom
 
             if source_layer is None:
-                self.log_error("No source layer available for OGR filter")
+                self.last_error = "No source layer available for OGR filter"
+                self.log_error(self.last_error)
                 return False
 
             if not isinstance(source_layer, QgsVectorLayer):
-                self.log_error(f"Source is not a QgsVectorLayer: {type(source_layer)}")
+                self.last_error = f"Source is not a QgsVectorLayer: {type(source_layer)}"
+                self.log_error(self.last_error)
                 return False
 
             self.log_info(f"📍 Applying OGR filter to {layer.name()}")
             self.log_info(f"  - Source: {source_layer.name()} ({source_layer.featureCount()} features)")
 
-            # Apply buffer to source layer if needed (static or dynamic)
+            # FIX v4.2.11: Apply buffer to source layer if needed (static or dynamic)
             if buffer_expression and buffer_expression.strip():
                 self.log_info(f"  - Applying dynamic buffer expression: {buffer_expression[:50]}...")
                 source_layer = self._apply_buffer_expression_to_layer(source_layer, buffer_expression)
                 if source_layer is None:
-                    self.log_error("Failed to apply buffer expression")
+                    self.last_error = f"Failed to apply dynamic buffer expression: {buffer_expression[:80]}"
+                    self.log_error(self.last_error)
                     return False
                 self.log_info(f"  - Buffered source: {source_layer.featureCount()} features")
             elif buffer_value is not None and buffer_value != 0:
                 self.log_info(f"  - Applying static buffer: {buffer_value}m")
                 source_layer = self._apply_buffer_to_layer(source_layer, buffer_value)
                 if source_layer is None:
-                    self.log_error("Failed to apply buffer")
+                    self.last_error = f"Failed to apply static buffer ({buffer_value}m)"
+                    self.log_error(self.last_error)
                     return False
                 self.log_info(f"  - Buffered source: {source_layer.featureCount()} features")
 
@@ -334,7 +339,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
             # Run selectbylocation
             try:
-                result = processing.run(
+                processing.run(
                     'native:selectbylocation',
                     {
                         'INPUT': layer,
@@ -344,8 +349,9 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     },
                     feedback=self._feedback
                 )
-            except (RuntimeError, KeyError) as e:
-                self.log_error(f"Processing failed: {e}")
+            except Exception as e:
+                self.last_error = f"native:selectbylocation processing failed: {e}"
+                self.log_error(self.last_error)
                 return False
 
             # Get selected feature IDs
@@ -357,21 +363,25 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 safe_set_subset_string(layer, "1 = 0")
                 return True
 
-            # For PostgreSQL layers via OGR, we need actual PK values, not QGIS internal FIDs
-            # selectedFeatureIds() returns QGIS internal feature IDs, which don't match PostgreSQL PK values
+            # FIX v4.5.3: For OGR layers with a real PK attribute field, use actual
+            # field values instead of QGIS internal FIDs. selectedFeatureIds() returns
+            # QGIS-internal IDs which don't match attribute values and the pseudo
+            # 'fid' column is unreliable in setSubsetString for many OGR drivers
+            # (ESRI Shapefile, PostgreSQL via OGR, etc.).
             pk_field = self._get_primary_key(layer)
-            storage_type = ""
-            try:
-                storage_type = layer.dataProvider().storageType().lower()
-            except (RuntimeError, AttributeError) as e:
-                logger.debug(f"Ignored in storage type detection: {e}")
+            use_pk_values = False
 
-            # Check if this is a PostgreSQL layer accessed via OGR
-            is_postgres_via_ogr = 'postgresql' in storage_type or 'postgis' in storage_type
+            # Use actual PK values when we have a real attribute field (not pseudo 'fid')
+            if pk_field and pk_field.lower() != 'fid':
+                use_pk_values = True
+                self.log_info(f"  - Real PK field '{pk_field}' detected: fetching actual attribute values")
+            else:
+                # Even for 'fid', check if it's a real field in the layer
+                if pk_field and layer.fields().indexOf(pk_field) >= 0:
+                    use_pk_values = True
+                    self.log_info(f"  - PK field '{pk_field}' exists as attribute: fetching actual values")
 
-            if is_postgres_via_ogr and pk_field:
-                # Get actual PK values from selected features
-                self.log_info(f"  - PostgreSQL via OGR detected: fetching actual PK values from '{pk_field}'")
+            if use_pk_values:
                 pk_values = []
                 for fid in selected_ids:
                     feature = layer.getFeature(fid)
@@ -382,13 +392,12 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
                 if pk_values:
                     self.log_info(f"  - Retrieved {len(pk_values)} actual PK values")
-                    # Build filter with actual PK values
                     fid_filter = self._build_fid_filter_with_values(layer, pk_values, pk_field)
                 else:
                     self.log_warning("  - Could not retrieve PK values, falling back to FID-based filter")
                     fid_filter = self._build_fid_filter(layer, selected_ids)
             else:
-                # Build FID filter normally for non-PostgreSQL layers
+                # No real PK field: use QGIS internal FIDs with pseudo 'fid' column
                 fid_filter = self._build_fid_filter(layer, selected_ids)
 
             # Clear selection (filter applied via subset)
@@ -410,22 +419,32 @@ class OGRExpressionBuilder(GeometricFilterPort):
             if success:
                 self.log_info(f"✓ OGR filter applied: {len(selected_ids)} features")
             else:
+                pk_name = self._get_primary_key(layer)
+                storage = ""
+                try:
+                    storage = layer.dataProvider().storageType()
+                except Exception:
+                    pass
+                self.last_error = (
+                    f"setSubsetString failed for {layer.name()} "
+                    f"(pk={pk_name}, fids={len(selected_ids)}, storage={storage})"
+                )
                 self.log_error(f"✗ Failed to apply FID filter to {layer.name()}")
                 self.log_error(f"  - Filter expression: {final_filter[:500]}...")
-                self.log_error(f"  - Primary key field: {self._get_primary_key(layer)}")
+                self.log_error(f"  - Primary key field: {pk_name}")
                 self.log_error(f"  - Number of FIDs: {len(selected_ids)}")
-                # Try to get more diagnostic info
                 try:
                     provider = layer.dataProvider()
                     self.log_error(f"  - Provider capabilities: {provider.capabilities()}")
-                    self.log_error(f"  - Storage type: {provider.storageType()}")
-                except (RuntimeError, AttributeError) as diag_e:
+                    self.log_error(f"  - Storage type: {storage}")
+                except Exception as diag_e:
                     self.log_error(f"  - Could not get diagnostics: {diag_e}")
 
             return success
 
-        except (RuntimeError, AttributeError) as e:
-            self.log_error(f"Error in OGR apply_filter: {e}")
+        except Exception as e:
+            self.last_error = f"OGR apply_filter exception: {e}"
+            self.log_error(self.last_error)
             return False
 
     def cancel(self):
@@ -467,8 +486,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
         storage_type = ""
         try:
             storage_type = layer.dataProvider().storageType().lower()
-        except (RuntimeError, AttributeError) as e:
-            logger.debug(f"Ignored in FID filter storage type detection: {e}")
+        except Exception:
+            pass
 
         pk_field = self._get_primary_key(layer)
         pk_field_lower = pk_field.lower()
@@ -482,8 +501,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 from qgis.PyQt.QtCore import QVariant
                 field_type = fields.at(pk_idx).type()
                 is_numeric_pk = field_type in (QVariant.Int, QVariant.LongLong, QVariant.UInt, QVariant.ULongLong, QVariant.Double)
-        except (RuntimeError, AttributeError, KeyError) as e:
-            logger.debug(f"Ignored in PK field type detection: {e}")
+        except Exception:
+            pass
 
         # Build value list based on PK type
         if is_numeric_pk:
@@ -529,7 +548,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         if not pk_values:
             return "1 = 0"
 
-        # IMPROVED numeric detection for PostgreSQL via OGR
+        # FIX v4.0.9: IMPROVED numeric detection for PostgreSQL via OGR
         # QGIS OGR provider may return incorrect field types for PostgreSQL.
         # Use multiple detection strategies with VALUE-BASED priority.
         is_numeric_pk = None
@@ -544,7 +563,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             if all_numeric_values:
                 is_numeric_pk = True
                 self.log_info("  - PK type detected from VALUES: numeric (all values are int/float)")
-        except (TypeError, ValueError) as val_e:
+        except Exception as val_e:
             self.log_debug(f"  - Value-based detection failed: {val_e}")
 
         # Strategy 2: Check if string values look like integers
@@ -559,8 +578,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 if all_look_numeric:
                     is_numeric_pk = True
                     self.log_info("  - PK type detected from string VALUES: numeric (all values look like integers)")
-            except (TypeError, ValueError) as e:
-                logger.debug(f"Ignored in PK numeric detection from values: {e}")
+            except Exception:
+                pass
 
         # Strategy 3: Check field type from layer fields (may be unreliable for OGR)
         if is_numeric_pk is None:
@@ -573,7 +592,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     numeric_types = (QVariant.Int, QVariant.LongLong, QVariant.UInt, QVariant.ULongLong, QVariant.Double)
                     is_numeric_pk = field_type in numeric_types
                     self.log_info(f"  - PK type detected from field schema: {'numeric' if is_numeric_pk else 'text'} (QVariant type={field_type})")
-            except (RuntimeError, AttributeError, KeyError) as field_e:
+            except Exception as field_e:
                 self.log_debug(f"  - Field type detection failed: {field_e}")
 
         # Default: assume numeric for common PK field names
@@ -649,7 +668,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             self.log_error("Buffer processing returned no valid layer")
             return None
 
-        except (RuntimeError, KeyError) as e:
+        except Exception as e:
             self.log_error(f"Failed to apply static buffer: {e}")
             return None
 
@@ -705,7 +724,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                             self._source_layer_keep_alive.append(buffered_layer)
                             self.log_info("  ✅ Dynamic buffer (field) applied successfully")
                             return buffered_layer
-                    except (RuntimeError, KeyError) as e:
+                    except Exception as e:
                         self.log_warning(f"  bufferbym failed: {e}, trying alternatives")
 
             # Strategy 2: Compute average buffer value from expression and use static buffer
@@ -719,7 +738,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             # Strategy 3: Fallback to extracting numeric default
             return self._fallback_buffer_from_expression(layer, buffer_expression)
 
-        except (RuntimeError, ValueError, AttributeError) as e:
+        except Exception as e:
             self.log_error(f"Failed to apply dynamic buffer: {e}")
             return self._fallback_buffer_from_expression(layer, buffer_expression)
 
@@ -774,7 +793,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
             return None
 
-        except (RuntimeError, ValueError, TypeError) as e:
+        except Exception as e:
             self.log_warning(f"  Could not compute average buffer: {e}")
             return None
 
@@ -855,8 +874,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     pk_name = fields.at(pk_indexes[0]).name()
                     self.log_debug(f"Using provider PK: {pk_name}")
                     return pk_name
-            except (RuntimeError, AttributeError, IndexError) as e:
-                logger.debug(f"Ignored in provider PK attribute detection: {e}")
+            except Exception:
+                pass
 
             # 2. Look for exact match PK names
             for field in fields:
@@ -888,7 +907,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     self.log_debug(f"Using first numeric field: {field.name()}")
                     return field.name()
 
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             self.log_warning(f"Error detecting primary key: {e}")
 
         # 6. Default to fid

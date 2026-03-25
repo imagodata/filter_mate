@@ -168,7 +168,7 @@ class FilterOrchestrator:
             # ==========================================
             # 3. SOURCE GEOMETRY PREPARATION
             # ==========================================
-            # Enhanced logging to diagnose geometry availability issues
+            # FIX v4.1.2: Enhanced logging to diagnose geometry availability issues
             logger.info(f"📦 SOURCE GEOMETRY CHECK for geometry_provider='{geometry_provider}':")
             for provider_key, geom_value in source_geometries.items():
                 status = "✓ AVAILABLE" if geom_value else "✗ None"
@@ -190,7 +190,7 @@ class FilterOrchestrator:
                 )
                 logger.error(f"   Available providers: {[k for k, v in source_geometries.items() if v]}")
                 logger.error("   💡 Check if prepare_*_source_geom() was called for this provider type")
-                # Log to QGIS message panel for visibility
+                # FIX v4.1.2: Log to QGIS message panel for visibility
                 QgsMessageLog.logMessage(
                     f"FilterMate: No source geometry for {geometry_provider} backend (layer: {layer.name()})",
                     "FilterMate", Qgis.MessageLevel.Critical
@@ -248,7 +248,7 @@ class FilterOrchestrator:
             # ==========================================
             # 7. BACKEND EXECUTION
             # ==========================================
-            # Enhanced logging before apply_filter for debugging PostgreSQL failures
+            # FIX v4.2.13: Enhanced logging before apply_filter for debugging PostgreSQL failures
             logger.info("=" * 80)
             logger.info("🎯 STEP 7: BACKEND EXECUTION")
             logger.info("=" * 80)

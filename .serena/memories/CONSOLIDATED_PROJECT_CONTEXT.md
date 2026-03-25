@@ -14,7 +14,7 @@ FilterMate is a QGIS plugin providing an intuitive interface for filtering and e
 **Key Features:**
 - Expression-based filtering with geometric predicates
 - Multi-backend support with auto-selection
-- **PLANNED:** Raster-vector integration (not yet on main, see `raster_integration_plan_atlas_2026_02_10`)
+- **NEW:** Interactive raster value selection tools (v5.4.0)
 - Undo/Redo filter history (100-state stack)
 - Progressive filtering for large datasets
 - Export functionality (multiple formats with style preservation)
@@ -38,7 +38,7 @@ FilterMate is a QGIS plugin providing an intuitive interface for filtering and e
 |  - integration.py (3,028) - Orchestration                     |
 |  - exploring_controller.py (3,208) - Feature explorer         |
 |  - filtering_controller.py - Filter operations                |
-|  - raster_controller.py - Raster operations (PLANNED, not on main) |
+|  - raster_controller.py - Raster operations (NEW v5.4)        |
 +---------------------------+-----------------------------------+
                             |
 +---------------------------v-----------------------------------+
@@ -114,8 +114,8 @@ filter_mate/
 │   │   └── ...
 │   ├── widgets/                # Custom widgets
 │   │   └── dockwidget_signal_manager.py  # Signal management (778 lines)
-│   ├── tools/                  # Map tools (directory does not exist on main yet)
-│   │   └── (planned: raster_pixel_picker_tool.py)
+│   ├── tools/                  # Map tools
+│   │   └── raster_pixel_picker_tool.py   # Raster value picking (NEW v5.4)
 │   ├── styles/                 # Theming (IconManager, ThemeWatcher)
 │   └── dialogs/                # Configuration dialogs
 │
@@ -191,8 +191,8 @@ from infrastructure.utils import get_datasource_connexion_from_layer
 # Domain
 from core.domain import FilterResult, LayerInfo, FilterExpression
 
-# UI Tools (PLANNED - not on main yet)
-# from ui.tools.raster_pixel_picker_tool import RasterPixelPickerTool
+# UI Tools (NEW v5.4)
+from ui.tools.raster_pixel_picker_tool import RasterPixelPickerTool
 
 # UI Widgets
 from ui.widgets.dockwidget_signal_manager import DockwidgetSignalManager
@@ -231,12 +231,20 @@ from ui.widgets.dockwidget_signal_manager import DockwidgetSignalManager
 
 ## 7. Recent Releases (v4.4.x - v5.4.0)
 
-### ~~v5.4.0 (February 1, 2026)~~ - BRANCH ONLY, NEVER MERGED
-> Raster Exploring Tool Buttons were developed on branch `fix/widget-visibility-and-styles-2026-02-02`
-> but never merged to `main`. None of these files/features exist on `main`.
-> See memory `raster_integration_plan_atlas_2026_02_10` for the updated raster roadmap.
+### v5.4.0 (February 1, 2026) - **CURRENT**
+**NEW: Raster Exploring Tool Buttons**
+- ✅ 5 new interactive raster tools (Pixel Picker, Rectangle Range, Sync Histogram, All Bands Info, Reset Range)
+- ✅ Consistent UI pattern with vector exploring panel
+- ✅ Checkable button mutual exclusion
+- ✅ Theme-aware icons and tooltips
+- ✅ Integration with existing RasterPixelPickerTool
 
-### v4.4.5 (January 25, 2026) - **CURRENT on main**
+**Files Changed:**
+- `filter_mate_dockwidget_base.py`: Added `widget_raster_keys` with 5 tool buttons
+- `filter_mate_dockwidget.py`: Added `_connect_raster_tool_buttons()` and handlers
+- `ui/tools/raster_pixel_picker_tool.py`: Enhanced with new modes
+
+### v4.4.5 (January 25, 2026)
 **FIX: Dynamic buffer fails on tables without "id" column**
 - ✅ Automatic PK detection from PostgreSQL `pg_index` metadata
 - ✅ Fallback to common PK names (id, fid, ogc_fid, cleabs, gid, objectid)
@@ -287,38 +295,36 @@ else:
 
 ---
 
-## 9. Raster Support - PLANNED (Not on main)
+## 9. Raster Support (EPIC-3 - v5.4.0)
 
-> **Audited 2026-02-10:** No raster features exist on `main`. Only a `RasterLayer = 1` enum value
-> in `filter_mate_dockwidget.py:56` and a type hint in `crs_utils.py`. All raster code was on
-> dev branches only (never merged).
+### New Tool Buttons (v5.4.0)
 
-### Actual State on `main`
-- `RasterLayer = 1` enum for layer type detection
-- `QgsRasterLayer` type hint in `core/geometry/crs_utils.py`
-- No raster services, no raster tasks, no raster UI widgets, no histogram
+| Button | Function | Mode | Shortcut |
+|--------|----------|------|----------|
+| 🔬 **Pixel Picker** | Click to pick single value | Checkable | Ctrl+click = extend range |
+| ⬛ **Rectangle Range** | Drag rectangle for area stats | Checkable | Auto-calculate min/max |
+| 🔄 **Sync Histogram** | Sync spinbox ↔ histogram | Action | Bidirectional sync |
+| 📊 **All Bands Info** | Show all band values | Checkable | Multi-band display |
+| 🎯 **Reset Range** | Reset to data range | Action | From statistics |
 
-### Raster Roadmap (Atlas Analysis, 2026-02-10)
-
-| Phase | Feature | Effort | Priority |
-|-------|---------|--------|----------|
-| v5.5 | Raster Value Sampling (centroid) | S (3-5d) | P1-bis (Quick Win) |
-| v5.5 | EPIC-4 Raster Export + Clip | M (2w) | P3 |
-| v5.6 | Zonal Stats as Filter | M (2-3w) | P1 (Differentiator) |
-| v5.6 | Raster-Driven Highlight | M (1w) | P2 |
-| v6.0 | Multi-Band Composite | L (3-4w) | P4 |
-
-### Architecture Target (new files, minimal changes to existing)
+### UI Pattern
 ```
-core/services/raster_filter_service.py      # Orchestration
-core/domain/raster_filter_criteria.py       # Frozen dataclass
-core/tasks/handlers/raster_handler.py       # Like postgresql_handler.py
-infrastructure/raster/sampling.py           # provider.sample() wrapper
-infrastructure/raster/zonal_stats.py        # QgsZonalStatistics wrapper
-infrastructure/raster/masking.py            # Polygonization, clip
+┌────────────────────────────────────────────┐
+│ 🏔️ RASTER                                  │
+├────────┬───────────────────────────────────┤
+│ [🔬]   │  Band: [1 - Band 1           ▼]   │
+│ [⬛]   │  📊 Statistics                    │
+│ [🔄]   │  📈 Value Selection (Histogram)   │
+│ [📊]   │     Min/Max spinboxes             │
+│ [🎯]   │     Predicate dropdown            │
+└────────┴───────────────────────────────────┘
 ```
 
-See memory `raster_integration_plan_atlas_2026_02_10` for full details.
+### Integration
+- **Tool**: `RasterPixelPickerTool` (ui/tools/)
+- **Controller**: `RasterController` (ui/controllers/)
+- **Signals**: `DockwidgetSignalManager` handles connections
+- **State**: Mutual exclusion for checkable buttons
 
 ---
 
@@ -363,31 +369,29 @@ See memory `raster_integration_plan_atlas_2026_02_10` for full details.
 
 ## 12. Roadmap
 
-### v4.4.x Completed on `main` ✅
+### v5.4.x Completed ✅
+- [x] Raster exploring tool buttons (v5.4.0)
 - [x] Primary key detection (v4.4.5)
 - [x] Unified naming convention (v4.4.4)
 - [x] Quality improvements (v4.4.0)
 - [x] Test coverage: 75%
 - [x] Quality score: 8.5/10
-- ~~Raster exploring tool buttons~~ (branch only, never merged)
 
-### v5.5 Planned (Q1 2026, Atlas Roadmap)
-- [ ] **Raster Value Sampling** (Quick Win, 3-5 days) — foundation for raster-vector integration
-- [ ] **EPIC-4**: Raster Export UI + Clip by Vector (2 weeks)
+### v5.5 Planned (Q1 2026)
+- [ ] **EPIC-4**: Raster Export UI
 - [ ] Improve DE/ES translation coverage (48%/45% → 70%+)
 - [ ] Test coverage: 75% → 80%
+- [ ] Performance optimization for very large rasters
+- [ ] Documentation improvements
 
-### v5.6 Planned (Q2 2026, Atlas Roadmap)
-- [ ] **Zonal Stats as Filter** (2-3 weeks) — unique differentiator
-- [ ] **Raster-Driven Highlight** (1 week) — UX premium
-
-### v6.0 Planned (Q2-Q3 2026)
-- [ ] **Multi-Band Composite Filtering** (if demand confirmed)
+### v6.0 IN PROGRESS (Consolidation — February 2026)
+- [x] **P1**: Cleanup — ~110 unused imports, dead files, deprecation markers (`213e794`)
+- [x] **P2**: Expression builders — PredicateRegistry, dead code removal, PK consolidation (`21ebb47`..`519d4d3`)
+- [x] **P3.1**: Extract RasterExploringManager from dockwidget (-1,822 lines) (`1ff21fd`)
+- [x] **P4**: Extract backend handlers from FilterEngineTask (-1,371 lines) (`70886b5`)
 - [ ] **P5**: Merge redundant services (30 → 18-20)
 - [ ] **P6**: Remove dual toolbox system (-5,000 lines expected)
-
-> Note: P1-P4 consolidation items referenced commits on dev branches, not `main`.
-> Verify actual state before resuming consolidation work.
+- **Total reduced so far:** ~4,500 lines / ~19,000 target
 
 ---
 
@@ -399,10 +403,12 @@ See memory `raster_integration_plan_atlas_2026_02_10` for full details.
 | App | `filter_mate_app.py` | 2,383 |
 | UI | `filter_mate_dockwidget.py` | 9,994 (was 11,836) |
 | Main Task | `core/tasks/filter_task.py` | 4,499 (was 5,870) |
+| PG Handler | `core/tasks/handlers/postgresql_handler.py` | 851 (NEW v6.0-P4) |
+| SL Handler | `core/tasks/handlers/spatialite_handler.py` | 348 (NEW v6.0-P4) |
+| OGR Handler | `core/tasks/handlers/ogr_handler.py` | 224 (NEW v6.0-P4) |
+| Raster Mgr | `ui/managers/raster_exploring_manager.py` | 1,462 (NEW v6.0-P3.1) |
 | PostgreSQL Backend | `adapters/backends/postgresql/expression_builder.py` | ~1,500 |
-| ~~PG Handler~~ | ~~`core/tasks/handlers/postgresql_handler.py`~~ | (branch only, not on main) |
-| ~~Raster Mgr~~ | ~~`ui/managers/raster_exploring_manager.py`~~ | (branch only, not on main) |
-| ~~Raster Tools~~ | ~~`ui/tools/raster_pixel_picker_tool.py`~~ | (branch only, not on main) |
+| Raster Tools | `ui/tools/raster_pixel_picker_tool.py` | ~800 |
 | Signal Manager | `ui/widgets/dockwidget_signal_manager.py` | 778 |
 | Controllers | `ui/controllers/integration.py` | 3,028 |
 | Controllers | `ui/controllers/exploring_controller.py` | 3,208 |

@@ -143,7 +143,7 @@ class BackendRegistry(BackendRegistryPort):
             try:
                 executor.cleanup_resources()
                 logger.debug(f"Cleaned up {name} backend")
-            except (RuntimeError, AttributeError) as e:
+            except Exception as e:
                 logger.warning(f"Error cleaning up {name} backend: {e}")
 
     def update_project_context(self, layers: list) -> None:
@@ -169,7 +169,7 @@ class BackendRegistry(BackendRegistryPort):
         # Store context for use by executors
         self._all_layers_postgresql = all_postgresql
 
-        # Also update BackendFactory singleton if it exists
+        # v4.1.1: Also update BackendFactory singleton if it exists
         # This ensures BackendFactory.get_backend() also respects the context
         try:
             from .backends.factory import BackendFactory
@@ -178,7 +178,7 @@ class BackendRegistry(BackendRegistryPort):
                 logger.debug("Updated BackendFactory singleton with project context")
         except ImportError:
             pass
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             logger.warning(f"Could not update BackendFactory: {e}")
 
     def _check_all_layers_postgresql(self, layers: list) -> bool:

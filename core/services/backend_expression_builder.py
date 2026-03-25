@@ -280,8 +280,7 @@ class BackendExpressionBuilder:
                     source_geom_field = uri_obj.geometryColumn() or 'geom'
                 else:
                     source_geom_field = 'geom'
-            except Exception as e:
-                logger.debug(f"Ignored in source geometry field detection: {e}")
+            except Exception:
                 source_geom_field = 'geom'
 
         # Create MV using backend method
@@ -423,13 +422,12 @@ class BackendExpressionBuilder:
                     fid = feature[pk_field]
                     if fid is not None:
                         all_fids.append(fid)
-                except Exception as e:
-                    logger.debug(f"Ignored in feature FID extraction by pk_field: {e}")
+                except Exception:
                     # Try feature.id() as fallback
                     try:
                         all_fids.append(feature.id())
-                    except Exception as e2:
-                        logger.debug(f"Ignored in feature.id() fallback: {e2}")
+                    except Exception:
+                        pass
 
             if not all_fids:
                 logger.warning("   ⚠️ No features found in source layer!")

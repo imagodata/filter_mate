@@ -228,8 +228,8 @@ class ExportTask(BaseFilterMateTask):
             pk_attrs = layer.primaryKeyAttributes()
             if pk_attrs:
                 return layer.fields()[pk_attrs[0]].name()
-        except Exception as e:
-            logger.debug(f"Ignored in primary key detection: {e}")
+        except Exception:
+            pass
         return "fid"
 
     @property

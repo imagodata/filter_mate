@@ -831,7 +831,7 @@ class TaskParameterBuilder:
                     }
                     geom_type_str = geom_type_map.get(layer.geometryType(), 'GeometryType.Unknown')
 
-                    # Use QgsDataSourceUri for reliable geometry column detection
+                    # FIX v4.0.7: Use QgsDataSourceUri for reliable geometry column detection
                     try:
                         from qgis.core import QgsDataSourceUri
                         uri = QgsDataSourceUri(layer.source())
@@ -880,7 +880,7 @@ class TaskParameterBuilder:
 
         dw = self._dockwidget
 
-        # Reset, unfilter, and export don't need features validation
+        # v2.9.28: reset, unfilter, and export don't need features validation
         if task_name in ('unfilter', 'reset', 'export'):
             logger.info(f"get_and_validate_features: task_name='{task_name}' - no features needed")
             return [], ""
@@ -900,7 +900,7 @@ class TaskParameterBuilder:
                 "FilterMate", Qgis.MessageLevel.Warning
             )
 
-            # ABORT in single_selection mode (FILTER ONLY)
+            # v2.9.21: ABORT in single_selection mode (FILTER ONLY)
             if dw.current_exploring_groupbox == "single_selection":
                 QgsMessageLog.logMessage(
                     "   Aborting filter - single_selection mode requires a selected feature!",
@@ -955,7 +955,7 @@ class TaskParameterBuilder:
         dw = self._dockwidget
         current_groupbox = dw.current_exploring_groupbox
 
-        # Single_selection and multiple_selection ALWAYS filter source layer
+        # v2.9.23: single_selection and multiple_selection ALWAYS filter source layer
         # Only custom_selection might skip source filter
         if current_groupbox != "custom_selection":
             return False

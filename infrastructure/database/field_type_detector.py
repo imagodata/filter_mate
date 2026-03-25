@@ -162,7 +162,7 @@ def get_postgresql_field_types(layer: 'QgsVectorLayer', connection=None) -> Dict
 
         return field_types
 
-    except Exception as e:  # catch-all safety net (psycopg2 + QGIS URI parsing)
+    except Exception as e:
         logger.warning(f"Failed to query PostgreSQL schema: {e}")
         logger.debug("Falling back to QGIS field types")
         return get_field_types_from_layer(layer)
@@ -171,8 +171,8 @@ def get_postgresql_field_types(layer: 'QgsVectorLayer', connection=None) -> Dict
         if close_conn and conn:
             try:
                 conn.close()
-            except Exception as e:  # catch-all safety net (connection cleanup)
-                logger.debug(f"Ignored in field_type_detector connection cleanup: {e}")
+            except Exception:
+                pass
 
 
 def suggest_type_cast(field_name: str, field_type: str, comparison_type: str) -> Optional[str]:

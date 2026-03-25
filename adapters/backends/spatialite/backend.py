@@ -34,7 +34,7 @@ from .index_manager import RTreeIndexManager, create_index_manager
 
 logger = logging.getLogger('FilterMate.Backend.Spatialite')
 
-# Import centralized spatialite_connect to eliminate duplication
+# v4.0.4: Import centralized spatialite_connect to eliminate duplication
 try:
     from ....infrastructure.utils.task_utils import spatialite_connect
 except ImportError:
@@ -73,8 +73,7 @@ except ImportError:
                 logger.debug(f"[Spatialite] Extension Loaded - Name: {ext}")
                 loaded = True
                 break
-            except sqlite3.OperationalError as e:
-                logger.debug(f"Ignored in spatialite extension load ({ext}): {e}")
+            except Exception:
                 continue
 
         if not loaded:
@@ -267,7 +266,7 @@ class SpatialiteBackend(BackendPort):
                 backend_name=self.name
             )
 
-        except Exception as e:  # catch-all safety net
+        except Exception as e:
             self._metrics['errors'] += 1
             logger.exception(f"Spatialite filter execution failed: {e}")
             return FilterResult.error(
@@ -350,10 +349,10 @@ class SpatialiteBackend(BackendPort):
             cursor = self._conn.cursor()
 
             # Drop if exists
-            cursor.execute(f'DROP TABLE IF EXISTS "{table_name}"')  # nosec B608 - table_name from internal FilterMate generation (SpatiaLite: no sql.Identifier equivalent)
+            cursor.execute(f'DROP TABLE IF EXISTS "{table_name}"')  # nosec B608
 
             # Create table from query
-            cursor.execute(f'CREATE TABLE "{table_name}" AS {query}')  # nosec B608 - table_name from internal FilterMate generation (SpatiaLite: no sql.Identifier equivalent)
+            cursor.execute(f'CREATE TABLE "{table_name}" AS {query}')  # nosec B608
 
             # Create spatial index if geometry column specified
             if geometry_column and self._index_manager:
@@ -363,7 +362,7 @@ class SpatialiteBackend(BackendPort):
             logger.debug(f"[Spatialite] Temp Table Created - Name: {table_name} - Spatial index: {geometry_column is not None}")
             return True
 
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error(f"[Spatialite] Temp Table Creation Failed - Name: {table_name} - {type(e).__name__}: {str(e)}")
             return False
 
@@ -382,11 +381,11 @@ class SpatialiteBackend(BackendPort):
 
         try:
             cursor = self._conn.cursor()
-            cursor.execute(f'DROP TABLE IF EXISTS "{table_name}"')  # nosec B608 - table_name from internal FilterMate generation (SpatiaLite: no sql.Identifier equivalent)
+            cursor.execute(f'DROP TABLE IF EXISTS "{table_name}"')  # nosec B608
             self._conn.commit()
             logger.debug(f"[Spatialite] Temp Table Dropped - Name: {table_name}")
             return True
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error(f"[Spatialite] Temp Table Drop Failed - Name: {table_name} - {type(e).__name__}: {str(e)}")
             return False
 
@@ -399,7 +398,7 @@ class SpatialiteBackend(BackendPort):
             cursor = self._conn.cursor()
             cursor.execute("SELECT 1")
             return cursor.fetchone() is not None
-        except sqlite3.Error:
+        except Exception:
             return False
 
     # === Private Methods ===
@@ -477,8 +476,8 @@ class SpatialiteBackend(BackendPort):
         if self._owns_connection and hasattr(self, '_conn') and self._conn:
             try:
                 self._conn.close()
-            except sqlite3.Error as e:
-                logger.debug(f"Ignored in connection close: {e}")
+            except Exception:
+                pass
 
 
 def create_spatialite_backend(

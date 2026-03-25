@@ -415,7 +415,7 @@ class ConfigurationManager(QObject):
                 "SIGNALS": [(
                     "toggled",
                     lambda state, x='has_buffer_type', custom_functions={
-                        # Fixed - Call correct state change function
+                        # v4.0.3: Fixed - Call correct state change function
                         "ON_CHANGE": lambda x: d.filtering_buffer_type_state_changed()
                     }: d.layer_property_changed(x, state, custom_functions)
                 )],
@@ -559,7 +559,7 @@ class ConfigurationManager(QObject):
                 "TYPE": "PushButton",
                 "WIDGET": d.pushButton_checkable_exporting_output_folder,
                 "SIGNALS": [(
-                    "clicked",  # Use clicked (not toggled) to open file dialog
+                    "clicked",  # v4.0.6 FIX: Use clicked (not toggled) to open file dialog
                     lambda state, x='has_output_folder_to_export', custom_functions={
                         "ON_CHANGE": lambda x: d.dialog_export_output_path()
                     }: d.project_property_changed(x, state, custom_functions)
@@ -570,7 +570,7 @@ class ConfigurationManager(QObject):
                 "TYPE": "PushButton",
                 "WIDGET": d.pushButton_checkable_exporting_zip,
                 "SIGNALS": [(
-                    "clicked",  # Use clicked (not toggled) to open file dialog
+                    "clicked",  # v4.0.6 FIX: Use clicked (not toggled) to open file dialog
                     lambda state, x='has_zip_to_export', custom_functions={
                         "ON_CHANGE": lambda x: d.dialog_export_output_pathzip()
                     }: d.project_property_changed(x, state, custom_functions)
@@ -679,7 +679,7 @@ class ConfigurationManager(QObject):
         from qgis.PyQt.QtWidgets import QSizePolicy
         import os
 
-        # Use IconManager instead of get_themed_icon
+        # v4.0.2 FIX: Use IconManager instead of get_themed_icon
         try:
             from ..config import UIConfig
             UI_CONFIG_AVAILABLE = True
@@ -705,7 +705,7 @@ class ConfigurationManager(QObject):
                     continue
                 widget_obj = widget_data["WIDGET"]
 
-                # Load icon using IconManager for proper theming
+                # v4.0.2 FIX: Load icon using IconManager for proper theming
                 icon_file = icons_config.get(widget_group, {}).get(widget_name)
                 if icon_file:
                     if icon_manager and hasattr(icon_manager, 'set_button_icon'):
@@ -824,7 +824,7 @@ class ConfigurationManager(QObject):
                        d.mFieldExpressionWidget_exploring_multiple_selection,
                        d.mFieldExpressionWidget_exploring_custom_selection]:
             widget.setFilters(field_filters)
-            # INTERDIRE les valeurs NULL dans les combobox field
+            # FIX v4.1 Simon 2026-01-16: INTERDIRE les valeurs NULL dans les combobox field
             # Les QgsFieldExpressionWidget autorisent par défaut la sélection d'une valeur vide
             # qui s'affiche comme "NULL". On doit désactiver cette option pour garantir qu'un
             # champ est TOUJOURS sélectionné.
@@ -848,7 +848,7 @@ class ConfigurationManager(QObject):
             from qgis.core import QgsMapLayerProxyModel
 
         d = self.dockwidget
-        # Filter to show only vector layers WITH geometry (exclude non-spatial tables)
+        # v4.2: Filter to show only vector layers WITH geometry (exclude non-spatial tables)
         # HasGeometry = PointLayer | LineLayer | PolygonLayer = 4 | 8 | 16 = 28
         # This excludes tables without geometry (NoGeometry = 2)
         try:
@@ -903,8 +903,8 @@ class ConfigurationManager(QObject):
             h = UIConfig.get_config('combobox', 'height')
             d.checkableComboBoxLayer_filtering_layers_to_filter.setMinimumHeight(h)
             d.checkableComboBoxLayer_filtering_layers_to_filter.setMaximumHeight(h)
-        except Exception as e:
-            logger.debug(f"Ignored in filtering combobox height config: {e}")
+        except Exception:
+            pass
 
     def setup_exporting_tab_widgets(self):
         """v4.0 Sprint 16: Configure widgets for Exporting tab (migrated from dockwidget)."""
@@ -924,8 +924,8 @@ class ConfigurationManager(QObject):
             h = UIConfig.get_config('combobox', 'height')
             d.checkableComboBoxLayer_exporting_layers.setMinimumHeight(h)
             d.checkableComboBoxLayer_exporting_layers.setMaximumHeight(h)
-        except Exception as e:
-            logger.debug(f"Ignored in exporting combobox height config: {e}")
+        except Exception:
+            pass
 
         for btn in ['pushButton_checkable_exporting_layers', 'pushButton_checkable_exporting_projection',
                     'pushButton_checkable_exporting_styles', 'pushButton_checkable_exporting_datatype',

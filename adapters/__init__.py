@@ -16,7 +16,7 @@ Follows hexagonal architecture pattern.
 # Re-export key components for convenience
 from .backends import BackendFactory, BackendSelector, create_backend_factory  # noqa: F401
 
-# Backend registry for hexagonal architecture compliance
+# v4.0.1: Backend registry for hexagonal architecture compliance
 from .backend_registry import (  # noqa: F401
     BackendRegistry,
     get_backend_registry,

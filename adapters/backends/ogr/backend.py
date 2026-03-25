@@ -204,18 +204,9 @@ class OGRBackend(BackendPort):
                 error_message="QGIS modules not available",
                 backend_name=self.name
             )
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             self._metrics['errors'] += 1
             logger.exception(f"   ❌ OGR filter execution failed: {e}")
-            return FilterResult.error(
-                layer_id=layer_info.layer_id,
-                expression_raw=expression.raw,
-                error_message=str(e),
-                backend_name=self.name
-            )
-        except Exception as e:  # catch-all safety net
-            self._metrics['errors'] += 1
-            logger.exception(f"   ❌ OGR filter unexpected error: {e}")
             return FilterResult.error(
                 layer_id=layer_info.layer_id,
                 expression_raw=expression.raw,
@@ -295,7 +286,7 @@ class OGRBackend(BackendPort):
 
         except ImportError:
             errors.append("QGIS modules not available for validation")
-        except (RuntimeError, ValueError) as e:
+        except Exception as e:
             errors.append(str(e))
 
         if errors:

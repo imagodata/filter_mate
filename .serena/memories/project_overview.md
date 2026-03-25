@@ -1,24 +1,24 @@
 # FilterMate Project Overview
 
-**Last Updated:** February 10, 2026
-**Version:** Main branch (Production)
-**Status:** Production - Hexagonal Architecture Complete, Vector filtering only
+**Last Updated:** February 1, 2026  
+**Version:** 5.4.0 (Production)  
+**Status:** Production - Hexagonal Architecture Complete + New Raster Features
 
-> **Raster Audit (2026-02-10):** No raster features exist on `main`. Previous claims of
-> "v5.4.0 Raster Exploring Tool Buttons" were branch-only (never merged).
-> See memory `raster_integration_plan_atlas_2026_02_10` for the raster roadmap.
+## Current Version: v5.4.0 (February 1, 2026)
 
-## Current State on `main`
+### Latest Features
+- 🎯 **NEW: Raster Exploring Tool Buttons** - Added column of interactive tool buttons similar to Vector exploring panel
+  - 🔬 Pixel Picker (click to pick single value, Ctrl+click to extend range)
+  - ⬛ Rectangle Range (drag rectangle to pick value range from area statistics)
+  - 🔄 Sync Histogram (synchronize spinbox values with histogram selection)
+  - 📊 All Bands Info (show pixel values for all bands at clicked point)
+  - 🎯 Reset Range (reset Min/Max to full data range)
 
-### Raster Support: NONE on `main`
-- Only: `RasterLayer = 1` enum (layer type detection), type hints in `crs_utils.py`
-- NO raster files, NO raster widgets, NO histogram, NO raster services
-- Raster features existed only on dev branch `fix/widget-visibility-and-styles-2026-02-02`
-
-### Recent Releases (v4.4.x)
+### Recent Releases (v4.4.x - v5.4.0)
 
 | Version | Date | Key Changes |
 |---------|------|-------------|
+| **5.4.0** | Feb 1, 2026 | Raster exploring tool buttons (5 new tools) |
 | **4.4.5** | Jan 25, 2026 | FIX: Dynamic buffer fails on tables without "id" PK column |
 | **4.4.4** | Jan 25, 2026 | Unified `fm_temp_*` naming for PostgreSQL temp objects |
 | **4.4.0** | Jan 22, 2026 | Major quality release - 396 unit tests, 75% coverage, hexagonal architecture |
@@ -54,7 +54,7 @@ infrastructure/
 ui/
 ├── controllers/            → 13 MVC controllers
 ├── widgets/                → Custom widgets (DockwidgetSignalManager)
-├── tools/                  → Map tools (empty - raster tools not yet on main)
+├── tools/                  → Map tools (RasterPixelPickerTool)
 └── styles/                 → Theming, icon management
 ```
 
@@ -86,10 +86,12 @@ ui/
 - **OGR**: Universal fallback (shapefiles, GeoJSON, GeoPackage, WFS)
 - **Memory**: In-memory filtering for small datasets
 
-### Raster Support: NOT YET on `main`
-- EPIC-3 raster features were developed on branch only (never merged)
-- See memory `raster_integration_plan_atlas_2026_02_10` for roadmap
-- Planned: Raster Value Sampling → Zonal Stats as Filter → Raster Export
+### Raster Support (EPIC-3 - New in v5.4)
+- Interactive raster value picking with histogram
+- Multi-band pixel value display
+- Rectangle area statistics
+- Bidirectional histogram ↔ spinbox synchronization
+- Full raster-vector integration
 
 ### Advanced Features
 - **Undo/Redo** filter history (100-state stack)
@@ -127,7 +129,11 @@ ui/
 
 ## Recent Improvements (2026)
 
-### ~~v5.4.0 - Raster Tool Buttons~~ (BRANCH ONLY - never merged to main)
+### v5.4.0 - Raster Tool Buttons
+- ✅ 5 new interactive raster tools
+- ✅ Consistent UI pattern with vector exploring
+- ✅ Checkable button mutual exclusion
+- ✅ Theme-aware icons
 
 ### v4.4.5 - Primary Key Detection
 - ✅ Automatic PK detection from PostgreSQL metadata
@@ -143,9 +149,8 @@ ui/
 ## Current Focus (Q1 2026)
 
 ### Active Development
-- **EPIC-3**: Raster-Vector Filter Integration - NOT on main (branch only, never merged)
-- **Raster Roadmap**: Sampling → Zonal Stats → Export (see `raster_integration_plan_atlas_2026_02_10`)
-- **EPIC-4**: Raster Export UI (planned, pairs with Raster Clip by Vector)
+- **EPIC-3**: Raster-Vector Filter Integration ✅ (v5.4.0 complete)
+- **EPIC-4**: Raster Export UI (planned)
 - **Translation Coverage**: Improve DE/ES coverage (48%/45% → 70%+)
 - **Test Coverage**: 75% → 80%
 

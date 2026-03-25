@@ -37,6 +37,7 @@ from qgis.PyQt.QtCore import (
 )
 from qgis.PyQt.QtGui import (
     QBrush,
+    QAction,
     QColor,
     QCursor,
     QFont,
@@ -46,7 +47,6 @@ from qgis.PyQt.QtGui import (
     QStandardItem
 )
 from qgis.PyQt.QtWidgets import (
-    QAction,
     QApplication,
     QComboBox,
     QLineEdit,
@@ -111,8 +111,8 @@ class ItemDelegate(QStyledItemDelegate):
         x, y, dx, dy = option.rect.x(), option.rect.y(), option.rect.width(), option.rect.height()
 
         # Decoration - Draw icon FIRST, positioned after checkbox
-        # Simplified - icon is now properly stored via setData(icon, Qt.DecorationRole)
-        pic = index.data(Qt.DecorationRole)
+        # v4.0.2: Simplified - icon is now properly stored via setData(icon, Qt.ItemDataRole.DecorationRole)
+        pic = index.data(Qt.ItemDataRole.DecorationRole)
 
         icon_drawn = False
         if pic:
@@ -127,11 +127,11 @@ class ItemDelegate(QStyledItemDelegate):
             elif isinstance(pic, QPixmap):
                 icon_x = x + CHECKBOX_WIDTH
                 icon_y = y + (dy - ICON_SIZE) // 2
-                painter.drawPixmap(icon_x, icon_y, pic.scaled(ICON_SIZE, ICON_SIZE, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                painter.drawPixmap(icon_x, icon_y, pic.scaled(ICON_SIZE, ICON_SIZE, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
                 icon_drawn = True
 
         # Draw text AFTER icon
-        text = index.data(Qt.DisplayRole)
+        text = index.data(Qt.ItemDataRole.DisplayRole)
         if text:
             # Position text after checkbox + icon + margins
             text_x = x + CHECKBOX_WIDTH + (ICON_SIZE + 4 if icon_drawn else 0)
@@ -139,24 +139,24 @@ class ItemDelegate(QStyledItemDelegate):
             painter.drawText(text_x, text_y, text)
 
         # Indicate Selected
-        painter.setPen(QtGui.QPen(Qt.NoPen))
+        painter.setPen(QtGui.QPen(Qt.PenStyle.NoPen))
         if option.state & QStyle.State_Selected:
             painter.setBrush(QBrush(QColor(0, 70, 240, 128)))
         else:
-            painter.setBrush(QBrush(Qt.NoBrush))
+            painter.setBrush(QBrush(Qt.BrushStyle.NoBrush))
         painter.drawRect(QRect(x, y, dx, dy))
 
         # Checkstate
-        value = index.data(Qt.CheckStateRole)
+        value = index.data(Qt.ItemDataRole.CheckStateRole)
         if value is not None:
             opt = QStyleOptionViewItem()
             opt.rect = self.getCheckboxRect(option)
             opt.state = opt.state & ~QStyle.State_HasFocus
-            if value == Qt.Unchecked:
+            if value == Qt.CheckState.Unchecked:
                 opt.state |= QStyle.State_Off
-            elif value == Qt.PartiallyChecked:
+            elif value == Qt.CheckState.PartiallyChecked:
                 opt.state |= QStyle.State_NoChange
-            elif value == Qt.Checked:
+            elif value == Qt.CheckState.Checked:
                 opt.state = QStyle.State_On
             style = QApplication.style()
             style.drawPrimitive(
@@ -191,8 +191,8 @@ class QgsCheckableComboBoxLayer(QComboBox):
         # Width and size policy still configured in Python for layout flexibility
         self.setMinimumWidth(30)
         self.setMaximumWidth(16777215)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        self.setCursor(Qt.PointingHandCursor)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         font = QFont("Segoe UI Semibold", 8)
         font.setBold(True)
@@ -211,22 +211,22 @@ class QgsCheckableComboBoxLayer(QComboBox):
         """Create the context menu with selection actions."""
         self.context_menu = QMenu(self)
 
-        self.action_check_all = QAction('Select All', self)
+        self.action_check_all = QAction(self.tr('Select All'), self)
         self.action_check_all.triggered.connect(self.select_all)
-        self.action_uncheck_all = QAction('De-select All', self)
+        self.action_uncheck_all = QAction(self.tr('De-select All'), self)
         self.action_uncheck_all.triggered.connect(self.deselect_all)
-        self.action_check_all_geometry_line = QAction('Select all layers by geometry type (Lines)', self)
-        self.action_check_all_geometry_line.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Line', Qt.Checked))
-        self.action_uncheck_all_geometry_line = QAction('De-Select all layers by geometry type (Lines)', self)
-        self.action_uncheck_all_geometry_line.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Line', Qt.Unchecked))
-        self.action_check_all_geometry_point = QAction('Select all layers by geometry type (Points)', self)
-        self.action_check_all_geometry_point.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Point', Qt.Checked))
-        self.action_uncheck_all_geometry_point = QAction('De-Select all layers by geometry type (Points)', self)
-        self.action_uncheck_all_geometry_point.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Point', Qt.Unchecked))
-        self.action_check_all_geometry_polygon = QAction('Select all layers by geometry type (Polygons)', self)
-        self.action_check_all_geometry_polygon.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Polygon', Qt.Checked))
-        self.action_uncheck_all_geometry_polygon = QAction('De-Select all layers by geometry type (Polygon)', self)
-        self.action_uncheck_all_geometry_polygon.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Polygon', Qt.Unchecked))
+        self.action_check_all_geometry_line = QAction(self.tr('Select all layers by geometry type (Lines)'), self)
+        self.action_check_all_geometry_line.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Line', Qt.CheckState.Checked))
+        self.action_uncheck_all_geometry_line = QAction(self.tr('De-Select all layers by geometry type (Lines)'), self)
+        self.action_uncheck_all_geometry_line.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Line', Qt.CheckState.Unchecked))
+        self.action_check_all_geometry_point = QAction(self.tr('Select all layers by geometry type (Points)'), self)
+        self.action_check_all_geometry_point.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Point', Qt.CheckState.Checked))
+        self.action_uncheck_all_geometry_point = QAction(self.tr('De-Select all layers by geometry type (Points)'), self)
+        self.action_uncheck_all_geometry_point.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Point', Qt.CheckState.Unchecked))
+        self.action_check_all_geometry_polygon = QAction(self.tr('Select all layers by geometry type (Polygons)'), self)
+        self.action_check_all_geometry_polygon.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Polygon', Qt.CheckState.Checked))
+        self.action_uncheck_all_geometry_polygon = QAction(self.tr('De-Select all layers by geometry type (Polygons)'), self)
+        self.action_uncheck_all_geometry_polygon.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Polygon', Qt.CheckState.Unchecked))
 
         self.context_menu.addAction(self.action_check_all)
         self.context_menu.addAction(self.action_uncheck_all)
@@ -249,29 +249,29 @@ class QgsCheckableComboBoxLayer(QComboBox):
             text: Display text (layer name)
             data: Optional user data (dict with layer_geometry_type, etc.)
 
-        v4.0.2 BUGFIX: Use setData(icon, Qt.DecorationRole) instead of setIcon()
-        This ensures the ItemDelegate can retrieve the icon via index.data(Qt.DecorationRole)
+        v4.0.2 BUGFIX: Use setData(icon, Qt.ItemDataRole.DecorationRole) instead of setIcon()
+        This ensures the ItemDelegate can retrieve the icon via index.data(Qt.ItemDataRole.DecorationRole)
         """
         item = QStandardItem()
         item.setCheckable(True)
-        item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
-        item.setData(Qt.Unchecked, Qt.CheckStateRole)
+        item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsUserCheckable)
+        item.setData(Qt.CheckState.Unchecked, Qt.ItemDataRole.CheckStateRole)
 
         # Set text first
         item.setText(text)
-        item.setData(text, role=Qt.DisplayRole)
+        item.setData(text, role=Qt.ItemDataRole.DisplayRole)
 
         # CRITICAL: Use setData() with DecorationRole, NOT setIcon()
         # setIcon() doesn't properly expose the icon to ItemDelegate.paint()
         if icon and not icon.isNull():
-            item.setData(icon, role=Qt.DecorationRole)
+            item.setData(icon, role=Qt.ItemDataRole.DecorationRole)
             geom_type = data.get('layer_geometry_type', 'Unknown') if data else 'Unknown'
             logger.debug(f"QgsCheckableComboBoxLayer.addItem: '{text}' with icon (geom_type={geom_type})")
         else:
             logger.warning(f"QgsCheckableComboBoxLayer.addItem: '{text}' has NULL or missing icon!")
 
         if data is not None:
-            item.setData(data, role=Qt.UserRole)
+            item.setData(data, role=Qt.ItemDataRole.UserRole)
 
         self.model().appendRow(item)
 
@@ -283,11 +283,11 @@ class QgsCheckableComboBoxLayer(QComboBox):
         if state is not None:
             item.setCheckState(state)
         else:
-            state = item.data(Qt.CheckStateRole)
-            if state == Qt.Checked:
-                item.setCheckState(Qt.Unchecked)
-            elif state == Qt.Unchecked:
-                item.setCheckState(Qt.Checked)
+            state = item.data(Qt.ItemDataRole.CheckStateRole)
+            if state == Qt.CheckState.Checked:
+                item.setCheckState(Qt.CheckState.Unchecked)
+            elif state == Qt.CheckState.Unchecked:
+                item.setCheckState(Qt.CheckState.Checked)
 
     def setItemsCheckState(self, input_list, state):
         """Set check state for multiple items by index."""
@@ -304,14 +304,14 @@ class QgsCheckableComboBoxLayer(QComboBox):
         for text in input_list:
             items = self.model().findItems(text)
             for item in items:
-                item.setCheckState(Qt.Checked)
+                item.setCheckState(Qt.CheckState.Checked)
 
     def select_all(self):
         """Select all items."""
         for i in range(self.count()):
             item = self.model().item(i)
             if item:
-                item.setCheckState(Qt.Checked)
+                item.setCheckState(Qt.CheckState.Checked)
         self.checkedItemsChangedEvent()
 
     def deselect_all(self):
@@ -319,7 +319,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
         for i in range(self.count()):
             item = self.model().item(i)
             if item:
-                item.setCheckState(Qt.Unchecked)
+                item.setCheckState(Qt.CheckState.Unchecked)
         self.checkedItemsChangedEvent()
 
     def select_by_geometry(self, geometry_type, state):
@@ -328,7 +328,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
         for i in range(self.count()):
             item = self.model().item(i)
             if item:
-                data = item.data(Qt.UserRole)
+                data = item.data(Qt.ItemDataRole.UserRole)
                 if data and isinstance(data, dict) and "layer_geometry_type" in data:
                     if data["layer_geometry_type"] == geometry_type:
                         items_to_be_checked.append(i)
@@ -340,11 +340,11 @@ class QgsCheckableComboBoxLayer(QComboBox):
             index = self.view().currentIndex()
             item = self.model().itemFromIndex(index)
             if item:
-                state = index.data(Qt.CheckStateRole)
-                if state == Qt.Checked:
-                    item.setCheckState(Qt.Unchecked)
-                elif state == Qt.Unchecked:
-                    item.setCheckState(Qt.Checked)
+                state = index.data(Qt.ItemDataRole.CheckStateRole)
+                if state == Qt.CheckState.Checked:
+                    item.setCheckState(Qt.CheckState.Unchecked)
+                elif state == Qt.CheckState.Unchecked:
+                    item.setCheckState(Qt.CheckState.Checked)
             return True
         elif event.type() == QEvent.MouseButtonRelease and obj in [self.view().viewport(), self] and event.button() == Qt.RightButton:
             action = self.context_menu.exec_(QCursor.pos())
@@ -366,7 +366,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
         checked_items = []
         for i in range(self.count()):
             item = self.model().item(i)
-            if item and item.checkState() == Qt.Checked:
+            if item and item.checkState() == Qt.CheckState.Checked:
                 checked_items.append(item.text())
         checked_items.sort()
         return checked_items
@@ -410,7 +410,7 @@ class ListWidgetWrapper(QListWidget):
 
         self.setMinimumHeight(list_min_height)
         # FIX 2026-01-18: Explicit sizePolicy to ensure list expands in parent layout
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.identifier_field_name = identifier_field_name
         self.identifier_field_type_numeric = primary_key_is_numeric
         self.filter_expression = ''
@@ -422,7 +422,13 @@ class ListWidgetWrapper(QListWidget):
         self.filter_expression_features_id_list = []
         self.visible_features_list = []
         self.selected_features_list = []
-        self.limit = 1000
+        # Configurable via APP.OPTIONS.EXPLORATION.feature_picker_limit
+        try:
+            from ...config.config import ENV_VARS, _get_option_value
+            _exp_cfg = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('EXPLORATION', {})
+            self.limit = _get_option_value(_exp_cfg.get('feature_picker_limit'), 1000)
+        except (ImportError, AttributeError, TypeError):
+            self.limit = 1000
         self.total_features_list_count = 0
 
     def setFilterExpression(self, filter_expression):
@@ -486,7 +492,7 @@ class ListWidgetWrapper(QListWidget):
                 item_fid = item.data(3)  # Feature ID is stored in data(3)
 
                 if item_fid in feature_ids_set:
-                    item.setCheckState(Qt.Checked)
+                    item.setCheckState(Qt.CheckState.Checked)
                     # Update font styling if parent_widget provided
                     if parent_widget and hasattr(parent_widget, 'font_by_state'):
                         # Check if item is in subset (data(4) == "True")
@@ -500,8 +506,8 @@ class ListWidgetWrapper(QListWidget):
                     checked_count += 1
                 else:
                     # Uncheck items not in the selection
-                    if item.checkState() == Qt.Checked:
-                        item.setCheckState(Qt.Unchecked)
+                    if item.checkState() == Qt.CheckState.Checked:
+                        item.setCheckState(Qt.CheckState.Unchecked)
                         if parent_widget and hasattr(parent_widget, 'font_by_state'):
                             is_in_subset = item.data(4) == "True"
                             if is_in_subset:
@@ -607,7 +613,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         # Dynamic sizing based on config matching before_migration/UIConfig compact profile
         # before_migration: combobox.height = 36px, list.min_height = 225px
-        # New combobox.height = 26px (from QSS), list.min_height = 225px (ratio 1.5x)
+        # New v4.0: combobox.height = 26px (from QSS), list.min_height = 225px (ratio 1.5x)
         try:
             from ...config.config import ENV_VARS
             # Try to get from config, fallback to hardcoded defaults
@@ -627,8 +633,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self.setMaximumWidth(16777215)
         self.setMinimumHeight(total_min_height)
         # Remove setMaximumHeight to allow expansion (before_migration pattern)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.setCursor(Qt.PointingHandCursor)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         font = QFont("Segoe UI", 8)
         self.setFont(font)
@@ -637,7 +643,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(2)
         self.filter_le = QLineEdit(self)
-        self.filter_le.setPlaceholderText('Type to filter...')
+        self.filter_le.setPlaceholderText(self.tr('Type to filter...'))
         self.items_le = QLineEdit(self)
         self.items_le.setReadOnly(True)
 
@@ -646,17 +652,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         # Context menu
         self.context_menu = QMenu(self)
-        self.action_check_all = QAction('Select All', self)
+        self.action_check_all = QAction(self.tr('Select All'), self)
         self.action_check_all.triggered.connect(lambda state, x='Select All': self.select_all(x))
-        self.action_check_all_non_subset = QAction('Select All (non subset)', self)
+        self.action_check_all_non_subset = QAction(self.tr('Select All (non subset)'), self)
         self.action_check_all_non_subset.triggered.connect(lambda state, x='Select All (non subset)': self.select_all(x))
-        self.action_check_all_subset = QAction('Select All (subset)', self)
+        self.action_check_all_subset = QAction(self.tr('Select All (subset)'), self)
         self.action_check_all_subset.triggered.connect(lambda state, x='Select All (subset)': self.select_all(x))
-        self.action_uncheck_all = QAction('De-select All', self)
+        self.action_uncheck_all = QAction(self.tr('De-select All'), self)
         self.action_uncheck_all.triggered.connect(lambda state, x='De-select All': self.deselect_all(x))
-        self.action_uncheck_all_non_subset = QAction('De-select All (non subset)', self)
+        self.action_uncheck_all_non_subset = QAction(self.tr('De-select All (non subset)'), self)
         self.action_uncheck_all_non_subset.triggered.connect(lambda state, x='De-select All (non subset)': self.deselect_all(x))
-        self.action_uncheck_all_subset = QAction('De-select All (subset)', self)
+        self.action_uncheck_all_subset = QAction(self.tr('De-select All (subset)'), self)
         self.action_uncheck_all_subset.triggered.connect(lambda state, x='De-select All (subset)': self.deselect_all(x))
 
         self.context_menu.addAction(self.action_check_all)
@@ -703,10 +709,16 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self._sort_order = 'ASC'
         self._sort_field = None
 
-        # Debounce timer for filter text input
+        # Debounce timer for filter text input (configurable via APP.OPTIONS.UI_RESPONSIVENESS.filter_debounce_ms)
+        try:
+            _ui_resp = (config_data or {}).get("APP", {}).get("OPTIONS", {}).get("UI_RESPONSIVENESS", {})
+            _fd = _ui_resp.get("filter_debounce_ms", {})
+            self._filter_debounce_ms = _fd.get("value", 300) if isinstance(_fd, dict) else 300
+        except (AttributeError, TypeError):
+            self._filter_debounce_ms = 300
         self._filter_debounce_timer = QTimer(self)
         self._filter_debounce_timer.setSingleShot(True)
-        self._filter_debounce_timer.setInterval(300)  # 300ms debounce delay
+        self._filter_debounce_timer.setInterval(self._filter_debounce_ms)
         self._filter_debounce_timer.timeout.connect(self._execute_filter)
 
     def setSortOrder(self, order='ASC', field=None):
@@ -732,7 +744,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         for i in range(self.list_widgets[self.layer.id()].count()):
             item = self.list_widgets[self.layer.id()].item(i)
-            if item and item.checkState() == Qt.Checked:
+            if item and item.checkState() == Qt.CheckState.Checked:
                 selection.append([item.data(0), item.data(3), item.data(6), item.data(9)])
         selection.sort(key=lambda k: k[0])
         return selection
@@ -1011,6 +1023,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                     if self.layout:
                         self.layout.invalidate()
                         self.layout.activate()
+                    # FIX 2026-02-12: Propagate geometry change to parent layouts
+                    self.updateGeometry()
 
             # FIX 2026-01-18 v10: Restore checked items after populate if preserve_checked is True
             if preserve_checked and saved_checked_fids:
@@ -1070,7 +1084,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                     # Simple field access
                     display_value = str(feature[expression]) if expression else str(fid)
 
-                # Ensure fid is converted to string for UUID/text PKs
+                # UUID FIX v4.0: Ensure fid is converted to string for UUID/text PKs
                 # This ensures proper handling when building SQL expressions later
                 fid_value = str(fid) if not isinstance(fid, (int, float)) else fid
                 features_data.append((display_value, fid_value))
@@ -1094,11 +1108,11 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         # Populate list widget
         for display_value, fid in features_data:
             item = QListWidgetItem(display_value)
-            item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
 
             # FIX 2026-01-19 v4: Restore checked state if in saved list
             is_checked = fid in checked_fid_set
-            item.setCheckState(Qt.Checked if is_checked else Qt.Unchecked)
+            item.setCheckState(Qt.CheckState.Checked if is_checked else Qt.CheckState.Unchecked)
 
             item.setData(0, display_value)
             item.setData(3, fid)
@@ -1127,6 +1141,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             self.layout.invalidate()
             self.layout.activate()
 
+        # FIX 2026-02-12: Propagate geometry change to parent layouts so scroll area
+        # and parent groupbox allocate space for the populated list widget
+        self.updateGeometry()
+
         self.connect_filter_lineEdit()
 
         restored_count = len([fid for fid in saved_checked_fids if fid in checked_fid_set]) if saved_checked_fids else 0
@@ -1152,8 +1170,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 clicked_item = self.list_widgets[self.layer.id()].itemAt(event.pos())
                 if clicked_item is not None:
                     id_item = clicked_item.data(3)
-                    if clicked_item.checkState() == Qt.Checked:
-                        clicked_item.setCheckState(Qt.Unchecked)
+                    if clicked_item.checkState() == Qt.CheckState.Checked:
+                        clicked_item.setCheckState(Qt.CheckState.Unchecked)
                         if id_item in nonSubset_features_list:
                             clicked_item.setData(6, self.font_by_state['unChecked'][0])
                             clicked_item.setData(9, QBrush(self.font_by_state['unChecked'][1]))
@@ -1163,7 +1181,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                             clicked_item.setData(9, QBrush(self.font_by_state['unCheckedFiltered'][1]))
                             clicked_item.setData(4, "False")
                     else:
-                        clicked_item.setCheckState(Qt.Checked)
+                        clicked_item.setCheckState(Qt.CheckState.Checked)
                         if id_item in nonSubset_features_list:
                             clicked_item.setData(6, self.font_by_state['checked'][0])
                             clicked_item.setData(9, QBrush(self.font_by_state['checked'][1]))
@@ -1287,6 +1305,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             list_widget.viewport().update()
             list_widget.update()
 
+            # FIX 2026-02-12: Propagate geometry change to parent layouts
+            self.updateGeometry()
+
             logger.debug(f"manage_list_widgets: Showed list widget for layer {self.layer.id()}, visible={list_widget.isVisible()}, count={list_widget.count()}")
         else:
             self.add_list_widget(layer_props)
@@ -1378,6 +1399,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self.list_widgets[self.layer.id()].setVisible(True)
         self.list_widgets[self.layer.id()].show()
 
+        # FIX 2026-02-12: Propagate geometry change to parent layouts so scroll area
+        # and parent groupbox allocate space for the newly added list widget
+        self.updateGeometry()
+
     def select_all(self, x):
         """Select all items based on action type."""
         if not is_layer_valid(self.layer) or self.layer.id() not in self.list_widgets:
@@ -1388,11 +1413,11 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             item = list_widget.item(i)
             if item:
                 if x == 'Select All':
-                    item.setCheckState(Qt.Checked)
+                    item.setCheckState(Qt.CheckState.Checked)
                 elif x == 'Select All (subset)' and item.data(4) == "True":
-                    item.setCheckState(Qt.Checked)
+                    item.setCheckState(Qt.CheckState.Checked)
                 elif x == 'Select All (non subset)' and item.data(4) == "False":
-                    item.setCheckState(Qt.Checked)
+                    item.setCheckState(Qt.CheckState.Checked)
 
         self._emit_checked_items_update()
 
@@ -1406,11 +1431,11 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             item = list_widget.item(i)
             if item:
                 if x == 'De-select All':
-                    item.setCheckState(Qt.Unchecked)
+                    item.setCheckState(Qt.CheckState.Unchecked)
                 elif x == 'De-select All (subset)' and item.data(4) == "True":
-                    item.setCheckState(Qt.Unchecked)
+                    item.setCheckState(Qt.CheckState.Unchecked)
                 elif x == 'De-select All (non subset)' and item.data(4) == "False":
-                    item.setCheckState(Qt.Unchecked)
+                    item.setCheckState(Qt.CheckState.Unchecked)
 
         # Clear selected_features_list in the wrapper
         list_widget.setSelectedFeaturesList([])
@@ -1487,7 +1512,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 for i in range(list_widget.count()):
                     item = list_widget.item(i)
                     if item:
-                        item.setCheckState(Qt.Unchecked)
+                        item.setCheckState(Qt.CheckState.Unchecked)
                 self.items_le.clear()
             return 0
 
@@ -1538,7 +1563,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         for i in range(list_widget.count()):
             item = list_widget.item(i)
-            if item and item.checkState() == Qt.Checked:
+            if item and item.checkState() == Qt.CheckState.Checked:
                 feature_ids.append(item.data(3))
 
         return feature_ids

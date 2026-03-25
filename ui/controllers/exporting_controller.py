@@ -235,12 +235,12 @@ class ExportingController(BaseController):
             if not dockwidget:
                 return False
 
-            # Check preconditions - Relaxed check since _on_project_layers_ready sets has_loaded_layers
+            # Check preconditions - v4.0.5: Relaxed check since _on_project_layers_ready sets has_loaded_layers
             if not dockwidget.widgets_initialized:
                 logger.warning("populate_export_combobox: widgets not initialized")
                 return False
 
-            # Check PROJECT_LAYERS instead of has_loaded_layers
+            # v4.0.5: Check PROJECT_LAYERS instead of has_loaded_layers
             # The signal may fire before has_loaded_layers is set by filter_mate_app.py
             if not dockwidget.PROJECT_LAYERS:
                 logger.info("populate_export_combobox: PROJECT_LAYERS empty, deferring until projectLayersReady signal")
@@ -710,8 +710,8 @@ class ExportingController(BaseController):
         for callback in self._on_export_started_callbacks:
             try:
                 callback()
-            except Exception as e:
-                logger.debug(f"Ignored in export started callback: {e}")
+            except Exception:
+                pass
 
         config = self.build_configuration()
 
@@ -785,8 +785,7 @@ class ExportingController(BaseController):
                 self._export_progress = (i + 1) / total
                 self._notify_progress(self._export_progress)
 
-            except Exception as e:
-                logger.debug(f"Ignored in batch export for layer {layer_id}: {e}")
+            except Exception:
                 failed_layers.append(layer_id)
 
         return ExportResult(
@@ -804,8 +803,8 @@ class ExportingController(BaseController):
         for callback in self._on_export_completed_callbacks:
             try:
                 callback(result)
-            except Exception as e:
-                logger.debug(f"Ignored in export completed callback: {e}")
+            except Exception:
+                pass
 
     def _on_export_error(self, error_message: str) -> None:
         """Handle export error."""
@@ -855,16 +854,16 @@ class ExportingController(BaseController):
         for callback in self._on_config_changed_callbacks:
             try:
                 callback(config)
-            except Exception as e:
-                logger.debug(f"Ignored in export config changed callback: {e}")
+            except Exception:
+                pass
 
     def _notify_progress(self, progress: float) -> None:
         """Notify listeners of progress update."""
         for callback in self._on_progress_callbacks:
             try:
                 callback(progress)
-            except Exception as e:
-                logger.debug(f"Ignored in export progress callback: {e}")
+            except Exception:
+                pass
 
     # === Lifecycle ===
 

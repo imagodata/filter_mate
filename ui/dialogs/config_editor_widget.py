@@ -23,7 +23,6 @@ Author: FilterMate Team
 Date: December 2025 (migrated January 2026)
 """
 
-import logging
 from typing import Any, Dict, Optional, Callable
 
 from qgis.PyQt.QtWidgets import (
@@ -35,8 +34,6 @@ from qgis.PyQt.QtWidgets import (
 )
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor
-
-logger = logging.getLogger(__name__)
 
 
 class ColorPickerWidget(QWidget):
@@ -351,8 +348,8 @@ class ConfigEditorWidget(QWidget):
         for callback in self._on_change_callbacks:
             try:
                 callback(config_path, value)
-            except Exception as e:
-                logger.debug(f"Ignored in config change callback for '{config_path}': {e}")
+            except Exception:
+                pass
 
     def get_config(self) -> Dict[str, Any]:
         """
