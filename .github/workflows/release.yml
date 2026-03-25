@@ -1,0 +1,194 @@
+name: Release & Publish to QGIS Plugin Repository
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'   # Ex : v4.6.2, v4.6.2-rc1
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag de version (ex: v4.6.2) - doit déjà exister dans metadata.txt'
+        required: true
+        type: string
+      skip_tests:
+        description: 'Ignorer les tests (déconseillé)'
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: 'Dry-run : construit le ZIP sans publier sur plugins.qgis.org'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write   # Pour créer la GitHub Release
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 1. Tests
+  # ─────────────────────────────────────────────────────────────────────────────
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.skip_tests }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-test.txt
+
+      - name: Run tests
+        run: python -m pytest tests/ -v -o "addopts="
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. Build & Publish
+  # ─────────────────────────────────────────────────────────────────────────────
+  release:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    needs: [test]
+    # Si skip_tests → on ne dépend pas du job test qui est skippé
+    if: always() && (needs.test.result == 'success' || needs.test.result == 'skipped')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── Extraire la version ──────────────────────────────────────────────────
+      - name: Extraire la version depuis metadata.txt
+        id: meta
+        run: |
+          VERSION=$(grep "^version=" metadata.txt | cut -d= -f2 | tr -d '[:space:]')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "ZIP_NAME=filter_mate_v${VERSION}.zip" >> $GITHUB_OUTPUT
+          echo "Version détectée : $VERSION"
+
+      # ── Vérifier la cohérence tag / metadata ───────────────────────────────
+      - name: Vérifier la cohérence tag / metadata.txt
+        if: github.event_name == 'push'
+        run: |
+          TAG="${GITHUB_REF_NAME}"          # ex: v4.6.2
+          META_VERSION="${{ steps.meta.outputs.VERSION }}"   # ex: 4.6.2
+          EXPECTED_TAG="v${META_VERSION}"
+          if [ "$TAG" != "$EXPECTED_TAG" ]; then
+            echo "❌ Le tag '$TAG' ne correspond pas à la version '$META_VERSION' dans metadata.txt"
+            echo "   Attendu : $EXPECTED_TAG"
+            exit 1
+          fi
+          echo "✅ Tag '$TAG' cohérent avec metadata.txt ($META_VERSION)"
+
+      # ── Build ZIP ────────────────────────────────────────────────────────────
+      - name: Construire le ZIP du plugin
+        run: |
+          sudo apt-get install -y --quiet zip rsync
+          bash scripts/prepare_plugin_zip.sh
+
+      - name: Vérifier le ZIP
+        run: |
+          ZIP_PATH="dist/${{ steps.meta.outputs.ZIP_NAME }}"
+          ls -lh "$ZIP_PATH"
+          unzip -l "$ZIP_PATH" | head -30
+
+      # ── Upload artifact inter-jobs ───────────────────────────────────────────
+      - name: Sauvegarder le ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-zip
+          path: dist/${{ steps.meta.outputs.ZIP_NAME }}
+          retention-days: 7
+
+      # ── Extraire les notes de changelog ─────────────────────────────────────
+      - name: Extraire les notes de release depuis CHANGELOG.md
+        id: changelog
+        run: |
+          VERSION="${{ steps.meta.outputs.VERSION }}"
+          # Cherche la section ## [VERSION] jusqu'à la prochaine section ##
+          NOTES=$(awk "/^## \[?${VERSION}\]?/,/^## [^[]/" CHANGELOG.md \
+                  | grep -v "^## " | sed '/^$/d' | head -80)
+          if [ -z "$NOTES" ]; then
+            NOTES="Release v${VERSION} — voir CHANGELOG.md pour les détails."
+          fi
+          # Échapper pour GitHub output (délimiteur EOF)
+          {
+            echo "NOTES<<EOF"
+            echo "$NOTES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      # ── Créer la GitHub Release ──────────────────────────────────────────────
+      - name: Créer la GitHub Release
+        id: gh_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'push' && github.ref_name || inputs.tag }}
+          name: "FilterMate v${{ steps.meta.outputs.VERSION }}"
+          body: |
+            ## FilterMate v${{ steps.meta.outputs.VERSION }}
+
+            ${{ steps.changelog.outputs.NOTES }}
+
+            ---
+            📦 **Installation** : téléchargez `${{ steps.meta.outputs.ZIP_NAME }}` et installez-le via *Extensions → Installer depuis un ZIP*.
+            🌐 **Plugin QGIS** : https://plugins.qgis.org/plugins/filter_mate/
+          files: dist/${{ steps.meta.outputs.ZIP_NAME }}
+          draft: false
+          prerelease: ${{ contains(steps.meta.outputs.VERSION, 'rc') || contains(steps.meta.outputs.VERSION, 'alpha') || contains(steps.meta.outputs.VERSION, 'beta') }}
+          generate_release_notes: false
+
+      # ── Publier sur plugins.qgis.org ─────────────────────────────────────────
+      - name: Publier sur plugins.qgis.org
+        if: ${{ !inputs.dry_run }}
+        env:
+          OSGEO_USERNAME: ${{ secrets.OSGEO_USERNAME }}
+          OSGEO_PASSWORD: ${{ secrets.OSGEO_PASSWORD }}
+        run: |
+          ZIP_PATH="dist/${{ steps.meta.outputs.ZIP_NAME }}"
+          VERSION="${{ steps.meta.outputs.VERSION }}"
+
+          echo "📤 Publication de FilterMate v${VERSION} sur plugins.qgis.org…"
+
+          HTTP_CODE=$(curl --silent --output response.json --write-out "%{http_code}" \
+            --request POST \
+            --user "${OSGEO_USERNAME}:${OSGEO_PASSWORD}" \
+            --form "package=@${ZIP_PATH}" \
+            "https://plugins.qgis.org/plugins/RPC2")
+
+          echo "Code HTTP : $HTTP_CODE"
+          cat response.json || true
+
+          if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
+            echo "✅ Plugin publié avec succès sur plugins.qgis.org !"
+          else
+            echo "❌ Échec de la publication (HTTP $HTTP_CODE)"
+            python3 -c "
+          import sys
+          content = open('response.json').read()
+          print(content[:2000])
+          " || true
+            exit 1
+          fi
+
+      - name: Résumé de la release
+        run: |
+          echo "### ✅ FilterMate v${{ steps.meta.outputs.VERSION }} publiée" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Cible | Statut |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| GitHub Release | ✅ Créée |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "| plugins.qgis.org | ⏭️ Skippé (dry-run) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| plugins.qgis.org | ✅ Publiée |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 ZIP : \`${{ steps.meta.outputs.ZIP_NAME }}\`" >> $GITHUB_STEP_SUMMARY

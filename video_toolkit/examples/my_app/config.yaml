@@ -1,0 +1,109 @@
+# config.yaml — Example project configuration for "My Notepad App" tutorial
+# Copy this file from config.template.yaml and customize for your application.
+# Run: python scripts/calibrate.py to fill in the regions section.
+
+# ── Application window ────────────────────────────────────────────────────
+app:
+  window_title: "Notepad"       # Substring of the window title for focus detection
+  app_name: "My Notepad Tutorial"
+  app_version: "v1.0"
+  url: "https://example.com"
+  assets_dir: "assets/buttons"  # Directory for button image templates
+
+  # Calibrated UI element positions (run: python scripts/calibrate.py)
+  regions:
+    main_window:
+      x: 0
+      y: 0
+      width: 1280
+      height: 800
+    content_area:
+      x: 10
+      y: 50
+      width: 1260
+      height: 740
+    menu_file:
+      x: 10
+      y: 10
+    menu_edit:
+      x: 50
+      y: 10
+    menu_view:
+      x: 90
+      y: 10
+    menu_format:
+      x: 135
+      y: 10
+
+# ── OBS Studio (desktop recording) ────────────────────────────────────────
+obs:
+  host: localhost
+  port: 4455
+  password: ""
+  scenes:
+    app_scene: "App Fullscreen"
+    diagram_overlay: "Diagram Overlay"
+    intro_scene: "Intro"
+    outro_scene: "Outro"
+  output_dir: ~/Videos/NotepadTutorial
+
+# ── Headless frame capture (Docker/Xvfb mode) ─────────────────────────────
+capture:
+  fps: 15
+  output_dir: output/captures
+  resolution: 1280x800
+  display: ":99"
+  method: import        # import | scrot | ffmpeg
+  codec: libx264
+  quality: 23
+  format: mp4
+  scenes:
+    app_scene: "App Fullscreen"
+    diagram_overlay: "Diagram Overlay"
+
+# ── Timing ────────────────────────────────────────────────────────────────
+timing:
+  click_delay: 0.3         # PyAutoGUI global pause between actions
+  type_delay: 0.05         # Delay between keystrokes
+  scroll_delay: 0.2        # Delay between scroll ticks
+  action_pause: 1.0        # Pause after significant UI actions
+  transition_pause: 2.0    # Pause at sequence start/end
+  mouse_move_duration: 0.5 # Duration for smooth mouse moves
+  startup_wait: 3          # Wait after focusing the app window
+
+# ── Diagram generation ────────────────────────────────────────────────────
+diagrams:
+  output_dir: output/diagrams
+  width: 1920
+  height: 1080
+  theme: dark
+  background_color: "#1a1a2e"
+  font_family: "Segoe UI"
+  app_name: "My Notepad Tutorial"
+  app_version: "v1.0"
+  accent_color: "#4CAF50"
+
+# ── TTS narration ─────────────────────────────────────────────────────────
+narration:
+  engine: edge-tts          # edge-tts | elevenlabs | f5-tts
+  voice: en-US-GuyNeural    # edge-tts voice name
+  output_dir: output/narration
+  speed: "+0%"              # Adjust speed: +10% (faster) or -10% (slower)
+
+  # F5-TTS (voice cloning) — only needed if engine: f5-tts
+  # f5_ref_audio: output/narration/ref_voice.wav
+  # f5_ref_text: "A short reference text from the audio file."
+  # f5_model: F5TTS_v1_Base
+  # f5_speed: 1.0
+  # f5_conda_env: f5-tts
+
+  # ElevenLabs — only needed if engine: elevenlabs
+  # Set ELEVENLABS_API_KEY environment variable
+
+# ── Final video output ─────────────────────────────────────────────────────
+output:
+  final_dir: output/final
+  resolution: 1920x1080
+  fps: 30
+  codec: libx264
+  quality: "23"

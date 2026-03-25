@@ -1,0 +1,179 @@
+# config.template.yaml — Video Toolkit Configuration Template
+# =============================================================
+# Copy this file to your project as `config.yaml` and fill in
+# the values for your application.
+#
+# Usage:
+#   cp config.template.yaml my_project/config.yaml
+#   python scripts/calibrate.py --config my_project/config.yaml
+
+# ── Application configuration ─────────────────────────────────────────────
+app:
+  # Title substring to identify the app's window (used for focus detection)
+  # Example: "Notepad", "Visual Studio Code", "GIMP"
+  window_title: "My Application"
+
+  # Branding used in diagram slides and title cards
+  app_name: "My App Tutorial"
+  app_version: "v1.0"
+  url: "https://example.com"
+
+  # Directory for button/icon screenshot templates (used by click_image())
+  assets_dir: "assets/buttons"
+
+  # Calibrated UI element positions.
+  # These are filled in by running: python scripts/calibrate.py
+  # Structure:
+  #   region_key: {x, y}              — a single point (center of element)
+  #   region_key: {x, y, width, height} — a rectangular region
+  regions:
+    # Main window boundaries (used as reference for validation)
+    main_window:
+      x: 0
+      y: 0
+      width: 1920
+      height: 1080
+
+    # Content / canvas area
+    content_area:
+      x: 0
+      y: 0
+      width: 1920
+      height: 1080
+
+    # Menu bar items (point: x,y at center of each menu label)
+    menu_file:
+      x: 0
+      y: 0
+    menu_edit:
+      x: 0
+      y: 0
+    menu_view:
+      x: 0
+      y: 0
+
+    # Add your application-specific regions here.
+    # The region names must match what you use in your automator and sequences.
+    # Example:
+    #   toolbar_save_btn:
+    #     x: 0
+    #     y: 0
+    #   sidebar_panel:
+    #     x: 0
+    #     y: 0
+    #     width: 300
+    #     height: 800
+
+# ── OBS Studio (desktop recording mode) ──────────────────────────────────
+# Used when recording with OBS Studio via WebSocket API.
+# Enable: Tools > WebSocket Server Settings > Enable WebSocket Server
+obs:
+  host: localhost
+  port: 4455
+  password: ""    # Set if you enabled authentication in OBS
+
+  # Scene names — must match what you create in OBS Studio
+  # Run: python scripts/setup_obs.py to auto-create these
+  scenes:
+    app_scene: "App Fullscreen"           # Your app fills the screen
+    diagram_overlay: "Diagram Overlay"    # Browser source with HTML diagrams
+    intro_scene: "Intro"                  # Title card scene
+    outro_scene: "Outro"                  # End card scene
+
+  # Where OBS saves recordings (MKV files)
+  # Change to a path with enough disk space
+  output_dir: ~/Videos/Tutorial
+
+# ── Headless frame capture (Docker/Xvfb mode) ─────────────────────────────
+# Used instead of OBS in headless environments (CI/CD, Docker, WSL).
+# Requires: Xvfb, ImageMagick (import command), ffmpeg
+#
+# Setup:
+#   sudo apt install xvfb imagemagick ffmpeg
+#   Xvfb :99 -screen 0 1920x1080x24 &
+#   export DISPLAY=:99
+capture:
+  fps: 15                   # Frames per second (10-30 recommended)
+  output_dir: output/captures
+  resolution: 1920x1080     # Must match your Xvfb screen resolution
+  display: ":99"            # Xvfb display number
+  method: import            # Capture method: import | scrot | ffmpeg
+  codec: libx264
+  quality: 23               # CRF quality (lower = better, 18-28 is typical)
+  format: mp4
+
+  scenes:                   # Same scene names as OBS (for API compatibility)
+    app_scene: "App Fullscreen"
+    diagram_overlay: "Diagram Overlay"
+
+# ── Interaction timing ─────────────────────────────────────────────────────
+# All values are in seconds. Adjust to match your app's responsiveness.
+timing:
+  click_delay: 0.3          # Global PyAutoGUI pause between actions (PAUSE)
+  type_delay: 0.05          # Delay between keystrokes (interval for typewrite)
+  scroll_delay: 0.2         # Delay between individual scroll clicks
+  action_pause: 1.0         # Pause after significant UI actions (menu clicks, etc.)
+  transition_pause: 2.0     # Pause at sequence start and end
+  mouse_move_duration: 0.5  # Duration for smooth mouse movement (easeOutQuad)
+  startup_wait: 3           # Wait after focusing the app window
+
+# ── Mermaid diagram generation ────────────────────────────────────────────
+# Requires: Playwright for PNG rendering (pip install playwright && playwright install chromium)
+diagrams:
+  output_dir: output/diagrams   # Where to save generated HTML/PNG files
+  width: 1920                   # Diagram viewport width (match recording resolution)
+  height: 1080                  # Diagram viewport height
+  theme: dark                   # Mermaid theme: dark | default | forest | base | neutral
+  background_color: "#1a1a2e"   # Background gradient start color
+  font_family: "Segoe UI"       # Font for diagram text
+
+  # Branding in diagram slides (used by templates/diagram.html)
+  app_name: "My App Tutorial"
+  app_version: "v1.0"
+  accent_color: "#4CAF50"       # Accent color for borders, highlights
+
+# ── Text-to-Speech narration ───────────────────────────────────────────────
+narration:
+  # TTS engine selection:
+  #   edge-tts    — Free, Microsoft voices. 400+ voices, 60+ languages.
+  #                 pip install edge-tts
+  #   elevenlabs  — Paid, high quality. Set ELEVENLABS_API_KEY env var.
+  #                 pip install elevenlabs
+  #   f5-tts      — Free, open-source voice cloning. GPU recommended.
+  #                 Requires a conda environment with f5-tts installed.
+  engine: edge-tts
+
+  # Voice name (depends on engine):
+  #   edge-tts:   Run list_voices.py to see all voices.
+  #               Examples: en-US-GuyNeural, en-US-JennyNeural,
+  #                         fr-FR-HenriNeural, de-DE-ConradNeural
+  #   elevenlabs: Voice ID or name from your ElevenLabs account
+  #   f5-tts:     Not used (voice comes from ref_audio)
+  voice: en-US-GuyNeural
+
+  output_dir: output/narration  # Where to cache generated audio files
+
+  # Speech rate adjustment (edge-tts only)
+  # Examples: "+10%" (faster), "-10%" (slower), "+0%" (normal)
+  speed: "+0%"
+
+  # ── F5-TTS voice cloning settings ────────────────────────────────────
+  # Only needed when engine: f5-tts
+  # Provide a ~15-30 second WAV file of the target voice.
+  # f5_ref_audio: output/narration/ref_voice.wav
+  # f5_ref_text: >
+  #   The exact transcript of the reference audio, verbatim.
+  #   This helps the model align prosody correctly.
+  # f5_model: F5TTS_v1_Base      # or E2TTS_Base
+  # f5_speed: 1.0                # Generation speed multiplier
+  # f5_conda_env: f5-tts         # Name of the conda environment
+  # f5_remove_silence: false     # Remove leading/trailing silence
+
+# ── Final video output ────────────────────────────────────────────────────
+output:
+  final_dir: output/final       # Where to save the final assembled video
+  resolution: 1920x1080         # Output resolution (width x height)
+  fps: 30                       # Output frame rate
+  codec: libx264                # FFmpeg video codec (libx264 | libx265 | libvpx-vp9)
+  quality: "23"                 # CRF quality (lower = better, 18-28 typical for libx264)
+  # preset: slow                # FFmpeg preset (ultrafast | fast | medium | slow | veryslow)

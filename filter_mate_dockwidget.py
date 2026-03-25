@@ -252,6 +252,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._configuring_groupbox = False  # FIX 2026-01-19: Prevent nested groupbox config
         # FIX 2026-01-19 v3: Counter for skipping selectionChanged signals (2 = removeSelection + select)
         self._skip_selection_changed_count = 0
+        # FIX 2026-03-16: Debounce featureChanged signal from QgsFeaturePickerWidget
+        # When user types in the picker, the completer fires featureChanged on each keystroke
+        # which triggers heavy processing and prevents proper selection from the dropdown
+        self._feature_picker_debounce_timer = QTimer()
+        self._feature_picker_debounce_timer.setSingleShot(True)
+        self._feature_picker_debounce_timer.setInterval(300)
+        self._feature_picker_debounce_timer.timeout.connect(self._execute_debounced_feature_change)
+        self._pending_feature_change_fid = None
         self._expression_debounce_timer = QTimer()
         _debounce_ms = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("UI_RESPONSIVENESS", {}).get("expression_debounce_ms", {})
         _debounce_val = _debounce_ms.get("value", 450) if isinstance(_debounce_ms, dict) else 450
@@ -1731,16 +1739,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     # 5. Force widget to rebuild its internal model
                     # 6. Reconnect signal
                     try:
-                        picker.featureChanged.disconnect(self.exploring_features_changed)
+                        picker.featureChanged.disconnect(self._debounced_exploring_features_changed)
                     except (TypeError, RuntimeError):
                         pass
 
-                    # Clear any existing filter and reset
-                    if hasattr(picker, 'setFilterExpression'):
-                        picker.setFilterExpression(None)
-
-                    # Set layer to reload the feature model
+                    # FIX 2026-03-16: Force full model rebuild by setting layer to None first
+                    # setLayer(same_layer) may be ignored by the widget if already set
+                    picker.setLayer(None)
                     picker.setLayer(self.current_layer)
+                    # Reconnect willBeDeleted signal after setLayer reset
+                    self._connect_feature_picker_layer_deletion(self.current_layer)
 
                     # Set display expression - this controls how features are displayed in dropdown
                     picker.setDisplayExpression(field_or_expression)
@@ -1750,12 +1758,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     picker.setShowBrowserButtons(True)
                     picker.setAllowNull(True)
 
-                    # Force model to reload by clearing filter expression
-                    if hasattr(picker, 'setFilterExpression'):
-                        picker.setFilterExpression("")
-
                     # Reconnect signal
-                    picker.featureChanged.connect(self.exploring_features_changed)
+                    picker.featureChanged.connect(self._debounced_exploring_features_changed)
 
                     # Force visual update
                     picker.update()
@@ -2869,6 +2873,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.error("❌ pushButton_exploring_identify does NOT exist!")
             return
 
+        # FIX 2026-03-16: Connect modelUpdated signal to ensure browser buttons (next/prev)
+        # are properly initialized after the model finishes loading features asynchronously.
+        picker = getattr(self, 'mFeaturePickerWidget_exploring_single_selection', None)
+        if picker and hasattr(picker, 'modelUpdated'):
+            try:
+                picker.modelUpdated.disconnect(self._on_feature_picker_model_updated)
+            except (TypeError, RuntimeError):
+                pass
+            picker.modelUpdated.connect(self._on_feature_picker_model_updated)
+            logger.debug("✓ Connected mFeaturePickerWidget modelUpdated signal")
+
         # FIX 2026-01-15: Connect IDENTIFY and ZOOM buttons FIRST
         # These must be connected directly, NOT via changeSignalState which can break them
         try:
@@ -3496,72 +3511,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def _update_exploring_buttons_state(self):
         """
-        v4.0 S18: Update identify/zoom buttons based on selection.
+        v4.0 S18: Update identify/zoom buttons based on layer validity.
 
-        FIX 2026-01-15: Improved detection and fallback to canvas selection.
-        FIX 2026-01-16: Use _is_layer_valid() for safe layer checking.
+        FIX 2026-03-16: Buttons are always enabled when a valid layer is present.
+        The handlers (exploring_identify_clicked, exploring_zoom_clicked) already
+        handle the case of no features by showing a user-friendly warning message.
+        Keeping buttons always clickable allows the user to attempt identify/zoom
+        at any time without needing to pre-select a feature in the widget.
         """
-        if not self._is_layer_valid():
-            self.pushButton_exploring_identify.setEnabled(False)
-            self.pushButton_exploring_zoom.setEnabled(False)
-            logger.debug("_update_exploring_buttons_state: Disabled (no layer)")
-            return
+        has_valid_layer = self._is_layer_valid()
 
-        has_features = False
-        detection_source = "none"
-
-        try:
-            w = self.widgets.get("EXPLORING", {})
-
-            # Check widget-specific features
-            if self.current_exploring_groupbox == "single_selection":
-                picker = w.get("SINGLE_SELECTION_FEATURES", {}).get("WIDGET")
-                if picker:
-                    # FIX 2026-01-22: Also check saved FID as authoritative source
-                    # picker.feature() may be invalid if layer has a filter excluding the selected feature
-                    saved_fid = getattr(self, '_last_single_selection_fid', None)
-                    saved_layer_id = getattr(self, '_last_single_selection_layer_id', None)
-                    if saved_fid is not None and self.current_layer and saved_layer_id == self.current_layer.id():
-                        has_features = True
-                        detection_source = "single_picker_saved_fid"
-                    else:
-                        f = picker.feature()
-                        has_features = f is not None and (not hasattr(f, 'isValid') or f.isValid())
-                        detection_source = "single_picker" if has_features else "single_picker_empty"
-
-            elif self.current_exploring_groupbox == "multiple_selection":
-                combo = w.get("MULTIPLE_SELECTION_FEATURES", {}).get("WIDGET")
-                if combo:
-                    has_features = bool(combo.checkedItems())
-                    detection_source = "multiple_combo" if has_features else "multiple_combo_empty"
-
-            elif self.current_exploring_groupbox == "custom_selection":
-                expr = w.get("CUSTOM_SELECTION_EXPRESSION", {}).get("WIDGET")
-                if expr:
-                    has_features = bool(expr.expression() and expr.expression().strip())
-                    detection_source = "custom_expr" if has_features else "custom_expr_empty"
-
-            # FIX 2026-01-15: Fallback to canvas selection if widgets don't show features
-            if not has_features and self.current_layer:
-                canvas_selection_count = len(self.current_layer.selectedFeatureIds())
-                if canvas_selection_count > 0:
-                    has_features = True
-                    detection_source = f"canvas_selection_{canvas_selection_count}"
-                    logger.debug(f"_update_exploring_buttons_state: Using canvas selection ({canvas_selection_count} features)")
-
-        except Exception as e:
-            logger.debug(f"_update_exploring_buttons_state error: {e}")
-            # Last resort: check canvas selection
-            try:
-                if self.current_layer and len(self.current_layer.selectedFeatureIds()) > 0:
-                    has_features = True
-                    detection_source = "canvas_fallback"
-            except (RuntimeError, AttributeError):
-                pass  # Layer may have been deleted
-
-        self.pushButton_exploring_identify.setEnabled(has_features)
-        self.pushButton_exploring_zoom.setEnabled(has_features)
-        logger.debug(f"_update_exploring_buttons_state: {has_features} (source: {detection_source})")
+        self.pushButton_exploring_identify.setEnabled(has_valid_layer)
+        self.pushButton_exploring_zoom.setEnabled(has_valid_layer)
+        logger.debug(f"_update_exploring_buttons_state: enabled={has_valid_layer}")
 
     def _configure_groupbox_common(self, groupbox_name):
         """v4.0 Sprint 17: Common groupbox configuration logic."""
@@ -3726,11 +3688,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if picker_widget:
                 # First try to disconnect any existing connection (ignore errors)
                 try:
-                    picker_widget.featureChanged.disconnect(self.exploring_features_changed)
+                    picker_widget.featureChanged.disconnect(self._debounced_exploring_features_changed)
                 except TypeError:
                     pass  # Not connected
                 # Now connect directly (same as before_migration line 7085)
-                picker_widget.featureChanged.connect(self.exploring_features_changed)
+                picker_widget.featureChanged.connect(self._debounced_exploring_features_changed)
                 logger.debug("_configure_single_selection_groupbox: Connected featureChanged signal")
 
         # FIX 2026-01-15 v9: Ensure selectionChanged stays connected for IS_TRACKING/IS_SELECTING
@@ -4688,9 +4650,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not self._is_layer_valid():
             return
 
-        # Clear selection
-        if not (self._controller_integration and self._controller_integration.delegate_exploring_clear_selection()):
-            self.current_layer.removeSelection()
+        # FIX 2026-03-17: Block selectionChanged during programmatic deselection
+        # to prevent _sync_widgets_from_qgis_selection → model reload → browser buttons disabled
+        with SignalBlocker(self.current_layer):
+            if not (self._controller_integration and self._controller_integration.delegate_exploring_clear_selection()):
+                self.current_layer.removeSelection()
 
         # FIX 2026-01-15: Switch to pan tool when deselecting
         try:
@@ -4732,8 +4696,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         if features:
             try:
-                self.current_layer.removeSelection()
-                self.current_layer.select([f.id() for f in features])
+                # FIX 2026-03-17: Block selectionChanged signal during programmatic selection.
+                # Without this, removeSelection()+select() triggers selectionChanged →
+                # _sync_widgets_from_qgis_selection → feature_picker.setFeature() → model reload
+                # → browser buttons (next/prev) get disabled, breaking subsequent navigation.
+                with SignalBlocker(self.current_layer):
+                    self.current_layer.removeSelection()
+                    self.current_layer.select([f.id() for f in features])
                 logger.info(f"exploring_select_features: ✓ Selected {len(features)} features on canvas")
             except Exception as e:
                 logger.warning(f"exploring_select_features: ✗ Failed to select features: {e}")
@@ -4785,6 +4754,66 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         if self._exploring_ctrl: return self._exploring_ctrl.exploring_features_changed(input, identify_by_primary_key_name, custom_expression, preserve_filter_if_empty)
         return []
+
+    def _debounced_exploring_features_changed(self, input=None):
+        """
+        FIX 2026-03-16: Debounced version of exploring_features_changed for QgsFeaturePickerWidget.
+
+        When the user types in the feature picker, the completer fires featureChanged
+        as it matches items. This debounced handler waits 300ms after the last change
+        before processing, allowing the user to type freely and select from the dropdown
+        without interference from heavy processing (QGIS selection sync, zoom, etc.).
+
+        CRITICAL: We store the feature ID (int), NOT the QgsFeature C++ object.
+        The C++ object may be destroyed by the widget's internal model before the
+        debounce timer fires, causing a crash or corrupted state.
+
+        NOTE 2026-03-17: pyautogui automation cannot reliably trigger featureChanged
+        on QgsFeaturePickerWidget. Select/Track demos must be captured manually.
+        """
+        from qgis.core import QgsFeature
+        if isinstance(input, QgsFeature):
+            try:
+                if input.isValid():
+                    self._pending_feature_change_fid = input.id()
+                else:
+                    self._pending_feature_change_fid = None
+            except RuntimeError:
+                # C++ object already deleted
+                self._pending_feature_change_fid = None
+        else:
+            self._pending_feature_change_fid = None
+        self._feature_picker_debounce_timer.start()
+
+    def _execute_debounced_feature_change(self):
+        """Execute the pending feature change after debounce delay.
+
+        Reloads the feature from the layer using the stored FID to get a
+        fresh, valid C++ object.
+        """
+        fid = getattr(self, '_pending_feature_change_fid', None)
+        self._pending_feature_change_fid = None
+        if fid is not None and self._is_layer_valid():
+            try:
+                feature = self.current_layer.getFeature(fid)
+                if feature.isValid():
+                    self.exploring_features_changed(feature)
+                else:
+                    logger.debug(f"_execute_debounced_feature_change: Feature {fid} no longer valid")
+            except Exception as e:
+                logger.debug(f"_execute_debounced_feature_change: Error reloading feature {fid}: {e}")
+
+    def _on_feature_picker_model_updated(self):
+        """FIX 2026-03-16: Re-enable browser buttons after model finishes loading.
+
+        QgsFeaturePickerWidget loads features asynchronously. The next/previous
+        browser buttons only work when the model has data. This handler ensures
+        they are properly enabled once the model has loaded.
+        """
+        picker = getattr(self, 'mFeaturePickerWidget_exploring_single_selection', None)
+        if picker:
+            picker.setShowBrowserButtons(True)
+            logger.debug("_on_feature_picker_model_updated: Re-enabled browser buttons")
 
     def _handle_exploring_features_result(
         self,
@@ -5243,10 +5272,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 picker_widget = self.widgets["EXPLORING"]["SINGLE_SELECTION_FEATURES"]["WIDGET"]
                 if picker_widget:
                     try:
-                        picker_widget.featureChanged.disconnect(self.exploring_features_changed)
+                        picker_widget.featureChanged.disconnect(self._debounced_exploring_features_changed)
                     except TypeError:
                         pass
-                    picker_widget.featureChanged.connect(self.exploring_features_changed)
+                    picker_widget.featureChanged.connect(self._debounced_exploring_features_changed)
                     logger.debug("✓ featureChanged signal directly reconnected")
 
             logger.debug(f"Fallback: Exploration widgets updated for layer {layer.name()}")
@@ -5611,10 +5640,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             picker_widget = self.widgets["EXPLORING"]["SINGLE_SELECTION_FEATURES"]["WIDGET"]
             if picker_widget:
                 try:
-                    picker_widget.featureChanged.disconnect(self.exploring_features_changed)
+                    picker_widget.featureChanged.disconnect(self._debounced_exploring_features_changed)
                 except TypeError:
                     pass
-                picker_widget.featureChanged.connect(self.exploring_features_changed)
+                picker_widget.featureChanged.connect(self._debounced_exploring_features_changed)
 
         # Reconnect other widgets via manageSignal (same as before_migration lines 10678-10682)
         try:
@@ -6367,6 +6396,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             event.accept()
             return
 
+        # FIX 2026-03-16: Stop debounce timer on close
+        try: self._feature_picker_debounce_timer.stop() if hasattr(self, '_feature_picker_debounce_timer') else None
+        except Exception: pass
         # FIX 2026-01-19: Disconnect willBeDeleted signal before cleanup
         try: self._disconnect_feature_picker_layer_deletion() if hasattr(self, '_disconnect_feature_picker_layer_deletion') else None
         except Exception:  # May already be disconnected - expected

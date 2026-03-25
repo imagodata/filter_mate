@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1920" />
+  <title>{{TITLE}}</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: linear-gradient(
+        135deg,
+        {{BG_COLOR}} 0%,
+        #16213e 55%,
+        #0f3460 100%
+      );
+      font-family: '{{FONT_FAMILY}}', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      color: #e8e8f0;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────────────── */
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      display: grid;
+      grid-template-rows: 72px 1fr 44px;
+      grid-template-columns: 1fr;
+      position: relative;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────── */
+    .header {
+      background: rgba(76, 175, 80, 0.12);
+      border-bottom: 2px solid rgba(76, 175, 80, 0.6);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 0 48px;
+      backdrop-filter: blur(4px);
+    }
+
+    .header-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    }
+
+    .header-badge {
+      margin-left: auto;
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.5);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: 14px;
+      color: #81C784;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Diagram area ──────────────────────────────────────────────────── */
+    .diagram-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 64px;
+      overflow: hidden;
+      animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .mermaid {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────── */
+    .footer {
+      background: rgba(0, 0, 0, 0.35);
+      border-top: 1px solid rgba(76, 175, 80, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* ── Decorative glow circles ───────────────────────────────────────── */
+    .glow {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-green {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(76,175,80,0.08) 0%, transparent 70%);
+      top: -200px; right: -200px;
+    }
+    .glow-blue {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(25,118,210,0.1) 0%, transparent 70%);
+      bottom: -100px; left: -100px;
+    }
+
+    /* ── Animations ────────────────────────────────────────────────────── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="slide">
+
+    <!-- Decorative glows (behind content) -->
+    <div class="glow glow-green"></div>
+    <div class="glow glow-blue"></div>
+
+    <!-- Header -->
+    <header class="header">
+      <h1 class="header-title">{{TITLE}}</h1>
+      <span class="header-badge">{{APP_NAME}}{{APP_VERSION}}</span>
+    </header>
+
+    <!-- Diagram -->
+    <main class="diagram-area">
+      <div class="mermaid">
+{{MERMAID_CODE}}
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>{{APP_NAME}}</span>
+    </footer>
+
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: '{{THEME}}',
+      themeVariables: {
+        primaryColor:        '#1976D2',
+        primaryTextColor:    '#ffffff',
+        primaryBorderColor:  '{{ACCENT_COLOR}}',
+        lineColor:           '{{ACCENT_COLOR}}',
+        secondaryColor:      '#16213e',
+        tertiaryColor:       '#0f3460',
+        background:          '{{BG_COLOR}}',
+        mainBkg:             '#16213e',
+        nodeBorder:          '{{ACCENT_COLOR}}',
+        clusterBkg:          'rgba(76,175,80,0.08)',
+        clusterBorder:       'rgba(76,175,80,0.4)',
+        titleColor:          '#ffffff',
+        edgeLabelBackground: 'rgba(22,33,62,0.85)',
+        actorBkg:            '#1976D2',
+        actorBorder:         '{{ACCENT_COLOR}}',
+        actorTextColor:      '#ffffff',
+        activationBkgColor:  'rgba(76,175,80,0.2)',
+        noteBkgColor:        'rgba(25,118,210,0.3)',
+        noteTextColor:       '#e0e0e0',
+        fontSize:            '18px',
+        fontFamily:          "'{{FONT_FAMILY}}', 'Segoe UI', sans-serif",
+      },
+      flowchart: {
+        curve:       'basis',
+        padding:     20,
+        useMaxWidth: false,
+      },
+      sequence: {
+        actorMargin:  80,
+        mirrorActors: false,
+        useMaxWidth:  false,
+      },
+      mindmap: {
+        useMaxWidth: false,
+      },
+      fontFamily: "'{{FONT_FAMILY}}', 'Segoe UI', sans-serif",
+    });
+  </script>
+</body>
+</html>

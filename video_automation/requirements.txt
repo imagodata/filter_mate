@@ -3,6 +3,9 @@ obsws-python>=1.7.0
 Pillow>=10.0
 pyyaml>=6.0
 edge-tts>=6.1.0
+# f5-tts: installed in separate conda env (Python 3.11), see setup below:
+#   conda create -n f5-tts python=3.11 -y && conda activate f5-tts
+#   pip install f5-tts torch torchaudio
 click>=8.1
 playwright>=1.40       # optional, for diagram PNG rendering
 mutagen>=1.47.0        # for audio duration detection

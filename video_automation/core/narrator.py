@@ -2,7 +2,8 @@
 Narrator — TTS Audio Generation
 =================================
 Generates narration audio files for each video sequence using either
-edge-tts (free, Microsoft voices) or ElevenLabs (paid, higher quality).
+edge-tts (free, Microsoft voices), ElevenLabs (paid, higher quality),
+or F5-TTS (open-source, zero-shot voice cloning).
 
 Usage:
     from core.narrator import Narrator
@@ -39,6 +40,14 @@ class Narrator:
         self.speed: str = config.get("speed", "+0%")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+        # F5-TTS specific config
+        self.f5_ref_audio: Optional[str] = config.get("f5_ref_audio")
+        self.f5_ref_text: str = config.get("f5_ref_text", "")
+        self.f5_model: str = config.get("f5_model", "F5TTS_v1_Base")
+        self.f5_speed: float = config.get("f5_speed", 1.0)
+        self.f5_conda_env: str = config.get("f5_conda_env", "f5-tts")
+        self.f5_remove_silence: bool = config.get("f5_remove_silence", False)
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -74,8 +83,10 @@ class Narrator:
             return self._generate_edge_tts(text, output_path, voice)
         elif self.engine == "elevenlabs":
             return self._generate_elevenlabs(text, output_path, voice)
+        elif self.engine == "f5-tts":
+            return self._generate_f5_tts(text, output_path)
         else:
-            raise ValueError(f"Unknown TTS engine: {self.engine}. Use 'edge-tts' or 'elevenlabs'.")
+            raise ValueError(f"Unknown TTS engine: {self.engine}. Use 'edge-tts', 'elevenlabs', or 'f5-tts'.")
 
     def generate_all_narrations(
         self,
@@ -171,6 +182,9 @@ class Narrator:
             await communicate.save(str(output_path))
 
         asyncio.run(_run())
+        if not output_path.exists() or output_path.stat().st_size == 0:
+            logger.error("edge-tts produced empty file: %s", output_path.name)
+            raise RuntimeError(f"edge-tts produced empty/missing file: {output_path}")
         logger.info("edge-tts generated: %s (%.1fs)", output_path.name,
                     self.get_narration_duration(output_path))
         return output_path
@@ -196,6 +210,114 @@ class Narrator:
         save(audio, str(output_path))
         logger.info("ElevenLabs generated: %s", output_path.name)
         return output_path
+
+    def _generate_f5_tts(self, text: str, output_path: Path) -> Path:
+        """Generate audio using F5-TTS via the bridge script in a conda env.
+
+        Calls the ``f5_tts_bridge.py`` script using the Python interpreter
+        from the conda environment, avoiding DLL/import conflicts with the
+        host Python (e.g. 3.14).
+        """
+        if not self.f5_ref_audio:
+            raise ValueError(
+                "f5_ref_audio must be set in narration config when using f5-tts engine. "
+                "Provide a ~15s reference audio WAV file for voice cloning."
+            )
+
+        ref_audio_path = Path(self.f5_ref_audio).resolve()
+        if not ref_audio_path.exists():
+            raise FileNotFoundError(f"F5-TTS reference audio not found: {ref_audio_path}")
+
+        # F5-TTS outputs .wav natively
+        wav_output = output_path.with_suffix(".wav").resolve()
+
+        # Bridge script path (next to this package's video_automation dir)
+        bridge_script = Path(__file__).parent.parent / "f5_tts_bridge.py"
+        if not bridge_script.exists():
+            raise FileNotFoundError(f"F5-TTS bridge script not found: {bridge_script}")
+
+        # Use the conda env's Python directly (avoids 'conda run' issues)
+        conda_python = Path.home() / "miniconda3" / "envs" / self.f5_conda_env / "python.exe"
+        if not conda_python.exists():
+            raise RuntimeError(
+                f"Conda env Python not found: {conda_python}\n"
+                f"Create the environment:\n"
+                f"  conda create -n {self.f5_conda_env} python=3.11 -y\n"
+                f"  conda activate {self.f5_conda_env}\n"
+                "  pip install f5-tts torch torchaudio"
+            )
+
+        # Write texts to temp files to avoid Windows CLI encoding issues (UTF-8)
+        import tempfile
+        gen_text_file = Path(tempfile.mktemp(suffix="_gen.txt"))
+        ref_text_file = Path(tempfile.mktemp(suffix="_ref.txt"))
+        gen_text_file.write_text(text, encoding="utf-8")
+        ref_text_file.write_text(self.f5_ref_text, encoding="utf-8")
+
+        cmd = [
+            str(conda_python),
+            "-X", "utf8",
+            str(bridge_script),
+            "--model", self.f5_model,
+            "--ref_audio", str(ref_audio_path),
+            "--ref_text_file", str(ref_text_file),
+            "--gen_text_file", str(gen_text_file),
+            "--output_file", str(wav_output),
+            "--speed", str(self.f5_speed),
+        ]
+        if self.f5_remove_silence:
+            cmd.append("--remove_silence")
+
+        logger.info("F5-TTS generating: %s (conda env: %s)", output_path.name, self.f5_conda_env)
+        logger.debug("F5-TTS command: %s", " ".join(cmd))
+
+        try:
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,  # 5 min max per segment
+            )
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(f"F5-TTS timed out after 300s for: {output_path.name}")
+        finally:
+            gen_text_file.unlink(missing_ok=True)
+            ref_text_file.unlink(missing_ok=True)
+
+        if result.returncode != 0:
+            logger.error("F5-TTS stderr:\n%s", result.stderr)
+            raise RuntimeError(
+                f"F5-TTS CLI failed (exit {result.returncode}):\n{result.stderr[:500]}"
+            )
+
+        if not wav_output.exists() or wav_output.stat().st_size == 0:
+            raise RuntimeError(f"F5-TTS produced empty/missing file: {wav_output}")
+
+        # Convert to mp3 if the caller requested .mp3
+        if output_path.suffix.lower() == ".mp3":
+            self._wav_to_mp3(wav_output, output_path)
+            wav_output.unlink(missing_ok=True)
+        else:
+            output_path = wav_output
+
+        logger.info("F5-TTS generated: %s (%.1fs)", output_path.name,
+                    self.get_narration_duration(output_path))
+        return output_path
+
+    @staticmethod
+    def _wav_to_mp3(wav_path: Path, mp3_path: Path) -> None:
+        """Convert WAV to MP3 using ffmpeg."""
+        try:
+            subprocess.run(
+                ["ffmpeg", "-y", "-i", str(wav_path), "-q:a", "2", str(mp3_path)],
+                capture_output=True,
+                check=True,
+            )
+        except FileNotFoundError:
+            raise RuntimeError(
+                "ffmpeg not found. Install ffmpeg to convert F5-TTS WAV output to MP3, "
+                "or set output files to .wav format."
+            )
 
     # ------------------------------------------------------------------
     # Duration helpers
@@ -227,211 +349,24 @@ class Narrator:
 
 
 # ---------------------------------------------------------------------------
-# Narration texts for each sequence (extracted from VIDEO_SCRIPT.md)
+# Narration texts — loaded from narrations.yaml
 # ---------------------------------------------------------------------------
-NARRATION_TEXTS: dict[str, str] = {
-    "seq00": (
-        "Vous avez 1 million de bâtiments dans votre PostGIS ? "
-        "Vous cherchez juste ceux à 200 mètres d'une route spécifique ? "
-        "Et vous voulez ça en moins de 2 secondes ? "
-        "C'est exactement ce que fait FilterMate."
-    ),
-    "seq01": (
-        "En SIG, le filtrage est une tâche centrale. "
-        "Mais QGIS native a ses limites : expressions complexes, aucun historique, "
-        "aucun système de favoris, performance dégradée sur les grosses sources. "
-        "FilterMate résout tout ça. C'est un plugin open source, "
-        "entièrement intégré à QGIS 3 et 4, avec une architecture multi-backend "
-        "qui choisit automatiquement la meilleure stratégie selon votre données source."
-    ),
-    "seq02": (
-        "Installation en 3 clics depuis le dépôt officiel QGIS. "
-        "Pour les bases PostgreSQL, un simple pip install psycopg2-binary suffit. "
-        "FilterMate fonctionne sur Windows, Linux et macOS."
-    ),
-    "seq03": (
-        "L'interface se présente sous forme d'un panneau ancré dans QGIS, "
-        "organisé en 3 onglets principaux : Filtrage, Exploration des données, et Export. "
-        "Support du thème sombre automatique, 22 langues disponibles."
-    ),
-    "seq04_part1": (
-        "Voilà un jeu de données BDTopo — 1 million de bâtiments dans PostgreSQL. "
-        "Je sélectionne ma couche source : les routes. "
-        "Ma couche cible : les bâtiments."
-    ),
-    "seq04_part2": (
-        "Je choisis le prédicat géométrique touches, "
-        "j'ajoute un buffer de 50 mètres... et j'applique. "
-        "FilterMate détecte automatiquement que c'est une couche PostgreSQL, "
-        "crée une vue matérialisée optimisée et renvoie le résultat : "
-        "1 milliseconde. Exactement."
-    ),
-    "seq04_part3": (
-        "Je peux annuler avec l'undo — 100 états conservés. "
-        "Ou rappeler un filtre favori enregistré précédemment. "
-        "Tout ça sans jamais écrire une seule ligne de SQL."
-    ),
-    "seq05": (
-        "L'onglet Exploration vous permet de parcourir vos entités une à une, "
-        "avec centrage automatique sur la carte. "
-        "Pour les couches raster, 5 outils interactifs sont disponibles : "
-        "sélection par clic, rectangle, synchronisation histogramme, "
-        "affichage multi-bandes, et réinitialisation de plage."
-    ),
-    "seq06": (
-        "L'export GeoPackage est l'une des fonctionnalités les plus puissantes. "
-        "FilterMate ne se contente pas d'exporter vos données — "
-        "il embarque votre projet QGIS complet dans le fichier. "
-        "Hiérarchie des groupes, styles des couches, système de coordonnées — tout est préservé. "
-        "À l'ouverture, QGIS reconstitue automatiquement votre arborescence. "
-        "Idéal pour partager un livrable complet en un seul fichier."
-    ),
-    "seq07": (
-        "Derrière l'interface simple, FilterMate embarque 4 backends optimisés. "
-        "Il choisit automatiquement le meilleur selon le type de votre source de données. "
-        "Pour PostgreSQL : vues matérialisées et requêtes parallèles. "
-        "Pour Spatialite : index R-tree. "
-        "Et pour tout le reste : le backend OGR universel."
-    ),
-    "seq08": (
-        "FilterMate est construit sur une architecture hexagonale — "
-        "aussi appelée Ports & Adapters. "
-        "Le domaine métier pur est au centre, totalement indépendant de QGIS, "
-        "de la base de données ou de l'interface graphique. "
-        "Cela rend le code testable à 75%, maintenable, "
-        "et extensible pour de futurs backends."
-    ),
-    "seq09": (
-        "FilterMate va plus loin : filtrage chaîné avec buffers dynamiques, "
-        "détection automatique de la clé primaire PostgreSQL "
-        "pour les tables BDTopo et OSM, "
-        "100 états undo/redo, et un système de favoris avec contexte spatial. "
-        "396 tests automatisés. 22 langues. Compatible QGIS 3 et 4."
-    ),
-    "seq10": (
-        "FilterMate est disponible gratuitement sur le dépôt officiel QGIS. "
-        "Le code source est sur GitHub, la documentation sur le site dédié. "
-        "Installez-le, essayez-le, et si ça vous est utile — "
-        "laissez une étoile sur GitHub. À bientôt !"
-    ),
-}
+_NARRATIONS_YAML = Path(__file__).parent.parent / "narrations.yaml"
+_narration_cache: dict[str, dict[str, str]] = {}
 
 
-# ---------------------------------------------------------------------------
-# V01 Narration texts — Installation & Premier Pas (14 sequences)
-# Extracted from SCRIPT_V01_INSTALLATION.md and V01 sequence classes.
-# ---------------------------------------------------------------------------
-V01_NARRATION_TEXTS: dict[str, str] = {
-    "v01_s00": (
-        "Un million de batiments dans votre base de donnees. "
-        "Vous cherchez uniquement ceux qui touchent une route precise. "
-        "Temps de reponse ? Deux secondes. Bienvenue dans FilterMate. "
-        "Dans cette premiere video, on va installer le plugin ensemble, "
-        "decouvrir son interface, et realiser votre tout premier filtrage "
-        "en moins de 7 minutes."
-    ),
-    "v01_s01": (
-        "L'installation se fait en 3 clics depuis QGIS. "
-        "Allez dans le menu Extensions, puis Gerer les extensions. "
-        "Dans l'onglet Toutes, tapez FilterMate dans la barre de recherche. "
-        "Le plugin apparait. Cliquez sur Installer. C'est tout. "
-        "FilterMate est gratuit, open source, et disponible sur le depot officiel QGIS "
-        "Windows, Linux et macOS."
-    ),
-    "v01_s02": (
-        "Pour lancer FilterMate, cliquez sur son icone dans la barre d'outils, "
-        "ou allez dans le menu Extensions puis FilterMate. "
-        "Un panneau lateral s'ouvre, c'est le Dock Widget. "
-        "Pour l'instant, il est vide. C'est normal. "
-        "FilterMate detecte automatiquement les couches de votre projet. "
-        "Des qu'on va charger des donnees, l'interface va se remplir. "
-        "Chargeons nos donnees de demonstration : un Shapefile des departements "
-        "de France, environ 100 entites, et un Shapefile des communes, 35 000 entites."
-    ),
-    "v01_s03": (
-        "Prenons un moment pour comprendre l'interface. "
-        "Elle est divisee en 3 zones principales, separees par un splitter vertical. "
-        "En haut, la Zone d'Exploration. C'est ici que vous parcourez et "
-        "selectionnez les entites de vos couches. "
-        "En bas, la Toolbox. Elle contient deux onglets : FILTERING et EXPORTING. "
-        "Et enfin, l'Action Bar. Ce sont les 6 boutons d'action. "
-        "Remarquez aussi le header : la pastille orange indique vos favoris, "
-        "et la pastille bleue affiche le backend actif."
-    ),
-    "v01_s04": (
-        "La Zone d'Exploration possede 6 boutons dans sa barre laterale. "
-        "Identify ouvre la fenetre d'identification QGIS. "
-        "Zoom centre la carte sur l'entite. "
-        "Select surligne l'entite. Track active le suivi automatique. "
-        "Link synchronise les selecteurs. "
-        "Reset reinitialise toutes les proprietes d'exploration."
-    ),
-    "v01_s05": (
-        "L'Action Bar est le coeur de FilterMate. Six boutons. "
-        "Filter applique le filtre. Undo annule, Redo retablit. "
-        "Unfilter retire tous les filtres. Export exporte en GeoPackage. "
-        "Et About, le seul bouton toujours actif. "
-        "Quand l'onglet EXPORTING est actif, les boutons Filter, Undo, Redo "
-        "et Unfilter se desactivent, et inversement avec Export."
-    ),
-    "v01_s06": (
-        "Passons a la pratique. Nos deux couches sont chargees : les departements "
-        "et les communes. Dans la Zone d'Exploration, je selectionne la couche "
-        "departements. Je choisis Gironde. "
-        "Dans l'onglet FILTERING, FilterMate a reconnu ma selection. "
-        "En couche cible, je choisis communes. "
-        "Predicat spatial : Intersects. Je clique sur Filter. "
-        "Les 35 000 communes sont filtrees instantanement. "
-        "Seules celles qui intersectent la Gironde restent visibles. "
-        "FilterMate a detecte le backend OGR automatiquement."
-    ),
-    "v01_s07": (
-        "FilterMate s'adapte automatiquement au theme de QGIS. "
-        "Vous etes en mode sombre ? Le plugin le detecte et ajuste ses couleurs, "
-        "ses icones et ses bordures. Pas besoin de configurer quoi que ce soit. "
-        "Trois modes : automatique, theme clair force, ou theme sombre force."
-    ),
-    "v01_s08": (
-        "FilterMate parle 22 langues. Francais, anglais, espagnol, allemand, "
-        "chinois, japonais, arabe... La langue se change dans la configuration. "
-        "Changeons vers l'anglais... Toute l'interface se met a jour immediatement, "
-        "sans relancer le plugin."
-    ),
-    "v01_s09": (
-        "Astuce pour les debutants : activez le mode verbose. "
-        "Dans la configuration, changez FEEDBACK_LEVEL de normal a verbose. "
-        "En mode verbose, FilterMate vous explique tout ce qu'il fait. "
-        "Trois niveaux : minimal pour les erreurs, normal pour un retour equilibre, "
-        "et verbose pour tout voir."
-    ),
-    "v01_s10": (
-        "En complement du mode verbose, FilterMate ecrit ses logs dans le panneau "
-        "standard de QGIS. Allez dans Vue, Panneaux, Messages de log. "
-        "Vous trouverez un onglet dedie FilterMate. "
-        "C'est ici que vous pouvez suivre les requetes SQL generees, "
-        "les temps d'execution, les erreurs eventuelles."
-    ),
-    "v01_s11": (
-        "Le selecteur affiche directement le nom des departements, pas un identifiant "
-        "cryptique. C'est grace a la detection automatique du champ d'affichage. "
-        "FilterMate analyse votre couche et choisit intelligemment le meilleur champ "
-        "selon 6 niveaux de priorite. C'est automatique."
-    ),
-    "v01_s12": (
-        "Tout ce que vous configurez dans FilterMate est sauvegarde automatiquement. "
-        "Le champ d'affichage, vos preferences, l'etat des toggles — tout est persiste "
-        "dans une base SQLite locale. "
-        "Fermez QGIS, rouvrez-le demain — FilterMate retrouve vos reglages."
-    ),
-    "v01_s13": (
-        "Voila, vous avez installe FilterMate, decouvert les 3 zones de l'interface, "
-        "utilise les boutons de la barre laterale et de l'Action Bar, "
-        "et realise votre premier filtrage spatial. Pas mal pour 7 minutes ! "
-        "Retrouvez le code source sur GitHub, le plugin sur le depot officiel QGIS, "
-        "et la documentation complete sur le site dedie. Les liens sont dans la description. "
-        "Dans la prochaine video, on approfondit le filtrage geometrique. A tres vite !"
-    ),
-}
+def _load_narrations_yaml() -> dict[str, dict[str, str]]:
+    """Load narrations.yaml and cache the result."""
+    if _narration_cache:
+        return _narration_cache
+    import yaml
+    if not _NARRATIONS_YAML.exists():
+        logger.warning("narrations.yaml not found at %s", _NARRATIONS_YAML)
+        return {"original": {}, "v01": {}}
+    with open(_NARRATIONS_YAML, encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    _narration_cache.update(data)
+    return _narration_cache
 
 
 def get_narration_texts(video: str | None = None) -> dict[str, str]:
@@ -442,6 +377,7 @@ def get_narration_texts(video: str | None = None) -> dict[str, str]:
     video : str or None
         Video identifier (e.g. "v01"). None returns original texts.
     """
-    if video == "v01":
-        return V01_NARRATION_TEXTS
-    return NARRATION_TEXTS
+    data = _load_narrations_yaml()
+    if video and video in data:
+        return data[video]
+    return data.get("original", {})

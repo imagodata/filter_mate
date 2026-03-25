@@ -137,7 +137,7 @@ class VideoAssembler:
         filter_complex = (
             f"[0:a]volume={original_volume}[orig];"
             f"[1:a]volume={narration_volume}[narr];"
-            "[orig][narr]amix=inputs=2:duration=first:dropout_transition=3[aout]"
+            "[orig][narr]amix=inputs=2:duration=first:dropout_transition=3:normalize=0[aout]"
         )
 
         _run_ffmpeg(
@@ -372,6 +372,201 @@ class VideoAssembler:
 
         logger.info("Final video created: %s", output_path)
         return output_path
+
+    # ------------------------------------------------------------------
+    # Timecode-based assembly (from TimelineSequence)
+    # ------------------------------------------------------------------
+
+    def create_final_video_with_timecodes(
+        self,
+        clips: list[str | Path],
+        timeline_results: list,
+        output_path: str | Path | None = None,
+    ) -> Path:
+        """
+        Full post-production with precise narration timecodes.
+
+        Each clip has an associated TimelineResult (or None for legacy
+        sequences).  Narration segments are placed at their exact recorded
+        timecodes in the final audio track.
+
+        Parameters
+        ----------
+        clips : list
+            Ordered list of video clip files (one per sequence).
+        timeline_results : list
+            List of TimelineResult objects (or None) matching each clip.
+        output_path : str | Path, optional
+            Final output path.
+        """
+        if output_path is None:
+            output_path = self.final_dir / "filtermate_final.mp4"
+        output_path = Path(output_path)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+
+            # Step 1: Concatenate all video clips
+            logger.info("Step 1/4: Concatenating %d clips…", len(clips))
+            concat_path = tmp / "concatenated.mp4"
+            if len(clips) == 1:
+                shutil.copy2(clips[0], concat_path)
+            else:
+                self._concat_clips(clips, concat_path)
+
+            # Step 2: Get clip durations to compute absolute timecodes
+            logger.info("Step 2/4: Computing narration timecodes…")
+            clip_offsets = self._get_clip_offsets(clips)
+
+            # Step 3: Build narration track with precise timecodes
+            logger.info("Step 3/4: Building narration track…")
+            narr_track = tmp / "narration_timed.wav"
+            has_narration = self._build_timed_narration_track(
+                clip_offsets, timeline_results, narr_track,
+            )
+
+            # Step 4: Mix narration with video and encode
+            if has_narration:
+                logger.info("Step 4/4: Mixing narration + final encode…")
+                narrated_path = tmp / "with_narration.mp4"
+                self.add_narration(concat_path, narr_track, narrated_path)
+            else:
+                narrated_path = concat_path
+
+            _run_ffmpeg(
+                "-i", str(narrated_path),
+                "-c:v", self.codec,
+                "-crf", self.quality,
+                "-preset", "slow",
+                "-c:a", "aac",
+                "-b:a", "192k",
+                "-movflags", "+faststart",
+                "-vf", f"scale={self.resolution.replace('x', ':')}",
+                "-r", str(self.fps),
+                str(output_path),
+            )
+
+        logger.info("Final video (timecode-based) created: %s", output_path)
+        return output_path
+
+    def _get_clip_offsets(self, clips: list[str | Path]) -> list[float]:
+        """
+        Return cumulative start offsets for each clip.
+
+        E.g., if clip durations are [10.0, 15.0, 20.0],
+        offsets are [0.0, 10.0, 25.0].
+        """
+        import json
+
+        offsets: list[float] = [0.0]
+        for clip in clips[:-1]:
+            try:
+                result = subprocess.run(
+                    [
+                        "ffprobe", "-v", "quiet",
+                        "-print_format", "json",
+                        "-show_format",
+                        str(clip),
+                    ],
+                    capture_output=True, text=True, check=True,
+                )
+                data = json.loads(result.stdout)
+                duration = float(data["format"]["duration"])
+            except Exception as exc:
+                logger.warning("Could not get duration for %s: %s", clip, exc)
+                duration = 30.0  # fallback
+            offsets.append(offsets[-1] + duration)
+        return offsets
+
+    def _build_timed_narration_track(
+        self,
+        clip_offsets: list[float],
+        timeline_results: list,
+        output_path: Path,
+    ) -> bool:
+        """
+        Build a single narration audio track with segments placed at
+        their exact timecodes using FFmpeg adelay filter.
+
+        Returns True if any narration segments were placed.
+        """
+        # Collect all (absolute_timecode, audio_path) pairs
+        all_segments: list[tuple[float, Path]] = []
+
+        for i, tl_result in enumerate(timeline_results):
+            if tl_result is None:
+                continue
+            clip_offset = clip_offsets[i] if i < len(clip_offsets) else 0.0
+            for rel_timecode, audio_path in tl_result.narration_timecodes:
+                abs_timecode = clip_offset + rel_timecode
+                all_segments.append((abs_timecode, audio_path))
+                logger.debug(
+                    "Narration segment at %.1fs: %s", abs_timecode, audio_path.name,
+                )
+
+        if not all_segments:
+            return False
+
+        logger.info("Placing %d narration segments with timecodes", len(all_segments))
+
+        # Get total video duration for the silent base track
+        total_duration = clip_offsets[-1] + 60.0 if clip_offsets else 300.0
+
+        # Build FFmpeg filter: create silent base, overlay each segment with adelay
+        inputs = []
+        filter_parts = []
+
+        # Input 0: silent base track
+        inputs.extend([
+            "-f", "lavfi",
+            "-t", str(total_duration),
+            "-i", f"anullsrc=r=44100:cl=stereo",
+        ])
+
+        # Filter out empty or missing narration files
+        valid_segments: list[tuple[float, Path]] = []
+        for timecode, audio_path in all_segments:
+            if not audio_path.exists() or audio_path.stat().st_size == 0:
+                logger.warning("Skipping invalid narration segment: %s", audio_path.name)
+                continue
+            valid_segments.append((timecode, audio_path))
+
+        if not valid_segments:
+            return False
+
+        all_segments = valid_segments
+        logger.info("Placing %d valid narration segments", len(all_segments))
+
+        # Add each narration segment as an input
+        for idx, (timecode, audio_path) in enumerate(all_segments):
+            input_idx = idx + 1
+            inputs.extend(["-i", str(audio_path)])
+            delay_ms = int(timecode * 1000)
+            filter_parts.append(
+                f"[{input_idx}:a]adelay={delay_ms}|{delay_ms}[seg{idx}]"
+            )
+
+        # Mix all delayed segments with the silent base.
+        # normalize=0 prevents amix from dividing volume by N inputs
+        # (otherwise narration becomes inaudible with many segments).
+        mix_inputs = "[0:a]" + "".join(f"[seg{i}]" for i in range(len(all_segments)))
+        filter_parts.append(
+            f"{mix_inputs}amix=inputs={len(all_segments) + 1}:"
+            f"duration=first:dropout_transition=0:normalize=0[aout]"
+        )
+
+        filter_complex = ";".join(filter_parts)
+
+        _run_ffmpeg(
+            *inputs,
+            "-filter_complex", filter_complex,
+            "-map", "[aout]",
+            "-c:a", "pcm_s16le",
+            str(output_path),
+        )
+
+        logger.info("Timed narration track created: %s", output_path.name)
+        return True
 
     # ------------------------------------------------------------------
     # Private helpers

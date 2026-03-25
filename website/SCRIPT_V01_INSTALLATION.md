@@ -17,18 +17,16 @@
 |----------|-------|-------|
 | 0 | Hook — "Filtrer 1 million d'entites en 2 secondes" | 0:15 |
 | 1 | Installation via le Plugin Manager | 0:30 |
-| 2 | Premier lancement — le dock widget apparait | 0:30 |
-| 3 | Architecture de l'interface : les 3 zones | 1:15 |
+| 2 | Premier lancement — le dock widget apparait | 0:20 |
+| 3 | Decouverte de l'interface : les 3 zones + Action Bar | 1:45 |
 | 4 | Les 6 boutons de la barre laterale (Exploring Zone) | 0:30 |
-| 5 | Les 6 boutons de l'Action Bar | 0:30 |
-| 6 | Premier filtrage : Shapefile local | 1:30 |
-| 7 | Theme sombre automatique | 0:20 |
-| 8 | Changement de langue (22 langues) | 0:20 |
-| 9 | Mode verbose — votre outil d'apprentissage | 0:20 |
-| 10 | QGIS Log Messages Panel — onglet FilterMate | 0:20 |
-| 11 | Auto-detection du champ d'affichage | 0:20 |
-| 12 | Configuration sauvegardee automatiquement | 0:15 |
-| 13 | Ou trouver l'aide — Conclusion | 0:15 |
+| 5 | Premier filtrage : Shapefile local | 1:30 |
+| 6 | Changement de langue (22 langues) | 0:20 |
+| 7 | Mode verbose — votre outil d'apprentissage | 0:20 |
+| 8 | QGIS Log Messages Panel — onglet FilterMate | 0:20 |
+| 9 | Auto-detection du champ d'affichage | 0:20 |
+| 10 | Configuration sauvegardee automatiquement | 0:15 |
+| 11 | Ou trouver l'aide — Conclusion | 0:15 |
 
 ---
 
@@ -100,21 +98,21 @@
 
 ---
 
-## SEQUENCE 2 — PREMIER LANCEMENT (0:45 - 1:15)
+## SEQUENCE 2 — PREMIER LANCEMENT (0:45 - 1:05)
 
 ### Visuel suggere
-> Capture QGIS : cliquer sur l'icone FilterMate dans la barre d'outils (ou menu Extensions > FilterMate). Le dock widget s'ouvre et s'ancre a droite de l'ecran. Montrer le panneau vide — aucune couche chargee.
+> Capture QGIS : cliquer sur l'icone FilterMate dans la barre d'outils (ou menu Extensions > FilterMate). Le dock widget s'ouvre et s'ancre a droite de l'ecran. Montrer le panneau vide — aucune couche chargee. Charger les donnees de demo, l'interface se remplit. Changer le champ d'affichage, puis ecrire "Paris" dans le selecteur d'entite (single selection). Cliquer sur le bouton suivant, puis sur precedent pour revenir sur Paris.
 
 ### Narration
 > *"Pour lancer FilterMate, cliquez sur son icone dans la barre d'outils, ou allez dans le menu 'Extensions' puis 'FilterMate'. Un panneau lateral s'ouvre — c'est le Dock Widget."*
 
-> *"Pour l'instant, il est vide. C'est normal — FilterMate detecte automatiquement les couches de votre projet. Des qu'on va charger des donnees, l'interface va se remplir."*
+> *"Pour l'instant, il est vide. C'est normal — FilterMate detecte automatiquement les couches de votre projet. Chargeons nos donnees de demonstration : un Shapefile des departements de France — environ 100 entites — et un Shapefile des communes — 35 000 entites."*
 
-> *"Chargeons nos donnees de demonstration : un Shapefile des departements de France — environ 100 entites — et un Shapefile des communes — 35 000 entites."*
+> *"L'interface se remplit. Apres avoir change le champ d'affichage, je tape 'Paris' dans le selecteur. Le departement apparait. Avec le bouton suivant, je passe au departement d'apres — puis precedent pour revenir sur Paris. La navigation est immediate."*
 
 ---
 
-## SEQUENCE 3 — ARCHITECTURE DE L'INTERFACE (1:15 - 2:30)
+## SEQUENCE 3 — DECOUVERTE DE L'INTERFACE (1:05 - 2:50)
 
 ### Visuel suggere
 > Capture annotee de l'interface FilterMate avec 3 zones clairement delimitees par des rectangles de couleur :
@@ -122,18 +120,33 @@
 > - Zone B (vert) : Toolbox en bas (onglets FILTERING et EXPORTING)
 > - Zone C (bleu) : Action Bar (6 boutons)
 > - Header bar avec les pastilles Favoris (orange) et Backend (bleu)
-> Animation : chaque zone s'eclaire a son tour pendant la narration.
+> Animation : chaque zone s'eclaire a son tour pendant la narration, puis zoom sur l'Action Bar pour detailler les 6 boutons.
 
-### Narration
+### Narration — partie 1 : les 3 zones
 > *"Prenons un moment pour comprendre l'interface. Elle est divisee en 3 zones principales, separees par un splitter vertical que vous pouvez ajuster selon vos besoins."*
 
 > *"En haut, la Zone d'Exploration. C'est ici que vous parcourez et selectionnez les entites de vos couches. Vous pouvez naviguer entite par entite, faire des selections multiples, ou ecrire des expressions personnalisees."*
 
 > *"En bas, la Toolbox. Elle contient deux onglets : FILTERING, pour configurer vos filtres spatiaux — couche source, couche cible, predicat geometrique — et EXPORTING, pour exporter vos donnees filtrees au format GeoPackage ou KML."*
 
-> *"Et enfin, l'Action Bar. Ce sont les 6 boutons d'action — on va les detailler dans un instant. C'est le coeur de l'interaction : tout le reste de l'interface sert a configurer ce que ces boutons vont executer."*
-
 > *"Remarquez aussi le header en haut du panneau : la pastille orange indique vos favoris enregistres, et la pastille bleue affiche le backend actif — le moteur de traitement que FilterMate a selectionne automatiquement pour votre source de donnees."*
+
+### Narration — partie 3 : l'Action Bar
+> *"Et enfin, l'Action Bar. C'est le coeur de l'interaction : tout le reste de l'interface sert a configurer ce que ces 6 boutons vont executer."*
+
+> *"**Filter** — applique le filtre que vous avez configure. C'est LE bouton principal. Il modifie la visibilite des entites directement sur la carte."*
+
+> *"**Undo** — annule le dernier filtre. FilterMate garde en memoire jusqu'a 100 etats precedents."*
+
+> *"**Redo** — retablit un filtre annule. Comme le Ctrl+Z / Ctrl+Y que vous connaissez deja."*
+
+> *"**Unfilter** — retire TOUS les filtres actifs de TOUTES les couches du projet. Un retour a la case depart."*
+
+> *"**Export** — exporte vos donnees filtrees au format GeoPackage, avec le projet QGIS embarque."*
+
+> *"Et **About** — le seul bouton qui est toujours actif, quel que soit l'etat du plugin. Il affiche les informations sur la version, les liens utiles et la configuration."*
+
+> *"Un detail important : quand l'onglet EXPORTING est actif dans la Toolbox, les boutons Filter, Undo, Redo et Unfilter se desactivent — et inversement avec Export quand l'onglet FILTERING est actif. Chaque contexte a ses boutons."*
 
 ---
 
@@ -223,25 +236,25 @@
 
 ---
 
-## SEQUENCE 4 — LES 6 BOUTONS DE LA BARRE LATERALE (2:30 - 3:00)
+## SEQUENCE 4 — LES 6 BOUTONS DE LA BARRE LATERALE (2:50 - 3:20)
 
 ### Visuel suggere
-> Zoom sur la barre laterale de la Zone d'Exploration. Chaque bouton est survole avec une annotation qui apparait a cote.
+> Demo live : chaque bouton est active ou clique devant la camera (sauf Reset). Pour Select, on selectionne un departement voisin de Paris (ex: Seine-et-Marne) pour montrer la surbrillance sur la carte. Chaque action produit un effet visible immediatement.
 
 ### Narration
-> *"La Zone d'Exploration possede 6 boutons dans sa barre laterale. Ce sont vos outils de navigation :"*
+> *"La Zone d'Exploration possede 6 boutons dans sa barre laterale. Voyons-les en action :"*
 
-> *"**Identify** — ouvre la fenetre d'identification QGIS pour l'entite selectionnee. Pratique pour inspecter rapidement les attributs."*
+> *"**Identify** — je clique : l'entite clignote en rouge sur la carte. Un flash visuel pour la reperer instantanement."*
 
-> *"**Zoom** — centre et zoome la carte sur l'entite en cours."*
+> *"**Zoom** — je clique : la carte se centre et zoome sur l'entite en cours."*
 
-> *"**Select** — un bouton a bascule. Active, il surligne l'entite sur la carte. Desactive, il retire la selection."*
+> *"**Select** — j'active le bouton, puis je selectionne la Seine-et-Marne dans le selecteur. Le departement apparait en surbrillance sur la carte, juste a cote de Paris. Je desactive : la surbrillance disparait."*
 
-> *"**Track** — active le suivi automatique. A chaque changement d'entite dans le selecteur, la carte se recentre et la suivante est mise en surbrillance."*
+> *"**Track** — j'active le suivi automatique. Maintenant, a chaque changement d'entite dans le selecteur, la carte se recentre automatiquement et l'entite suivante est mise en surbrillance."*
 
-> *"**Link** — synchronise tous les groupes de selection entre eux : simple, multiple et personnalise."*
+> *"**Link** — celui-ci est deja active par defaut. Il synchronise les trois groupes de selection — simple, multiple et personnalise — entre eux automatiquement."*
 
-> *"**Reset** — reinitialise toutes les proprietes d'exploration de la couche active. Un retour a zero propre."*
+> *"**Reset** — reinitialise toutes les proprietes d'exploration de la couche active. Un retour a zero propre. On ne le declenche pas maintenant pour garder notre contexte."*
 
 ---
 
@@ -255,18 +268,18 @@
   </tr>
   <tr style="background: #9C27B0;">
     <td style="text-align: center; padding: 12px; color: #fff; width: 20%;">
-      <img src="../icons/identify_alt.png" width="28"/><br/><strong>Identify</strong><br/><small>Inspecter les attributs</small>
+      <img src="../icons/identify_alt.png" width="28"/><br/><strong>Identify</strong><br/><small>Flash visuel sur la carte</small>
     </td>
-    <td style="text-align: center; padding: 8px; color: #fff; width: 15%;"><em>1 clic</em></td>
+    <td style="text-align: center; padding: 8px; color: #fff; width: 15%;"><em>clic</em></td>
     <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
-      Fenetre Identify Results
+      Clignotement rouge de l'entite
     </td>
   </tr>
   <tr style="background: #9C27B0;">
     <td style="text-align: center; padding: 12px; color: #fff;">
       <img src="../icons/zoom.png" width="28"/><br/><strong>Zoom</strong><br/><small>Centrer sur l'entite</small>
     </td>
-    <td style="text-align: center; padding: 8px; color: #fff;"><em>1 clic</em></td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>clic</em></td>
     <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
       Carte centree + zoom
     </td>
@@ -277,7 +290,7 @@
     </td>
     <td style="text-align: center; padding: 8px; color: #fff;"><em>ON/OFF</em></td>
     <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
-      Entite surlignee
+      Seine-et-Marne en surbrillance
     </td>
   </tr>
   <tr style="background: #9C27B0;">
@@ -291,11 +304,11 @@
   </tr>
   <tr style="background: #9C27B0;">
     <td style="text-align: center; padding: 12px; color: #fff;">
-      <img src="../icons/link.png" width="28"/><br/><strong>Link</strong><br/><small>Synchroniser selecteurs (bascule)</small>
+      <img src="../icons/link.png" width="28"/><br/><strong>Link</strong><br/><small>Synchroniser selecteurs (auto)</small>
     </td>
-    <td style="text-align: center; padding: 8px; color: #fff;"><em>ON/OFF</em></td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>ON auto</em></td>
     <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
-      Selecteurs synchronises
+      Selecteurs synchronises par defaut
     </td>
   </tr>
   <tr style="background: #9C27B0;">
@@ -311,89 +324,7 @@
 
 ---
 
-## SEQUENCE 5 — LES 6 BOUTONS DE L'ACTION BAR (3:00 - 3:30)
-
-### Visuel suggere
-> Zoom sur l'Action Bar. Chaque bouton s'eclaire avec un tooltip. Mettre en evidence que About est toujours actif (jamais grise), tandis que les 5 autres changent d'etat selon le contexte.
-
-### Narration
-> *"L'Action Bar est le coeur de FilterMate. Six boutons, chacun avec un role precis :"*
-
-> *"**Filter** — applique le filtre que vous avez configure. C'est LE bouton principal. Il modifie la visibilite des entites directement sur la carte."*
-
-> *"**Undo** — annule le dernier filtre. FilterMate garde en memoire jusqu'a 100 etats precedents."*
-
-> *"**Redo** — retablit un filtre annule. Comme le Ctrl+Z / Ctrl+Y que vous connaissez deja."*
-
-> *"**Unfilter** — retire TOUS les filtres actifs de TOUTES les couches du projet. Un retour a la case depart."*
-
-> *"**Export** — exporte vos donnees filtrees au format GeoPackage, avec le projet QGIS embarque."*
-
-> *"Et **About** — le seul bouton qui est toujours actif, quel que soit l'etat du plugin. Il affiche les informations sur la version, les liens utiles et la configuration."*
-
-> *"Un detail important : quand l'onglet EXPORTING est actif dans la Toolbox, les boutons Filter, Undo, Redo et Unfilter se desactivent — et inversement avec Export quand l'onglet FILTERING est actif. Chaque contexte a ses boutons."*
-
----
-
-### Diagramme — Activation des boutons selon l'onglet
-
-<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
-  <tr>
-    <td colspan="6" style="background: #388E3C; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
-      Onglet FILTERING actif
-    </td>
-  </tr>
-  <tr style="background: #4CAF50;">
-    <td style="text-align: center; padding: 10px; color: #fff;">
-      <img src="../icons/filter.png" width="32"/><br/><small>Filter</small><br/>✅
-    </td>
-    <td style="text-align: center; padding: 10px; color: #fff;">
-      <img src="../icons/undo.png" width="32"/><br/><small>Undo</small><br/>✅
-    </td>
-    <td style="text-align: center; padding: 10px; color: #fff;">
-      <img src="../icons/redo.png" width="32"/><br/><small>Redo</small><br/>✅
-    </td>
-    <td style="text-align: center; padding: 10px; color: #fff;">
-      <img src="../icons/unfilter.png" width="32"/><br/><small>Unfilter</small><br/>✅
-    </td>
-    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
-      <img src="../icons/export.png" width="32"/><br/><small>Export</small><br/>❌
-    </td>
-    <td style="text-align: center; padding: 10px; background: #1565C0; color: #fff;">
-      <img src="../icons/icon.png" width="32"/><br/><small>About</small><br/>✅
-    </td>
-  </tr>
-  <tr><td colspan="6" style="padding: 6px;"></td></tr>
-  <tr>
-    <td colspan="6" style="background: #F57C00; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
-      Onglet EXPORTING actif
-    </td>
-  </tr>
-  <tr style="background: #FF9800;">
-    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
-      <img src="../icons/filter.png" width="32"/><br/><small>Filter</small><br/>❌
-    </td>
-    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
-      <img src="../icons/undo.png" width="32"/><br/><small>Undo</small><br/>❌
-    </td>
-    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
-      <img src="../icons/redo.png" width="32"/><br/><small>Redo</small><br/>❌
-    </td>
-    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
-      <img src="../icons/unfilter.png" width="32"/><br/><small>Unfilter</small><br/>❌
-    </td>
-    <td style="text-align: center; padding: 10px; color: #fff;">
-      <img src="../icons/export.png" width="32"/><br/><small>Export</small><br/>✅
-    </td>
-    <td style="text-align: center; padding: 10px; background: #1565C0; color: #fff; border-radius: 0 0 8px 0;">
-      <img src="../icons/icon.png" width="32"/><br/><small>About</small><br/>✅
-    </td>
-  </tr>
-</table>
-
----
-
-## SEQUENCE 6 — PREMIER FILTRAGE : SHAPEFILE LOCAL (3:30 - 5:00)
+## SEQUENCE 5 — PREMIER FILTRAGE : SHAPEFILE LOCAL (3:20 - 4:50)
 
 ### Visuel suggere
 > Demo live en temps reel. Etapes visibles a l'ecran :
@@ -447,19 +378,7 @@ sequenceDiagram
 
 ---
 
-## SEQUENCE 7 — THEME SOMBRE AUTOMATIQUE (5:00 - 5:20)
-
-### Visuel suggere
-> Capture QGIS : montrer FilterMate en theme clair, puis basculer QGIS en theme sombre (Preferences > General > Interface Theme > "Night Mapping"). FilterMate bascule automatiquement — les icones, les couleurs de fond, les bordures s'adaptent.
-
-### Narration
-> *"FilterMate s'adapte automatiquement au theme de QGIS. Vous etes en mode sombre ? Le plugin le detecte et ajuste ses couleurs, ses icones et ses bordures. Pas besoin de configurer quoi que ce soit — c'est instantane."*
-
-> *"Trois modes sont disponibles : automatique, qui suit QGIS, ou vous pouvez forcer le theme clair ou sombre dans la configuration."*
-
----
-
-## SEQUENCE 8 — CHANGEMENT DE LANGUE (5:20 - 5:40)
+## SEQUENCE 6 — CHANGEMENT DE LANGUE (4:50 - 5:10)
 
 ### Visuel suggere
 > Capture QGIS : ouvrir la configuration FilterMate (bouton About > onglet Config ou JSON TreeView), naviguer jusqu'au parametre de langue, montrer le menu deroulant avec les 22 langues disponibles. Changer de francais vers anglais, puis vers japonais — l'interface se met a jour instantanement.
@@ -507,7 +426,7 @@ mindmap
 
 ---
 
-## SEQUENCE 9 — MODE VERBOSE (5:40 - 6:00)
+## SEQUENCE 7 — MODE VERBOSE (5:10 - 5:30)
 
 ### Visuel suggere
 > Capture QGIS : ouvrir la configuration (JSON TreeView), naviguer vers `APP > DOCKWIDGET > FEEDBACK_LEVEL`. Montrer les 3 choix dans le menu deroulant : "minimal", "normal", "verbose". Selectionner "verbose". Effectuer un filtrage et montrer les messages detailles qui apparaissent dans la barre de message QGIS.
@@ -544,7 +463,7 @@ graph LR
 
 ---
 
-## SEQUENCE 10 — QGIS LOG MESSAGES PANEL (6:00 - 6:20)
+## SEQUENCE 8 — QGIS LOG MESSAGES PANEL (5:30 - 5:50)
 
 ### Visuel suggere
 > Capture QGIS : menu Vue > Panneaux > Messages de log (ou View > Panels > Log Messages). Montrer le panneau qui s'ouvre en bas. Cliquer sur l'onglet "FilterMate". Effectuer un filtrage et montrer les logs detailles qui apparaissent : timestamp, niveau, message.
@@ -556,7 +475,7 @@ graph LR
 
 ---
 
-## SEQUENCE 11 — AUTO-DETECTION DU CHAMP D'AFFICHAGE (6:20 - 6:40)
+## SEQUENCE 9 — AUTO-DETECTION DU CHAMP D'AFFICHAGE (5:50 - 6:10)
 
 ### Visuel suggere
 > Demo live : charger une couche avec un champ "nom" ou "name". Montrer que FilterMate l'a automatiquement detecte et l'utilise pour afficher les entites dans le selecteur. Puis charger une couche avec des champs moins evidents — montrer que FilterMate cherche intelligemment le meilleur champ.
@@ -609,7 +528,7 @@ graph TD
 
 ---
 
-## SEQUENCE 12 — CONFIGURATION SAUVEGARDEE AUTOMATIQUEMENT (6:40 - 6:55)
+## SEQUENCE 10 — CONFIGURATION SAUVEGARDEE AUTOMATIQUEMENT (6:10 - 6:25)
 
 ### Visuel suggere
 > Schema anime : montrer les proprietes de la couche (champ d'affichage selectionne, derniere entite parcourue, etat des toggles) qui sont ecrites dans une base SQLite locale. Puis fermer QGIS, le rouvrir, et montrer que tout est restaure a l'identique.
@@ -656,7 +575,7 @@ flowchart LR
 
 ---
 
-## SEQUENCE 13 — CONCLUSION & RESSOURCES (6:55 - 7:10)
+## SEQUENCE 11 — CONCLUSION & RESSOURCES (6:25 - 6:40)
 
 ### Visuel suggere
 > Ecran de fin avec le logo FilterMate, les 3 liens (GitHub, QGIS Plugins, Documentation), et un appel a l'action. Musique legere en fond.
@@ -679,36 +598,33 @@ flowchart LR
 | 0:00 | Hook — "1 million d'entites, 2 secondes" |
 | 0:15 | Installation via Plugin Manager |
 | 0:45 | Premier lancement — dock widget |
-| 1:15 | Architecture de l'interface (3 zones) |
-| 2:30 | Barre laterale (6 boutons Exploring) |
-| 3:00 | Action Bar (6 boutons d'action) |
-| 3:30 | Premier filtrage : Shapefile local |
-| 5:00 | Theme sombre automatique |
-| 5:20 | Changement de langue (22 langues) |
-| 5:40 | Mode verbose (FEEDBACK_LEVEL) |
-| 6:00 | QGIS Log Messages Panel |
-| 6:20 | Auto-detection du champ d'affichage |
-| 6:40 | Config sauvegardee automatiquement (SQLite) |
-| 6:55 | Conclusion + Ressources |
+| 1:05 | Decouverte de l'interface (3 zones + Action Bar) |
+| 2:50 | Barre laterale (6 boutons Exploring) |
+| 3:20 | Premier filtrage : Shapefile local |
+| 4:50 | Changement de langue (22 langues) |
+| 5:10 | Mode verbose (FEEDBACK_LEVEL) |
+| 5:30 | QGIS Log Messages Panel |
+| 5:50 | Auto-detection du champ d'affichage |
+| 6:10 | Config sauvegardee automatiquement (SQLite) |
+| 6:25 | Conclusion + Ressources |
 
 ### Captures QGIS requises
 
 1. Plugin Manager avec "FilterMate" dans la barre de recherche
 2. Icone FilterMate dans la barre d'outils QGIS
 3. Dock widget vide au premier lancement
-4. Dock widget avec couches chargees — vue d'ensemble annotee (3 zones)
-5. Zoom sur la barre laterale (6 boutons) avec annotations
-6. Zoom sur l'Action Bar (6 boutons) avec annotations
+4. Selecteur d'entite avec departement Paris selectionne (single selection)
+5. Dock widget avec couches chargees — vue d'ensemble annotee (3 zones + Action Bar)
+6. Zoom sur la barre laterale (6 boutons) avec annotations
 7. Couches departements + communes chargees dans QGIS
 8. Zone d'Exploration avec "Gironde" selectionnee
 9. Onglet FILTERING avec source/cible/predicat configures
 10. Resultat du filtrage : communes de la Gironde uniquement visibles
-11. Basculement theme clair vers theme sombre
-12. Menu deroulant de selection de langue
-13. Parametre FEEDBACK_LEVEL dans le JSON TreeView
-14. Panneau Log Messages avec onglet FilterMate
-15. Selecteur d'entites montrant les noms (pas les IDs)
-16. Ecran de fin avec liens GitHub / QGIS Plugins / Documentation
+11. Menu deroulant de selection de langue
+12. Parametre FEEDBACK_LEVEL dans le JSON TreeView
+13. Panneau Log Messages avec onglet FilterMate
+14. Selecteur d'entites montrant les noms (pas les IDs)
+15. Ecran de fin avec liens GitHub / QGIS Plugins / Documentation
 
 ### Donnees de demo
 
@@ -737,7 +653,7 @@ flowchart LR
 
 1. **Accessibilite** : Installation en 3 clics, aucune competence technique requise
 2. **Simplicite** : 3 zones, 6 boutons d'action, navigation intuitive
-3. **Intelligence** : Detection automatique du backend, du champ d'affichage, du theme
+3. **Intelligence** : Detection automatique du backend et du champ d'affichage
 4. **Pedagogie** : Le mode verbose transforme FilterMate en outil d'apprentissage
 5. **Persistence** : Configuration sauvegardee entre sessions sans intervention manuelle
 6. **Internationalisation** : 22 langues, changement instantane
@@ -763,3 +679,4 @@ flowchart LR
 
 *Script cree le 14 Mars 2026 — FilterMate v4.6.1*
 *Serie de tutoriels : Video 01 sur 10*
+

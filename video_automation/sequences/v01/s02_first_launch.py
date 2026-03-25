@@ -1,51 +1,276 @@
 """
-V01 Sequence 2 — PREMIER LANCEMENT (0:45 - 1:15)
-=================================================
-Cliquer sur l'icone FilterMate, le dock widget s'ouvre.
-Charger les donnees de demo (departements + communes).
+V01 Sequence 2 — PREMIER LANCEMENT + DÉCOUVERTE INTERFACE
+===========================================================
+Ouvrir FilterMate (dock vide), découvrir les 3 zones de l'interface
+(Exploring, Toolbox, Header) avec cycle des onglets,
+puis sélectionner la couche source, changer le champ d'affichage,
+naviguer avec next/prev et montrer la détection automatique (diagramme).
+
+Uses TimelineSequence for narration-synchronized execution.
 """
 from __future__ import annotations
 
-from sequences.base import VideoSequence
+import pyautogui
+
+from core.timeline import NarrationCue
+from sequences.base import TimelineSequence
 
 
-class V01S02FirstLaunch(VideoSequence):
+class V01S02FirstLaunch(TimelineSequence):
     name = "V01 — Premier lancement"
     sequence_id = "v01_s02"
-    duration_estimate = 30.0
+    duration_estimate = 95.0
     obs_scene = "QGIS + FilterMate"
-    diagram_ids = []
-    narration_text = (
-        "Pour lancer FilterMate, cliquez sur son icone dans la barre d'outils, "
-        "ou allez dans le menu Extensions puis FilterMate. "
-        "Un panneau lateral s'ouvre, c'est le Dock Widget. "
-        "Pour l'instant, il est vide. C'est normal. "
-        "FilterMate detecte automatiquement les couches de votre projet. "
-        "Des qu'on va charger des donnees, l'interface va se remplir. "
-        "Chargeons nos donnees de demonstration : un Shapefile des departements "
-        "de France, environ 100 entites, et un Shapefile des communes, 35 000 entites."
-    )
+    diagram_ids = ["v01_interface_zones", "v01_display_field_detection"]
+    narration_text = ""  # Narration is now in the cues
 
-    def execute(self, obs, qgis, config):
-        qgis.focus_qgis()
-        qgis.wait(1.0)
+    def build_timeline(self, obs, qgis, config):
+        regions = config["qgis"]["regions"]
+        move_dur = config["timing"].get("mouse_move_duration", 0.5)
 
-        # 1. Click FilterMate toolbar icon
-        qgis.open_filtermate_toolbar()
-        qgis.wait(2.0)
+        def show_tabs_cycle():
+            """Cycle through toolbox tabs without hovering individual buttons."""
+            qgis.highlight_area("toolbox_zone", duration=2.5)
+            # FILTERING
+            qgis.select_tab("FILTERING")
+            qgis.wait(0.8)
+            # EXPORTING
+            qgis.select_tab("EXPORTING")
+            qgis.wait(0.8)
+            # CONFIGURATION
+            qgis.select_tab("CONFIGURATION")
+            qgis.wait(0.8)
+            # Retour FILTERING
+            qgis.select_tab("FILTERING")
 
-        # 2. Show the empty dock widget
-        qgis.focus_filtermate()
-        qgis.wait(2.0)
+        def click_prev_then_next():
+            """Click prev to go to previous department, then next to return."""
+            btn_prev = regions.get("exploring_feature_prev_btn")
+            btn_next = regions.get("exploring_feature_next_btn")
+            if btn_prev:
+                pyautogui.click(btn_prev["x"], btn_prev["y"], duration=move_dur)
+            qgis.wait(1.5)
+            if btn_next:
+                pyautogui.click(btn_next["x"], btn_next["y"], duration=move_dur)
+            qgis.wait(1.0)
 
-        # 3. Hover over the empty panel to show it's blank
-        qgis.hover_region("filtermate_dock", duration=1.5)
+        def activate_auto_current_layer():
+            """Enable auto-sync between layer tree and source layer combo."""
+            self._log.info("Activating auto current layer sync")
+            qgis.click_at("btn_auto_current_layer")
+            qgis.wait(0.5)
 
-        # 4. Load demo data — drag & drop or use Layer > Add Vector Layer
-        # (Data should be pre-loaded in the demo project)
-        # Here we simulate the layers appearing after project load
-        qgis.wait(2.0)
+        def click_layer_communes():
+            """Click communes in QGIS layer panel to switch source layer."""
+            self._log.info("Clicking communes in layer panel")
+            qgis.click_at("layer_panel_name_communes")
+            qgis.wait(1.0)
 
-        # 5. Show that the dock widget now has content
-        qgis.focus_filtermate()
-        qgis.wait(2.0)
+        def click_layer_departements():
+            """Click departements in QGIS layer panel to switch back."""
+            self._log.info("Clicking departements in layer panel")
+            qgis.click_at("layer_panel_name_departements")
+            qgis.wait(1.0)
+
+        return [
+            # Cue 0: Open FilterMate — dock is empty
+            NarrationCue(
+                label="Lancement FilterMate",
+                text=(
+                    "Pour lancer FilterMate, cliquez sur son icône "
+                    "dans la barre d'outils, "
+                    "ou allez dans le menu Extensions puis FilterMate."
+                ),
+                sync="during",
+                actions=lambda: (
+                    qgis.focus_qgis(),
+                    qgis.open_filtermate_toolbar(),
+                ),
+                post_delay=0.5,
+            ),
+            # ── DÉCOUVERTE INTERFACE : LES 3 ZONES ─────────────
+
+            # Cue 1: Introduction interface
+            NarrationCue(
+                label="Introduction interface",
+                text=(
+                    "Prenons un moment pour comprendre l'interface. "
+                    "Elle est divisée en 3 zones principales, "
+                    "séparées par un splitter vertical."
+                ),
+                sync="during",
+                actions=lambda: qgis.focus_filtermate(),
+                post_delay=0.5,
+            ),
+            # Cue 2: Zone A — Exploring Zone
+            NarrationCue(
+                label="Zone d'Exploration",
+                text=(
+                    "En haut, la Zone d'Exploration. "
+                    "C'est ici que vous parcourez et sélectionnez "
+                    "les entités de vos couches."
+                ),
+                sync="during",
+                actions=lambda: qgis.highlight_area("exploring_zone", duration=3.0),
+                post_delay=0.3,
+            ),
+            # Cue 3: Zone B — Toolbox + cycle des onglets
+            NarrationCue(
+                label="Toolbox + onglets",
+                text=(
+                    "En bas, la Toolbox. "
+                    "Trois onglets : FILTERING, EXPORTING et CONFIGURATION."
+                ),
+                sync="during",
+                actions=lambda: show_tabs_cycle(),
+                post_delay=0.3,
+            ),
+            # Cue 4: Header — badges
+            NarrationCue(
+                label="Header badges",
+                text=(
+                    "Remarquez aussi le header : "
+                    "la pastille orange indique vos favoris, "
+                    "et la pastille bleue affiche le backend actif."
+                ),
+                sync="during",
+                actions=lambda: (
+                    qgis.hover_region("badge_favorites", duration=1.5),
+                    qgis.hover_region("badge_backend", duration=1.5),
+                ),
+                post_delay=0.3,
+            ),
+            # Cue 5: Diagram — 3 zones
+            NarrationCue(
+                label="Diagramme zones",
+                text="",
+                actions=lambda: self.show_diagram_and_return(
+                    obs, qgis, "v01_interface_zones", duration=5.0
+                ),
+                post_delay=0.5,
+            ),
+
+            # ── SÉLECTION COUCHE SOURCE ────────────────────────
+
+            # Cue 6: Select source layer in FILTERING tab
+            NarrationCue(
+                label="Sélection couche source",
+                text=(
+                    "Maintenant, configurons la couche source. "
+                    "Je sélectionne la couche départements "
+                    "dans l'onglet Filtering."
+                ),
+                sync="during",
+                actions=lambda: (
+                    self._log.info("Switching to FILTERING tab"),
+                    qgis.select_tab("FILTERING"),
+                    qgis.wait(0.5),
+                    self._log.info("Selecting source layer 'departements'"),
+                    qgis.select_layer("departements", index=1),
+                ),
+                post_delay=0.5,
+            ),
+            # Cue 7: Activate auto current layer sync
+            NarrationCue(
+                label="Activation synchro couche source",
+                text=(
+                    "J'active la synchronisation avec le panneau de couches QGIS. "
+                    "Ce bouton lie la couche source à la sélection dans l'arbre des couches."
+                ),
+                sync="during",
+                actions=lambda: activate_auto_current_layer(),
+                post_delay=0.5,
+            ),
+            # Cue 8: Click communes in layer panel
+            NarrationCue(
+                label="Clic couche communes",
+                text=(
+                    "Je clique sur communes dans le panneau des couches. "
+                    "La couche source se met à jour automatiquement."
+                ),
+                sync="during",
+                actions=lambda: click_layer_communes(),
+                post_delay=0.5,
+            ),
+            # Cue 9: Click back on departements
+            NarrationCue(
+                label="Retour couche départements",
+                text=(
+                    "Je reviens sur départements. "
+                    "La synchronisation est immédiate."
+                ),
+                sync="during",
+                actions=lambda: click_layer_departements(),
+                post_delay=0.5,
+            ),
+            # Cue 10: Change display field via mouse
+            NarrationCue(
+                label="Changement champ d'affichage",
+                text=(
+                    "De retour dans l'onglet Exploration, "
+                    "je change le champ d'affichage."
+                ),
+                sync="during",
+                actions=lambda: (
+                    self._log.info("Setting display field to 'NOM_DEPT'"),
+                    pyautogui.click(
+                        regions["exploring_display_field_combo"]["x"],
+                        regions["exploring_display_field_combo"]["y"],
+                        duration=move_dur,
+                    ),
+                    qgis.wait(0.3),
+                    pyautogui.hotkey("ctrl", "a"),
+                    qgis.wait(0.1),
+                    qgis.type_text_unicode("NOM_DEPT"),
+                    qgis.wait(0.5),
+                    pyautogui.press("enter"),
+                    qgis.wait(0.5),
+                ),
+                post_delay=0.5,
+            ),
+            # Cue 11: Browse feature picker with keyboard
+            NarrationCue(
+                label="Parcours feature picker clavier",
+                text=(
+                    "Je clique dans le sélecteur d'entités "
+                    "et je navigue avec les flèches du clavier."
+                ),
+                sync="during",
+                actions=lambda: (
+                    self._log.info("Clicking into feature picker combo"),
+                    pyautogui.click(
+                        regions["exploring_feature_selector"]["x"],
+                        regions["exploring_feature_selector"]["y"],
+                        duration=move_dur,
+                    ),
+                    qgis.wait(0.5),
+                    pyautogui.press("down"),
+                    qgis.wait(0.8),
+                    pyautogui.press("down"),
+                    qgis.wait(0.8),
+                ),
+                post_delay=0.5,
+            ),
+            # Cue 12: Navigate with next/prev buttons
+            NarrationCue(
+                label="Navigation next/prev",
+                text=(
+                    "Avec le bouton précédent, je passe au département d'avant, "
+                    "puis suivant pour revenir. "
+                    "La navigation est immédiate."
+                ),
+                sync="during",
+                actions=lambda: click_prev_then_next(),
+                post_delay=0.5,
+            ),
+            # Cue 13: Diagram
+            NarrationCue(
+                label="Diagramme auto-détection",
+                text="C'est automatique.",
+                sync="during",
+                actions=lambda: self.show_diagram_and_return(
+                    obs, qgis, "v01_display_field_detection", duration=5.0
+                ),
+                post_delay=0.5,
+            ),
+        ]
