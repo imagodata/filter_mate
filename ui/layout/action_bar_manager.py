@@ -257,6 +257,7 @@ class ActionBarManager(LayoutManagerBase):
             'pushButton_action_redo_filter',
             'pushButton_action_unfilter',
             'pushButton_action_export',
+            'pushButton_action_qfieldcloud',
             'pushButton_action_about'
         ]
         for name in button_names:
@@ -270,6 +271,25 @@ class ActionBarManager(LayoutManagerBase):
         if UIConfig and hasattr(UIConfig, 'get_button_height'):
             return UIConfig.get_button_height("action_button")
         return 34  # Fallback matches COMPACT profile
+
+    def _get_icon_size(self) -> int:
+        """Get action button icon size from config or use fallback."""
+        UIConfig = self._get_ui_config()
+        if UIConfig and hasattr(UIConfig, 'get_icon_size'):
+            return UIConfig.get_icon_size("action_button")
+        return 22  # Fallback matches COMPACT profile
+
+    def _apply_uniform_button_sizes(self, button_height: int) -> None:
+        """Enforce uniform square size and icon size on all action buttons."""
+        from qgis.PyQt.QtCore import QSize
+
+        icon_size = self._get_icon_size()
+        btn_size = QSize(button_height, button_height)
+        ico_size = QSize(icon_size, icon_size)
+
+        for btn in self._get_action_buttons():
+            btn.setFixedSize(btn_size)
+            btn.setIconSize(ico_size)
 
     def clear_layout(self) -> None:
         """
@@ -292,6 +312,10 @@ class ActionBarManager(LayoutManagerBase):
         """
         Create horizontal layout for action bar (top/bottom position).
 
+        Uses a centered layout with uniform fixed spacing between buttons.
+        Buttons are grouped together in the center of the action bar,
+        not spread apart with expanding spacers.
+
         Args:
             action_buttons: List of QPushButton widgets to add
         """
@@ -304,19 +328,25 @@ class ActionBarManager(LayoutManagerBase):
                 margins.get('right', 8), margins.get('bottom', 16))
         else:
             new_layout.setContentsMargins(8, 8, 8, 16)
-        new_layout.setSpacing(6)
 
-        for i, btn in enumerate(action_buttons):
+        # Uniform fixed spacing between buttons
+        button_spacing = 8
+        new_layout.setSpacing(button_spacing)
+
+        # Leading spacer to center the button group
+        new_layout.addStretch(1)
+
+        for btn in action_buttons:
             btn.setParent(self.dockwidget.frame_actions)
+            # Fixed size policy so buttons don't stretch
+            btn.setSizePolicy(
+                QtWidgets.QSizePolicy.Policy.Fixed,
+                QtWidgets.QSizePolicy.Policy.Fixed,
+            )
             new_layout.addWidget(btn)
-            # Add expanding spacer between buttons
-            if i < len(action_buttons) - 1:
-                spacer = QtWidgets.QSpacerItem(
-                    4, 20,
-                    QtWidgets.QSizePolicy.Policy.Expanding,
-                    QtWidgets.QSizePolicy.Policy.Minimum
-                )
-                new_layout.addItem(spacer)
+
+        # Trailing spacer to center the button group
+        new_layout.addStretch(1)
 
         logger.debug("ActionBarManager: Created horizontal layout")
 
@@ -349,11 +379,17 @@ class ActionBarManager(LayoutManagerBase):
     def apply_size_constraints(self) -> None:
         """
         Apply appropriate size constraints to frame_actions based on position.
+
+        Also enforces uniform button dimensions so all action buttons
+        are the same square size with the same icon size.
         """
         frame = self.dockwidget.frame_actions
         button_height = self._get_button_height()
         UIConfig = self._get_ui_config()
         action_frame_cfg = (UIConfig.get_config('action_frame') if UIConfig else None) or {}
+
+        # Enforce uniform button dimensions
+        self._apply_uniform_button_sizes(button_height)
 
         if self._position in ('top', 'bottom'):
             # Horizontal mode - use UIConfig action_frame dimensions

@@ -261,6 +261,15 @@ class ConfigurationManager(QObject):
             }
         }
 
+        # QFieldCloud button is injected dynamically by the extension
+        if hasattr(d, 'pushButton_action_qfieldcloud'):
+            widgets["ACTION"]["QFIELDCLOUD"] = {
+                "TYPE": "PushButton",
+                "WIDGET": d.pushButton_action_qfieldcloud,
+                "SIGNALS": [],
+                "ICON": None
+            }
+
         # EXPLORING widgets - Feature exploration and selection
         widgets["EXPLORING"] = {
             "IDENTIFY": {

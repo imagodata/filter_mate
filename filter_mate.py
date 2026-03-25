@@ -309,6 +309,11 @@ class FilterMate:
             # Note: layersAdded signal is NOT connected to avoid freeze issues
             logger.debug("FilterMate.initGui: Connecting auto-activation signals")
             self._connect_auto_activation_signals()
+
+            # v5.0: Discover and initialize extensions (QFieldCloud, etc.)
+            logger.debug("FilterMate.initGui: Initializing extension system")
+            self._init_extensions()
+
             logger.debug("FilterMate.initGui: Completed successfully")
 
         except Exception as e:
@@ -661,6 +666,93 @@ class FilterMate:
         except Exception as e:
             logger.warning(f"Error checking geometry validation settings: {e}")
             # Don't block plugin initialization if check fails
+
+    def _init_extensions(self):
+        """Discover and initialize FilterMate extensions (v5.0).
+
+        Extensions are optional modules (e.g., QFieldCloud) that add
+        functionality without modifying core FilterMate code.
+        If no extensions are found or all fail, FilterMate works normally.
+        """
+        try:
+            from .extensions import get_extension_registry
+
+            registry = get_extension_registry()
+            discovered = registry.discover_extensions()
+
+            if discovered:
+                logger.info("FilterMate: Discovered %d extension(s): %s",
+                           len(discovered), ', '.join(discovered))
+
+                # Initialize all available extensions
+                results = registry.initialize_all(self.iface)
+                for ext_id, success in results.items():
+                    if success:
+                        logger.info("FilterMate: Extension '%s' initialized", ext_id)
+                    else:
+                        logger.debug("FilterMate: Extension '%s' not available", ext_id)
+
+                # Create UI for initialized extensions
+                ui_results = registry.create_all_ui(self.toolbar, self.menu)
+                for ext_id, actions in ui_results.items():
+                    if actions:
+                        self.actions.extend(actions)
+                        logger.debug("FilterMate: Extension '%s' added %d UI action(s)",
+                                    ext_id, len(actions))
+            else:
+                logger.debug("FilterMate: No extensions found")
+
+        except Exception as e:
+            logger.warning("FilterMate: Extension system error: %s", e)
+            # Extension failure must never block core FilterMate
+
+    def _init_extensions_dockwidget_ui(self):
+        """Inject extension UI into the FilterMate dockwidget.
+
+        Called after the dockwidget is created and shown, allowing extensions
+        to add buttons/widgets inside the dockwidget (e.g., in the action bar).
+        """
+        if not self.app or not self.app.dockwidget:
+            return
+        try:
+            from .extensions import get_extension_registry
+
+            registry = get_extension_registry()
+            dw_results = registry.create_all_dockwidget_ui(self.app.dockwidget)
+            for ext_id, widgets_list in dw_results.items():
+                if widgets_list:
+                    logger.debug(
+                        "FilterMate: Extension '%s' added %d dockwidget widget(s)",
+                        ext_id, len(widgets_list),
+                    )
+
+            # Register dynamically-injected extension buttons in widgets dict
+            dw = self.app.dockwidget
+            if (hasattr(dw, 'pushButton_action_qfieldcloud')
+                    and hasattr(dw, 'widgets')
+                    and 'ACTION' in dw.widgets
+                    and 'QFIELDCLOUD' not in dw.widgets['ACTION']):
+                dw.widgets['ACTION']['QFIELDCLOUD'] = {
+                    'TYPE': 'PushButton',
+                    'WIDGET': dw.pushButton_action_qfieldcloud,
+                    'SIGNALS': [],
+                    'ICON': None,
+                }
+                # Sync enabled state with current panel
+                if hasattr(dw, 'select_tabTools_index'):
+                    dw.select_tabTools_index()
+        except Exception as e:
+            logger.warning("FilterMate: Extension dockwidget UI error: %s", e)
+
+    def _teardown_extensions(self):
+        """Teardown all extensions on plugin unload."""
+        try:
+            from .extensions import get_extension_registry
+            registry = get_extension_registry()
+            registry.teardown_all()
+            logger.debug("FilterMate: Extensions torn down")
+        except Exception as e:
+            logger.debug("FilterMate: Extension teardown error: %s", e)
 
     def _connect_auto_activation_signals(self):
         """Connect signals to handle project changes and reload layers.
@@ -1165,6 +1257,9 @@ class FilterMate:
             except Exception as e:
                 logger.debug(f"FilterMate: Error clearing FeaturePickerWidget during unload: {e}")
 
+        # v5.0: Teardown extensions before core cleanup
+        self._teardown_extensions()
+
         # Nettoyer les ressources de l'application FilterMate
         if self.app:
             self.app.cleanup()
@@ -1364,6 +1459,7 @@ class FilterMate:
                     if self.app.dockwidget:
                         self.app.dockwidget.closingPlugin.connect(self.onClosePlugin)
                         self._show_discord_welcome()
+                        self._init_extensions_dockwidget_ui()
                 else:
                     # App already exists, call run() which will show the dockwidget
                     # and refresh layers if needed
