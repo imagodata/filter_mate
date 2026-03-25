@@ -383,8 +383,8 @@ class LayerLifecycleService:
             finally:
                 try:
                     connexion.close()
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"Ignored in session cleanup connection close: {e}")
 
         except CircuitOpenError:
             logger.debug("PostgreSQL cleanup skipped - circuit breaker tripped")
@@ -456,8 +456,8 @@ class LayerLifecycleService:
         finally:
             try:
                 connexion.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Ignored in orphaned views cleanup connection close: {e}")
 
         return cleaned_count
 

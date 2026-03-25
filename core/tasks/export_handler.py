@@ -77,7 +77,6 @@ class ExportHandler:
                 'zip_path': result.zip_path,
                 'batch_output_folder': result.batch_output_folder,
                 'batch_zip': result.batch_zip,
-                'preserve_groups': result.preserve_groups,
             }
         else:
             logger.error(result.error_message)
@@ -239,9 +238,7 @@ class ExportHandler:
         if datatype == 'GPKG':
             return self._export_gpkg(
                 layers, output_folder, save_styles, zip_path,
-                project, layer_exporter, batch_exporter, sanitize_filename,
-                preserve_groups=export_config.get('preserve_groups', False),
-                export_crs=projection,
+                project, layer_exporter, batch_exporter, sanitize_filename
             )
 
         # STREAMING MODE: For large datasets (non-GPKG)
@@ -274,12 +271,8 @@ class ExportHandler:
         if len(layers) == 1:
             layer_name = layers[0]['layer_name'] if isinstance(layers[0], dict) else layers[0]
             logger.info(f"Single layer export - delegating to LayerExporter: {layer_name}")
-            # Build proper file path (output_folder is a directory)
-            from ..export.layer_exporter import get_extension_for_format
-            ext = get_extension_for_format(datatype)
-            single_output = os.path.join(output_folder, f"{sanitize_filename(layer_name)}{ext}")
             result = layer_exporter.export_single_layer(
-                layer_name, single_output, projection, datatype, style_format, save_styles
+                layer_name, output_folder, projection, datatype, style_format, save_styles
             )
             export_success = result.success
             if not result.success:
@@ -317,22 +310,6 @@ class ExportHandler:
             if not zip_created:
                 return False, 'Failed to create ZIP archive', None
 
-        # Store deferred KML folder merge for main thread execution (in finished())
-        preserve_groups = export_config.get('preserve_groups', False)
-        if preserve_groups and datatype == 'KML':
-            layer_ids = []
-            for l in layers:
-                if isinstance(l, dict):
-                    layer_ids.append(l.get('layer_id', ''))
-                else:
-                    layer_ids.append(str(l))
-            self._pending_kml_merge = {
-                'output_folder': output_folder,
-                'layer_ids': layer_ids,
-                'project_title': project.title() or 'FilterMate Export',
-            }
-            logger.info("KML folder merge deferred to main thread (finished callback)")
-
         message = f'Layer(s) has been exported to <a href="file:///{output_folder}">{output_folder}</a>'
         if zip_created:
             message += f' and Zip file has been exported to <a href="file:///{zip_path}">{zip_path}</a>'
@@ -350,8 +327,6 @@ class ExportHandler:
         layer_exporter: Any,
         batch_exporter_class: Any,
         sanitize_filename_fn: Callable,
-        preserve_groups: bool = False,
-        export_crs: Any = None,
     ) -> tuple:
         """Handle GPKG export mode.
 
@@ -364,8 +339,6 @@ class ExportHandler:
             layer_exporter: LayerExporter instance
             batch_exporter_class: BatchExporter class (for create_zip_archive)
             sanitize_filename_fn: Function to sanitize filenames
-            preserve_groups: Whether to preserve layer group structure in GPKG
-            export_crs: Optional QgsCoordinateReferenceSystem for reprojection
 
         Returns:
             tuple: (success: bool, message: str, error_details: Optional[str])
@@ -377,14 +350,14 @@ class ExportHandler:
                 try:
                     os.makedirs(gpkg_dir)
                     logger.info(f"Created output directory: {gpkg_dir}")
-                except OSError as e:
+                except Exception as e:
                     logger.error(f"Failed to create output directory: {e}")
                     return False, f'Failed to create output directory: {gpkg_dir}', None
         else:
             if not os.path.exists(output_folder):
                 try:
                     os.makedirs(output_folder)
-                except OSError as e:
+                except Exception as e:
                     logger.debug(f"Ignored in makedirs for export output: {e}")
                     return False, f'Failed to create output directory: {output_folder}', None
 
@@ -400,30 +373,7 @@ class ExportHandler:
         if not result.success:
             return False, result.error_message or 'GPKG export failed', None
 
-        # Store deferred layer tree write for main thread execution (in finished())
-        if preserve_groups:
-            layer_ids = []
-            for l in layers:
-                if isinstance(l, dict):
-                    layer_ids.append(l.get('layer_id', ''))
-                else:
-                    layer_ids.append(str(l))
-            self._pending_layer_tree_write = {
-                'gpkg_path': gpkg_output_path,
-                'layer_ids': layer_ids,
-                'project_title': project.title() or 'FilterMate Export',
-                'export_crs_authid': export_crs.authid() if export_crs and export_crs.isValid() else None,
-                'save_styles': save_styles,
-            }
-            logger.info("Layer tree write deferred to main thread (finished callback)")
-
         message = f'Layer(s) exported to <a href="file:///{gpkg_output_path}">{gpkg_output_path}</a>'
-
-        if preserve_groups:
-            message += (
-                '<br/><i>To open with group structure: '
-                'Project &gt; Open from &gt; GeoPackage</i>'
-            )
 
         if zip_path:
             gpkg_dir = os.path.dirname(gpkg_output_path)
@@ -491,8 +441,6 @@ class ExportHandler:
 
             exported_count = 0
             failed_layers = []
-            from ..export.layer_exporter import get_extension_for_format
-            ext = get_extension_for_format(datatype)
 
             for layer_info in layers:
                 layer_name = layer_info['layer_name'] if isinstance(layer_info, dict) else layer_info
@@ -504,7 +452,9 @@ class ExportHandler:
                     continue
 
                 # Determine output path
-                output_path = os.path.join(output_folder, f"{layer_name}{ext}")
+                ext_map = {'GPKG': 'gpkg', 'SHP': 'shp', 'GEOJSON': 'geojson'}
+                ext = ext_map.get(datatype, datatype.lower())
+                output_path = os.path.join(output_folder, f"{layer_name}.{ext}")
 
                 logger.info(f"Streaming export: {layer_name} -> {output_path}")
 
@@ -557,7 +507,7 @@ class ExportHandler:
             )
             return True, message
 
-        except Exception as e:  # catch-all safety net: streaming export must return error tuple
+        except Exception as e:
             error_msg = f"Streaming export error: {e}"
             logger.error(error_msg)
             return False, error_msg

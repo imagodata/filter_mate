@@ -16,6 +16,7 @@ Updated: EPIC-1 Phase E4-S8 - Extracted prepare_spatialite_source_geom()
 """
 
 import logging
+import sqlite3
 from dataclasses import dataclass, field
 from typing import Optional, List, Any, Callable, Dict, Tuple
 
@@ -191,10 +192,10 @@ def validate_spatialite_features(
     valid_features = []
     validation_errors = 0
     skipped_no_geometry = 0
-    cancel_check_interval = 100  # v4.2.8: Check every 100 features
+    cancel_check_interval = 100  # Check every 100 features
 
     for i, f in enumerate(task_features):
-        # v4.2.8: Periodic cancellation check
+        # Periodic cancellation check
         if cancel_check and i > 0 and i % cancel_check_interval == 0:
             if cancel_check():
                 logger.info(f"[Spatialite] Feature validation canceled at {i}/{len(task_features)} features")
@@ -217,7 +218,7 @@ def validate_spatialite_features(
                     logger.debug(f"[Spatialite]   Skipping feature[{i}] without valid geometry")
             elif f:
                 valid_features.append(f)
-        except Exception as e:
+        except Exception as e:  # catch-all safety net (QGIS feature access, thread-safety)
             validation_errors += 1
             logger.warning(f"[Spatialite]   Feature[{i}] validation error (thread-safety): {e}")
             continue
@@ -251,7 +252,7 @@ def recover_spatialite_features_from_fids(
         if recovered:
             logger.debug(f"[Spatialite]   ✓ Recovered {len(recovered)} features using FIDs")
         return recovered
-    except Exception as e:
+    except Exception as e:  # catch-all safety net (QGIS feature request)
         logger.error(f"[Spatialite]   ❌ FID recovery failed: {e}")
         return []
 
@@ -319,7 +320,7 @@ def resolve_spatialite_features(
                         request = QgsFeatureRequest().setFilterFids(selected_fids)
                         features = list(source_layer.getFeatures(request))
                         logger.debug(f"[Spatialite]   ✓ Recovered {len(features)} from selection")
-                except Exception as e:
+                except Exception as e:  # catch-all safety net (QGIS selection recovery)
                     logger.error(f"[Spatialite]   ❌ Selection recovery failed: {e}")
 
     elif mode == SourceMode.SUBSET:
@@ -329,14 +330,14 @@ def resolve_spatialite_features(
         logger.debug(f"[Spatialite]   Retrieved {len(features)} features")
 
     elif mode == SourceMode.SELECTION:
-        logger.info("[Spatialite] === resolve_spatialite_features (MULTI-SELECTION MODE) ===")  # nosec B608
+        logger.info("[Spatialite] === resolve_spatialite_features (MULTI-SELECTION MODE) ===")  # nosec B608 - false positive: logger statement, no SQL execution
         try:
             from qgis.core import QgsFeatureRequest
             selected_fids = list(source_layer.selectedFeatureIds())
             if selected_fids:
                 request = QgsFeatureRequest().setFilterFids(selected_fids)
                 features = list(source_layer.getFeatures(request))
-        except Exception as e:
+        except Exception as e:  # catch-all safety net (QGIS feature request)
             logger.error(f"[Spatialite] Failed to get selected features: {e}")
 
     elif mode == SourceMode.FIELD_BASED:
@@ -406,11 +407,11 @@ def process_spatialite_geometries(
         transform = QgsCoordinateTransform(source_crs_obj, target_crs, context.PROJECT)
         logger.debug(f"[Spatialite] Will reproject from {context.source_crs.authid()} to {context.source_layer_crs_authid}")
 
-    # v4.2.8: Cancel check interval for geometry processing loop
+    # Cancel check interval for geometry processing loop
     cancel_check_interval = 100
 
     for i, geometry in enumerate(raw_geometries):
-        # v4.2.8: Periodic cancellation check
+        # Periodic cancellation check
         if cancel_check and i > 0 and i % cancel_check_interval == 0:
             if cancel_check():
                 logger.info(f"[Spatialite] Geometry processing canceled at {i}/{len(raw_geometries)} geometries")
@@ -617,7 +618,7 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
                     request = QgsFeatureRequest(expr)
                     features = list(source_layer.getFeatures(request))
                     logger.info(f"[Spatialite] Expression fallback: {len(features)} features")
-            except Exception as e:
+            except Exception as e:  # catch-all safety net (QGIS expression evaluation)
                 logger.warning(f"[Spatialite] Expression fallback failed: {e}")
 
         if not features:
@@ -750,7 +751,7 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
         return expression
 
     # 1. Convert QGIS spatial functions to Spatialite
-    # FIX v4.2.12: Added spatial function conversions (missing in previous version)
+    # Added spatial function conversions (missing in previous version)
     spatial_conversions = {
         '$area': f'ST_Area("{geom_col}")',
         '$length': f'ST_Length("{geom_col}")',
@@ -768,7 +769,7 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
         expression = expression.replace(qgis_func, spatialite_func)
 
     # 2. Convert IF statements to CASE WHEN
-    # FIX v4.2.12: Added IF conversion (missing in previous version)
+    # Added IF conversion (missing in previous version)
     if expression.find('if') >= 0:
         expression = re.sub(
             r'if\s*\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)',
@@ -779,7 +780,7 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
         logger.debug(f"[Spatialite] Expression after IF conversion: {expression}")
 
     # 3. Add type casting for numeric operations
-    # FIX v4.2.12: Spatialite uses CAST() instead of :: operator
+    # Spatialite uses CAST() instead of :: operator
     # Pattern: "field" > value → CAST("field" AS REAL) > value
     expression = re.sub(r'("[^"]+")(\s*[><]=?\s*)', r'CAST(\1 AS REAL)\2', expression)
     expression = re.sub(r'("[^"]+")(\s*[+\-*/]\s*)', r'CAST(\1 AS REAL)\2', expression)
@@ -926,10 +927,10 @@ def apply_spatialite_subset(
     session_name = f"{session_id}_{name}" if session_id else name
 
     # Apply subset string to layer (reference temp table)
-    # v4.4.4: Use fm_temp_ prefix for new tables
+    # Use fm_temp_ prefix for new tables
     layer_subsetString = (
         f'"{primary_key_name}" IN '
-        f'(SELECT "{primary_key_name}" FROM fm_temp_{session_name})'  # nosec B608
+        f'(SELECT "{primary_key_name}" FROM fm_temp_{session_name})'  # nosec B608 - primary_key_name from QGIS layer metadata, session_name from internal session ID generation
     )
     logger.debug(f"[Spatialite] Applying Spatialite subset string: {layer_subsetString}")
 
@@ -948,7 +949,7 @@ def apply_spatialite_subset(
                 seq_order=current_seq_order,
                 source_layer_id=source_layer_id or ''
             )
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.warning(f"[Spatialite] Failed to update Spatialite history: {e}")
         finally:
             history_repo.close()
@@ -1034,7 +1035,7 @@ def manage_spatialite_subset(
         task_parameters=task_parameters
     )
 
-    # Create temporary table with session-prefixed name (v4.4.4: fm_temp_ prefix)
+    # Create temporary table with session-prefixed name (fm_temp_ prefix)
     session_name = f"{session_id}_{name}" if session_id else name
     logger.info(
         f"Creating Spatialite temp table 'fm_temp_{session_name}' "
@@ -1099,7 +1100,7 @@ def get_last_subset_info(cur, layer, project_uuid: str, conn=None) -> tuple:
                 return last_entry.id, last_entry.seq_order, layer_name, name
             else:
                 return None, 0, layer_name, name
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.warning(f"[Spatialite] Failed to get last subset info via repository: {e}")
             return None, 0, layer_name, name
         finally:
@@ -1120,7 +1121,7 @@ def get_last_subset_info(cur, layer, project_uuid: str, conn=None) -> tuple:
             return result[0], result[5], layer_name, name
         else:
             return None, 0, layer_name, name
-    except Exception as e:
+    except sqlite3.Error as e:
         logger.warning(f"[Spatialite] Failed to get last subset info: {e}")
         return None, 0, layer_name, name
 
@@ -1165,11 +1166,11 @@ def cleanup_session_temp_tables(
         for (table_name,) in tables:
             try:
                 # Drop the table
-                cur.execute(f'DROP TABLE IF EXISTS "{table_name}";')  # nosec B608
+                cur.execute(f'DROP TABLE IF EXISTS "{table_name}";')  # nosec B608 - table_name from sqlite_master query (trusted source)
                 # Drop associated R-tree index
-                cur.execute(f'DROP TABLE IF EXISTS "idx_{table_name}_geometry";')  # nosec B608
+                cur.execute(f'DROP TABLE IF EXISTS "idx_{table_name}_geometry";')  # nosec B608 - table_name from sqlite_master query (trusted source)
                 count += 1
-            except Exception as e:
+            except sqlite3.Error as e:
                 logger.warning(f"[Spatialite] Error dropping temp table {table_name}: {e}")
 
         conn.commit()
@@ -1182,7 +1183,7 @@ def cleanup_session_temp_tables(
             )
         return count
 
-    except Exception as e:
+    except sqlite3.Error as e:
         logger.error(f"[Spatialite] Error cleaning up session tables: {e}")
         return 0
 

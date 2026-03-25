@@ -24,22 +24,12 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from qgis.PyQt.QtCore import QObject
 
-from ...infrastructure.signal_utils import SignalBlocker
+from ...core.domain.exceptions import SignalStateChangeError  # noqa: F401
 
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
 
 logger = logging.getLogger(__name__)
-
-
-class SignalStateChangeError(Exception):
-    """Exception raised when signal state change fails."""
-
-    def __init__(self, state: Optional[bool], widget_path: List[str], message: str = ""):
-        self.state = state
-        self.widget_path = widget_path
-        self.message = message or f"Signal state change failed for {widget_path}"
-        super().__init__(self.message)
 
 
 class DockwidgetSignalManager:
@@ -537,7 +527,7 @@ class DockwidgetSignalManager:
                 stored_state = project_layers[layer_id]["exploring"].get("is_selecting", False)
 
                 if current_button_state != stored_state:
-                    logger.warning(f"IS_SELECTING state mismatch! Button={current_button_state}, Stored={stored_state}")  # nosec B608
+                    logger.warning(f"IS_SELECTING state mismatch! Button={current_button_state}, Stored={stored_state}")  # nosec B608 - false positive: logger statement, no SQL execution
                     project_layers[layer_id]["exploring"]["is_selecting"] = current_button_state
 
         def _on_selecting_toggled(checked):
@@ -548,7 +538,7 @@ class DockwidgetSignalManager:
             layer_id = self.dockwidget.current_layer.id()
             if layer_id in self.dockwidget.PROJECT_LAYERS:
                 self.dockwidget.PROJECT_LAYERS[layer_id]["exploring"]["is_selecting"] = checked
-                logger.info(f"IS_SELECTING state updated: {checked}")  # nosec B608
+                logger.info(f"IS_SELECTING state updated: {checked}")  # nosec B608 - false positive: logger statement, no SQL execution
 
             if checked:
                 logger.info("IS_SELECTING ON: Calling exploring_select_features()")
@@ -663,13 +653,16 @@ class DockwidgetSignalManager:
         try:
             # Disconnect existing signals first
             for gb, _ in gbs:
-                with SignalBlocker(gb):
+                try:
+                    gb.blockSignals(True)
                     try:
                         gb.toggled.disconnect()
                         gb.collapsedStateChanged.disconnect()
                     except TypeError:
                         # Signals not connected yet - expected on first setup
                         pass
+                finally:
+                    gb.blockSignals(False)
 
             # Connect new signals
             for gb, name in gbs:
@@ -682,6 +675,12 @@ class DockwidgetSignalManager:
 
         except Exception as e:
             logger.warning(f"connect_groupbox_signals_directly error: {e}")
+            # Ensure all groupboxes have signals unblocked
+            for gb, _ in gbs:
+                try:
+                    gb.blockSignals(False)
+                except (RuntimeError, AttributeError):
+                    pass
 
     def connect_initial_widget_signals(self) -> None:
         """
@@ -690,7 +689,6 @@ class DockwidgetSignalManager:
         FIX 2026-01-14: These signals must be connected at startup:
         - FILTERING.CURRENT_LAYER.layerChanged: Updates exploring widgets
         - ACTION buttons: FILTER, UNFILTER, UNDO_FILTER, REDO_FILTER, EXPORT
-        - DOCK.TOOLS.currentChanged: Updates action button states on tab switch
 
         NOTE: QGIS.LAYER_TREE_VIEW.currentLayerChanged is managed by
         filtering_auto_current_layer_changed() based on AUTO_CURRENT_LAYER state.
@@ -726,20 +724,6 @@ class DockwidgetSignalManager:
             logger.debug("EXPORTING button signals connected at startup")
         except Exception as e:
             logger.warning(f"Could not connect EXPORTING signals at startup: {e}")
-
-        # FIX 2026-02-18: Connect toolBox_tabTools.currentChanged directly
-        # to update action button enabled/disabled states on tab switch
-        try:
-            toolbox = getattr(self.dockwidget, 'toolBox_tabTools', None)
-            if toolbox:
-                try:
-                    toolbox.currentChanged.disconnect(self.dockwidget.select_tabTools_index)
-                except (TypeError, RuntimeError):
-                    pass
-                toolbox.currentChanged.connect(self.dockwidget.select_tabTools_index)
-                logger.debug("Connected toolBox_tabTools.currentChanged DIRECTLY")
-        except Exception as e:
-            logger.warning(f"Could not connect toolBox_tabTools signal: {e}")
 
         # FIX 2026-01-14: Connect LAYER_TREE_VIEW if AUTO_CURRENT_LAYER enabled
         try:

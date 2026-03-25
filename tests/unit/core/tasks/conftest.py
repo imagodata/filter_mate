@@ -48,7 +48,7 @@ def _setup_handler_mocks():
     # Logger and ENV mocks
     mock_logger = MagicMock()
     mock_setup_logger = MagicMock(return_value=mock_logger)
-    mock_env_vars = {"PATH_ABSOLUTE_PROJECT": "/tmp/filtermate_test"}  # nosec B108
+    mock_env_vars = {"PATH_ABSOLUTE_PROJECT": "/tmp/filtermate_test"}
 
     # Constants mock with real values
     mock_constants = MagicMock()
@@ -136,6 +136,7 @@ def _setup_handler_mocks():
             is_metric_crs=MagicMock(return_value=True),
             get_optimal_metric_crs=MagicMock(return_value='EPSG:2154'),
             get_layer_crs_info=MagicMock(return_value={}),
+            CRS_UTILS_AVAILABLE=True,
         ),
         f'{ROOT}.core.geometry.spatial_index': MagicMock(),
         f'{ROOT}.core.geometry.buffer_processor': MagicMock(),

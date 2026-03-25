@@ -9,15 +9,9 @@ import logging
 from typing import List, Tuple, Optional, Any, Callable
 
 from qgis.core import QgsMessageLog, Qgis, QgsProject
-from qgis.utils import iface
 from qgis.PyQt.QtCore import QTimer
 
 from ...core.ports.qgis_port import get_qgis_factory
-from ...infrastructure.signal_utils import SignalBlocker
-from ...infrastructure.constants import (
-    QGIS_PROVIDER_POSTGRES, QGIS_PROVIDER_SPATIALITE, QGIS_PROVIDER_OGR,
-    QGIS_PROVIDER_MEMORY,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -49,10 +43,11 @@ def display_warning_messages(warning_messages: List[str]) -> None:
     if not warning_messages:
         return
 
+    from qgis.utils import iface
     for warning_msg in warning_messages:
         try:
             iface.messageBar().pushWarning("FilterMate", warning_msg)
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             logger.warning(f"Could not display warning: {e}")
 
 
@@ -74,7 +69,7 @@ def should_skip_subset_application(
     Returns:
         bool: True if subset application should be skipped
     """
-    # v3.0.8: Only skip if TRULY canceled (not just marked as canceled)
+    # Only skip if TRULY canceled (not just marked as canceled)
     # Check if we have pending requests AND if the task actually returned False (failed)
     # If the task succeeded (result=True), we should still apply the subsets even if
     # isCanceled() returns True (which can happen due to race conditions in QGIS)
@@ -108,7 +103,7 @@ def apply_pending_subset_requests(
 
     QgsMessageLog.logMessage(
         f"📥 Applying {len(pending_requests)} pending subset requests on main thread",
-        "FilterMate", Qgis.MessageLevel.Info
+        "FilterMate", Qgis.Info
     )
     logger.info(f"finished(): Applying {len(pending_requests)} pending subset requests on main thread")
 
@@ -133,7 +128,7 @@ def apply_pending_subset_requests(
             if not layer or not is_valid_layer(layer):
                 QgsMessageLog.logMessage(
                     f"finished() ✗ Layer invalid: {layer.name() if layer else 'None'}",
-                    "FilterMate", Qgis.MessageLevel.Warning
+                    "FilterMate", Qgis.Warning
                 )
                 continue
 
@@ -152,36 +147,39 @@ def apply_pending_subset_requests(
                 # FIX 2026-01-24: Skip reload for Spatialite with empty subset (unfilter operation)
                 # layer.reload() on Spatialite with empty subset causes freeze because it tries
                 # to reload from temporary tables that don't exist for unfilter operations.
-                should_reload = (layer.providerType() in (QGIS_PROVIDER_POSTGRES, QGIS_PROVIDER_OGR) or
-                                (layer.providerType() == QGIS_PROVIDER_SPATIALITE and expression_str.strip() != ''))
+                should_reload = (layer.providerType() in ('postgres', 'ogr') or
+                                (layer.providerType() == 'spatialite' and expression_str.strip() != ''))
 
                 if should_reload:
-                    with SignalBlocker(layer):
+                    try:
+                        layer.blockSignals(True)
                         layer.reload()
+                    finally:
+                        layer.blockSignals(False)
 
                 # Update extents for smaller layers
                 feature_count = layer.featureCount()
                 if feature_count is not None and feature_count >= 0 and feature_count < MAX_FEATURES_FOR_UPDATE_EXTENTS:
                     try:
                         layer.updateExtents()
-                    except (RuntimeError, AttributeError):
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Ignored in updateExtents (filter already applied): {e}")
 
                 layer.triggerRepaint()
 
-                # FIX v2.9.24: Clear selection for Spatialite layers after reload
-                if layer.providerType() == QGIS_PROVIDER_SPATIALITE:
+                # Clear selection for Spatialite layers after reload
+                if layer.providerType() == 'spatialite':
                     try:
                         layer.removeSelection()
                         logger.debug("Cleared selection after Spatialite filter (already applied)")
-                    except (RuntimeError, AttributeError) as sel_err:
+                    except Exception as sel_err:
                         logger.debug(f"Could not clear selection: {sel_err}")
 
                 count_str = f"{feature_count} features" if feature_count >= 0 else "(count pending)"
                 logger.debug(f"  ✓ Filter already applied to {layer.name()}, triggered reload+repaint")
                 QgsMessageLog.logMessage(
                     f"finished() ✓ Repaint: {layer.name()} → {count_str} (filter already applied)",
-                    "FilterMate", Qgis.MessageLevel.Info
+                    "FilterMate", Qgis.Info
                 )
                 applied_count += 1
             else:
@@ -193,29 +191,32 @@ def apply_pending_subset_requests(
                     # FIX 2026-01-24: Skip reload for Spatialite with empty subset (unfilter operation)
                     # layer.reload() on Spatialite with empty subset causes freeze because it tries
                     # to reload from temporary tables that don't exist for unfilter operations.
-                    should_reload = (layer.providerType() in (QGIS_PROVIDER_POSTGRES, QGIS_PROVIDER_OGR) or
-                                    (layer.providerType() == QGIS_PROVIDER_SPATIALITE and expression_str.strip() != ''))
+                    should_reload = (layer.providerType() in ('postgres', 'ogr') or
+                                    (layer.providerType() == 'spatialite' and expression_str.strip() != ''))
 
                     if should_reload:
-                        with SignalBlocker(layer):
+                        try:
+                            layer.blockSignals(True)
                             layer.reload()
+                        finally:
+                            layer.blockSignals(False)
 
                     # Update extents for smaller layers
                     feature_count = layer.featureCount()
                     if feature_count is not None and feature_count >= 0 and feature_count < MAX_FEATURES_FOR_UPDATE_EXTENTS:
                         try:
                             layer.updateExtents()
-                        except (RuntimeError, AttributeError):
-                            pass
+                        except Exception as e:
+                            logger.debug(f"Ignored in updateExtents (new filter applied): {e}")
 
                     layer.triggerRepaint()
 
-                    # FIX v2.9.24: Clear selection for Spatialite layers
-                    if layer.providerType() == QGIS_PROVIDER_SPATIALITE:
+                    # Clear selection for Spatialite layers
+                    if layer.providerType() == 'spatialite':
                         try:
                             layer.removeSelection()
                             logger.debug("Cleared selection after Spatialite filter (new filter)")
-                        except (RuntimeError, AttributeError) as sel_err:
+                        except Exception as sel_err:
                             logger.debug(f"Could not clear selection: {sel_err}")
 
                     logger.debug(f"  ✓ Applied filter to {layer.name()}: {len(expression_str)} chars")
@@ -225,7 +226,7 @@ def apply_pending_subset_requests(
                     if feature_count >= 0:
                         QgsMessageLog.logMessage(
                             f"✓ Filter APPLIED: {layer.name()} → {feature_count} features",
-                            "FilterMate", Qgis.MessageLevel.Info
+                            "FilterMate", Qgis.Info
                         )
                         # Diagnostic for layers with 0 features
                         if feature_count == 0:
@@ -233,12 +234,12 @@ def apply_pending_subset_requests(
                             logger.warning(f"    → Expression length: {len(expression_str)} chars")
                             QgsMessageLog.logMessage(
                                 f"⚠️ {layer.name()} → 0 features (filter may be too restrictive)",
-                                "FilterMate", Qgis.MessageLevel.Warning
+                                "FilterMate", Qgis.Warning
                             )
                     else:
                         QgsMessageLog.logMessage(
                             f"✓ Filter APPLIED: {layer.name()} → (count pending)",
-                            "FilterMate", Qgis.MessageLevel.Info
+                            "FilterMate", Qgis.Info
                         )
 
                     applied_count += 1
@@ -253,16 +254,16 @@ def apply_pending_subset_requests(
                     logger.warning(f"    → Provider: {layer.providerType()}")
                     QgsMessageLog.logMessage(
                         f"finished() ✗ FAILED: {layer.name()} - {error_msg}",
-                        "FilterMate", Qgis.MessageLevel.Critical
+                        "FilterMate", Qgis.Critical
                     )
 
-        except Exception as e:  # catch-all safety net: subset application must not crash finished()
+        except Exception as e:
             import traceback
             logger.error(f"  ✗ Error applying subset string: {e}")
             logger.error(f"    → Traceback: {traceback.format_exc()}")
             QgsMessageLog.logMessage(
                 f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
-                "FilterMate", Qgis.MessageLevel.Critical
+                "FilterMate", Qgis.Critical
             )
 
     # Handle large expressions with deferred application
@@ -288,6 +289,7 @@ def _schedule_deferred_filter_application(
     """
     def apply_deferred_filters():
         """Apply large filter expressions with UI breathing room."""
+        from qgis.utils import iface
         for lyr, expr in large_expressions:
             try:
                 if lyr and is_valid_layer(lyr):
@@ -296,18 +298,18 @@ def _schedule_deferred_filter_application(
                         lyr.triggerRepaint()
                         QgsMessageLog.logMessage(
                             f"finished() ✓ Deferred: {lyr.name()} → {lyr.featureCount()} features",
-                            "FilterMate", Qgis.MessageLevel.Info
+                            "FilterMate", Qgis.Info
                         )
                     else:
                         logger.error(f"Failed to apply deferred filter to {lyr.name()}")
-            except (RuntimeError, AttributeError, ValueError) as e:
+            except Exception as e:
                 logger.error(f"Error applying deferred filter: {e}")
 
         # Final canvas refresh
         try:
             iface.mapCanvas().refresh()
-        except (RuntimeError, AttributeError):
-            pass
+        except Exception as e:
+            logger.debug(f"Ignored in deferred canvas refresh: {e}")
 
     # Defer to allow UI to breathe
     QTimer.singleShot(100, apply_deferred_filters)
@@ -326,13 +328,14 @@ def schedule_canvas_refresh(
         is_complex_filter_fn: Function to check if filter is complex
         single_refresh_fn: Function to perform single canvas refresh
     """
+    from qgis.utils import iface
     try:
         # Stop any ongoing rendering first
         canvas = iface.mapCanvas()
         canvas.stopRendering()
         canvas.refresh()
         logger.debug("Immediate canvas refresh triggered after filter application (with stopRendering)")
-    except (RuntimeError, AttributeError) as refresh_err:
+    except Exception as refresh_err:
         logger.debug(f"Could not trigger immediate canvas refresh: {refresh_err}")
 
     try:
@@ -348,29 +351,20 @@ def schedule_canvas_refresh(
                     has_complex_filter = True
                     break
 
-        # Use longer delay for complex filters (configurable via APP.OPTIONS.UI_RESPONSIVENESS)
-        try:
-            from ...config.config import ENV_VARS
-            _ui_resp = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('UI_RESPONSIVENESS', {})
-            _complex = _ui_resp.get('canvas_refresh_delay_complex_ms', {})
-            _simple = _ui_resp.get('canvas_refresh_delay_simple_ms', {})
-            delay_complex = _complex.get('value', 1500) if isinstance(_complex, dict) else 1500
-            delay_simple = _simple.get('value', 500) if isinstance(_simple, dict) else 500
-        except (ImportError, AttributeError, TypeError):
-            delay_complex, delay_simple = 1500, 500
-        refresh_delay = delay_complex if has_complex_filter else delay_simple
+        # Use longer delay for complex filters
+        refresh_delay = 1500 if has_complex_filter else 500
 
         # Schedule single comprehensive refresh
         QTimer.singleShot(refresh_delay, single_refresh_fn)
         logger.debug(f"Scheduled single canvas refresh in {refresh_delay}ms (complex={has_complex_filter})")
 
-    except (RuntimeError, AttributeError) as canvas_err:
+    except Exception as canvas_err:
         logger.warning(f"Failed to schedule canvas refresh: {canvas_err}")
         # Fallback: immediate refresh
         try:
             iface.mapCanvas().refresh()
-        except (RuntimeError, AttributeError):
-            pass
+        except Exception as e:
+            logger.debug(f"Ignored in fallback canvas refresh: {e}")
 
 
 def cleanup_memory_layer(ogr_source_geom: Optional[Any]) -> None:  # Optional[QgsVectorLayer]
@@ -384,12 +378,12 @@ def cleanup_memory_layer(ogr_source_geom: Optional[Any]) -> None:  # Optional[Qg
         return
 
     try:
-        if ogr_source_geom.isValid() and ogr_source_geom.providerType() == QGIS_PROVIDER_MEMORY:
+        if ogr_source_geom.isValid() and ogr_source_geom.providerType() == 'memory':
             # Check if layer is in project
             factory = get_qgis_factory()
             project = factory.get_project()
             if project.map_layer(ogr_source_geom.id()):
                 logger.debug("finished(): Removing OGR source memory layer from project")
                 project.remove_map_layer(ogr_source_geom.id())
-    except (RuntimeError, AttributeError) as e:
+    except Exception as e:
         logger.debug(f"Could not cleanup memory layer: {e}")

@@ -26,7 +26,12 @@ from typing import Optional, Dict, List, Tuple, Any
 from dataclasses import dataclass
 from datetime import datetime
 
-from ....infrastructure.database.sql_utils import sanitize_sql_identifier
+try:
+    import psycopg2
+except ImportError:
+    psycopg2 = None
+
+from ....core.domain.exceptions import PostgreSQLError
 
 # Import port interface
 from ....core.ports.materialized_view_port import (
@@ -81,8 +86,8 @@ class MVConfig:
 
     Note: Kept for backwards compatibility. New code should use ViewConfig.
     """
-    feature_threshold: int = 100000  # v4.2.12: Increased from 10k to 100k
-    complexity_threshold: int = 5     # v4.2.12: Increased from 3 to 5
+    feature_threshold: int = 100000  # Increased from 10k to 100k
+    complexity_threshold: int = 5     # Increased from 3 to 5
     auto_refresh: bool = True
     refresh_on_change: bool = True
     concurrent_refresh: bool = True
@@ -289,9 +294,7 @@ class MaterializedViewManager(MaterializedViewPort):
         """
         # Generate unique MV name
         mv_name = self._generate_mv_name(query, session_scoped)
-        safe_schema = sanitize_sql_identifier(self.MV_SCHEMA)
-        safe_mv = sanitize_sql_identifier(mv_name)
-        full_name = f'"{safe_schema}"."{safe_mv}"'
+        full_name = f'"{self.MV_SCHEMA}"."{mv_name}"'
 
         # Check if already exists
         if self.mv_exists(mv_name, connection=connection):
@@ -307,7 +310,7 @@ class MaterializedViewManager(MaterializedViewPort):
             cursor = conn.cursor()
 
             # Ensure schema exists
-            cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{safe_schema}"')
+            cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{self.MV_SCHEMA}"')
 
             # Create MV
             "WITH DATA" if self._mv_config.with_data else "WITH NO DATA"
@@ -347,9 +350,9 @@ class MaterializedViewManager(MaterializedViewPort):
             logger.info(f"[PostgreSQL] Created MV: {mv_name}")
             return mv_name
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Failed to create MV {mv_name}: {e}")
-            raise
+            raise PostgreSQLError(f"Failed to create MV {mv_name}: {e}") from e
 
     def refresh_mv(
         self,
@@ -368,9 +371,7 @@ class MaterializedViewManager(MaterializedViewPort):
         Returns:
             True if refresh succeeded
         """
-        safe_schema = sanitize_sql_identifier(self.MV_SCHEMA)
-        safe_mv = sanitize_sql_identifier(mv_name)
-        full_name = f'"{safe_schema}"."{safe_mv}"'
+        full_name = f'"{self.MV_SCHEMA}"."{mv_name}"'
         use_concurrent = concurrent if concurrent is not None else self._mv_config.concurrent_refresh
 
         conn = connection or self._get_connection()
@@ -406,7 +407,7 @@ class MaterializedViewManager(MaterializedViewPort):
             logger.debug(f"[PostgreSQL] Refreshed MV: {mv_name}")
             return True
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Failed to refresh MV {mv_name}: {e}")
             return False
 
@@ -427,9 +428,7 @@ class MaterializedViewManager(MaterializedViewPort):
         Returns:
             True if drop succeeded
         """
-        safe_schema = sanitize_sql_identifier(self.MV_SCHEMA)
-        safe_mv = sanitize_sql_identifier(mv_name)
-        full_name = f'"{safe_schema}"."{safe_mv}"'
+        full_name = f'"{self.MV_SCHEMA}"."{mv_name}"'
 
         conn = connection or self._get_connection()
         if conn is None:
@@ -452,7 +451,7 @@ class MaterializedViewManager(MaterializedViewPort):
             logger.debug(f"[PostgreSQL] Dropped MV: {mv_name}")
             return True
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Failed to drop MV {mv_name}: {e}")
             return False
 
@@ -476,7 +475,7 @@ class MaterializedViewManager(MaterializedViewPort):
             """, (self.MV_SCHEMA, mv_name))
             result = cursor.fetchone()
             return result[0] if result else False
-        except Exception:
+        except (psycopg2.Error if psycopg2 else Exception):
             return False
 
     def get_mv_info(
@@ -529,7 +528,7 @@ class MaterializedViewManager(MaterializedViewPort):
                     definition=definition
                 )
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Failed to get MV info for {mv_name}: {e}")
 
         return None
@@ -566,7 +565,7 @@ class MaterializedViewManager(MaterializedViewPort):
             if connection is None:
                 conn.commit()
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Failed to cleanup session MVs: {e}")
 
         logger.info(f"[PostgreSQL] Cleaned up {count} session MVs")
@@ -604,14 +603,14 @@ class MaterializedViewManager(MaterializedViewPort):
         try:
             cursor = conn.cursor()
 
-            query = f"SELECT {columns} FROM {full_name}"  # nosec B608
+            query = f"SELECT {columns} FROM {full_name}"  # nosec B608 - columns from caller API, full_name built from internal MV_SCHEMA constant + generated mv_name
             if where_clause:
                 query += f" WHERE {where_clause}"
 
             cursor.execute(query)
             return cursor.fetchall()
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Failed to query MV {mv_name}: {e}")
             return []
 
@@ -707,7 +706,7 @@ class MaterializedViewManager(MaterializedViewPort):
                 return self._pool.getconn()
             else:
                 return self._pool
-        except Exception:
+        except Exception:  # catch-all safety net (pool abstraction may raise varied errors)
             return None
 
     def _generate_mv_name(self, query: str, session_scoped: bool) -> str:
@@ -740,7 +739,7 @@ class MaterializedViewManager(MaterializedViewPort):
                 CREATE INDEX IF NOT EXISTS "{index_name}"
                 ON {table_name} USING GIST ("{geometry_column}")
             """)
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.warning(f"[PostgreSQL] Failed to create spatial index: {e}")
 
     def _create_index(
@@ -758,7 +757,7 @@ class MaterializedViewManager(MaterializedViewPort):
                 CREATE INDEX IF NOT EXISTS "{index_name}"
                 ON {table_name} ("{column}")
             """)
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.warning(f"[PostgreSQL] Failed to create index on {column}: {e}")
 
 

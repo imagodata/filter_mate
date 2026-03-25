@@ -18,6 +18,7 @@ Date: January 2026
 """
 
 import logging
+import sqlite3
 from typing import Optional, List
 from dataclasses import dataclass
 
@@ -96,7 +97,7 @@ class RTreeIndexManager:
                 WHERE type='table' AND name=?
             """, (index_table,))
             return cursor.fetchone() is not None
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.debug(f"[Spatialite] Error checking index existence: {e}")
             return False
 
@@ -120,7 +121,7 @@ class RTreeIndexManager:
         try:
             # Create the spatial index using Spatialite function
             cursor.execute(
-                f"SELECT CreateSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608
+                f"SELECT CreateSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608 - table_name/geometry_column from QGIS layer metadata (SpatiaLite: no sql.Identifier equivalent)
             )
             self._conn.commit()
 
@@ -128,7 +129,7 @@ class RTreeIndexManager:
             logger.info(f"[Spatialite] Created R-tree index on {table_name}.{geometry_column}")
             return True
 
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error(f"[Spatialite] Failed to create index on {table_name}.{geometry_column}: {e}")
             return False
 
@@ -171,12 +172,12 @@ class RTreeIndexManager:
         try:
             # Disable spatial index using Spatialite function
             cursor.execute(
-                f"SELECT DisableSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608
+                f"SELECT DisableSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608 - table_name/geometry_column from QGIS layer metadata (SpatiaLite: no sql.Identifier equivalent)
             )
 
             # Drop the index table
             index_table = f"idx_{table_name}_{geometry_column}"
-            cursor.execute(f"DROP TABLE IF EXISTS \"{index_table}\"")  # nosec B608
+            cursor.execute(f"DROP TABLE IF EXISTS \"{index_table}\"")  # nosec B608 - index_table built from table_name/geometry_column via QGIS layer metadata
 
             self._conn.commit()
 
@@ -184,7 +185,7 @@ class RTreeIndexManager:
             logger.info(f"[Spatialite] Dropped R-tree index on {table_name}.{geometry_column}")
             return True
 
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error(f"[Spatialite] Failed to drop index on {table_name}.{geometry_column}: {e}")
             return False
 
@@ -233,27 +234,27 @@ class RTreeIndexManager:
 
         try:
             # Get row count
-            cursor.execute(f'SELECT COUNT(*) FROM "{index_table}"')  # nosec B608
+            cursor.execute(f'SELECT COUNT(*) FROM "{index_table}"')  # nosec B608 - index_table built from table_name/geometry_column via QGIS layer metadata
             row_count = cursor.fetchone()[0]
 
             # Validate index using Spatialite function
             try:
                 cursor.execute(
-                    f"SELECT CheckSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608
+                    f"SELECT CheckSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608 - table_name/geometry_column from QGIS layer metadata (SpatiaLite: no sql.Identifier equivalent)
                 )
                 check_result = cursor.fetchone()
                 is_valid = check_result[0] == 1 if check_result else False
-            except Exception:
+            except sqlite3.Error:
                 is_valid = True  # Assume valid if check not available
 
             # Get table size
             try:
                 cursor.execute(
-                    f"SELECT page_count * page_size FROM pragma_page_count('{index_table}'), pragma_page_size()"  # nosec B608
+                    f"SELECT page_count * page_size FROM pragma_page_count('{index_table}'), pragma_page_size()"  # nosec B608 - index_table built from table_name/geometry_column via QGIS layer metadata
                 )
                 size_result = cursor.fetchone()
                 size_bytes = size_result[0] if size_result else 0
-            except Exception:
+            except sqlite3.Error:
                 size_bytes = 0
 
             return IndexInfo(
@@ -265,7 +266,7 @@ class RTreeIndexManager:
                 size_bytes=size_bytes
             )
 
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error(f"[Spatialite] Failed to get index info for {table_name}.{geometry_column}: {e}")
             return None
 
@@ -291,7 +292,7 @@ class RTreeIndexManager:
                 if info:
                     indexes.append(info)
 
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error(f"[Spatialite] Failed to get all indexes: {e}")
 
         return indexes
@@ -317,7 +318,7 @@ class RTreeIndexManager:
                     if self.rebuild_index(table_name, geom_col):
                         count += 1
 
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error(f"[Spatialite] Failed to optimize indexes: {e}")
 
         logger.info(f"[Spatialite] Optimized {count} spatial indexes")
@@ -349,7 +350,7 @@ class RTreeIndexManager:
             logger.info(f"[Spatialite] Vacuumed database (includes {len(index_tables)} index tables)")
             return True
 
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error(f"[Spatialite] Failed to vacuum: {e}")
             return False
 
@@ -386,7 +387,7 @@ class RTreeIndexManager:
                         f'CREATE INDEX IF NOT EXISTS "{index_name}" ON "{table_name}" ("{col}")'
                     )
                     count += 1
-                except Exception as e:
+                except sqlite3.Error as e:
                     logger.warning(f"[Spatialite] Failed to create index on {table_name}.{col}: {e}")
 
             self._conn.commit()

@@ -5,53 +5,51 @@
 
 [general]
 name=FilterMate
-qgisMinimumVersion=3.22
-qgisMaximumVersion=4.99
+qgisMinimumVersion=3.16
 description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector data with lightning-fast performance on ANY data source.
-version=4.6.1
+version=4.4.6
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🎯 FilterMate 4.6.1 - Your Swiss Army Knife for Spatial Data!
-
+about=🎯 FilterMate 4.4 - Your Swiss Army Knife for Spatial Data!
+    
     Stop struggling with complex filters. FilterMate makes spatial queries intuitive, fast, and powerful.
-
+    
     🌟 WHY FILTERMATE?
     ━━━━━━━━━━━━━━━━━
     ✓ Works with EVERYTHING: PostgreSQL, Spatialite, GeoPackage, Shapefiles, WFS...
     ✓ Lightning fast: 2-8× faster with 4 performance optimizers + smart caching
     ✓ Intuitive: Filter by clicking, drawing, or selecting - no SQL needed!
     ✓ Professional: Undo/Redo, Favorites, Dark Mode, 21 languages
-
+    
     🔥 KILLER FEATURES:
     ━━━━━━━━━━━━━━━━━━
     📍 Geometric filtering with buffer, intersection, containment...
     🔍 Smart entity search across any layer type
     ⭐ Save & share your favorite filter configurations with spatial context
-    📦 One-click export to GeoPackage with embedded QGIS project (preserves group structure, styles & CRS)
+    📦 One-click export with styles to GeoPackage
     🎨 Beautiful UI that adapts to your QGIS theme
     ⚡ Filter chaining with dynamic buffer expressions
+    
+    💡 v4.4.6: Latest maintenance release
+    💡 v4.4.0: Quality release - 396 unit tests, hexagonal architecture, 75%% coverage!
+    
+    📖 Full docs: https://sducournau.github.io/filter_mate
 
-    💡 v4.6.1: QGIS 4 / Qt6 compatibility, edit mode popup, i18n 22 languages at 100%%, config harmonization
-    💡 v4.6.0: GPKG export now embeds a full QGIS project with layer groups, styles & CRS
-    💡 v4.5.3: Fix GPKG export crash (thread-safety fix for GUI calls)
-
-    📖 Full docs: https://imagodata.github.io/filter_mate
-
-tracker=https://github.com/imagodata/filter_mate/issues
-repository=https://github.com/imagodata/filter_mate
+tracker=https://github.com/sducournau/filter_mate/issues
+repository=https://github.com/sducournau/filter_mate
 # End of mandatory metadata
 
 # Recommended items: regexp
 
 hasProcessingProvider=no
 
-changelog=v4.6.1 (2026-03-09): QGIS 4 / Qt6 compatibility. Edit mode popup before filter/unfilter operations. i18n 22 languages at 100%%. Config harmonization with single source of truth. v4.6.0 (2026-02-18): GPKG export now embeds a full QGIS project preserving layer group hierarchy, styles and CRS. Fix action buttons not disabled when switching to exporting tab. v4.5.3 (2026-02-18): Fix GPKG export crash caused by GUI calls from background thread. v4.5.2 (2026-02-12): Fix square key buttons sizing, exploring sidebar layout alignment. v4.5.1 (2026-02-11): Website launch, org migration, 600 tests, quality score 9.0/10.
+changelog=v4.4.0 (2026-01-22): Major quality release - 396 standalone unit tests, DockwidgetSignalManager extraction (778 lines), hexagonal architecture complete. Test coverage 75%%, quality score 8.5/10.
 
 # Tags are comma separated with spaces allowed
 tags=python,filter,vector,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export
 
-homepage=https://imagodata.github.io/filter_mate/
+homepage=https://sducournau.github.io/filter_mate/
 category=Plugins
 icon=icon.png
 # experimental flag

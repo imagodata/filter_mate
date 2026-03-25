@@ -28,7 +28,7 @@ Location: core/tasks/filtering_orchestrator.py (Application Layer)
 
 import logging
 import os
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from qgis.core import QgsVectorLayer
 
@@ -509,7 +509,7 @@ class FilteringOrchestrator:
             - Handles provider-specific geometry preparation (PostgreSQL, Spatialite, OGR)
         """
         logger.info(f"manage_distant_layers_geometric_filtering: {source_layer.name()} (features: {source_layer.featureCount()})")
-        logger.info("  is_field_expression: N/A (handled by caller)")
+        logger.info(f"  is_field_expression: N/A (handled by caller)")
         logger.info("=" * 60)
 
         # DIAGNOSTIC COMPLET - ARCHITECTURE FIX 2026-01-16
@@ -540,20 +540,20 @@ class FilteringOrchestrator:
         # CRITICAL - Only call MV creation if feature count exceeds threshold
         from ...adapters.backends.postgresql.filter_executor import BUFFER_EXPR_MV_THRESHOLD
         if (current_buffer_expression and
-            param_source_provider_type == PROVIDER_POSTGRES and
+            param_source_provider_type == 'postgresql' and
             cached_feature_count is not None and
                 cached_feature_count > BUFFER_EXPR_MV_THRESHOLD):
             logger.info(f"  Feature count ({cached_feature_count}) > threshold ({BUFFER_EXPR_MV_THRESHOLD})")
             logger.info("  -> Calling _ensure_buffer_expression_mv_exists()...")
             ensure_buffer_expression_mv_exists_callback()
-        elif current_buffer_expression and param_source_provider_type == PROVIDER_POSTGRES:
+        elif current_buffer_expression and param_source_provider_type == 'postgresql':
             logger.info(f"  SKIP MV creation: {cached_feature_count} features <= {BUFFER_EXPR_MV_THRESHOLD} threshold")
             logger.info("  -> Buffer expression will be applied INLINE by prepare_postgresql_source_geom()")
 
         # Try to create optimized filter chain MV for PostgreSQL
         # When multiple spatial filters are chained (zone_pop AND demand_points etc.),
         # creating a single MV reduces N*M EXISTS queries to 1 EXISTS per distant layer
-        if param_source_provider_type == PROVIDER_POSTGRES:
+        if param_source_provider_type == 'postgresql':
             try_create_filter_chain_mv_callback()
 
         # Build unique provider list including source layer provider AND forced backends
@@ -872,11 +872,7 @@ class FilteringOrchestrator:
                 logger.debug(f"FILTERING {i}/{layers_count}: {layer_name} ({layer_provider_type})")
                 logger.info(f"   Features before filter: {layer_feature_count}")
 
-                try:
-                    filter_result = execute_geometric_filtering_callback(layer_provider_type, layer, layer_props)
-                except Exception as filter_exc:
-                    filter_result = False
-                    logger.error(f"  {layer_name} - filtering exception: {filter_exc}")
+                filter_result = execute_geometric_filtering_callback(layer_provider_type, layer, layer_props)
 
                 # Log result VISIBLY for debugging
                 logger.info(f"   -> execute_geometric_filtering RESULT: {filter_result}")

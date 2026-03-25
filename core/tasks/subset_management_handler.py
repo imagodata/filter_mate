@@ -20,6 +20,7 @@ Thread Safety:
 import logging
 import os
 import uuid
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ...infrastructure.logging import setup_logger
 from ...config.config import ENV_VARS
@@ -282,7 +283,7 @@ class SubsetManagementHandler:
                     seq_order=seq_order,
                     subset_string=sql_subset_string
                 )
-            except (RuntimeError, OSError, AttributeError) as e:
+            except Exception as e:
                 logger.warning(f"Prepared statement failed, falling back to repository: {e}")
 
         # Fallback: Use centralized HistoryRepository
@@ -472,7 +473,7 @@ class SubsetManagementHandler:
             if ps_manager:
                 try:
                     ps_manager.delete_subset_history(project_uuid, layer.id())
-                except (RuntimeError, OSError, AttributeError) as e:
+                except Exception as e:
                     logger.warning(f"Prepared statement failed, falling back to repository: {e}")
                     history_repo.delete_for_layer(project_uuid, layer.id())
             else:
@@ -491,7 +492,7 @@ class SubsetManagementHandler:
             temp_conn.commit()
             temp_cur.close()
             temp_conn.close()
-        except sqlite3.Error as e:
+        except Exception as e:
             logger.error(f"Error dropping Spatialite temp table: {e}")
 
         queue_subset_fn(layer, '')
@@ -522,7 +523,7 @@ class SubsetManagementHandler:
             if ps_manager:
                 try:
                     ps_manager.delete_subset_history(project_uuid, layer.id())
-                except (RuntimeError, OSError, AttributeError) as e:
+                except Exception as e:
                     logger.warning(f"Prepared statement failed, falling back to repository: {e}")
                     history_repo.delete_for_layer(project_uuid, layer.id())
             else:
@@ -936,7 +937,7 @@ class SubsetManagementHandler:
             finally:
                 try:
                     cur.close()
-                except (RuntimeError, OSError, AttributeError) as e:
+                except Exception as e:
                     logger.debug(f"Could not close database cursor: {e}")
                 if conn in active_connections:
                     active_connections.remove(conn)

@@ -18,14 +18,12 @@ Dependencies:
 
 from qgis.core import (
     Qgis,
-    QgsFeatureRequest,
     QgsFeatureSource,
     QgsField,
     QgsTask,
     QgsVectorLayer
 )
 from qgis.PyQt.QtCore import pyqtSignal, QMetaType, QTimer
-from qgis.utils import iface
 from qgis import processing
 import logging
 import os
@@ -37,6 +35,7 @@ import re
 
 # Import logging configuration
 from ...infrastructure.logging import setup_logger, safe_log
+from ...infrastructure.utils.thread_utils import main_thread_only
 from ...config.config import ENV_VARS
 
 # Setup logger
@@ -58,7 +57,6 @@ from ...infrastructure.utils import (
     detect_layer_provider_type,
     get_best_display_field
 )
-from ...infrastructure.database.sql_utils import sanitize_sql_identifier
 
 # Additional utilities from infrastructure
 try:
@@ -95,10 +93,7 @@ from ...infrastructure.utils import (
 try:
     import sip
 except ImportError:
-    try:
-        from PyQt6 import sip
-    except ImportError:
-        sip = None
+    sip = None
 
 # Import task utilities
 from ...infrastructure.database.spatialite_support import (
@@ -197,41 +192,19 @@ class LayersManagementEngineTask(QgsTask):
         # This avoids opening/closing connections for each layer during init
         self._postgresql_connection_cache = {}
 
-        # THREAD SAFETY (v2.3.10): Queue for layer variable operations
+        # Queue for layer variable operations (thread safety)
         # QgsExpressionContextUtils calls must happen in main thread (finished() method)
         # This queue stores: (layer_id, variable_key, value) tuples for setLayerVariable
         # or (layer_id, None, None) for setLayerVariables({}) to clear all
         self._deferred_layer_variables = []
 
-        # THREAD SAFETY: Store warnings for display in finished() on main thread
-        # DO NOT call iface.messageBar() from run() - causes crash (access violation)
-        self._deferred_warnings = []
-
         # JSON templates for layer properties
         # NOTE: has_combine_operator defaults to false - additive filter is auto-enabled
         # when existing subsets are detected on source or distant layers (see _synchronize_layer_widgets)
         # source_layer_combine_operator and other_layers_combine_operator default to "AND" (index 0)
-        self.json_template_layer_infos = (
-            '{"layer_geometry_type":"%s","layer_name":"%s","layer_table_name":"%s","layer_id":"%s",'
-            '"layer_schema":"%s","is_already_subset":false,"layer_provider_type":"%s","layer_crs_authid":"%s",'
-            '"primary_key_name":"%s","primary_key_idx":%s,"primary_key_type":"%s",'
-            '"layer_geometry_field":"%s","primary_key_is_numeric":%s,"is_current_layer":false }'
-        )
-        self.json_template_layer_exploring = (
-            '{"is_changing_all_layer_properties":true,"is_tracking":false,"is_selecting":false,'
-            '"is_linking":false,"current_exploring_groupbox":"single_selection",'
-            '"single_selection_expression":"%s","multiple_selection_expression":"%s",'
-            '"custom_selection_expression":"%s" }'
-        )
-        self.json_template_layer_filtering = (
-            '{"has_layers_to_filter":false,"layers_to_filter":[],"has_combine_operator":false,'
-            '"source_layer_combine_operator":"AND","other_layers_combine_operator":"AND",'
-            '"has_geometric_predicates":false,"geometric_predicates":[],'
-            '"use_centroids_source_layer":false,"use_centroids_distant_layers":false,'
-            '"has_buffer_value":false,"buffer_value":0.0,"buffer_value_property":false,'
-            '"buffer_value_expression":"","has_buffer_type":false,"buffer_type":"Round",'
-            '"buffer_segments":5,"has_simplify_tolerance":false,"simplify_tolerance":0.0 }'
-        )
+        self.json_template_layer_infos = '{"layer_geometry_type":"%s","layer_name":"%s","layer_table_name":"%s","layer_id":"%s","layer_schema":"%s","is_already_subset":false,"layer_provider_type":"%s","layer_crs_authid":"%s","primary_key_name":"%s","primary_key_idx":%s,"primary_key_type":"%s","layer_geometry_field":"%s","primary_key_is_numeric":%s,"is_current_layer":false }'
+        self.json_template_layer_exploring = '{"is_changing_all_layer_properties":true,"is_tracking":false,"is_selecting":false,"is_linking":false,"current_exploring_groupbox":"single_selection","single_selection_expression":"%s","multiple_selection_expression":"%s","custom_selection_expression":"%s" }'
+        self.json_template_layer_filtering = '{"has_layers_to_filter":false,"layers_to_filter":[],"has_combine_operator":false,"source_layer_combine_operator":"AND","other_layers_combine_operator":"AND","has_geometric_predicates":false,"geometric_predicates":[],"use_centroids_source_layer":false,"use_centroids_distant_layers":false,"has_buffer_value":false,"buffer_value":0.0,"buffer_value_property":false,"buffer_value_expression":"","has_buffer_type":false,"buffer_type":"Round","buffer_segments":5,"has_simplify_tolerance":false,"simplify_tolerance":0.0 }'
 
         global ENV_VARS
         self.PROJECT = ENV_VARS["PROJECT"]
@@ -289,10 +262,10 @@ class LayersManagementEngineTask(QgsTask):
 
                 # Verify database is accessible before processing
                 try:
-                    with self._safe_spatialite_connect():
+                    with self._safe_spatialite_connect() as conn:
                         pass  # Connection test - context manager handles close
                     logger.debug("Database accessibility check: OK")
-                except (OSError, RuntimeError) as db_err:
+                except Exception as db_err:
                     logger.error(f"Database accessibility check FAILED: {db_err}", exc_info=True)
                     raise
 
@@ -310,7 +283,7 @@ class LayersManagementEngineTask(QgsTask):
 
             return True
 
-        except Exception as e:  # catch-all safety net: QgsTask.run() must not propagate exceptions
+        except Exception as e:
             self.exception = e
             # Provide detailed error information for database issues
             error_msg = f'LayerManagementEngineTask run() failed: {e}'
@@ -337,10 +310,7 @@ class LayersManagementEngineTask(QgsTask):
             if self.isCanceled() or result is False:
                 return False
 
-        total = len(self.layers)
-        for i, layer in enumerate(self.layers):
-            if total > 0:
-                self.setProgress((i / total) * 100)
+        for layer in self.layers:
             if self.task_action == 'add_layers':
                 if isinstance(layer, QgsVectorLayer):
                     if layer.id() not in self.project_layers.keys():
@@ -398,7 +368,7 @@ class LayersManagementEngineTask(QgsTask):
                 )
                 existing_layer_variables[property[0]][property[1]] = value_typped
 
-                # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                # Queue for main thread execution
                 variable_key = f"filterMate_{property[0]}_{property[1]}"
                 self._deferred_layer_variables.append((layer.id(), variable_key, value_typped))
 
@@ -440,7 +410,7 @@ class LayersManagementEngineTask(QgsTask):
 
         # Ensure all required exploring boolean flags exist
         exploring_booleans = {
-            "is_linking": self._get_default_is_linking(),
+            "is_linking": False,
             "is_selecting": False,
             "is_tracking": False,
             "is_changing_all_layer_properties": True
@@ -456,7 +426,7 @@ class LayersManagementEngineTask(QgsTask):
             logger.info(f"Added missing 'current_exploring_groupbox' property for layer {layer.id()}")
 
         # Ensure all expression properties exist with primary key as default
-        # FIX v4.1 Simon 2026-01-16: Garantir un fallback robuste si primary_key est vide
+        # Garantir un fallback robuste si primary_key est vide
         expression_properties = [
             "single_selection_expression",
             "multiple_selection_expression",
@@ -477,7 +447,7 @@ class LayersManagementEngineTask(QgsTask):
                 else:
                     fallback_field = "$id"
                     logger.warning(f"Layer {layer.id()} has no fields, using $id as fallback")
-            except (RuntimeError, AttributeError) as e:
+            except Exception as e:
                 fallback_field = "$id"
                 logger.error(f"Error getting fields for layer {layer.id()}: {e}, using $id")
 
@@ -500,7 +470,7 @@ class LayersManagementEngineTask(QgsTask):
                     conn.commit()
                     cur.close()
                 logger.debug(f"Updated database for layer {layer.id()}")
-            except (OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning(f"Could not update database for migration: {e}")
 
         # Add layer_table_name if missing
@@ -520,7 +490,7 @@ class LayersManagementEngineTask(QgsTask):
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning(f"Could not add layer_table_name to database: {e}")
 
         # Add layer_provider_type if missing
@@ -540,10 +510,10 @@ class LayersManagementEngineTask(QgsTask):
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning(f"Could not add layer_provider_type to database: {e}")
 
-            # THREAD SAFETY (v2.3.10): Queue for main thread execution
+            # Queue for main thread execution
             self._deferred_layer_variables.append((layer.id(), "filterMate_infos_layer_table_name", infos.get("layer_table_name", "")))
 
         # Add layer_geometry_type if missing
@@ -563,7 +533,7 @@ class LayersManagementEngineTask(QgsTask):
                     )
                     conn.commit()
                     cur.close()
-            except (OSError, RuntimeError) as e:
+            except Exception as e:
                 logger.warning(f"Could not add layer_geometry_type to database: {e}")
 
     def _detect_layer_metadata(self, layer, layer_provider_type):
@@ -604,7 +574,7 @@ class LayersManagementEngineTask(QgsTask):
 
                 logger.debug(f"PostgreSQL layer metadata: schema={source_schema}, geometry_field={geometry_field}")
 
-            except (RuntimeError, AttributeError, ValueError) as e:
+            except Exception as e:
                 logger.warning(f"Error parsing PostgreSQL layer source: {e}, falling back to regex")
                 # Fallback to regex if QgsDataSourceUri fails
                 layer_source = layer.source()
@@ -616,7 +586,7 @@ class LayersManagementEngineTask(QgsTask):
                     geometry_field = regexp_match_geom.group()
 
         elif layer_provider_type in [PROVIDER_SPATIALITE, PROVIDER_OGR]:
-            # FIX v2.4.13: Improved geometry column detection for GeoPackage/Spatialite
+            # Improved geometry column detection for GeoPackage/Spatialite
             # Try multiple methods in order of reliability
             detected_geom_field = None
 
@@ -626,8 +596,8 @@ class LayersManagementEngineTask(QgsTask):
                 if geom_col and geom_col.strip():
                     detected_geom_field = geom_col
                     logger.debug(f"Geometry column from layer.geometryColumn(): '{detected_geom_field}'")
-            except (RuntimeError, AttributeError):
-                pass
+            except Exception as e:
+                logger.debug(f"Ignored in geometryColumn() detection: {e}")
 
             # METHOD 1: Query GeoPackage metadata (for .gpkg files)
             if not detected_geom_field:
@@ -664,7 +634,7 @@ class LayersManagementEngineTask(QgsTask):
                                     detected_geom_field = result[0]
                                     logger.debug(f"Geometry column from gpkg_geometry_columns: '{detected_geom_field}'")
                                 conn.close()
-                except (OSError, RuntimeError, AttributeError) as e:
+                except Exception as e:
                     logger.debug(f"Could not query GeoPackage metadata: {e}")
 
             # Final assignment with fallback
@@ -675,7 +645,7 @@ class LayersManagementEngineTask(QgsTask):
                 geometry_field = 'geom' if layer_provider_type == PROVIDER_OGR else 'geometry'
                 logger.debug(f"Using default geometry field: '{geometry_field}'")
 
-        # FIX v4.0.8 (2026-01-16): FINAL FALLBACK - never return 'NULL' as geometry_field
+        # FINAL FALLBACK - never return 'NULL' as geometry_field
         # This ensures all layers have a valid geometry column from initialization
         # (avoids fallback detection during filtering task)
         if geometry_field == 'NULL' or not geometry_field:
@@ -688,9 +658,9 @@ class LayersManagementEngineTask(QgsTask):
                 else:
                     geometry_field = 'geom'  # Ultimate fallback
                     logger.info("Final fallback: using default geometry column 'geom'")
-            except (RuntimeError, AttributeError):
+            except Exception as e:
                 geometry_field = 'geom'
-                logger.info("Final fallback: using default geometry column 'geom' (detection failed)")
+                logger.info(f"Final fallback: using default geometry column 'geom' (detection failed: {e})")
 
         return source_schema, geometry_field
 
@@ -718,7 +688,7 @@ class LayersManagementEngineTask(QgsTask):
         source_table_name = get_source_table_name(layer)
 
         # Check PostgreSQL connection availability for PostgreSQL layers
-        # CRITICAL FIX v2.5.19: PostgreSQL layers are ALWAYS available for basic filtering
+        # PostgreSQL layers are ALWAYS available for basic filtering
         # via QGIS native API (setSubsetString) - this works without psycopg2!
         # psycopg2 is only needed for ADVANCED features (materialized views, custom indexes)
         #
@@ -728,7 +698,7 @@ class LayersManagementEngineTask(QgsTask):
         postgresql_connection_available = False
         psycopg2_connection_available = False
 
-        # v3.0.5: CRITICAL FIX - PostgreSQL layers are ALWAYS filterable via QGIS native API
+        # PostgreSQL layers are ALWAYS filterable via QGIS native API
         # psycopg2 is only needed for ADVANCED features (materialized views, indexes)
         # Basic filtering via setSubsetString() works without psycopg2
         if layer_provider_type == PROVIDER_POSTGRES:
@@ -767,7 +737,7 @@ class LayersManagementEngineTask(QgsTask):
                             logger.info(f"PostgreSQL layer {layer.name()}: psycopg2 connection unavailable (advanced features disabled, basic filtering still works)")
                         # Cache the result for other layers from same database
                         self._postgresql_connection_cache[cache_key] = psycopg2_connection_available
-                except (RuntimeError, OSError, AttributeError) as e:
+                except Exception as e:
                     logger.info(f"PostgreSQL psycopg2 connection test failed for {layer.name()}: {e} (advanced features disabled, basic filtering still works)")
             else:
                 logger.debug(f"PostgreSQL layer {layer.name()}: psycopg2 not installed (advanced features disabled, basic filtering still works)")
@@ -803,7 +773,7 @@ class LayersManagementEngineTask(QgsTask):
         # Use descriptive text fields when available instead of just primary key
         best_display_field = get_best_display_field(layer)
 
-        # FIX v4.1 Simon 2026-01-16: GARANTIR que display_expression n'est JAMAIS vide
+        # GARANTIR que display_expression n'est JAMAIS vide
         # Les combobox field ne doivent JAMAIS être vides au chargement d'un layer
         if best_display_field:
             display_expression = best_display_field
@@ -828,27 +798,14 @@ class LayersManagementEngineTask(QgsTask):
                 escape_json_string(display_expression)
             )
         )
-        # Apply config default for is_linking
-        default_is_linking = self._get_default_is_linking()
-        new_layer_variables["exploring"]["is_linking"] = default_is_linking
         new_layer_variables["filtering"] = json.loads(self.json_template_layer_filtering)
 
-        # VERIFICATION v2.9.32: Log default centroid checkbox values to confirm they are False
+        # VERIFICATION Log default centroid checkbox values to confirm they are False
         logger.debug(f"🔍 Default centroid values for new layer {layer.name()}: "
                     f"use_centroids_source_layer={new_layer_variables['filtering']['use_centroids_source_layer']}, "
                     f"use_centroids_distant_layers={new_layer_variables['filtering']['use_centroids_distant_layers']}")
 
         return new_layer_variables
-
-    def _get_default_is_linking(self):
-        """Read DEFAULT_IS_LINKING from config, handling wrapped {value, description} format."""
-        try:
-            option = self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"].get("DEFAULT_IS_LINKING", True)
-            if isinstance(option, dict):
-                return bool(option.get("value", True))
-            return bool(option)
-        except (KeyError, TypeError, AttributeError):
-            return True
 
     def _set_layer_variables(self, layer, layer_variables):
         """
@@ -902,7 +859,7 @@ class LayersManagementEngineTask(QgsTask):
                     logger.debug(f"Could not create spatial index for PostgreSQL layer {layer.id()}: {e}")
                     # Fallback to QGIS spatial index
                     self.create_spatial_index_for_layer(layer)
-                except Exception as e:  # catch-all safety net: includes psycopg2.Error and RuntimeError
+                except Exception as e:
                     if POSTGRESQL_AVAILABLE and psycopg2 and isinstance(e, psycopg2.Error):
                         logger.debug(f"PostgreSQL error creating spatial index: {e}")
                     else:
@@ -941,13 +898,13 @@ class LayersManagementEngineTask(QgsTask):
             if layer.providerType() == 'postgres':
                 primary_key = layer_variables.get("infos", {}).get("primary_key_name")
                 if primary_key == "virtual_id":
-                    error_msg = self.tr(
-                        "PostgreSQL layer '{0}': Corrupted data detected.\n\n"
-                        "This layer uses 'virtual_id' which does not exist in PostgreSQL.\n"
-                        "This error originates from a previous version of FilterMate.\n\n"
-                        "Solution: Remove this layer from the FilterMate project, then re-add it.\n"
-                        "Make sure the PostgreSQL table has a PRIMARY KEY defined."
-                    ).format(layer.name())
+                    error_msg = (
+                        f"Couche PostgreSQL '{layer.name()}' : Données corrompues détectées.\n\n"
+                        "Cette couche utilise 'virtual_id' qui n'existe pas dans PostgreSQL.\n"
+                        "Cette erreur provient d'une version précédente de FilterMate.\n\n"
+                        "Solution : Supprimez cette couche du projet FilterMate, puis rajoutez-la.\n"
+                        "Assurez-vous que la table PostgreSQL a une PRIMARY KEY définie."
+                    )
                     logger.error(error_msg)
                     raise ValueError(error_msg)
 
@@ -965,15 +922,17 @@ class LayersManagementEngineTask(QgsTask):
             # Check if PostgreSQL layer using ctid (no PRIMARY KEY)
             primary_key = result[0]
             if layer.providerType() == 'postgres' and primary_key == 'ctid':
-                # Store warning for display on main thread in finished()
-                # DO NOT call iface.messageBar() here - causes crash (access violation)
-                warning_msg = self.tr(
-                    "Layer '{0}' has no PRIMARY KEY. "
-                    "Limited features: materialized views disabled. "
-                    "Recommendation: add a PRIMARY KEY for optimal performance."
-                ).format(layer.name())
-                self._deferred_warnings.append(warning_msg)
-                logger.warning(f"PostgreSQL layer without PRIMARY KEY: {layer.name()}")
+                # Show warning to user about limitations
+                from qgis.core import Qgis
+                from qgis.utils import iface
+                iface.messageBar().pushMessage(
+                    "FilterMate - PostgreSQL sans clé primaire",
+                    f"La couche '{layer.name()}' n'a pas de PRIMARY KEY. "
+                    "Fonctionnalités limitées : vues matérialisées désactivées. "
+                    "Recommandation : ajoutez une PRIMARY KEY pour performances optimales.",
+                    Qgis.Warning,
+                    duration=10
+                )
 
             layer_variables = self._build_new_layer_properties(layer, result)
             self._set_layer_variables(layer, layer_variables)
@@ -998,9 +957,8 @@ class LayersManagementEngineTask(QgsTask):
         # Save to database
         self.insert_properties_to_spatialite(layer.id(), layer_props)
 
-        # Mark spatial index as pending — will be created on-demand during filtering
-        # (GeoPackage layers often already have rtree; processing.run is very slow on large layers)
-        layer_props["infos"]["spatial_index_pending"] = True
+        # Create spatial index
+        self._create_spatial_index(layer, layer_props)
 
         # Add to project layers dictionary
         self.project_layers[layer.id()] = layer_props
@@ -1036,7 +994,7 @@ class LayersManagementEngineTask(QgsTask):
             del self.project_layers[layer_id]
             logger.debug(f"remove_project_layer: successfully removed layer '{layer_id}'")
             return True
-        except (RuntimeError, OSError, KeyError, AttributeError) as e:
+        except Exception as e:
             logger.error(f"remove_project_layer: error removing layer '{layer_id}': {e}")
             return False
 
@@ -1096,7 +1054,7 @@ class LayersManagementEngineTask(QgsTask):
             if cleaned_layer_ids:
                 logger.info(f"Cleaned up {len(cleaned_layer_ids)} PostgreSQL layers with virtual_id: {cleaned_layer_ids}")
 
-        except (OSError, RuntimeError) as e:
+        except Exception as e:
             logger.error(f"Error during PostgreSQL virtual_id cleanup: {e}")
 
         return cleaned_layer_ids
@@ -1130,14 +1088,8 @@ class LayersManagementEngineTask(QgsTask):
         Returns:
             tuple: (field_name, field_index, field_type, is_numeric) or False if canceled
         """
+        feature_count = layer.featureCount()
         layer_provider = layer.providerType()
-
-        # Skip expensive featureCount() for non-PostgreSQL providers
-        # (GeoPackage iterates all features internally — very slow on 100k+ rows)
-        if layer_provider == 'postgres':
-            feature_count = layer.featureCount()
-        else:
-            feature_count = -1  # Unknown — will trust PK attributes
 
         # CRITICAL FIX: For PostgreSQL layers, ALWAYS trust declared primary key
         # without checking uniqueness to avoid freeze on large tables.
@@ -1212,13 +1164,13 @@ class LayersManagementEngineTask(QgsTask):
         # 5. For PostgreSQL without PK, use ctid immediately
         if is_postgresql:
             logger.warning(
-                f"PostgreSQL layer '{layer.name()}': No primary key or ID field found.\n"
-                "   FilterMate will use 'ctid' (PostgreSQL internal identifier) with limitations:\n"
-                "   - Attribute filtering: OK\n"
-                "   - Basic geometry filtering: OK\n"
-                "   - Materialized views: disabled (reduced performance)\n"
-                "   - Filter history: limited\n"
-                "   Recommendation: Add a PRIMARY KEY for optimal performance."
+                f"⚠️ Couche PostgreSQL '{layer.name()}' : Aucune clé primaire ou champ ID trouvé.\n"
+                "   FilterMate utilisera 'ctid' (identifiant interne PostgreSQL) avec limitations :\n"
+                "   - ✅ Filtrage attributaire possible\n"
+                "   - ✅ Filtrage géométrique basique possible\n"
+                "   - ❌ Vues matérialisées désactivées (performance réduite)\n"
+                "   - ❌ Historique de filtres limité\n"
+                "   Recommandation : Ajoutez une PRIMARY KEY pour performances optimales."
             )
             return ('ctid', -1, 'tid', False)
 
@@ -1280,7 +1232,7 @@ class LayersManagementEngineTask(QgsTask):
         geometry_field = infos["layer_geometry_field"]
         primary_key_name = infos["primary_key_name"]
 
-        # PERFORMANCE v2.4.0: Use connection pooling if available
+        # PERFORMANCE Use connection pooling if available
         use_pooled = CONNECTION_POOL_AVAILABLE and pooled_connection_from_layer is not None
 
         if use_pooled:
@@ -1291,7 +1243,7 @@ class LayersManagementEngineTask(QgsTask):
                         logger.warning(f"Cannot create spatial index for PostgreSQL layer {layer.name()}: no database connection (pooled)")
                         return False
                     return self._create_postgresql_indexes(connexion, schema, table, geometry_field, primary_key_name, layer.name())
-            except (RuntimeError, OSError, AttributeError) as e:
+            except Exception as e:
                 logger.error(f"Pooled connection error for spatial index: {e}")
                 # Fallback to non-pooled connection
                 use_pooled = False
@@ -1330,15 +1282,9 @@ class LayersManagementEngineTask(QgsTask):
             bool: True if successful
         """
         try:
-            # Sanitize all identifiers from QGIS URI metadata
-            safe_schema = sanitize_sql_identifier(schema)
-            safe_table = sanitize_sql_identifier(table)
-            safe_geom = sanitize_sql_identifier(geometry_field)
-            safe_pk = sanitize_sql_identifier(primary_key_name)
-
             with connexion.cursor() as cursor:
                 # PERFORMANCE: Check if GIST index already exists before creating
-                gist_index_name = sanitize_sql_identifier(f"{schema}_{table}_{geometry_field}_idx")
+                gist_index_name = f"{schema}_{table}_{geometry_field}_idx"
                 cursor.execute("""
                     SELECT 1 FROM pg_indexes
                     WHERE schemaname = %s AND tablename = %s AND indexname = %s
@@ -1346,17 +1292,17 @@ class LayersManagementEngineTask(QgsTask):
                 gist_exists = cursor.fetchone() is not None
 
                 if not gist_exists:
-                    logger.debug(f"Creating GIST spatial index on {safe_schema}.{safe_table}.{safe_geom}")
+                    logger.debug(f"Creating GIST spatial index on {schema}.{table}.{geometry_field}")
                     cursor.execute(
                         f'CREATE INDEX {gist_index_name} '
-                        f'ON "{safe_schema}"."{safe_table}" USING GIST ("{safe_geom}");'
+                        f'ON "{schema}"."{table}" USING GIST ("{geometry_field}");'
                     )
                 else:
                     logger.debug(f"GIST index {gist_index_name} already exists, skipping")
 
                 # PERFORMANCE: Check if primary key index already exists
                 # Note: PostgreSQL auto-creates index for PRIMARY KEY, but not for manual 'id' fields
-                pk_index_name = sanitize_sql_identifier(f"{schema}_{table}_{primary_key_name}_idx")
+                pk_index_name = f"{schema}_{table}_{primary_key_name}_idx"
                 cursor.execute("""
                     SELECT 1 FROM pg_indexes
                     WHERE schemaname = %s AND tablename = %s AND indexname = %s
@@ -1364,17 +1310,17 @@ class LayersManagementEngineTask(QgsTask):
                 pk_exists = cursor.fetchone() is not None
 
                 if not pk_exists and primary_key_name != 'ctid':
-                    logger.debug(f"Creating unique index on {safe_schema}.{safe_table}.{safe_pk}")
+                    logger.debug(f"Creating unique index on {schema}.{table}.{primary_key_name}")
                     try:
                         cursor.execute(
                             f'CREATE UNIQUE INDEX {pk_index_name} '
-                            f'ON "{safe_schema}"."{safe_table}" ("{safe_pk}");'
+                            f'ON "{schema}"."{table}" ("{primary_key_name}");'
                         )
-                    except (RuntimeError, OSError) as e:
+                    except Exception as e:
                         # May fail if column has duplicates - not critical
-                        logger.debug(f"Could not create unique index on {safe_pk}: {e}")
+                        logger.debug(f"Could not create unique index on {primary_key_name}: {e}")
                 else:
-                    logger.debug(f"PK index for {safe_pk} already exists or not needed, skipping")
+                    logger.debug(f"PK index for {primary_key_name} already exists or not needed, skipping")
 
                 # PERFORMANCE: Skip CLUSTER at init - it's very slow on large tables
                 # CLUSTER will be done lazily during first filter if beneficial
@@ -1391,14 +1337,14 @@ class LayersManagementEngineTask(QgsTask):
                 has_stats = cursor.fetchone() is not None
 
                 if not has_stats:
-                    logger.debug(f"Running ANALYZE on {safe_schema}.{safe_table} (no statistics found)")
-                    cursor.execute(f'ANALYZE "{safe_schema}"."{safe_table}";')
+                    logger.debug(f"Running ANALYZE on {schema}.{table} (no statistics found)")
+                    cursor.execute(f'ANALYZE "{schema}"."{table}";')
                 else:
-                    logger.debug(f"Table {safe_schema}.{safe_table} already has statistics, skipping ANALYZE")
+                    logger.debug(f"Table {schema}.{table} already has statistics, skipping ANALYZE")
 
             connexion.commit()
             logger.info(f"PostgreSQL layer {layer_name}: spatial index setup completed")
-        except (RuntimeError, OSError, AttributeError) as e:
+        except Exception as e:
             logger.warning(f"Error creating spatial index for PostgreSQL layer {layer_name}: {e}")
             return False
 
@@ -1427,10 +1373,9 @@ class LayersManagementEngineTask(QgsTask):
             if layer.featureCount() == 0:
                 return True
 
-            # Check for at least one valid geometry (sample first 10 features max)
+            # Check for at least one valid geometry
             has_valid_geom = False
-            request = QgsFeatureRequest().setLimit(10)
-            for feature in layer.getFeatures(request):
+            for feature in layer.getFeatures():
                 if feature.hasGeometry() and not feature.geometry().isNull():
                     has_valid_geom = True
                     break
@@ -1447,7 +1392,7 @@ class LayersManagementEngineTask(QgsTask):
             if self.isCanceled():
                 return False
 
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             safe_log(logger, logging.WARNING,
                     f"Failed to create spatial index for layer {layer.name()}: {str(e)}")
 
@@ -1481,7 +1426,7 @@ class LayersManagementEngineTask(QgsTask):
                                 if type_returned in (list, dict):
                                     value_typped = json.dumps(value_typped)
                                 variable_key = f"filterMate_{key_group}_{key}"
-                                # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                                # Queue for main thread execution
                                 self._deferred_layer_variables.append((layer.id(), variable_key, value_typped))
                                 self.savingLayerVariable.emit(layer, variable_key, value_typped, type_returned)
                                 cur.execute(
@@ -1506,7 +1451,7 @@ class LayersManagementEngineTask(QgsTask):
                                     if type_returned in (list, dict):
                                         value_typped = json.dumps(value_typped)
                                     variable_key = f"filterMate_{layer_property[0]}_{layer_property[1]}"
-                                    # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                                    # Queue for main thread execution
                                     self._deferred_layer_variables.append((layer.id(), variable_key, value_typped))
                                     self.savingLayerVariable.emit(layer, variable_key, value_typped, type_returned)
                                     cur.execute(
@@ -1553,7 +1498,7 @@ class LayersManagementEngineTask(QgsTask):
                             (str(self.project_uuid), layer.id())
                         )
                         conn.commit()
-                        # THREAD SAFETY (v2.3.10): Queue for main thread execution (clear all)
+                        # Queue for main thread execution (clear all)
                         self._deferred_layer_variables.append((layer.id(), None, None))
                     else:
                         for layer_property in layer_properties:
@@ -1566,7 +1511,7 @@ class LayersManagementEngineTask(QgsTask):
                                     )
                                     conn.commit()
                                     variable_key = f"filterMate_{layer_property[0]}_{layer_property[1]}"
-                                    # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                                    # Queue for main thread execution
                                     self._deferred_layer_variables.append((layer.id(), variable_key, ''))
                                     self.removingLayerVariable.emit(layer, variable_key)
                 finally:
@@ -1596,7 +1541,7 @@ class LayersManagementEngineTask(QgsTask):
                 layer = layers[0]
                 try:
                     layer.deleteStyleFromDatabase(name=f"FilterMate_style_{layer.name()}")
-                    layer.saveStyleToDatabase(name=f"FilterMate_style_{layer.name()}", description=f"FilterMate style for {layer.name()}", useAsDefault=True, uiFileContent="")
+                    result = layer.saveStyleToDatabase(name=f"FilterMate_style_{layer.name()}", description=f"FilterMate style for {layer.name()}", useAsDefault=True, uiFileContent="")
                 except (RuntimeError, AttributeError) as e:
                     logger.debug(f"Could not save style to database for layer {layer.name()}, falling back to file: {e}")
                     layer_path = layer.source().split('|')[0]
@@ -1622,7 +1567,7 @@ class LayersManagementEngineTask(QgsTask):
                     result_layers = [result_layer for result_layer in self.PROJECT.mapLayersByName(layer.name())]
                     if len(result_layers) > 0:
                         for result_layer in result_layers:
-                            # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                            # Queue for main thread execution
                             self._deferred_layer_variables.append((result_layer.id(), None, None))
                             if self.isCanceled():
                                 return False
@@ -1640,7 +1585,7 @@ class LayersManagementEngineTask(QgsTask):
                 result_layers = [layer for layer in self.PROJECT.mapLayersByName(self.project_layers[layer_id]["infos"]["layer_name"]) if layer.id() == layer_id]
                 if len(result_layers) > 0:
                     result_layer = result_layers[0]
-                    # THREAD SAFETY (v2.3.10): Queue for main thread execution
+                    # Queue for main thread execution
                     self._deferred_layer_variables.append((result_layer.id(), None, None))
 
                 if self.isCanceled():
@@ -1768,18 +1713,20 @@ class LayersManagementEngineTask(QgsTask):
         Since cancel() is often called during shutdown, we now avoid QgsMessageLog
         entirely in this method to prevent the Windows fatal exception.
         """
-        # CRASH FIX (v2.8.7): Do NOT use QgsMessageLog in cancel() method.
+        # Do NOT use QgsMessageLog in cancel() method.
         # During QGIS shutdown, QgsTaskManager::cancelAll() is called, and
         # QgsMessageLog may already be destroyed even if QApplication exists.
         # Use Python logger only (file-based, safe during shutdown).
         try:
             logger.info(f'"{self.description()}" task was canceled')
-        except Exception:  # catch-all safety net: logger may be destroyed during QGIS shutdown
+        except Exception:
+            # Even Python logging might fail during shutdown, ignore silently
             pass
 
         # Call parent cancel without any QGIS API calls
         super().cancel()
 
+    @main_thread_only
     def finished(self, result):
         """
         Handle task completion and emit results.
@@ -1797,16 +1744,17 @@ class LayersManagementEngineTask(QgsTask):
         Args:
             result (bool): Task result
         """
+        from qgis.utils import iface
         logger.info(f"LayersManagementEngineTask.finished(): task_action={self.task_action}, result={result}, project_layers count={len(self.project_layers) if self.project_layers else 0}")
 
-        # THREAD SAFETY (v2.3.10): Apply deferred layer variable operations
+        # Apply deferred layer variable operations (thread safety)
         # These operations MUST happen in the main thread (finished() runs in main thread)
-        # CRASH FIX (v2.3.12): Use safe wrapper functions that re-fetch and validate
+        # Use safe wrapper functions that re-fetch and validate
         # the layer immediately before C++ operations to prevent access violations
-        # CRASH FIX (v2.4.7): Process events BEFORE applying layer variables to
+        # Process events BEFORE applying layer variables to
         # allow any pending layer deletions to complete, reducing race condition window
-        # CRASH FIX (v2.4.8): Check if QGIS is alive before any layer operations
-        # CRASH FIX (v2.4.9): Use QTimer.singleShot(0) to defer layer variable operations
+        # Check if QGIS is alive before any layer operations
+        # Use QTimer.singleShot(0) to defer layer variable operations
         # to the next event loop iteration. This ensures all pending layer deletions
         # are fully processed before we access the layers, preventing access violations.
         if self._deferred_layer_variables:
@@ -1822,7 +1770,7 @@ class LayersManagementEngineTask(QgsTask):
                 operations_to_apply = list(self._deferred_layer_variables)
                 self._deferred_layer_variables.clear()
 
-                # CRASH FIX (v2.4.9): Use QTimer.singleShot(0) to defer operations
+                # Use QTimer.singleShot(0) to defer operations
                 # to the next event loop cycle. This provides a complete "round-trip"
                 # through Qt's event loop, ensuring all pending layer deletions
                 # are fully processed before we touch any layers.
@@ -1850,23 +1798,11 @@ class LayersManagementEngineTask(QgsTask):
                                 # Set individual variable using safe wrapper
                                 if not safe_set_layer_variable(layer_id, variable_key, value):
                                     logger.debug(f"Could not set layer variable {variable_key} for {layer_id} (layer may be deleted)")
-                    except (RuntimeError, AttributeError, TypeError) as e:
+                    except Exception as e:
                         logger.warning(f"Error in deferred layer variable callback: {e}")
 
                 # Schedule for next event loop iteration (0ms timeout)
                 QTimer.singleShot(0, apply_deferred_layer_variables)
-
-        # THREAD SAFETY: Display deferred warnings on main thread
-        # These warnings were collected during run() but couldn't be displayed there
-        if self._deferred_warnings:
-            for warning_msg in self._deferred_warnings:
-                iface.messageBar().pushMessage(
-                    "FilterMate",
-                    warning_msg,
-                    Qgis.MessageLevel.Warning,
-                    duration=10
-                )
-            self._deferred_warnings.clear()
 
         result_action = None
         message_category = MESSAGE_TASKS_CATEGORIES[self.task_action]
@@ -1908,7 +1844,7 @@ class LayersManagementEngineTask(QgsTask):
 
             iface.messageBar().pushMessage(
                 message_category,
-                self.tr("Exception: {0}").format(self.exception),
-                Qgis.MessageLevel.Critical
+                f"Exception: {self.exception}",
+                Qgis.Critical
             )
             raise self.exception

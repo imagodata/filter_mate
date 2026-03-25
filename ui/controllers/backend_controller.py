@@ -17,7 +17,6 @@ from qgis.PyQt.QtGui import QCursor
 from qgis.core import QgsVectorLayer
 
 from .base_controller import BaseController
-from ...infrastructure.database.sql_utils import sanitize_sql_identifier
 
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
@@ -25,7 +24,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-# Backend display configuration - v4.0: Softer "mousse" colors
+# Backend display configuration - Softer "mousse" colors
 BACKEND_STYLES = {
     'postgresql': {
         'text': 'PostgreSQL',
@@ -411,7 +410,7 @@ class BackendController(BaseController):
         logger.debug(f"  PostgreSQL available: {POSTGRESQL_AVAILABLE}")
 
         # PostgreSQL layers - ALWAYS use PostgreSQL backend (v4.1.4)
-        # FIX v4.1.4: QGIS native API (setSubsetString) works without psycopg2
+        # QGIS native API (setSubsetString) works without psycopg2
         # Never fallback to OGR for PostgreSQL layers
         if provider_type == 'postgresql':
             if not POSTGRESQL_AVAILABLE:
@@ -548,7 +547,7 @@ class BackendController(BaseController):
             return self._forced_backends[layer.id()].lower()
 
         # Auto-detection
-        # FIX v4.1.4 (2026-01-21): PostgreSQL layers ALWAYS use PostgreSQL backend.
+        # PostgreSQL layers ALWAYS use PostgreSQL backend.
         # QGIS native API (setSubsetString) works without psycopg2.
         provider_type = layer.providerType()
 
@@ -602,18 +601,21 @@ class BackendController(BaseController):
 
         self._indicator_label.setText(text)
 
-        # Build stylesheet - v4.0: Soft "mousse" style with smoother appearance
-        stylesheet = (
-            f"QLabel#label_backend_indicator {{"
-            f"  color: {style['color']};"
-            f"  background-color: {style['background']};"
-            f"  font-size: 8pt; font-weight: 500;"
-            f"  padding: 2px 8px; border-radius: 10px; border: none;"
-            f"}}"
-            f"QLabel#label_backend_indicator:hover {{"
-            f"  background-color: {style['background']};"
-            f"}}"
-        )
+        # Build stylesheet - Soft "mousse" style with smoother appearance
+        stylesheet = """
+            QLabel#label_backend_indicator {{
+                color: {style['color']};
+                background-color: {style['background']};
+                font-size: 8pt;
+                font-weight: 500;
+                padding: 2px 8px;
+                border-radius: 10px;
+                border: none;
+            }}
+            QLabel#label_backend_indicator:hover {{
+                filter: brightness(1.1);
+            }}
+        """
         self._indicator_label.setStyleSheet(stylesheet)
 
         # Build tooltip with context
@@ -681,7 +683,7 @@ class BackendController(BaseController):
         """)
 
         # Header
-        header = menu.addAction(self._tr("Select Backend:"))
+        header = menu.addAction("Select Backend:")
         header.setEnabled(False)
         menu.addSeparator()
 
@@ -697,7 +699,7 @@ class BackendController(BaseController):
         menu.addSeparator()
 
         # Auto option
-        auto_action = menu.addAction("⚙️ " + self._tr("Auto (Default)"))
+        auto_action = menu.addAction("⚙️ Auto (Default)")
         auto_action.setData(None)
         if not current_forced:
             auto_action.setText(auto_action.text() + " ✓")
@@ -705,18 +707,18 @@ class BackendController(BaseController):
         menu.addSeparator()
 
         # Auto-select all
-        auto_all_action = menu.addAction("🎯 " + self._tr("Auto-select Optimal for All Layers"))
+        auto_all_action = menu.addAction("🎯 Auto-select Optimal for All Layers")
         auto_all_action.setData('__AUTO_ALL__')
 
         # Force all
         current_backend = self.get_current_backend(layer)
-        force_all_action = menu.addAction("🔒 " + self._tr("Force {0} for All Layers").format(current_backend.upper()))
+        force_all_action = menu.addAction(f"🔒 Force {current_backend.upper()} for All Layers")
         force_all_action.setData('__FORCE_ALL__')
 
         menu.addSeparator()
 
         # Cleanup Temp Tables submenu
-        cleanup_menu = menu.addMenu("🧹 " + self._tr("Clear Temp Tables"))
+        cleanup_menu = menu.addMenu("🧹 Clear Temp Tables")
 
         # Project cleanup
         project_cleanup_action = cleanup_menu.addAction(self._tr("📁 Current Project"))
@@ -849,7 +851,7 @@ class BackendController(BaseController):
                 if connexion:
                     break
 
-        # 2. FIX v4.3.8: If no connection found, search ALL QGIS project layers
+        # 2. If no connection found, search ALL QGIS project layers
         # This handles cases where PostgreSQL layers exist but aren't in PROJECT_LAYERS
         if not connexion:
             from qgis.core import QgsProject
@@ -923,11 +925,9 @@ class BackendController(BaseController):
                     return True
 
                 # Drop each view
-                safe_schema = sanitize_sql_identifier(schema)
                 for view in views:
                     try:
-                        safe_view = sanitize_sql_identifier(view)
-                        cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{safe_schema}"."{safe_view}" CASCADE;')
+                        cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."{view}" CASCADE;')
                     except Exception as e:
                         logger.warning(f"Failed to drop view {view}: {e}")
 
@@ -941,8 +941,8 @@ class BackendController(BaseController):
         finally:
             try:
                 connexion.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Ignored in PostgreSQL connection close (session views cleanup): {e}")
 
     def cleanup_postgresql_schema_if_empty(self, force: bool = False) -> bool:
         """
@@ -993,8 +993,7 @@ class BackendController(BaseController):
                     return False
 
                 # Drop schema
-                safe_schema = sanitize_sql_identifier(schema)
-                cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
+                cursor.execute(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE;')
                 connexion.commit()
                 logger.info(f"Schema '{schema}' dropped successfully")
                 return True
@@ -1005,8 +1004,8 @@ class BackendController(BaseController):
         finally:
             try:
                 connexion.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Ignored in PostgreSQL connection close (schema cleanup): {e}")
 
     def get_postgresql_session_info(self) -> dict:
         """
@@ -1063,8 +1062,8 @@ class BackendController(BaseController):
             finally:
                 try:
                     connexion.close()
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug(f"Ignored in PostgreSQL connection close (session info): {e}")
 
         return info
 
@@ -1153,11 +1152,9 @@ class BackendController(BaseController):
                     return 0
 
                 count = 0
-                safe_schema = sanitize_sql_identifier(schema)
                 for view in views:
                     try:
-                        safe_view = sanitize_sql_identifier(view)
-                        cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{safe_schema}"."{safe_view}" CASCADE;')
+                        cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."{view}" CASCADE;')
                         count += 1
                     except Exception as e:
                         logger.warning(f"Failed to drop PostgreSQL view {view}: {e}")
@@ -1172,8 +1169,8 @@ class BackendController(BaseController):
         finally:
             try:
                 connexion.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Ignored in PostgreSQL connection close (current session cleanup): {e}")
 
     def _cleanup_postgresql_all_sessions(self) -> int:
         """
@@ -1222,9 +1219,7 @@ class BackendController(BaseController):
                     # Drop each materialized view
                     for view_schema, view_name in all_views:
                         try:
-                            safe_vs = sanitize_sql_identifier(view_schema)
-                            safe_vn = sanitize_sql_identifier(view_name)
-                            cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{safe_vs}"."{safe_vn}" CASCADE;')
+                            cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{view_schema}"."{view_name}" CASCADE;')
                             total_count += 1
                             logger.debug(f"Dropped MV: {view_schema}.{view_name}")
                         except Exception as e:
@@ -1253,9 +1248,7 @@ class BackendController(BaseController):
                     # Drop each table
                     for table_schema, table_name in all_tables:
                         try:
-                            safe_ts = sanitize_sql_identifier(table_schema)
-                            safe_tn = sanitize_sql_identifier(table_name)
-                            cursor.execute(f'DROP TABLE IF EXISTS "{safe_ts}"."{safe_tn}" CASCADE;')  # nosec B608
+                            cursor.execute(f'DROP TABLE IF EXISTS "{table_schema}"."{table_name}" CASCADE;')  # nosec B608 - table_schema/table_name from pg_tables/pg_matviews query (trusted source)
                             total_count += 1
                             logger.debug(f"Dropped TABLE: {table_schema}.{table_name}")
                         except Exception as e:
@@ -1266,8 +1259,7 @@ class BackendController(BaseController):
                 # 3. Also try to drop the temp schemas if empty
                 for temp_schema in ['filter_mate_temp', 'filtermate_temp']:
                     try:
-                        safe_schema = sanitize_sql_identifier(temp_schema)
-                        cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
+                        cursor.execute(f'DROP SCHEMA IF EXISTS "{temp_schema}" CASCADE;')
                         connexion.commit()
                         logger.debug(f"Dropped empty schema: {temp_schema}")
                     except Exception as e:
@@ -1282,8 +1274,8 @@ class BackendController(BaseController):
         finally:
             try:
                 connexion.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Ignored in PostgreSQL connection close (all sessions cleanup): {e}")
 
     def _cleanup_spatialite_project_tables(self) -> int:
         """Clean Spatialite temp tables for current project databases."""
@@ -1375,9 +1367,9 @@ class BackendController(BaseController):
             count = 0
             for (table_name,) in tables:
                 try:
-                    cur.execute(f'DROP TABLE IF EXISTS "{table_name}";')  # nosec B608
+                    cur.execute(f'DROP TABLE IF EXISTS "{table_name}";')  # nosec B608 - table_name from sqlite_master query (trusted source)
                     # Also drop R-tree index if exists
-                    cur.execute(f'DROP TABLE IF EXISTS "idx_{table_name}_geometry";')  # nosec B608
+                    cur.execute(f'DROP TABLE IF EXISTS "idx_{table_name}_geometry";')  # nosec B608 - table_name from sqlite_master query (trusted source)
                     count += 1
                 except Exception as e:
                     logger.warning(f"Error dropping table {table_name}: {e}")

@@ -12,7 +12,7 @@ Future phases: Zonal Stats criteria, Histogram ranges, Band compositions.
 """
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 
 class SamplingMethod(Enum):

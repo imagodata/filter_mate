@@ -30,7 +30,8 @@ except ImportError:
         """Fallback: check isValid()."""
         try:
             return layer.isValid()
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Ignored in fallback layer source check: {e}")
             return False
 
 logger = logging.getLogger(__name__)
@@ -133,7 +134,7 @@ class LayerService(QObject):
         self._saved_layer_id_before_filter: Optional[str] = None
 
         # Protection window duration (matches dockwidget)
-        self.POST_FILTER_PROTECTION_WINDOW = 1.5  # v4.1.3: Reduced from 5.0s for faster user interaction
+        self.POST_FILTER_PROTECTION_WINDOW = 1.5  # Reduced from 5.0s for faster user interaction
 
     # ─────────────────────────────────────────────────────────────────
     # Layer Validation
@@ -242,11 +243,13 @@ class LayerService(QObject):
         try:
             # Use local function instead of self-import
             return is_layer_source_available(layer)
-        except Exception:
+        except Exception as e:
+            logger.debug(f"Ignored in layer source availability check: {e}")
             # Fallback: check isValid()
             try:
                 return layer.isValid()
-            except Exception:
+            except Exception as e2:
+                logger.debug(f"Ignored in isValid() fallback: {e2}")
                 return False
 
     # ─────────────────────────────────────────────────────────────────
@@ -559,7 +562,7 @@ class LayerService(QObject):
                 return True, None
 
             # Try to validate as QGIS expression
-            # HEXAGONAL MIGRATION v4.1: Use adapter instead of QgsExpression
+            # HEXAGONAL MIGRATION Use adapter instead of QgsExpression
             from ..ports.qgis_port import get_qgis_factory
 
             factory = get_qgis_factory()
@@ -611,8 +614,8 @@ class LayerService(QObject):
             fields = layer.fields()
             if fields:
                 return fields[0].name()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Ignored in get_valid_expression field fallback: {e}")
 
         return expression or ""
 

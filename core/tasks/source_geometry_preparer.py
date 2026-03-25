@@ -21,6 +21,7 @@ Thread Safety:
 
 import logging
 import os
+from typing import Any, Callable, Dict, List, Optional
 
 from ...infrastructure.logging import setup_logger
 from ...config.config import ENV_VARS
@@ -226,7 +227,7 @@ class SourceGeometryPreparer:
             from qgis.core import QgsMessageLog, Qgis
             QgsMessageLog.logMessage(
                 f"Spatialite geometry preparation FAILED: {error_msg}",
-                "FilterMate", Qgis.MessageLevel.Critical
+                "FilterMate", Qgis.Critical
             )
             logger.error("  -> This will cause distant layer filtering to fail!")
             logger.error("  -> Check if source layer has valid geometry")

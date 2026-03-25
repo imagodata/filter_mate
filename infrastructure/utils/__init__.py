@@ -12,6 +12,10 @@ Common utility functions and helper classes:
 
 Migrated from modules/ (EPIC-1 v3.0).
 """
+import logging
+
+logger = logging.getLogger(__name__)
+
 from .provider_utils import (  # noqa: F401
     ProviderType,
     detect_provider_type,
@@ -33,7 +37,7 @@ from .validation_utils import (  # noqa: F401
     safe_get_layer_name,
     safe_get_layer_id,
     safe_get_layer_source,
-    # v4.1.0: Expression type detection for filtering
+    # Expression type detection for filtering
     is_filter_expression,
     is_display_expression,
     should_skip_expression_for_filtering,
@@ -102,6 +106,9 @@ from .signal_utils import (  # noqa: F401
     safe_emit,
     safe_set_layer_variable,
     safe_set_layer_variables,
+)
+from .thread_utils import (  # noqa: F401
+    main_thread_only,
 )
 
 # Import SQL utilities (from infrastructure.database)
@@ -213,16 +220,16 @@ class GdalErrorHandler:
             from osgeo import gdal  # noqa: F401
             self.previous_handler = gdal.GetErrorHandler()
             gdal.PushErrorHandler('CPLQuietErrorHandler')
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Ignored in GdalErrorHandler.__enter__: {e}")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
             from osgeo import gdal  # noqa: F401
             gdal.PopErrorHandler()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Ignored in GdalErrorHandler.__exit__: {e}")
         return False
 
 
@@ -434,6 +441,8 @@ __all__ = [
     # QGIS safety utilities
     'is_qgis_alive',
     'GdalErrorHandler',
+    # Thread safety utilities
+    'main_thread_only',
     # Signal and layer variable utilities (EPIC-1 migration)
     'is_layer_in_project',
     'safe_disconnect',

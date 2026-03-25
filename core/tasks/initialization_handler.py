@@ -19,7 +19,9 @@ Thread Safety:
 
 import logging
 import os
-from qgis.core import QgsGeometry
+from typing import Any, Dict, Optional
+
+from qgis.core import QgsProject, QgsVectorLayer
 
 from ...infrastructure.logging import setup_logger
 from ...config.config import ENV_VARS
@@ -31,13 +33,18 @@ logger = setup_logger(
     level=logging.INFO
 )
 
-# CRS utilities (migrated to core/geometry)
-from ..geometry.crs_utils import (
-    is_geographic_crs,
-    is_metric_crs,
-    get_optimal_metric_crs,
-    get_layer_crs_info
-)
+# CRS utilities (optional import)
+try:
+    from ..geometry.crs_utils import (
+        is_geographic_crs,
+        is_metric_crs,
+        get_optimal_metric_crs,
+        get_layer_crs_info
+    )
+    CRS_UTILS_AVAILABLE = True
+except ImportError:
+    CRS_UTILS_AVAILABLE = False
+    logger.warning("crs_utils module not available - using legacy CRS handling")
 
 
 class InitializationHandler:
@@ -166,34 +173,55 @@ class InitializationHandler:
             'crs_authid': source_layer_crs_authid,
         }
 
-        # CRS handling via crs_utils
-        is_non_metric = is_geographic_crs(source_crs) or not is_metric_crs(source_crs)
+        # Use crs_utils if available for better CRS handling
+        if CRS_UTILS_AVAILABLE:
+            is_non_metric = is_geographic_crs(source_crs) or not is_metric_crs(source_crs)
 
-        if is_non_metric:
-            result['has_to_reproject'] = True
+            if is_non_metric:
+                result['has_to_reproject'] = True
 
-            # Get optimal metric CRS using layer extent for better accuracy
-            layer_extent = source_layer.extent() if source_layer else None
-            extent_geom = QgsGeometry.fromRect(layer_extent) if layer_extent else None
-            metric_crs = get_optimal_metric_crs(
-                geometry=extent_geom,
-                source_crs=source_crs,
-            )
-            result['crs_authid'] = metric_crs.authid()
+                # Get optimal metric CRS using layer extent for better accuracy
+                layer_extent = source_layer.extent() if source_layer else None
+                result['crs_authid'] = get_optimal_metric_crs(
+                    project=project,
+                    source_crs=source_crs,
+                    extent=layer_extent,
+                    prefer_utm=True
+                )
 
-            # Log CRS conversion info
-            crs_info = get_layer_crs_info(source_layer)
-            logger.info(
-                f"Source layer CRS: {crs_info.get('authid', 'unknown')} "
-                f"(units: {crs_info.get('units', 'unknown')}, "
-                f"geographic: {crs_info.get('is_geographic', False)})"
-            )
-            logger.info(
-                f"Source layer will be reprojected to {result['crs_authid']} "
-                "for metric calculations"
-            )
+                # Log CRS conversion info
+                crs_info = get_layer_crs_info(source_layer)
+                logger.info(
+                    f"Source layer CRS: {crs_info.get('authid', 'unknown')} "
+                    f"(units: {crs_info.get('units', 'unknown')}, "
+                    f"geographic: {crs_info.get('is_geographic', False)})"
+                )
+                logger.info(
+                    f"Source layer will be reprojected to {result['crs_authid']} "
+                    "for metric calculations"
+                )
+            else:
+                logger.info(f"Source layer CRS is already metric: {source_layer_crs_authid}")
         else:
-            logger.info(f"Source layer CRS is already metric: {source_layer_crs_authid}")
+            # Legacy CRS handling (fallback)
+            from ...infrastructure.utils import get_best_metric_crs
+
+            source_crs_distance_unit = source_crs.mapUnits()
+
+            is_non_metric = (
+                source_crs_distance_unit in ['DistanceUnit.Degrees', 'DistanceUnit.Unknown']
+                or source_crs.isGeographic()
+            )
+
+            if is_non_metric:
+                result['has_to_reproject'] = True
+                result['crs_authid'] = get_best_metric_crs(project, source_crs)
+                logger.info(
+                    f"Source layer will be reprojected to {result['crs_authid']} "
+                    "for metric calculations"
+                )
+            else:
+                logger.info(f"Source layer CRS is already metric: {source_layer_crs_authid}")
 
         return result
 

@@ -11,6 +11,8 @@ objects are tested in integration tests.
 
 Module tested: core.filter.expression_builder
 """
+import pytest
+
 from core.filter.expression_builder import (
     build_feature_id_expression,
     build_combined_filter_expression,

@@ -19,12 +19,11 @@ v4.3: Strangler Fig Pattern - New service with fallback to FilterMateApp legacy 
 
 import time
 from typing import Optional, Dict, Any
-from qgis.PyQt.QtCore import QCoreApplication, QTimer
+from qgis.PyQt.QtCore import QTimer
 from qgis.core import QgsVectorLayer, QgsProject, QgsMessageLog, Qgis
 from qgis.utils import iface
 
 from ..infrastructure.logging import get_app_logger
-from ..infrastructure.signal_utils import SignalBlocker
 from ..config.feedback_config import should_show_message
 from ..infrastructure.feedback import show_success_with_backend, show_info
 
@@ -112,7 +111,7 @@ class FilterResultHandler:
         if task_name not in ('filter', 'unfilter', 'reset'):
             return
 
-        # v2.9.19: Clear Spatialite cache for all affected layers when unfiltering/resetting
+        # Clear Spatialite cache for all affected layers when unfiltering/resetting
         # This ensures the multi-step cache doesn't interfere with subsequent filter operations
         if task_name in ('unfilter', 'reset'):
             self._clear_spatialite_cache(source_layer, task_parameters)
@@ -126,7 +125,7 @@ class FilterResultHandler:
         provider_type = task_parameters["infos"].get("layer_provider_type", "unknown")
         layer_count = len(task_parameters.get("task", {}).get("layers", [])) + 1
 
-        # v2.4.13: Use actual backend for success message (not just requested provider type)
+        # Use actual backend for success message (not just requested provider type)
         # This ensures the message reflects what backend was really used (e.g., OGR fallback)
         display_backend, is_fallback = self._determine_backend(task_parameters, provider_type)
 
@@ -154,26 +153,14 @@ class FilterResultHandler:
         # Sync PROJECT_LAYERS between app and dockwidget
         self._sync_project_layers()
 
-        # v2.9.19: CRITICAL - Restore EXACT same current_layer that was active BEFORE filtering
+        # CRITICAL - Restore EXACT same current_layer that was active BEFORE filtering
         restored_layer = self._restore_current_layer(current_layer_id_before_filter)
 
-        # FIX 2026-02-18: Suppress tracking zoom during post-filter widget reload.
-        # _handle_auto_zoom already performed the correct zoom to filtered extent.
-        # Without this flag, widget reload can trigger exploring_features_changed →
-        # handle_exploring_features_result → zooming_to_features with partial data
-        # (often just 1 feature), overriding the correct auto-zoom.
-        dockwidget = self._get_dockwidget() if self._get_dockwidget else None
-        if dockwidget:
-            dockwidget._suppress_tracking_zoom = True
-        try:
-            # v2.8.15: CRITICAL FIX - Ensure current_layer combo and exploring panel stay synchronized
-            # v3.0.10: Use restored_layer directly to avoid issues if current_layer is modified by async signals
-            self._refresh_ui_after_filtering(restored_layer, display_backend, current_layer_id_before_filter)
-        finally:
-            if dockwidget:
-                dockwidget._suppress_tracking_zoom = False
+        # Ensure current_layer combo and exploring panel stay synchronized
+        # Use restored_layer directly to avoid issues if current_layer is modified by async signals
+        self._refresh_ui_after_filtering(restored_layer, display_backend, current_layer_id_before_filter)
 
-        # v2.8.13: CRITICAL - Invalidate expression cache after filtering
+        # CRITICAL - Invalidate expression cache after filtering
         self._invalidate_expression_cache(source_layer, task_parameters)
 
     def _clear_spatialite_cache(self, source_layer: QgsVectorLayer, task_parameters: Dict[str, Any]) -> None:
@@ -192,7 +179,7 @@ class FilterResultHandler:
             logger.info(f"FilterMate: Cleared Spatialite cache for source layer {source_layer.name()}")
 
             # Clear cache for all associated layers
-            # FIX v2.9.24: layers_list contains dicts with 'layer_id', not layer objects
+            # Layers_list contains dicts with 'layer_id', not layer objects
             layers_list = task_parameters.get("task", {}).get("layers", [])
             for lyr_info in layers_list:
                 if isinstance(lyr_info, dict) and 'layer_id' in lyr_info:
@@ -262,28 +249,12 @@ class FilterResultHandler:
 
         # Only show feature count if configured to do so
         if should_show_message('filter_count'):
-            count_str = "{:,}".format(feature_count)
             if task_name == 'filter':
-                show_info(
-                    QCoreApplication.translate(
-                        "FilterResultHandler",
-                        "{count} features visible in main layer"
-                    ).format(count=count_str)
-                )
+                show_info(f"{feature_count:,} features visible in main layer")
             elif task_name == 'unfilter':
-                show_info(
-                    QCoreApplication.translate(
-                        "FilterResultHandler",
-                        "All filters cleared - {count} features visible in main layer"
-                    ).format(count=count_str)
-                )
+                show_info(f"All filters cleared - {feature_count:,} features visible in main layer")
             elif task_name == 'reset':
-                show_info(
-                    QCoreApplication.translate(
-                        "FilterResultHandler",
-                        "{count} features visible in main layer"
-                    ).format(count=count_str)
-                )
+                show_info(f"{feature_count:,} features visible in main layer")
 
     def _update_backend_indicator(
         self,
@@ -312,7 +283,7 @@ class FilterResultHandler:
             if actual_backends:
                 # Get PostgreSQL connection status
                 postgresql_conn = task_parameters.get('infos', {}).get('postgresql_connection_available')
-                # v2.9.25: If fallback was used, show the original provider with fallback indicator
+                # If fallback was used, show the original provider with fallback indicator
                 if is_fallback:
                     # Show original provider type with fallback flag
                     dockwidget._update_backend_indicator(
@@ -430,7 +401,7 @@ class FilterResultHandler:
         if not dockwidget:
             return
 
-        # v3.0.10: Use restored_layer directly to avoid issues if current_layer is modified by async signals
+        # Use restored_layer directly to avoid issues if current_layer is modified by async signals
         target_layer = restored_layer if restored_layer and restored_layer.isValid() else dockwidget.current_layer
 
         try:
@@ -444,7 +415,7 @@ class FilterResultHandler:
             # 2. Force reload of exploring widgets to refresh feature lists after filtering
             self._reload_exploring_widgets(target_layer, display_backend)
 
-            # 3. v2.8.16: Force explicit layer repaint to ensure canvas displays filtered features
+            # 3. Force explicit layer repaint to ensure canvas displays filtered features
             self._trigger_layer_repaint(target_layer, display_backend)
 
         except (AttributeError, RuntimeError) as e:
@@ -452,7 +423,7 @@ class FilterResultHandler:
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
         finally:
-            # v2.9.20: CRITICAL FIX - finally OUTSIDE if block to guarantee execution
+            # Finally OUTSIDE if block to guarantee execution
             # This ensures signal reconnection happens even if current_layer is None
             self._finalize_filtering(current_layer_id_before_filter)
 
@@ -507,10 +478,10 @@ class FilterResultHandler:
             if hasattr(dockwidget, '_reload_exploration_widgets'):
                 dockwidget._reload_exploration_widgets(target_layer, layer_props)
 
-            # v2.9.28: CRITICAL FIX - Always restore groupbox UI state after filtering
+            # Always restore groupbox UI state after filtering
             self._restore_groupbox_ui_state(layer_props)
 
-            # v2.9.41: CRITICAL - Update button states after filtering completes
+            # CRITICAL - Update button states after filtering completes
             if hasattr(dockwidget, '_update_exploring_buttons_state'):
                 dockwidget._update_exploring_buttons_state()
                 logger.info(f"v2.9.41: ✅ Updated exploring button states after {display_backend} filter")
@@ -587,52 +558,46 @@ class FilterResultHandler:
             return
 
         try:
-            # v3.0.12: Set time-based protection BEFORE reconnecting signals
+            # Set time-based protection BEFORE reconnecting signals
             dockwidget._filter_completed_time = time.time()
             if current_layer_id_before_filter:
                 dockwidget._saved_layer_id_before_filter = current_layer_id_before_filter
                 logger.info(f"v3.0.12: ⏱️ Initial protection set for layer '{current_layer_id_before_filter[:8]}...'")
 
-            # v2.9.26: CRITICAL - Ensure combobox shows correct layer BEFORE reconnecting signal
+            # CRITICAL - Ensure combobox shows correct layer BEFORE reconnecting signal
             self._force_combobox_restoration(current_layer_id_before_filter)
 
-            # v3.0.19: CRITICAL - Keep combobox signals BLOCKED during 5s protection
+            # CRITICAL - Keep combobox signals BLOCKED during 5s protection
             logger.debug("v3.0.19: ⏳ Keeping current_layer signal DISCONNECTED during 5s protection")
 
-            # v2.9.27: Reconnect LAYER_TREE_VIEW signal (if legend link enabled)
+            # Reconnect LAYER_TREE_VIEW signal (if legend link enabled)
             self._reconnect_layer_tree_view_signal()
 
-            # v2.9.24: CRITICAL FIX - Force reconnect ACTION signals
+            # Force reconnect ACTION signals
             logger.info("📡 About to call _force_reconnect_action_signals()")
             self._force_reconnect_action_signals()
 
-            # FIX 2026-02-18: Reconnect toolbox signal and sync button states
-            # The toolBox_tabTools.currentChanged signal may have been disconnected
-            # during filtering (e.g., via disconnect_widgets_signals from add_layers).
-            # Without this, switching tabs won't update action button enabled states.
-            self._reconnect_toolbox_signal()
-
-            # v3.0.11: CRITICAL FIX - Force reconnect EXPLORING signals
+            # Force reconnect EXPLORING signals
             self._force_reconnect_exploring_signals()
 
-            # v2.9.20: FORCE invalidation of exploring cache after filtering
+            # FORCE invalidation of exploring cache after filtering
             self._invalidate_exploring_cache()
 
-            # v3.0.12: Final combobox protection BEFORE resetting filtering flag
+            # Final combobox protection BEFORE resetting filtering flag
             self._final_combobox_protection(current_layer_id_before_filter)
 
-            # v3.0.12: Update protection time AFTER restoring combobox
+            # Update protection time AFTER restoring combobox
             dockwidget._filter_completed_time = time.time()
             if current_layer_id_before_filter:
                 dockwidget._saved_layer_id_before_filter = current_layer_id_before_filter
             logger.info("v3.0.12: ⏱️ Updated 2000ms protection window AFTER combobox restoration")
 
-            # v3.0.19: Schedule combobox signal reconnection AFTER protection expires
+            # Schedule combobox signal reconnection AFTER protection expires
             self._schedule_delayed_reconnection(current_layer_id_before_filter)
 
         except Exception as reconnect_error:
             logger.error(f"v2.9.20: ❌ Failed to reconnect signals: {reconnect_error}")
-            # v2.9.25: Reset flag even on error
+            # Reset flag even on error
             if dockwidget:
                 dockwidget._filtering_in_progress = False
 
@@ -652,10 +617,10 @@ class FilterResultHandler:
         combo_name = current_combo_layer.name() if current_combo_layer else "(None)"
         restored_name = restored_layer.name() if restored_layer else "(None)"
 
-        # v3.0.16: DEBUG - Log current combobox state
+        # DEBUG - Log current combobox state
         QgsMessageLog.logMessage(
             f"v3.0.16: 🔍 Combobox state: current='{combo_name}', should_be='{restored_name}'",
-            "FilterMate", Qgis.MessageLevel.Info
+            "FilterMate", Qgis.Info
         )
 
         if restored_layer and restored_layer.isValid():
@@ -664,11 +629,11 @@ class FilterResultHandler:
                 dockwidget.comboBox_filtering_current_layer.setLayer(restored_layer)
                 QgsMessageLog.logMessage(
                     f"v3.0.19: ✅ FORCED combobox to '{restored_layer.name()}' (signals STAY BLOCKED)",
-                    "FilterMate", Qgis.MessageLevel.Info
+                    "FilterMate", Qgis.Info
                 )
                 logger.info(f"v3.0.19: ✅ FINALLY - Forced combobox to '{restored_layer.name()}' (signals blocked)")
 
-            # v3.0.10: Also ensure current_layer is set correctly
+            # Also ensure current_layer is set correctly
             if dockwidget.current_layer is None or dockwidget.current_layer.id() != restored_layer.id():
                 dockwidget.current_layer = restored_layer
                 logger.info(f"v3.0.10: ✅ FINALLY - Ensured current_layer is '{restored_layer.name()}'")
@@ -706,42 +671,6 @@ class FilterResultHandler:
         if dockwidget and hasattr(dockwidget, 'force_reconnect_exploring_signals'):
             dockwidget.force_reconnect_exploring_signals()
 
-    def _reconnect_toolbox_signal(self) -> None:
-        """FIX 2026-02-18: Reconnect toolBox_tabTools.currentChanged and sync button states.
-
-        After filtering, the toolbox signal may have been disconnected (e.g., by
-        disconnect_widgets_signals from add_layers task). Without this signal,
-        switching between filtering/exporting/exploring tabs won't update
-        action button enabled/disabled states.
-
-        Also calls select_tabTools_index() to synchronize button states with
-        the current tab, ensuring correct enabled/disabled states.
-        """
-        dockwidget = self._get_dockwidget() if self._get_dockwidget else None
-        if not dockwidget:
-            return
-
-        # Reconnect toolbox signal
-        toolbox = getattr(dockwidget, 'toolBox_tabTools', None)
-        if toolbox and hasattr(dockwidget, 'select_tabTools_index'):
-            try:
-                try:
-                    toolbox.currentChanged.disconnect(dockwidget.select_tabTools_index)
-                except (TypeError, RuntimeError):
-                    pass  # Not connected - expected
-                toolbox.currentChanged.connect(dockwidget.select_tabTools_index)
-                logger.debug("FIX 2026-02-18: ✓ Reconnected toolBox_tabTools.currentChanged")
-            except Exception as e:
-                logger.warning(f"FIX 2026-02-18: Could not reconnect toolbox signal: {e}")
-
-        # Sync button states with current tab
-        if hasattr(dockwidget, 'select_tabTools_index'):
-            try:
-                dockwidget.select_tabTools_index()
-                logger.debug("FIX 2026-02-18: ✓ Synced action button states with current tab")
-            except Exception as e:
-                logger.warning(f"FIX 2026-02-18: Could not sync tab button states: {e}")
-
     def _invalidate_exploring_cache(self) -> None:
         """Invalidate exploring cache after filtering to show fresh features."""
         dockwidget = self._get_dockwidget() if self._get_dockwidget else None
@@ -767,8 +696,9 @@ class FilterResultHandler:
             current_combo = dockwidget.comboBox_filtering_current_layer.currentLayer()
             if not current_combo or current_combo.id() != final_layer.id():
                 # Block and restore combobox to correct layer
-                with SignalBlocker(dockwidget.comboBox_filtering_current_layer):
-                    dockwidget.comboBox_filtering_current_layer.setLayer(final_layer)
+                dockwidget.comboBox_filtering_current_layer.blockSignals(True)
+                dockwidget.comboBox_filtering_current_layer.setLayer(final_layer)
+                dockwidget.comboBox_filtering_current_layer.blockSignals(False)
                 # Also update current_layer reference in dockwidget
                 dockwidget.current_layer = final_layer
                 logger.info(f"v3.0.12: ✅ FINAL - Restored combobox to '{final_layer.name()}' BEFORE signal unlock")
@@ -813,16 +743,16 @@ class FilterResultHandler:
                 if saved_layer and saved_layer.isValid():
                     current_combo = dockwidget.comboBox_filtering_current_layer.currentLayer()
                     current_name = current_combo.name() if current_combo else "(None)"
-                    # v3.0.16: Log every check to QGIS MessageLog
+                    # Log every check to QGIS MessageLog
                     QgsMessageLog.logMessage(
                         f"v3.0.19: 🔄 DELAYED CHECK - combobox='{current_name}', expected='{saved_layer.name()}'",
-                        "FilterMate", Qgis.MessageLevel.Info
+                        "FilterMate", Qgis.Info
                     )
                     if not current_combo or current_combo.id() != saved_layer.id():
                         logger.info(f"v3.0.19: 🔧 DELAYED CHECK - Combobox was changed, restoring to '{saved_layer.name()}'")
                         QgsMessageLog.logMessage(
                             f"v3.0.19: 🔧 RESTORING combobox from '{current_name}' to '{saved_layer.name()}'",
-                            "FilterMate", Qgis.MessageLevel.Warning
+                            "FilterMate", Qgis.Warning
                         )
                         # Keep signals blocked during restore
                         dockwidget.comboBox_filtering_current_layer.setLayer(saved_layer)
@@ -841,27 +771,23 @@ class FilterResultHandler:
                 if hasattr(dockwidget, 'manageSignal'):
                     dockwidget.manageSignal(["FILTERING", "CURRENT_LAYER"], 'connect', 'layerChanged')
 
-                # FIX 2026-02-18: Reconnect toolbox signal + sync button states
-                # Ensures tab switching properly updates action buttons after filtering
-                self._reconnect_toolbox_signal()
-
-                # v3.0.19: CRITICAL FIX - Reset _filtering_in_progress HERE, not earlier
+                # Reset _filtering_in_progress HERE, not earlier
                 dockwidget._filtering_in_progress = False
 
                 logger.debug("v3.0.19: ✅ Unblocked combobox, reconnected handler, and reset filtering flag after protection")
                 QgsMessageLog.logMessage(
                     "v3.0.19: ✅ Combobox protection ENDED - signals reconnected, filtering flag reset",
-                    "FilterMate", Qgis.MessageLevel.Info
+                    "FilterMate", Qgis.Info
                 )
             except Exception as e:
                 logger.error(f"v3.0.19: Error reconnecting combobox: {e}")
 
         # Schedule checks during protection window (signals still blocked)
-        # v4.1.3: Reduced delays for faster response time
+        # Reduced delays for faster response time
         for delay in [100, 300, 500, 800, 1000]:
             QTimer.singleShot(delay, restore_combobox_if_needed)
 
-        # v4.1.3: Reduced protection window from 5s to 1.5s for faster user interaction
+        # Reduced protection window from 5s to 1.5s for faster user interaction
         # Unblock and reconnect AFTER protection window
         QTimer.singleShot(1500, unblock_and_reconnect_combobox)
 
@@ -887,7 +813,7 @@ class FilterResultHandler:
             affected_layer_ids.append(source_layer.id())
 
         # Also include all distant layers from task_parameters
-        # FIX v2.9.24: distant_layers contains dicts with 'layer_id', not layer objects
+        # Distant_layers contains dicts with 'layer_id', not layer objects
         distant_layers = task_parameters.get("task", {}).get("layers", [])
         for dl in distant_layers:
             if isinstance(dl, dict) and 'layer_id' in dl:

@@ -31,7 +31,6 @@ try:
         QgsCoordinateReferenceSystem,
         QgsProject,
     )
-    from qgis.PyQt.QtCore import QCoreApplication
     from qgis import processing
     QGIS_AVAILABLE = True
 except ImportError:
@@ -42,47 +41,6 @@ except ImportError:
     QgsProject = Any
 
 logger = logging.getLogger('FilterMate.Export')
-
-# Canonical mapping of uppercased OGR driver descriptions to file extensions.
-# Covers both short aliases (SHP, TAB) and full OGR names (ESRI SHAPEFILE, MAPINFO FILE).
-# Used by LayerExporter, BatchExporter, and ExportHandler for consistent extension resolution.
-OGR_EXTENSION_MAP = {
-    'GPKG': '.gpkg',
-    'SHP': '.shp',
-    'SHAPEFILE': '.shp',
-    'ESRI SHAPEFILE': '.shp',
-    'GEOJSON': '.geojson',
-    'JSON': '.geojson',
-    'GML': '.gml',
-    'KML': '.kml',
-    'LIBKML': '.kml',
-    'CSV': '.csv',
-    'XLSX': '.xlsx',
-    'TAB': '.tab',
-    'MAPINFO': '.tab',
-    'MAPINFO FILE': '.tab',
-    'DXF': '.dxf',
-    'SQLITE': '.sqlite',
-    'SPATIALITE': '.spatialite',
-    'FLATGEOBUF': '.fgb',
-    'ESRI FILEGDB': '.gdb',
-    'OPENFILEGDB': '.gdb',
-    'PGDUMP': '.sql',
-}
-
-
-def get_extension_for_format(datatype: str) -> str:
-    """Return the file extension (with dot) for an OGR driver description.
-
-    Handles both short aliases ('SHP') and full OGR names ('ESRI Shapefile').
-    Falls back to '.{datatype_lower}' for unknown drivers.
-    """
-    ext = OGR_EXTENSION_MAP.get(datatype.upper())
-    if ext:
-        return ext
-    # Fallback: use lowercased datatype as extension (only safe for single-word names)
-    clean = datatype.strip().lower().replace(' ', '_')
-    return f'.{clean}'
 
 
 class ExportFormat(Enum):
@@ -179,7 +137,7 @@ class LayerExporter:
 
     """
 
-    # Format driver mapping (uppercased key → OGR driver name)
+    # Format driver mapping
     DRIVER_MAP = {
         'GPKG': 'GPKG',
         'SHP': 'ESRI Shapefile',
@@ -189,16 +147,13 @@ class LayerExporter:
         'JSON': 'GeoJSON',
         'GML': 'GML',
         'KML': 'KML',
-        'LIBKML': 'LIBKML',
         'CSV': 'CSV',
         'XLSX': 'XLSX',
         'TAB': 'MapInfo File',
         'MAPINFO': 'MapInfo File',
-        'MAPINFO FILE': 'MapInfo File',
         'DXF': 'DXF',
         'SQLITE': 'SQLite',
-        'SPATIALITE': 'SpatiaLite',
-        'FLATGEOBUF': 'FlatGeobuf',
+        'SPATIALITE': 'SpatiaLite'
     }
 
     def __init__(self, project: Optional[QgsProject] = None):
@@ -380,9 +335,15 @@ class LayerExporter:
 
             logger.info(f"GPKG export successful: {output['OUTPUT']}")
 
-            # NOTE: Success message is displayed by finished_handler on main thread
-            # DO NOT call iface.messageBar() here - this code runs in background thread!
-            # Calling GUI methods from background thread causes crash (access violation)
+            # Show success message to user
+            try:
+                from qgis.utils import iface
+                iface.messageBar().pushSuccess(
+                    "FilterMate",
+                    f"Export terminé: {len(layer_objects)} couche(s) exportée(s) vers {output_path}"
+                )
+            except Exception as e:
+                logger.debug(f"Ignored in message bar success notification: {e}")
 
             return ExportResult(
                 success=True,
@@ -414,10 +375,9 @@ class LayerExporter:
             layer_name = layer_name_item['layer_name'] if isinstance(layer_name_item, dict) else layer_name_item
 
             # Build output path for this layer
-            ext = get_extension_for_format(config.datatype)
             layer_output = os.path.join(
                 config.output_path,
-                f"{layer_name}{ext}"
+                f"{layer_name}.{config.datatype.lower()}"
             )
 
             # Export layer
@@ -459,7 +419,7 @@ class LayerExporter:
         import zipfile
 
         if config.batch_zip:
-            # v5.0: Implement ZIP archive creation
+            # Implement ZIP archive creation
             # Export to temp directory first, then zip
             temp_dir = tempfile.mkdtemp(prefix='filtermate_export_')
             try:

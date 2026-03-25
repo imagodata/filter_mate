@@ -118,7 +118,7 @@ class InterruptibleSQLiteQuery:
             cursor.execute(self.sql)
             self.results = cursor.fetchall()
             self.completed = True
-        except Exception as e:
+        except sqlite3.Error as e:
             self.error = e
             self.completed = True
 
@@ -173,7 +173,7 @@ class InterruptibleSQLiteQuery:
                 progress = min(elapsed / timeout, 0.99)  # Never report 100% until done
                 try:
                     progress_callback(progress)
-                except Exception:
+                except Exception:  # catch-all safety net
                     pass  # Ignore callback errors
 
             # Check timeout
@@ -189,7 +189,7 @@ class InterruptibleSQLiteQuery:
                         logger.info("[InterruptibleQuery] Query cancelled by user")
                         self._interrupt_query()
                         return [], Exception("Query cancelled by user")
-                except Exception as e:
+                except Exception as e:  # catch-all safety net
                     logger.warning(f"[InterruptibleQuery] Cancel check failed: {e}")
 
             # Sleep briefly before next check
@@ -213,7 +213,7 @@ class InterruptibleSQLiteQuery:
         try:
             self.connection.interrupt()
             logger.debug("[InterruptibleQuery] SQLite interrupt() called")
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.warning(f"[InterruptibleQuery] Failed to interrupt query: {e}")
 
     @property

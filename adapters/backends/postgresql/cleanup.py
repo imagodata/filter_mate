@@ -24,7 +24,14 @@ import logging
 from typing import Optional, List, Tuple
 from datetime import datetime
 
-from ....infrastructure.database.sql_utils import sanitize_sql_identifier
+try:
+    import psycopg2
+    from psycopg2 import sql as psycopg2_sql
+except ImportError:
+    psycopg2 = None
+    psycopg2_sql = None
+
+from ....core.domain.exceptions import PostgreSQLError
 
 logger = logging.getLogger('FilterMate.Cleanup.PostgreSQL')
 
@@ -186,29 +193,27 @@ class PostgreSQLCleanupService:
 
             views = [row[0] for row in cursor.fetchall()]
 
-            safe_schema = sanitize_sql_identifier(self._schema)
             for view_name in views:
                 try:
                     # Drop associated index first
                     # Handle both new (fm_temp_mv_) and legacy (mv_) prefixes
                     if view_name.startswith('fm_temp_mv_'):
-                        index_name = sanitize_sql_identifier(f"{self._schema}_{view_name[11:]}_cluster")  # Remove 'fm_temp_mv_' prefix
+                        index_name = f"{self._schema}_{view_name[11:]}_cluster"  # Remove 'fm_temp_mv_' prefix
                     else:
-                        index_name = sanitize_sql_identifier(f"{self._schema}_{view_name[3:]}_cluster")  # Remove 'mv_' prefix (legacy)
+                        index_name = f"{self._schema}_{view_name[3:]}_cluster"  # Remove 'mv_' prefix (legacy)
                     cursor.execute(f'DROP INDEX IF EXISTS "{index_name}" CASCADE;')
                     self._metrics['indexes_cleaned'] += 1
 
                     # Drop the materialized view
-                    safe_view = sanitize_sql_identifier(view_name)
                     cursor.execute(
-                        f'DROP MATERIALIZED VIEW IF EXISTS "{safe_schema}"."{safe_view}" CASCADE;'
+                        f'DROP MATERIALIZED VIEW IF EXISTS "{self._schema}"."{view_name}" CASCADE;'
                     )
                     cleaned_views.append(view_name)
                     self._metrics['views_cleaned'] += 1
 
                     logger.debug(f"[PostgreSQL] Dropped MV: {view_name}")
 
-                except Exception as e:
+                except (psycopg2.Error if psycopg2 else Exception) as e:
                     logger.warning(f"[PostgreSQL] Error dropping view {view_name}: {e}")
                     self._metrics['errors'] += 1
 
@@ -225,10 +230,10 @@ class PostgreSQLCleanupService:
 
             return (len(cleaned_views), cleaned_views)
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Error during session cleanup: {e}")
             self._record_failure()
-            raise
+            raise PostgreSQLError(f"Session cleanup failed: {e}") from e
 
     def cleanup_orphaned_views(
         self,
@@ -289,17 +294,15 @@ class PostgreSQLCleanupService:
 
             # Clean orphaned views
             cleaned = []
-            safe_schema = sanitize_sql_identifier(self._schema)
             for view_name in orphaned_views:
                 try:
-                    safe_view = sanitize_sql_identifier(view_name)
                     cursor.execute(
-                        f'DROP MATERIALIZED VIEW IF EXISTS "{safe_schema}"."{safe_view}" CASCADE;'
+                        f'DROP MATERIALIZED VIEW IF EXISTS "{self._schema}"."{view_name}" CASCADE;'
                     )
                     cleaned.append(view_name)
                     self._metrics['views_cleaned'] += 1
                     logger.debug(f"[PostgreSQL] Dropped orphaned MV: {view_name}")
-                except Exception as e:
+                except (psycopg2.Error if psycopg2 else Exception) as e:
                     logger.warning(f"[PostgreSQL] Error dropping orphaned view {view_name}: {e}")
                     self._metrics['errors'] += 1
 
@@ -311,10 +314,10 @@ class PostgreSQLCleanupService:
             self._record_success()
             return (len(cleaned), cleaned)
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Error during orphaned view cleanup: {e}")
             self._record_failure()
-            raise
+            raise PostgreSQLError(f"Orphaned view cleanup failed: {e}") from e
 
     def cleanup_schema_if_empty(
         self,
@@ -379,15 +382,14 @@ class PostgreSQLCleanupService:
                     return False
 
             # Drop the schema
-            safe_schema = sanitize_sql_identifier(self._schema)
-            cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
+            cursor.execute(f'DROP SCHEMA IF EXISTS "{self._schema}" CASCADE;')
             connexion.commit()
 
             logger.info(f"[PostgreSQL] Dropped schema '{self._schema}'")
             self._record_success()
             return True
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Error dropping schema: {e}")
             self._record_failure()
             return False
@@ -407,15 +409,14 @@ class PostgreSQLCleanupService:
 
         try:
             cursor = connexion.cursor()
-            safe_schema = sanitize_sql_identifier(self._schema)
-            cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{safe_schema}";')
+            cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{self._schema}";')
             connexion.commit()
 
             logger.debug(f"[PostgreSQL] Ensured schema '{self._schema}' exists")
             self._record_success()
             return True
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Error creating schema: {e}")
             self._record_failure()
             return False
@@ -445,7 +446,7 @@ class PostgreSQLCleanupService:
 
             return cursor.fetchone()[0]
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.debug(f"[PostgreSQL] Error counting session views: {e}")
             return 0
 
@@ -483,7 +484,7 @@ class PostgreSQLCleanupService:
 
             return views
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.debug(f"[PostgreSQL] Error listing views: {e}")
             return []
 
@@ -550,9 +551,7 @@ class PostgreSQLCleanupService:
                     views = [row[0] for row in cursor.fetchall()]
 
                     for view_name in views:
-                        safe_s = sanitize_sql_identifier(schema)
-                        safe_v = sanitize_sql_identifier(view_name)
-                        full_name = f'"{safe_s}"."{safe_v}"'
+                        full_name = f'"{schema}"."{view_name}"'
 
                         if dry_run:
                             cleaned_objects.append(f"[DRY RUN] Would drop MV: {full_name}")
@@ -566,7 +565,7 @@ class PostgreSQLCleanupService:
                                 cleaned_objects.append(f"MV: {full_name}")
                                 self._metrics['views_cleaned'] += 1
                                 logger.debug(f"Dropped MV: {full_name}")
-                            except Exception as e:
+                            except (psycopg2.Error if psycopg2 else Exception) as e:
                                 logger.warning(f"Error dropping {full_name}: {e}")
                                 self._metrics['errors'] += 1
 
@@ -581,30 +580,30 @@ class PostgreSQLCleanupService:
                     tables = [row[0] for row in cursor.fetchall()]
 
                     for table_name in tables:
-                        safe_s = sanitize_sql_identifier(schema)
-                        safe_t = sanitize_sql_identifier(table_name)
-                        full_name = f'"{safe_s}"."{safe_t}"'
+                        full_name = f'"{schema}"."{table_name}"'
 
                         if dry_run:
                             cleaned_objects.append(f"[DRY RUN] Would drop TABLE: {full_name}")
                         else:
                             try:
                                 cursor.execute(
-                                    f'DROP TABLE IF EXISTS {full_name} CASCADE;'  # nosec B608
+                                    psycopg2_sql.SQL('DROP TABLE IF EXISTS {}.{} CASCADE').format(
+                                        psycopg2_sql.Identifier(schema),
+                                        psycopg2_sql.Identifier(table_name)
+                                    )
                                 )
                                 cleaned_objects.append(f"TABLE: {full_name}")
                                 logger.debug(f"Dropped TABLE: {full_name}")
-                            except Exception as e:
+                            except (psycopg2.Error if psycopg2 else Exception) as e:
                                 logger.warning(f"Error dropping table {full_name}: {e}")
 
             # Drop filtermate_temp schema if empty or force
             if not dry_run:
                 try:
-                    safe_schema = sanitize_sql_identifier(self._schema)
-                    cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
+                    cursor.execute(f'DROP SCHEMA IF EXISTS "{self._schema}" CASCADE;')
                     cleaned_objects.append(f"SCHEMA: {self._schema}")
                     logger.info(f"Dropped schema: {self._schema}")
-                except Exception as e:
+                except (psycopg2.Error if psycopg2 else Exception) as e:
                     logger.warning(f"Could not drop schema {self._schema}: {e}")
 
             connexion.commit()
@@ -615,9 +614,9 @@ class PostgreSQLCleanupService:
             self._metrics['last_cleanup'] = datetime.now().isoformat()
             return (len(cleaned_objects), cleaned_objects)
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"[PostgreSQL] Error during full cleanup: {e}")
-            raise
+            raise PostgreSQLError(f"Full cleanup failed: {e}") from e
 
     def cleanup_src_sel_views(
         self,
@@ -655,10 +654,8 @@ class PostgreSQLCleanupService:
 
             logger.info(f"Found {len(views)} src_sel views to clean")
 
-            safe_schema = sanitize_sql_identifier(self._schema)
             for view_name in views:
-                safe_view = sanitize_sql_identifier(view_name)
-                full_name = f'"{safe_schema}"."{safe_view}"'
+                full_name = f'"{self._schema}"."{view_name}"'
 
                 if dry_run:
                     cleaned.append(f"[DRY RUN] {view_name}")
@@ -669,7 +666,7 @@ class PostgreSQLCleanupService:
                         )
                         cleaned.append(view_name)
                         logger.debug(f"Dropped src_sel view: {view_name}")
-                    except Exception as e:
+                    except (psycopg2.Error if psycopg2 else Exception) as e:
                         logger.warning(f"Error dropping {view_name}: {e}")
 
             if not dry_run:
@@ -677,7 +674,7 @@ class PostgreSQLCleanupService:
 
             return (len(cleaned), cleaned)
 
-        except Exception as e:
+        except (psycopg2.Error if psycopg2 else Exception) as e:
             logger.error(f"Error cleaning src_sel views: {e}")
             return (0, [])
 

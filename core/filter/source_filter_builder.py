@@ -55,7 +55,7 @@ def should_skip_source_subset(source_subset: Optional[str]) -> bool:
         return True
 
     # Check for MV references (except source selection MVs which are allowed)
-    # v2.8.0: Use negative lookahead to exclude mv_src_sel_ (source selection MVs)
+    # Use negative lookahead to exclude mv_src_sel_ (source selection MVs)
     if re.search(
         r'IN\s*\(\s*SELECT.*FROM\s+["\']?filter_mate_temp["\']?\s*\.\s*["\']?.*mv_(?!.*src_sel_)',
         source_subset,
@@ -89,8 +89,8 @@ def get_primary_key_field(layer) -> Optional[str]:
         if pk_attrs:
             fields = layer.fields()
             return fields[pk_attrs[0]].name()
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Ignored in primary key detection from provider: {e}")
 
     # Fallback: try common PK names
     for common_pk in ['fid', 'id', 'gid', 'ogc_fid']:
@@ -123,7 +123,8 @@ def get_source_table_name(layer, param_source_table: Optional[str] = None) -> Op
         from qgis.core import QgsDataSourceUri
         uri = QgsDataSourceUri(layer.source())
         return uri.table()
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Ignored in source table name extraction from URI: {e}")
         return layer.name() if hasattr(layer, 'name') else None
 
 
@@ -218,7 +219,7 @@ def build_source_filter_with_mv(
     Returns:
         str: SQL filter expression using MV reference
     """
-    return f'"{source_table_name}"."{pk_field}" IN (SELECT pk FROM {mv_ref})'  # nosec B608
+    return f'"{source_table_name}"."{pk_field}" IN (SELECT pk FROM {mv_ref})'  # nosec B608 - source_table_name/pk_field from QGIS layer metadata, mv_ref from internal MV manager
 
 
 def get_visible_feature_ids(layer, pk_field: str) -> List[Any]:
@@ -242,8 +243,8 @@ def get_visible_feature_ids(layer, pk_field: str) -> List[Any]:
                 fid_val = feature.attribute(pk_field)
                 if fid_val is not None:
                     visible_fids.append(fid_val)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Ignored in visible feature ID extraction: {e}")
     except Exception as e:
         logger.error(f"Failed to get visible features: {e}")
 

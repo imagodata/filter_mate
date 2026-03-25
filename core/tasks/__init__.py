@@ -13,6 +13,8 @@ Exported Symbols:
     - ExpressionEvaluationManager: Singleton manager for expression tasks
     - get_expression_manager: Factory function for manager singleton
     - LayersManagementEngineTask: QgsTask for layer tracking management
+    - RasterSamplingSignals: QObject for raster sampling thread-safe signals
+    - RasterSamplingTask: QgsTask for async raster value sampling
 
 Architecture:
     core/tasks/ → Application layer (business logic with QGIS)
@@ -25,6 +27,7 @@ Migration History:
     - v3.0: Migrated expression_evaluation_task.py from modules/tasks/ (EPIC-1)
     - v3.0: Migrated layer_management_task.py from modules/tasks/ (EPIC-1)
     - v4.0: Migrated filter_task.py from modules/tasks/ (EPIC-1 Final)
+    - v4.1: Added raster_sampling_task.py (Phase 1 Dual Panel Raster)
 """
 
 # Main filter task (EPIC-1 migration - January 2026)
@@ -38,6 +41,12 @@ from .expression_evaluation_task import (  # noqa: F401
 )
 
 from .layer_management_task import LayersManagementEngineTask  # noqa: F401
+
+# Phase 1: Raster sampling task (Dual Panel Raster)
+from .raster_sampling_task import (  # noqa: F401
+    RasterSamplingSignals,
+    RasterSamplingTask,
+)
 
 # E6: Task completion handler functions
 from .task_completion_handler import (  # noqa: F401
@@ -61,9 +70,6 @@ from .subset_management_handler import SubsetManagementHandler  # noqa: F401
 # Phase 3 C1 US-C1.3.2: Filtering orchestration handler (February 2026)
 from .filtering_orchestrator import FilteringOrchestrator  # noqa: F401
 
-# Phase 3 C1 US-C1.3.3: Task completion handler (February 2026)
-from .finished_handler import FinishedHandler  # noqa: F401
-
 __all__ = [
     # Main filter task
     'FilterEngineTask',
@@ -80,6 +86,9 @@ __all__ = [
     'apply_pending_subset_requests',
     'schedule_canvas_refresh',
     'cleanup_memory_layer',
+    # Raster sampling (Phase 1)
+    'RasterSamplingSignals',
+    'RasterSamplingTask',
     # Phase 3 C1: Extracted handlers
     'CleanupHandler',
     'ExportHandler',
@@ -90,6 +99,4 @@ __all__ = [
     'SubsetManagementHandler',
     # Phase 3 C1 US-C1.3.2: Filtering orchestration handler
     'FilteringOrchestrator',
-    # Phase 3 C1 US-C1.3.3: Task completion handler
-    'FinishedHandler',
 ]

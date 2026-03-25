@@ -74,7 +74,8 @@ def validate_geometry_for_geos(geom: Optional[QgsGeometry]) -> bool:
         return False
     try:
         return geom.isGeosValid()
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Ignored in GEOS validity check: {e}")
         return False
 
 
@@ -92,7 +93,8 @@ def get_geometry_type_name(geom: Optional[QgsGeometry]) -> str:
         return 'Unknown'
     try:
         return QgsWkbTypes.displayString(geom.wkbType())
-    except Exception:
+    except Exception as e:
+        logger.debug(f"Ignored in geometry type name detection: {e}")
         return 'Unknown'
 
 
@@ -412,16 +414,16 @@ def repair_geometry(geom: Optional[QgsGeometry]) -> Optional[QgsGeometry]:
         repaired = geom.makeValid()
         if validate_geometry_for_geos(repaired):
             return repaired
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Ignored in repair_geometry makeValid: {e}")
 
     # Strategy 2: buffer(0)
     try:
         buffered = geom.buffer(0, 5)
         if validate_geometry_for_geos(buffered):
             return buffered
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Ignored in repair_geometry buffer(0): {e}")
 
     # Strategy 3: simplify + makeValid
     try:
@@ -430,8 +432,8 @@ def repair_geometry(geom: Optional[QgsGeometry]) -> Optional[QgsGeometry]:
             repaired = simplified.makeValid()
             if validate_geometry_for_geos(repaired):
                 return repaired
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Ignored in repair_geometry simplify+makeValid: {e}")
 
     return None
 
@@ -482,11 +484,11 @@ def create_geos_safe_layer(
 
         safe_layer.commitChanges()
 
-        # FIX v2.9.44: CRITICAL - Add layer to project registry BEFORE returning
+        # CRITICAL - Add layer to project registry BEFORE returning
         # The layer can be garbage collected by Qt's C++ GC during the return from this function.
         # Adding it to the project registry (with addToLegend=False) creates a strong C++ reference
         # that survives the return. The caller is responsible for removing it when done.
-        # FIX v4.1.1: Register layer for cleanup after filtering completes
+        # Register layer for cleanup after filtering completes
         try:
             from qgis.core import QgsProject
             QgsProject.instance().addMapLayer(safe_layer, False)  # addToLegend=False

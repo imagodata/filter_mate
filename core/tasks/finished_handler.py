@@ -32,7 +32,6 @@ from qgis.core import (
     QgsMessageLog,
     QgsProject,
 )
-from qgis.PyQt.QtCore import QCoreApplication
 
 from ...infrastructure.logging import setup_logger
 from ...config.config import ENV_VARS
@@ -339,19 +338,13 @@ class FinishedHandler:
             iface: QGIS iface instance.
         """
         # Enhanced error message with failed layer names
-        error_msg = task_message if task_message else QCoreApplication.translate(
-            "FinishedHandler", "Task failed"
-        )
+        error_msg = task_message if task_message else 'Task failed'
 
         # Include failed layer names if available
-        if failed_layer_names and error_msg == QCoreApplication.translate("FinishedHandler", "Task failed"):
-            error_msg = QCoreApplication.translate(
-                "FinishedHandler", "Filter failed for: {0}"
-            ).format(', '.join(failed_layer_names[:3]))
+        if failed_layer_names and error_msg == 'Task failed':
+            error_msg = f"Filter failed for: {', '.join(failed_layer_names[:3])}"
             if len(failed_layer_names) > 3:
-                error_msg += QCoreApplication.translate(
-                    "FinishedHandler", " (+{0} more)"
-                ).format(len(failed_layer_names) - 3)
+                error_msg += f" (+{len(failed_layer_names) - 3} more)"
 
         source_name = source_layer.name() if source_layer else 'None'
         logger.error(f"Task finished with failure: {error_msg}")
@@ -362,7 +355,7 @@ class FinishedHandler:
         # Log to QGIS message log for visibility
         QgsMessageLog.logMessage(
             f"Task failed: {error_msg}",
-            "FilterMate", Qgis.MessageLevel.Critical
+            "FilterMate", Qgis.Critical
         )
 
         # Log additional diagnostic info to Python console
@@ -373,7 +366,7 @@ class FinishedHandler:
         iface.messageBar().pushMessage(
             message_category,
             error_msg,
-            Qgis.MessageLevel.Critical)
+            Qgis.Critical)
 
     def _display_success_message(
         self,
@@ -396,45 +389,35 @@ class FinishedHandler:
 
         if message_category == 'FilterLayers':
             if task_action == 'filter':
-                result_action = QCoreApplication.translate(
-                    "FinishedHandler", "Layer(s) filtered"
-                )
+                result_action = 'Layer(s) filtered'
             elif task_action == 'unfilter':
-                result_action = QCoreApplication.translate(
-                    "FinishedHandler", "Layer(s) filtered to precedent state"
-                )
+                result_action = 'Layer(s) filtered to precedent state'
             elif task_action == 'reset':
-                result_action = QCoreApplication.translate(
-                    "FinishedHandler", "Layer(s) unfiltered"
-                )
+                result_action = 'Layer(s) unfiltered'
 
             iface.messageBar().pushMessage(
                 message_category,
-                QCoreApplication.translate(
-                    "FinishedHandler", "Filter task : {0}"
-                ).format(result_action),
-                Qgis.MessageLevel.Success)
+                f'Filter task : {result_action}',
+                Qgis.Success)
 
             # Restore source layer selection after filter/unfilter
             try:
                 restore_selection_fn()
-            except (RuntimeError, AttributeError) as sel_err:
+            except Exception as sel_err:
                 logger.debug(f"Could not restore source layer selection: {sel_err}")
 
             # Ensure canvas is refreshed after successful filter operation
             try:
                 iface.mapCanvas().refresh()
-            except (RuntimeError, AttributeError) as e:
+            except Exception as e:
                 logger.debug(f"Ignored in post-filter canvas refresh: {e}")
 
         elif message_category == 'ExportLayers':
             if task_action == 'export':
                 iface.messageBar().pushMessage(
                     message_category,
-                    QCoreApplication.translate(
-                        "FinishedHandler", "Export task : {0}"
-                    ).format(task_message),
-                    Qgis.MessageLevel.Success)
+                    f'Export task : {task_message}',
+                    Qgis.Success)
 
     def _handle_exception_result(
         self,
@@ -454,16 +437,14 @@ class FinishedHandler:
         Raises:
             Exception: Re-raises the exception if result is False (complete failure).
         """
-        error_msg = QCoreApplication.translate(
-            "FinishedHandler", "Exception: {0}"
-        ).format(exception)
+        error_msg = f"Exception: {exception}"
         logger.error(f"Task finished with exception: {error_msg}")
 
         # Display error to user
         iface.messageBar().pushMessage(
             message_category,
             error_msg,
-            Qgis.MessageLevel.Critical)
+            Qgis.Critical)
 
         # Only raise exception if task completely failed (result is False)
         # If result is True, some layers may have been processed successfully
@@ -502,7 +483,7 @@ class FinishedHandler:
                     if backend and hasattr(backend, '_temp_layers_keep_alive'):
                         cleanup_ogr_temp_layers(backend)
                         logger.debug(f"Cleaned up temp layers for backend: {type(backend).__name__}")
-        except (ImportError, RuntimeError, AttributeError) as cleanup_err:
+        except Exception as cleanup_err:
             logger.debug(f"OGR temp layer cleanup failed (non-critical): {cleanup_err}")
 
     def _log_task_bridge_metrics(self, task_bridge: Optional[Any]) -> None:
@@ -515,7 +496,7 @@ class FinishedHandler:
             try:
                 metrics_report = task_bridge.get_metrics_report()
                 logger.info(metrics_report)
-            except (RuntimeError, AttributeError) as metrics_err:
+            except Exception as metrics_err:
                 logger.debug(f"TaskBridge metrics logging failed: {metrics_err}")
 
     def cleanup_safe_intersect_layers(self) -> None:
@@ -555,5 +536,5 @@ class FinishedHandler:
             if layers_to_remove:
                 project.removeMapLayers(layers_to_remove)
                 logger.debug(f"Cleaned up {len(layers_to_remove)} temporary safe_intersect layers")
-        except (RuntimeError, AttributeError) as e:
+        except Exception as e:
             logger.debug(f"safe_intersect cleanup failed (non-critical): {e}")

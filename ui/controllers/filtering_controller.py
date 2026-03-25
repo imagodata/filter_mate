@@ -379,12 +379,8 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 logger.warning("populate_layers_checkable_combobox: widgets not initialized")
                 return False
 
-            # v4.0.5: Log diagnostic info
-            logger.info(
-                f"populate_layers_checkable_combobox: "
-                f"has_loaded_layers={getattr(dockwidget, 'has_loaded_layers', False)}, "
-                f"PROJECT_LAYERS count={len(dockwidget.PROJECT_LAYERS) if dockwidget.PROJECT_LAYERS else 0}"
-            )
+            # Log diagnostic info
+            logger.info(f"populate_layers_checkable_combobox: has_loaded_layers={getattr(dockwidget, 'has_loaded_layers', False)}, PROJECT_LAYERS count={len(dockwidget.PROJECT_LAYERS) if dockwidget.PROJECT_LAYERS else 0}")
 
             # Imports
             from qgis.core import QgsVectorLayer, QgsProject
@@ -407,7 +403,7 @@ class FilteringController(BaseController, LayerSelectionMixin):
             layer_props = dockwidget.PROJECT_LAYERS[layer.id()]
             project = QgsProject.instance()
 
-            # DIAGNOSTIC v4.0.5: Log PROJECT_LAYERS state
+            # DIAGNOSTIC Log PROJECT_LAYERS state
             logger.info(f"🔍 DIAGNOSTIC: PROJECT_LAYERS has {len(dockwidget.PROJECT_LAYERS)} entries")
             logger.info(f"🔍 DIAGNOSTIC: PROJECT_LAYERS keys: {list(dockwidget.PROJECT_LAYERS.keys())}")
 
@@ -436,10 +432,9 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 logger.debug(f"✓ Source layer {layer.name()} (ID: {source_layer_id}) not in layers_to_filter (correct)")
 
             # Diagnostic logging
-            # Exclude non-spatial layers: add_project_layer intentionally skips them (isSpatial() = False)
             qgis_vector_layers = [l for l in project.mapLayers().values()
                                   if isinstance(l, QgsVectorLayer) and l.id() != layer.id()]
-            missing = [l for l in qgis_vector_layers if l.id() not in dockwidget.PROJECT_LAYERS and l.isSpatial()]
+            missing = [l for l in qgis_vector_layers if l.id() not in dockwidget.PROJECT_LAYERS]
             if missing:
                 logger.warning(f"populate_layers_checkable_combobox: {len(missing)} layer(s) NOT in PROJECT_LAYERS")
                 logger.warning(f"Layers in QGIS but NOT in PROJECT_LAYERS: {[l.name() for l in missing]}")
@@ -507,7 +502,7 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 if not isinstance(layer_obj, QgsVectorLayer):
                     skipped_reasons.append(f"{layer_name}: not QgsVectorLayer")
                     continue
-                # v4.2: Skip non-spatial tables (tables without geometry)
+                # Skip non-spatial tables (tables without geometry)
                 if not layer_obj.isSpatial():
                     skipped_reasons.append(f"{layer_name}: non-spatial table (no geometry)")
                     continue
@@ -522,36 +517,33 @@ class FilteringController(BaseController, LayerSelectionMixin):
 
                 item = layers_widget.model().item(item_index)
                 if has_layers and layer_id in layers_to_filter:
-                    item.setCheckState(Qt.CheckState.Checked)
+                    item.setCheckState(Qt.Checked)
                 else:
-                    item.setCheckState(Qt.CheckState.Unchecked)
+                    item.setCheckState(Qt.Unchecked)
                 item_index += 1
 
-            # DIAGNOSTIC v4.0.5: Log skipped layers
+            # DIAGNOSTIC Log skipped layers
             if skipped_reasons:
                 logger.warning(f"🔍 DIAGNOSTIC: Skipped {len(skipped_reasons)} layers:")
                 for reason in skipped_reasons:
                     logger.warning(f"   - {reason}")
 
-            # FIX v4.1.3 (2026-01-18): Add missing layers directly to combobox (same as populate_export_combobox)
+            # Add missing layers directly to combobox (same as populate_export_combobox)
             # This ensures PostgreSQL and remote layers missing from PROJECT_LAYERS are still filterable
             from ...infrastructure.utils import geometry_type_to_string
 
             for missing_layer in missing:
-                # v4.2: Skip non-spatial tables (tables without geometry)
+                # Skip non-spatial tables (tables without geometry)
                 if missing_layer.isValid() and missing_layer.isSpatial() and is_layer_source_available(missing_layer, require_psycopg2=False):
                     display_name = f"{missing_layer.name()} [{missing_layer.crs().authid()}]"
                     geom_type_str = geometry_type_to_string(missing_layer)
                     layer_icon = dockwidget.icon_per_geometry_type(geom_type_str)
-                    logger.debug(
-                        f"populate_layers_checkable_combobox [MISSING]: layer='{missing_layer.name()}', "
-                        f"geom_type='{geom_type_str}', icon_isNull={layer_icon.isNull() if layer_icon else 'None'}"
-                    )
+                    logger.debug(f"populate_layers_checkable_combobox [MISSING]: layer='{missing_layer.name()}', geom_type='{geom_type_str}', icon_isNull={layer_icon.isNull() if layer_icon else 'None'}")
                     item_data = {"layer_id": missing_layer.id(), "layer_geometry_type": geom_type_str}
                     layers_widget.addItem(layer_icon, display_name, item_data)
                     item = layers_widget.model().item(item_index)
                     # Check if this layer was previously selected for filtering
-                    item.setCheckState(Qt.CheckState.Checked if missing_layer.id() in layers_to_filter else Qt.CheckState.Unchecked)
+                    item.setCheckState(Qt.Checked if missing_layer.id() in layers_to_filter else Qt.Unchecked)
                     item_index += 1
                     logger.info(f"✓ populate_layers_checkable_combobox: Added missing layer '{missing_layer.name()}'")
 
@@ -583,6 +575,10 @@ class FilteringController(BaseController, LayerSelectionMixin):
         self._current_predicate = predicate
         self._rebuild_expression()
         self._notify_config_changed()
+
+    def get_available_predicates(self) -> List[PredicateType]:
+        """Get list of available predicates."""
+        return list(PredicateType)
 
     def on_predicate_changed(self, predicate_value: str) -> None:
         """
@@ -798,7 +794,7 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 else:
                     logger.debug("FilteringController: TaskParameters build returned None")
 
-            # v4.0 Note: FilterService integration requires additional work:
+            # FilterService integration requires additional work:
             # 1. FilterService.apply_filter() expects FilterRequest with domain objects
             # 2. The async task execution model (QgsTask) is currently in FilterEngineTask
             # 3. Full integration planned for v5.0 when FilterEngineTask is fully refactored
@@ -1045,8 +1041,8 @@ class FilteringController(BaseController, LayerSelectionMixin):
         for callback in self._on_expression_changed_callbacks:
             try:
                 callback(expression)
-            except Exception:
-                pass  # Don't let callback errors break flow
+            except Exception as e:
+                logger.debug(f"Ignored in expression changed callback: {e}")
 
     def _notify_config_changed(self) -> None:
         """Notify listeners of configuration change."""
@@ -1054,8 +1050,8 @@ class FilteringController(BaseController, LayerSelectionMixin):
         for callback in self._on_config_changed_callbacks:
             try:
                 callback(config)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Ignored in filter config changed callback: {e}")
 
     # === Lifecycle ===
 

@@ -44,7 +44,7 @@ except ImportError:
             return False
         try:
             return layer.setSubsetString(expression)
-        except Exception:
+        except Exception:  # catch-all safety net (QGIS layer API)
             return False
 
 # Sentinel value for OGR fallback
@@ -100,7 +100,6 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         """
         super().__init__(task_params)
         self._logger = logger
-        self.last_error = None
 
     def get_backend_name(self) -> str:
         """Get backend name."""
@@ -160,7 +159,7 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         """
         self.log_debug(f"Building Spatialite expression for {layer_props.get('layer_name', 'unknown')}")
 
-        # FIX v4.2.13: Spatialite cannot evaluate dynamic buffer expressions with field references
+        # Spatialite cannot evaluate dynamic buffer expressions with field references
         # Unlike PostgreSQL which can create temp tables with pre-calculated buffers,
         # Spatialite's Buffer(GeomFromText(wkt), "field_name" * 2) fails because
         # the field reference is not valid in the context of a WKT literal.
@@ -220,7 +219,7 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         self.log_debug(f"SRIDs: source={source_srid}, target={target_srid}")
 
         # Build source geometry SQL
-        # FIX v4.2.11: Pass buffer_expression for dynamic buffer support
+        # Pass buffer_expression for dynamic buffer support
         source_geom_sql = self._build_source_geometry_sql(
             source_geom, source_srid, target_srid, buffer_value, buffer_expression
         )
@@ -273,14 +272,12 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         """
         try:
             if not expression:
-                self.last_error = "Empty expression, skipping filter"
-                self.log_warning(self.last_error)
+                self.log_warning("Empty expression, skipping filter")
                 return False
 
             # Check for OGR fallback sentinel
             if expression == USE_OGR_FALLBACK:
-                self.last_error = "OGR fallback requested"
-                self.log_info(self.last_error)
+                self.log_info("OGR fallback requested")
                 return False
 
             # Combine with existing filter if needed
@@ -299,21 +296,19 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             if success:
                 self.log_info("✓ Filter applied successfully")
             else:
-                self.last_error = f"setSubsetString failed for {layer.name()} (spatialite)"
-                self.log_error(f"✗ Failed to apply filter: {self.last_error}")
+                self.log_error("✗ Failed to apply filter")
 
             return success
 
-        except Exception as e:
-            self.last_error = f"Spatialite apply_filter exception: {e}"
-            self.log_error(self.last_error)
+        except Exception as e:  # catch-all safety net
+            self.log_error(f"Error applying filter: {e}")
             return False
 
     # =========================================================================
     # Private Helper Methods
     # =========================================================================
 
-    # NOTE v4.0.1: _detect_geometry_column, _apply_centroid_transform,
+    # NOTE _detect_geometry_column, _apply_centroid_transform,
     # _get_layer_srid, _get_source_srid are inherited from GeometricFilterPort
 
     def _is_geopackage(self, layer) -> bool:
@@ -357,7 +352,7 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             source_geom_sql = f"Transform({source_geom_sql}, {target_srid})"
             self.log_info(f"Applying CRS transform: {source_srid} → {target_srid}")
 
-        # FIX v4.2.11: Support dynamic buffer expressions
+        # Support dynamic buffer expressions
         # Priority: buffer_expression (dynamic) > buffer_value (static)
         if buffer_expression and buffer_expression.strip():
             # Convert QGIS expression to Spatialite SQL
@@ -392,7 +387,7 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
                 simplified = geom.simplify(tolerance)
                 if simplified and not simplified.isEmpty():
                     return simplified.asWkt()
-        except Exception as e:
+        except Exception as e:  # catch-all safety net (QGIS geometry simplification)
             self.log_warning(f"WKT simplification failed: {e}")
 
         return wkt
