@@ -95,8 +95,10 @@ class FilterMate:
             self.translator = QTranslator()
             self.translator.load(locale_path)
             QCoreApplication.installTranslator(self.translator)
+            self._current_locale = locale
             logger.info(f"Loaded translation: {locale}")
         else:
+            self._current_locale = None
             logger.warning(f"Translation file not found: {locale_path}")
 
         # Declare instance attributes
@@ -175,7 +177,7 @@ class FilterMate:
             loaded = self.translator.load(locale_path)
             if loaded:
                 QCoreApplication.installTranslator(self.translator)
-                # Verify translation works
+                self._current_locale = locale
                 test = self.tr('Open FilterMate panel')
                 logger.info(f"Reloaded translation: {locale} (test: '{test}')")
             else:
@@ -562,7 +564,7 @@ class FilterMate:
                         for field in layer.fields():
                             vr_info = get_value_relation_info(layer, field.name(), check_layer_availability=False)
                             if vr_info and not vr_info.get('layer_available', True):
-                                ref_name = vr_info.get('layer_name', 'unknown')
+                                ref_name = vr_info.get('layer_name', '') or 'unknown'
                                 self._missing_dependency_layers.add(ref_name)
 
                     if self._missing_dependency_layers and not self._form_dependency_warning_shown:

@@ -52,12 +52,6 @@ class ConfigModelManager:
         Delegates to ConfigController for change tracking.
         Also applies LANGUAGE changes immediately (live preview) for instant feedback.
         """
-        from qgis.core import QgsMessageLog, Qgis
-        QgsMessageLog.logMessage(
-            f"CONFIG CHANGED: input_data={type(input_data).__name__}",
-            "FilterMate", Qgis.MessageLevel.Info
-        )
-
         dw = self.dockwidget
         if dw._controller_integration:
             dw._controller_integration.delegate_config_data_changed(input_data)
@@ -90,11 +84,6 @@ class ConfigModelManager:
             if not key_item:
                 return
             key_name = key_item.data(Qt.ItemDataRole.DisplayRole)
-            from qgis.core import QgsMessageLog, Qgis
-            QgsMessageLog.logMessage(
-                f"_try_live_language_change: key={key_name}",
-                "FilterMate", Qgis.MessageLevel.Info
-            )
             if key_name != 'LANGUAGE':
                 return
 
@@ -108,22 +97,17 @@ class ConfigModelManager:
             if not new_locale:
                 return
 
-            # Ignore if this matches the currently saved locale
+            # Ignore if this matches the currently active translator locale
             # (spurious itemChanged when editor opens / setEditorData runs)
-            saved_locale = (dw.CONFIG_DATA
-                            .get('APP', {})
-                            .get('DOCKWIDGET', {})
-                            .get('LANGUAGE', {})
-                            .get('value', 'auto'))
-            if new_locale == saved_locale:
+            from qgis.utils import plugins
+            plugin = plugins.get('filter_mate')
+            active_locale = getattr(plugin, '_current_locale', None) if plugin else None
+            if new_locale == active_locale:
                 return
 
             self._language_change_pending = True
             self._pending_locale = new_locale
-            QgsMessageLog.logMessage(
-                f"Live language change: {saved_locale} -> {new_locale}",
-                "FilterMate", Qgis.MessageLevel.Warning
-            )
+            logger.info(f"Live language change: {active_locale} -> {new_locale}")
 
             # Defer everything to next event loop tick
             # (setModelData is still in progress — retranslateUi during it can cause issues)
@@ -141,13 +125,8 @@ class ConfigModelManager:
         Patches CONFIG_DATA directly (no full serialize) to avoid
         psycopg2.connection leak from CURRENT_PROJECT.
         """
-        from qgis.core import QgsMessageLog, Qgis
         try:
             new_locale = getattr(self, '_pending_locale', None)
-            QgsMessageLog.logMessage(
-                f"_deferred_language_apply CALLED: locale={new_locale}",
-                "FilterMate", Qgis.MessageLevel.Warning
-            )
             dw = self.dockwidget
             if not new_locale or not hasattr(dw, 'CONFIG_DATA'):
                 return
@@ -155,41 +134,21 @@ class ConfigModelManager:
             # 1) Reload translator + retranslate UI
             from qgis.utils import plugins
             plugin = plugins.get('filter_mate')
-            QgsMessageLog.logMessage(
-                f"plugin={plugin is not None}, has_reload={hasattr(plugin, 'reload_translator') if plugin else False}",
-                "FilterMate", Qgis.MessageLevel.Warning
-            )
             if plugin and hasattr(plugin, 'reload_translator'):
                 try:
                     plugin.reload_translator(new_locale)
-                    QgsMessageLog.logMessage(
-                        f"reload_translator OK for {new_locale}",
-                        "FilterMate", Qgis.MessageLevel.Warning
-                    )
+                    logger.info(f"reload_translator OK for {new_locale}")
                 except Exception as tr_err:
-                    QgsMessageLog.logMessage(
-                        f"reload_translator FAILED: {tr_err}",
-                        "FilterMate", Qgis.MessageLevel.Critical
-                    )
+                    logger.error(f"reload_translator FAILED: {tr_err}")
                 try:
                     if hasattr(plugin, 'retranslate_actions'):
                         plugin.retranslate_actions()
                     if hasattr(dw, 'retranslate_all_ui'):
                         dw.retranslate_all_ui()
-                    QgsMessageLog.logMessage(
-                        f"retranslate_all_ui OK",
-                        "FilterMate", Qgis.MessageLevel.Warning
-                    )
                 except Exception as rt_err:
-                    QgsMessageLog.logMessage(
-                        f"retranslate FAILED: {rt_err}",
-                        "FilterMate", Qgis.MessageLevel.Critical
-                    )
+                    logger.error(f"retranslate FAILED: {rt_err}")
             else:
-                QgsMessageLog.logMessage(
-                    f"SKIP: plugin not found or no reload_translator",
-                    "FilterMate", Qgis.MessageLevel.Critical
-                )
+                logger.warning("SKIP: plugin not found or no reload_translator")
 
             # 2) Patch CONFIG_DATA in place
             app = dw.CONFIG_DATA.get('APP')
