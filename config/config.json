@@ -62,7 +62,19 @@
           "sl",
           "tl",
           "am",
-          "uz"
+          "uz",
+          "ko",
+          "ja",
+          "ar",
+          "th",
+          "uk",
+          "cs",
+          "ro",
+          "el",
+          "hu",
+          "bg",
+          "ms",
+          "ca"
         ],
         "description": "Interface language: 'auto' (use QGIS locale), or force specific language",
         "available_translations": [
@@ -87,7 +99,19 @@
           "sl (Slovenščina)",
           "tl (Tagalog)",
           "am (አማርኛ)",
-          "uz (Oʻzbekcha)"
+          "uz (Oʻzbekcha)",
+          "ko (한국어)",
+          "ja (日本語)",
+          "ar (العربية)",
+          "th (ไทย)",
+          "uk (Українська)",
+          "cs (Čeština)",
+          "ro (Română)",
+          "el (Ελληνικά)",
+          "hu (Magyar)",
+          "bg (Български)",
+          "ms (Bahasa Melayu)",
+          "ca (Català)"
         ]
       },
       "UI_PROFILE": {

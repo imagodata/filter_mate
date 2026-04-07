@@ -608,13 +608,19 @@ class ConfigController(BaseController):
                     plugin = plugins.get('filter_mate')
                     if plugin and hasattr(plugin, 'reload_translator'):
                         plugin.reload_translator(new_locale)
+
+                        # Retranslate all existing UI with the new translator
+                        if hasattr(plugin, 'retranslate_actions'):
+                            plugin.retranslate_actions()
+                        if self.dockwidget and hasattr(self.dockwidget, 'retranslate_all_ui'):
+                            self.dockwidget.retranslate_all_ui()
+
                         changes_summary.append(f"Language: {new_locale}")
                         from ...infrastructure.feedback import show_info
                         show_info(
                             "FilterMate",
                             self.dockwidget.tr(
-                                "Language changed to '{0}'. "
-                                "Some UI elements may require reopening the panel."
+                                "Language changed to '{0}'."
                             ).format(new_locale)
                         )
                     else:

@@ -20,7 +20,7 @@
 | 📐 **Geometric Filtering** | Spatial predicates with buffer support |
 | ⭐ **Filter Favorites** | Save and reuse filter configurations |
 | 📝 **Undo/Redo** | Complete filter history |
-| 🌍 **21 Languages** | Full internationalization |
+| 🌍 **34 Languages** | Full internationalization |
 | 🎨 **Dark Mode** | Automatic theme detection |
 | 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |

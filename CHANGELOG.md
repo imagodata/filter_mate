@@ -2,6 +2,28 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.6.3] - 2026-04-07
+
+### i18n - 34 Languages & Live Language Switching
+
+Expanded internationalization from 22 to 34 languages and fixed live language switching.
+
+#### New Languages (+12)
+
+- 🇰🇷 Korean (ko), 🇯🇵 Japanese (ja), 🇸🇦 Arabic (ar), 🇹🇭 Thai (th)
+- 🇺🇦 Ukrainian (uk), 🇨🇿 Czech (cs), 🇷🇴 Romanian (ro), 🇬🇷 Greek (el)
+- 🇭🇺 Hungarian (hu), 🇧🇬 Bulgarian (bg), 🇲🇾 Malay (ms), 🏴 Catalan (ca)
+
+#### Bug Fixes
+
+- **Live language switching**: Changing language from config or QGIS settings now retranslates the entire UI immediately (`.ui` file strings, indicator tooltips, buffer tooltips, combo/picker tooltips, menu/toolbar actions)
+- **`retranslate_all_ui()`**: New unified retranslation method with reentrant guard, called from config UI and `QEvent.LanguageChange`
+- **`changeEvent(LanguageChange)`**: Dockwidget now handles Qt language change events, covering QGIS locale changes without going through FilterMate config
+- **`retranslate_actions()`**: Menu and toolbar action texts are now retranslated on language change
+- **`app_initializer._retranslate_ui()`**: Delegates to unified `retranslate_all_ui()` for consistency
+
+---
+
 ## [4.6.2] - 2026-03-17
 
 ### Bug Fixes - Feature Picker & Exploring

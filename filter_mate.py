@@ -172,6 +172,16 @@ class FilterMate:
         else:
             logger.warning(f"Translation file not found: {locale_path}")
 
+    def retranslate_actions(self):
+        """Retranslate menu and toolbar action texts after a language change."""
+        self.menu = self.tr(u'&FilterMate')
+        if len(self.actions) >= 1:
+            self.actions[0].setText(self.tr(u'FilterMate'))
+            self.actions[0].setStatusTip(self.tr(u'Open FilterMate panel'))
+        if len(self.actions) >= 2:
+            self.actions[1].setText(self.tr(u'Reset configuration and database'))
+            self.actions[1].setStatusTip(self.tr(u'Reset the default configuration and delete the SQLite database'))
+
     def add_action(
         self,
         icon_path,

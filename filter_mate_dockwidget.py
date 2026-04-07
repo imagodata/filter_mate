@@ -32,6 +32,7 @@ from qgis.PyQt import QtGui, QtWidgets, QtCore
 from qgis.PyQt.QtCore import (
     Qt,
     QCoreApplication,
+    QEvent,
     QMetaMethod,
     QObject,
     pyqtSignal,
@@ -6770,6 +6771,70 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 refresh()
             except Exception as error:
                 logger.debug(f"FilterMate: Could not refresh dynamic tooltip: {error}")
+
+    def retranslate_all_ui(self):
+        """Full UI retranslation after language change.
+
+        Calls retranslateUi() for .ui-file strings (tabs, group boxes, button
+        tooltips, etc.), then refreshes all Python-set dynamic strings:
+        indicator tooltips, buffer spinbox tooltip, and combo/picker tooltips.
+        """
+        if not getattr(self, 'widgets_initialized', False):
+            return
+        if getattr(self, '_retranslating', False):
+            return
+        self._retranslating = True
+        try:
+            try:
+                # 1) .ui-file strings (tab labels, group box titles, button tooltips)
+                if hasattr(self, 'retranslateUi'):
+                    self.retranslateUi(self)
+                    logger.debug("retranslate_all_ui: retranslateUi() done")
+            except Exception as e:
+                logger.warning(f"retranslate_all_ui: retranslateUi failed: {e}")
+
+            try:
+                # 2) Indicator tooltips
+                if hasattr(self, 'favorites_indicator_label') and self.favorites_indicator_label:
+                    self._update_favorite_indicator()
+                if hasattr(self, 'backend_indicator_label') and self.backend_indicator_label:
+                    if self.current_layer and hasattr(self, '_update_backend_indicator'):
+                        provider = self.current_layer.dataProvider().name() if self.current_layer.dataProvider() else 'ogr'
+                        self._update_backend_indicator(provider)
+            except Exception as e:
+                logger.debug(f"retranslate_all_ui: indicator refresh failed: {e}")
+
+            try:
+                # 3) Buffer spinbox tooltip
+                if hasattr(self, 'mQgsDoubleSpinBox_filtering_buffer_value'):
+                    self._update_buffer_spinbox_style(
+                        self.mQgsDoubleSpinBox_filtering_buffer_value.value()
+                    )
+            except Exception as e:
+                logger.debug(f"retranslate_all_ui: buffer tooltip refresh failed: {e}")
+
+            try:
+                # 4) Dynamic combo/expression/picker tooltips
+                self.retranslate_dynamic_tooltips()
+            except Exception as e:
+                logger.debug(f"retranslate_all_ui: dynamic tooltips refresh failed: {e}")
+
+            logger.info("retranslate_all_ui: UI retranslation complete")
+        finally:
+            self._retranslating = False
+
+    def changeEvent(self, event):
+        """Handle QEvent.LanguageChange emitted by Qt when a QTranslator is installed/removed.
+
+        This covers the case where QGIS itself changes locale (e.g. settings change)
+        without going through FilterMate's config UI.
+        A reentrant guard prevents double retranslation when _apply_language_change()
+        already calls retranslate_all_ui() explicitly.
+        """
+        super().changeEvent(event)
+        if event.type() == QEvent.Type.LanguageChange:
+            if not getattr(self, '_retranslating', False):
+                self.retranslate_all_ui()
 
     def _setup_keyboard_shortcuts(self):
         """Setup keyboard shortcuts: F5=reload layers, Ctrl+Z=undo, Ctrl+Y=redo."""

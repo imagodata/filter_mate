@@ -456,12 +456,14 @@ class AppInitializer:
             return
 
         try:
-            if hasattr(dockwidget, 'retranslateUi'):
-                dockwidget.retranslateUi(dockwidget)
-                logger.info("FilterMate: DockWidget UI retranslated with active locale")
-            if hasattr(dockwidget, 'retranslate_dynamic_tooltips'):
-                dockwidget.retranslate_dynamic_tooltips()
-                logger.info("FilterMate: Dynamic tooltips refreshed with active locale")
+            if hasattr(dockwidget, 'retranslate_all_ui'):
+                dockwidget.retranslate_all_ui()
+            else:
+                # Fallback for older dockwidget without retranslate_all_ui
+                if hasattr(dockwidget, 'retranslateUi'):
+                    dockwidget.retranslateUi(dockwidget)
+                if hasattr(dockwidget, 'retranslate_dynamic_tooltips'):
+                    dockwidget.retranslate_dynamic_tooltips()
         except Exception as e:
             logger.warning(f"FilterMate: Failed to retranslate DockWidget UI: {e}")
 
