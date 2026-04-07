@@ -52,6 +52,12 @@ class ConfigModelManager:
         Delegates to ConfigController for change tracking.
         Also applies LANGUAGE changes immediately (live preview) for instant feedback.
         """
+        from qgis.core import QgsMessageLog, Qgis
+        QgsMessageLog.logMessage(
+            f"CONFIG CHANGED: input_data={type(input_data).__name__}",
+            "FilterMate", Qgis.MessageLevel.Info
+        )
+
         dw = self.dockwidget
         if dw._controller_integration:
             dw._controller_integration.delegate_config_data_changed(input_data)
@@ -84,7 +90,11 @@ class ConfigModelManager:
             if not key_item:
                 return
             key_name = key_item.data(Qt.ItemDataRole.DisplayRole)
-            logger.debug(f"_try_live_language_change: key={key_name}")
+            from qgis.core import QgsMessageLog, Qgis
+            QgsMessageLog.logMessage(
+                f"_try_live_language_change: key={key_name}",
+                "FilterMate", Qgis.MessageLevel.Info
+            )
             if key_name != 'LANGUAGE':
                 return
 
@@ -118,8 +128,13 @@ class ConfigModelManager:
         Patches CONFIG_DATA directly (no full serialize) to avoid
         psycopg2.connection leak from CURRENT_PROJECT.
         """
+        from qgis.core import QgsMessageLog, Qgis
         try:
             new_locale = getattr(self, '_pending_locale', None)
+            QgsMessageLog.logMessage(
+                f"_deferred_language_apply CALLED: locale={new_locale}",
+                "FilterMate", Qgis.MessageLevel.Warning
+            )
             dw = self.dockwidget
             if not new_locale or not hasattr(dw, 'CONFIG_DATA'):
                 return
