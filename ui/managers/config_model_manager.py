@@ -96,29 +96,21 @@ class ConfigModelManager:
             self._pending_locale = new_locale
             logger.info(f"Live language change: {new_locale}")
 
-            # Reload translator + retranslate UI immediately
-            from qgis.utils import plugins
-            plugin = plugins.get('filter_mate')
-            if plugin and hasattr(plugin, 'reload_translator'):
-                plugin.reload_translator(new_locale)
-                if hasattr(plugin, 'retranslate_actions'):
-                    plugin.retranslate_actions()
-                if hasattr(self.dockwidget, 'retranslate_all_ui'):
-                    self.dockwidget.retranslate_all_ui()
-
-            # Defer save to next event loop tick (after setModelData finishes)
+            # Defer everything to next event loop tick
+            # (setModelData is still in progress — retranslateUi during it can cause issues)
             from qgis.PyQt.QtCore import QTimer
-            QTimer.singleShot(0, self._deferred_language_save)
+            QTimer.singleShot(0, self._deferred_language_apply)
 
         except Exception as e:
             self._language_change_pending = False
             logger.warning(f"_try_live_language_change failed: {e}")
 
-    def _deferred_language_save(self):
-        """Save language change to disk by patching CONFIG_DATA directly.
+    def _deferred_language_apply(self):
+        """Apply language change: reload translator, retranslate UI, save to disk.
 
-        No full serialize (avoids psycopg2.connection leak).
-        No tree rebuild (avoids tree collapse + stale model issues).
+        Runs in the next event loop tick after setModelData has completed.
+        Patches CONFIG_DATA directly (no full serialize) to avoid
+        psycopg2.connection leak from CURRENT_PROJECT.
         """
         try:
             new_locale = getattr(self, '_pending_locale', None)
@@ -126,7 +118,18 @@ class ConfigModelManager:
             if not new_locale or not hasattr(dw, 'CONFIG_DATA'):
                 return
 
-            # Patch CONFIG_DATA in place
+            # 1) Reload translator + retranslate UI
+            from qgis.utils import plugins
+            plugin = plugins.get('filter_mate')
+            if plugin and hasattr(plugin, 'reload_translator'):
+                plugin.reload_translator(new_locale)
+                if hasattr(plugin, 'retranslate_actions'):
+                    plugin.retranslate_actions()
+                if hasattr(dw, 'retranslate_all_ui'):
+                    dw.retranslate_all_ui()
+                logger.info(f"Language applied: {new_locale}")
+
+            # 2) Patch CONFIG_DATA in place
             app = dw.CONFIG_DATA.get('APP')
             if isinstance(app, dict):
                 dock = app.get('DOCKWIDGET')
@@ -137,11 +140,9 @@ class ConfigModelManager:
                     else:
                         dock['LANGUAGE'] = {'value': new_locale}
 
-            # Sync ENV_VARS
+            # 3) Sync ENV_VARS + save to disk
             from ...config.config import ENV_VARS
             ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
-
-            # Save to disk (sanitize to strip runtime objects like connections)
             config_path = ENV_VARS.get(
                 'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json')
             clean = self._sanitize_for_json(dw.CONFIG_DATA)
@@ -150,7 +151,7 @@ class ConfigModelManager:
             logger.info(f"Language saved to disk: {new_locale}")
 
         except Exception as e:
-            logger.error(f"_deferred_language_save failed: {e}")
+            logger.error(f"_deferred_language_apply failed: {e}")
             import traceback
             logger.error(traceback.format_exc())
         finally:
