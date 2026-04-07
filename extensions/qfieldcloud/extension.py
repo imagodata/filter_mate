@@ -10,6 +10,8 @@ import logging
 import os
 from typing import Any, Dict, List, Optional
 
+from qgis.PyQt.QtCore import QCoreApplication
+
 from ..base import BaseExtension, ExtensionMetadata, ExtensionState
 
 logger = logging.getLogger('FilterMate.Extensions.QFieldCloud')
@@ -45,6 +47,10 @@ class QFieldCloudExtension(BaseExtension):
 
     EXTENSION_ID = "qfieldcloud"
     EXTENSION_VERSION = "1.0.0"
+
+    @staticmethod
+    def tr(message):
+        return QCoreApplication.translate('QFieldCloudExtension', message)
 
     def __init__(self):
         super().__init__()
@@ -103,7 +109,7 @@ class QFieldCloudExtension(BaseExtension):
         parent = self._iface.mainWindow()
 
         # Settings action (menu only)
-        settings_action = QAction("QFieldCloud Settings...", parent)
+        settings_action = QAction(self.tr("QFieldCloud Settings..."), parent)
         settings_action.triggered.connect(self._on_settings_triggered)
         self._iface.addPluginToVectorMenu(menu_name, settings_action)
         actions.append(settings_action)
@@ -133,7 +139,7 @@ class QFieldCloudExtension(BaseExtension):
         # Create the push button matching the style of existing action buttons
         btn = QPushButton(dockwidget)
         btn.setObjectName("pushButton_action_qfieldcloud")
-        btn.setToolTip("Export filtered layers to QFieldCloud")
+        btn.setToolTip(self.tr("Export filtered layers to QFieldCloud"))
         btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         if os.path.isfile(icon_path):
             btn.setIcon(QIcon(icon_path))

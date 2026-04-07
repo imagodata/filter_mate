@@ -2282,8 +2282,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._config_model_manager.setup_reload_button()
 
     def _on_reload_button_clicked(self):
-        """v5.0 P2-2: Delegated to ConfigModelManager."""
-        self._config_model_manager.on_reload_button_clicked()
+        """Deprecated: reload button removed. No-op for compatibility."""
+        pass
 
     def manage_output_name(self):
         """v4.0 S18: Set export output name."""

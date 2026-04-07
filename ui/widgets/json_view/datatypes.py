@@ -624,9 +624,22 @@ class ChoicesType(DataType):
     def createEditor(self, parent, option, index):
         data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         cbx = QtWidgets.QComboBox(parent)
-        cbx.addItems([str(d) for d in data['choices']])
-        cbx.setCurrentIndex(cbx.findText(str(data['value'])))
-        # Add description as tooltip if available
+        # Use display labels when available (e.g. "fr (Français)" instead of "fr")
+        labels = data.get('available_translations')
+        if labels and len(labels) == len(data['choices']) - 1:
+            # available_translations doesn't include 'auto' — prepend it
+            display_items = ['auto'] + list(labels)
+        elif labels and len(labels) == len(data['choices']):
+            display_items = list(labels)
+        else:
+            display_items = [str(d) for d in data['choices']]
+        cbx.addItems(display_items)
+        # Find current value by matching against choices (codes)
+        try:
+            current_idx = list(data['choices']).index(data['value'])
+        except ValueError:
+            current_idx = 0
+        cbx.setCurrentIndex(current_idx)
         if 'description' in data:
             cbx.setToolTip(str(data['description']))
         return cbx
@@ -634,14 +647,32 @@ class ChoicesType(DataType):
     def setModelData(self, editor, model, index):
         data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         data['value'] = data['choices'][editor.currentIndex()]
-        model.itemFromIndex(index).setData(data['value'], QtCore.Qt.ItemDataRole.DisplayRole)
+        # Display the label if available, otherwise the raw value
+        labels = data.get('available_translations')
+        if labels and len(labels) == len(data['choices']) - 1:
+            display_items = ['auto'] + list(labels)
+        elif labels and len(labels) == len(data['choices']):
+            display_items = list(labels)
+        else:
+            display_items = None
+        display_text = display_items[editor.currentIndex()] if display_items else str(data['value'])
+        model.itemFromIndex(index).setData(display_text, QtCore.Qt.ItemDataRole.DisplayRole)
         model.itemFromIndex(index).setData(data, QtCore.Qt.ItemDataRole.UserRole)
 
     def value_item(self, value, model, key=None):
         """Item representing a value with optional tooltip from description."""
-        value_item = super(ChoicesType, self).value_item(value['value'], model, key)
+        # Show label instead of code when available_translations exists
+        display_value = value['value']
+        labels = value.get('available_translations')
+        choices = value.get('choices', [])
+        if labels and display_value in choices:
+            idx = choices.index(display_value)
+            if len(labels) == len(choices) - 1 and idx > 0:
+                display_value = labels[idx - 1]
+            elif len(labels) == len(choices):
+                display_value = labels[idx]
+        value_item = super(ChoicesType, self).value_item(display_value, model, key)
         value_item.setData(value, QtCore.Qt.ItemDataRole.UserRole)
-        # Set tooltip from description if available
         if 'description' in value:
             value_item.setData(str(value['description']), QtCore.Qt.ItemDataRole.ToolTipRole)
         return value_item

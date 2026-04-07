@@ -729,11 +729,13 @@
   "EXTENSIONS": {
     "qfieldcloud": {
       "enabled": {
-        "value": true,
+        "value": false,
+        "choices": [true, false],
         "description": "Enable/disable the QFieldCloud extension. When disabled, the export button is hidden."
       },
       "dismiss_missing_deps_warning": {
         "value": false,
+        "choices": [true, false],
         "description": "Do not show the missing dependencies warning for this extension"
       }
     }

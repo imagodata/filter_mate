@@ -9,7 +9,7 @@ and extension preferences.
 import logging
 from typing import TYPE_CHECKING
 
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import QCoreApplication, Qt
 from qgis.PyQt.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -41,12 +41,16 @@ class QFieldCloudSettingsDialog(QDialog):
         - Preferences (auto-package, default project)
     """
 
+    @staticmethod
+    def tr(message):
+        return QCoreApplication.translate('QFieldCloudSettingsDialog', message)
+
     def __init__(self, parent=None, extension: 'QFieldCloudExtension' = None):
         super().__init__(parent, Qt.WindowType.Dialog)
         self._extension = extension
         self._credentials = extension._credentials_manager
 
-        self.setWindowTitle("QFieldCloud Configuration")
+        self.setWindowTitle(self.tr("QFieldCloud Configuration"))
         self.setMinimumWidth(450)
         self.setModal(True)
 
@@ -59,60 +63,60 @@ class QFieldCloudSettingsDialog(QDialog):
         layout = QVBoxLayout()
 
         # --- Server group ---
-        server_group = QGroupBox("Server")
+        server_group = QGroupBox(self.tr("Server"))
         server_layout = QFormLayout()
 
         self._url_edit = QLineEdit()
         self._url_edit.setPlaceholderText("https://app.qfield.cloud/api/v1/")
-        server_layout.addRow("URL:", self._url_edit)
+        server_layout.addRow(self.tr("URL:"), self._url_edit)
 
         server_group.setLayout(server_layout)
         layout.addWidget(server_group)
 
         # --- Credentials group ---
-        creds_group = QGroupBox("Credentials")
+        creds_group = QGroupBox(self.tr("Credentials"))
         creds_layout = QFormLayout()
 
         self._username_edit = QLineEdit()
-        self._username_edit.setPlaceholderText("username")
-        creds_layout.addRow("Username:", self._username_edit)
+        self._username_edit.setPlaceholderText(self.tr("username"))
+        creds_layout.addRow(self.tr("Username:"), self._username_edit)
 
         self._password_edit = QLineEdit()
         self._password_edit.setEchoMode(QLineEdit.EchoMode.Password)
-        self._password_edit.setPlaceholderText("password (for initial login)")
-        creds_layout.addRow("Password:", self._password_edit)
+        self._password_edit.setPlaceholderText(self.tr("password (for initial login)"))
+        creds_layout.addRow(self.tr("Password:"), self._password_edit)
 
         self._token_edit = QLineEdit()
-        self._token_edit.setPlaceholderText("JWT token (auto-filled after login)")
+        self._token_edit.setPlaceholderText(self.tr("JWT token (auto-filled after login)"))
         self._token_edit.setReadOnly(True)
 
         token_row = QHBoxLayout()
         token_row.addWidget(self._token_edit)
-        self._refresh_btn = QPushButton("Login")
-        self._refresh_btn.setToolTip("Login with username/password to get a token")
+        self._refresh_btn = QPushButton(self.tr("Login"))
+        self._refresh_btn.setToolTip(self.tr("Login with username/password to get a token"))
         token_row.addWidget(self._refresh_btn)
-        creds_layout.addRow("Token:", token_row)
+        creds_layout.addRow(self.tr("Token:"), token_row)
 
         # Connection status
         self._status_label = QLabel("")
-        creds_layout.addRow("Status:", self._status_label)
+        creds_layout.addRow(self.tr("Status:"), self._status_label)
 
         # Test button
-        self._test_btn = QPushButton("Test Connection")
+        self._test_btn = QPushButton(self.tr("Test Connection"))
         creds_layout.addRow("", self._test_btn)
 
         creds_group.setLayout(creds_layout)
         layout.addWidget(creds_group)
 
         # --- Preferences group ---
-        prefs_group = QGroupBox("Preferences")
+        prefs_group = QGroupBox(self.tr("Preferences"))
         prefs_layout = QFormLayout()
 
         self._default_project_edit = QLineEdit()
         self._default_project_edit.setPlaceholderText("WYRE-POP_001")
-        prefs_layout.addRow("Default project:", self._default_project_edit)
+        prefs_layout.addRow(self.tr("Default project:"), self._default_project_edit)
 
-        self._auto_package_cb = QCheckBox("Trigger packaging after upload")
+        self._auto_package_cb = QCheckBox(self.tr("Trigger packaging after upload"))
         self._auto_package_cb.setChecked(True)
         prefs_layout.addRow("", self._auto_package_cb)
 
@@ -137,7 +141,7 @@ class QFieldCloudSettingsDialog(QDialog):
             # Show truncated token
             display = token[:20] + "..." if len(token) > 20 else token
             self._token_edit.setText(display)
-            self._status_label.setText("Token stored")
+            self._status_label.setText(self.tr("Token stored"))
             self._status_label.setStyleSheet("color: green;")
 
         self._default_project_edit.setText(
@@ -162,12 +166,12 @@ class QFieldCloudSettingsDialog(QDialog):
 
         if not url or not username or not password:
             QMessageBox.warning(
-                self, "Missing Fields",
-                "Please fill in URL, username, and password.",
+                self, self.tr("Missing Fields"),
+                self.tr("Please fill in URL, username, and password."),
             )
             return
 
-        self._status_label.setText("Logging in...")
+        self._status_label.setText(self.tr("Logging in..."))
         self._status_label.setStyleSheet("color: blue;")
         self._refresh_btn.setEnabled(False)
 
@@ -184,14 +188,14 @@ class QFieldCloudSettingsDialog(QDialog):
             # Store token immediately
             self._credentials.set_token(token)
 
-            self._status_label.setText(f"Logged in as {username}")
+            self._status_label.setText(self.tr("Logged in as {0}").format(username))
             self._status_label.setStyleSheet("color: green;")
 
             if self._extension and self._extension._signals:
                 self._extension._signals.authenticated.emit(username)
 
         except Exception as e:
-            self._status_label.setText(f"Login failed: {e}")
+            self._status_label.setText(self.tr("Login failed: {0}").format(e))
             self._status_label.setStyleSheet("color: red;")
 
             if self._extension and self._extension._signals:
@@ -207,12 +211,12 @@ class QFieldCloudSettingsDialog(QDialog):
 
         if not url or not token:
             QMessageBox.warning(
-                self, "Missing Configuration",
-                "Please configure URL and login first.",
+                self, self.tr("Missing Configuration"),
+                self.tr("Please configure URL and login first."),
             )
             return
 
-        self._status_label.setText("Testing connection...")
+        self._status_label.setText(self.tr("Testing connection..."))
         self._status_label.setStyleSheet("color: blue;")
         self._test_btn.setEnabled(False)
 
@@ -223,12 +227,12 @@ class QFieldCloudSettingsDialog(QDialog):
             projects = adapter.list_projects()
 
             self._status_label.setText(
-                f"Connected! ({len(projects)} projects accessible)"
+                self.tr("Connected! ({0} projects accessible)").format(len(projects))
             )
             self._status_label.setStyleSheet("color: green;")
 
         except Exception as e:
-            self._status_label.setText(f"Connection failed: {e}")
+            self._status_label.setText(self.tr("Connection failed: {0}").format(e))
             self._status_label.setStyleSheet("color: red;")
 
         finally:
@@ -240,7 +244,7 @@ class QFieldCloudSettingsDialog(QDialog):
         username = self._username_edit.text().strip()
 
         if not url:
-            QMessageBox.warning(self, "Missing URL", "Server URL is required.")
+            QMessageBox.warning(self, self.tr("Missing URL"), self.tr("Server URL is required."))
             return
 
         self._credentials.set_url(url)

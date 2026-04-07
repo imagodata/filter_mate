@@ -46,83 +46,81 @@ class ConfigModelManager:
     # ========================================
 
     def data_changed_configuration_model(self, input_data=None):
-        """Track configuration changes without applying immediately.
+        """Track configuration changes and apply live-preview changes immediately.
 
-        Delegates to ConfigController if available.
+        Delegates to ConfigController for change tracking.
+        Also applies LANGUAGE changes immediately (live preview) for instant feedback.
         """
         dw = self.dockwidget
         if dw._controller_integration:
             dw._controller_integration.delegate_config_data_changed(input_data)
-            # Enable OK/Cancel buttons when changes are pending
-            if (
-                hasattr(dw, 'buttonBox')
-                and dw._controller_integration.delegate_config_has_pending_changes()
-            ):
-                dw.buttonBox.setEnabled(True)
+
+        # Live-apply language change immediately (don't wait for OK)
+        if input_data is not None:
+            self._try_live_language_change(input_data)
+
+    def _try_live_language_change(self, item):
+        """If the changed item is the LANGUAGE setting, apply it immediately."""
+        from qgis.PyQt.QtCore import Qt
+        try:
+            # Check if this item's key (column 0 sibling) is LANGUAGE
+            index = item.index()
+            model = self.dockwidget.config_view.model
+            key_item = model.itemFromIndex(index.siblingAtColumn(0))
+            if not key_item:
+                return
+            key_name = key_item.data(Qt.ItemDataRole.DisplayRole)
+            if key_name != 'LANGUAGE':
+                return
+
+            # Extract locale from the changed value item
+            value_data = item.data(Qt.ItemDataRole.UserRole)
+            new_locale = None
+            if isinstance(value_data, dict) and 'value' in value_data:
+                new_locale = value_data['value']
+            elif isinstance(value_data, str):
+                new_locale = value_data
+
+            if not new_locale:
+                return
+
+            logger.info(f"Live language change: {new_locale}")
+
+            from qgis.utils import plugins
+            plugin = plugins.get('filter_mate')
+            if plugin and hasattr(plugin, 'reload_translator'):
+                plugin.reload_translator(new_locale)
+                if hasattr(plugin, 'retranslate_actions'):
+                    plugin.retranslate_actions()
+                if hasattr(self.dockwidget, 'retranslate_all_ui'):
+                    self.dockwidget.retranslate_all_ui()
+                logger.info(f"Live language change applied: {new_locale}")
+
+                # Also save to disk immediately so it persists on restart
+                self.save_configuration_model()
+
+        except Exception as e:
+            logger.warning(f"_try_live_language_change failed: {e}")
 
     def apply_pending_config_changes(self):
         """Apply all pending configuration changes when OK button is clicked.
 
-        Delegates to ConfigController if available, falls back to local reset.
+        Delegates to ConfigController. The controller handles button state,
+        saving, and clearing pending changes.
         """
         dw = self.dockwidget
         if dw._controller_integration:
-            if dw._controller_integration.delegate_config_apply_pending_changes():
-                # Disable OK/Cancel buttons after changes applied
-                if hasattr(dw, 'buttonBox'):
-                    dw.buttonBox.setEnabled(False)
-                return
-
-        # Clear local state as fallback
-        dw.pending_config_changes = []
-        dw.config_changes_pending = False
+            dw._controller_integration.delegate_config_apply_pending_changes()
 
     def cancel_pending_config_changes(self):
         """Cancel pending configuration changes.
 
-        Disconnects signal before recreating model to prevent multiple
-        signal connections (v4.0.7 FIX).
+        Delegates to ConfigController which handles model reload,
+        signal reconnection, and state cleanup.
         """
-        from ...infrastructure.feedback import show_error
-        from ...config.config import ENV_VARS
         dw = self.dockwidget
-        if not dw.config_changes_pending or not dw.pending_config_changes:
-            return
-        try:
-            # Disconnect signal before replacing model
-            self.disconnect_config_model_signal()
-
-            config_path = ENV_VARS.get(
-                'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json'
-            )
-            with open(config_path, 'r') as f:
-                dw.CONFIG_DATA = json.load(f)
-            # Sync ENV_VARS so all code reading from it sees reverted values
-            ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
-
-            from ...ui.widgets.json_view.model import JsonModel
-            dw.config_model = JsonModel(
-                data=dw.CONFIG_DATA,
-                editable_keys=False,
-                editable_values=True,
-                plugin_dir=dw.plugin_dir,
-            )
-            if hasattr(dw, 'config_view') and dw.config_view:
-                dw.config_view.setModel(dw.config_model)
-                dw.config_view.model = dw.config_model
-
-            # Reconnect signal to new model
-            self.connect_config_model_signal()
-
-            dw.pending_config_changes = []
-            dw.config_changes_pending = False
-            if hasattr(dw, 'buttonBox'):
-                dw.buttonBox.setEnabled(False)
-        except Exception as e:
-            show_error(
-                "FilterMate",
-                dw.tr("Error cancelling changes: {0}").format(str(e))
-            )
+        if dw._controller_integration:
+            dw._controller_integration.delegate_config_cancel_pending_changes()
 
     # ========================================
     # OK / CANCEL BUTTON HANDLERS
@@ -130,24 +128,12 @@ class ConfigModelManager:
 
     def on_config_buttonbox_accepted(self):
         """Handle OK button click in config panel."""
-        dw = self.dockwidget
         logger.info("Configuration OK button clicked")
-        if (
-            dw._controller_integration
-            and dw._controller_integration.delegate_config_apply_pending_changes()
-        ):
-            return
         self.apply_pending_config_changes()
 
     def on_config_buttonbox_rejected(self):
         """Handle Cancel button click in config panel."""
-        dw = self.dockwidget
         logger.info("Configuration Cancel button clicked")
-        if (
-            dw._controller_integration
-            and dw._controller_integration.delegate_config_cancel_pending_changes()
-        ):
-            return
         self.cancel_pending_config_changes()
 
     # ========================================
@@ -250,6 +236,22 @@ class ConfigModelManager:
             # Disconnect any existing signal first
             self.disconnect_config_model_signal()
 
+            # Reload CONFIG_DATA from disk to pick up any new entries (e.g. new languages)
+            import os
+            config_path = os.path.join(dw.plugin_dir, 'config', 'config.json')
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    fresh_config = json.load(f)
+                dw.CONFIG_DATA = fresh_config
+                try:
+                    from ...config.config import ENV_VARS
+                    ENV_VARS["CONFIG_DATA"] = fresh_config
+                except Exception:
+                    pass
+                logger.info(f"Config reloaded from {config_path}")
+            except Exception as e:
+                logger.warning(f"Could not reload config from disk: {e}")
+
             from ...ui.widgets.json_view.model import JsonModel
             dw.config_model = JsonModel(
                 data=dw.CONFIG_DATA,
@@ -285,60 +287,10 @@ class ConfigModelManager:
 
             # Connect signal using centralized method
             self.connect_config_model_signal()
-            self.setup_reload_button()
 
+            # Hide OK/Cancel — config changes are applied live
             if hasattr(dw, 'buttonBox'):
-                dw.buttonBox.setEnabled(False)
-                dw.buttonBox.accepted.connect(dw.on_config_buttonbox_accepted)
-                dw.buttonBox.rejected.connect(dw.on_config_buttonbox_rejected)
+                dw.buttonBox.hide()
         except Exception as e:
             logger.error(f"Error creating configuration model: {e}")
 
-    def setup_reload_button(self):
-        """Setup Reload Plugin button in config panel."""
-        from qgis.PyQt import QtGui, QtWidgets
-        from qgis.PyQt.QtCore import Qt, QCoreApplication
-        dw = self.dockwidget
-        try:
-            dw.pushButton_reload_plugin = QtWidgets.QPushButton(
-                "Reload Plugin"
-            )
-            dw.pushButton_reload_plugin.setObjectName("pushButton_reload_plugin")
-            dw.pushButton_reload_plugin.setToolTip(
-                QCoreApplication.translate(
-                    "FilterMate",
-                    "Reload the plugin to apply layout changes (action bar position)"
-                )
-            )
-            dw.pushButton_reload_plugin.setCursor(
-                QtGui.QCursor(Qt.CursorShape.PointingHandCursor)
-            )
-            dw.pushButton_reload_plugin.clicked.connect(
-                dw._on_reload_button_clicked
-            )
-            if dw.CONFIGURATION.layout():
-                dw.CONFIGURATION.layout().insertWidget(
-                    dw.CONFIGURATION.layout().count() - 1,
-                    dw.pushButton_reload_plugin
-                )
-        except Exception as e:
-            logger.error(f"Error setting up reload button: {e}")
-
-    def on_reload_button_clicked(self):
-        """Reload plugin after saving config."""
-        from qgis.PyQt.QtWidgets import QMessageBox
-        dw = self.dockwidget
-        if dw.config_changes_pending and dw.pending_config_changes:
-            self.apply_pending_config_changes()
-        self.save_configuration_model()
-        if QMessageBox.question(
-            dw,
-            dw.tr("Reload Plugin"),
-            dw.tr(
-                "Do you want to reload FilterMate to apply all "
-                "configuration changes?"
-            ),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.Yes,
-        ) == QMessageBox.StandardButton.Yes:
-            dw.reload_plugin()

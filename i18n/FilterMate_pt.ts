@@ -2,50 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="pt_BR" sourcelanguage="en_US">
 <context>
-    <name>@default</name>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="173"/>
-        <source>OptimizationManager</source>
-        <comment>Use Centroids</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="175"/>
-        <source>OptimizationManager</source>
-        <comment>Simplify before buffer</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="177"/>
-        <source>OptimizationManager</source>
-        <comment>Reduce buffer segments (3)</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-</context>
-<context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="168"/>
+        <location filename="../core/services/app_initializer.py" line="171"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Filtros corrompidos removidos de {0} camada(s). Por favor, reaplique os seus filtros.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="237"/>
+        <location filename="../core/services/app_initializer.py" line="240"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Projeto vazio detetado. Adicione camadas vetoriais para ativar o plugin.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="304"/>
+        <location filename="../core/services/app_initializer.py" line="307"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>Não é possível aceder à base de dados do FilterMate. Verifique as permissões do diretório do projeto.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="318"/>
+        <location filename="../core/services/app_initializer.py" line="321"/>
         <source>Error during database verification: {0}</source>
         <translation>Erro durante a verificação da base de dados: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="594"/>
+        <location filename="../core/services/app_initializer.py" line="599"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Carregamento de camadas falhou. Use F5 para forçar o recarregamento.</translation>
     </message>
@@ -84,769 +63,9 @@
     </message>
 </context>
 <context>
-    <name>BackendOptimizationWidget</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Quick Setup</source>
-        <translation type="obsolete">Configuração rápida</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Choose a profile or customize settings below</source>
-        <translation type="obsolete">Escolha um perfil ou personalize as configurações abaixo</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Smart Recommendations</source>
-        <translation type="obsolete">Recomendações inteligentes</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Analyzing your project... Recommendations will appear here.</source>
-        <translation type="obsolete">Analisando seu projeto... As recomendações aparecerão aqui.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Materialized Views</source>
-        <translation type="obsolete">Habilitar visões materializadas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>You have {0} PostgreSQL layers with large datasets. Materialized views can speed up filtering by 3-10x.</source>
-        <translation type="obsolete">Você tem {0} camadas PostgreSQL com grandes conjuntos de dados. Visões materializadas podem acelerar a filtragem de 3 a 10 vezes.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Auto-Centroid for Remote Layers</source>
-        <translation type="obsolete">Habilitar centróide automático para camadas remotas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>You have {0} remote layers. Using centroids reduces network transfer by ~90%.</source>
-        <translation type="obsolete">Você tem {0} camadas remotas. O uso de centróides reduz a transferência de rede em ~90%.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Direct SQL for GeoPackage</source>
-        <translation type="obsolete">Habilitar SQL direto para GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Direct SQL access can make GeoPackage filtering 2-5x faster.</source>
-        <translation type="obsolete">O acesso SQL direto pode tornar a filtragem GeoPackage 2-5 vezes mais rápida.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create Spatial Indexes</source>
-        <translation type="obsolete">Criar índices espaciais</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Some shapefiles may lack spatial indexes. Creating indexes can improve performance 10-100x.</source>
-        <translation type="obsolete">Alguns shapefiles podem não ter índices espaciais. A criação de índices pode melhorar o desempenho de 10 a 100 vezes.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use Balanced Profile</source>
-        <translation type="obsolete">Usar perfil equilibrado</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Start with balanced settings for optimal performance on most projects.</source>
-        <translation type="obsolete">Comece com configurações equilibradas para desempenho ideal na maioria dos projetos.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply</source>
-        <translation type="obsolete">Aplicar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Estimated performance improvement</source>
-        <translation type="obsolete">Melhoria de desempenho estimada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL/PostGIS Optimizations</source>
-        <translation type="obsolete">Otimizações PostgreSQL/PostGIS</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations for PostgreSQL databases with PostGIS extension</source>
-        <translation type="obsolete">Otimizações para bancos de dados PostgreSQL com extensão PostGIS</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Materialized Views</source>
-        <translation type="obsolete">Visões materializadas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create indexed temporary views for complex spatial queries. Best for large datasets with complex expressions.</source>
-        <translation type="obsolete">Criar visões temporárias indexadas para consultas espaciais complexas. Ideal para grandes conjuntos de dados com expressões complexas.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Threshold (features):</source>
-        <translation type="obsolete">Limite (feições):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create materialized views for datasets larger than this</source>
-        <translation type="obsolete">Criar visões materializadas para conjuntos de dados maiores que este limite</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Two-Phase Filtering</source>
-        <translation type="obsolete">Filtragem em duas fases</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>First filter by bounding box, then by exact geometry. Reduces precision calculations on irrelevant features.</source>
-        <translation type="obsolete">Primeiro filtrar por caixa delimitadora, depois por geometria exata. Reduz cálculos de precisão em feições irrelevantes.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Progressive Loading</source>
-        <translation type="obsolete">Carregamento progressivo</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Stream results in chunks to reduce memory usage. Essential for very large result sets.</source>
-        <translation type="obsolete">Transmitir resultados em blocos para reduzir o uso de memória. Essencial para conjuntos de resultados muito grandes.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Lazy cursor threshold:</source>
-        <translation type="obsolete">Limite do cursor lazy:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Query Expression Caching</source>
-        <translation type="obsolete">Cache de expressões de consulta</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache built expressions to avoid rebuilding identical queries.</source>
-        <translation type="obsolete">Cachear expressões construídas para evitar reconstruir consultas idênticas.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Connection Pooling</source>
-        <translation type="obsolete">Pool de conexões</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reuse database connections to avoid 50-100ms overhead per query.</source>
-        <translation type="obsolete">Reutilizar conexões de banco de dados para evitar 50-100ms de overhead por consulta.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>EXISTS Subquery for Large WKT</source>
-        <translation type="obsolete">Subconsulta EXISTS para WKT grandes</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use EXISTS subquery instead of inline WKT for very large geometries.</source>
-        <translation type="obsolete">Usar subconsulta EXISTS em vez de WKT inline para geometrias muito grandes.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>WKT length threshold (chars):</source>
-        <translation type="obsolete">Limite de comprimento WKT (caracteres):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatic GIST Index Usage</source>
-        <translation type="obsolete">Uso automático de índice GIST</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Verify and use GIST spatial indexes for optimal query plans.</source>
-        <translation type="obsolete">Verificar e usar índices espaciais GIST para planos de consulta ideais.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Spatialite/GeoPackage Optimizations</source>
-        <translation type="obsolete">Otimizações Spatialite/GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations for Spatialite databases and GeoPackage files</source>
-        <translation type="obsolete">Otimizações para bancos de dados Spatialite e arquivos GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>R-tree Temp Tables</source>
-        <translation type="obsolete">Tabelas temporárias R-tree</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary tables with R-tree spatial indexes for complex queries. Best for complex expressions on local files.</source>
-        <translation type="obsolete">Criar tabelas temporárias com índices espaciais R-tree para consultas complexas. Ideal para expressões complexas em arquivos locais.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>WKT size threshold (KB):</source>
-        <translation type="obsolete">Limite de tamanho WKT (KB):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use R-tree optimization for WKT larger than this</source>
-        <translation type="obsolete">Usar otimização R-tree para WKT maiores que este limite</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox Pre-filtering</source>
-        <translation type="obsolete">Pré-filtragem BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use bounding box filter before exact geometry test. Leverages spatial indexes effectively.</source>
-        <translation type="obsolete">Usar filtro de caixa delimitadora antes do teste de geometria exata. Aproveita efetivamente os índices espaciais.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Interruptible Queries</source>
-        <translation type="obsolete">Consultas interrompíveis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Execute SQLite queries in background thread with cancellation support. Prevents UI freezing.</source>
-        <translation type="obsolete">Executar consultas SQLite em thread de fundo com suporte a cancelamento. Previne congelamento da interface.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Query timeout (seconds):</source>
-        <translation type="obsolete">Tempo limite da consulta (segundos):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Direct SQL for GeoPackage</source>
-        <translation type="obsolete">SQL direto para GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Bypass GDAL layer and execute SQL directly on GeoPackage. Faster for complex spatial queries.</source>
-        <translation type="obsolete">Ignorar camada GDAL e executar SQL diretamente no GeoPackage. Mais rápido para consultas espaciais complexas.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>WKT Geometry Caching</source>
-        <translation type="obsolete">Cache de geometria WKT</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache converted WKT strings to avoid repeated geometry serialization.</source>
-        <translation type="obsolete">Cachear strings WKT convertidas para evitar serialização repetida de geometria.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-detect mod_spatialite</source>
-        <translation type="obsolete">Detecção automática de mod_spatialite</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically find and load the best mod_spatialite extension.</source>
-        <translation type="obsolete">Encontrar e carregar automaticamente a melhor extensão mod_spatialite.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>OGR/Memory Optimizations</source>
-        <translation type="obsolete">Otimizações OGR/Memória</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations for file-based formats (Shapefiles, GeoJSON) and memory layers</source>
-        <translation type="obsolete">Otimizações para formatos baseados em arquivo (Shapefiles, GeoJSON) e camadas de memória</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatic Spatial Index</source>
-        <translation type="obsolete">Índice espacial automático</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically create spatial index (.qix/.shx) for layers without one. Dramatically improves spatial query speed.</source>
-        <translation type="obsolete">Criar automaticamente índice espacial (.qix/.shx) para camadas sem um. Melhora drasticamente a velocidade de consultas espaciais.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Small Dataset Memory Backend</source>
-        <translation type="obsolete">Backend de memória para conjuntos pequenos</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>For small PostgreSQL layers, copy to memory for faster filtering. Avoids network latency for small datasets.</source>
-        <translation type="obsolete">Para camadas PostgreSQL pequenas, copiar para memória para filtragem mais rápida. Evita latência de rede para conjuntos de dados pequenos.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Small dataset threshold:</source>
-        <translation type="obsolete">Limite de conjunto pequeno:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cancellable Processing</source>
-        <translation type="obsolete">Processamento cancelável</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Allow cancellation of QGIS processing algorithms. Enables stopping long-running operations.</source>
-        <translation type="obsolete">Permitir cancelamento de algoritmos de processamento QGIS. Permite parar operações de longa duração.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Progressive Chunking</source>
-        <translation type="obsolete">Processamento por blocos progressivo</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Process features in chunks for very large datasets. Reduces peak memory usage.</source>
-        <translation type="obsolete">Processar feições em blocos para conjuntos de dados muito grandes. Reduz o uso máximo de memória.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Chunk size (features):</source>
-        <translation type="obsolete">Tamanho do bloco (feições):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>GEOS-safe Geometry Handling</source>
-        <translation type="obsolete">Manipulação de geometria GEOS-safe</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Validate and repair geometries before processing. Prevents crashes on invalid geometries.</source>
-        <translation type="obsolete">Validar e reparar geometrias antes do processamento. Previne falhas em geometrias inválidas.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Thread-safe Operations</source>
-        <translation type="obsolete">Operações thread-safe</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Force sequential execution for OGR layers to prevent crashes. Safer but slower.</source>
-        <translation type="obsolete">Forçar execução sequencial para camadas OGR para prevenir falhas. Mais seguro, mas mais lento.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Global Optimizations</source>
-        <translation type="obsolete">Otimizações globais</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations that apply to all backend types</source>
-        <translation type="obsolete">Otimizações que se aplicam a todos os tipos de backend</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Auto-Optimization</source>
-        <translation type="obsolete">Habilitar auto-otimização</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically analyze layers and suggest optimizations before filtering.</source>
-        <translation type="obsolete">Analisar automaticamente camadas e sugerir otimizações antes da filtragem.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Centroid for Distant Layers</source>
-        <translation type="obsolete">Centróide automático para camadas distantes</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically use ST_Centroid() for remote layers (WFS, ArcGIS). Reduces network data transfer by ~90%.</source>
-        <translation type="obsolete">Usar automaticamente ST_Centroid() para camadas remotas (WFS, ArcGIS). Reduz a transferência de dados de rede em ~90%.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Distant layer threshold:</source>
-        <translation type="obsolete">Limite de camadas distantes:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Select Best Strategy</source>
-        <translation type="obsolete">Seleção automática da melhor estratégia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically choose optimal filtering strategy based on layer analysis. (attribute-first, bbox-prefilter, progressive chunks)</source>
-        <translation type="obsolete">Escolher automaticamente a estratégia de filtragem ideal com base na análise da camada. (atributos primeiro, pré-filtro bbox, blocos progressivos)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Simplify Geometries ⚠️</source>
-        <translation type="obsolete">Simplificação automática de geometrias ⚠️</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically simplify complex geometries. WARNING: This is a LOSSY operation that may change polygon shapes.</source>
-        <translation type="obsolete">Simplificar automaticamente geometrias complexas. ATENÇÃO: Esta é uma operação COM PERDA que pode alterar as formas dos polígonos.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify Before Buffer</source>
-        <translation type="obsolete">Simplificar antes do buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify geometries before applying buffer operations. Improves buffer performance without affecting final spatial results.</source>
-        <translation type="obsolete">Simplificar geometrias antes de aplicar operações de buffer. Melhora o desempenho do buffer sem afetar os resultados espaciais finais.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify After Buffer</source>
-        <translation type="obsolete">Simplificar após o buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify the resulting polygon after buffer operations. Reduces vertex count for complex polygons from negative/positive buffer sequences.</source>
-        <translation type="obsolete">Simplificar o polígono resultante após operações de buffer. Reduz a contagem de vértices para polígonos complexos de sequências de buffer negativo/positivo.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Parallel Layer Filtering</source>
-        <translation type="obsolete">Filtragem de camadas em paralelo</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter multiple layers simultaneously using multiple CPU cores.</source>
-        <translation type="obsolete">Filtrar múltiplas camadas simultaneamente usando múltiplos núcleos de CPU.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Max workers (0=auto):</source>
-        <translation type="obsolete">Workers máx. (0=auto):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Streaming Export</source>
-        <translation type="obsolete">Exportação em streaming</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use batch streaming for exporting large datasets. Prevents memory issues with very large exports.</source>
-        <translation type="obsolete">Usar streaming por lotes para exportar grandes conjuntos de dados. Previne problemas de memória com exportações muito grandes.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirm Before Applying</source>
-        <translation type="obsolete">Confirmar antes de aplicar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show confirmation dialog before applying automatic optimizations.</source>
-        <translation type="obsolete">Mostrar diálogo de confirmação antes de aplicar otimizações automáticas.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show Optimization Hints</source>
-        <translation type="obsolete">Mostrar dicas de otimização</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display optimization hints in message bar when recommendations are available.</source>
-        <translation type="obsolete">Mostrar dicas de otimização na barra de mensagens quando recomendações estiverem disponíveis.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Global</source>
-        <translation type="obsolete">Global</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Backend Optimizations</source>
-        <translation type="obsolete">FilterMate - Otimizações de backend</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>💡 Tip: Select a profile for quick setup, or customize each backend below.</source>
-        <translation type="obsolete">💡 Dica: Selecione um perfil para configuração rápida, ou personalize cada backend abaixo.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset to Defaults</source>
-        <translation type="obsolete">Restaurar valores padrão</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cancel</source>
-        <translation type="obsolete">Cancelar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Save Settings</source>
-        <translation type="obsolete">Salvar configurações</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Restore Defaults</source>
-        <translation type="obsolete">Restaurar padrões</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset all settings to balanced defaults?</source>
-        <translation type="obsolete">Restaurar todas as configurações para os valores equilibrados padrão?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Checking...</source>
-        <translation type="obsolete">Estado MV: Verificando...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Error</source>
-        <translation type="obsolete">Estado MV: Erro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Clean</source>
-        <translation type="obsolete">Estado MV: Limpo</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status:</source>
-        <translation type="obsolete">Estado MV:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>active</source>
-        <translation type="obsolete">ativas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No active materialized views</source>
-        <translation type="obsolete">Nenhuma visualização materializada ativa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Session:</source>
-        <translation type="obsolete">Sessão:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Other sessions:</source>
-        <translation type="obsolete">Outras sessões:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🧹 Session</source>
-        <translation type="obsolete">🧹 Sessão</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup MVs from this session</source>
-        <translation type="obsolete">Limpar MVs desta sessão</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🗑️ Orphaned</source>
-        <translation type="obsolete">🗑️ Órfãs</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup orphaned MVs (&gt;24h old)</source>
-        <translation type="obsolete">Limpar MVs órfãs (&gt;24h)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⚠️ All</source>
-        <translation type="obsolete">⚠️ Todas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup ALL MVs (affects other sessions)</source>
-        <translation type="obsolete">Limpar TODAS as MVs (afeta outras sessões)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirm Cleanup</source>
-        <translation type="obsolete">Confirmar limpeza</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Drop ALL materialized views?
-This affects other FilterMate sessions!</source>
-        <translation type="obsolete">Excluir TODAS as visualizações materializadas?
-Isso afeta outras sessões do FilterMate!</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Refresh MV status</source>
-        <translation type="obsolete">Atualizar status de MV</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Threshold:</source>
-        <translation type="obsolete">Limite:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>features</source>
-        <translation type="obsolete">feições</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-cleanup on exit</source>
-        <translation type="obsolete">Limpeza auto ao sair</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically drop session MVs when plugin unloads</source>
-        <translation type="obsolete">Excluir automaticamente MVs da sessão quando o plugin descarregar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create MVs for datasets larger than this</source>
-        <translation type="obsolete">Criar MVs para conjuntos de dados maiores que isso</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>faster possible</source>
-        <translation type="obsolete">mais rápido possível</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations available</source>
-        <translation type="obsolete">Otimizações disponíveis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Apply Optimizations?</source>
-        <translation type="obsolete">FilterMate - Aplicar otimizações?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip</source>
-        <translation type="obsolete">Pular</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>✓ Apply</source>
-        <translation type="obsolete">✓ Aplicar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Don&apos;t ask for this session</source>
-        <translation type="obsolete">Não perguntar nesta sessão</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Centróides</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify</source>
-        <translation type="obsolete">Simplificar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Pre-simplify</source>
-        <translation type="obsolete">Pré-simplificar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Fewer segments</source>
-        <translation type="obsolete">Menos segmentos</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Flat buffer</source>
-        <translation type="obsolete">Buffer plano</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox filter</source>
-        <translation type="obsolete">Filtro BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Attr-first</source>
-        <translation type="obsolete">Atributo primeiro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL not available</source>
-        <translation type="obsolete">PostgreSQL não disponível</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No connection</source>
-        <translation type="obsolete">Sem conexão</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation type="obsolete">Zoom automático ao mudar feição</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimization settings saved</source>
-        <translation type="obsolete">Configurações de otimização do backend salvas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimizations configured</source>
-        <translation type="obsolete">Otimizações de backend configuradas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression Evaluation</source>
-        <translation type="obsolete">Avaliação de expressão</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Identify selected feature</source>
-        <translation type="obsolete">Identificar feição selecionada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Layer properties reset to defaults</source>
-        <translation type="obsolete">Propriedades da camada redefinidas para padrões</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Link exploring widgets together</source>
-        <translation type="obsolete">Vincular widgets de exploração</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization settings saved</source>
-        <translation type="obsolete">Configurações de otimização salvas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset all layer exploring properties</source>
-        <translation type="obsolete">Redefinir todas as propriedades de exploração da camada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Toggle feature selection on map</source>
-        <translation type="obsolete">Alternar seleção de feições no mapa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons)</source>
-        <translation type="obsolete">Usar centróides em vez de geometrias completas para camadas distantes (mais rápido para polígonos complexos)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">Usar centróides em vez de geometrias completas para camada de origem (mais rápido para polígonos complexos)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Zoom to selected feature</source>
-        <translation type="obsolete">Zoom para feição selecionada</translation>
-    </message>
-</context>
-<context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="275"/>
+        <location filename="../ui/controllers/config_controller.py" line="311"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Erro ao cancelar as alterações: {0}</translation>
     </message>
@@ -895,34 +114,6 @@ Isso afeta outras sessões do FilterMate!</translation>
         <location filename="../adapters/database_manager.py" line="527"/>
         <source>Error during database initialization: {0}</source>
         <translation>Erro durante a inicialização da base de dados: {0}</translation>
-    </message>
-</context>
-<context>
-    <name>DatasourceManager</name>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
-        <source>Database file does not exist: {db_file_path}</source>
-        <translation>O ficheiro da base de dados não existe: {db_file_path}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
-        <source>Failed to connect to database {db_file_path}: {error}</source>
-        <translation>Falha ao conectar à base de dados {db_file_path}: {error}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
-        <source>QGIS processing module not available to create spatial index</source>
-        <translation>Módulo de processamento do QGIS não disponível para criar índice espacial</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
-        <source>Cannot create spatial index: layer invalid or source not found.</source>
-        <translation>Não é possível criar índice espacial: camada inválida ou fonte não encontrada.</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
-        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
-        <translation>Camadas PostgreSQL detetadas, mas psycopg2 não está instalado. A utilizar o backend local Spatialite. Para melhor desempenho com grandes conjuntos de dados, instale psycopg2.</translation>
     </message>
 </context>
 <context>
@@ -1448,59 +639,6 @@ Clique no indicador ★ e selecione &apos;Adicionar filtro atual aos favoritos&a
     </message>
 </context>
 <context>
-    <name>FeedbackUtils</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Starting filter on {count} layer(s)</source>
-        <translation type="obsolete">Iniciando filtragem em {count} camada(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Removing filters from {count} layer(s)</source>
-        <translation type="obsolete">Removendo filtros de {count} camada(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Resetting {count} layer(s)</source>
-        <translation type="obsolete">Redefinindo {count} camada(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Exporting {count} layer(s)</source>
-        <translation type="obsolete">Exportando {count} camada(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully filtered {count} layer(s)</source>
-        <translation type="obsolete">{count} camada(s) filtrada(s) com sucesso</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully removed filters from {count} layer(s)</source>
-        <translation type="obsolete">Filtros removidos de {count} camada(s) com sucesso</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully reset {count} layer(s)</source>
-        <translation type="obsolete">{count} camada(s) redefinida(s) com sucesso</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully exported {count} layer(s)</source>
-        <translation type="obsolete">{count} camada(s) exportada(s) com sucesso</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</source>
-        <translation type="obsolete">Conjunto de dados grande ({count} feições) sem PostgreSQL. O desempenho pode ser reduzido.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL recommended for better performance.</source>
-        <translation type="obsolete">PostgreSQL recomendado para melhor desempenho.</translation>
-    </message>
-</context>
-<context>
     <name>FilepathType</name>
     <message>
         <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
@@ -1557,209 +695,127 @@ Clique no indicador ★ e selecione &apos;Adicionar filtro atual aos favoritos&a
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="106"/>
+        <location filename="../filter_mate.py" line="188"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>Open FilterMate panel</source>
         <translation>Abrir painel FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset configuration and database</source>
         <translation>Redefinir configuração e banco de dados</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Redefinir a configuração padrão e excluir o banco de dados SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Reset Configuration</source>
         <translation>Redefinir Configuração</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Are you sure you want to reset to the default configuration?
-
-This will:
-- Reset all FilterMate settings
-- Delete all filter history databases</source>
-        <translation type="obsolete">Tem certeza de que deseja redefinir para a configuração padrão?
-
-Isso irá:
-- Redefinir todas as configurações do FilterMate
-- Excluir todos os bancos de dados de histórico de filtros</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1192"/>
+        <location filename="../filter_mate.py" line="1355"/>
         <source>Configuration reset successfully.</source>
         <translation>Configuração redefinida com sucesso.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1197"/>
+        <location filename="../filter_mate.py" line="1360"/>
         <source>Default configuration file not found.</source>
         <translation>Arquivo de configuração padrão não encontrado.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1218"/>
+        <location filename="../filter_mate.py" line="1381"/>
         <source>Database deleted: {filename}</source>
         <translation>Banco de dados excluído: {filename}</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Unable to delete {filename}: {error}</source>
-        <translation type="obsolete">Não foi possível excluir {filename}: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>Restart required</source>
         <translation>Reinicialização necessária</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>The configuration has been reset.
-
-Please restart QGIS to apply all changes.</source>
-        <translation type="obsolete">A configuração foi redefinida.
-
-Por favor, reinicie o QGIS para aplicar todas as alterações.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error during reset: {error}</source>
-        <translation type="obsolete">Erro durante a redefinição: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="350"/>
+        <location filename="../filter_mate.py" line="401"/>
         <source>Obsolete configuration detected</source>
         <translation>Configuração obsoleta detectada</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="351"/>
+        <location filename="../filter_mate.py" line="402"/>
         <source>unknown version</source>
         <translation>versão desconhecida</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="359"/>
+        <location filename="../filter_mate.py" line="410"/>
         <source>Corrupted configuration detected</source>
         <translation>Configuração corrompida detectada</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="416"/>
+        <location filename="../filter_mate.py" line="467"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Configuração não redefinida. Algumas funcionalidades podem não funcionar corretamente.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="427"/>
+        <location filename="../filter_mate.py" line="478"/>
         <source>Configuration created with default values</source>
         <translation>Configuração criada com valores padrão</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Configuração corrompida redefinida. As configurações padrão foram restauradas.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="484"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Configuração obsoleta redefinida. As configurações padrão foram restauradas.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="505"/>
         <source>Configuration updated to latest version</source>
         <translation>Configuração atualizada para a versão mais recente</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="451"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Configuração atualizada: novas definições disponíveis ({sections}). Acesso via menu Opções.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Geometry Simplification</source>
         <translation>Simplificação de geometria</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>Optimization Thresholds</source>
         <translation>Limiares de otimização</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="591"/>
+        <location filename="../filter_mate.py" line="642"/>
         <source>Geometry validation setting</source>
         <translation>Configuração de validação de geometria</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="621"/>
+        <location filename="../filter_mate.py" line="672"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filtragem de geometrias inválidas desativada com sucesso.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="628"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filtragem de geometrias inválidas não modificada. Algumas feições podem ser excluídas das exportações.</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">Valor do buffer em metros (positivo=expandir, negativo=encolher polígonos)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation type="obsolete">Buffer negativo (erosão): encolhe polígonos para dentro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>point</source>
-        <translation type="obsolete">ponto</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>line</source>
-        <translation type="obsolete">linha</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>non-polygon</source>
-        <translation type="obsolete">não-polígono</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer value in meters (positive only when centroids are enabled. Negative buffers cannot be applied to points)</source>
-        <translation type="obsolete">Valor do buffer em metros (apenas positivo quando centroides estão ativados. Buffers negativos não podem ser aplicados a pontos)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Mode batch</source>
-        <translation type="obsolete">Modo batch</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">Número de segmentos para precisão do buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Centróides</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons like buildings)</source>
-        <translation type="obsolete">Usar centróides em vez de geometrias completas para camadas distantes (mais rápido para polígonos complexos como edifícios)</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="352"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1774,7 +830,7 @@ Deseja redefinir para as configurações padrão?
 • Não: Manter a configuração atual (pode causar problemas)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="360"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1789,12 +845,12 @@ Deseja redefinir para as configurações padrão?
 • Não: Cancelar (o plugin pode não funcionar corretamente)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="367"/>
+        <location filename="../filter_mate.py" line="418"/>
         <source>Configuration reset</source>
         <translation>Redefinição de configuração</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="419"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1803,12 +859,12 @@ Do you want to continue?</source>
 Deseja continuar?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="473"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Error during configuration migration: {}</source>
         <translation>Erro durante a migração de configuração: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="593"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -1835,7 +891,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1852,7 +908,7 @@ Isso irá:
 O QGIS deve ser reiniciado para aplicar as alterações.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1861,796 +917,386 @@ Please restart QGIS to apply the changes.</source>
 Reinicie o QGIS para aplicar as alterações.</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>All layers using auto-selection</source>
-        <translation type="obsolete">Todas as camadas usando seleção automática</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimizer module not available</source>
-        <translation type="obsolete">Módulo de otimização automática não disponível</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend controller not available</source>
-        <translation type="obsolete">Controlador de backend não disponível</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimization unavailable</source>
-        <translation type="obsolete">Otimização de backend não disponível</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Could not reload plugin automatically.</source>
-        <translation type="obsolete">Não foi possível recarregar o plugin automaticamente.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Favorites manager not available</source>
-        <translation type="obsolete">Gerenciador de favoritos não disponível</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No PostgreSQL connection available</source>
-        <translation type="obsolete">Nenhuma conexão PostgreSQL disponível</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation type="obsolete">Nenhuma camada selecionada. Por favor, selecione uma camada primeiro.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimizations selected to apply.</source>
-        <translation type="obsolete">Nenhuma otimização selecionada para aplicar.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No views to clean or cleanup failed</source>
-        <translation type="obsolete">Nenhuma visualização para limpar ou limpeza falhou</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Other Sessions Active</source>
-        <translation type="obsolete">Outras sessões ativas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL auto-cleanup disabled</source>
-        <translation type="obsolete">Limpeza automática PostgreSQL desativada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL auto-cleanup enabled</source>
-        <translation type="obsolete">Limpeza automática PostgreSQL ativada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL session views cleaned up</source>
-        <translation type="obsolete">Visualizações de sessão PostgreSQL limpas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Schema cleanup cancelled</source>
-        <translation type="obsolete">Limpeza de esquema cancelada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Schema cleanup failed</source>
-        <translation type="obsolete">Falha na limpeza do esquema</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>UI configuration incomplete - check logs</source>
-        <translation type="obsolete">Configuração da UI incompleta - verifique os logs</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>disabled</source>
-        <translation type="obsolete">desativado</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>enabled</source>
-        <translation type="obsolete">ativado</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>★ No favorites saved
-Click to add current filter</source>
-        <translation type="obsolete">★ Nenhum favorito salvo
-Clique para adicionar o filtro atual</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>★ {0} Favorites saved
-Click to apply or manage</source>
-        <translation type="obsolete">★ {0} favoritos salvos
-Clique para aplicar ou gerenciar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Initialization error: {}</source>
-        <translation type="obsolete">Erro de inicialização: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>UI dimension error: {}</source>
-        <translation type="obsolete">Erro de dimensão da UI: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Forced {0} backend for {1} layer(s)</source>
-        <translation type="obsolete">Backend {0} forçado para {1} camada(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Schema has {0} view(s) from other sessions.
-Drop anyway?</source>
-        <translation type="obsolete">O esquema tem {0} visualização(ões) de outras sessões.
-Remover mesmo assim?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Schema &apos;{0}&apos; dropped successfully</source>
-        <translation type="obsolete">Esquema &apos;{0}&apos; removido com sucesso</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimization {0}</source>
-        <translation type="obsolete">Otimização automática {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-centroid {0}</source>
-        <translation type="obsolete">Centroide automático {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirmation {0}</source>
-        <translation type="obsolete">Confirmação {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation type="obsolete">Não foi possível analisar a camada &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation type="obsolete">A camada &apos;{0}&apos; já está configurada de forma ideal.
-Tipo: {1}
-Feições: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation type="obsolete">Otimizador automático não disponível: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation type="obsolete">Erro ao analisar camada: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation type="obsolete">Aplicado a &apos;{0}&apos;:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Dialog not available: {0}</source>
-        <translation type="obsolete">Diálogo não disponível: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error: {0}</source>
-        <translation type="obsolete">Erro: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation type="obsolete">{0} camada(s) otimizada(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation type="obsolete">Erro ao cancelar alterações: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error reloading plugin: {0}</source>
-        <translation type="obsolete">Erro ao recarregar plugin: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No alternative backends available for this layer</source>
-        <translation type="obsolete">Nenhum backend alternativo disponível para esta camada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📁 Current Project</source>
-        <translation type="obsolete">📁 Projeto atual</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear temporary tables for the current project only</source>
-        <translation type="obsolete">Limpar tabelas temporárias apenas para o projeto atual</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🌐 All Projects (Global)</source>
-        <translation type="obsolete">🌐 Todos os projetos (Global)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear ALL FilterMate temporary tables from all databases</source>
-        <translation type="obsolete">Limpar TODAS as tabelas temporárias do FilterMate de todos os bancos de dados</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-selected backends for {0} layer(s)</source>
-        <translation type="obsolete">Backends selecionados automaticamente para {0} camada(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleared {0} temporary table(s) for current project</source>
-        <translation type="obsolete">{0} tabela(s) temporária(s) limpa(s) para projeto atual</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No temporary tables found for current project</source>
-        <translation type="obsolete">Nenhuma tabela temporária encontrada para o projeto atual</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleared {0} temporary table(s) globally</source>
-        <translation type="obsolete">{0} tabela(s) temporária(s) limpa(s) globalmente</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No temporary tables found</source>
-        <translation type="obsolete">Nenhuma tabela temporária encontrada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend forced to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">Backend forçado para {0} para &apos;{1}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend set to Auto for &apos;{0}&apos;</source>
-        <translation type="obsolete">Backend definido como Auto para &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo last filter (Ctrl+Z)</source>
-        <translation type="obsolete">Desfazer último filtro (Ctrl+Z)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo filter (Ctrl+Y)</source>
-        <translation type="obsolete">Refazer filtro (Ctrl+Y)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter history position</source>
-        <translation type="obsolete">Posição no histórico de filtros</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Add to Favorites</source>
-        <translation type="obsolete">FilterMate - Adicionar aos favoritos</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter a name for this filter</source>
-        <translation type="obsolete">Digite um nome para este filtro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Description (auto-generated, you can modify it)</source>
-        <translation type="obsolete">Descrição (gerada automaticamente, você pode modificá-la)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add Current Filter to Favorites</source>
-        <translation type="obsolete">⭐ Adicionar filtro atual aos favoritos</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add Current Filter (no filter active)</source>
-        <translation type="obsolete">⭐ Adicionar filtro atual (nenhum filtro ativo)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add current filter to favorites</source>
-        <translation type="obsolete">⭐ Adicionar filtro atual aos favoritos</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add filter (no active filter)</source>
-        <translation type="obsolete">⭐ Adicionar filtro (nenhum filtro ativo)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⚙️ Manage favorites...</source>
-        <translation type="obsolete">⚙️ Gerenciar favoritos...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📤 Export...</source>
-        <translation type="obsolete">📤 Exportar...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📥 Import...</source>
-        <translation type="obsolete">📥 Importar...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>The selected layer is invalid or its source cannot be found.</source>
-        <translation type="obsolete">A camada selecionada é inválida ou sua fonte não pode ser encontrada.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Plugin activated with {0} vector layer(s)</source>
-        <translation type="obsolete">Plugin ativado com {0} camada(s) vetorial(is)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Theme adapted: {0}</source>
-        <translation type="obsolete">Tema adaptado: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Dark mode</source>
-        <translation type="obsolete">Modo escuro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Light mode</source>
-        <translation type="obsolete">Modo claro</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="295"/>
+        <location filename="../filter_mate.py" line="346"/>
         <source>Initialization error: {0}</source>
         <translation>Erro de inicialização: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} camada(s) referenciada(s) não carregada(s) ({layers_list}). A utilizar visualização alternativa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1223"/>
+        <location filename="../filter_mate.py" line="1386"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Não é possível eliminar {filename}: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1240"/>
+        <location filename="../filter_mate.py" line="1403"/>
         <source>Error during reset: {str(e)}</source>
         <translation>Erro durante a reposição: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1273"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Obrigado por utilizar o &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Junte-se à nossa comunidade Discord para:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Obter ajuda e suporte&lt;/li&gt;&lt;li&gt;Reportar erros e problemas&lt;/li&gt;&lt;li&gt;Sugerir novas funcionalidades&lt;/li&gt;&lt;li&gt;Partilhar dicas com outros utilizadores&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1289"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>  Join us on Discord</source>
         <translation>  Junte-se a nós no Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1309"/>
+        <location filename="../filter_mate.py" line="1472"/>
         <source>Don&apos;t show this again</source>
         <translation>Não mostrar novamente</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1312"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Close</source>
         <translation>Fechar</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1541"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Erro ao carregar o plugin: {0}. Verifique a consola Python do QGIS para mais detalhes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6630"/>
+        <location filename="../filter_mate_dockwidget.py" line="6691"/>
         <source>Current layer: {0}</source>
         <translation>Camada atual: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6632"/>
+        <location filename="../filter_mate_dockwidget.py" line="6693"/>
         <source>No layer selected</source>
         <translation>Nenhuma camada selecionada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>Selected layers:
 {0}</source>
         <translation>Camadas selecionadas:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>No layers selected</source>
         <translation>Nenhuma camada selecionada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6662"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No expression defined</source>
         <translation>Nenhuma expressão definida</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6674"/>
+        <location filename="../filter_mate_dockwidget.py" line="6735"/>
         <source>Display expression: {0}</source>
         <translation>Expressão de visualização: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6750"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID do elemento: {0}
 Primeiro atributo: {1}</translation>
     </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="301"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation>Recarregue o plugin para aplicar as alterações de layout (posição da barra de ações)</translation>
-    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="271"/>
+        <location filename="../filter_mate_app.py" line="274"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Camadas PostgreSQL detetadas ({0}), mas psycopg2 não está instalado.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="358"/>
+        <location filename="../filter_mate_app.py" line="361"/>
         <source>Cleared {0} caches</source>
         <translation>{0} caches limpos</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="769"/>
+        <location filename="../filter_mate_app.py" line="772"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Falha ao criar o painel acoplável: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="779"/>
+        <location filename="../filter_mate_app.py" line="782"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Falha ao apresentar o painel acoplável: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1229"/>
+        <location filename="../filter_mate_app.py" line="1232"/>
         <source>Error executing {0}: {1}</source>
         <translation>Erro ao executar {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1241"/>
+        <location filename="../filter_mate_app.py" line="1244"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plugin em execução em modo degradado (serviços hexagonais indisponíveis). O desempenho pode ser reduzido.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ERRO</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Não é possível executar {0}: inicialização do widget falhou.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1994"/>
+        <location filename="../filter_mate_app.py" line="2144"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Não é possível {0}: camada inválida ou fonte não encontrada.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2131"/>
+        <location filename="../filter_mate_app.py" line="2281"/>
         <source>All filters cleared - </source>
         <translation>Todos os filtros removidos – </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2132"/>
+        <location filename="../filter_mate_app.py" line="2282"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} elementos visíveis na camada principal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2138"/>
+        <location filename="../filter_mate_app.py" line="2288"/>
         <source>Error: result handler missing</source>
         <translation>Erro: manipulador de resultados em falta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2151"/>
+        <location filename="../filter_mate_app.py" line="2301"/>
         <source>Error during filtering: {0}</source>
         <translation>Erro durante a filtragem: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2280"/>
+        <location filename="../filter_mate_app.py" line="2432"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} favorito(s) órfão(s) recuperado(s): {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2416"/>
+        <location filename="../filter_mate_app.py" line="2568"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Carregamento de camadas falhou – clique para tentar novamente</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2463"/>
+        <location filename="../filter_mate_app.py" line="2615"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} camada(s) carregada(s) com sucesso</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1595"/>
+        <source>filter</source>
+        <translation>filtrar</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1597"/>
+        <source>unfilter</source>
+        <translation>desfiltrar</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1600"/>
+        <source>FilterMate – Edit Mode Detected</source>
+        <translation>FilterMate – Modo de edição detectado</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1602"/>
+        <source>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</source>
+        <translation>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1612"/>
+        <source>Save Changes &amp; {0}</source>
+        <translation>Salvar alterações e {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1619"/>
+        <source>Discard Changes &amp; {0}</source>
+        <translation>Descartar alterações e {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1626"/>
+        <source>Cancel</source>
+        <translation>Cancelar</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1650"/>
+        <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
+        <translation>Não foi possível salvar as alterações da camada &quot;{0}&quot;. Operação cancelada.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation type="obsolete">Recarregar o plugin para aplicar alterações de layout (posição da barra de ações)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reload Plugin</source>
-        <translation type="obsolete">Recarregar Plugin</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation type="obsolete">Deseja recarregar o FilterMate para aplicar todas as alterações de configuração?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer: {name}</source>
-        <translation type="obsolete">Camada atual: {name}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layer selected</source>
-        <translation type="obsolete">Nenhuma camada selecionada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Selected layers:</source>
-        <translation type="obsolete">Camadas selecionadas:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Multiple layers selected</source>
-        <translation type="obsolete">Várias camadas selecionadas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layers selected</source>
-        <translation type="obsolete">Nenhuma camada selecionada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression:</source>
-        <translation type="obsolete">Expressão:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No expression defined</source>
-        <translation type="obsolete">Nenhuma expressão definida</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display expression: {expr}</source>
-        <translation type="obsolete">Expressão de exibição: {expr}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Feature ID: {id}</source>
-        <translation type="obsolete">ID da feição: {id}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer: {0}</source>
-        <translation type="obsolete">Camada atual: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Selected layers:
-{0}</source>
-        <translation type="obsolete">Camadas selecionadas:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression:
-{0}</source>
-        <translation type="obsolete">Expressão:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression: {0}</source>
-        <translation type="obsolete">Expressão: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display expression: {0}</source>
-        <translation type="obsolete">Expressão de exibição: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Feature ID: {0}
-First attribute: {1}</source>
-        <translation type="obsolete">ID da feição: {0}
-Primeiro atributo: {1}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="582"/>
+        <location filename="../filter_mate_dockwidget.py" line="596"/>
         <source>Initialization error: {}</source>
         <translation>Erro de inicialização: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Configuração da interface incompleta – verifique os registos</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
         <translation>Erro de dimensão da interface: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1340"/>
+        <location filename="../filter_mate_dockwidget.py" line="1355"/>
         <source>Favorites manager not available</source>
         <translation>Gestor de favoritos não disponível</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1359"/>
+        <location filename="../filter_mate_dockwidget.py" line="1374"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} favoritos guardados
 Clique para aplicar ou gerir</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1367"/>
+        <location filename="../filter_mate_dockwidget.py" line="1382"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Sem favoritos guardados
 Clique para adicionar o filtro atual</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1391"/>
+        <location filename="../filter_mate_dockwidget.py" line="1406"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Backend {0} forçado para {1} camada(s)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1477"/>
+        <location filename="../filter_mate_dockwidget.py" line="1492"/>
         <source>Backend controller not available</source>
         <translation>Controlador de backend não disponível</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1415"/>
+        <location filename="../filter_mate_dockwidget.py" line="1430"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Limpeza automática do PostgreSQL ativada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1416"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Limpeza automática do PostgreSQL desativada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Vistas de sessão PostgreSQL limpas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Sem vistas para limpar ou limpeza falhou</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1433"/>
+        <location filename="../filter_mate_dockwidget.py" line="1448"/>
         <source>No PostgreSQL connection available</source>
         <translation>Nenhuma conexão PostgreSQL disponível</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1439"/>
+        <location filename="../filter_mate_dockwidget.py" line="1454"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>O esquema tem {0} vista(s) de outras sessões.
 Eliminar mesmo assim?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1440"/>
+        <location filename="../filter_mate_dockwidget.py" line="1455"/>
         <source>Other Sessions Active</source>
         <translation>Outras sessões ativas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1442"/>
+        <location filename="../filter_mate_dockwidget.py" line="1457"/>
         <source>Schema cleanup cancelled</source>
         <translation>Limpeza do esquema cancelada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1447"/>
+        <location filename="../filter_mate_dockwidget.py" line="1462"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Esquema &apos;{0}&apos; eliminado com sucesso</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1464"/>
         <source>Schema cleanup failed</source>
         <translation>Limpeza do esquema falhou</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1475"/>
+        <location filename="../filter_mate_dockwidget.py" line="1490"/>
         <source>PostgreSQL Session Info</source>
         <translation>Informação de sessão PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema adaptado: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Dark mode</source>
         <translation>Modo escuro</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Light mode</source>
         <translation>Modo claro</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3908"/>
+        <location filename="../filter_mate_dockwidget.py" line="3896"/>
         <source>Selected features have no geometry.</source>
         <translation>Os elementos selecionados não têm geometria.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3927"/>
+        <location filename="../filter_mate_dockwidget.py" line="3915"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Nenhum elemento selecionado. Selecione um elemento da lista suspensa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4902"/>
+        <location filename="../filter_mate_dockwidget.py" line="4957"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>A camada selecionada é inválida ou a sua fonte não pode ser encontrada.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5612"/>
+        <location filename="../filter_mate_dockwidget.py" line="5667"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Buffer negativo (erosão): contrai os polígonos para o interior</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5615"/>
+        <location filename="../filter_mate_dockwidget.py" line="5670"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Valor do buffer em metros (positivo=expandir, negativo=contrair polígonos)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6089"/>
+        <location filename="../filter_mate_dockwidget.py" line="6144"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin ativado com {0} camada(s) vetorial(ais)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6172"/>
+        <location filename="../filter_mate_dockwidget.py" line="6227"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Não foi possível recarregar o plugin automaticamente.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6174"/>
+        <location filename="../filter_mate_dockwidget.py" line="6229"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Erro ao recarregar o plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6224"/>
+        <location filename="../filter_mate_dockwidget.py" line="6282"/>
         <source>Layer properties reset to defaults</source>
         <translation>Propriedades da camada repostas para os valores predefinidos</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6225"/>
+        <location filename="../filter_mate_dockwidget.py" line="6283"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Erro ao repor as propriedades da camada: {}</translation>
     </message>
@@ -2658,417 +1304,172 @@ Eliminar mesmo assim?</translation>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
         <translation>SELEÇÃO SIMPLES</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
         <source>MULTIPLE SELECTION</source>
         <translation>SELEÇÃO MÚLTIPLA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1545"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
         <source>CUSTOM SELECTION</source>
         <translation>SELEÇÃO PERSONALIZADA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
         <source>FILTERING</source>
         <translation>FILTRAGEM</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1575"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
         <source>EXPORTING</source>
         <translation>EXPORTAÇÃO</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1576"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
         <source>CONFIGURATION</source>
         <translation>CONFIGURAÇÃO</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Identify feature - Display feature attributes</source>
-        <translation type="obsolete">Identificar feição - Exibir atributos da feição</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Zoom to feature - Center the map on the selected feature</source>
-        <translation type="obsolete">Zoom para feição - Centralizar o mapa na feição selecionada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable selection - Select features on map</source>
-        <translation type="obsolete">Ativar seleção - Selecionar feições no mapa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable tracking - Follow the selected feature on the map</source>
-        <translation type="obsolete">Ativar rastreamento - Seguir a feição selecionada no mapa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Link widgets - Synchronize selection between widgets</source>
-        <translation type="obsolete">Vincular widgets - Sincronizar seleção entre widgets</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset layer properties - Restore default layer settings</source>
-        <translation type="obsolete">Redefinir propriedades da camada - Restaurar configurações padrão da camada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-sync with current layer - Automatically update when layer changes</source>
-        <translation type="obsolete">Auto-sincronizar com camada atual - Atualizar automaticamente quando a camada mudar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable multi-layer filtering - Apply filter to multiple layers simultaneously</source>
-        <translation type="obsolete">Ativar filtragem multicamada - Aplicar filtro a várias camadas simultaneamente</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable additive filtering - Combine multiple filters on the current layer</source>
-        <translation type="obsolete">Ativar filtragem aditiva - Combinar vários filtros na camada atual</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable spatial filtering - Filter features using geometric relationships</source>
-        <translation type="obsolete">Ativar filtragem espacial - Filtrar feições usando relações geométricas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable buffer - Add a buffer zone around selected features</source>
-        <translation type="obsolete">Ativar buffer - Adicionar uma zona de buffer ao redor das feições selecionadas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer type - Select the buffer calculation method</source>
-        <translation type="obsolete">Tipo de buffer - Selecionar o método de cálculo do buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer - Select the layer to filter</source>
-        <translation type="obsolete">Camada atual - Selecionar a camada a filtrar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Logical operator for combining filters on the source layer</source>
-        <translation type="obsolete">Operador lógico para combinar filtros na camada de origem</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Logical operator for combining filters on other layers</source>
-        <translation type="obsolete">Operador lógico para combinar filtros em outras camadas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select geometric predicate(s) for spatial filtering</source>
-        <translation type="obsolete">Selecionar predicado(s) geométrico(s) para filtragem espacial</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer distance in meters</source>
-        <translation type="obsolete">Distância do buffer em metros</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer type - Define how the buffer is calculated</source>
-        <translation type="obsolete">Tipo de buffer - Definir como o buffer é calculado</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select layers to export</source>
-        <translation type="obsolete">Selecionar camadas para exportar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Configure output projection</source>
-        <translation type="obsolete">Configurar projeção de saída</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Export layer styles (QML/SLD)</source>
-        <translation type="obsolete">Exportar estilos de camada (QML/SLD)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select output format</source>
-        <translation type="obsolete">Selecionar formato de saída</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Configure output location and filename</source>
-        <translation type="obsolete">Configurar local de saída e nome do arquivo</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable ZIP compression - Create a compressed archive of exported files</source>
-        <translation type="obsolete">Ativar compressão ZIP - Criar um arquivo compactado dos arquivos exportados</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1569"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
         <source>Select CRS for export</source>
         <translation>Selecionar SRC para exportação</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Style format - Select QML or SLD format</source>
-        <translation type="obsolete">Formato de estilo - Selecionar formato QML ou SLD</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Output file format</source>
-        <translation type="obsolete">Formato do arquivo de saída</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Output folder name - Enter the name of the export folder</source>
-        <translation type="obsolete">Nome da pasta de saída - Digite o nome da pasta de exportação</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter folder name...</source>
-        <translation type="obsolete">Digite o nome da pasta...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode - Export each layer to a separate folder</source>
-        <translation type="obsolete">Modo em lote - Exportar cada camada para uma pasta separada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode</source>
-        <translation type="obsolete">Modo em lote</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>ZIP filename - Enter the name for the compressed archive</source>
-        <translation type="obsolete">Nome do arquivo ZIP - Digite o nome para o arquivo compactado</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter ZIP filename...</source>
-        <translation type="obsolete">Digite o nome do arquivo ZIP...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode - Create a separate ZIP for each layer</source>
-        <translation type="obsolete">Modo em lote - Criar um ZIP separado para cada camada</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply Filter - Execute the current filter on selected layers</source>
-        <translation type="obsolete">Aplicar Filtro - Executar o filtro atual nas camadas selecionadas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply Filter</source>
-        <translation type="obsolete">Aplicar Filtro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply the current filter expression to filter features on the selected layer(s)</source>
-        <translation type="obsolete">Aplicar a expressão de filtro atual para filtrar feições na(s) camada(s) selecionada(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo Filter - Restore the previous filter state</source>
-        <translation type="obsolete">Desfazer Filtro - Restaurar o estado anterior do filtro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo Filter</source>
-        <translation type="obsolete">Desfazer Filtro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo the last filter operation and restore the previous state</source>
-        <translation type="obsolete">Desfazer a última operação de filtro e restaurar o estado anterior</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo Filter - Reapply the previously undone filter</source>
-        <translation type="obsolete">Refazer Filtro - Reaplicar o filtro anteriormente desfeito</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo Filter</source>
-        <translation type="obsolete">Refazer Filtro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo the previously undone filter operation</source>
-        <translation type="obsolete">Refazer a operação de filtro anteriormente desfeita</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear All Filters - Remove all filters from all layers</source>
-        <translation type="obsolete">Limpar Todos os Filtros - Remover todos os filtros de todas as camadas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear All Filters</source>
-        <translation type="obsolete">Limpar Todos os Filtros</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Remove all active filters from all layers in the project</source>
-        <translation type="obsolete">Remover todos os filtros ativos de todas as camadas do projeto</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Export - Save filtered layers to the specified location</source>
-        <translation type="obsolete">Exportar - Salvar camadas filtradas no local especificado</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
         <source>Export</source>
         <translation>Exportar</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Export the filtered layers to the configured output location and format</source>
-        <translation type="obsolete">Exportar as camadas filtradas para o local e formato de saída configurados</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>About FilterMate - Display plugin information and help</source>
-        <translation type="obsolete">Sobre FilterMate - Exibir informações do plugin e ajuda</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
         <source>AND</source>
         <translation>E</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1556"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
         <source>AND NOT</source>
         <translation>E NÃO</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1557"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
         <source>OR</source>
         <translation>OU</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1559"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
         <source>, </source>
         <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
         <source>Multi-layer filtering</source>
         <translation>Filtragem multicamada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1547"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
         <source>Additive filtering for the selected layer</source>
         <translation>Filtragem aditiva para a camada selecionada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1548"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
         <source>Geospatial filtering</source>
         <translation>Filtragem geoespacial</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
         <source>Buffer</source>
         <translation>Buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
         <source>Expression layer</source>
         <translation>Camada de expressão</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1558"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
         <source>Geometric predicate</source>
         <translation>Predicado geométrico</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Value in meters</source>
-        <translation type="obsolete">Valor em metros</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1572"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
         <source>Output format</source>
         <translation>Formato de saída</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
         <source>Filter</source>
         <translation>Filtrar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
         <source>Reset</source>
         <translation>Redefinir</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
         <source>Layers to export</source>
         <translation>Camadas para exportar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
         <source>Layers projection</source>
         <translation>Projeção das camadas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
         <source>Save styles</source>
         <translation>Salvar estilos</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1567"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
         <source>Datatype export</source>
         <translation>Exportar tipo de dados</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
         <source>Name of file/directory</source>
         <translation>Nome do arquivo/diretório</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1550"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>Usar centróides em vez de geometrias completas para a camada de origem (mais rápido para polígonos complexos)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Valor do buffer em metros (positivo=expandir, negativo=contrair polígonos)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
         <source>Number of segments for buffer precision</source>
         <translation>Número de segmentos para a precisão do buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
         <source>Mode batch</source>
         <translation>Modo batch</translation>
     </message>
@@ -3176,7 +1577,7 @@ Eliminar mesmo assim?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="928"/>
+        <location filename="../core/tasks/layer_management_task.py" line="944"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -3193,12 +1594,12 @@ Solução: Remova esta camada do projeto FilterMate e adicione-a novamente.
 Certifique-se de que a tabela PostgreSQL tem um PRIMARY KEY definido.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="954"/>
+        <location filename="../core/tasks/layer_management_task.py" line="970"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>A camada &apos;{0}&apos; não tem PRIMARY KEY. Funcionalidades limitadas: vistas materializadas desativadas. Recomendação: adicionar um PRIMARY KEY para desempenho ótimo.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1893"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
         <source>Exception: {0}</source>
         <translation>Exceção: {0}</translation>
     </message>
@@ -3337,159 +1738,6 @@ Certifique-se de que a tabela PostgreSQL tem um PRIMARY KEY definido.</translati
     </message>
 </context>
 <context>
-    <name>OptimizationDialogs</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Optimizations</source>
-        <translation type="obsolete">FilterMate - Otimizações</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations for:</source>
-        <translation type="obsolete">Otimizações para:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>features</source>
-        <translation type="obsolete">feições</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Estimated speedup:</source>
-        <translation type="obsolete">Aceleração estimada:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>faster</source>
-        <translation type="obsolete">mais rápido</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids</source>
-        <translation type="obsolete">Usar centróides</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids for distant layers</source>
-        <translation type="obsolete">Usar centróides para camadas distantes</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable buffer type</source>
-        <translation type="obsolete">Ativar tipo de buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify geometries</source>
-        <translation type="obsolete">Simplificar geometrias</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox pre-filtering</source>
-        <translation type="obsolete">Pré-filtro BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Attribute-first strategy</source>
-        <translation type="obsolete">Estratégia atributos primeiro</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Remember for this session</source>
-        <translation type="obsolete">Lembrar para esta sessão</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip</source>
-        <translation type="obsolete">Ignorar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply</source>
-        <translation type="obsolete">Aplicar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization Settings</source>
-        <translation type="obsolete">Configurações de otimização</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable optimizations</source>
-        <translation type="obsolete">Ativar otimizações</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Suggest performance optimizations before filtering</source>
-        <translation type="obsolete">Sugerir otimizações de desempenho antes de filtrar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-use centroids for remote layers</source>
-        <translation type="obsolete">Usar auto. centróides para camadas remotas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids to reduce network transfer (~90% faster)</source>
-        <translation type="obsolete">Usar centróides para reduzir transferência de rede (~90% mais rápido)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-select best strategy</source>
-        <translation type="obsolete">Seleção auto. da melhor estratégia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically choose optimal filtering strategy</source>
-        <translation type="obsolete">Escolher automaticamente a estratégia de filtro ideal</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-simplify geometries</source>
-        <translation type="obsolete">Simplificar auto. geometrias</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Warning: lossy operation, may change polygon shapes</source>
-        <translation type="obsolete">Aviso: operação com perda, pode alterar formas de polígonos</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Ask before applying</source>
-        <translation type="obsolete">Perguntar antes de aplicar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show confirmation dialog before optimizations</source>
-        <translation type="obsolete">Mostrar diálogo de confirmação antes das otimizações</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids enabled for &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">Centróides ativados para &apos;{0}&apos; (~{1}x {2})</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox pre-filter enabled for &apos;{0}&apos;</source>
-        <translation type="obsolete">Pré-filtro BBox ativado para &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization applied: &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">Otimização aplicada: &apos;{0}&apos; (~{1}x {2})</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify before buffer</source>
-        <translation type="obsolete">Simplificar antes do buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reduce buffer segments</source>
-        <translation type="obsolete">Reduzir segmentos do buffer</translation>
-    </message>
-</context>
-<context>
     <name>PostgresInfoDialog</name>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="80"/>
@@ -3587,11 +1835,6 @@ Certifique-se de que a tabela PostgreSQL tem um PRIMARY KEY definido.</translati
         <translation>Limpeza falhou</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Error resetting layer properties: {}</source>
-        <translation type="obsolete">Erro ao redefinir propriedades da camada: {}</translation>
-    </message>
-    <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="119"/>
         <source>&lt;b&gt;PostgreSQL is not available&lt;/b&gt;&lt;br&gt;&lt;br&gt;To use PostgreSQL features, install psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Then restart QGIS to apply changes.</source>
         <translation>&lt;b&gt;PostgreSQL não está disponível&lt;/b&gt;&lt;br&gt;&lt;br&gt;Para utilizar as funcionalidades PostgreSQL, instale psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Depois reinicie o QGIS para aplicar as alterações.</translation>
@@ -3636,39 +1879,402 @@ Continuar?</translation>
     </message>
 </context>
 <context>
+    <name>QFieldCloudExtension</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <source>QFieldCloud Settings...</source>
+        <translation>Configurações QFieldCloud...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <source>Export filtered layers to QFieldCloud</source>
+        <translation>Exportar camadas filtradas para QFieldCloud</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudPushDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <source>Export to QFieldCloud</source>
+        <translation>Exportar para QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <source>Active Filter</source>
+        <translation>Filtro ativo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <source>No active filter</source>
+        <translation>Sem filtro ativo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <source>Filter:</source>
+        <translation>Filtro:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <source>0 layers</source>
+        <translation>0 camadas</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <source>Layers:</source>
+        <translation>Camadas:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <source>QFieldCloud Project</source>
+        <translation>Projeto QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <source>Project name:</source>
+        <translation>Nome do projeto:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <source>Description:</source>
+        <translation>Descrição:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <source>Create new</source>
+        <translation>Criar novo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <source>Update existing:</source>
+        <translation>Atualizar existente:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <source>Mode:</source>
+        <translation>Modo:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <source>Layer Modes</source>
+        <translation>Modos de camada</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Layer</source>
+        <translation>Camada</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Mode</source>
+        <translation>Modo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <source>Export</source>
+        <translation>Exportar</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <source>{0} layers ({1} features)</source>
+        <translation>{0} camadas ({1} feições)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <source>{0} layers (no filter active)</source>
+        <translation>{0} camadas (sem filtro ativo)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Missing Name</source>
+        <translation>Nome ausente</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Please enter a project name.</source>
+        <translation>Por favor, insira um nome de projeto.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>Not Connected</source>
+        <translation>Não conectado</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>QFieldCloud is not connected. Please configure credentials first.</source>
+        <translation>QFieldCloud não está conectado. Configure as credenciais primeiro.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No Layers</source>
+        <translation>Sem camadas</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No valid layers to export.</source>
+        <translation>Nenhuma camada válida para exportar.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>Export Error</source>
+        <translation>Erro de exportação</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <source>Failed to export layer &apos;{0}&apos;: {1}</source>
+        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>GPKG export failed: {0}</source>
+        <translation>Exportação GPKG falhou: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <source>Push complete!</source>
+        <translation>Envio concluído!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project successfully pushed to QFieldCloud!</source>
+        <translation>Projeto enviado com sucesso para QFieldCloud!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project: {0}</source>
+        <translation>Projeto: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Files: {0}</source>
+        <translation>Arquivos: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Duration: {0:.1f}s</source>
+        <translation>Duração: {0:.1f}s</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>URL: {0}</source>
+        <translation>URL: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <source>Warnings:</source>
+        <translation>Avisos:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <source>Push Complete</source>
+        <translation>Envio concluído</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <source>Error: {0}</source>
+        <translation>Erro: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push Failed</source>
+        <translation>Falha no envio</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push failed:
+
+{0}</source>
+        <translation>Falha no envio:
+
+{0}</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudSettingsDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="53"/>
+        <source>QFieldCloud Configuration</source>
+        <translation>Configuração QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="66"/>
+        <source>Server</source>
+        <translation>Servidor</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="71"/>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="77"/>
+        <source>Credentials</source>
+        <translation>Credenciais</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="81"/>
+        <source>username</source>
+        <translation>nome de utilizador</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="82"/>
+        <source>Username:</source>
+        <translation>Nome de utilizador:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="86"/>
+        <source>password (for initial login)</source>
+        <translation>senha (para login inicial)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="87"/>
+        <source>Password:</source>
+        <translation>Senha:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="90"/>
+        <source>JWT token (auto-filled after login)</source>
+        <translation>Token JWT (preenchido automaticamente após login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="95"/>
+        <source>Login</source>
+        <translation>Entrar</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="96"/>
+        <source>Login with username/password to get a token</source>
+        <translation>Entrar com utilizador/senha para obter um token</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="98"/>
+        <source>Token:</source>
+        <translation>Token:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="102"/>
+        <source>Status:</source>
+        <translation>Estado:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="105"/>
+        <source>Test Connection</source>
+        <translation>Testar conexão</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="112"/>
+        <source>Preferences</source>
+        <translation>Preferências</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="117"/>
+        <source>Default project:</source>
+        <translation>Projeto padrão:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="119"/>
+        <source>Trigger packaging after upload</source>
+        <translation>Acionar empacotamento após o envio</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="144"/>
+        <source>Token stored</source>
+        <translation>Token armazenado</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Missing Fields</source>
+        <translation>Campos ausentes</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Please fill in URL, username, and password.</source>
+        <translation>Por favor, preencha URL, utilizador e senha.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="174"/>
+        <source>Logging in...</source>
+        <translation>Entrando...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="191"/>
+        <source>Logged in as {0}</source>
+        <translation>Conectado como {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="198"/>
+        <source>Login failed: {0}</source>
+        <translation>Falha no login: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Missing Configuration</source>
+        <translation>Configuração ausente</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Please configure URL and login first.</source>
+        <translation>Configure a URL e faça login primeiro.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="219"/>
+        <source>Testing connection...</source>
+        <translation>Testando conexão...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="229"/>
+        <source>Connected! ({0} projects accessible)</source>
+        <translation>Conectado! ({0} projetos acessíveis)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="235"/>
+        <source>Connection failed: {0}</source>
+        <translation>Falha na conexão: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Missing URL</source>
+        <translation>URL ausente</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Server URL is required.</source>
+        <translation>A URL do servidor é obrigatória.</translation>
+    </message>
+</context>
+<context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="640"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
         <source>Type to filter...</source>
         <translation>Escreva para filtrar...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="649"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
         <source>Select All</source>
         <translation>Selecionar tudo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="651"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
         <source>Select All (non subset)</source>
         <translation>Selecionar tudo (sem subconjunto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="653"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
         <source>Select All (subset)</source>
         <translation>Selecionar tudo (subconjunto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>De-select All</source>
         <translation>Desselecionar tudo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>De-select All (non subset)</source>
         <translation>Desselecionar tudo (sem subconjunto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>De-select All (subset)</source>
         <translation>Desselecionar tudo (subconjunto)</translation>
     </message>
@@ -3888,196 +2494,11 @@ Continuar?</translation>
     </message>
 </context>
 <context>
-    <name>d</name>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="870"/>
-        <source>Use centroids instead of full geometries for distant layers</source>
-        <translation>Usar centróides em vez de geometrias completas para camadas distantes</translation>
-    </message>
-</context>
-<context>
-    <name>dw</name>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="737"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation>Buffer negativo (erosão): contrai os polígonos para o interior</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="744"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Valor do buffer em metros (positivo=expandir, negativo=contrair polígonos)</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="120"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation>Erro ao cancelar as alterações: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Reload Plugin</source>
-        <translation>Recarregar plugin</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation>Deseja recarregar o FilterMate para aplicar todas as alterações de configuração?</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="56"/>
-        <source>Auto-optimization {0}</source>
-        <translation>Auto-otimização {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>enabled</source>
-        <translation>ativada</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>disabled</source>
-        <translation>desativada</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="69"/>
-        <source>Auto-centroid {0}</source>
-        <translation>Auto-centróide {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>Confirmation {0}</source>
-        <translation>Confirmação {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="97"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation>Nenhuma camada selecionada. Por favor, selecione uma camada primeiro.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="104"/>
-        <source>Auto-optimizer module not available</source>
-        <translation>Módulo de auto-otimização não disponível</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="108"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation>Não foi possível analisar a camada &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="129"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation>A camada &apos;{0}&apos; já está configurada de forma ótima.
-Tipo: {1}
-Elementos: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="156"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation>Auto-otimizador não disponível: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="161"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation>Erro ao analisar a camada: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="189"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation>Aplicado a &apos;{0}&apos;:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="196"/>
-        <source>No optimizations selected to apply.</source>
-        <translation>Nenhuma otimização selecionada para aplicar.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="231"/>
-        <source>Optimization settings saved</source>
-        <translation>Definições de otimização guardadas</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="288"/>
-        <source>Dialog not available: {0}</source>
-        <translation>Diálogo não disponível: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="293"/>
-        <source>Error: {0}</source>
-        <translation>Erro: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="257"/>
-        <source>Backend optimization settings saved</source>
-        <translation>Definições de otimização do backend guardadas</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="286"/>
-        <source>Backend optimizations configured</source>
-        <translation>Otimizações do backend configuradas</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="406"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation>{0} camada(s) otimizada(s)</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="411"/>
-        <source>All layers using auto-selection</source>
-        <translation>Todas as camadas a usar seleção automática</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="420"/>
-        <source>Backend optimization unavailable</source>
-        <translation>Otimização do backend não disponível</translation>
-    </message>
-</context>
-<context>
-    <name>self._dockwidget</name>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Expression Evaluation</source>
-        <translation>Avaliação de expressão</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Error evaluating expression: {error_msg}</source>
-        <translation>Erro ao avaliar a expressão: {error_msg}</translation>
-    </message>
-</context>
-<context>
     <name>self.dockwidget</name>
     <message>
-        <location filename="../ui/managers/configuration_manager.py" line="685"/>
-        <source>Identify selected feature</source>
-        <translation>Identificar elemento selecionado</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="686"/>
-        <source>Zoom to selected feature</source>
-        <translation>Zoom para o elemento selecionado</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="687"/>
-        <source>Toggle feature selection on map</source>
-        <translation>Alternar seleção de elementos no mapa</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="688"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation>Auto-zoom quando o elemento muda</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="689"/>
-        <source>Link exploring widgets together</source>
-        <translation>Ligar widgets de exploração</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="690"/>
-        <source>Reset all layer exploring properties</source>
-        <translation>Repor todas as propriedades de exploração de camadas</translation>
+        <location filename="../ui/controllers/config_controller.py" line="664"/>
+        <source>Language changed to &apos;{0}&apos;.</source>
+        <translation>Idioma alterado para &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

@@ -2,50 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="id_ID" sourcelanguage="en_US">
 <context>
-    <name>@default</name>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="173"/>
-        <source>OptimizationManager</source>
-        <comment>Use Centroids</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="175"/>
-        <source>OptimizationManager</source>
-        <comment>Simplify before buffer</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="177"/>
-        <source>OptimizationManager</source>
-        <comment>Reduce buffer segments (3)</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-</context>
-<context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="168"/>
+        <location filename="../core/services/app_initializer.py" line="171"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Filter rusak dihapus dari {0} lapisan. Silakan terapkan ulang filter Anda.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="237"/>
+        <location filename="../core/services/app_initializer.py" line="240"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Proyek kosong terdeteksi. Tambahkan lapisan vektor untuk mengaktifkan plugin.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="304"/>
+        <location filename="../core/services/app_initializer.py" line="307"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>Tidak dapat mengakses basis data FilterMate. Periksa izin direktori proyek.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="318"/>
+        <location filename="../core/services/app_initializer.py" line="321"/>
         <source>Error during database verification: {0}</source>
         <translation>Kesalahan saat verifikasi basis data: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="594"/>
+        <location filename="../core/services/app_initializer.py" line="599"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Pemuatan lapisan gagal. Gunakan F5 untuk memaksa muat ulang.</translation>
     </message>
@@ -84,564 +63,9 @@
     </message>
 </context>
 <context>
-    <name>BackendOptimizationWidget</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Quick Setup</source>
-        <translation type="obsolete">Pengaturan Cepat</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Choose a profile or customize settings below</source>
-        <translation type="obsolete">Pilih profil atau sesuaikan pengaturan di bawah</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Smart Recommendations</source>
-        <translation type="obsolete">Rekomendasi Cerdas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Balanced Profile</source>
-        <translation type="obsolete">Profil Seimbang</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Maximum Performance</source>
-        <translation type="obsolete">Performa Maksimal</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Minimal Resources</source>
-        <translation type="obsolete">Sumber Daya Minimal</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL/PostGIS Optimizations</source>
-        <translation type="obsolete">Optimasi PostgreSQL/PostGIS</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Materialized Views</source>
-        <translation type="obsolete">View Termaterialisasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary materialized views for complex filters</source>
-        <translation type="obsolete">Buat view termaterialisasi sementara untuk filter kompleks</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Two-Phase Filtering</source>
-        <translation type="obsolete">Penyaringan Dua Fase</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use bounding box pre-filtering before precise geometry tests</source>
-        <translation type="obsolete">Gunakan pra-penyaringan kotak pembatas sebelum pengujian geometri presisi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Progressive Loading</source>
-        <translation type="obsolete">Pemuatan Progresif</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Load data in chunks for very large datasets</source>
-        <translation type="obsolete">Muat data dalam potongan untuk dataset yang sangat besar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Chunk Size</source>
-        <translation type="obsolete">Ukuran Potongan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Server-Side Simplification</source>
-        <translation type="obsolete">Penyederhanaan Sisi Server</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify geometries on server for display purposes</source>
-        <translation type="obsolete">Sederhanakan geometri di server untuk tujuan tampilan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplification Tolerance</source>
-        <translation type="obsolete">Toleransi Penyederhanaan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Parallel Query Execution</source>
-        <translation type="obsolete">Eksekusi Kueri Paralel</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Execute independent queries in parallel</source>
-        <translation type="obsolete">Jalankan kueri independen secara paralel</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression Caching</source>
-        <translation type="obsolete">Caching Ekspresi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache compiled expressions for reuse</source>
-        <translation type="obsolete">Cache ekspresi terkompilasi untuk digunakan kembali</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Spatialite/GeoPackage Optimizations</source>
-        <translation type="obsolete">Optimasi Spatialite/GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>R-tree Temp Tables</source>
-        <translation type="obsolete">Tabel Sementara R-tree</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary tables with R-tree indexes</source>
-        <translation type="obsolete">Buat tabel sementara dengan indeks R-tree</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox Pre-filtering</source>
-        <translation type="obsolete">Pra-penyaringan BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use bounding box filtering before precise tests</source>
-        <translation type="obsolete">Gunakan penyaringan kotak pembatas sebelum pengujian presisi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory-Mapped I/O</source>
-        <translation type="obsolete">I/O Peta Memori</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use memory-mapped I/O for file access</source>
-        <translation type="obsolete">Gunakan I/O peta memori untuk akses file</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch Processing</source>
-        <translation type="obsolete">Pemrosesan Batch</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Process multiple operations in batches</source>
-        <translation type="obsolete">Proses beberapa operasi dalam batch</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch Size</source>
-        <translation type="obsolete">Ukuran Batch</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>OGR/Memory Optimizations</source>
-        <translation type="obsolete">Optimasi OGR/Memori</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatic Spatial Index</source>
-        <translation type="obsolete">Indeks Spasial Otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary spatial indexes automatically</source>
-        <translation type="obsolete">Buat indeks spasial sementara secara otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Progressive Chunking</source>
-        <translation type="obsolete">Pemotongan Progresif</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Process large files in progressive chunks</source>
-        <translation type="obsolete">Proses file besar dalam potongan progresif</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory Feature Caching</source>
-        <translation type="obsolete">Caching Fitur Memori</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache features in memory for faster access</source>
-        <translation type="obsolete">Cache fitur dalam memori untuk akses lebih cepat</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache Size (features)</source>
-        <translation type="obsolete">Ukuran Cache (fitur)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Geometry Simplification</source>
-        <translation type="obsolete">Penyederhanaan Geometri</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify complex geometries during processing</source>
-        <translation type="obsolete">Sederhanakan geometri kompleks selama pemrosesan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Global Optimizations</source>
-        <translation type="obsolete">Optimasi Global</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Optimization</source>
-        <translation type="obsolete">Optimasi Otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically optimize based on data analysis</source>
-        <translation type="obsolete">Optimalkan secara otomatis berdasarkan analisis data</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Centroid</source>
-        <translation type="obsolete">Sentroid Otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically center view on filter results</source>
-        <translation type="obsolete">Pusatkan tampilan secara otomatis pada hasil filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Parallel Layer Filtering</source>
-        <translation type="obsolete">Penyaringan Lapisan Paralel</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter multiple layers simultaneously</source>
-        <translation type="obsolete">Saring beberapa lapisan secara bersamaan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Smart Expression Parsing</source>
-        <translation type="obsolete">Parsing Ekspresi Cerdas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimize expression parsing for complex queries</source>
-        <translation type="obsolete">Optimalkan parsing ekspresi untuk kueri kompleks</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Deferred Refresh</source>
-        <translation type="obsolete">Penyegaran Tertunda</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Delay map refresh until all filters are applied</source>
-        <translation type="obsolete">Tunda penyegaran peta sampai semua filter diterapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Verbose Logging</source>
-        <translation type="obsolete">Pencatatan Detail</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable detailed logging for debugging</source>
-        <translation type="obsolete">Aktifkan pencatatan detail untuk debugging</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply</source>
-        <translation type="obsolete">Terapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset to Defaults</source>
-        <translation type="obsolete">Kembalikan ke Default</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Settings applied successfully</source>
-        <translation type="obsolete">Pengaturan berhasil diterapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Settings reset to defaults</source>
-        <translation type="obsolete">Pengaturan dikembalikan ke default</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Profile applied: {}</source>
-        <translation type="obsolete">Profil diterapkan: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error applying settings</source>
-        <translation type="obsolete">Kesalahan saat menerapkan pengaturan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Checking...</source>
-        <translation type="obsolete">Status MV: Memeriksa...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Error</source>
-        <translation type="obsolete">Status MV: Error</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Clean</source>
-        <translation type="obsolete">Status MV: Bersih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status:</source>
-        <translation type="obsolete">Status MV:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>active</source>
-        <translation type="obsolete">aktif</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No active materialized views</source>
-        <translation type="obsolete">Tidak ada materialized view aktif</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Session:</source>
-        <translation type="obsolete">Sesi:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Other sessions:</source>
-        <translation type="obsolete">Sesi lain:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🧹 Session</source>
-        <translation type="obsolete">🧹 Sesi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup MVs from this session</source>
-        <translation type="obsolete">Bersihkan MV dari sesi ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🗑️ Orphaned</source>
-        <translation type="obsolete">🗑️ Yatim</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup orphaned MVs (&gt;24h old)</source>
-        <translation type="obsolete">Bersihkan MV yatim (&gt;24 jam)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⚠️ All</source>
-        <translation type="obsolete">⚠️ Semua</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup ALL MVs (affects other sessions)</source>
-        <translation type="obsolete">Bersihkan SEMUA MV (mempengaruhi sesi lain)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirm Cleanup</source>
-        <translation type="obsolete">Konfirmasi pembersihan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Drop ALL materialized views?
-This affects other FilterMate sessions!</source>
-        <translation type="obsolete">Hapus SEMUA materialized view?
-Ini mempengaruhi sesi FilterMate lain!</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Refresh MV status</source>
-        <translation type="obsolete">Perbarui status MV</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Threshold:</source>
-        <translation type="obsolete">Ambang batas:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>features</source>
-        <translation type="obsolete">fitur</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-cleanup on exit</source>
-        <translation type="obsolete">Bersihkan otomatis saat keluar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically drop session MVs when plugin unloads</source>
-        <translation type="obsolete">Otomatis hapus session MVs saat plugin dilepas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create MVs for datasets larger than this</source>
-        <translation type="obsolete">Buat MV untuk dataset yang lebih besar dari ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>faster possible</source>
-        <translation type="obsolete">lebih cepat mungkin</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations available</source>
-        <translation type="obsolete">Optimasi tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Apply Optimizations?</source>
-        <translation type="obsolete">FilterMate - Terapkan Optimasi?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip</source>
-        <translation type="obsolete">Lewati</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>✓ Apply</source>
-        <translation type="obsolete">✓ Terapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Don&apos;t ask for this session</source>
-        <translation type="obsolete">Jangan tanya untuk sesi ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Sentroid</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify</source>
-        <translation type="obsolete">Sederhanakan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Pre-simplify</source>
-        <translation type="obsolete">Pra-sederhanakan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Fewer segments</source>
-        <translation type="obsolete">Lebih sedikit segmen</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Flat buffer</source>
-        <translation type="obsolete">Buffer datar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox filter</source>
-        <translation type="obsolete">Filter BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Attr-first</source>
-        <translation type="obsolete">Attr-pertama</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL not available</source>
-        <translation type="obsolete">PostgreSQL tidak tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No connection</source>
-        <translation type="obsolete">Tidak ada koneksi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation type="obsolete">Auto-zoom saat fitur berubah</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimization settings saved</source>
-        <translation type="obsolete">Pengaturan optimasi backend disimpan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimizations configured</source>
-        <translation type="obsolete">Optimasi backend dikonfigurasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression Evaluation</source>
-        <translation type="obsolete">Evaluasi Ekspresi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Identify selected feature</source>
-        <translation type="obsolete">Identifikasi fitur yang dipilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Layer properties reset to defaults</source>
-        <translation type="obsolete">Properti layer direset ke default</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Link exploring widgets together</source>
-        <translation type="obsolete">Hubungkan widget eksplorasi bersama</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization settings saved</source>
-        <translation type="obsolete">Pengaturan optimasi disimpan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset all layer exploring properties</source>
-        <translation type="obsolete">Reset semua properti eksplorasi layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Toggle feature selection on map</source>
-        <translation type="obsolete">Beralih pilihan fitur pada peta</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons)</source>
-        <translation type="obsolete">Gunakan sentroid alih-alih geometri penuh untuk lapisan jauh (lebih cepat untuk poligon kompleks)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">Gunakan sentroid alih-alih geometri penuh untuk lapisan sumber (lebih cepat untuk poligon kompleks)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Zoom to selected feature</source>
-        <translation type="obsolete">Zoom ke fitur yang dipilih</translation>
-    </message>
-</context>
-<context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="275"/>
+        <location filename="../ui/controllers/config_controller.py" line="311"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Kesalahan saat membatalkan perubahan: {0}</translation>
     </message>
@@ -690,34 +114,6 @@ Ini mempengaruhi sesi FilterMate lain!</translation>
         <location filename="../adapters/database_manager.py" line="527"/>
         <source>Error during database initialization: {0}</source>
         <translation>Kesalahan saat inisialisasi basis data: {0}</translation>
-    </message>
-</context>
-<context>
-    <name>DatasourceManager</name>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
-        <source>Database file does not exist: {db_file_path}</source>
-        <translation>File basis data tidak ada: {db_file_path}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
-        <source>Failed to connect to database {db_file_path}: {error}</source>
-        <translation>Gagal terhubung ke basis data {db_file_path}: {error}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
-        <source>QGIS processing module not available to create spatial index</source>
-        <translation>Modul pemrosesan QGIS tidak tersedia untuk membuat indeks spasial</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
-        <source>Cannot create spatial index: layer invalid or source not found.</source>
-        <translation>Tidak dapat membuat indeks spasial: lapisan tidak valid atau sumber tidak ditemukan.</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
-        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
-        <translation>Lapisan PostgreSQL terdeteksi tetapi psycopg2 belum terinstal. Menggunakan backend Spatialite lokal. Untuk kinerja lebih baik dengan dataset besar, instal psycopg2.</translation>
     </message>
 </context>
 <context>
@@ -1243,59 +639,6 @@ Klik indikator ★ dan pilih &apos;Tambahkan filter saat ini ke favorit&apos; un
     </message>
 </context>
 <context>
-    <name>FeedbackUtils</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Starting filter on {count} layer(s)</source>
-        <translation type="obsolete">Memulai filter pada {count} layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Removing filters from {count} layer(s)</source>
-        <translation type="obsolete">Menghapus filter dari {count} layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Resetting {count} layer(s)</source>
-        <translation type="obsolete">Mereset {count} layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Exporting {count} layer(s)</source>
-        <translation type="obsolete">Mengekspor {count} layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully filtered {count} layer(s)</source>
-        <translation type="obsolete">Berhasil memfilter {count} layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully removed filters from {count} layer(s)</source>
-        <translation type="obsolete">Berhasil menghapus filter dari {count} layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully reset {count} layer(s)</source>
-        <translation type="obsolete">Berhasil mereset {count} layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully exported {count} layer(s)</source>
-        <translation type="obsolete">Berhasil mengekspor {count} layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</source>
-        <translation type="obsolete">Dataset besar ({count} fitur) tanpa PostgreSQL. Performa mungkin berkurang.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL recommended for better performance.</source>
-        <translation type="obsolete">PostgreSQL disarankan untuk performa yang lebih baik.</translation>
-    </message>
-</context>
-<context>
     <name>FilepathType</name>
     <message>
         <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
@@ -1352,209 +695,127 @@ Klik indikator ★ dan pilih &apos;Tambahkan filter saat ini ke favorit&apos; un
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="106"/>
+        <location filename="../filter_mate.py" line="188"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>Open FilterMate panel</source>
         <translation>Buka panel FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset configuration and database</source>
         <translation>Reset konfigurasi dan database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Kembalikan konfigurasi default dan hapus database SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Reset Configuration</source>
         <translation>Reset Konfigurasi</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Are you sure you want to reset to the default configuration?
-
-This will:
-- Reset all FilterMate settings
-- Delete all filter history databases</source>
-        <translation type="obsolete">Apakah Anda yakin ingin mengembalikan ke konfigurasi default?
-
-Ini akan:
-- Mereset semua pengaturan FilterMate
-- Menghapus semua database riwayat filter</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1192"/>
+        <location filename="../filter_mate.py" line="1355"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfigurasi berhasil direset.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1197"/>
+        <location filename="../filter_mate.py" line="1360"/>
         <source>Default configuration file not found.</source>
         <translation>File konfigurasi default tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1218"/>
+        <location filename="../filter_mate.py" line="1381"/>
         <source>Database deleted: {filename}</source>
         <translation>Database dihapus: {filename}</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Unable to delete {filename}: {error}</source>
-        <translation type="obsolete">Tidak dapat menghapus {filename}: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>Restart required</source>
         <translation>Perlu restart</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>The configuration has been reset.
-
-Please restart QGIS to apply all changes.</source>
-        <translation type="obsolete">Konfigurasi telah direset.
-
-Silakan restart QGIS untuk menerapkan semua perubahan.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error during reset: {error}</source>
-        <translation type="obsolete">Error saat reset: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="350"/>
+        <location filename="../filter_mate.py" line="401"/>
         <source>Obsolete configuration detected</source>
         <translation>Konfigurasi usang terdeteksi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="351"/>
+        <location filename="../filter_mate.py" line="402"/>
         <source>unknown version</source>
         <translation>versi tidak dikenal</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="359"/>
+        <location filename="../filter_mate.py" line="410"/>
         <source>Corrupted configuration detected</source>
         <translation>Konfigurasi rusak terdeteksi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="416"/>
+        <location filename="../filter_mate.py" line="467"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Konfigurasi tidak direset. Beberapa fitur mungkin tidak berfungsi dengan benar.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="427"/>
+        <location filename="../filter_mate.py" line="478"/>
         <source>Configuration created with default values</source>
         <translation>Konfigurasi dibuat dengan nilai default</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Konfigurasi rusak telah direset. Pengaturan default telah dipulihkan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="484"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Konfigurasi usang telah direset. Pengaturan default telah dipulihkan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="505"/>
         <source>Configuration updated to latest version</source>
         <translation>Konfigurasi diperbarui ke versi terbaru</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="451"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Konfigurasi diperbarui: pengaturan baru tersedia ({sections}). Akses melalui menu Opsi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Geometry Simplification</source>
         <translation>Penyederhanaan Geometri</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>Optimization Thresholds</source>
         <translation>Ambang Batas Optimasi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="591"/>
+        <location filename="../filter_mate.py" line="642"/>
         <source>Geometry validation setting</source>
         <translation>Pengaturan validasi geometri</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="621"/>
+        <location filename="../filter_mate.py" line="672"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Pemfilteran geometri tidak valid berhasil dinonaktifkan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="628"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Pemfilteran geometri tidak valid tidak diubah. Beberapa fitur mungkin dikecualikan dari ekspor.</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">Nilai buffer dalam meter (positif=perluas, negatif=perkecil poligon)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation type="obsolete">Buffer negatif (erosi): memperkecil poligon ke dalam</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>point</source>
-        <translation type="obsolete">titik</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>line</source>
-        <translation type="obsolete">garis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>non-polygon</source>
-        <translation type="obsolete">bukan-poligon</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer value in meters (positive only when centroids are enabled. Negative buffers cannot be applied to points)</source>
-        <translation type="obsolete">Nilai buffer dalam meter (hanya positif ketika centroid diaktifkan. Buffer negatif tidak dapat diterapkan ke titik)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Mode batch</source>
-        <translation type="obsolete">Mode batch</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">Jumlah segmen untuk presisi buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Centroid</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons like buildings)</source>
-        <translation type="obsolete">Gunakan centroid sebagai pengganti geometri lengkap untuk lapisan jauh (lebih cepat untuk poligon kompleks seperti bangunan)</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="352"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1569,7 +830,7 @@ Apakah Anda ingin mengatur ulang ke pengaturan default?
 • Tidak: Pertahankan konfigurasi saat ini (mungkin menyebabkan masalah)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="360"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1584,12 +845,12 @@ Apakah Anda ingin mengatur ulang ke pengaturan default?
 • Tidak: Batal (plugin mungkin tidak berfungsi dengan benar)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="367"/>
+        <location filename="../filter_mate.py" line="418"/>
         <source>Configuration reset</source>
         <translation>Reset konfigurasi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="419"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1598,12 +859,12 @@ Do you want to continue?</source>
 Apakah Anda ingin melanjutkan?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="473"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Error during configuration migration: {}</source>
         <translation>Kesalahan selama migrasi konfigurasi: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="593"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -1630,7 +891,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1647,7 +908,7 @@ Ini akan:
 QGIS harus dimulai ulang untuk menerapkan perubahan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1656,439 +917,386 @@ Please restart QGIS to apply the changes.</source>
 Silakan mulai ulang QGIS untuk menerapkan perubahan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="295"/>
+        <location filename="../filter_mate.py" line="346"/>
         <source>Initialization error: {0}</source>
         <translation>Kesalahan inisialisasi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} lapisan referensi tidak dimuat ({layers_list}). Menggunakan tampilan cadangan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1223"/>
+        <location filename="../filter_mate.py" line="1386"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Tidak dapat menghapus {filename}: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1240"/>
+        <location filename="../filter_mate.py" line="1403"/>
         <source>Error during reset: {str(e)}</source>
         <translation>Kesalahan saat reset: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1273"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Terima kasih telah menggunakan &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Bergabunglah dengan komunitas Discord kami untuk:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Mendapatkan bantuan dan dukungan&lt;/li&gt;&lt;li&gt;Melaporkan bug dan masalah&lt;/li&gt;&lt;li&gt;Menyarankan fitur baru&lt;/li&gt;&lt;li&gt;Berbagi tips dengan pengguna lain&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1289"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>  Join us on Discord</source>
         <translation>  Bergabung di Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1309"/>
+        <location filename="../filter_mate.py" line="1472"/>
         <source>Don&apos;t show this again</source>
         <translation>Jangan tampilkan lagi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1312"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Close</source>
         <translation>Tutup</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1541"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Kesalahan memuat plugin: {0}. Periksa konsol Python QGIS untuk detail.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6630"/>
+        <location filename="../filter_mate_dockwidget.py" line="6691"/>
         <source>Current layer: {0}</source>
         <translation>Lapisan saat ini: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6632"/>
+        <location filename="../filter_mate_dockwidget.py" line="6693"/>
         <source>No layer selected</source>
         <translation>Tidak ada lapisan dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>Selected layers:
 {0}</source>
         <translation>Lapisan terpilih:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>No layers selected</source>
         <translation>Tidak ada lapisan dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6662"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No expression defined</source>
         <translation>Tidak ada ekspresi didefinisikan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6674"/>
+        <location filename="../filter_mate_dockwidget.py" line="6735"/>
         <source>Display expression: {0}</source>
         <translation>Ekspresi tampilan: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6750"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID Fitur: {0}
 Atribut pertama: {1}</translation>
     </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="301"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation>Muat ulang plugin untuk menerapkan perubahan tata letak (posisi bilah aksi)</translation>
-    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="271"/>
+        <location filename="../filter_mate_app.py" line="274"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Lapisan PostgreSQL terdeteksi ({0}) tetapi psycopg2 belum terinstal.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="358"/>
+        <location filename="../filter_mate_app.py" line="361"/>
         <source>Cleared {0} caches</source>
         <translation>{0} cache dihapus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="769"/>
+        <location filename="../filter_mate_app.py" line="772"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Gagal membuat dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="779"/>
+        <location filename="../filter_mate_app.py" line="782"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Gagal menampilkan dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1229"/>
+        <location filename="../filter_mate_app.py" line="1232"/>
         <source>Error executing {0}: {1}</source>
         <translation>Kesalahan menjalankan {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1241"/>
+        <location filename="../filter_mate_app.py" line="1244"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plugin berjalan dalam mode terdegradasi (layanan heksagonal tidak tersedia). Kinerja mungkin berkurang.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>FilterMate ERROR</source>
         <translation>KESALAHAN FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Tidak dapat menjalankan {0}: inisialisasi widget gagal.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1994"/>
+        <location filename="../filter_mate_app.py" line="2144"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Tidak dapat {0}: lapisan tidak valid atau sumber tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2131"/>
+        <location filename="../filter_mate_app.py" line="2281"/>
         <source>All filters cleared - </source>
         <translation>Semua filter dihapus - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2132"/>
+        <location filename="../filter_mate_app.py" line="2282"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} fitur terlihat di lapisan utama</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2138"/>
+        <location filename="../filter_mate_app.py" line="2288"/>
         <source>Error: result handler missing</source>
         <translation>Kesalahan: penangan hasil hilang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2151"/>
+        <location filename="../filter_mate_app.py" line="2301"/>
         <source>Error during filtering: {0}</source>
         <translation>Kesalahan saat filtering: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2280"/>
+        <location filename="../filter_mate_app.py" line="2432"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} favorit yatim dipulihkan: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2416"/>
+        <location filename="../filter_mate_app.py" line="2568"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Pemuatan lapisan gagal - klik untuk coba lagi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2463"/>
+        <location filename="../filter_mate_app.py" line="2615"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} lapisan berhasil dimuat</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1595"/>
+        <source>filter</source>
+        <translation>filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1597"/>
+        <source>unfilter</source>
+        <translation>unfilter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1600"/>
+        <source>FilterMate – Edit Mode Detected</source>
+        <translation>FilterMate – Edit Mode Detected</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1602"/>
+        <source>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</source>
+        <translation>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1612"/>
+        <source>Save Changes &amp; {0}</source>
+        <translation>Save Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1619"/>
+        <source>Discard Changes &amp; {0}</source>
+        <translation>Discard Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1626"/>
+        <source>Cancel</source>
+        <translation>Batal</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1650"/>
+        <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
+        <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation type="obsolete">Muat ulang plugin untuk menerapkan perubahan tata letak (posisi bilah aksi)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reload Plugin</source>
-        <translation type="obsolete">Muat Ulang Plugin</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation type="obsolete">Apakah Anda ingin memuat ulang FilterMate untuk menerapkan semua perubahan konfigurasi?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer: {name}</source>
-        <translation type="obsolete">Layer saat ini: {name}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layer selected</source>
-        <translation type="obsolete">Tidak ada layer yang dipilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Selected layers:</source>
-        <translation type="obsolete">Layer yang dipilih:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Multiple layers selected</source>
-        <translation type="obsolete">Beberapa layer dipilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layers selected</source>
-        <translation type="obsolete">Tidak ada layer yang dipilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression:</source>
-        <translation type="obsolete">Ekspresi:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No expression defined</source>
-        <translation type="obsolete">Tidak ada ekspresi yang ditentukan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display expression: {expr}</source>
-        <translation type="obsolete">Ekspresi tampilan: {expr}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Feature ID: {id}</source>
-        <translation type="obsolete">ID Fitur: {id}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer: {0}</source>
-        <translation type="obsolete">Layer saat ini: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Selected layers:
-{0}</source>
-        <translation type="obsolete">Layer yang dipilih:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression:
-{0}</source>
-        <translation type="obsolete">Ekspresi:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression: {0}</source>
-        <translation type="obsolete">Ekspresi: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display expression: {0}</source>
-        <translation type="obsolete">Ekspresi tampilan: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Feature ID: {0}
-First attribute: {1}</source>
-        <translation type="obsolete">ID Fitur: {0}
-Atribut pertama: {1}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="582"/>
+        <location filename="../filter_mate_dockwidget.py" line="596"/>
         <source>Initialization error: {}</source>
         <translation>Kesalahan inisialisasi: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Konfigurasi UI tidak lengkap - periksa log</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
         <translation>Kesalahan dimensi UI: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1340"/>
+        <location filename="../filter_mate_dockwidget.py" line="1355"/>
         <source>Favorites manager not available</source>
         <translation>Manajer favorit tidak tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1359"/>
+        <location filename="../filter_mate_dockwidget.py" line="1374"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} Favorit tersimpan
 Klik untuk menerapkan atau mengelola</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1367"/>
+        <location filename="../filter_mate_dockwidget.py" line="1382"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Tidak ada favorit tersimpan
 Klik untuk menambah filter saat ini</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1391"/>
+        <location filename="../filter_mate_dockwidget.py" line="1406"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Backend {0} dipaksa untuk {1} lapisan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1477"/>
+        <location filename="../filter_mate_dockwidget.py" line="1492"/>
         <source>Backend controller not available</source>
         <translation>Pengontrol backend tidak tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1415"/>
+        <location filename="../filter_mate_dockwidget.py" line="1430"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Pembersihan otomatis PostgreSQL diaktifkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1416"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Pembersihan otomatis PostgreSQL dinonaktifkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>View sesi PostgreSQL dibersihkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Tidak ada view untuk dibersihkan atau pembersihan gagal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1433"/>
+        <location filename="../filter_mate_dockwidget.py" line="1448"/>
         <source>No PostgreSQL connection available</source>
         <translation>Tidak ada koneksi PostgreSQL tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1439"/>
+        <location filename="../filter_mate_dockwidget.py" line="1454"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Skema memiliki {0} view dari sesi lain.
 Tetap hapus?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1440"/>
+        <location filename="../filter_mate_dockwidget.py" line="1455"/>
         <source>Other Sessions Active</source>
         <translation>Sesi Lain Aktif</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1442"/>
+        <location filename="../filter_mate_dockwidget.py" line="1457"/>
         <source>Schema cleanup cancelled</source>
         <translation>Pembersihan skema dibatalkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1447"/>
+        <location filename="../filter_mate_dockwidget.py" line="1462"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Skema &apos;{0}&apos; berhasil dihapus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1464"/>
         <source>Schema cleanup failed</source>
         <translation>Pembersihan skema gagal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1475"/>
+        <location filename="../filter_mate_dockwidget.py" line="1490"/>
         <source>PostgreSQL Session Info</source>
         <translation>Info Sesi PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema disesuaikan: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Dark mode</source>
         <translation>Mode gelap</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Light mode</source>
         <translation>Mode terang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3908"/>
+        <location filename="../filter_mate_dockwidget.py" line="3896"/>
         <source>Selected features have no geometry.</source>
         <translation>Fitur terpilih tidak memiliki geometri.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3927"/>
+        <location filename="../filter_mate_dockwidget.py" line="3915"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Tidak ada fitur dipilih. Pilih fitur dari daftar dropdown.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4902"/>
+        <location filename="../filter_mate_dockwidget.py" line="4957"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Lapisan terpilih tidak valid atau sumbernya tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5612"/>
+        <location filename="../filter_mate_dockwidget.py" line="5667"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Buffer negatif (erosi): menyusutkan poligon ke dalam</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5615"/>
+        <location filename="../filter_mate_dockwidget.py" line="5670"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Nilai buffer dalam meter (positif=perluas, negatif=susutkan poligon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6089"/>
+        <location filename="../filter_mate_dockwidget.py" line="6144"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin diaktifkan dengan {0} lapisan vektor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6172"/>
+        <location filename="../filter_mate_dockwidget.py" line="6227"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Tidak dapat memuat ulang plugin secara otomatis.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6174"/>
+        <location filename="../filter_mate_dockwidget.py" line="6229"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Kesalahan memuat ulang plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6224"/>
+        <location filename="../filter_mate_dockwidget.py" line="6282"/>
         <source>Layer properties reset to defaults</source>
         <translation>Properti lapisan direset ke default</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6225"/>
+        <location filename="../filter_mate_dockwidget.py" line="6283"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Kesalahan mereset properti lapisan: {}</translation>
     </message>
@@ -2096,417 +1304,172 @@ Tetap hapus?</translation>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
         <translation>SELEKSI TUNGGAL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
         <source>MULTIPLE SELECTION</source>
         <translation>SELEKSI BERGANDA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1545"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
         <source>CUSTOM SELECTION</source>
         <translation>SELEKSI KUSTOM</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
         <source>FILTERING</source>
         <translation>FILTER</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1575"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
         <source>EXPORTING</source>
         <translation>EKSPOR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1576"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
         <source>CONFIGURATION</source>
         <translation>KONFIGURASI</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Identify feature - Display feature attributes</source>
-        <translation type="obsolete">Identifikasi fitur - Tampilkan atribut fitur</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Zoom to feature - Center the map on the selected feature</source>
-        <translation type="obsolete">Zoom ke fitur - Pusatkan peta pada fitur yang dipilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable selection - Select features on map</source>
-        <translation type="obsolete">Aktifkan seleksi - Pilih fitur di peta</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable tracking - Follow the selected feature on the map</source>
-        <translation type="obsolete">Aktifkan pelacakan - Ikuti fitur yang dipilih di peta</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Link widgets - Synchronize selection between widgets</source>
-        <translation type="obsolete">Hubungkan widget - Sinkronkan seleksi antar widget</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset layer properties - Restore default layer settings</source>
-        <translation type="obsolete">Reset properti layer - Kembalikan pengaturan layer default</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-sync with current layer - Automatically update when layer changes</source>
-        <translation type="obsolete">Sinkronisasi otomatis dengan layer saat ini - Perbarui otomatis saat layer berubah</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable multi-layer filtering - Apply filter to multiple layers simultaneously</source>
-        <translation type="obsolete">Aktifkan filter multi-layer - Terapkan filter ke beberapa layer secara bersamaan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable additive filtering - Combine multiple filters on the current layer</source>
-        <translation type="obsolete">Aktifkan filter aditif - Gabungkan beberapa filter pada layer saat ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable spatial filtering - Filter features using geometric relationships</source>
-        <translation type="obsolete">Aktifkan filter spasial - Filter fitur menggunakan hubungan geometri</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable buffer - Add a buffer zone around selected features</source>
-        <translation type="obsolete">Aktifkan buffer - Tambahkan zona buffer di sekitar fitur yang dipilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer type - Select the buffer calculation method</source>
-        <translation type="obsolete">Tipe buffer - Pilih metode perhitungan buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer - Select the layer to filter</source>
-        <translation type="obsolete">Layer saat ini - Pilih layer untuk difilter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Logical operator for combining filters on the source layer</source>
-        <translation type="obsolete">Operator logika untuk menggabungkan filter pada layer sumber</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Logical operator for combining filters on other layers</source>
-        <translation type="obsolete">Operator logika untuk menggabungkan filter pada layer lain</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select geometric predicate(s) for spatial filtering</source>
-        <translation type="obsolete">Pilih predikat geometri untuk filter spasial</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer distance in meters</source>
-        <translation type="obsolete">Jarak buffer dalam meter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer type - Define how the buffer is calculated</source>
-        <translation type="obsolete">Tipe buffer - Tentukan cara perhitungan buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select layers to export</source>
-        <translation type="obsolete">Pilih layer untuk diekspor</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Configure output projection</source>
-        <translation type="obsolete">Konfigurasi proyeksi output</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Export layer styles (QML/SLD)</source>
-        <translation type="obsolete">Ekspor gaya layer (QML/SLD)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select output format</source>
-        <translation type="obsolete">Pilih format output</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Configure output location and filename</source>
-        <translation type="obsolete">Konfigurasi lokasi dan nama file output</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable ZIP compression - Create a compressed archive of exported files</source>
-        <translation type="obsolete">Aktifkan kompresi ZIP - Buat arsip terkompresi dari file yang diekspor</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1569"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
         <source>Select CRS for export</source>
         <translation>Pilih CRS untuk ekspor</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Style format - Select QML or SLD format</source>
-        <translation type="obsolete">Format gaya - Pilih format QML atau SLD</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Output file format</source>
-        <translation type="obsolete">Format file output</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Output folder name - Enter the name of the export folder</source>
-        <translation type="obsolete">Nama folder output - Masukkan nama folder ekspor</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter folder name...</source>
-        <translation type="obsolete">Masukkan nama folder...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode - Export each layer to a separate folder</source>
-        <translation type="obsolete">Mode batch - Ekspor setiap layer ke folder terpisah</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode</source>
-        <translation type="obsolete">Mode batch</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>ZIP filename - Enter the name for the compressed archive</source>
-        <translation type="obsolete">Nama file ZIP - Masukkan nama untuk arsip terkompresi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter ZIP filename...</source>
-        <translation type="obsolete">Masukkan nama file ZIP...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode - Create a separate ZIP for each layer</source>
-        <translation type="obsolete">Mode batch - Buat ZIP terpisah untuk setiap layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply Filter - Execute the current filter on selected layers</source>
-        <translation type="obsolete">Terapkan Filter - Jalankan filter saat ini pada layer yang dipilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply Filter</source>
-        <translation type="obsolete">Terapkan Filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply the current filter expression to filter features on the selected layer(s)</source>
-        <translation type="obsolete">Terapkan ekspresi filter saat ini untuk memfilter fitur pada layer yang dipilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo Filter - Restore the previous filter state</source>
-        <translation type="obsolete">Batalkan Filter - Kembalikan status filter sebelumnya</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo Filter</source>
-        <translation type="obsolete">Batalkan Filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo the last filter operation and restore the previous state</source>
-        <translation type="obsolete">Batalkan operasi filter terakhir dan kembalikan status sebelumnya</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo Filter - Reapply the previously undone filter</source>
-        <translation type="obsolete">Ulangi Filter - Terapkan kembali filter yang dibatalkan sebelumnya</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo Filter</source>
-        <translation type="obsolete">Ulangi Filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo the previously undone filter operation</source>
-        <translation type="obsolete">Ulangi operasi filter yang dibatalkan sebelumnya</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear All Filters - Remove all filters from all layers</source>
-        <translation type="obsolete">Hapus Semua Filter - Hapus semua filter dari semua layer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear All Filters</source>
-        <translation type="obsolete">Hapus Semua Filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Remove all active filters from all layers in the project</source>
-        <translation type="obsolete">Hapus semua filter aktif dari semua layer di proyek</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Export - Save filtered layers to the specified location</source>
-        <translation type="obsolete">Ekspor - Simpan layer yang difilter ke lokasi yang ditentukan</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
         <source>Export</source>
         <translation>Ekspor</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Export the filtered layers to the configured output location and format</source>
-        <translation type="obsolete">Ekspor layer yang difilter ke lokasi dan format output yang dikonfigurasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>About FilterMate - Display plugin information and help</source>
-        <translation type="obsolete">Tentang FilterMate - Tampilkan informasi plugin dan bantuan</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
         <source>AND</source>
         <translation>DAN</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1556"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
         <source>AND NOT</source>
         <translation>DAN BUKAN</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1557"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
         <source>OR</source>
         <translation>ATAU</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1559"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
         <source>, </source>
         <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
         <source>Multi-layer filtering</source>
         <translation>Filter multi-layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1547"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
         <source>Additive filtering for the selected layer</source>
         <translation>Filter aditif untuk layer yang dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1548"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
         <source>Geospatial filtering</source>
         <translation>Filter geospasial</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
         <source>Buffer</source>
         <translation>Buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
         <source>Expression layer</source>
         <translation>Layer ekspresi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1558"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
         <source>Geometric predicate</source>
         <translation>Predikat geometri</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Value in meters</source>
-        <translation type="obsolete">Nilai dalam meter</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1572"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
         <source>Output format</source>
         <translation>Format output</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
         <source>Reset</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
         <source>Layers to export</source>
         <translation>Layer untuk diekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
         <source>Layers projection</source>
         <translation>Proyeksi layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
         <source>Save styles</source>
         <translation>Simpan gaya</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1567"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
         <source>Datatype export</source>
         <translation>Ekspor tipe data</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
         <source>Name of file/directory</source>
         <translation>Nama file/direktori</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1550"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>Gunakan sentroid alih-alih geometri penuh untuk lapisan sumber (lebih cepat untuk poligon kompleks)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Nilai buffer dalam meter (positif=perluas, negatif=susutkan poligon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
         <source>Number of segments for buffer precision</source>
         <translation>Jumlah segmen untuk presisi buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
         <source>Mode batch</source>
         <translation>Mode batch</translation>
     </message>
@@ -2614,7 +1577,7 @@ Tetap hapus?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="928"/>
+        <location filename="../core/tasks/layer_management_task.py" line="944"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2631,12 +1594,12 @@ Solusi: Hapus lapisan ini dari proyek FilterMate, lalu tambahkan kembali.
 Pastikan tabel PostgreSQL memiliki PRIMARY KEY yang didefinisikan.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="954"/>
+        <location filename="../core/tasks/layer_management_task.py" line="970"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Lapisan &apos;{0}&apos; tidak memiliki PRIMARY KEY. Fitur terbatas: materialized view dinonaktifkan. Rekomendasi: tambahkan PRIMARY KEY untuk kinerja optimal.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1893"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
         <source>Exception: {0}</source>
         <translation>Pengecualian: {0}</translation>
     </message>
@@ -2775,164 +1738,6 @@ Pastikan tabel PostgreSQL memiliki PRIMARY KEY yang didefinisikan.</translation>
     </message>
 </context>
 <context>
-    <name>OptimizationDialogs</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Optimizations</source>
-        <translation type="obsolete">FilterMate - Optimasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations for:</source>
-        <translation type="obsolete">Optimasi untuk:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>features</source>
-        <translation type="obsolete">fitur</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Estimated speedup:</source>
-        <translation type="obsolete">Percepatan perkiraan:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>faster</source>
-        <translation type="obsolete">lebih cepat</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for large datasets</source>
-        <translation type="obsolete">Gunakan centroid bukan geometri penuh untuk dataset besar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids</source>
-        <translation type="obsolete">Gunakan centroid</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids for distant layers</source>
-        <translation type="obsolete">Gunakan centroid untuk layer jauh</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable buffer type</source>
-        <translation type="obsolete">Aktifkan tipe buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify complex geometries to reduce processing time</source>
-        <translation type="obsolete">Sederhanakan geometri kompleks untuk mengurangi waktu pemrosesan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify geometries</source>
-        <translation type="obsolete">Sederhanakan geometri</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter by bounding box first to eliminate distant features quickly</source>
-        <translation type="obsolete">Filter dengan bounding box dulu untuk eliminasi fitur jauh dengan cepat</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox pre-filtering</source>
-        <translation type="obsolete">Pra-filter BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Evaluate attribute conditions before expensive spatial operations</source>
-        <translation type="obsolete">Evaluasi kondisi atribut sebelum operasi spasial yang mahal</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Attribute-first strategy</source>
-        <translation type="obsolete">Strategi atribut-dulu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply for current session only</source>
-        <translation type="obsolete">Terapkan untuk sesi ini saja</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Remember for this session</source>
-        <translation type="obsolete">Ingat untuk sesi ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip without applying</source>
-        <translation type="obsolete">Lewati tanpa menerapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip</source>
-        <translation type="obsolete">Lewati</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply selected optimizations</source>
-        <translation type="obsolete">Terapkan optimasi terpilih</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply</source>
-        <translation type="obsolete">Terapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization Settings</source>
-        <translation type="obsolete">Pengaturan Optimasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable automatic optimizations</source>
-        <translation type="obsolete">Aktifkan optimasi otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable optimizations</source>
-        <translation type="obsolete">Aktifkan optimasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-apply recommendations</source>
-        <translation type="obsolete">Otomatis terapkan rekomendasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Ask before applying</source>
-        <translation type="obsolete">Tanya sebelum menerapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show optimization dialog</source>
-        <translation type="obsolete">Tampilkan dialog optimasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Never apply</source>
-        <translation type="obsolete">Jangan pernah terapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimizations</source>
-        <translation type="obsolete">Tanpa optimasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify before buffer</source>
-        <translation type="obsolete">Sederhanakan sebelum buffer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reduce buffer segments</source>
-        <translation type="obsolete">Kurangi segmen buffer</translation>
-    </message>
-</context>
-<context>
     <name>PostgresInfoDialog</name>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="80"/>
@@ -3030,561 +1835,6 @@ Pastikan tabel PostgreSQL memiliki PRIMARY KEY yang didefinisikan.</translation>
         <translation>Pembersihan Gagal</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>All layers using auto-selection</source>
-        <translation type="obsolete">Semua lapisan menggunakan pemilihan otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Applied to &apos;{0}&apos;:</source>
-        <translation type="obsolete">Diterapkan ke &apos;{0}&apos;:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-centroid {0}</source>
-        <translation type="obsolete">Centroid otomatis {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimization {0}</source>
-        <translation type="obsolete">Optimasi otomatis {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimizer module not available</source>
-        <translation type="obsolete">Modul pengoptimalisasi otomatis tidak tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation type="obsolete">Pengoptimalisasi otomatis tidak tersedia: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-select best strategy</source>
-        <translation type="obsolete">Pilih strategi terbaik secara otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-selected backends for {0} layer(s)</source>
-        <translation type="obsolete">Backend dipilih otomatis untuk {0} lapisan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-simplify geometries</source>
-        <translation type="obsolete">Sederhanakan geometri secara otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-use centroids for remote layers</source>
-        <translation type="obsolete">Gunakan centroid secara otomatis untuk lapisan jarak jauh</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically choose optimal filtering strategy</source>
-        <translation type="obsolete">Pilih strategi pemfilteran optimal secara otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox pre-filter enabled for &apos;{0}&apos;</source>
-        <translation type="obsolete">Pra-filter BBox diaktifkan untuk &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend controller not available</source>
-        <translation type="obsolete">Pengontrol backend tidak tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend forced to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">Backend dipaksa ke {0} untuk &apos;{1}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimization unavailable</source>
-        <translation type="obsolete">Optimasi backend tidak tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend set to Auto for &apos;{0}&apos;</source>
-        <translation type="obsolete">Backend diatur ke Otomatis untuk &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids enabled for &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">Centroid diaktifkan untuk &apos;{0}&apos; (~{1}x {2})</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear ALL FilterMate temporary tables from all databases</source>
-        <translation type="obsolete">Bersihkan SEMUA tabel sementara FilterMate dari semua database</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear temporary tables for the current project only</source>
-        <translation type="obsolete">Bersihkan tabel sementara hanya untuk proyek saat ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleared {0} temporary table(s) for current project</source>
-        <translation type="obsolete">{0} tabel sementara dibersihkan untuk proyek saat ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleared {0} temporary table(s) globally</source>
-        <translation type="obsolete">{0} tabel sementara dibersihkan secara global</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirmation {0}</source>
-        <translation type="obsolete">Konfirmasi {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation type="obsolete">Tidak dapat menganalisis lapisan &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Could not reload plugin automatically.</source>
-        <translation type="obsolete">Tidak dapat memuat ulang plugin secara otomatis.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Dark mode</source>
-        <translation type="obsolete">Mode gelap</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Description (auto-generated, you can modify it)</source>
-        <translation type="obsolete">Deskripsi (dibuat otomatis, Anda dapat memodifikasinya)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Dialog not available: {0}</source>
-        <translation type="obsolete">Dialog tidak tersedia: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter a name for this filter</source>
-        <translation type="obsolete">Masukkan nama untuk filter ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation type="obsolete">Error menganalisis lapisan: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation type="obsolete">Error membatalkan perubahan: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error reloading plugin: {0}</source>
-        <translation type="obsolete">Error memuat ulang plugin: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error resetting layer properties: {}</source>
-        <translation type="obsolete">Error mereset properti lapisan: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error: {0}</source>
-        <translation type="obsolete">Error: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Favorites manager not available</source>
-        <translation type="obsolete">Manajer favorit tidak tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter history position</source>
-        <translation type="obsolete">Posisi riwayat filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Add to Favorites</source>
-        <translation type="obsolete">FilterMate - Tambah ke Favorit</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Forced {0} backend for {1} layer(s)</source>
-        <translation type="obsolete">Backend {0} dipaksa untuk {1} lapisan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Light mode</source>
-        <translation type="obsolete">Mode terang</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory layer filtering complete for &apos;{0}&apos;</source>
-        <translation type="obsolete">Pemfilteran lapisan memori selesai untuk &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimization recommendations at this time.</source>
-        <translation type="obsolete">Tidak ada rekomendasi optimasi saat ini.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>OGR/Memory</source>
-        <translation type="obsolete">OGR/Memori</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization applied to {0} layer(s)</source>
-        <translation type="obsolete">Optimasi diterapkan ke {0} lapisan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization recommendations</source>
-        <translation type="obsolete">Rekomendasi optimasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL</source>
-        <translation type="obsolete">PostgreSQL</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo filter</source>
-        <translation type="obsolete">Ulangi filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo unavailable</source>
-        <translation type="obsolete">Ulangi tidak tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Save current filter</source>
-        <translation type="obsolete">Simpan filter saat ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Spatialite</source>
-        <translation type="obsolete">Spatialite</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Strategy set to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">Strategi diatur ke {0} untuk &apos;{1}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Theme changed</source>
-        <translation type="obsolete">Tema diubah</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Toggle dark/light mode</source>
-        <translation type="obsolete">Beralih mode gelap/terang</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo filter</source>
-        <translation type="obsolete">Batalkan filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo unavailable</source>
-        <translation type="obsolete">Batalkan tidak tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Using QGIS expressions for filtering</source>
-        <translation type="obsolete">Menggunakan ekspresi QGIS untuk pemfilteran</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>View filter history</source>
-        <translation type="obsolete">Lihat riwayat filter</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>WKT expression threshold:</source>
-        <translation type="obsolete">Ambang batas ekspresi WKT:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>memory copy</source>
-        <translation type="obsolete">salinan memori</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>pool size</source>
-        <translation type="obsolete">ukuran pool</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>simplified to {0} vertices</source>
-        <translation type="obsolete">disederhanakan menjadi {0} titik</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>temp views</source>
-        <translation type="obsolete">tampilan sementara</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Allow cancellation of QGIS processing algorithms. Enables stopping long-running operations.</source>
-        <translation type="obsolete">Izinkan pembatalan algoritma pemrosesan QGIS. Memungkinkan penghentian operasi yang berjalan lama.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Analyzing your project... Recommendations will appear here.</source>
-        <translation type="obsolete">Menganalisis proyek Anda... Rekomendasi akan muncul di sini.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Centroid for Distant Layers</source>
-        <translation type="obsolete">Auto-Centroid untuk Layer Jauh</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Select Best Strategy</source>
-        <translation type="obsolete">Pilih Strategi Terbaik Otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Simplify Geometries ⚠️</source>
-        <translation type="obsolete">Sederhanakan Geometri Otomatis ⚠️</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-detect mod_spatialite</source>
-        <translation type="obsolete">Deteksi otomatis mod_spatialite</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatic GIST Index Usage</source>
-        <translation type="obsolete">Penggunaan Indeks GIST Otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cancel</source>
-        <translation type="obsolete">Batal</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cancellable Processing</source>
-        <translation type="obsolete">Pemrosesan yang Dapat Dibatalkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Chunk size (features):</source>
-        <translation type="obsolete">Ukuran chunk (fitur):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirm Before Applying</source>
-        <translation type="obsolete">Konfirmasi Sebelum Menerapkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Connection Pooling</source>
-        <translation type="obsolete">Connection Pooling</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create Spatial Indexes</source>
-        <translation type="obsolete">Buat Indeks Spasial</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Direct SQL for GeoPackage</source>
-        <translation type="obsolete">SQL Langsung untuk GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Auto-Centroid for Remote Layers</source>
-        <translation type="obsolete">Aktifkan Auto-Centroid untuk Layer Remote</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Auto-Optimization</source>
-        <translation type="obsolete">Aktifkan Optimasi Otomatis</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Direct SQL for GeoPackage</source>
-        <translation type="obsolete">Aktifkan SQL Langsung untuk GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Materialized Views</source>
-        <translation type="obsolete">Aktifkan Materialized Views</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Estimated performance improvement</source>
-        <translation type="obsolete">Perkiraan peningkatan kinerja</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Backend Optimizations</source>
-        <translation type="obsolete">FilterMate - Optimasi Backend</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>GEOS-safe Geometry Handling</source>
-        <translation type="obsolete">Penanganan Geometri GEOS-safe</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Global</source>
-        <translation type="obsolete">Global</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Initialization error: {}</source>
-        <translation type="obsolete">Error inisialisasi: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Interruptible Queries</source>
-        <translation type="obsolete">Query yang Dapat Diinterupsi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Lazy cursor threshold:</source>
-        <translation type="obsolete">Ambang batas kursor malas:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Max workers (0=auto):</source>
-        <translation type="obsolete">Maks pekerja (0=otomatis):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No PostgreSQL connection available</source>
-        <translation type="obsolete">Tidak ada koneksi PostgreSQL yang tersedia</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No alternative backends available for this layer</source>
-        <translation type="obsolete">Tidak ada backend alternatif untuk lapisan ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation type="obsolete">Tidak ada lapisan yang dipilih. Silakan pilih lapisan terlebih dahulu.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimizations selected to apply.</source>
-        <translation type="obsolete">Tidak ada optimasi yang dipilih untuk diterapkan.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No temporary tables found</source>
-        <translation type="obsolete">Tidak ada tabel sementara yang ditemukan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No temporary tables found for current project</source>
-        <translation type="obsolete">Tidak ada tabel sementara untuk proyek saat ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Save Settings</source>
-        <translation type="obsolete">Simpan Pengaturan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show Optimization Hints</source>
-        <translation type="obsolete">Tampilkan Petunjuk Optimasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo filter (Ctrl+Y)</source>
-        <translation type="obsolete">Ulangi filter (Ctrl+Y)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo last filter (Ctrl+Z)</source>
-        <translation type="obsolete">Batalkan filter terakhir (Ctrl+Z)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>disabled</source>
-        <translation type="obsolete">dinonaktifkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>enabled</source>
-        <translation type="obsolete">diaktifkan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>★ No favorites saved</source>
-        <translation type="obsolete">★ Tidak ada favorit tersimpan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>★ {0} Favorites saved</source>
-        <translation type="obsolete">★ {0} Favorit tersimpan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⚙️ Manage favorites...</source>
-        <translation type="obsolete">⚙️ Kelola favorit...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add Current Filter (no filter active)</source>
-        <translation type="obsolete">⭐ Tambah Filter Saat Ini (tidak ada filter aktif)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add Current Filter to Favorites</source>
-        <translation type="obsolete">⭐ Tambah Filter Saat Ini ke Favorit</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add current filter to favorites</source>
-        <translation type="obsolete">⭐ Tambah filter saat ini ke favorit</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add filter (no active filter)</source>
-        <translation type="obsolete">⭐ Tambah filter (tidak ada filter aktif)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🌐 All Projects (Global)</source>
-        <translation type="obsolete">🌐 Semua Proyek (Global)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📁 Current Project</source>
-        <translation type="obsolete">📁 Proyek Saat Ini</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📤 Export...</source>
-        <translation type="obsolete">📤 Ekspor...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📥 Import...</source>
-        <translation type="obsolete">📥 Impor...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Restore Defaults</source>
-        <translation type="obsolete">Kembalikan Default</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use Balanced Profile</source>
-        <translation type="obsolete">Gunakan Profil Seimbang</translation>
-    </message>
-    <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="119"/>
         <source>&lt;b&gt;PostgreSQL is not available&lt;/b&gt;&lt;br&gt;&lt;br&gt;To use PostgreSQL features, install psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Then restart QGIS to apply changes.</source>
         <translation>&lt;b&gt;PostgreSQL tidak tersedia&lt;/b&gt;&lt;br&gt;&lt;br&gt;Untuk menggunakan fitur PostgreSQL, instal psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Kemudian mulai ulang QGIS untuk menerapkan perubahan.</translation>
@@ -3629,39 +1879,402 @@ Lanjutkan?</translation>
     </message>
 </context>
 <context>
+    <name>QFieldCloudExtension</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <source>QFieldCloud Settings...</source>
+        <translation>QFieldCloud Settings...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <source>Export filtered layers to QFieldCloud</source>
+        <translation>Export filtered layers to QFieldCloud</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudPushDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <source>Export to QFieldCloud</source>
+        <translation>Export to QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <source>Active Filter</source>
+        <translation>Active Filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <source>No active filter</source>
+        <translation>No active filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <source>Filter:</source>
+        <translation>Filter:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <source>0 layers</source>
+        <translation>0 layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <source>Layers:</source>
+        <translation>Layers:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <source>QFieldCloud Project</source>
+        <translation>QFieldCloud Project</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <source>Project name:</source>
+        <translation>Project name:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <source>Description:</source>
+        <translation>Deskripsi:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <source>Create new</source>
+        <translation>Create new</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <source>Update existing:</source>
+        <translation>Update existing:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <source>Mode:</source>
+        <translation>Mode:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <source>Layer Modes</source>
+        <translation>Layer Modes</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Layer</source>
+        <translation>Lapisan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Mode</source>
+        <translation>Mode</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <source>Export</source>
+        <translation>Ekspor</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <source>{0} layers ({1} features)</source>
+        <translation>{0} layers ({1} features)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <source>{0} layers (no filter active)</source>
+        <translation>{0} layers (no filter active)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Missing Name</source>
+        <translation>Missing Name</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Please enter a project name.</source>
+        <translation>Please enter a project name.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>Not Connected</source>
+        <translation>Not Connected</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>QFieldCloud is not connected. Please configure credentials first.</source>
+        <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No Layers</source>
+        <translation>No Layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No valid layers to export.</source>
+        <translation>No valid layers to export.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>Export Error</source>
+        <translation>Export Error</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <source>Failed to export layer &apos;{0}&apos;: {1}</source>
+        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>GPKG export failed: {0}</source>
+        <translation>GPKG export failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <source>Push complete!</source>
+        <translation>Push complete!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project successfully pushed to QFieldCloud!</source>
+        <translation>Project successfully pushed to QFieldCloud!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project: {0}</source>
+        <translation>Project: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Files: {0}</source>
+        <translation>Files: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Duration: {0:.1f}s</source>
+        <translation>Duration: {0:.1f}s</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>URL: {0}</source>
+        <translation>URL: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <source>Warnings:</source>
+        <translation>Warnings:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <source>Push Complete</source>
+        <translation>Push Complete</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <source>Error: {0}</source>
+        <translation>Error: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push Failed</source>
+        <translation>Push Failed</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push failed:
+
+{0}</source>
+        <translation>Push failed:
+
+{0}</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudSettingsDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="53"/>
+        <source>QFieldCloud Configuration</source>
+        <translation>QFieldCloud Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="66"/>
+        <source>Server</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="71"/>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="77"/>
+        <source>Credentials</source>
+        <translation>Credentials</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="81"/>
+        <source>username</source>
+        <translation>username</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="82"/>
+        <source>Username:</source>
+        <translation>Username:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="86"/>
+        <source>password (for initial login)</source>
+        <translation>password (for initial login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="87"/>
+        <source>Password:</source>
+        <translation>Password:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="90"/>
+        <source>JWT token (auto-filled after login)</source>
+        <translation>JWT token (auto-filled after login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="95"/>
+        <source>Login</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="96"/>
+        <source>Login with username/password to get a token</source>
+        <translation>Login with username/password to get a token</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="98"/>
+        <source>Token:</source>
+        <translation>Token:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="102"/>
+        <source>Status:</source>
+        <translation>Status:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="105"/>
+        <source>Test Connection</source>
+        <translation>Test Connection</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="112"/>
+        <source>Preferences</source>
+        <translation>Preferences</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="117"/>
+        <source>Default project:</source>
+        <translation>Default project:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="119"/>
+        <source>Trigger packaging after upload</source>
+        <translation>Trigger packaging after upload</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="144"/>
+        <source>Token stored</source>
+        <translation>Token stored</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Missing Fields</source>
+        <translation>Missing Fields</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Please fill in URL, username, and password.</source>
+        <translation>Please fill in URL, username, and password.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="174"/>
+        <source>Logging in...</source>
+        <translation>Logging in...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="191"/>
+        <source>Logged in as {0}</source>
+        <translation>Logged in as {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="198"/>
+        <source>Login failed: {0}</source>
+        <translation>Login failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Missing Configuration</source>
+        <translation>Missing Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Please configure URL and login first.</source>
+        <translation>Please configure URL and login first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="219"/>
+        <source>Testing connection...</source>
+        <translation>Testing connection...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="229"/>
+        <source>Connected! ({0} projects accessible)</source>
+        <translation>Connected! ({0} projects accessible)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="235"/>
+        <source>Connection failed: {0}</source>
+        <translation>Connection failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Missing URL</source>
+        <translation>Missing URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Server URL is required.</source>
+        <translation>Server URL is required.</translation>
+    </message>
+</context>
+<context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="640"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
         <source>Type to filter...</source>
         <translation>Ketik untuk memfilter...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="649"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
         <source>Select All</source>
         <translation>Pilih Semua</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="651"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
         <source>Select All (non subset)</source>
         <translation>Pilih Semua (bukan subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="653"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
         <source>Select All (subset)</source>
         <translation>Pilih Semua (subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>De-select All</source>
         <translation>Batalkan Pilih Semua</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>De-select All (non subset)</source>
         <translation>Batalkan Pilih Semua (bukan subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>De-select All (subset)</source>
         <translation>Batalkan Pilih Semua (subset)</translation>
     </message>
@@ -3881,196 +2494,11 @@ Lanjutkan?</translation>
     </message>
 </context>
 <context>
-    <name>d</name>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="870"/>
-        <source>Use centroids instead of full geometries for distant layers</source>
-        <translation>Gunakan sentroid alih-alih geometri penuh untuk lapisan jarak jauh</translation>
-    </message>
-</context>
-<context>
-    <name>dw</name>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="737"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation>Buffer negatif (erosi): menyusutkan poligon ke dalam</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="744"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Nilai buffer dalam meter (positif=perluas, negatif=susutkan poligon)</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="120"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation>Kesalahan saat membatalkan perubahan: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Reload Plugin</source>
-        <translation>Muat Ulang Plugin</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation>Apakah Anda ingin memuat ulang FilterMate untuk menerapkan semua perubahan konfigurasi?</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="56"/>
-        <source>Auto-optimization {0}</source>
-        <translation>Optimasi otomatis {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>enabled</source>
-        <translation>diaktifkan</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>disabled</source>
-        <translation>dinonaktifkan</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="69"/>
-        <source>Auto-centroid {0}</source>
-        <translation>Sentroid otomatis {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>Confirmation {0}</source>
-        <translation>Konfirmasi {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="97"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation>Tidak ada lapisan dipilih. Silakan pilih lapisan terlebih dahulu.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="104"/>
-        <source>Auto-optimizer module not available</source>
-        <translation>Modul pengoptimal otomatis tidak tersedia</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="108"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation>Tidak dapat menganalisis lapisan &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="129"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation>Lapisan &apos;{0}&apos; sudah dikonfigurasi optimal.
-Tipe: {1}
-Fitur: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="156"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation>Pengoptimal otomatis tidak tersedia: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="161"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation>Kesalahan menganalisis lapisan: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="189"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation>Diterapkan pada &apos;{0}&apos;:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="196"/>
-        <source>No optimizations selected to apply.</source>
-        <translation>Tidak ada optimasi yang dipilih untuk diterapkan.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="231"/>
-        <source>Optimization settings saved</source>
-        <translation>Pengaturan optimasi disimpan</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="288"/>
-        <source>Dialog not available: {0}</source>
-        <translation>Dialog tidak tersedia: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="293"/>
-        <source>Error: {0}</source>
-        <translation>Kesalahan: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="257"/>
-        <source>Backend optimization settings saved</source>
-        <translation>Pengaturan optimasi backend disimpan</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="286"/>
-        <source>Backend optimizations configured</source>
-        <translation>Optimasi backend dikonfigurasi</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="406"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation>{0} lapisan dioptimasi</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="411"/>
-        <source>All layers using auto-selection</source>
-        <translation>Semua lapisan menggunakan pemilihan otomatis</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="420"/>
-        <source>Backend optimization unavailable</source>
-        <translation>Optimasi backend tidak tersedia</translation>
-    </message>
-</context>
-<context>
-    <name>self._dockwidget</name>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Expression Evaluation</source>
-        <translation>Evaluasi Ekspresi</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Error evaluating expression: {error_msg}</source>
-        <translation>Kesalahan mengevaluasi ekspresi: {error_msg}</translation>
-    </message>
-</context>
-<context>
     <name>self.dockwidget</name>
     <message>
-        <location filename="../ui/managers/configuration_manager.py" line="685"/>
-        <source>Identify selected feature</source>
-        <translation>Identifikasi fitur terpilih</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="686"/>
-        <source>Zoom to selected feature</source>
-        <translation>Perbesar ke fitur terpilih</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="687"/>
-        <source>Toggle feature selection on map</source>
-        <translation>Aktifkan/nonaktifkan pemilihan fitur di peta</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="688"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation>Perbesar otomatis saat fitur berubah</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="689"/>
-        <source>Link exploring widgets together</source>
-        <translation>Hubungkan widget eksplorasi bersama</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="690"/>
-        <source>Reset all layer exploring properties</source>
-        <translation>Reset semua properti eksplorasi lapisan</translation>
+        <location filename="../ui/controllers/config_controller.py" line="664"/>
+        <source>Language changed to &apos;{0}&apos;.</source>
+        <translation>Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

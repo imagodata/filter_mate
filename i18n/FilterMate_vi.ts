@@ -2,50 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="vi_VN" sourcelanguage="en_US">
 <context>
-    <name>@default</name>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="173"/>
-        <source>OptimizationManager</source>
-        <comment>Use Centroids</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="175"/>
-        <source>OptimizationManager</source>
-        <comment>Simplify before buffer</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="177"/>
-        <source>OptimizationManager</source>
-        <comment>Reduce buffer segments (3)</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-</context>
-<context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="168"/>
+        <location filename="../core/services/app_initializer.py" line="171"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Da xoa bo loc bi hong tu {0} lop. Vui long ap dung lai bo loc cua ban.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="237"/>
+        <location filename="../core/services/app_initializer.py" line="240"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Phat hien du an trong. Them lop vector de kich hoat plugin.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="304"/>
+        <location filename="../core/services/app_initializer.py" line="307"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>Khong the truy cap co so du lieu FilterMate. Kiem tra quyen thu muc du an.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="318"/>
+        <location filename="../core/services/app_initializer.py" line="321"/>
         <source>Error during database verification: {0}</source>
         <translation>Loi trong qua trinh xac minh co so du lieu: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="594"/>
+        <location filename="../core/services/app_initializer.py" line="599"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Tai lop that bai. Su dung F5 de buoc tai lai.</translation>
     </message>
@@ -84,564 +63,9 @@
     </message>
 </context>
 <context>
-    <name>BackendOptimizationWidget</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Quick Setup</source>
-        <translation type="obsolete">Cài đặt nhanh</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Choose a profile or customize settings below</source>
-        <translation type="obsolete">Chọn hồ sơ hoặc tùy chỉnh cài đặt bên dưới</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Smart Recommendations</source>
-        <translation type="obsolete">Đề xuất thông minh</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Balanced Profile</source>
-        <translation type="obsolete">Hồ sơ cân bằng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Maximum Performance</source>
-        <translation type="obsolete">Hiệu suất tối đa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Minimal Resources</source>
-        <translation type="obsolete">Tài nguyên tối thiểu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL/PostGIS Optimizations</source>
-        <translation type="obsolete">Tối ưu hóa PostgreSQL/PostGIS</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Materialized Views</source>
-        <translation type="obsolete">View vật liệu hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary materialized views for complex filters</source>
-        <translation type="obsolete">Tạo view vật liệu hóa tạm thời cho các bộ lọc phức tạp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Two-Phase Filtering</source>
-        <translation type="obsolete">Lọc hai giai đoạn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use bounding box pre-filtering before precise geometry tests</source>
-        <translation type="obsolete">Sử dụng lọc trước hộp bao trước các kiểm tra hình học chính xác</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Progressive Loading</source>
-        <translation type="obsolete">Tải tiến dần</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Load data in chunks for very large datasets</source>
-        <translation type="obsolete">Tải dữ liệu theo từng phần cho các tập dữ liệu rất lớn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Chunk Size</source>
-        <translation type="obsolete">Kích thước phần</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Server-Side Simplification</source>
-        <translation type="obsolete">Đơn giản hóa phía máy chủ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify geometries on server for display purposes</source>
-        <translation type="obsolete">Đơn giản hóa hình học trên máy chủ cho mục đích hiển thị</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplification Tolerance</source>
-        <translation type="obsolete">Dung sai đơn giản hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Parallel Query Execution</source>
-        <translation type="obsolete">Thực thi truy vấn song song</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Execute independent queries in parallel</source>
-        <translation type="obsolete">Thực thi các truy vấn độc lập song song</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression Caching</source>
-        <translation type="obsolete">Bộ nhớ đệm biểu thức</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache compiled expressions for reuse</source>
-        <translation type="obsolete">Lưu đệm các biểu thức đã biên dịch để tái sử dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Spatialite/GeoPackage Optimizations</source>
-        <translation type="obsolete">Tối ưu hóa Spatialite/GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>R-tree Temp Tables</source>
-        <translation type="obsolete">Bảng tạm R-tree</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary tables with R-tree indexes</source>
-        <translation type="obsolete">Tạo bảng tạm với chỉ mục R-tree</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox Pre-filtering</source>
-        <translation type="obsolete">Lọc trước BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use bounding box filtering before precise tests</source>
-        <translation type="obsolete">Sử dụng lọc hộp bao trước các kiểm tra chính xác</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory-Mapped I/O</source>
-        <translation type="obsolete">I/O ánh xạ bộ nhớ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use memory-mapped I/O for file access</source>
-        <translation type="obsolete">Sử dụng I/O ánh xạ bộ nhớ để truy cập tệp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch Processing</source>
-        <translation type="obsolete">Xử lý theo lô</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Process multiple operations in batches</source>
-        <translation type="obsolete">Xử lý nhiều thao tác theo lô</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch Size</source>
-        <translation type="obsolete">Kích thước lô</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>OGR/Memory Optimizations</source>
-        <translation type="obsolete">Tối ưu hóa OGR/Bộ nhớ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatic Spatial Index</source>
-        <translation type="obsolete">Chỉ mục không gian tự động</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary spatial indexes automatically</source>
-        <translation type="obsolete">Tự động tạo chỉ mục không gian tạm thời</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Progressive Chunking</source>
-        <translation type="obsolete">Phân đoạn tiến dần</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Process large files in progressive chunks</source>
-        <translation type="obsolete">Xử lý tệp lớn theo các phần tiến dần</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory Feature Caching</source>
-        <translation type="obsolete">Bộ nhớ đệm đối tượng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache features in memory for faster access</source>
-        <translation type="obsolete">Lưu đệm đối tượng trong bộ nhớ để truy cập nhanh hơn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache Size (features)</source>
-        <translation type="obsolete">Kích thước bộ đệm (đối tượng)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Geometry Simplification</source>
-        <translation type="obsolete">Đơn giản hóa hình học</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify complex geometries during processing</source>
-        <translation type="obsolete">Đơn giản hóa hình học phức tạp trong quá trình xử lý</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Global Optimizations</source>
-        <translation type="obsolete">Tối ưu hóa toàn cục</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Optimization</source>
-        <translation type="obsolete">Tự động tối ưu hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically optimize based on data analysis</source>
-        <translation type="obsolete">Tự động tối ưu hóa dựa trên phân tích dữ liệu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Centroid</source>
-        <translation type="obsolete">Tự động trọng tâm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically center view on filter results</source>
-        <translation type="obsolete">Tự động căn giữa chế độ xem trên kết quả lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Parallel Layer Filtering</source>
-        <translation type="obsolete">Lọc lớp song song</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter multiple layers simultaneously</source>
-        <translation type="obsolete">Lọc nhiều lớp đồng thời</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Smart Expression Parsing</source>
-        <translation type="obsolete">Phân tích biểu thức thông minh</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimize expression parsing for complex queries</source>
-        <translation type="obsolete">Tối ưu hóa phân tích biểu thức cho các truy vấn phức tạp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Deferred Refresh</source>
-        <translation type="obsolete">Làm mới trì hoãn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Delay map refresh until all filters are applied</source>
-        <translation type="obsolete">Trì hoãn làm mới bản đồ cho đến khi tất cả bộ lọc được áp dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Verbose Logging</source>
-        <translation type="obsolete">Ghi nhật ký chi tiết</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable detailed logging for debugging</source>
-        <translation type="obsolete">Bật ghi nhật ký chi tiết để gỡ lỗi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply</source>
-        <translation type="obsolete">Áp dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset to Defaults</source>
-        <translation type="obsolete">Đặt lại mặc định</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Settings applied successfully</source>
-        <translation type="obsolete">Đã áp dụng cài đặt thành công</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Settings reset to defaults</source>
-        <translation type="obsolete">Đã đặt lại cài đặt về mặc định</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Profile applied: {}</source>
-        <translation type="obsolete">Đã áp dụng hồ sơ: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error applying settings</source>
-        <translation type="obsolete">Lỗi khi áp dụng cài đặt</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Checking...</source>
-        <translation type="obsolete">Trạng thái MV: Đang kiểm tra...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Error</source>
-        <translation type="obsolete">Trạng thái MV: Lỗi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Clean</source>
-        <translation type="obsolete">Trạng thái MV: Sạch</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status:</source>
-        <translation type="obsolete">Trạng thái MV:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>active</source>
-        <translation type="obsolete">hoạt động</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No active materialized views</source>
-        <translation type="obsolete">Không có materialized view hoạt động</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Session:</source>
-        <translation type="obsolete">Phiên:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Other sessions:</source>
-        <translation type="obsolete">Các phiên khác:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🧹 Session</source>
-        <translation type="obsolete">🧹 Phiên</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup MVs from this session</source>
-        <translation type="obsolete">Dọn dẹp MV từ phiên này</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🗑️ Orphaned</source>
-        <translation type="obsolete">🗑️ Mồ côi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup orphaned MVs (&gt;24h old)</source>
-        <translation type="obsolete">Dọn MV mồ côi (&gt;24 giờ)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⚠️ All</source>
-        <translation type="obsolete">⚠️ Tất cả</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup ALL MVs (affects other sessions)</source>
-        <translation type="obsolete">Dọn TẤT CẢ MV (ảnh hưởng phiên khác)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirm Cleanup</source>
-        <translation type="obsolete">Xác nhận dọn dẹp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Drop ALL materialized views?
-This affects other FilterMate sessions!</source>
-        <translation type="obsolete">Xóa TẤT CẢ materialized view?
-Điều này ảnh hưởng đến các phiên FilterMate khác!</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Refresh MV status</source>
-        <translation type="obsolete">Làm mới trạng thái MV</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Threshold:</source>
-        <translation type="obsolete">Ngưỡng:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>features</source>
-        <translation type="obsolete">tính năng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-cleanup on exit</source>
-        <translation type="obsolete">Tự động dọn dẹp khi thoát</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically drop session MVs when plugin unloads</source>
-        <translation type="obsolete">Tự động xóa MV phiên khi plugin được dỡ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create MVs for datasets larger than this</source>
-        <translation type="obsolete">Tạo MV cho các bộ dữ liệu lớn hơn này</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>faster possible</source>
-        <translation type="obsolete">nhanh hơn có thể</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations available</source>
-        <translation type="obsolete">Tối ưu hóa có sẵn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Apply Optimizations?</source>
-        <translation type="obsolete">FilterMate - Áp dụng tối ưu hóa?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip</source>
-        <translation type="obsolete">Bỏ qua</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>✓ Apply</source>
-        <translation type="obsolete">✓ Áp dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Don&apos;t ask for this session</source>
-        <translation type="obsolete">Không hỏi cho phiên này</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Trọng tâm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify</source>
-        <translation type="obsolete">Đơn giản hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Pre-simplify</source>
-        <translation type="obsolete">Tiền đơn giản hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Fewer segments</source>
-        <translation type="obsolete">Ít phân đoạn hơn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Flat buffer</source>
-        <translation type="obsolete">Bộ đệm phẳng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox filter</source>
-        <translation type="obsolete">Bộ lọc BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Attr-first</source>
-        <translation type="obsolete">Attr-trước</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL not available</source>
-        <translation type="obsolete">PostgreSQL không khả dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No connection</source>
-        <translation type="obsolete">Không có kết nối</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation type="obsolete">Tự động thu phóng khi tính năng thay đổi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimization settings saved</source>
-        <translation type="obsolete">Cài đặt tối ưu hóa backend đã lưu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimizations configured</source>
-        <translation type="obsolete">Tối ưu hóa backend đã cấu hình</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression Evaluation</source>
-        <translation type="obsolete">Đánh giá biểu thức</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Identify selected feature</source>
-        <translation type="obsolete">Xác định tính năng đã chọn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Layer properties reset to defaults</source>
-        <translation type="obsolete">Thuộc tính lớp đặt lại về mặc định</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Link exploring widgets together</source>
-        <translation type="obsolete">Liên kết các widget khám phá cùng nhau</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization settings saved</source>
-        <translation type="obsolete">Cài đặt tối ưu hóa đã lưu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset all layer exploring properties</source>
-        <translation type="obsolete">Đặt lại tất cả thuộc tính khám phá lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Toggle feature selection on map</source>
-        <translation type="obsolete">Bật/tắt lựa chọn tính năng trên bản đồ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons)</source>
-        <translation type="obsolete">Sử dụng trọng tâm thay vì hình học đầy đủ cho các lớp xa (nhanh hơn cho đa giác phức tạp)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">Sử dụng trọng tâm thay vì hình học đầy đủ cho lớp nguồn (nhanh hơn cho đa giác phức tạp)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Zoom to selected feature</source>
-        <translation type="obsolete">Thu phóng đến tính năng đã chọn</translation>
-    </message>
-</context>
-<context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="275"/>
+        <location filename="../ui/controllers/config_controller.py" line="311"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Loi khi huy thay doi: {0}</translation>
     </message>
@@ -690,34 +114,6 @@ This affects other FilterMate sessions!</source>
         <location filename="../adapters/database_manager.py" line="527"/>
         <source>Error during database initialization: {0}</source>
         <translation>Loi trong qua trinh khoi tao co so du lieu: {0}</translation>
-    </message>
-</context>
-<context>
-    <name>DatasourceManager</name>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
-        <source>Database file does not exist: {db_file_path}</source>
-        <translation>Tep co so du lieu khong ton tai: {db_file_path}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
-        <source>Failed to connect to database {db_file_path}: {error}</source>
-        <translation>Ket noi co so du lieu {db_file_path} that bai: {error}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
-        <source>QGIS processing module not available to create spatial index</source>
-        <translation>Module xu ly QGIS khong kha dung de tao chi muc khong gian</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
-        <source>Cannot create spatial index: layer invalid or source not found.</source>
-        <translation>Khong the tao chi muc khong gian: lop khong hop le hoac khong tim thay nguon.</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
-        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
-        <translation>Phat hien lop PostgreSQL nhung psycopg2 chua duoc cai dat. Dang su dung backend Spatialite cuc bo. De co hieu suat tot hon voi du lieu lon, hay cai dat psycopg2.</translation>
     </message>
 </context>
 <context>
@@ -1243,59 +639,6 @@ Nhan vao chi bao ★ va chon &apos;Them bo loc hien tai vao yeu thich&apos; de l
     </message>
 </context>
 <context>
-    <name>FeedbackUtils</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Starting filter on {count} layer(s)</source>
-        <translation type="obsolete">Bắt đầu lọc trên {count} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Removing filters from {count} layer(s)</source>
-        <translation type="obsolete">Đang xóa bộ lọc khỏi {count} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Resetting {count} layer(s)</source>
-        <translation type="obsolete">Đang đặt lại {count} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Exporting {count} layer(s)</source>
-        <translation type="obsolete">Đang xuất {count} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully filtered {count} layer(s)</source>
-        <translation type="obsolete">Đã lọc thành công {count} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully removed filters from {count} layer(s)</source>
-        <translation type="obsolete">Đã xóa thành công bộ lọc khỏi {count} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully reset {count} layer(s)</source>
-        <translation type="obsolete">Đã đặt lại thành công {count} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully exported {count} layer(s)</source>
-        <translation type="obsolete">Đã xuất thành công {count} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</source>
-        <translation type="obsolete">Tập dữ liệu lớn ({count} đối tượng) không có PostgreSQL. Hiệu suất có thể giảm.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL recommended for better performance.</source>
-        <translation type="obsolete">Khuyến nghị sử dụng PostgreSQL để có hiệu suất tốt hơn.</translation>
-    </message>
-</context>
-<context>
     <name>FilepathType</name>
     <message>
         <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
@@ -1352,209 +695,127 @@ Nhan vao chi bao ★ va chon &apos;Them bo loc hien tai vao yeu thich&apos; de l
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="106"/>
+        <location filename="../filter_mate.py" line="188"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>Open FilterMate panel</source>
         <translation>Mở bảng điều khiển FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset configuration and database</source>
         <translation>Đặt lại cấu hình và cơ sở dữ liệu</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Khôi phục cấu hình mặc định và xóa cơ sở dữ liệu SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Reset Configuration</source>
         <translation>Đặt lại cấu hình</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Are you sure you want to reset to the default configuration?
-
-This will:
-- Reset all FilterMate settings
-- Delete all filter history databases</source>
-        <translation type="obsolete">Bạn có chắc chắn muốn khôi phục cấu hình mặc định?
-
-Điều này sẽ:
-- Đặt lại tất cả cài đặt FilterMate
-- Xóa tất cả cơ sở dữ liệu lịch sử bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1192"/>
+        <location filename="../filter_mate.py" line="1355"/>
         <source>Configuration reset successfully.</source>
         <translation>Đặt lại cấu hình thành công.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1197"/>
+        <location filename="../filter_mate.py" line="1360"/>
         <source>Default configuration file not found.</source>
         <translation>Không tìm thấy tệp cấu hình mặc định.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1218"/>
+        <location filename="../filter_mate.py" line="1381"/>
         <source>Database deleted: {filename}</source>
         <translation>Đã xóa cơ sở dữ liệu: {filename}</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Unable to delete {filename}: {error}</source>
-        <translation type="obsolete">Không thể xóa {filename}: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>Restart required</source>
         <translation>Cần khởi động lại</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>The configuration has been reset.
-
-Please restart QGIS to apply all changes.</source>
-        <translation type="obsolete">Cấu hình đã được đặt lại.
-
-Vui lòng khởi động lại QGIS để áp dụng tất cả các thay đổi.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error during reset: {error}</source>
-        <translation type="obsolete">Lỗi khi đặt lại: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="350"/>
+        <location filename="../filter_mate.py" line="401"/>
         <source>Obsolete configuration detected</source>
         <translation>Phát hiện cấu hình lỗi thời</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="351"/>
+        <location filename="../filter_mate.py" line="402"/>
         <source>unknown version</source>
         <translation>phiên bản không xác định</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="359"/>
+        <location filename="../filter_mate.py" line="410"/>
         <source>Corrupted configuration detected</source>
         <translation>Phát hiện cấu hình bị hỏng</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="416"/>
+        <location filename="../filter_mate.py" line="467"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Cấu hình chưa được đặt lại. Một số tính năng có thể không hoạt động đúng.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="427"/>
+        <location filename="../filter_mate.py" line="478"/>
         <source>Configuration created with default values</source>
         <translation>Cấu hình đã được tạo với giá trị mặc định</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Cấu hình bị hỏng đã được đặt lại. Cài đặt mặc định đã được khôi phục.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="484"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Cấu hình lỗi thời đã được đặt lại. Cài đặt mặc định đã được khôi phục.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="505"/>
         <source>Configuration updated to latest version</source>
         <translation>Cấu hình đã được cập nhật lên phiên bản mới nhất</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="451"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Cấu hình đã cập nhật: cài đặt mới có sẵn ({sections}). Truy cập qua menu Tùy chọn.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Geometry Simplification</source>
         <translation>Đơn giản hóa hình học</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>Optimization Thresholds</source>
         <translation>Ngưỡng tối ưu hóa</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="591"/>
+        <location filename="../filter_mate.py" line="642"/>
         <source>Geometry validation setting</source>
         <translation>Cài đặt xác thực hình học</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="621"/>
+        <location filename="../filter_mate.py" line="672"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Đã tắt thành công bộ lọc hình học không hợp lệ.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="628"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Bộ lọc hình học không hợp lệ không được thay đổi. Một số đối tượng có thể bị loại khỏi xuất.</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">Giá trị đệm tính bằng mét (dương=mở rộng, âm=thu nhỏ đa giác)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation type="obsolete">Đệm âm (xói mòn): thu nhỏ đa giác vào trong</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>point</source>
-        <translation type="obsolete">điểm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>line</source>
-        <translation type="obsolete">đường</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>non-polygon</source>
-        <translation type="obsolete">không phải đa giác</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer value in meters (positive only when centroids are enabled. Negative buffers cannot be applied to points)</source>
-        <translation type="obsolete">Giá trị vùng đệm tính bằng mét (chỉ dương khi centroid được bật. Vùng đệm âm không thể áp dụng cho điểm)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Mode batch</source>
-        <translation type="obsolete">Chế độ batch</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">Số đoạn cho độ chính xác đệm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Trọng tâm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons like buildings)</source>
-        <translation type="obsolete">Sử dụng trọng tâm thay vì hình học đầy đủ cho các lớp xa (nhanh hơn cho đa giác phức tạp như tòa nhà)</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="352"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1569,7 +830,7 @@ Bạn có muốn đặt lại về cài đặt mặc định không?
 • Không: Giữ cấu hình hiện tại (có thể gây ra sự cố)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="360"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1584,12 +845,12 @@ Bạn có muốn đặt lại về cài đặt mặc định không?
 • Không: Hủy (plugin có thể không hoạt động chính xác)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="367"/>
+        <location filename="../filter_mate.py" line="418"/>
         <source>Configuration reset</source>
         <translation>Đặt lại cấu hình</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="419"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1598,12 +859,12 @@ Do you want to continue?</source>
 Bạn có muốn tiếp tục không?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="473"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Error during configuration migration: {}</source>
         <translation>Lỗi trong quá trình di chuyển cấu hình: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="593"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -1630,7 +891,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1647,7 +908,7 @@ QGIS must be restarted to apply the changes.</source>
 QGIS phải được khởi động lại để áp dụng các thay đổi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1656,439 +917,386 @@ Please restart QGIS to apply the changes.</source>
 Vui lòng khởi động lại QGIS để áp dụng các thay đổi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="295"/>
+        <location filename="../filter_mate.py" line="346"/>
         <source>Initialization error: {0}</source>
         <translation>Loi khoi tao: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} lop duoc tham chieu chua duoc tai ({layers_list}). Su dung hien thi du phong.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1223"/>
+        <location filename="../filter_mate.py" line="1386"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Khong the xoa {filename}: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1240"/>
+        <location filename="../filter_mate.py" line="1403"/>
         <source>Error during reset: {str(e)}</source>
         <translation>Loi trong qua trinh dat lai: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1273"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Cam on ban da su dung &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Tham gia cong dong Discord cua chung toi de:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Nhan tro giup va ho tro&lt;/li&gt;&lt;li&gt;Bao cao loi va su co&lt;/li&gt;&lt;li&gt;De xuat tinh nang moi&lt;/li&gt;&lt;li&gt;Chia se meo voi nguoi dung khac&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1289"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>  Join us on Discord</source>
         <translation>  Tham gia Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1309"/>
+        <location filename="../filter_mate.py" line="1472"/>
         <source>Don&apos;t show this again</source>
         <translation>Khong hien thi lai</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1312"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Close</source>
         <translation>Dong</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1541"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Loi tai plugin: {0}. Kiem tra bang dieu khien Python cua QGIS de biet chi tiet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6630"/>
+        <location filename="../filter_mate_dockwidget.py" line="6691"/>
         <source>Current layer: {0}</source>
         <translation>Lop hien tai: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6632"/>
+        <location filename="../filter_mate_dockwidget.py" line="6693"/>
         <source>No layer selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>Selected layers:
 {0}</source>
         <translation>Cac lop da chon:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>No layers selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6662"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No expression defined</source>
         <translation>Chua dinh nghia bieu thuc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6674"/>
+        <location filename="../filter_mate_dockwidget.py" line="6735"/>
         <source>Display expression: {0}</source>
         <translation>Bieu thuc hien thi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6750"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID doi tuong: {0}
 Thuoc tinh dau tien: {1}</translation>
     </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="301"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation>Tai lai plugin de ap dung thay doi bo cuc (vi tri thanh hanh dong)</translation>
-    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="271"/>
+        <location filename="../filter_mate_app.py" line="274"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Phat hien lop PostgreSQL ({0}) nhung psycopg2 chua duoc cai dat.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="358"/>
+        <location filename="../filter_mate_app.py" line="361"/>
         <source>Cleared {0} caches</source>
         <translation>Da xoa {0} bo nho dem</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="769"/>
+        <location filename="../filter_mate_app.py" line="772"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Tao dockwidget that bai: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="779"/>
+        <location filename="../filter_mate_app.py" line="782"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Hien thi dockwidget that bai: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1229"/>
+        <location filename="../filter_mate_app.py" line="1232"/>
         <source>Error executing {0}: {1}</source>
         <translation>Loi thuc thi {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1241"/>
+        <location filename="../filter_mate_app.py" line="1244"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plugin dang chay o che do suy giam (dich vu hexagonal khong kha dung). Hieu suat co the giam.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>FilterMate ERROR</source>
         <translation>Loi FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Khong the thuc thi {0}: khoi tao widget that bai.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1994"/>
+        <location filename="../filter_mate_app.py" line="2144"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Khong the {0}: lop khong hop le hoac khong tim thay nguon.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2131"/>
+        <location filename="../filter_mate_app.py" line="2281"/>
         <source>All filters cleared - </source>
         <translation>Tat ca bo loc da xoa - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2132"/>
+        <location filename="../filter_mate_app.py" line="2282"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} doi tuong hien thi trong lop chinh</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2138"/>
+        <location filename="../filter_mate_app.py" line="2288"/>
         <source>Error: result handler missing</source>
         <translation>Loi: thieu trinh xu ly ket qua</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2151"/>
+        <location filename="../filter_mate_app.py" line="2301"/>
         <source>Error during filtering: {0}</source>
         <translation>Loi trong qua trinh loc: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2280"/>
+        <location filename="../filter_mate_app.py" line="2432"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Da phuc hoi {0} yeu thich mo coi: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2416"/>
+        <location filename="../filter_mate_app.py" line="2568"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Tai lop that bai - nhan de thu lai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2463"/>
+        <location filename="../filter_mate_app.py" line="2615"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} lop da tai thanh cong</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1595"/>
+        <source>filter</source>
+        <translation>filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1597"/>
+        <source>unfilter</source>
+        <translation>unfilter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1600"/>
+        <source>FilterMate – Edit Mode Detected</source>
+        <translation>FilterMate – Edit Mode Detected</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1602"/>
+        <source>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</source>
+        <translation>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1612"/>
+        <source>Save Changes &amp; {0}</source>
+        <translation>Save Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1619"/>
+        <source>Discard Changes &amp; {0}</source>
+        <translation>Discard Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1626"/>
+        <source>Cancel</source>
+        <translation>Hủy</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1650"/>
+        <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
+        <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation type="obsolete">Tải lại plugin để áp dụng thay đổi bố cục (vị trí thanh hành động)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reload Plugin</source>
-        <translation type="obsolete">Tải lại Plugin</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation type="obsolete">Bạn có muốn tải lại FilterMate để áp dụng tất cả thay đổi cấu hình?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer: {name}</source>
-        <translation type="obsolete">Lớp hiện tại: {name}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layer selected</source>
-        <translation type="obsolete">Chưa chọn lớp nào</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Selected layers:</source>
-        <translation type="obsolete">Các lớp đã chọn:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Multiple layers selected</source>
-        <translation type="obsolete">Đã chọn nhiều lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layers selected</source>
-        <translation type="obsolete">Chưa chọn lớp nào</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression:</source>
-        <translation type="obsolete">Biểu thức:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No expression defined</source>
-        <translation type="obsolete">Chưa định nghĩa biểu thức</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display expression: {expr}</source>
-        <translation type="obsolete">Biểu thức hiển thị: {expr}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Feature ID: {id}</source>
-        <translation type="obsolete">ID đối tượng: {id}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer: {0}</source>
-        <translation type="obsolete">Lớp hiện tại: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Selected layers:
-{0}</source>
-        <translation type="obsolete">Các lớp đã chọn:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression:
-{0}</source>
-        <translation type="obsolete">Biểu thức:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression: {0}</source>
-        <translation type="obsolete">Biểu thức: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display expression: {0}</source>
-        <translation type="obsolete">Biểu thức hiển thị: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Feature ID: {0}
-First attribute: {1}</source>
-        <translation type="obsolete">ID đối tượng: {0}
-Thuộc tính đầu tiên: {1}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="582"/>
+        <location filename="../filter_mate_dockwidget.py" line="596"/>
         <source>Initialization error: {}</source>
         <translation>Loi khoi tao: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Cau hinh UI chua hoan thanh - kiem tra nhat ky</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
         <translation>Loi kich thuoc UI: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1340"/>
+        <location filename="../filter_mate_dockwidget.py" line="1355"/>
         <source>Favorites manager not available</source>
         <translation>Trinh quan ly yeu thich khong kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1359"/>
+        <location filename="../filter_mate_dockwidget.py" line="1374"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} yeu thich da luu
 Nhan de ap dung hoac quan ly</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1367"/>
+        <location filename="../filter_mate_dockwidget.py" line="1382"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Chua luu yeu thich nao
 Nhan de them bo loc hien tai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1391"/>
+        <location filename="../filter_mate_dockwidget.py" line="1406"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Da buoc backend {0} cho {1} lop</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1477"/>
+        <location filename="../filter_mate_dockwidget.py" line="1492"/>
         <source>Backend controller not available</source>
         <translation>Bo dieu khien backend khong kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1415"/>
+        <location filename="../filter_mate_dockwidget.py" line="1430"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Tu dong don dep PostgreSQL da bat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1416"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Tu dong don dep PostgreSQL da tat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Da don dep cac view phien PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Khong co view de don dep hoac don dep that bai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1433"/>
+        <location filename="../filter_mate_dockwidget.py" line="1448"/>
         <source>No PostgreSQL connection available</source>
         <translation>Khong co ket noi PostgreSQL kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1439"/>
+        <location filename="../filter_mate_dockwidget.py" line="1454"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Schema co {0} view tu cac phien khac.
 Van xoa?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1440"/>
+        <location filename="../filter_mate_dockwidget.py" line="1455"/>
         <source>Other Sessions Active</source>
         <translation>Cac phien khac dang hoat dong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1442"/>
+        <location filename="../filter_mate_dockwidget.py" line="1457"/>
         <source>Schema cleanup cancelled</source>
         <translation>Don dep schema da huy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1447"/>
+        <location filename="../filter_mate_dockwidget.py" line="1462"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Schema &apos;{0}&apos; da xoa thanh cong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1464"/>
         <source>Schema cleanup failed</source>
         <translation>Don dep schema that bai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1475"/>
+        <location filename="../filter_mate_dockwidget.py" line="1490"/>
         <source>PostgreSQL Session Info</source>
         <translation>Thong tin phien PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Theme adapted: {0}</source>
         <translation>Giao dien da thich ung: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Dark mode</source>
         <translation>Che do toi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Light mode</source>
         <translation>Che do sang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3908"/>
+        <location filename="../filter_mate_dockwidget.py" line="3896"/>
         <source>Selected features have no geometry.</source>
         <translation>Cac doi tuong da chon khong co hinh hoc.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3927"/>
+        <location filename="../filter_mate_dockwidget.py" line="3915"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Chua chon doi tuong. Chon mot doi tuong tu danh sach xo xuong.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4902"/>
+        <location filename="../filter_mate_dockwidget.py" line="4957"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Lop da chon khong hop le hoac khong tim thay nguon.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5612"/>
+        <location filename="../filter_mate_dockwidget.py" line="5667"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Vung dem am (xoi mon): thu nho da giac vao trong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5615"/>
+        <location filename="../filter_mate_dockwidget.py" line="5670"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Gia tri vung dem tinh bang met (duong=mo rong, am=thu nho da giac)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6089"/>
+        <location filename="../filter_mate_dockwidget.py" line="6144"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin da kich hoat voi {0} lop vector</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6172"/>
+        <location filename="../filter_mate_dockwidget.py" line="6227"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Khong the tu dong tai lai plugin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6174"/>
+        <location filename="../filter_mate_dockwidget.py" line="6229"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Loi tai lai plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6224"/>
+        <location filename="../filter_mate_dockwidget.py" line="6282"/>
         <source>Layer properties reset to defaults</source>
         <translation>Thuoc tinh lop da dat lai ve mac dinh</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6225"/>
+        <location filename="../filter_mate_dockwidget.py" line="6283"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Loi dat lai thuoc tinh lop: {}</translation>
     </message>
@@ -2096,417 +1304,172 @@ Van xoa?</translation>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
         <translation>CHỌN ĐƠN</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
         <source>MULTIPLE SELECTION</source>
         <translation>CHỌN NHIỀU</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1545"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
         <source>CUSTOM SELECTION</source>
         <translation>CHỌN TÙY CHỈNH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
         <source>FILTERING</source>
         <translation>LỌC</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1575"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
         <source>EXPORTING</source>
         <translation>XUẤT</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1576"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
         <source>CONFIGURATION</source>
         <translation>CẤU HÌNH</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Identify feature - Display feature attributes</source>
-        <translation type="obsolete">Nhận dạng đối tượng - Hiển thị thuộc tính đối tượng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Zoom to feature - Center the map on the selected feature</source>
-        <translation type="obsolete">Phóng đến đối tượng - Căn giữa bản đồ trên đối tượng đã chọn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable selection - Select features on map</source>
-        <translation type="obsolete">Bật chọn - Chọn đối tượng trên bản đồ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable tracking - Follow the selected feature on the map</source>
-        <translation type="obsolete">Bật theo dõi - Theo dõi đối tượng đã chọn trên bản đồ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Link widgets - Synchronize selection between widgets</source>
-        <translation type="obsolete">Liên kết widget - Đồng bộ lựa chọn giữa các widget</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset layer properties - Restore default layer settings</source>
-        <translation type="obsolete">Đặt lại thuộc tính lớp - Khôi phục cài đặt lớp mặc định</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-sync with current layer - Automatically update when layer changes</source>
-        <translation type="obsolete">Tự động đồng bộ với lớp hiện tại - Tự động cập nhật khi lớp thay đổi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable multi-layer filtering - Apply filter to multiple layers simultaneously</source>
-        <translation type="obsolete">Bật lọc đa lớp - Áp dụng bộ lọc cho nhiều lớp cùng lúc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable additive filtering - Combine multiple filters on the current layer</source>
-        <translation type="obsolete">Bật lọc cộng dồn - Kết hợp nhiều bộ lọc trên lớp hiện tại</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable spatial filtering - Filter features using geometric relationships</source>
-        <translation type="obsolete">Bật lọc không gian - Lọc đối tượng sử dụng quan hệ hình học</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable buffer - Add a buffer zone around selected features</source>
-        <translation type="obsolete">Bật vùng đệm - Thêm vùng đệm xung quanh đối tượng đã chọn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer type - Select the buffer calculation method</source>
-        <translation type="obsolete">Loại vùng đệm - Chọn phương pháp tính vùng đệm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer - Select the layer to filter</source>
-        <translation type="obsolete">Lớp hiện tại - Chọn lớp để lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Logical operator for combining filters on the source layer</source>
-        <translation type="obsolete">Toán tử logic để kết hợp bộ lọc trên lớp nguồn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Logical operator for combining filters on other layers</source>
-        <translation type="obsolete">Toán tử logic để kết hợp bộ lọc trên các lớp khác</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select geometric predicate(s) for spatial filtering</source>
-        <translation type="obsolete">Chọn vị từ hình học cho lọc không gian</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer distance in meters</source>
-        <translation type="obsolete">Khoảng cách vùng đệm tính bằng mét</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer type - Define how the buffer is calculated</source>
-        <translation type="obsolete">Loại vùng đệm - Xác định cách tính vùng đệm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select layers to export</source>
-        <translation type="obsolete">Chọn lớp để xuất</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Configure output projection</source>
-        <translation type="obsolete">Cấu hình phép chiếu đầu ra</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Export layer styles (QML/SLD)</source>
-        <translation type="obsolete">Xuất kiểu lớp (QML/SLD)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select output format</source>
-        <translation type="obsolete">Chọn định dạng đầu ra</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Configure output location and filename</source>
-        <translation type="obsolete">Cấu hình vị trí và tên tệp đầu ra</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable ZIP compression - Create a compressed archive of exported files</source>
-        <translation type="obsolete">Bật nén ZIP - Tạo tệp nén của các tệp đã xuất</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1569"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
         <source>Select CRS for export</source>
         <translation>Chọn hệ tọa độ để xuất</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Style format - Select QML or SLD format</source>
-        <translation type="obsolete">Định dạng kiểu - Chọn định dạng QML hoặc SLD</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Output file format</source>
-        <translation type="obsolete">Định dạng tệp đầu ra</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Output folder name - Enter the name of the export folder</source>
-        <translation type="obsolete">Tên thư mục đầu ra - Nhập tên thư mục xuất</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter folder name...</source>
-        <translation type="obsolete">Nhập tên thư mục...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode - Export each layer to a separate folder</source>
-        <translation type="obsolete">Chế độ hàng loạt - Xuất mỗi lớp vào thư mục riêng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode</source>
-        <translation type="obsolete">Chế độ hàng loạt</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>ZIP filename - Enter the name for the compressed archive</source>
-        <translation type="obsolete">Tên tệp ZIP - Nhập tên cho tệp nén</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter ZIP filename...</source>
-        <translation type="obsolete">Nhập tên tệp ZIP...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode - Create a separate ZIP for each layer</source>
-        <translation type="obsolete">Chế độ hàng loạt - Tạo ZIP riêng cho mỗi lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply Filter - Execute the current filter on selected layers</source>
-        <translation type="obsolete">Áp dụng bộ lọc - Thực thi bộ lọc hiện tại trên các lớp đã chọn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply Filter</source>
-        <translation type="obsolete">Áp dụng bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply the current filter expression to filter features on the selected layer(s)</source>
-        <translation type="obsolete">Áp dụng biểu thức lọc hiện tại để lọc đối tượng trên các lớp đã chọn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo Filter - Restore the previous filter state</source>
-        <translation type="obsolete">Hoàn tác bộ lọc - Khôi phục trạng thái bộ lọc trước đó</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo Filter</source>
-        <translation type="obsolete">Hoàn tác bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo the last filter operation and restore the previous state</source>
-        <translation type="obsolete">Hoàn tác thao tác lọc cuối cùng và khôi phục trạng thái trước đó</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo Filter - Reapply the previously undone filter</source>
-        <translation type="obsolete">Làm lại bộ lọc - Áp dụng lại bộ lọc đã hoàn tác trước đó</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo Filter</source>
-        <translation type="obsolete">Làm lại bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo the previously undone filter operation</source>
-        <translation type="obsolete">Làm lại thao tác lọc đã hoàn tác trước đó</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear All Filters - Remove all filters from all layers</source>
-        <translation type="obsolete">Xóa tất cả bộ lọc - Xóa tất cả bộ lọc khỏi tất cả các lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear All Filters</source>
-        <translation type="obsolete">Xóa tất cả bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Remove all active filters from all layers in the project</source>
-        <translation type="obsolete">Xóa tất cả bộ lọc đang hoạt động khỏi tất cả các lớp trong dự án</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Export - Save filtered layers to the specified location</source>
-        <translation type="obsolete">Xuất - Lưu các lớp đã lọc vào vị trí được chỉ định</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
         <source>Export</source>
         <translation>Xuất</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Export the filtered layers to the configured output location and format</source>
-        <translation type="obsolete">Xuất các lớp đã lọc đến vị trí và định dạng đầu ra đã cấu hình</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>About FilterMate - Display plugin information and help</source>
-        <translation type="obsolete">Giới thiệu FilterMate - Hiển thị thông tin plugin và trợ giúp</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
         <source>AND</source>
         <translation>VÀ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1556"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
         <source>AND NOT</source>
         <translation>VÀ KHÔNG</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1557"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
         <source>OR</source>
         <translation>HOẶC</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1559"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
         <source>, </source>
         <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
         <source>Multi-layer filtering</source>
         <translation>Lọc đa lớp</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1547"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
         <source>Additive filtering for the selected layer</source>
         <translation>Lọc cộng dồn cho lớp đã chọn</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1548"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
         <source>Geospatial filtering</source>
         <translation>Lọc địa không gian</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
         <source>Buffer</source>
         <translation>Vùng đệm</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
         <source>Expression layer</source>
         <translation>Lớp biểu thức</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1558"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
         <source>Geometric predicate</source>
         <translation>Vị từ hình học</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Value in meters</source>
-        <translation type="obsolete">Giá trị tính bằng mét</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1572"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
         <source>Output format</source>
         <translation>Định dạng đầu ra</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
         <source>Filter</source>
         <translation>Bộ lọc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
         <source>Reset</source>
         <translation>Đặt lại</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
         <source>Layers to export</source>
         <translation>Các lớp cần xuất</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
         <source>Layers projection</source>
         <translation>Phép chiếu lớp</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
         <source>Save styles</source>
         <translation>Lưu kiểu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1567"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
         <source>Datatype export</source>
         <translation>Xuất loại dữ liệu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
         <source>Name of file/directory</source>
         <translation>Tên tệp/thư mục</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1550"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>Su dung trong tam thay vi hinh hoc day du cho lop nguon (nhanh hon cho da giac phuc tap)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Gia tri vung dem tinh bang met (duong=mo rong, am=thu nho da giac)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
         <source>Number of segments for buffer precision</source>
         <translation>So doan cho do chinh xac vung dem</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
         <source>Mode batch</source>
         <translation>Che do hang loat</translation>
     </message>
@@ -2614,7 +1577,7 @@ Van xoa?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="928"/>
+        <location filename="../core/tasks/layer_management_task.py" line="944"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2631,12 +1594,12 @@ Giai phap: Xoa lop nay khoi du an FilterMate, sau do them lai.
 Dam bao bang PostgreSQL co PRIMARY KEY duoc dinh nghia.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="954"/>
+        <location filename="../core/tasks/layer_management_task.py" line="970"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Lop &apos;{0}&apos; khong co PRIMARY KEY. Tinh nang bi han che: materialized view bi tat. Khuyen nghi: them PRIMARY KEY de co hieu suat toi uu.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1893"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
         <source>Exception: {0}</source>
         <translation>Ngoai le: {0}</translation>
     </message>
@@ -2775,164 +1738,6 @@ Dam bao bang PostgreSQL co PRIMARY KEY duoc dinh nghia.</translation>
     </message>
 </context>
 <context>
-    <name>OptimizationDialogs</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Optimizations</source>
-        <translation type="obsolete">FilterMate - Tối ưu hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations for:</source>
-        <translation type="obsolete">Tối ưu hóa cho:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>features</source>
-        <translation type="obsolete">đối tượng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Estimated speedup:</source>
-        <translation type="obsolete">Tăng tốc ước tính:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>faster</source>
-        <translation type="obsolete">nhanh hơn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for large datasets</source>
-        <translation type="obsolete">Sử dụng tâm thay vì hình học đầy đủ cho tập dữ liệu lớn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids</source>
-        <translation type="obsolete">Dùng tâm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids for distant layers</source>
-        <translation type="obsolete">Dùng tâm cho các lớp xa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable buffer type</source>
-        <translation type="obsolete">Bật loại vùng đệm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify complex geometries to reduce processing time</source>
-        <translation type="obsolete">Đơn giản hóa hình học phức tạp để giảm thời gian xử lý</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify geometries</source>
-        <translation type="obsolete">Đơn giản hóa hình học</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter by bounding box first to eliminate distant features quickly</source>
-        <translation type="obsolete">Lọc theo hộp bao trước để loại bỏ nhanh các đối tượng xa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox pre-filtering</source>
-        <translation type="obsolete">Lọc trước BBox</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Evaluate attribute conditions before expensive spatial operations</source>
-        <translation type="obsolete">Đánh giá điều kiện thuộc tính trước các phép toán không gian tốn kém</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Attribute-first strategy</source>
-        <translation type="obsolete">Chiến lược thuộc tính trước</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply for current session only</source>
-        <translation type="obsolete">Chỉ áp dụng cho phiên hiện tại</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Remember for this session</source>
-        <translation type="obsolete">Ghi nhớ cho phiên này</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip without applying</source>
-        <translation type="obsolete">Bỏ qua không áp dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip</source>
-        <translation type="obsolete">Bỏ qua</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply selected optimizations</source>
-        <translation type="obsolete">Áp dụng các tối ưu đã chọn</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply</source>
-        <translation type="obsolete">Áp dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization Settings</source>
-        <translation type="obsolete">Cài đặt tối ưu hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable automatic optimizations</source>
-        <translation type="obsolete">Bật tối ưu hóa tự động</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable optimizations</source>
-        <translation type="obsolete">Bật tối ưu hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-apply recommendations</source>
-        <translation type="obsolete">Tự động áp dụng đề xuất</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Ask before applying</source>
-        <translation type="obsolete">Hỏi trước khi áp dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show optimization dialog</source>
-        <translation type="obsolete">Hiện hộp thoại tối ưu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Never apply</source>
-        <translation type="obsolete">Không bao giờ áp dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimizations</source>
-        <translation type="obsolete">Không tối ưu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify before buffer</source>
-        <translation type="obsolete">Đơn giản hóa trước vùng đệm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reduce buffer segments</source>
-        <translation type="obsolete">Giảm số phân đoạn vùng đệm</translation>
-    </message>
-</context>
-<context>
     <name>PostgresInfoDialog</name>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="80"/>
@@ -3030,561 +1835,6 @@ Dam bao bang PostgreSQL co PRIMARY KEY duoc dinh nghia.</translation>
         <translation>Dọn dẹp thất bại</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>All layers using auto-selection</source>
-        <translation type="obsolete">Tất cả các lớp đang sử dụng chọn tự động</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Applied to &apos;{0}&apos;:</source>
-        <translation type="obsolete">Đã áp dụng cho &apos;{0}&apos;:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-centroid {0}</source>
-        <translation type="obsolete">Tự động tâm {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimization {0}</source>
-        <translation type="obsolete">Tối ưu hóa tự động {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimizer module not available</source>
-        <translation type="obsolete">Mô-đun tối ưu hóa tự động không khả dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation type="obsolete">Trình tối ưu hóa tự động không khả dụng: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-select best strategy</source>
-        <translation type="obsolete">Tự động chọn chiến lược tốt nhất</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-selected backends for {0} layer(s)</source>
-        <translation type="obsolete">Đã tự động chọn backend cho {0} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-simplify geometries</source>
-        <translation type="obsolete">Tự động đơn giản hóa hình học</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-use centroids for remote layers</source>
-        <translation type="obsolete">Tự động sử dụng tâm cho các lớp từ xa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically choose optimal filtering strategy</source>
-        <translation type="obsolete">Tự động chọn chiến lược lọc tối ưu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox pre-filter enabled for &apos;{0}&apos;</source>
-        <translation type="obsolete">Đã bật bộ lọc trước BBox cho &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend controller not available</source>
-        <translation type="obsolete">Bộ điều khiển backend không khả dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend forced to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">Backend bị buộc thành {0} cho &apos;{1}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimization unavailable</source>
-        <translation type="obsolete">Tối ưu hóa backend không khả dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend set to Auto for &apos;{0}&apos;</source>
-        <translation type="obsolete">Backend được đặt thành Tự động cho &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids enabled for &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">Đã bật tâm cho &apos;{0}&apos; (~{1}x {2})</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear ALL FilterMate temporary tables from all databases</source>
-        <translation type="obsolete">Xóa TẤT CẢ bảng tạm FilterMate khỏi tất cả cơ sở dữ liệu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear temporary tables for the current project only</source>
-        <translation type="obsolete">Xóa bảng tạm chỉ cho dự án hiện tại</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleared {0} temporary table(s) for current project</source>
-        <translation type="obsolete">Đã xóa {0} bảng tạm cho dự án hiện tại</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleared {0} temporary table(s) globally</source>
-        <translation type="obsolete">Đã xóa {0} bảng tạm trên toàn cục</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirmation {0}</source>
-        <translation type="obsolete">Xác nhận {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation type="obsolete">Không thể phân tích lớp &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Could not reload plugin automatically.</source>
-        <translation type="obsolete">Không thể tải lại plugin tự động.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Dark mode</source>
-        <translation type="obsolete">Chế độ tối</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Description (auto-generated, you can modify it)</source>
-        <translation type="obsolete">Mô tả (tự động tạo, bạn có thể sửa đổi)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Dialog not available: {0}</source>
-        <translation type="obsolete">Hộp thoại không khả dụng: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter a name for this filter</source>
-        <translation type="obsolete">Nhập tên cho bộ lọc này</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation type="obsolete">Lỗi phân tích lớp: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation type="obsolete">Lỗi hủy thay đổi: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error reloading plugin: {0}</source>
-        <translation type="obsolete">Lỗi tải lại plugin: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error resetting layer properties: {}</source>
-        <translation type="obsolete">Lỗi đặt lại thuộc tính lớp: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error: {0}</source>
-        <translation type="obsolete">Lỗi: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Favorites manager not available</source>
-        <translation type="obsolete">Trình quản lý yêu thích không khả dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter history position</source>
-        <translation type="obsolete">Vị trí lịch sử bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Add to Favorites</source>
-        <translation type="obsolete">FilterMate - Thêm vào Yêu thích</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Forced {0} backend for {1} layer(s)</source>
-        <translation type="obsolete">Đã buộc backend {0} cho {1} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Light mode</source>
-        <translation type="obsolete">Chế độ sáng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory layer filtering complete for &apos;{0}&apos;</source>
-        <translation type="obsolete">Đã hoàn thành lọc lớp bộ nhớ cho &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimization recommendations at this time.</source>
-        <translation type="obsolete">Không có đề xuất tối ưu hóa vào lúc này.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>OGR/Memory</source>
-        <translation type="obsolete">OGR/Bộ nhớ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization applied to {0} layer(s)</source>
-        <translation type="obsolete">Đã áp dụng tối ưu hóa cho {0} lớp</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization recommendations</source>
-        <translation type="obsolete">Đề xuất tối ưu hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL</source>
-        <translation type="obsolete">PostgreSQL</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo filter</source>
-        <translation type="obsolete">Làm lại bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo unavailable</source>
-        <translation type="obsolete">Làm lại không khả dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Save current filter</source>
-        <translation type="obsolete">Lưu bộ lọc hiện tại</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Spatialite</source>
-        <translation type="obsolete">Spatialite</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Strategy set to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">Chiến lược được đặt thành {0} cho &apos;{1}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Theme changed</source>
-        <translation type="obsolete">Đã thay đổi chủ đề</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Toggle dark/light mode</source>
-        <translation type="obsolete">Chuyển đổi chế độ tối/sáng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo filter</source>
-        <translation type="obsolete">Hoàn tác bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo unavailable</source>
-        <translation type="obsolete">Hoàn tác không khả dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Using QGIS expressions for filtering</source>
-        <translation type="obsolete">Sử dụng biểu thức QGIS để lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>View filter history</source>
-        <translation type="obsolete">Xem lịch sử bộ lọc</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>WKT expression threshold:</source>
-        <translation type="obsolete">Ngưỡng biểu thức WKT:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>memory copy</source>
-        <translation type="obsolete">sao chép bộ nhớ</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>pool size</source>
-        <translation type="obsolete">kích thước pool</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>simplified to {0} vertices</source>
-        <translation type="obsolete">đơn giản hóa thành {0} đỉnh</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>temp views</source>
-        <translation type="obsolete">chế độ xem tạm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Allow cancellation of QGIS processing algorithms. Enables stopping long-running operations.</source>
-        <translation type="obsolete">Cho phép hủy các thuật toán xử lý QGIS. Cho phép dừng các thao tác chạy lâu.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Analyzing your project... Recommendations will appear here.</source>
-        <translation type="obsolete">Đang phân tích dự án của bạn... Các đề xuất sẽ xuất hiện ở đây.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Centroid for Distant Layers</source>
-        <translation type="obsolete">Tự động tâm cho các lớp xa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Select Best Strategy</source>
-        <translation type="obsolete">Tự động chọn chiến lược tốt nhất</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Simplify Geometries ⚠️</source>
-        <translation type="obsolete">Tự động đơn giản hóa hình học ⚠️</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-detect mod_spatialite</source>
-        <translation type="obsolete">Tự động phát hiện mod_spatialite</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatic GIST Index Usage</source>
-        <translation type="obsolete">Sử dụng chỉ mục GIST tự động</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cancel</source>
-        <translation type="obsolete">Hủy</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cancellable Processing</source>
-        <translation type="obsolete">Xử lý có thể hủy</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Chunk size (features):</source>
-        <translation type="obsolete">Kích thước khối (đối tượng):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirm Before Applying</source>
-        <translation type="obsolete">Xác nhận trước khi áp dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Connection Pooling</source>
-        <translation type="obsolete">Gộp kết nối</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create Spatial Indexes</source>
-        <translation type="obsolete">Tạo chỉ mục không gian</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Direct SQL for GeoPackage</source>
-        <translation type="obsolete">SQL trực tiếp cho GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Auto-Centroid for Remote Layers</source>
-        <translation type="obsolete">Bật tự động tâm cho các lớp từ xa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Auto-Optimization</source>
-        <translation type="obsolete">Bật tối ưu hóa tự động</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Direct SQL for GeoPackage</source>
-        <translation type="obsolete">Bật SQL trực tiếp cho GeoPackage</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Materialized Views</source>
-        <translation type="obsolete">Bật chế độ xem vật chất hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Estimated performance improvement</source>
-        <translation type="obsolete">Cải thiện hiệu suất ước tính</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Backend Optimizations</source>
-        <translation type="obsolete">FilterMate - Tối ưu hóa Backend</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>GEOS-safe Geometry Handling</source>
-        <translation type="obsolete">Xử lý hình học an toàn GEOS</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Global</source>
-        <translation type="obsolete">Toàn cục</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Initialization error: {}</source>
-        <translation type="obsolete">Lỗi khởi tạo: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Interruptible Queries</source>
-        <translation type="obsolete">Truy vấn có thể ngắt</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Lazy cursor threshold:</source>
-        <translation type="obsolete">Ngưỡng con trỏ lười:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Max workers (0=auto):</source>
-        <translation type="obsolete">Số worker tối đa (0=tự động):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No PostgreSQL connection available</source>
-        <translation type="obsolete">Không có kết nối PostgreSQL khả dụng</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No alternative backends available for this layer</source>
-        <translation type="obsolete">Không có backend thay thế cho lớp này</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation type="obsolete">Chưa chọn lớp nào. Vui lòng chọn một lớp trước.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimizations selected to apply.</source>
-        <translation type="obsolete">Không có tối ưu hóa nào được chọn để áp dụng.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No temporary tables found</source>
-        <translation type="obsolete">Không tìm thấy bảng tạm</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No temporary tables found for current project</source>
-        <translation type="obsolete">Không tìm thấy bảng tạm cho dự án hiện tại</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Save Settings</source>
-        <translation type="obsolete">Lưu cài đặt</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show Optimization Hints</source>
-        <translation type="obsolete">Hiển thị gợi ý tối ưu hóa</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo filter (Ctrl+Y)</source>
-        <translation type="obsolete">Làm lại bộ lọc (Ctrl+Y)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo last filter (Ctrl+Z)</source>
-        <translation type="obsolete">Hoàn tác bộ lọc cuối (Ctrl+Z)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>disabled</source>
-        <translation type="obsolete">đã tắt</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>enabled</source>
-        <translation type="obsolete">đã bật</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>★ No favorites saved</source>
-        <translation type="obsolete">★ Chưa lưu yêu thích nào</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>★ {0} Favorites saved</source>
-        <translation type="obsolete">★ {0} Yêu thích đã lưu</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⚙️ Manage favorites...</source>
-        <translation type="obsolete">⚙️ Quản lý yêu thích...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add Current Filter (no filter active)</source>
-        <translation type="obsolete">⭐ Thêm bộ lọc hiện tại (không có bộ lọc đang hoạt động)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add Current Filter to Favorites</source>
-        <translation type="obsolete">⭐ Thêm bộ lọc hiện tại vào yêu thích</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add current filter to favorites</source>
-        <translation type="obsolete">⭐ Thêm bộ lọc hiện tại vào yêu thích</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add filter (no active filter)</source>
-        <translation type="obsolete">⭐ Thêm bộ lọc (không có bộ lọc đang hoạt động)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🌐 All Projects (Global)</source>
-        <translation type="obsolete">🌐 Tất cả dự án (Toàn cục)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📁 Current Project</source>
-        <translation type="obsolete">📁 Dự án hiện tại</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📤 Export...</source>
-        <translation type="obsolete">📤 Xuất...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📥 Import...</source>
-        <translation type="obsolete">📥 Nhập...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Restore Defaults</source>
-        <translation type="obsolete">Khôi phục mặc định</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use Balanced Profile</source>
-        <translation type="obsolete">Sử dụng hồ sơ cân bằng</translation>
-    </message>
-    <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="119"/>
         <source>&lt;b&gt;PostgreSQL is not available&lt;/b&gt;&lt;br&gt;&lt;br&gt;To use PostgreSQL features, install psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Then restart QGIS to apply changes.</source>
         <translation>&lt;b&gt;PostgreSQL khong kha dung&lt;/b&gt;&lt;br&gt;&lt;br&gt;De su dung tinh nang PostgreSQL, cai dat psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Sau do khoi dong lai QGIS de ap dung thay doi.</translation>
@@ -3629,39 +1879,402 @@ Tiep tuc?</translation>
     </message>
 </context>
 <context>
+    <name>QFieldCloudExtension</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <source>QFieldCloud Settings...</source>
+        <translation>QFieldCloud Settings...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <source>Export filtered layers to QFieldCloud</source>
+        <translation>Export filtered layers to QFieldCloud</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudPushDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <source>Export to QFieldCloud</source>
+        <translation>Export to QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <source>Active Filter</source>
+        <translation>Active Filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <source>No active filter</source>
+        <translation>No active filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <source>Filter:</source>
+        <translation>Filter:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <source>0 layers</source>
+        <translation>0 layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <source>Layers:</source>
+        <translation>Layers:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <source>QFieldCloud Project</source>
+        <translation>QFieldCloud Project</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <source>Project name:</source>
+        <translation>Project name:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <source>Description:</source>
+        <translation>Mo ta:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <source>Create new</source>
+        <translation>Create new</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <source>Update existing:</source>
+        <translation>Update existing:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <source>Mode:</source>
+        <translation>Mode:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <source>Layer Modes</source>
+        <translation>Layer Modes</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Layer</source>
+        <translation>Lop</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Mode</source>
+        <translation>Mode</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <source>Export</source>
+        <translation>Xuất</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <source>{0} layers ({1} features)</source>
+        <translation>{0} layers ({1} features)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <source>{0} layers (no filter active)</source>
+        <translation>{0} layers (no filter active)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Missing Name</source>
+        <translation>Missing Name</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Please enter a project name.</source>
+        <translation>Please enter a project name.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>Not Connected</source>
+        <translation>Not Connected</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>QFieldCloud is not connected. Please configure credentials first.</source>
+        <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No Layers</source>
+        <translation>No Layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No valid layers to export.</source>
+        <translation>No valid layers to export.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>Export Error</source>
+        <translation>Export Error</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <source>Failed to export layer &apos;{0}&apos;: {1}</source>
+        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>GPKG export failed: {0}</source>
+        <translation>GPKG export failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <source>Push complete!</source>
+        <translation>Push complete!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project successfully pushed to QFieldCloud!</source>
+        <translation>Project successfully pushed to QFieldCloud!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project: {0}</source>
+        <translation>Project: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Files: {0}</source>
+        <translation>Files: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Duration: {0:.1f}s</source>
+        <translation>Duration: {0:.1f}s</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>URL: {0}</source>
+        <translation>URL: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <source>Warnings:</source>
+        <translation>Warnings:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <source>Push Complete</source>
+        <translation>Push Complete</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <source>Error: {0}</source>
+        <translation>Error: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push Failed</source>
+        <translation>Push Failed</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push failed:
+
+{0}</source>
+        <translation>Push failed:
+
+{0}</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudSettingsDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="53"/>
+        <source>QFieldCloud Configuration</source>
+        <translation>QFieldCloud Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="66"/>
+        <source>Server</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="71"/>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="77"/>
+        <source>Credentials</source>
+        <translation>Credentials</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="81"/>
+        <source>username</source>
+        <translation>username</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="82"/>
+        <source>Username:</source>
+        <translation>Username:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="86"/>
+        <source>password (for initial login)</source>
+        <translation>password (for initial login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="87"/>
+        <source>Password:</source>
+        <translation>Password:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="90"/>
+        <source>JWT token (auto-filled after login)</source>
+        <translation>JWT token (auto-filled after login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="95"/>
+        <source>Login</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="96"/>
+        <source>Login with username/password to get a token</source>
+        <translation>Login with username/password to get a token</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="98"/>
+        <source>Token:</source>
+        <translation>Token:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="102"/>
+        <source>Status:</source>
+        <translation>Trạng thái:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="105"/>
+        <source>Test Connection</source>
+        <translation>Test Connection</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="112"/>
+        <source>Preferences</source>
+        <translation>Preferences</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="117"/>
+        <source>Default project:</source>
+        <translation>Default project:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="119"/>
+        <source>Trigger packaging after upload</source>
+        <translation>Trigger packaging after upload</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="144"/>
+        <source>Token stored</source>
+        <translation>Token stored</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Missing Fields</source>
+        <translation>Missing Fields</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Please fill in URL, username, and password.</source>
+        <translation>Please fill in URL, username, and password.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="174"/>
+        <source>Logging in...</source>
+        <translation>Logging in...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="191"/>
+        <source>Logged in as {0}</source>
+        <translation>Logged in as {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="198"/>
+        <source>Login failed: {0}</source>
+        <translation>Login failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Missing Configuration</source>
+        <translation>Missing Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Please configure URL and login first.</source>
+        <translation>Please configure URL and login first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="219"/>
+        <source>Testing connection...</source>
+        <translation>Testing connection...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="229"/>
+        <source>Connected! ({0} projects accessible)</source>
+        <translation>Connected! ({0} projects accessible)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="235"/>
+        <source>Connection failed: {0}</source>
+        <translation>Connection failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Missing URL</source>
+        <translation>Missing URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Server URL is required.</source>
+        <translation>Server URL is required.</translation>
+    </message>
+</context>
+<context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="640"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
         <source>Type to filter...</source>
         <translation>Go de loc...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="649"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
         <source>Select All</source>
         <translation>Chon tat ca</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="651"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
         <source>Select All (non subset)</source>
         <translation>Chon tat ca (khong phai tap con)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="653"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
         <source>Select All (subset)</source>
         <translation>Chon tat ca (tap con)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>De-select All</source>
         <translation>Bo chon tat ca</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>De-select All (non subset)</source>
         <translation>Bo chon tat ca (khong phai tap con)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>De-select All (subset)</source>
         <translation>Bo chon tat ca (tap con)</translation>
     </message>
@@ -3881,196 +2494,11 @@ Tiep tuc?</translation>
     </message>
 </context>
 <context>
-    <name>d</name>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="870"/>
-        <source>Use centroids instead of full geometries for distant layers</source>
-        <translation>Su dung trong tam thay vi hinh hoc day du cho cac lop tu xa</translation>
-    </message>
-</context>
-<context>
-    <name>dw</name>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="737"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation>Vung dem am (xoi mon): thu nho da giac vao trong</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="744"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Gia tri vung dem tinh bang met (duong=mo rong, am=thu nho da giac)</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="120"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation>Loi khi huy thay doi: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Reload Plugin</source>
-        <translation>Tai lai plugin</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation>Ban co muon tai lai FilterMate de ap dung tat ca thay doi cau hinh?</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="56"/>
-        <source>Auto-optimization {0}</source>
-        <translation>Tu dong toi uu hoa {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>enabled</source>
-        <translation>da bat</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>disabled</source>
-        <translation>da tat</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="69"/>
-        <source>Auto-centroid {0}</source>
-        <translation>Tu dong trong tam {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>Confirmation {0}</source>
-        <translation>Xac nhan {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="97"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation>Chua chon lop. Vui long chon mot lop truoc.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="104"/>
-        <source>Auto-optimizer module not available</source>
-        <translation>Module tu dong toi uu khong kha dung</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="108"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation>Khong the phan tich lop &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="129"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation>Lop &apos;{0}&apos; da duoc cau hinh toi uu.
-Loai: {1}
-Doi tuong: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="156"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation>Tu dong toi uu khong kha dung: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="161"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation>Loi phan tich lop: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="189"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation>Da ap dung cho &apos;{0}&apos;:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="196"/>
-        <source>No optimizations selected to apply.</source>
-        <translation>Khong co toi uu nao duoc chon de ap dung.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="231"/>
-        <source>Optimization settings saved</source>
-        <translation>Cai dat toi uu da luu</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="288"/>
-        <source>Dialog not available: {0}</source>
-        <translation>Hop thoai khong kha dung: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="293"/>
-        <source>Error: {0}</source>
-        <translation>Loi: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="257"/>
-        <source>Backend optimization settings saved</source>
-        <translation>Cai dat toi uu backend da luu</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="286"/>
-        <source>Backend optimizations configured</source>
-        <translation>Toi uu backend da cau hinh</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="406"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation>Da toi uu {0} lop</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="411"/>
-        <source>All layers using auto-selection</source>
-        <translation>Tat ca cac lop dang su dung tu dong chon</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="420"/>
-        <source>Backend optimization unavailable</source>
-        <translation>Toi uu backend khong kha dung</translation>
-    </message>
-</context>
-<context>
-    <name>self._dockwidget</name>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Expression Evaluation</source>
-        <translation>Danh gia bieu thuc</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Error evaluating expression: {error_msg}</source>
-        <translation>Loi danh gia bieu thuc: {error_msg}</translation>
-    </message>
-</context>
-<context>
     <name>self.dockwidget</name>
     <message>
-        <location filename="../ui/managers/configuration_manager.py" line="685"/>
-        <source>Identify selected feature</source>
-        <translation>Nhan dang doi tuong da chon</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="686"/>
-        <source>Zoom to selected feature</source>
-        <translation>Phong to den doi tuong da chon</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="687"/>
-        <source>Toggle feature selection on map</source>
-        <translation>Bat/tat chon doi tuong tren ban do</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="688"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation>Tu dong phong to khi doi tuong thay doi</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="689"/>
-        <source>Link exploring widgets together</source>
-        <translation>Lien ket cac widget kham pha</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="690"/>
-        <source>Reset all layer exploring properties</source>
-        <translation>Dat lai tat ca thuoc tinh kham pha lop</translation>
+        <location filename="../ui/controllers/config_controller.py" line="664"/>
+        <source>Language changed to &apos;{0}&apos;.</source>
+        <translation>Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

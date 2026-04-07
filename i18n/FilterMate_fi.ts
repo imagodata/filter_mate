@@ -2,50 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="fi_FI" sourcelanguage="en_US">
 <context>
-    <name>@default</name>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="173"/>
-        <source>OptimizationManager</source>
-        <comment>Use Centroids</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="175"/>
-        <source>OptimizationManager</source>
-        <comment>Simplify before buffer</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="177"/>
-        <source>OptimizationManager</source>
-        <comment>Reduce buffer segments (3)</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-</context>
-<context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="168"/>
+        <location filename="../core/services/app_initializer.py" line="171"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Vioittuneet suodattimet poistettu {0} tasolta. Aseta suodattimet uudelleen.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="237"/>
+        <location filename="../core/services/app_initializer.py" line="240"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Tyhja projekti havaittu. Lisaa vektoritasoja aktivoidaksesi laajennuksen.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="304"/>
+        <location filename="../core/services/app_initializer.py" line="307"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>FilterMate-tietokantaan ei paasta. Tarkista projektikansion kayttooikeudet.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="318"/>
+        <location filename="../core/services/app_initializer.py" line="321"/>
         <source>Error during database verification: {0}</source>
         <translation>Virhe tietokannan tarkistuksessa: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="594"/>
+        <location filename="../core/services/app_initializer.py" line="599"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Tason lataus epaonnistui. Kayta F5 pakottaaksesi uudelleenlatauksen.</translation>
     </message>
@@ -84,564 +63,9 @@
     </message>
 </context>
 <context>
-    <name>BackendOptimizationWidget</name>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Quick Setup</source>
-        <translation type="obsolete">Pika-asennus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Choose a profile or customize settings below</source>
-        <translation type="obsolete">Valitse profiili tai mukauta asetuksia alla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Smart Recommendations</source>
-        <translation type="obsolete">Älykkäät suositukset</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Balanced Profile</source>
-        <translation type="obsolete">Tasapainoinen profiili</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Maximum Performance</source>
-        <translation type="obsolete">Maksimaalinen suorituskyky</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Minimal Resources</source>
-        <translation type="obsolete">Minimaaliset resurssit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>PostgreSQL/PostGIS Optimizations</source>
-        <translation type="obsolete">PostgreSQL/PostGIS-optimoinnit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Materialized Views</source>
-        <translation type="obsolete">Materialisoidut näkymät</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Create temporary materialized views for complex filters</source>
-        <translation type="obsolete">Luo tilapäisiä materialisoituja näkymiä monimutkaisille suodattimille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Two-Phase Filtering</source>
-        <translation type="obsolete">Kaksivaiheinen suodatus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use bounding box pre-filtering before precise geometry tests</source>
-        <translation type="obsolete">Käytä rajauslaatikkoessuodatusta ennen tarkkoja geometriatestejä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Progressive Loading</source>
-        <translation type="obsolete">Progressiivinen lataus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Load data in chunks for very large datasets</source>
-        <translation type="obsolete">Lataa dataa paloissa erittäin suurille tietoaineistoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Chunk Size</source>
-        <translation type="obsolete">Palakoko</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Server-Side Simplification</source>
-        <translation type="obsolete">Palvelinpuolen yksinkertaistaminen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Simplify geometries on server for display purposes</source>
-        <translation type="obsolete">Yksinkertaista geometrioita palvelimella näyttötarkoituksiin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Simplification Tolerance</source>
-        <translation type="obsolete">Yksinkertaistamistoleranssi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Parallel Query Execution</source>
-        <translation type="obsolete">Rinnakkainen kyselysuoritus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Execute independent queries in parallel</source>
-        <translation type="obsolete">Suorita riippumattomat kyselyt rinnakkain</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Expression Caching</source>
-        <translation type="obsolete">Lausekkeiden välimuistitus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cache compiled expressions for reuse</source>
-        <translation type="obsolete">Välimuistita käännetyt lausekkeet uudelleenkäyttöä varten</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Spatialite/GeoPackage Optimizations</source>
-        <translation type="obsolete">Spatialite/GeoPackage-optimoinnit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>R-tree Temp Tables</source>
-        <translation type="obsolete">R-tree tilapäistaulut</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Create temporary tables with R-tree indexes</source>
-        <translation type="obsolete">Luo tilapäistauluja R-tree-indekseillä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>BBox Pre-filtering</source>
-        <translation type="obsolete">BBox-esisuodatus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use bounding box filtering before precise tests</source>
-        <translation type="obsolete">Käytä rajauslaatikkosuodatusta ennen tarkkoja testejä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Memory-Mapped I/O</source>
-        <translation type="obsolete">Muistikartoitettu I/O</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use memory-mapped I/O for file access</source>
-        <translation type="obsolete">Käytä muistikartoitettua I/O:ta tiedostojen käyttöön</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Batch Processing</source>
-        <translation type="obsolete">Eräkäsittely</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Process multiple operations in batches</source>
-        <translation type="obsolete">Käsittele useita toimintoja erinä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Batch Size</source>
-        <translation type="obsolete">Eräkoko</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>OGR/Memory Optimizations</source>
-        <translation type="obsolete">OGR/Muistioptimoinnit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatic Spatial Index</source>
-        <translation type="obsolete">Automaattinen paikkatietoindeksi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Create temporary spatial indexes automatically</source>
-        <translation type="obsolete">Luo automaattisesti tilapäisiä paikkatietoindeksejä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Progressive Chunking</source>
-        <translation type="obsolete">Progressiivinen paloittelu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Process large files in progressive chunks</source>
-        <translation type="obsolete">Käsittele suuria tiedostoja progressiivisissa paloissa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Memory Feature Caching</source>
-        <translation type="obsolete">Muistikohteiden välimuistitus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cache features in memory for faster access</source>
-        <translation type="obsolete">Välimuistita kohteet muistissa nopeampaa käyttöä varten</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cache Size (features)</source>
-        <translation type="obsolete">Välimuistin koko (kohteet)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Geometry Simplification</source>
-        <translation type="obsolete">Geometrian yksinkertaistaminen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Simplify complex geometries during processing</source>
-        <translation type="obsolete">Yksinkertaista monimutkaisia geometrioita käsittelyn aikana</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Global Optimizations</source>
-        <translation type="obsolete">Yleiset optimoinnit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-Optimization</source>
-        <translation type="obsolete">Automaattinen optimointi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically optimize based on data analysis</source>
-        <translation type="obsolete">Optimoi automaattisesti data-analyysin perusteella</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-Centroid</source>
-        <translation type="obsolete">Automaattinen keskipiste</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically center view on filter results</source>
-        <translation type="obsolete">Keskitä näkymä automaattisesti suodatustuloksiin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Parallel Layer Filtering</source>
-        <translation type="obsolete">Rinnakkainen tasosuodatus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Filter multiple layers simultaneously</source>
-        <translation type="obsolete">Suodata useita tasoja samanaikaisesti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Smart Expression Parsing</source>
-        <translation type="obsolete">Älykäs lausekkeiden jäsentäminen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimize expression parsing for complex queries</source>
-        <translation type="obsolete">Optimoi lausekkeiden jäsentäminen monimutkaisille kyselyille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Deferred Refresh</source>
-        <translation type="obsolete">Viivästetty päivitys</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Delay map refresh until all filters are applied</source>
-        <translation type="obsolete">Viivästä kartan päivitystä kunnes kaikki suodattimet on sovellettu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Verbose Logging</source>
-        <translation type="obsolete">Yksityiskohtainen kirjaus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable detailed logging for debugging</source>
-        <translation type="obsolete">Ota käyttöön yksityiskohtainen kirjaus virheenkorjausta varten</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Apply</source>
-        <translation type="obsolete">Käytä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Reset to Defaults</source>
-        <translation type="obsolete">Palauta oletukset</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Settings applied successfully</source>
-        <translation type="obsolete">Asetukset sovellettu onnistuneesti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Settings reset to defaults</source>
-        <translation type="obsolete">Asetukset palautettu oletuksiin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Profile applied: {}</source>
-        <translation type="obsolete">Profiili sovellettu: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Error applying settings</source>
-        <translation type="obsolete">Virhe asetuksia sovellettaessa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>MV Status: Checking...</source>
-        <translation type="obsolete">MV Tila: Tarkistetaan...</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>MV Status: Error</source>
-        <translation type="obsolete">MV Tila: Virhe</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>MV Status: Clean</source>
-        <translation type="obsolete">MV Tila: Puhdas</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>MV Status:</source>
-        <translation type="obsolete">MV Tila:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>active</source>
-        <translation type="obsolete">aktiivinen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No active materialized views</source>
-        <translation type="obsolete">Ei aktiivisia materiaalistettuja näkymiä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Session:</source>
-        <translation type="obsolete">Istunto:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Other sessions:</source>
-        <translation type="obsolete">Muut istunnot:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>🧹 Session</source>
-        <translation type="obsolete">🧹 Istunto</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cleanup MVs from this session</source>
-        <translation type="obsolete">Siivoa tämän istunnon MV:t</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>🗑️ Orphaned</source>
-        <translation type="obsolete">🗑️ Orvot</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cleanup orphaned MVs (&gt;24h old)</source>
-        <translation type="obsolete">Siivoa orvot MV:t (&gt;24h vanhat)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>⚠️ All</source>
-        <translation type="obsolete">⚠️ Kaikki</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cleanup ALL MVs (affects other sessions)</source>
-        <translation type="obsolete">Siivoa KAIKKI MV:t (vaikuttaa muihin istuntoihin)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Confirm Cleanup</source>
-        <translation type="obsolete">Vahvista siivous</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Drop ALL materialized views?
-This affects other FilterMate sessions!</source>
-        <translation type="obsolete">Poista KAIKKI materialisoidut näkymät?
-Tämä vaikuttaa muihin FilterMate-istuntoihin!</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Refresh MV status</source>
-        <translation type="obsolete">Päivitä MV-tila</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Threshold:</source>
-        <translation type="obsolete">Kynnysarvo:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>features</source>
-        <translation type="obsolete">ominaisuudet</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-cleanup on exit</source>
-        <translation type="obsolete">Automaattinen siivous lopetettaessa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically drop session MVs when plugin unloads</source>
-        <translation type="obsolete">Poista istunnon MV:t automaattisesti kun lisäosa poistetaan</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Create MVs for datasets larger than this</source>
-        <translation type="obsolete">Luo MV:t tätä suuremmille tietojoukoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>faster possible</source>
-        <translation type="obsolete">nopeampi mahdollista</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimizations available</source>
-        <translation type="obsolete">Optimoinnit saatavilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>FilterMate - Apply Optimizations?</source>
-        <translation type="obsolete">FilterMate - Käytä optimointeja?</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Skip</source>
-        <translation type="obsolete">Ohita</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>✓ Apply</source>
-        <translation type="obsolete">✓ Käytä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Don&apos;t ask for this session</source>
-        <translation type="obsolete">Älä kysy tästä istunnosta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Keskipisteet</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Simplify</source>
-        <translation type="obsolete">Yksinkertaista</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Pre-simplify</source>
-        <translation type="obsolete">Esiyksinkertaista</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Fewer segments</source>
-        <translation type="obsolete">Vähemmän segmenttejä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Flat buffer</source>
-        <translation type="obsolete">Tasainen puskuri</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>BBox filter</source>
-        <translation type="obsolete">BBox-suodatin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Attr-first</source>
-        <translation type="obsolete">Attr-ensin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>PostgreSQL not available</source>
-        <translation type="obsolete">PostgreSQL ei saatavilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No connection</source>
-        <translation type="obsolete">Ei yhteyttä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation type="obsolete">Automaattinen zoomaus kun ominaisuus muuttuu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Backend optimization settings saved</source>
-        <translation type="obsolete">Backend-optimointiasetukset tallennettu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Backend optimizations configured</source>
-        <translation type="obsolete">Backend-optimoinnit määritetty</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Expression Evaluation</source>
-        <translation type="obsolete">Lausekkeen arviointi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Identify selected feature</source>
-        <translation type="obsolete">Tunnista valittu ominaisuus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Layer properties reset to defaults</source>
-        <translation type="obsolete">Tason ominaisuudet palautettu oletuksiin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Link exploring widgets together</source>
-        <translation type="obsolete">Linkitä tutkimuswidgetit yhteen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimization settings saved</source>
-        <translation type="obsolete">Optimointiasetukset tallennettu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Reset all layer exploring properties</source>
-        <translation type="obsolete">Palauta kaikki tason tutkimusominaisuudet</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Toggle feature selection on map</source>
-        <translation type="obsolete">Vaihda ominaisuusvalinta kartalla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons)</source>
-        <translation type="obsolete">Käytä keskipisteitä täysien geometrioiden sijaan etäisille tasoille (nopeampi monimutkaisille monikulmioille)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">Käytä keskipisteitä täysien geometrioiden sijaan lähdetasolle (nopeampi monimutkaisille monikulmioille)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Zoom to selected feature</source>
-        <translation type="obsolete">Zoomaa valittuun ominaisuuteen</translation>
-    </message>
-</context>
-<context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="275"/>
+        <location filename="../ui/controllers/config_controller.py" line="311"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Virhe muutosten peruuttamisessa: {0}</translation>
     </message>
@@ -690,34 +114,6 @@ Tämä vaikuttaa muihin FilterMate-istuntoihin!</translation>
         <location filename="../adapters/database_manager.py" line="527"/>
         <source>Error during database initialization: {0}</source>
         <translation>Virhe tietokannan alustuksessa: {0}</translation>
-    </message>
-</context>
-<context>
-    <name>DatasourceManager</name>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
-        <source>Database file does not exist: {db_file_path}</source>
-        <translation>Tietokantatiedostoa ei ole olemassa: {db_file_path}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
-        <source>Failed to connect to database {db_file_path}: {error}</source>
-        <translation>Yhteys tietokantaan {db_file_path} epaonnistui: {error}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
-        <source>QGIS processing module not available to create spatial index</source>
-        <translation>QGIS-kasittelymoduuli ei ole kaytettavissa paikkatietoindeksin luontiin</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
-        <source>Cannot create spatial index: layer invalid or source not found.</source>
-        <translation>Paikkatietoindeksia ei voi luoda: taso virheellinen tai lahdetta ei loydy.</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
-        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
-        <translation>PostgreSQL-tasoja havaittu, mutta psycopg2 ei ole asennettu. Kaytetaan paikallista Spatialite-taustaohjelmistoa. Parempaan suorituskykyyn suurilla tietoaineistoilla asenna psycopg2.</translation>
     </message>
 </context>
 <context>
@@ -1243,59 +639,6 @@ Napsauta ★-ilmaisinta ja valitse &apos;Lisaa nykyinen suodatin suosikkeihin&ap
     </message>
 </context>
 <context>
-    <name>FeedbackUtils</name>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Starting filter on {count} layer(s)</source>
-        <translation type="obsolete">Aloitetaan suodatus {count} tasolla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Removing filters from {count} layer(s)</source>
-        <translation type="obsolete">Poistetaan suodattimia {count} tasolta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Resetting {count} layer(s)</source>
-        <translation type="obsolete">Palautetaan {count} tasoa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Exporting {count} layer(s)</source>
-        <translation type="obsolete">Viedään {count} tasoa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Successfully filtered {count} layer(s)</source>
-        <translation type="obsolete">{count} tasoa suodatettu onnistuneesti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Successfully removed filters from {count} layer(s)</source>
-        <translation type="obsolete">Suodattimet poistettu onnistuneesti {count} tasolta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Successfully reset {count} layer(s)</source>
-        <translation type="obsolete">{count} tasoa palautettu onnistuneesti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Successfully exported {count} layer(s)</source>
-        <translation type="obsolete">{count} tasoa viety onnistuneesti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</source>
-        <translation type="obsolete">Suuri aineisto ({count} kohdetta) ilman PostgreSQL:ää. Suorituskyky saattaa heiketä.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>PostgreSQL recommended for better performance.</source>
-        <translation type="obsolete">PostgreSQL suositellaan parempaan suorituskykyyn.</translation>
-    </message>
-</context>
-<context>
     <name>FilepathType</name>
     <message>
         <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
@@ -1352,209 +695,127 @@ Napsauta ★-ilmaisinta ja valitse &apos;Lisaa nykyinen suodatin suosikkeihin&ap
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="106"/>
+        <location filename="../filter_mate.py" line="188"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>Open FilterMate panel</source>
         <translation>Avaa FilterMate-paneeli</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset configuration and database</source>
         <translation>Palauta asetukset ja tietokanta</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Palauta oletusasetukset ja poista SQLite-tietokanta</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Reset Configuration</source>
         <translation>Palauta asetukset</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Are you sure you want to reset to the default configuration?
-
-This will:
-- Reset all FilterMate settings
-- Delete all filter history databases</source>
-        <translation type="obsolete">Haluatko varmasti palauttaa oletusasetukset?
-
-Tämä:
-- Palauttaa kaikki FilterMate-asetukset
-- Poistaa kaikki suodatinhistoriatietokannat</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1192"/>
+        <location filename="../filter_mate.py" line="1355"/>
         <source>Configuration reset successfully.</source>
         <translation>Asetukset palautettu onnistuneesti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1197"/>
+        <location filename="../filter_mate.py" line="1360"/>
         <source>Default configuration file not found.</source>
         <translation>Oletusasetustiedostoa ei löydy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1218"/>
+        <location filename="../filter_mate.py" line="1381"/>
         <source>Database deleted: {filename}</source>
         <translation>Tietokanta poistettu: {filename}</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Unable to delete {filename}: {error}</source>
-        <translation type="obsolete">Ei voida poistaa {filename}: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>Restart required</source>
         <translation>Uudelleenkäynnistys vaaditaan</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>The configuration has been reset.
-
-Please restart QGIS to apply all changes.</source>
-        <translation type="obsolete">Asetukset on palautettu.
-
-Käynnistä QGIS uudelleen ottaaksesi kaikki muutokset käyttöön.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Error during reset: {error}</source>
-        <translation type="obsolete">Virhe palautuksen aikana: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="350"/>
+        <location filename="../filter_mate.py" line="401"/>
         <source>Obsolete configuration detected</source>
         <translation>Vanhentunut asetustiedosto havaittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="351"/>
+        <location filename="../filter_mate.py" line="402"/>
         <source>unknown version</source>
         <translation>tuntematon versio</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="359"/>
+        <location filename="../filter_mate.py" line="410"/>
         <source>Corrupted configuration detected</source>
         <translation>Vioittunut asetustiedosto havaittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="416"/>
+        <location filename="../filter_mate.py" line="467"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Asetuksia ei nollattu. Jotkin toiminnot eivät ehkä toimi oikein.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="427"/>
+        <location filename="../filter_mate.py" line="478"/>
         <source>Configuration created with default values</source>
         <translation>Asetukset luotu oletusarvoilla</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Vioittunut asetustiedosto nollattu. Oletusasetukset on palautettu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="484"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Vanhentunut asetustiedosto nollattu. Oletusasetukset on palautettu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="505"/>
         <source>Configuration updated to latest version</source>
         <translation>Asetukset päivitetty uusimpaan versioon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="451"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Asetukset päivitetty: uudet asetukset saatavilla ({sections}). Pääsy Asetukset-valikon kautta.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Geometry Simplification</source>
         <translation>Geometrian yksinkertaistaminen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>Optimization Thresholds</source>
         <translation>Optimointirajat</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="591"/>
+        <location filename="../filter_mate.py" line="642"/>
         <source>Geometry validation setting</source>
         <translation>Geometrian tarkistusasetus</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="621"/>
+        <location filename="../filter_mate.py" line="672"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Virheellisten geometrioiden suodatus poistettu käytöstä onnistuneesti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="628"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Virheellisten geometrioiden suodatusta ei muutettu. Jotkin kohteet voivat jäädä pois viennistä.</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">Puskurin arvo metreinä (positiivinen=laajenna, negatiivinen=kutista polygoneja)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation type="obsolete">Negatiivinen puskuri (eroosio): kutistaa polygoneja sisäänpäin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>point</source>
-        <translation type="obsolete">piste</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>line</source>
-        <translation type="obsolete">viiva</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>non-polygon</source>
-        <translation type="obsolete">ei-polygoni</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Buffer value in meters (positive only when centroids are enabled. Negative buffers cannot be applied to points)</source>
-        <translation type="obsolete">Puskurin arvo metreinä (vain positiivinen kun keskipisteet ovat käytössä. Negatiivisia puskureita ei voi soveltaa pisteisiin)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Mode batch</source>
-        <translation type="obsolete">Eräkäsittely-tila</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">Segmenttien määrä puskurin tarkkuudelle</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Keskipisteet</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons like buildings)</source>
-        <translation type="obsolete">Käytä keskipisteitä täysien geometrioiden sijaan etätasoille (nopeampi monimutkaisille monikulmioille kuten rakennuksille)</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="352"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1569,7 +830,7 @@ Haluatko palauttaa oletusasetukset?
 • Ei: Säilytä nykyinen konfiguraatio (voi aiheuttaa ongelmia)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="360"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1584,12 +845,12 @@ Haluatko palauttaa oletusasetukset?
 • Ei: Peruuta (lisäosa ei ehkä toimi oikein)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="367"/>
+        <location filename="../filter_mate.py" line="418"/>
         <source>Configuration reset</source>
         <translation>Konfiguraation palautus</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="419"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1598,12 +859,12 @@ Do you want to continue?</source>
 Haluatko jatkaa?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="473"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Error during configuration migration: {}</source>
         <translation>Virhe konfiguraation siirrossa: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="593"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -1630,7 +891,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1647,7 +908,7 @@ Tämä:
 QGIS on käynnistettävä uudelleen muutosten käyttöönottamiseksi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1656,796 +917,386 @@ Please restart QGIS to apply the changes.</source>
 Käynnistä QGIS uudelleen ottaaksesi muutokset käyttöön.</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>All layers using auto-selection</source>
-        <translation type="obsolete">Kaikki tasot käyttävät automaattista valintaa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-optimizer module not available</source>
-        <translation type="obsolete">Automaattisen optimoinnin moduuli ei saatavilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Backend controller not available</source>
-        <translation type="obsolete">Taustaohjelman ohjain ei saatavilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Backend optimization unavailable</source>
-        <translation type="obsolete">Taustaohjelman optimointi ei saatavilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Could not reload plugin automatically.</source>
-        <translation type="obsolete">Laajennusta ei voitu ladata automaattisesti uudelleen.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Favorites manager not available</source>
-        <translation type="obsolete">Suosikkien hallinta ei saatavilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No PostgreSQL connection available</source>
-        <translation type="obsolete">PostgreSQL-yhteyttä ei saatavilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation type="obsolete">Tasoa ei valittu. Valitse ensin taso.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No optimizations selected to apply.</source>
-        <translation type="obsolete">Sovellettavia optimointeja ei valittu.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No views to clean or cleanup failed</source>
-        <translation type="obsolete">Ei puhdistettavia näkymiä tai puhdistus epäonnistui</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Other Sessions Active</source>
-        <translation type="obsolete">Muut istunnot aktiivisia</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>PostgreSQL auto-cleanup disabled</source>
-        <translation type="obsolete">PostgreSQL automaattinen puhdistus poistettu käytöstä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>PostgreSQL auto-cleanup enabled</source>
-        <translation type="obsolete">PostgreSQL automaattinen puhdistus käytössä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>PostgreSQL session views cleaned up</source>
-        <translation type="obsolete">PostgreSQL-istunnon näkymät puhdistettu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Schema cleanup cancelled</source>
-        <translation type="obsolete">Rakenteen puhdistus peruutettu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Schema cleanup failed</source>
-        <translation type="obsolete">Rakenteen puhdistus epäonnistui</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>UI configuration incomplete - check logs</source>
-        <translation type="obsolete">Käyttöliittymän määritys puutteellinen - tarkista lokit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>disabled</source>
-        <translation type="obsolete">poistettu käytöstä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>enabled</source>
-        <translation type="obsolete">käytössä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>★ No favorites saved
-Click to add current filter</source>
-        <translation type="obsolete">★ Ei tallennettuja suosikkeja
-Napsauta lisätäksesi nykyisen suodattimen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>★ {0} Favorites saved
-Click to apply or manage</source>
-        <translation type="obsolete">★ {0} suosikkia tallennettu
-Napsauta soveltaaksesi tai hallitaksesi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Initialization error: {}</source>
-        <translation type="obsolete">Alustusvirhe: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>UI dimension error: {}</source>
-        <translation type="obsolete">Käyttöliittymän mitta-virhe: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Forced {0} backend for {1} layer(s)</source>
-        <translation type="obsolete">Pakotettu {0} taustaohjelma {1} tasolle/tasoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Schema has {0} view(s) from other sessions.
-Drop anyway?</source>
-        <translation type="obsolete">Rakenteella on {0} näkymää muista istunnoista.
-Poista silti?</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Schema &apos;{0}&apos; dropped successfully</source>
-        <translation type="obsolete">Rakenne &apos;{0}&apos; poistettu onnistuneesti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-optimization {0}</source>
-        <translation type="obsolete">Automaattinen optimointi {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-centroid {0}</source>
-        <translation type="obsolete">Automaattinen keskipiste {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Confirmation {0}</source>
-        <translation type="obsolete">Vahvistus {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation type="obsolete">Tasoa &apos;{0}&apos; ei voitu analysoida</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation type="obsolete">Taso &apos;{0}&apos; on jo optimaalisesti määritetty.
-Tyyppi: {1}
-Kohteet: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation type="obsolete">Automaattinen optimoija ei saatavilla: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation type="obsolete">Virhe analysoitaessa tasoa: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation type="obsolete">Sovellettu kohteeseen &apos;{0}&apos;:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Dialog not available: {0}</source>
-        <translation type="obsolete">Valintaikkuna ei saatavilla: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Error: {0}</source>
-        <translation type="obsolete">Virhe: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation type="obsolete">Optimoitu {0} taso/tasoa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation type="obsolete">Virhe peruutettaessa muutoksia: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Error reloading plugin: {0}</source>
-        <translation type="obsolete">Virhe ladattaessa laajennusta uudelleen: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No alternative backends available for this layer</source>
-        <translation type="obsolete">Tälle tasolle ei ole vaihtoehtoisia taustaohjelmia</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>📁 Current Project</source>
-        <translation type="obsolete">📁 Nykyinen projekti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Clear temporary tables for the current project only</source>
-        <translation type="obsolete">Tyhjennä väliaikaiset taulut vain nykyisestä projektista</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>🌐 All Projects (Global)</source>
-        <translation type="obsolete">🌐 Kaikki projektit (Globaali)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Clear ALL FilterMate temporary tables from all databases</source>
-        <translation type="obsolete">Tyhjennä KAIKKI FilterMaten väliaikaiset taulut kaikista tietokannoista</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-selected backends for {0} layer(s)</source>
-        <translation type="obsolete">Automaattisesti valitut taustaohjelmat {0} tasolle/tasoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cleared {0} temporary table(s) for current project</source>
-        <translation type="obsolete">Tyhjennetty {0} väliaikaista taulua nykyisestä projektista</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No temporary tables found for current project</source>
-        <translation type="obsolete">Nykyisestä projektista ei löytynyt väliaikaisia tauluja</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cleared {0} temporary table(s) globally</source>
-        <translation type="obsolete">Tyhjennetty {0} väliaikaista taulua globaalisti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No temporary tables found</source>
-        <translation type="obsolete">Väliaikaisia tauluja ei löytynyt</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Backend forced to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">Taustaohjelma pakotettu tilaan {0} kohteelle &apos;{1}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Backend set to Auto for &apos;{0}&apos;</source>
-        <translation type="obsolete">Taustaohjelma asetettu tilaan Auto kohteelle &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Undo last filter (Ctrl+Z)</source>
-        <translation type="obsolete">Kumoa viimeisin suodatin (Ctrl+Z)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Redo filter (Ctrl+Y)</source>
-        <translation type="obsolete">Tee suodatin uudelleen (Ctrl+Y)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Filter history position</source>
-        <translation type="obsolete">Sijainti suodatinhistoriassa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>FilterMate - Add to Favorites</source>
-        <translation type="obsolete">FilterMate - Lisää suosikkeihin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enter a name for this filter</source>
-        <translation type="obsolete">Anna tälle suodattimelle nimi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Description (auto-generated, you can modify it)</source>
-        <translation type="obsolete">Kuvaus (automaattisesti luotu, voit muokata sitä)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>⭐ Add Current Filter to Favorites</source>
-        <translation type="obsolete">⭐ Lisää nykyinen suodatin suosikkeihin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>⭐ Add Current Filter (no filter active)</source>
-        <translation type="obsolete">⭐ Lisää nykyinen suodatin (ei aktiivista suodatinta)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>⭐ Add current filter to favorites</source>
-        <translation type="obsolete">⭐ Lisää nykyinen suodatin suosikkeihin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>⭐ Add filter (no active filter)</source>
-        <translation type="obsolete">⭐ Lisää suodatin (ei aktiivista suodatinta)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>⚙️ Manage favorites...</source>
-        <translation type="obsolete">⚙️ Hallitse suosikkeja...</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>📤 Export...</source>
-        <translation type="obsolete">📤 Vie...</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>📥 Import...</source>
-        <translation type="obsolete">📥 Tuo...</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>The selected layer is invalid or its source cannot be found.</source>
-        <translation type="obsolete">Valittu taso on virheellinen tai sen lähdettä ei löydy.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Plugin activated with {0} vector layer(s)</source>
-        <translation type="obsolete">Laajennus aktivoitu {0} vektoritasolla/tasoilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Theme adapted: {0}</source>
-        <translation type="obsolete">Teema mukautettu: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Dark mode</source>
-        <translation type="obsolete">Tumma tila</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Light mode</source>
-        <translation type="obsolete">Vaalea tila</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="295"/>
+        <location filename="../filter_mate.py" line="346"/>
         <source>Initialization error: {0}</source>
         <translation>Alustusvirhe: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} viitattua tasoa ei ladattu ({layers_list}). Kaytetaan varanakymaa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1223"/>
+        <location filename="../filter_mate.py" line="1386"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Tiedostoa {filename} ei voi poistaa: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1240"/>
+        <location filename="../filter_mate.py" line="1403"/>
         <source>Error during reset: {str(e)}</source>
         <translation>Virhe nollauksen aikana: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1273"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Kiitos &lt;b&gt;FilterMaten&lt;/b&gt; kaytosta!&lt;br&gt;Liity Discord-yhteisoomme:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Saa apua ja tukea&lt;/li&gt;&lt;li&gt;Ilmoita virheista ja ongelmista&lt;/li&gt;&lt;li&gt;Ehdota uusia ominaisuuksia&lt;/li&gt;&lt;li&gt;Jaa vinkkeja muiden kayttajien kanssa&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1289"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>  Join us on Discord</source>
         <translation>  Liity Discordiin</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1309"/>
+        <location filename="../filter_mate.py" line="1472"/>
         <source>Don&apos;t show this again</source>
         <translation>Ala nayta tata uudelleen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1312"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Close</source>
         <translation>Sulje</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1541"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Virhe laajennuksen latauksessa: {0}. Tarkista QGIS Python -konsoli lisatietoja varten.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6630"/>
+        <location filename="../filter_mate_dockwidget.py" line="6691"/>
         <source>Current layer: {0}</source>
         <translation>Nykyinen taso: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6632"/>
+        <location filename="../filter_mate_dockwidget.py" line="6693"/>
         <source>No layer selected</source>
         <translation>Tasoa ei ole valittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>Selected layers:
 {0}</source>
         <translation>Valitut tasot:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>No layers selected</source>
         <translation>Tasoja ei ole valittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6662"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No expression defined</source>
         <translation>Lauseketta ei ole maaritetty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6674"/>
+        <location filename="../filter_mate_dockwidget.py" line="6735"/>
         <source>Display expression: {0}</source>
         <translation>Nayttolauseke: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6750"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Kohteen tunnus: {0}
 Ensimmainen attribuutti: {1}</translation>
     </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="301"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation>Lataa laajennus uudelleen soveltaaksesi asettelumuutoksia (toimintopalkin sijainti)</translation>
-    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="271"/>
+        <location filename="../filter_mate_app.py" line="274"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL-tasoja havaittu ({0}), mutta psycopg2 ei ole asennettu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="358"/>
+        <location filename="../filter_mate_app.py" line="361"/>
         <source>Cleared {0} caches</source>
         <translation>{0} vailimuistia tyhjennetty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="769"/>
+        <location filename="../filter_mate_app.py" line="772"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Dockwidgetin luonti epaonnistui: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="779"/>
+        <location filename="../filter_mate_app.py" line="782"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Dockwidgetin nayttaminen epaonnistui: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1229"/>
+        <location filename="../filter_mate_app.py" line="1232"/>
         <source>Error executing {0}: {1}</source>
         <translation>Virhe suoritettaessa {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1241"/>
+        <location filename="../filter_mate_app.py" line="1244"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Laajennus toimii rajoitetussa tilassa (heksagonaalipalvelut eivat ole kaytettavissa). Suorituskyky voi olla alentunut.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate VIRHE</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Kohdetta {0} ei voi suorittaa: widgetin alustus epaonnistui.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1994"/>
+        <location filename="../filter_mate_app.py" line="2144"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Toimintoa {0} ei voi suorittaa: taso virheellinen tai lahdetta ei loydy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2131"/>
+        <location filename="../filter_mate_app.py" line="2281"/>
         <source>All filters cleared - </source>
         <translation>Kaikki suodattimet poistettu - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2132"/>
+        <location filename="../filter_mate_app.py" line="2282"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} kohdetta nakyvissa paatasolla</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2138"/>
+        <location filename="../filter_mate_app.py" line="2288"/>
         <source>Error: result handler missing</source>
         <translation>Virhe: tuloskasittelija puuttuu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2151"/>
+        <location filename="../filter_mate_app.py" line="2301"/>
         <source>Error during filtering: {0}</source>
         <translation>Virhe suodatuksen aikana: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2280"/>
+        <location filename="../filter_mate_app.py" line="2432"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} orpoa suosikkia palautettu: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2416"/>
+        <location filename="../filter_mate_app.py" line="2568"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Tason lataus epaonnistui - napsauta yrittaaksesi uudelleen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2463"/>
+        <location filename="../filter_mate_app.py" line="2615"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} tasoa ladattu onnistuneesti</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1595"/>
+        <source>filter</source>
+        <translation>filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1597"/>
+        <source>unfilter</source>
+        <translation>unfilter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1600"/>
+        <source>FilterMate – Edit Mode Detected</source>
+        <translation>FilterMate – Edit Mode Detected</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1602"/>
+        <source>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</source>
+        <translation>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1612"/>
+        <source>Save Changes &amp; {0}</source>
+        <translation>Save Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1619"/>
+        <source>Discard Changes &amp; {0}</source>
+        <translation>Discard Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1626"/>
+        <source>Cancel</source>
+        <translation>Peruuta</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1650"/>
+        <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
+        <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation type="obsolete">Lataa lisäosa uudelleen ottaaksesi asettelumuutokset käyttöön (toimintopalkin sijainti)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Reload Plugin</source>
-        <translation type="obsolete">Lataa lisäosa uudelleen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation type="obsolete">Haluatko ladata FilterMaten uudelleen ottaaksesi kaikki asetusmuutokset käyttöön?</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Current layer: {name}</source>
-        <translation type="obsolete">Nykyinen taso: {name}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No layer selected</source>
-        <translation type="obsolete">Tasoa ei ole valittu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Selected layers:</source>
-        <translation type="obsolete">Valitut tasot:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Multiple layers selected</source>
-        <translation type="obsolete">Useita tasoja valittu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No layers selected</source>
-        <translation type="obsolete">Tasoja ei ole valittu</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Expression:</source>
-        <translation type="obsolete">Lauseke:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>No expression defined</source>
-        <translation type="obsolete">Lauseketta ei ole määritetty</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Display expression: {expr}</source>
-        <translation type="obsolete">Näytä lauseke: {expr}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Feature ID: {id}</source>
-        <translation type="obsolete">Kohteen tunnus: {id}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Current layer: {0}</source>
-        <translation type="obsolete">Nykyinen taso: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Selected layers:
-{0}</source>
-        <translation type="obsolete">Valitut tasot:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Expression:
-{0}</source>
-        <translation type="obsolete">Lauseke:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Expression: {0}</source>
-        <translation type="obsolete">Lauseke: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Display expression: {0}</source>
-        <translation type="obsolete">Näytä lauseke: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Feature ID: {0}
-First attribute: {1}</source>
-        <translation type="obsolete">Kohteen tunnus: {0}
-Ensimmäinen ominaisuus: {1}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="582"/>
+        <location filename="../filter_mate_dockwidget.py" line="596"/>
         <source>Initialization error: {}</source>
         <translation>Alustusvirhe: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Kayttoliittymaasetukset puutteelliset - tarkista lokit</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
         <translation>Kayttoliittyman mittavirhe: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1340"/>
+        <location filename="../filter_mate_dockwidget.py" line="1355"/>
         <source>Favorites manager not available</source>
         <translation>Suosikkien hallinta ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1359"/>
+        <location filename="../filter_mate_dockwidget.py" line="1374"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} suosikkia tallennettu
 Napsauta kayttaaksesi tai hallitaksesi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1367"/>
+        <location filename="../filter_mate_dockwidget.py" line="1382"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Ei tallennettuja suosikkeja
 Napsauta lisaataksesi nykyisen suodattimen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1391"/>
+        <location filename="../filter_mate_dockwidget.py" line="1406"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{0} taustaohjelmisto pakotettu {1} tasolle</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1477"/>
+        <location filename="../filter_mate_dockwidget.py" line="1492"/>
         <source>Backend controller not available</source>
         <translation>Taustaohjelmiston ohjain ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1415"/>
+        <location filename="../filter_mate_dockwidget.py" line="1430"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL automaattinen siivous kaytoessa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1416"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL automaattinen siivous poissa kaytosta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL-istuntonakymat siivottu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Ei nakymia siivottavaksi tai siivous epaonnistui</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1433"/>
+        <location filename="../filter_mate_dockwidget.py" line="1448"/>
         <source>No PostgreSQL connection available</source>
         <translation>PostgreSQL-yhteytta ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1439"/>
+        <location filename="../filter_mate_dockwidget.py" line="1454"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Skeemassa on {0} nakymaa muista istunnoista.
 Poista silti?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1440"/>
+        <location filename="../filter_mate_dockwidget.py" line="1455"/>
         <source>Other Sessions Active</source>
         <translation>Muita istuntoja aktiivisena</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1442"/>
+        <location filename="../filter_mate_dockwidget.py" line="1457"/>
         <source>Schema cleanup cancelled</source>
         <translation>Skeeman siivous peruutettu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1447"/>
+        <location filename="../filter_mate_dockwidget.py" line="1462"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Skeema &apos;{0}&apos; poistettu onnistuneesti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1464"/>
         <source>Schema cleanup failed</source>
         <translation>Skeeman siivous epaonnistui</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1475"/>
+        <location filename="../filter_mate_dockwidget.py" line="1490"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL istuntotiedot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Theme adapted: {0}</source>
         <translation>Teema mukautettu: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Dark mode</source>
         <translation>Tumma tila</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Light mode</source>
         <translation>Vaalea tila</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3908"/>
+        <location filename="../filter_mate_dockwidget.py" line="3896"/>
         <source>Selected features have no geometry.</source>
         <translation>Valituilla kohteilla ei ole geometriaa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3927"/>
+        <location filename="../filter_mate_dockwidget.py" line="3915"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Kohdetta ei ole valittu. Valitse kohde pudotusvalikosta.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4902"/>
+        <location filename="../filter_mate_dockwidget.py" line="4957"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Valittu taso on virheellinen tai sen lahdetta ei loydy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5612"/>
+        <location filename="../filter_mate_dockwidget.py" line="5667"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatiivinen puskuri (eroosio): kutistaa monikulmioita sisaanpain</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5615"/>
+        <location filename="../filter_mate_dockwidget.py" line="5670"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Puskuriarvo metrissa (positiivinen=laajenna, negatiivinen=kutista monikulmioita)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6089"/>
+        <location filename="../filter_mate_dockwidget.py" line="6144"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Laajennus aktivoitu {0} vektoritasolla</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6172"/>
+        <location filename="../filter_mate_dockwidget.py" line="6227"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Laajennusta ei voitu ladata uudelleen automaattisesti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6174"/>
+        <location filename="../filter_mate_dockwidget.py" line="6229"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Virhe laajennuksen uudelleenlatauksessa: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6224"/>
+        <location filename="../filter_mate_dockwidget.py" line="6282"/>
         <source>Layer properties reset to defaults</source>
         <translation>Tason ominaisuudet palautettu oletusarvoihin</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6225"/>
+        <location filename="../filter_mate_dockwidget.py" line="6283"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Virhe tason ominaisuuksien nollauksessa: {}</translation>
     </message>
@@ -2453,417 +1304,172 @@ Poista silti?</translation>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
         <translation>YKSITTÄINEN VALINTA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
         <source>MULTIPLE SELECTION</source>
         <translation>MONIVALINTA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1545"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
         <source>CUSTOM SELECTION</source>
         <translation>MUKAUTETTU VALINTA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
         <source>FILTERING</source>
         <translation>SUODATUS</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1575"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
         <source>EXPORTING</source>
         <translation>VIENTI</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1576"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
         <source>CONFIGURATION</source>
         <translation>ASETUKSET</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Identify feature - Display feature attributes</source>
-        <translation type="obsolete">Tunnista kohde - Näytä kohteen ominaisuudet</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Zoom to feature - Center the map on the selected feature</source>
-        <translation type="obsolete">Zoomaa kohteeseen - Keskitä kartta valittuun kohteeseen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable selection - Select features on map</source>
-        <translation type="obsolete">Ota valinta käyttöön - Valitse kohteita kartalta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable tracking - Follow the selected feature on the map</source>
-        <translation type="obsolete">Ota seuranta käyttöön - Seuraa valittua kohdetta kartalla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Link widgets - Synchronize selection between widgets</source>
-        <translation type="obsolete">Linkitä widgetit - Synkronoi valinta widgettien välillä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Reset layer properties - Restore default layer settings</source>
-        <translation type="obsolete">Palauta tason ominaisuudet - Palauta tason oletusasetukset</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-sync with current layer - Automatically update when layer changes</source>
-        <translation type="obsolete">Automaattinen synkronointi nykyisen tason kanssa - Päivitä automaattisesti tason muuttuessa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable multi-layer filtering - Apply filter to multiple layers simultaneously</source>
-        <translation type="obsolete">Ota monitasosuodatus käyttöön - Sovella suodatinta useisiin tasoihin samanaikaisesti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable additive filtering - Combine multiple filters on the current layer</source>
-        <translation type="obsolete">Ota lisäävä suodatus käyttöön - Yhdistä useita suodattimia nykyiseen tasoon</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable spatial filtering - Filter features using geometric relationships</source>
-        <translation type="obsolete">Ota spatiaalinen suodatus käyttöön - Suodata kohteita geometristen suhteiden avulla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable buffer - Add a buffer zone around selected features</source>
-        <translation type="obsolete">Ota puskuri käyttöön - Lisää puskurivyöhyke valittujen kohteiden ympärille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Buffer type - Select the buffer calculation method</source>
-        <translation type="obsolete">Puskurityyppi - Valitse puskurin laskentatapa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Current layer - Select the layer to filter</source>
-        <translation type="obsolete">Nykyinen taso - Valitse suodatettava taso</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Logical operator for combining filters on the source layer</source>
-        <translation type="obsolete">Looginen operaattori suodattimien yhdistämiseen lähdetasolla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Logical operator for combining filters on other layers</source>
-        <translation type="obsolete">Looginen operaattori suodattimien yhdistämiseen muilla tasoilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Select geometric predicate(s) for spatial filtering</source>
-        <translation type="obsolete">Valitse geometriset predikaatit spatiaaliseen suodatukseen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Buffer distance in meters</source>
-        <translation type="obsolete">Puskurietäisyys metreinä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Buffer type - Define how the buffer is calculated</source>
-        <translation type="obsolete">Puskurityyppi - Määritä miten puskuri lasketaan</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Select layers to export</source>
-        <translation type="obsolete">Valitse vietävät tasot</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Configure output projection</source>
-        <translation type="obsolete">Määritä tulosteen projektio</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Export layer styles (QML/SLD)</source>
-        <translation type="obsolete">Vie tasojen tyylit (QML/SLD)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Select output format</source>
-        <translation type="obsolete">Valitse tulostemuoto</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Configure output location and filename</source>
-        <translation type="obsolete">Määritä tulosteen sijainti ja tiedostonimi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable ZIP compression - Create a compressed archive of exported files</source>
-        <translation type="obsolete">Ota ZIP-pakkaus käyttöön - Luo pakattu arkisto viedyistä tiedostoista</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1569"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
         <source>Select CRS for export</source>
         <translation>Valitse koordinaattijärjestelmä vientiin</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Style format - Select QML or SLD format</source>
-        <translation type="obsolete">Tyyliformaatti - Valitse QML tai SLD</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Output file format</source>
-        <translation type="obsolete">Tulostetiedoston muoto</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Output folder name - Enter the name of the export folder</source>
-        <translation type="obsolete">Tulostekansion nimi - Syötä vientikansion nimi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enter folder name...</source>
-        <translation type="obsolete">Syötä kansion nimi...</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Batch mode - Export each layer to a separate folder</source>
-        <translation type="obsolete">Eräkäsittelytila - Vie jokainen taso omaan kansioonsa</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Batch mode</source>
-        <translation type="obsolete">Eräkäsittelytila</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>ZIP filename - Enter the name for the compressed archive</source>
-        <translation type="obsolete">ZIP-tiedostonimi - Syötä pakatun arkiston nimi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enter ZIP filename...</source>
-        <translation type="obsolete">Syötä ZIP-tiedostonimi...</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Batch mode - Create a separate ZIP for each layer</source>
-        <translation type="obsolete">Eräkäsittelytila - Luo erillinen ZIP jokaiselle tasolle</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Apply Filter - Execute the current filter on selected layers</source>
-        <translation type="obsolete">Käytä suodatinta - Suorita nykyinen suodatin valituilla tasoilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Apply Filter</source>
-        <translation type="obsolete">Käytä suodatinta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Apply the current filter expression to filter features on the selected layer(s)</source>
-        <translation type="obsolete">Käytä nykyistä suodatinlauseketta suodattaaksesi kohteita valituilla tasoilla</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Undo Filter - Restore the previous filter state</source>
-        <translation type="obsolete">Kumoa suodatin - Palauta edellinen suodatintila</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Undo Filter</source>
-        <translation type="obsolete">Kumoa suodatin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Undo the last filter operation and restore the previous state</source>
-        <translation type="obsolete">Kumoa viimeisin suodatinoperaatio ja palauta edellinen tila</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Redo Filter - Reapply the previously undone filter</source>
-        <translation type="obsolete">Tee uudelleen suodatin - Sovella uudelleen kumottu suodatin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Redo Filter</source>
-        <translation type="obsolete">Tee uudelleen suodatin</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Redo the previously undone filter operation</source>
-        <translation type="obsolete">Tee uudelleen kumottu suodatinoperaatio</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Clear All Filters - Remove all filters from all layers</source>
-        <translation type="obsolete">Tyhjennä kaikki suodattimet - Poista kaikki suodattimet kaikilta tasoilta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Clear All Filters</source>
-        <translation type="obsolete">Tyhjennä kaikki suodattimet</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Remove all active filters from all layers in the project</source>
-        <translation type="obsolete">Poista kaikki aktiiviset suodattimet kaikilta projektin tasoilta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Export - Save filtered layers to the specified location</source>
-        <translation type="obsolete">Vie - Tallenna suodatetut tasot määritettyyn sijaintiin</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
         <source>Export</source>
         <translation>Vie</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Export the filtered layers to the configured output location and format</source>
-        <translation type="obsolete">Vie suodatetut tasot määritettyyn tulosteen sijaintiin ja muotoon</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>About FilterMate - Display plugin information and help</source>
-        <translation type="obsolete">Tietoa FilterMatesta - Näytä lisäosan tiedot ja ohje</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
         <source>AND</source>
         <translation>JA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1556"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
         <source>AND NOT</source>
         <translation>JA EI</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1557"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
         <source>OR</source>
         <translation>TAI</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1559"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
         <source>, </source>
         <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
         <source>Multi-layer filtering</source>
         <translation>Monitasosuodatus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1547"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
         <source>Additive filtering for the selected layer</source>
         <translation>Lisäävä suodatus valitulle tasolle</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1548"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
         <source>Geospatial filtering</source>
         <translation>Geospatiaalinen suodatus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
         <source>Buffer</source>
         <translation>Puskuri</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
         <source>Expression layer</source>
         <translation>Lauseketaso</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1558"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
         <source>Geometric predicate</source>
         <translation>Geometrinen predikaatti</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Value in meters</source>
-        <translation type="obsolete">Arvo metreinä</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1572"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
         <source>Output format</source>
         <translation>Tulostemuoto</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
         <source>Filter</source>
         <translation>Suodatin</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
         <source>Reset</source>
         <translation>Palauta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
         <source>Layers to export</source>
         <translation>Vietävät tasot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
         <source>Layers projection</source>
         <translation>Tasojen projektio</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
         <source>Save styles</source>
         <translation>Tallenna tyylit</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1567"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
         <source>Datatype export</source>
         <translation>Tietotyypin vienti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
         <source>Name of file/directory</source>
         <translation>Tiedoston/kansion nimi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1550"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>Kayta sentroideja taydellisten geometrioiden sijaan lahdetasolle (nopeampi monimutkaisille monikulmioille)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Puskuriarvo metrissa (positiivinen=laajenna, negatiivinen=kutista monikulmioita)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
         <source>Number of segments for buffer precision</source>
         <translation>Segmenttien maara puskurin tarkkuuteen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
         <source>Mode batch</source>
         <translation>Eratila</translation>
     </message>
@@ -2971,7 +1577,7 @@ Poista silti?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="928"/>
+        <location filename="../core/tasks/layer_management_task.py" line="944"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2988,12 +1594,12 @@ Ratkaisu: Poista tama taso FilterMate-projektista ja lisaa se uudelleen.
 Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="954"/>
+        <location filename="../core/tasks/layer_management_task.py" line="970"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Tasolla &apos;{0}&apos; ei ole PRIMARY KEY -avainta. Rajoitettu toiminnallisuus: materialisoidut nakymat poistettu kaytosta. Suositus: lisaa PRIMARY KEY optimaalisen suorituskyvyn varmistamiseksi.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1893"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
         <source>Exception: {0}</source>
         <translation>Poikkeus: {0}</translation>
     </message>
@@ -3132,159 +1738,6 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
     </message>
 </context>
 <context>
-    <name>OptimizationDialogs</name>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>FilterMate - Optimizations</source>
-        <translation type="obsolete">FilterMate - Optimoinnit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimizations for:</source>
-        <translation type="obsolete">Optimoinnit:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>features</source>
-        <translation type="obsolete">kohdetta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Estimated speedup:</source>
-        <translation type="obsolete">Arvioitu nopeutus:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>faster</source>
-        <translation type="obsolete">nopeampi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use centroids</source>
-        <translation type="obsolete">Käytä keskipisteitä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use centroids for distant layers</source>
-        <translation type="obsolete">Käytä keskipisteitä etäisille tasoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable buffer type</source>
-        <translation type="obsolete">Ota puskurityyppi käyttöön</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Simplify geometries</source>
-        <translation type="obsolete">Yksinkertaista geometrioita</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>BBox pre-filtering</source>
-        <translation type="obsolete">BBox esisuodatus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Attribute-first strategy</source>
-        <translation type="obsolete">Attribuutti-ensin strategia</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Remember for this session</source>
-        <translation type="obsolete">Muista tämän istunnon ajan</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Skip</source>
-        <translation type="obsolete">Ohita</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Apply</source>
-        <translation type="obsolete">Käytä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimization Settings</source>
-        <translation type="obsolete">Optimointiasetukset</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable optimizations</source>
-        <translation type="obsolete">Ota optimoinnit käyttöön</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Suggest performance optimizations before filtering</source>
-        <translation type="obsolete">Ehdota suorituskykyoptimointeja ennen suodatusta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-use centroids for remote layers</source>
-        <translation type="obsolete">Käytä auto. keskipisteitä etätasoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Use centroids to reduce network transfer (~90% faster)</source>
-        <translation type="obsolete">Käytä keskipisteitä verkkosiirron vähentämiseksi (~90% nopeampi)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-select best strategy</source>
-        <translation type="obsolete">Valitse auto. paras strategia</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically choose optimal filtering strategy</source>
-        <translation type="obsolete">Valitse automaattisesti optimaalinen suodatusstrategia</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-simplify geometries</source>
-        <translation type="obsolete">Yksinkertaista auto. geometrioita</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Warning: lossy operation, may change polygon shapes</source>
-        <translation type="obsolete">Varoitus: häviöllinen toiminto, voi muuttaa monikulmioiden muotoja</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Ask before applying</source>
-        <translation type="obsolete">Kysy ennen käyttöä</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Show confirmation dialog before optimizations</source>
-        <translation type="obsolete">Näytä vahvistusikkuna ennen optimointeja</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Centroids enabled for &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">Keskipisteet käytössä kohteelle &apos;{0}&apos; (~{1}x {2})</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>BBox pre-filter enabled for &apos;{0}&apos;</source>
-        <translation type="obsolete">BBox esisuodatin käytössä kohteelle &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimization applied: &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">Optimointi käytetty: &apos;{0}&apos; (~{1}x {2})</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Simplify before buffer</source>
-        <translation type="obsolete">Yksinkertaista ennen puskuria</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Reduce buffer segments</source>
-        <translation type="obsolete">Vähennä puskurisegmenttejä</translation>
-    </message>
-</context>
-<context>
     <name>PostgresInfoDialog</name>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="80"/>
@@ -3382,256 +1835,6 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
         <translation>Puhdistus epäonnistui</translation>
     </message>
     <message>
-        <location filename="." line="1881156722"/>
-        <source>Allow cancellation of QGIS processing algorithms. Enables stopping long-running operations.</source>
-        <translation type="obsolete">Salli QGIS-käsittelyalgoritmien peruutus. Mahdollistaa pitkäkestoisten operaatioiden pysäyttämisen.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Analyzing your project... Recommendations will appear here.</source>
-        <translation type="obsolete">Analysoidaan projektiasi... Suositukset näkyvät tässä.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-Centroid for Distant Layers</source>
-        <translation type="obsolete">Automaattinen keskipiste etäisille tasoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-Select Best Strategy</source>
-        <translation type="obsolete">Valitse automaattisesti paras strategia</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-Simplify Geometries ⚠️</source>
-        <translation type="obsolete">Automaattinen geometrioiden yksinkertaistaminen ⚠️</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Auto-detect mod_spatialite</source>
-        <translation type="obsolete">Tunnista mod_spatialite automaattisesti</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatic GIST Index Usage</source>
-        <translation type="obsolete">Automaattinen GIST-indeksin käyttö</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically analyze layers and suggest optimizations before filtering.</source>
-        <translation type="obsolete">Analysoi tasot automaattisesti ja ehdota optimointeja ennen suodatusta.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically choose optimal filtering strategy based on layer analysis. (attribute-first, bbox-prefilter, progressive chunks)</source>
-        <translation type="obsolete">Valitse automaattisesti optimaalinen suodatusstrategia tasoanalyysin perusteella. (attribuutti-ensin, bbox-esisuodatin, progressiiviset lohkot)</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically create spatial index (.qix/.shx) for layers without one. Dramatically improves spatial query speed.</source>
-        <translation type="obsolete">Luo automaattisesti spatiaalinen indeksi (.qix/.shx) tasoille joilla ei ole sitä. Parantaa dramaattisesti spatiaalisten kyselyjen nopeutta.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically find and load the best mod_spatialite extension.</source>
-        <translation type="obsolete">Etsi ja lataa automaattisesti paras mod_spatialite-laajennus.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically simplify complex geometries. WARNING: This is a LOSSY operation that may change polygon shapes.</source>
-        <translation type="obsolete">Yksinkertaista monimutkaiset geometriat automaattisesti. VAROITUS: Tämä on HÄVIÖLLINEN operaatio joka voi muuttaa monikulmioiden muotoja.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Automatically use ST_Centroid() for remote layers (WFS, ArcGIS). Reduces network data transfer by ~90%.</source>
-        <translation type="obsolete">Käytä automaattisesti ST_Centroid() etätasoille (WFS, ArcGIS). Vähentää verkkodata-siirtoa ~90%.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Bypass GDAL layer and execute SQL directly on GeoPackage. Faster for complex spatial queries.</source>
-        <translation type="obsolete">Ohita GDAL-taso ja suorita SQL suoraan GeoPackagessa. Nopeampi monimutkaisille spatiaalisille kyselyille.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cache built expressions to avoid rebuilding identical queries.</source>
-        <translation type="obsolete">Välimuistiin rakennetut lausekkeet välttääksesi identtisten kyselyjen uudelleenrakentamisen.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cache converted WKT strings to avoid repeated geometry serialization.</source>
-        <translation type="obsolete">Välimuistiin muunnetut WKT-merkkijonot välttääksesi toistuvan geometrian sarjallistamisen.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cancel</source>
-        <translation type="obsolete">Peruuta</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Cancellable Processing</source>
-        <translation type="obsolete">Peruutettava käsittely</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Chunk size (features):</source>
-        <translation type="obsolete">Lohkokoko (ominaisuudet):</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Confirm Before Applying</source>
-        <translation type="obsolete">Vahvista ennen soveltamista</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Connection Pooling</source>
-        <translation type="obsolete">Yhteyksien yhdistäminen</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Create Spatial Indexes</source>
-        <translation type="obsolete">Luo spatiaaliset indeksit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Create indexed temporary views for complex spatial queries. Best for large datasets with complex expressions.</source>
-        <translation type="obsolete">Luo indeksoituja väliaikaisia näkymiä monimutkaisille spatiaalisille kyselyille. Paras suurille tietojoukkoille monimutkaisilla lausekkeilla.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Create materialized views for datasets larger than this</source>
-        <translation type="obsolete">Luo materialisoidut näkymät tätä suuremmille tietojoukoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Create temporary tables with R-tree spatial indexes for complex queries. Best for complex expressions on local files.</source>
-        <translation type="obsolete">Luo väliaikaiset taulukot R-puu spatiaalisilla indekseillä monimutkaisille kyselyille. Paras monimutkaisille lausekkeille paikallisissa tiedostoissa.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Direct SQL access can make GeoPackage filtering 2-5x faster.</source>
-        <translation type="obsolete">Suora SQL-pääsy voi tehdä GeoPackage-suodatuksesta 2-5x nopeampaa.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Direct SQL for GeoPackage</source>
-        <translation type="obsolete">Suora SQL GeoPackagelle</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Display optimization hints in message bar when recommendations are available.</source>
-        <translation type="obsolete">Näytä optimointivihjeet viestipalkkissa kun suosituksia on saatavilla.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Distant layer threshold:</source>
-        <translation type="obsolete">Etäisen tason kynnys:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>EXISTS Subquery for Large WKT</source>
-        <translation type="obsolete">EXISTS-alikysely suurelle WKT:lle</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable Auto-Centroid for Remote Layers</source>
-        <translation type="obsolete">Ota käyttöön automaattinen keskipiste etätasoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable Auto-Optimization</source>
-        <translation type="obsolete">Ota käyttöön automaattinen optimointi</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable Direct SQL for GeoPackage</source>
-        <translation type="obsolete">Ota käyttöön suora SQL GeoPackagelle</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Enable Materialized Views</source>
-        <translation type="obsolete">Ota käyttöön materialisoidut näkymät</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Error resetting layer properties: {}</source>
-        <translation type="obsolete">Virhe tason ominaisuuksien nollauksessa: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Estimated performance improvement</source>
-        <translation type="obsolete">Arvioitu suorituskyvyn parannus</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Execute SQLite queries in background thread with cancellation support. Prevents UI freezing.</source>
-        <translation type="obsolete">Suorita SQLite-kyselyt taustasäikeessä peruutustuella. Estää käyttöliittymän jäätymisen.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Filter multiple layers simultaneously using multiple CPU cores.</source>
-        <translation type="obsolete">Suodata useita tasoja samanaikaisesti käyttäen useita CPU-ytimiä.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>FilterMate - Backend Optimizations</source>
-        <translation type="obsolete">FilterMate - Backend-optimoinnit</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>First filter by bounding box, then by exact geometry. Reduces precision calculations on irrelevant features.</source>
-        <translation type="obsolete">Suodata ensin rajauslaatikolla, sitten tarkalla geometrialla. Vähentää tarkkuuslaskentoja epäolennaisille kohteille.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>For small PostgreSQL layers, copy to memory for faster filtering. Avoids network latency for small datasets.</source>
-        <translation type="obsolete">Pienille PostgreSQL-tasoille, kopioi muistiin nopeampaa suodatusta varten. Välttää verkon latenssin pienille tietojoukoille.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Force sequential execution for OGR layers to prevent crashes. Safer but slower.</source>
-        <translation type="obsolete">Pakota peräkkäinen suoritus OGR-tasoille kaatumisten estämiseksi. Turvallisempi mutta hitaampi.</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>GEOS-safe Geometry Handling</source>
-        <translation type="obsolete">GEOS-turvallinen geometrian käsittely</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Global</source>
-        <translation type="obsolete">Globaali</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Interruptible Queries</source>
-        <translation type="obsolete">Keskeytettävät kyselyt</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Lazy cursor threshold:</source>
-        <translation type="obsolete">Laiska osoitinkynnys:</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Max workers (0=auto):</source>
-        <translation type="obsolete">Maksimi työntekijät (0=auto):</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimizations for PostgreSQL databases with PostGIS extension</source>
-        <translation type="obsolete">Optimoinnit PostgreSQL-tietokannoille PostGIS-laajennuksella</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimizations for Spatialite databases and GeoPackage files</source>
-        <translation type="obsolete">Optimoinnit Spatialite-tietokannoille ja GeoPackage-tiedostoille</translation>
-    </message>
-    <message>
-        <location filename="." line="1881156722"/>
-        <source>Optimizations for file-based formats (Shapefiles, GeoJSON) and memory layers</source>
-        <translation type="obsolete">Optimoinnit tiedostopohjaisille formaateille (Shapefiles, GeoJSON) ja muistitasoille</translation>
-    </message>
-    <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="119"/>
         <source>&lt;b&gt;PostgreSQL is not available&lt;/b&gt;&lt;br&gt;&lt;br&gt;To use PostgreSQL features, install psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Then restart QGIS to apply changes.</source>
         <translation>&lt;b&gt;PostgreSQL ei ole kaytettavissa&lt;/b&gt;&lt;br&gt;&lt;br&gt;Kayttaaksesi PostgreSQL-ominaisuuksia, asenna psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Kaynnista sitten QGIS uudelleen ottaaksesi muutokset kayttoon.</translation>
@@ -3676,39 +1879,402 @@ Jatketaanko?</translation>
     </message>
 </context>
 <context>
+    <name>QFieldCloudExtension</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <source>QFieldCloud Settings...</source>
+        <translation>QFieldCloud Settings...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <source>Export filtered layers to QFieldCloud</source>
+        <translation>Export filtered layers to QFieldCloud</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudPushDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <source>Export to QFieldCloud</source>
+        <translation>Export to QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <source>Active Filter</source>
+        <translation>Active Filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <source>No active filter</source>
+        <translation>No active filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <source>Filter:</source>
+        <translation>Filter:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <source>0 layers</source>
+        <translation>0 layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <source>Layers:</source>
+        <translation>Layers:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <source>QFieldCloud Project</source>
+        <translation>QFieldCloud Project</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <source>Project name:</source>
+        <translation>Project name:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <source>Description:</source>
+        <translation>Kuvaus:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <source>Create new</source>
+        <translation>Create new</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <source>Update existing:</source>
+        <translation>Update existing:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <source>Mode:</source>
+        <translation>Mode:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <source>Layer Modes</source>
+        <translation>Layer Modes</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Layer</source>
+        <translation>Taso</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Mode</source>
+        <translation>Mode</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <source>Export</source>
+        <translation>Vie</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <source>{0} layers ({1} features)</source>
+        <translation>{0} layers ({1} features)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <source>{0} layers (no filter active)</source>
+        <translation>{0} layers (no filter active)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Missing Name</source>
+        <translation>Missing Name</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Please enter a project name.</source>
+        <translation>Please enter a project name.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>Not Connected</source>
+        <translation>Not Connected</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>QFieldCloud is not connected. Please configure credentials first.</source>
+        <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No Layers</source>
+        <translation>No Layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No valid layers to export.</source>
+        <translation>No valid layers to export.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>Export Error</source>
+        <translation>Export Error</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <source>Failed to export layer &apos;{0}&apos;: {1}</source>
+        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>GPKG export failed: {0}</source>
+        <translation>GPKG export failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <source>Push complete!</source>
+        <translation>Push complete!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project successfully pushed to QFieldCloud!</source>
+        <translation>Project successfully pushed to QFieldCloud!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project: {0}</source>
+        <translation>Project: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Files: {0}</source>
+        <translation>Files: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Duration: {0:.1f}s</source>
+        <translation>Duration: {0:.1f}s</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>URL: {0}</source>
+        <translation>URL: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <source>Warnings:</source>
+        <translation>Warnings:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <source>Push Complete</source>
+        <translation>Push Complete</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <source>Error: {0}</source>
+        <translation>Virhe: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push Failed</source>
+        <translation>Push Failed</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push failed:
+
+{0}</source>
+        <translation>Push failed:
+
+{0}</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudSettingsDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="53"/>
+        <source>QFieldCloud Configuration</source>
+        <translation>QFieldCloud Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="66"/>
+        <source>Server</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="71"/>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="77"/>
+        <source>Credentials</source>
+        <translation>Credentials</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="81"/>
+        <source>username</source>
+        <translation>username</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="82"/>
+        <source>Username:</source>
+        <translation>Username:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="86"/>
+        <source>password (for initial login)</source>
+        <translation>password (for initial login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="87"/>
+        <source>Password:</source>
+        <translation>Password:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="90"/>
+        <source>JWT token (auto-filled after login)</source>
+        <translation>JWT token (auto-filled after login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="95"/>
+        <source>Login</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="96"/>
+        <source>Login with username/password to get a token</source>
+        <translation>Login with username/password to get a token</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="98"/>
+        <source>Token:</source>
+        <translation>Token:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="102"/>
+        <source>Status:</source>
+        <translation>Tila:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="105"/>
+        <source>Test Connection</source>
+        <translation>Test Connection</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="112"/>
+        <source>Preferences</source>
+        <translation>Preferences</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="117"/>
+        <source>Default project:</source>
+        <translation>Default project:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="119"/>
+        <source>Trigger packaging after upload</source>
+        <translation>Trigger packaging after upload</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="144"/>
+        <source>Token stored</source>
+        <translation>Token stored</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Missing Fields</source>
+        <translation>Missing Fields</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Please fill in URL, username, and password.</source>
+        <translation>Please fill in URL, username, and password.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="174"/>
+        <source>Logging in...</source>
+        <translation>Logging in...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="191"/>
+        <source>Logged in as {0}</source>
+        <translation>Logged in as {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="198"/>
+        <source>Login failed: {0}</source>
+        <translation>Login failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Missing Configuration</source>
+        <translation>Missing Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Please configure URL and login first.</source>
+        <translation>Please configure URL and login first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="219"/>
+        <source>Testing connection...</source>
+        <translation>Testing connection...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="229"/>
+        <source>Connected! ({0} projects accessible)</source>
+        <translation>Connected! ({0} projects accessible)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="235"/>
+        <source>Connection failed: {0}</source>
+        <translation>Connection failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Missing URL</source>
+        <translation>Missing URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Server URL is required.</source>
+        <translation>Server URL is required.</translation>
+    </message>
+</context>
+<context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="640"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
         <source>Type to filter...</source>
         <translation>Kirjoita suodattaaksesi...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="649"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
         <source>Select All</source>
         <translation>Valitse kaikki</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="651"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
         <source>Select All (non subset)</source>
         <translation>Valitse kaikki (ei osajoukko)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="653"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
         <source>Select All (subset)</source>
         <translation>Valitse kaikki (osajoukko)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>De-select All</source>
         <translation>Poista kaikki valinnat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>De-select All (non subset)</source>
         <translation>Poista kaikki valinnat (ei osajoukko)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>De-select All (subset)</source>
         <translation>Poista kaikki valinnat (osajoukko)</translation>
     </message>
@@ -3928,196 +2494,11 @@ Jatketaanko?</translation>
     </message>
 </context>
 <context>
-    <name>d</name>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="870"/>
-        <source>Use centroids instead of full geometries for distant layers</source>
-        <translation>Kayta sentroideja taydellisten geometrioiden sijaan etaisille tasoille</translation>
-    </message>
-</context>
-<context>
-    <name>dw</name>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="737"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation>Negatiivinen puskuri (eroosio): kutistaa monikulmioita sisaanpain</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="744"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Puskuriarvo metrissa (positiivinen=laajenna, negatiivinen=kutista monikulmioita)</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="120"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation>Virhe muutosten peruuttamisessa: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Reload Plugin</source>
-        <translation>Lataa laajennus uudelleen</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation>Haluatko ladata FilterMaten uudelleen soveltaaksesi kaikki asetusmuutokset?</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="56"/>
-        <source>Auto-optimization {0}</source>
-        <translation>Automaattinen optimointi {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>enabled</source>
-        <translation>kaytoessa</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>disabled</source>
-        <translation>poissa kaytosta</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="69"/>
-        <source>Auto-centroid {0}</source>
-        <translation>Automaattinen sentroidi {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>Confirmation {0}</source>
-        <translation>Vahvistus {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="97"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation>Tasoa ei ole valittu. Valitse ensin taso.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="104"/>
-        <source>Auto-optimizer module not available</source>
-        <translation>Automaattinen optimointimoduuli ei ole kaytettavissa</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="108"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation>Tasoa &apos;{0}&apos; ei voitu analysoida</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="129"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation>Taso &apos;{0}&apos; on jo optimaalisesti maaritetty.
-Tyyppi: {1}
-Kohteita: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="156"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation>Automaattinen optimointi ei ole kaytettavissa: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="161"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation>Virhe tason analysoinnissa: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="189"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation>Kaytetty tasolle &apos;{0}&apos;:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="196"/>
-        <source>No optimizations selected to apply.</source>
-        <translation>Ei optimointeja valittu kaytettavaksi.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="231"/>
-        <source>Optimization settings saved</source>
-        <translation>Optimointiasetukset tallennettu</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="288"/>
-        <source>Dialog not available: {0}</source>
-        <translation>Valintaikkuna ei ole kaytettavissa: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="293"/>
-        <source>Error: {0}</source>
-        <translation>Virhe: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="257"/>
-        <source>Backend optimization settings saved</source>
-        <translation>Taustaohjelmiston optimointiasetukset tallennettu</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="286"/>
-        <source>Backend optimizations configured</source>
-        <translation>Taustaohjelmiston optimoinnit maaritetty</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="406"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation>{0} tasoa optimoitu</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="411"/>
-        <source>All layers using auto-selection</source>
-        <translation>Kaikki tasot kayttavat automaattista valintaa</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="420"/>
-        <source>Backend optimization unavailable</source>
-        <translation>Taustaohjelmiston optimointi ei ole kaytettavissa</translation>
-    </message>
-</context>
-<context>
-    <name>self._dockwidget</name>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Expression Evaluation</source>
-        <translation>Lausekkeen arviointi</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Error evaluating expression: {error_msg}</source>
-        <translation>Virhe lausekkeen arvioinnissa: {error_msg}</translation>
-    </message>
-</context>
-<context>
     <name>self.dockwidget</name>
     <message>
-        <location filename="../ui/managers/configuration_manager.py" line="685"/>
-        <source>Identify selected feature</source>
-        <translation>Tunnista valittu kohde</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="686"/>
-        <source>Zoom to selected feature</source>
-        <translation>Zoomaa valittuun kohteeseen</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="687"/>
-        <source>Toggle feature selection on map</source>
-        <translation>Vaihda kohteen valinta kartalla</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="688"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation>Automaattinen zoomaus kohteen vaihtuessa</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="689"/>
-        <source>Link exploring widgets together</source>
-        <translation>Linkita selauswidgetit yhteen</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="690"/>
-        <source>Reset all layer exploring properties</source>
-        <translation>Nollaa kaikki tason selausominaisuudet</translation>
+        <location filename="../ui/controllers/config_controller.py" line="664"/>
+        <source>Language changed to &apos;{0}&apos;.</source>
+        <translation>Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

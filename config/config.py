@@ -68,11 +68,13 @@ FALLBACK_CONFIG = {
     "EXTENSIONS": {
         "qfieldcloud": {
             "enabled": {
-                "value": True,
+                "value": False,
+                "choices": [True, False],
                 "description": "Enable/disable the QFieldCloud extension"
             },
             "dismiss_missing_deps_warning": {
                 "value": False,
+                "choices": [True, False],
                 "description": "Do not show the missing dependencies warning"
             }
         }

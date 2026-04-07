@@ -2,50 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="uz_UZ" sourcelanguage="en_US">
 <context>
-    <name>@default</name>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="173"/>
-        <source>OptimizationManager</source>
-        <comment>Use Centroids</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="175"/>
-        <source>OptimizationManager</source>
-        <comment>Simplify before buffer</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="177"/>
-        <source>OptimizationManager</source>
-        <comment>Reduce buffer segments (3)</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-</context>
-<context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="168"/>
+        <location filename="../core/services/app_initializer.py" line="171"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>{0} qatlam(lar)dan buzilgan filtrlar tozalandi. Iltimos, filtrlaringizni qayta qo&apos;llang.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="237"/>
+        <location filename="../core/services/app_initializer.py" line="240"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Bo&apos;sh loyiha aniqlandi. Plaginni faollashtirish uchun vektor qatlamlar qo&apos;shing.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="304"/>
+        <location filename="../core/services/app_initializer.py" line="307"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>FilterMate ma&apos;lumotlar bazasiga kirish imkoni yo&apos;q. Loyiha katalogi ruxsatlarini tekshiring.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="318"/>
+        <location filename="../core/services/app_initializer.py" line="321"/>
         <source>Error during database verification: {0}</source>
         <translation>Ma&apos;lumotlar bazasini tekshirishda xatolik: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="594"/>
+        <location filename="../core/services/app_initializer.py" line="599"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Qatlamni yuklash muvaffaqiyatsiz. Majburiy qayta yuklash uchun F5 tugmasini bosing.</translation>
     </message>
@@ -84,564 +63,9 @@
     </message>
 </context>
 <context>
-    <name>BackendOptimizationWidget</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Quick Setup</source>
-        <translation type="obsolete">Tez sozlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Choose a profile or customize settings below</source>
-        <translation type="obsolete">Profilni tanlang yoki quyidagi sozlamalarni moslashtiring</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Smart Recommendations</source>
-        <translation type="obsolete">Aqlli tavsiyalar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Balanced Profile</source>
-        <translation type="obsolete">Muvozanatlangan profil</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Maximum Performance</source>
-        <translation type="obsolete">Maksimal unumdorlik</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Minimal Resources</source>
-        <translation type="obsolete">Minimal resurslar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL/PostGIS Optimizations</source>
-        <translation type="obsolete">PostgreSQL/PostGIS optimallashtirishlari</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Materialized Views</source>
-        <translation type="obsolete">Materiallashtirilgan ko&apos;rinishlar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary materialized views for complex filters</source>
-        <translation type="obsolete">Murakkab filtrlar uchun vaqtinchalik materiallashtirilgan ko&apos;rinishlar yaratish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Two-Phase Filtering</source>
-        <translation type="obsolete">Ikki bosqichli filtrlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use bounding box pre-filtering before precise geometry tests</source>
-        <translation type="obsolete">Aniq geometriya testlaridan oldin chegaralovchi quti oldindan filtrlashdan foydalaning</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Progressive Loading</source>
-        <translation type="obsolete">Progressiv yuklash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Load data in chunks for very large datasets</source>
-        <translation type="obsolete">Juda katta ma&apos;lumotlar to&apos;plamlari uchun ma&apos;lumotlarni qismlarga bo&apos;lib yuklash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Chunk Size</source>
-        <translation type="obsolete">Qism hajmi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Server-Side Simplification</source>
-        <translation type="obsolete">Server tomonidan soddalshtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify geometries on server for display purposes</source>
-        <translation type="obsolete">Ko&apos;rsatish maqsadlari uchun serverda geometriyalarni soddalashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplification Tolerance</source>
-        <translation type="obsolete">Soddalshtirish toleransi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Parallel Query Execution</source>
-        <translation type="obsolete">Parallel so&apos;rovlarni bajarish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Execute independent queries in parallel</source>
-        <translation type="obsolete">Mustaqil so&apos;rovlarni parallel bajarish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression Caching</source>
-        <translation type="obsolete">Ifodalarni keshlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache compiled expressions for reuse</source>
-        <translation type="obsolete">Qayta foydalanish uchun kompilyatsiya qilingan ifodalarni keshlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Spatialite/GeoPackage Optimizations</source>
-        <translation type="obsolete">Spatialite/GeoPackage optimallashtirishlari</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>R-tree Temp Tables</source>
-        <translation type="obsolete">R-tree vaqtinchalik jadvallar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary tables with R-tree indexes</source>
-        <translation type="obsolete">R-tree indekslari bilan vaqtinchalik jadvallar yaratish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox Pre-filtering</source>
-        <translation type="obsolete">BBox oldindan filtrlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use bounding box filtering before precise tests</source>
-        <translation type="obsolete">Aniq testlardan oldin chegaralovchi quti filtrlashdan foydalaning</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory-Mapped I/O</source>
-        <translation type="obsolete">Xotira-xaritalangan I/O</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use memory-mapped I/O for file access</source>
-        <translation type="obsolete">Faylga kirish uchun xotira-xaritalangan I/O dan foydalaning</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch Processing</source>
-        <translation type="obsolete">To&apos;plamli qayta ishlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Process multiple operations in batches</source>
-        <translation type="obsolete">Bir nechta amallarni to&apos;plamlarda qayta ishlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch Size</source>
-        <translation type="obsolete">To&apos;plam hajmi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>OGR/Memory Optimizations</source>
-        <translation type="obsolete">OGR/Xotira optimallashtirishlari</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatic Spatial Index</source>
-        <translation type="obsolete">Avtomatik fazoviy indeks</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create temporary spatial indexes automatically</source>
-        <translation type="obsolete">Vaqtinchalik fazoviy indekslarni avtomatik yaratish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Progressive Chunking</source>
-        <translation type="obsolete">Progressiv bo&apos;laklash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Process large files in progressive chunks</source>
-        <translation type="obsolete">Katta fayllarni progressiv qismlarda qayta ishlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory Feature Caching</source>
-        <translation type="obsolete">Xotira xususiyatlarini keshlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache features in memory for faster access</source>
-        <translation type="obsolete">Tezroq kirish uchun xususiyatlarni xotirada keshlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cache Size (features)</source>
-        <translation type="obsolete">Kesh hajmi (xususiyatlar)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Geometry Simplification</source>
-        <translation type="obsolete">Geometriyani soddalashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify complex geometries during processing</source>
-        <translation type="obsolete">Qayta ishlash paytida murakkab geometriyalarni soddalashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Global Optimizations</source>
-        <translation type="obsolete">Global optimallashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Optimization</source>
-        <translation type="obsolete">Avtomatik optimallashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically optimize based on data analysis</source>
-        <translation type="obsolete">Ma&apos;lumotlar tahlili asosida avtomatik optimallashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Centroid</source>
-        <translation type="obsolete">Avtomatik markaz</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically center view on filter results</source>
-        <translation type="obsolete">Ko&apos;rinishni filtr natijalariga avtomatik markazlashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Parallel Layer Filtering</source>
-        <translation type="obsolete">Parallel qatlam filtrlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter multiple layers simultaneously</source>
-        <translation type="obsolete">Bir vaqtning o&apos;zida bir nechta qatlamlarni filtrlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Smart Expression Parsing</source>
-        <translation type="obsolete">Aqlli ifoda tahlili</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimize expression parsing for complex queries</source>
-        <translation type="obsolete">Murakkab so&apos;rovlar uchun ifoda tahlilini optimallashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Deferred Refresh</source>
-        <translation type="obsolete">Kechiktirilgan yangilash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Delay map refresh until all filters are applied</source>
-        <translation type="obsolete">Barcha filtrlar qo&apos;llanilgunga qadar xarita yangilanishini kechiktirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Verbose Logging</source>
-        <translation type="obsolete">Batafsil jurnallash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable detailed logging for debugging</source>
-        <translation type="obsolete">Xatolarni tuzatish uchun batafsil jurnallashni yoqish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply</source>
-        <translation type="obsolete">Qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset to Defaults</source>
-        <translation type="obsolete">Standartlarga qaytarish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Settings applied successfully</source>
-        <translation type="obsolete">Sozlamalar muvaffaqiyatli qo&apos;llandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Settings reset to defaults</source>
-        <translation type="obsolete">Sozlamalar standartlarga qaytarildi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Profile applied: {}</source>
-        <translation type="obsolete">Profil qo&apos;llandi: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error applying settings</source>
-        <translation type="obsolete">Sozlamalarni qo&apos;llashda xato</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Checking...</source>
-        <translation type="obsolete">MV holati: Tekshirilmoqda...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Error</source>
-        <translation type="obsolete">MV holati: Xato</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status: Clean</source>
-        <translation type="obsolete">MV holati: Toza</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>MV Status:</source>
-        <translation type="obsolete">MV holati:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>active</source>
-        <translation type="obsolete">faol</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No active materialized views</source>
-        <translation type="obsolete">Faol materialized viewlar yo&apos;q</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Session:</source>
-        <translation type="obsolete">Sessiya:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Other sessions:</source>
-        <translation type="obsolete">Boshqa sessiyalar:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🧹 Session</source>
-        <translation type="obsolete">🧹 Sessiya</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup MVs from this session</source>
-        <translation type="obsolete">Ushbu sessiyaning MV larini tozalash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🗑️ Orphaned</source>
-        <translation type="obsolete">🗑️ Yetim</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup orphaned MVs (&gt;24h old)</source>
-        <translation type="obsolete">Yetim MV larini tozalash (&gt;24 soat)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⚠️ All</source>
-        <translation type="obsolete">⚠️ Barchasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleanup ALL MVs (affects other sessions)</source>
-        <translation type="obsolete">BARCHA MV larni tozalash (boshqa sessiyalarga ta&apos;sir qiladi)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirm Cleanup</source>
-        <translation type="obsolete">Tozalashni tasdiqlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Drop ALL materialized views?
-This affects other FilterMate sessions!</source>
-        <translation type="obsolete">BARCHA materialized viewlarni o&apos;chirish?
-Bu boshqa FilterMate sessiyalariga ta&apos;sir qiladi!</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Refresh MV status</source>
-        <translation type="obsolete">MV holatini yangilash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Threshold:</source>
-        <translation type="obsolete">Chegara:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>features</source>
-        <translation type="obsolete">xususiyatlar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-cleanup on exit</source>
-        <translation type="obsolete">Chiqishda avtomatik tozalash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically drop session MVs when plugin unloads</source>
-        <translation type="obsolete">Plugin yuklanmagan holda sessiya MV larini avtomatik o&apos;chirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create MVs for datasets larger than this</source>
-        <translation type="obsolete">Bundan kattaroq ma&apos;lumotlar to&apos;plamlari uchun MV lar yarating</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>faster possible</source>
-        <translation type="obsolete">tezroq mumkin</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations available</source>
-        <translation type="obsolete">Optimizatsiyalar mavjud</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Apply Optimizations?</source>
-        <translation type="obsolete">FilterMate - Optimizatsiyalarni qo&apos;llash?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip</source>
-        <translation type="obsolete">O&apos;tkazib yuborish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>✓ Apply</source>
-        <translation type="obsolete">✓ Qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Don&apos;t ask for this session</source>
-        <translation type="obsolete">Bu sessiya uchun so&apos;ramang</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Markazlar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify</source>
-        <translation type="obsolete">Soddalashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Pre-simplify</source>
-        <translation type="obsolete">Oldindan soddalashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Fewer segments</source>
-        <translation type="obsolete">Kamroq segmentlar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Flat buffer</source>
-        <translation type="obsolete">Tekis bufer</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox filter</source>
-        <translation type="obsolete">BBox filtr</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Attr-first</source>
-        <translation type="obsolete">Attr-birinchi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL not available</source>
-        <translation type="obsolete">PostgreSQL mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No connection</source>
-        <translation type="obsolete">Ulanish yo&apos;q</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation type="obsolete">Xususiyat o&apos;zgarganda avtomatik zoom</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimization settings saved</source>
-        <translation type="obsolete">Backend optimallashtirish sozlamalari saqlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimizations configured</source>
-        <translation type="obsolete">Backend optimizatsiyalari sozlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression Evaluation</source>
-        <translation type="obsolete">Ifoda baholash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Identify selected feature</source>
-        <translation type="obsolete">Tanlangan xususiyatni aniqlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Layer properties reset to defaults</source>
-        <translation type="obsolete">Qatlam xususiyatlari standartlarga qaytarildi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Link exploring widgets together</source>
-        <translation type="obsolete">Tadqiqot vidjetlarini birlashtiring</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization settings saved</source>
-        <translation type="obsolete">Optimallashtirish sozlamalari saqlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset all layer exploring properties</source>
-        <translation type="obsolete">Barcha qatlam tadqiqot xususiyatlarini qayta o&apos;rnatish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Toggle feature selection on map</source>
-        <translation type="obsolete">Xaritada xususiyat tanlovini almashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons)</source>
-        <translation type="obsolete">Uzoq qatlamlar uchun to&apos;liq geometriyalar o&apos;rniga markazlardan foydalaning (murakkab ko&apos;pburchaklar uchun tezroq)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">Manba qatlam uchun to&apos;liq geometriyalar o&apos;rniga markazlardan foydalaning (murakkab ko&apos;pburchaklar uchun tezroq)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Zoom to selected feature</source>
-        <translation type="obsolete">Tanlangan xususiyatga yaqinlashtirish</translation>
-    </message>
-</context>
-<context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="275"/>
+        <location filename="../ui/controllers/config_controller.py" line="311"/>
         <source>Error cancelling changes: {0}</source>
         <translation>O&apos;zgarishlarni bekor qilishda xatolik: {0}</translation>
     </message>
@@ -690,34 +114,6 @@ Bu boshqa FilterMate sessiyalariga ta&apos;sir qiladi!</translation>
         <location filename="../adapters/database_manager.py" line="527"/>
         <source>Error during database initialization: {0}</source>
         <translation>Ma&apos;lumotlar bazasini ishga tushirishda xatolik: {0}</translation>
-    </message>
-</context>
-<context>
-    <name>DatasourceManager</name>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
-        <source>Database file does not exist: {db_file_path}</source>
-        <translation>Ma&apos;lumotlar bazasi fayli mavjud emas: {db_file_path}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
-        <source>Failed to connect to database {db_file_path}: {error}</source>
-        <translation>Ma&apos;lumotlar bazasi {db_file_path} ga ulanish muvaffaqiyatsiz: {error}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
-        <source>QGIS processing module not available to create spatial index</source>
-        <translation>Fazoviy indeks yaratish uchun QGIS ishlov berish moduli mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
-        <source>Cannot create spatial index: layer invalid or source not found.</source>
-        <translation>Fazoviy indeks yaratib bo&apos;lmaydi: qatlam noto&apos;g&apos;ri yoki manba topilmadi.</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
-        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
-        <translation>PostgreSQL qatlamlari aniqlandi, lekin psycopg2 o&apos;rnatilmagan. Mahalliy Spatialite backend ishlatilmoqda. Katta ma&apos;lumotlar to&apos;plamlari bilan yaxshiroq ishlash uchun psycopg2 ni o&apos;rnating.</translation>
     </message>
 </context>
 <context>
@@ -1243,59 +639,6 @@ Birinchi sevimlingizni saqlash uchun ★ ko&apos;rsatkichini bosing va &apos;Jor
     </message>
 </context>
 <context>
-    <name>FeedbackUtils</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Starting filter on {count} layer(s)</source>
-        <translation type="obsolete">{count} ta qatlamda filtrlash boshlanmoqda</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Removing filters from {count} layer(s)</source>
-        <translation type="obsolete">{count} ta qatlamdan filtrlar olib tashlanmoqda</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Resetting {count} layer(s)</source>
-        <translation type="obsolete">{count} ta qatlam tiklanmoqda</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Exporting {count} layer(s)</source>
-        <translation type="obsolete">{count} ta qatlam eksport qilinmoqda</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully filtered {count} layer(s)</source>
-        <translation type="obsolete">{count} ta qatlam muvaffaqiyatli filtrlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully removed filters from {count} layer(s)</source>
-        <translation type="obsolete">{count} ta qatlamdan filtrlar muvaffaqiyatli olib tashlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully reset {count} layer(s)</source>
-        <translation type="obsolete">{count} ta qatlam muvaffaqiyatli tiklandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Successfully exported {count} layer(s)</source>
-        <translation type="obsolete">{count} ta qatlam muvaffaqiyatli eksport qilindi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</source>
-        <translation type="obsolete">PostgreSQL siz katta ma&apos;lumotlar to&apos;plami ({count} ta obyekt). Ishlash samaradorligi kamayishi mumkin.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL recommended for better performance.</source>
-        <translation type="obsolete">Yaxshiroq ishlash uchun PostgreSQL tavsiya etiladi.</translation>
-    </message>
-</context>
-<context>
     <name>FilepathType</name>
     <message>
         <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
@@ -1352,99 +695,67 @@ Birinchi sevimlingizni saqlash uchun ★ ko&apos;rsatkichini bosing va &apos;Jor
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="106"/>
+        <location filename="../filter_mate.py" line="188"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>Open FilterMate panel</source>
         <translation>FilterMate panelini ochish</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset configuration and database</source>
         <translation>Sozlamalar va ma&apos;lumotlar bazasini tiklash</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Standart sozlamalarni tiklash va SQLite ma&apos;lumotlar bazasini o&apos;chirish</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Reset Configuration</source>
         <translation>Sozlamalarni tiklash</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Are you sure you want to reset to the default configuration?
-
-This will:
-- Reset all FilterMate settings
-- Delete all filter history databases</source>
-        <translation type="obsolete">Standart sozlamalarga qaytishni xohlaysizmi?
-
-Bu quyidagilarni bajaradi:
-- Barcha FilterMate sozlamalarini tiklaydi
-- Barcha filtr tarixi ma&apos;lumotlar bazalarini o&apos;chiradi</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1192"/>
+        <location filename="../filter_mate.py" line="1355"/>
         <source>Configuration reset successfully.</source>
         <translation>Sozlamalar muvaffaqiyatli tiklandi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1197"/>
+        <location filename="../filter_mate.py" line="1360"/>
         <source>Default configuration file not found.</source>
         <translation>Standart sozlamalar fayli topilmadi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1218"/>
+        <location filename="../filter_mate.py" line="1381"/>
         <source>Database deleted: {filename}</source>
         <translation>Ma&apos;lumotlar bazasi o&apos;chirildi: {filename}</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Unable to delete {filename}: {error}</source>
-        <translation type="obsolete">{filename} ni o&apos;chirib bo&apos;lmadi: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>Restart required</source>
         <translation>Qayta ishga tushirish talab qilinadi</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>The configuration has been reset.
-
-Please restart QGIS to apply all changes.</source>
-        <translation type="obsolete">Sozlamalar tiklandi.
-
-Barcha o&apos;zgarishlarni qo&apos;llash uchun QGIS ni qayta ishga tushiring.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error during reset: {error}</source>
-        <translation type="obsolete">Tiklash vaqtida xatolik: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="350"/>
+        <location filename="../filter_mate.py" line="401"/>
         <source>Obsolete configuration detected</source>
         <translation>Eskirgan sozlamalar aniqlandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="351"/>
+        <location filename="../filter_mate.py" line="402"/>
         <source>unknown version</source>
         <translation>noma&apos;lum versiya</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="352"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1459,12 +770,12 @@ Standart sozlamalarga tiklamoqchimisiz?
 • Yo&apos;q: Joriy sozlamalarni saqlash (muammolar yuzaga kelishi mumkin)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="359"/>
+        <location filename="../filter_mate.py" line="410"/>
         <source>Corrupted configuration detected</source>
         <translation>Buzilgan sozlamalar aniqlandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="360"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1479,12 +790,12 @@ Standart sozlamalarga tiklamoqchimisiz?
 • Yo&apos;q: Bekor qilish (plagin to&apos;g&apos;ri ishlamasligi mumkin)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="367"/>
+        <location filename="../filter_mate.py" line="418"/>
         <source>Configuration reset</source>
         <translation>Sozlamalar tiklandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="419"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1493,57 +804,57 @@ Do you want to continue?</source>
 Davom etmoqchimisiz?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="416"/>
+        <location filename="../filter_mate.py" line="467"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Sozlamalar tiklanmadi. Ba&apos;zi funksiyalar to&apos;g&apos;ri ishlamasligi mumkin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="427"/>
+        <location filename="../filter_mate.py" line="478"/>
         <source>Configuration created with default values</source>
         <translation>Standart qiymatlar bilan sozlamalar yaratildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Buzilgan sozlamalar tiklandi. Standart sozlamalar qayta tiklandi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="484"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Eskirgan sozlamalar tiklandi. Standart sozlamalar qayta tiklandi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="505"/>
         <source>Configuration updated to latest version</source>
         <translation>Sozlamalar eng so&apos;nggi versiyaga yangilandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="451"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Sozlamalar yangilandi: yangi sozlamalar mavjud ({sections}). Tanlovlar menyusi orqali kirish.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Geometry Simplification</source>
         <translation>Geometriyani soddalashtirish</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>Optimization Thresholds</source>
         <translation>Optimallashtirish chegaralari</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="473"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Error during configuration migration: {}</source>
         <translation>Sozlamalarni ko&apos;chirish vaqtida xatolik: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="591"/>
+        <location filename="../filter_mate.py" line="642"/>
         <source>Geometry validation setting</source>
         <translation>Geometriya tekshirish sozlamalari</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="593"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -1570,17 +881,17 @@ Hozir bu sozlamani o&apos;chirmoqchimisiz?
 • Yo&apos;q: Joriy sozlamani saqlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="621"/>
+        <location filename="../filter_mate.py" line="672"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Noto&apos;g&apos;ri geometriya filtrlash muvaffaqiyatli o&apos;chirildi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="628"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Noto&apos;g&apos;ri geometriya filtrlash o&apos;zgartirilmadi. Ba&apos;zi obyektlar eksportdan chiqarib tashlanishi mumkin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1597,7 +908,7 @@ Bu quyidagilarni bajaradi:
 O&apos;zgarishlarni qo&apos;llash uchun QGIS qayta ishga tushirilishi kerak.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1606,489 +917,386 @@ Please restart QGIS to apply the changes.</source>
 O&apos;zgarishlarni qo&apos;llash uchun QGIS ni qayta ishga tushiring.</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">Bufer qiymati metrda (musbat=kengaytirish, manfiy=poligonlarni qisqartirish)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation type="obsolete">Manfiy bufer (eroziya): poligonlarni ichkariga qisqartiradi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>point</source>
-        <translation type="obsolete">nuqta</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>line</source>
-        <translation type="obsolete">chiziq</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>non-polygon</source>
-        <translation type="obsolete">ko&apos;pburchak-emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer value in meters (positive only when centroids are enabled. Negative buffers cannot be applied to points)</source>
-        <translation type="obsolete">Bufer qiymati metrda (faqat sentroidlar yoqilganda ijobiy. Salbiy buferlar nuqtalarga qo&apos;llanilmaydi)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Mode batch</source>
-        <translation type="obsolete">Ommaviy rejim</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">Bufer aniqligi uchun segmentlar soni</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids</source>
-        <translation type="obsolete">Markazlar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons like buildings)</source>
-        <translation type="obsolete">Uzoq qatlamlar uchun to&apos;liq geometriyalar o&apos;rniga markazlardan foydalaning (binolar kabi murakkab ko&apos;pburchaklar uchun tezroq)</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="295"/>
+        <location filename="../filter_mate.py" line="346"/>
         <source>Initialization error: {0}</source>
         <translation>Ishga tushirish xatoligi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} havola qilingan qatlam(lar) yuklanmadi ({layers_list}). Zaxira ko&apos;rinish ishlatilmoqda.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1223"/>
+        <location filename="../filter_mate.py" line="1386"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename} ni o&apos;chirib bo&apos;lmadi: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1240"/>
+        <location filename="../filter_mate.py" line="1403"/>
         <source>Error during reset: {str(e)}</source>
         <translation>Qayta tiklashda xatolik: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1273"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate&lt;/b&gt; dan foydalanganingiz uchun rahmat!&lt;br&gt;Discord hamjamiyatimizga qo&apos;shiling:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Yordam va qo&apos;llab-quvvatlash oling&lt;/li&gt;&lt;li&gt;Xatolar va muammolarni xabar qiling&lt;/li&gt;&lt;li&gt;Yangi funksiyalarni taklif qiling&lt;/li&gt;&lt;li&gt;Boshqa foydalanuvchilar bilan maslahatlar bo&apos;lishing&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1289"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>  Join us on Discord</source>
         <translation>  Discord da bizga qo&apos;shiling</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1309"/>
+        <location filename="../filter_mate.py" line="1472"/>
         <source>Don&apos;t show this again</source>
         <translation>Buni boshqa ko&apos;rsatmang</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1312"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Close</source>
         <translation>Yopish</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1541"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Plaginni yuklashda xatolik: {0}. Tafsilotlar uchun QGIS Python konsolini tekshiring.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6630"/>
+        <location filename="../filter_mate_dockwidget.py" line="6691"/>
         <source>Current layer: {0}</source>
         <translation>Joriy qatlam: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6632"/>
+        <location filename="../filter_mate_dockwidget.py" line="6693"/>
         <source>No layer selected</source>
         <translation>Qatlam tanlanmagan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>Selected layers:
 {0}</source>
         <translation>Tanlangan qatlamlar:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>No layers selected</source>
         <translation>Qatlam tanlanmagan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6662"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No expression defined</source>
         <translation>Ifoda belgilanmagan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6674"/>
+        <location filename="../filter_mate_dockwidget.py" line="6735"/>
         <source>Display expression: {0}</source>
         <translation>Ko&apos;rsatish ifodasi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6750"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Xususiyat ID: {0}
 Birinchi atribut: {1}</translation>
     </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="301"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation>Tartib o&apos;zgarishlarini qo&apos;llash uchun plaginni qayta yuklang (amal paneli joylashuvi)</translation>
-    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="271"/>
+        <location filename="../filter_mate_app.py" line="274"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL qatlamlari aniqlandi ({0}), lekin psycopg2 o&apos;rnatilmagan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="358"/>
+        <location filename="../filter_mate_app.py" line="361"/>
         <source>Cleared {0} caches</source>
         <translation>{0} kesh tozalandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="769"/>
+        <location filename="../filter_mate_app.py" line="772"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Dockwidget yaratish muvaffaqiyatsiz: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="779"/>
+        <location filename="../filter_mate_app.py" line="782"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Dockwidget ko&apos;rsatish muvaffaqiyatsiz: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1229"/>
+        <location filename="../filter_mate_app.py" line="1232"/>
         <source>Error executing {0}: {1}</source>
         <translation>{0} ni bajarishda xatolik: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1241"/>
+        <location filename="../filter_mate_app.py" line="1244"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plagin pasaytirilgan rejimda ishlayapti (olti burchakli xizmatlar mavjud emas). Ishlash tezligi pasayishi mumkin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate XATOLIK</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>{0} ni bajarib bo&apos;lmaydi: vidjet ishga tushirilishi muvaffaqiyatsiz.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1994"/>
+        <location filename="../filter_mate_app.py" line="2144"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0} ni bajarib bo&apos;lmaydi: qatlam noto&apos;g&apos;ri yoki manba topilmadi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2131"/>
+        <location filename="../filter_mate_app.py" line="2281"/>
         <source>All filters cleared - </source>
         <translation>Barcha filtrlar tozalandi - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2132"/>
+        <location filename="../filter_mate_app.py" line="2282"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>Asosiy qatlamda {0}{1} xususiyat ko&apos;rinadi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2138"/>
+        <location filename="../filter_mate_app.py" line="2288"/>
         <source>Error: result handler missing</source>
         <translation>Xatolik: natija ishlov beruvchi yo&apos;q</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2151"/>
+        <location filename="../filter_mate_app.py" line="2301"/>
         <source>Error during filtering: {0}</source>
         <translation>Filtrlashda xatolik: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2280"/>
+        <location filename="../filter_mate_app.py" line="2432"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} yetim sevimli tiklandi: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2416"/>
+        <location filename="../filter_mate_app.py" line="2568"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Qatlam yuklash muvaffaqiyatsiz - qayta urinish uchun bosing</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2463"/>
+        <location filename="../filter_mate_app.py" line="2615"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} qatlam muvaffaqiyatli yuklandi</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1595"/>
+        <source>filter</source>
+        <translation>filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1597"/>
+        <source>unfilter</source>
+        <translation>unfilter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1600"/>
+        <source>FilterMate – Edit Mode Detected</source>
+        <translation>FilterMate – Edit Mode Detected</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1602"/>
+        <source>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</source>
+        <translation>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1612"/>
+        <source>Save Changes &amp; {0}</source>
+        <translation>Save Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1619"/>
+        <source>Discard Changes &amp; {0}</source>
+        <translation>Discard Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1626"/>
+        <source>Cancel</source>
+        <translation>Bekor qilish</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1650"/>
+        <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
+        <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation type="obsolete">Tartib o&apos;zgarishlarini qo&apos;llash uchun plaginni qayta yuklash (amal paneli holati)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reload Plugin</source>
-        <translation type="obsolete">Plaginni qayta yuklash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation type="obsolete">Barcha sozlama o&apos;zgarishlarini qo&apos;llash uchun FilterMate ni qayta yuklamoqchimisiz?</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer: {name}</source>
-        <translation type="obsolete">Joriy qatlam: {name}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layer selected</source>
-        <translation type="obsolete">Hech qanday qatlam tanlanmagan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Selected layers:</source>
-        <translation type="obsolete">Tanlangan qatlamlar:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Multiple layers selected</source>
-        <translation type="obsolete">Bir nechta qatlam tanlangan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layers selected</source>
-        <translation type="obsolete">Hech qanday qatlam tanlanmagan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression:</source>
-        <translation type="obsolete">Ifoda:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No expression defined</source>
-        <translation type="obsolete">Hech qanday ifoda belgilanmagan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display expression: {expr}</source>
-        <translation type="obsolete">Ko&apos;rsatish ifodasi: {expr}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Feature ID: {id}</source>
-        <translation type="obsolete">Obyekt IDsi: {id}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer: {0}</source>
-        <translation type="obsolete">Joriy qatlam: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Selected layers:
-{0}</source>
-        <translation type="obsolete">Tanlangan qatlamlar:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression:
-{0}</source>
-        <translation type="obsolete">Ifoda:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Expression: {0}</source>
-        <translation type="obsolete">Ifoda: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Display expression: {0}</source>
-        <translation type="obsolete">Ko&apos;rsatish ifodasi: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Feature ID: {0}
-First attribute: {1}</source>
-        <translation type="obsolete">Obyekt IDsi: {0}
-Birinchi atribut: {1}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="582"/>
+        <location filename="../filter_mate_dockwidget.py" line="596"/>
         <source>Initialization error: {}</source>
         <translation>Ishga tushirish xatoligi: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI konfiguratsiyasi tugallanmagan - jurnallarni tekshiring</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
         <translation>UI o&apos;lcham xatoligi: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1340"/>
+        <location filename="../filter_mate_dockwidget.py" line="1355"/>
         <source>Favorites manager not available</source>
         <translation>Sevimlilar boshqaruvchisi mavjud emas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1359"/>
+        <location filename="../filter_mate_dockwidget.py" line="1374"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} sevimli saqlangan
 Qo&apos;llash yoki boshqarish uchun bosing</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1367"/>
+        <location filename="../filter_mate_dockwidget.py" line="1382"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Sevimli saqlanmagan
 Joriy filtrni qo&apos;shish uchun bosing</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1391"/>
+        <location filename="../filter_mate_dockwidget.py" line="1406"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{1} qatlam uchun {0} backend majburlandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1477"/>
+        <location filename="../filter_mate_dockwidget.py" line="1492"/>
         <source>Backend controller not available</source>
         <translation>Backend boshqaruvchisi mavjud emas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1415"/>
+        <location filename="../filter_mate_dockwidget.py" line="1430"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL avtomatik tozalash yoqildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1416"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL avtomatik tozalash o&apos;chirildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL seans ko&apos;rinishlari tozalandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Tozalanadigan ko&apos;rinish yo&apos;q yoki tozalash muvaffaqiyatsiz</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1433"/>
+        <location filename="../filter_mate_dockwidget.py" line="1448"/>
         <source>No PostgreSQL connection available</source>
         <translation>PostgreSQL ulanishi mavjud emas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1439"/>
+        <location filename="../filter_mate_dockwidget.py" line="1454"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Sxema boshqa seanslardan {0} ko&apos;rinishga ega.
 Baribir o&apos;chirilsinmi?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1440"/>
+        <location filename="../filter_mate_dockwidget.py" line="1455"/>
         <source>Other Sessions Active</source>
         <translation>Boshqa seanslar faol</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1442"/>
+        <location filename="../filter_mate_dockwidget.py" line="1457"/>
         <source>Schema cleanup cancelled</source>
         <translation>Sxema tozalash bekor qilindi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1447"/>
+        <location filename="../filter_mate_dockwidget.py" line="1462"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Sxema &apos;{0}&apos; muvaffaqiyatli o&apos;chirildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1464"/>
         <source>Schema cleanup failed</source>
         <translation>Sxema tozalash muvaffaqiyatsiz</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1475"/>
+        <location filename="../filter_mate_dockwidget.py" line="1490"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL seans ma&apos;lumoti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Theme adapted: {0}</source>
         <translation>Mavzu moslashtirildi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Dark mode</source>
         <translation>Qorong&apos;i rejim</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Light mode</source>
         <translation>Yorug&apos; rejim</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3908"/>
+        <location filename="../filter_mate_dockwidget.py" line="3896"/>
         <source>Selected features have no geometry.</source>
         <translation>Tanlangan xususiyatlarning geometriyasi yo&apos;q.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3927"/>
+        <location filename="../filter_mate_dockwidget.py" line="3915"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Xususiyat tanlanmagan. Ochiladigan ro&apos;yxatdan xususiyat tanlang.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4902"/>
+        <location filename="../filter_mate_dockwidget.py" line="4957"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Tanlangan qatlam noto&apos;g&apos;ri yoki uning manbasi topilmadi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5612"/>
+        <location filename="../filter_mate_dockwidget.py" line="5667"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Manfiy bufer (eroziya): ko&apos;pburchaklarni ichkariga kichraytiradi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5615"/>
+        <location filename="../filter_mate_dockwidget.py" line="5670"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Metrda bufer qiymati (musbat=kengaytirish, manfiy=ko&apos;pburchaklarni kichraytirish)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6089"/>
+        <location filename="../filter_mate_dockwidget.py" line="6144"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plagin {0} vektor qatlam bilan faollashtirildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6172"/>
+        <location filename="../filter_mate_dockwidget.py" line="6227"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Plaginni avtomatik qayta yuklab bo&apos;lmadi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6174"/>
+        <location filename="../filter_mate_dockwidget.py" line="6229"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Plaginni qayta yuklashda xatolik: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6224"/>
+        <location filename="../filter_mate_dockwidget.py" line="6282"/>
         <source>Layer properties reset to defaults</source>
         <translation>Qatlam xususiyatlari standart qiymatlarga qayta tiklandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6225"/>
+        <location filename="../filter_mate_dockwidget.py" line="6283"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Qatlam xususiyatlarini qayta tiklashda xatolik: {}</translation>
     </message>
@@ -2096,417 +1304,172 @@ Baribir o&apos;chirilsinmi?</translation>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
         <translation>YAKKA TANLASH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
         <source>MULTIPLE SELECTION</source>
         <translation>KO&apos;P TANLASH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1545"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
         <source>CUSTOM SELECTION</source>
         <translation>MAXSUS TANLASH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
         <source>FILTERING</source>
         <translation>FILTRLASH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1575"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
         <source>EXPORTING</source>
         <translation>EKSPORT QILISH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1576"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
         <source>CONFIGURATION</source>
         <translation>SOZLAMALAR</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Identify feature - Display feature attributes</source>
-        <translation type="obsolete">Obyektni aniqlash - Obyekt atributlarini ko&apos;rsatish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Zoom to feature - Center the map on the selected feature</source>
-        <translation type="obsolete">Obyektga yaqinlashtirish - Xaritani tanlangan obyektga markazlashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable selection - Select features on map</source>
-        <translation type="obsolete">Tanlashni yoqish - Xaritada obyektlarni tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable tracking - Follow the selected feature on the map</source>
-        <translation type="obsolete">Kuzatishni yoqish - Xaritada tanlangan obyektni kuzatish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Link widgets - Synchronize selection between widgets</source>
-        <translation type="obsolete">Vidjetlarni bog&apos;lash - Vidjetlar o&apos;rtasida tanlashni sinxronlashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reset layer properties - Restore default layer settings</source>
-        <translation type="obsolete">Qatlam xususiyatlarini tiklash - Standart qatlam sozlamalarini tiklash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-sync with current layer - Automatically update when layer changes</source>
-        <translation type="obsolete">Joriy qatlam bilan avtomatik sinxronlash - Qatlam o&apos;zgarganda avtomatik yangilash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable multi-layer filtering - Apply filter to multiple layers simultaneously</source>
-        <translation type="obsolete">Ko&apos;p qatlamli filtrlashni yoqish - Filtrni bir vaqtda bir nechta qatlamlarga qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable additive filtering - Combine multiple filters on the current layer</source>
-        <translation type="obsolete">Qo&apos;shimcha filtrlashni yoqish - Joriy qatlamda bir nechta filtrlarni birlashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable spatial filtering - Filter features using geometric relationships</source>
-        <translation type="obsolete">Fazoviy filtrlashni yoqish - Geometrik munosabatlar yordamida obyektlarni filtrlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable buffer - Add a buffer zone around selected features</source>
-        <translation type="obsolete">Buferni yoqish - Tanlangan obyektlar atrofiga bufer zonasini qo&apos;shish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer type - Select the buffer calculation method</source>
-        <translation type="obsolete">Bufer turi - Bufer hisoblash usulini tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Current layer - Select the layer to filter</source>
-        <translation type="obsolete">Joriy qatlam - Filtrlash uchun qatlamni tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Logical operator for combining filters on the source layer</source>
-        <translation type="obsolete">Manba qatlamida filtrlarni birlashtirish uchun mantiqiy operator</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Logical operator for combining filters on other layers</source>
-        <translation type="obsolete">Boshqa qatlamlarda filtrlarni birlashtirish uchun mantiqiy operator</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select geometric predicate(s) for spatial filtering</source>
-        <translation type="obsolete">Fazoviy filtrlash uchun geometrik predikat(lar)ni tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer distance in meters</source>
-        <translation type="obsolete">Metrda bufer masofasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Buffer type - Define how the buffer is calculated</source>
-        <translation type="obsolete">Bufer turi - Bufer qanday hisoblanishini belgilash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select layers to export</source>
-        <translation type="obsolete">Eksport qilish uchun qatlamlarni tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Configure output projection</source>
-        <translation type="obsolete">Chiqish proyeksiyasini sozlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Export layer styles (QML/SLD)</source>
-        <translation type="obsolete">Qatlam uslublarini eksport qilish (QML/SLD)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Select output format</source>
-        <translation type="obsolete">Chiqish formatini tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Configure output location and filename</source>
-        <translation type="obsolete">Chiqish joylashuvi va fayl nomini sozlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable ZIP compression - Create a compressed archive of exported files</source>
-        <translation type="obsolete">ZIP siqishni yoqish - Eksport qilingan fayllarning siqilgan arxivini yaratish</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1569"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
         <source>Select CRS for export</source>
         <translation>Eksport uchun CRS ni tanlash</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Style format - Select QML or SLD format</source>
-        <translation type="obsolete">Uslub formati - QML yoki SLD formatini tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Output file format</source>
-        <translation type="obsolete">Chiqish fayl formati</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Output folder name - Enter the name of the export folder</source>
-        <translation type="obsolete">Chiqish papka nomi - Eksport papkasining nomini kiriting</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter folder name...</source>
-        <translation type="obsolete">Papka nomini kiriting...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode - Export each layer to a separate folder</source>
-        <translation type="obsolete">Ommaviy rejim - Har bir qatlamni alohida papkaga eksport qilish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode</source>
-        <translation type="obsolete">Ommaviy rejim</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>ZIP filename - Enter the name for the compressed archive</source>
-        <translation type="obsolete">ZIP fayl nomi - Siqilgan arxiv uchun nomni kiriting</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter ZIP filename...</source>
-        <translation type="obsolete">ZIP fayl nomini kiriting...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Batch mode - Create a separate ZIP for each layer</source>
-        <translation type="obsolete">Ommaviy rejim - Har bir qatlam uchun alohida ZIP yaratish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply Filter - Execute the current filter on selected layers</source>
-        <translation type="obsolete">Filtrni qo&apos;llash - Tanlangan qatlamlarda joriy filtrni bajarish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply Filter</source>
-        <translation type="obsolete">Filtrni qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply the current filter expression to filter features on the selected layer(s)</source>
-        <translation type="obsolete">Tanlangan qatlam(lar)dagi obyektlarni filtrlash uchun joriy filtr ifodasini qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo Filter - Restore the previous filter state</source>
-        <translation type="obsolete">Filtrni bekor qilish - Oldingi filtr holatini tiklash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo Filter</source>
-        <translation type="obsolete">Filtrni bekor qilish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo the last filter operation and restore the previous state</source>
-        <translation type="obsolete">Oxirgi filtr operatsiyasini bekor qilish va oldingi holatni tiklash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo Filter - Reapply the previously undone filter</source>
-        <translation type="obsolete">Filtrni qayta qo&apos;llash - Oldin bekor qilingan filtrni qayta qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo Filter</source>
-        <translation type="obsolete">Filtrni qayta qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo the previously undone filter operation</source>
-        <translation type="obsolete">Oldin bekor qilingan filtr operatsiyasini qayta bajarish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear All Filters - Remove all filters from all layers</source>
-        <translation type="obsolete">Barcha filtrlarni tozalash - Barcha qatlamlardan barcha filtrlarni olib tashlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear All Filters</source>
-        <translation type="obsolete">Barcha filtrlarni tozalash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Remove all active filters from all layers in the project</source>
-        <translation type="obsolete">Loyihadagi barcha qatlamlardan barcha faol filtrlarni olib tashlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Export - Save filtered layers to the specified location</source>
-        <translation type="obsolete">Eksport - Filtrlangan qatlamlarni ko&apos;rsatilgan joyga saqlash</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
         <source>Export</source>
         <translation>Eksport</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Export the filtered layers to the configured output location and format</source>
-        <translation type="obsolete">Filtrlangan qatlamlarni sozlangan chiqish joylashuvi va formatiga eksport qilish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>About FilterMate - Display plugin information and help</source>
-        <translation type="obsolete">FilterMate haqida - Plagin ma&apos;lumotlari va yordamni ko&apos;rsatish</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
         <source>AND</source>
         <translation>VA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1556"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
         <source>AND NOT</source>
         <translation>VA EMAS</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1557"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
         <source>OR</source>
         <translation>YOKI</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1559"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
         <source>, </source>
         <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
         <source>Multi-layer filtering</source>
         <translation>Ko&apos;p qatlamli filtrlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1547"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
         <source>Additive filtering for the selected layer</source>
         <translation>Tanlangan qatlam uchun qo&apos;shimcha filtrlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1548"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
         <source>Geospatial filtering</source>
         <translation>Geofazoviy filtrlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
         <source>Buffer</source>
         <translation>Bufer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
         <source>Expression layer</source>
         <translation>Ifoda qatlami</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1558"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
         <source>Geometric predicate</source>
         <translation>Geometrik predikat</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>Value in meters</source>
-        <translation type="obsolete">Metrda qiymat</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1572"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
         <source>Output format</source>
         <translation>Chiqish formati</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
         <source>Filter</source>
         <translation>Filtr</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
         <source>Reset</source>
         <translation>Tiklash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
         <source>Layers to export</source>
         <translation>Eksport qilinadigan qatlamlar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
         <source>Layers projection</source>
         <translation>Qatlamlar proyeksiyasi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
         <source>Save styles</source>
         <translation>Uslublarni saqlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1567"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
         <source>Datatype export</source>
         <translation>Ma&apos;lumot turi eksporti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
         <source>Name of file/directory</source>
         <translation>Fayl/katalog nomi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1550"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>Manba qatlami uchun to&apos;liq geometriya o&apos;rniga markaziy nuqtalardan foydalaning (murakkab ko&apos;pburchaklar uchun tezroq)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Metrda bufer qiymati (musbat=kengaytirish, manfiy=ko&apos;pburchaklarni kichraytirish)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
         <source>Number of segments for buffer precision</source>
         <translation>Bufer aniqligi uchun segmentlar soni</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
         <source>Mode batch</source>
         <translation>Paketli rejim</translation>
     </message>
@@ -2614,7 +1577,7 @@ Baribir o&apos;chirilsinmi?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="928"/>
+        <location filename="../core/tasks/layer_management_task.py" line="944"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2631,12 +1594,12 @@ Yechim: Bu qatlamni FilterMate loyihasidan olib tashlang, so&apos;ngra qayta qo&
 PostgreSQL jadvalida PRIMARY KEY belgilanganligiga ishonch hosil qiling.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="954"/>
+        <location filename="../core/tasks/layer_management_task.py" line="970"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Qatlam &apos;{0}&apos; da PRIMARY KEY yo&apos;q. Cheklangan funksiyalar: materiallashtirilgan ko&apos;rinishlar o&apos;chirilgan. Tavsiya: optimal ishlash uchun PRIMARY KEY qo&apos;shing.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1893"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
         <source>Exception: {0}</source>
         <translation>Istisno: {0}</translation>
     </message>
@@ -2775,164 +1738,6 @@ PostgreSQL jadvalida PRIMARY KEY belgilanganligiga ishonch hosil qiling.</transl
     </message>
 </context>
 <context>
-    <name>OptimizationDialogs</name>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Optimizations</source>
-        <translation type="obsolete">FilterMate - Optimallashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimizations for:</source>
-        <translation type="obsolete">Optimallashtirish uchun:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>features</source>
-        <translation type="obsolete">obyekt</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Estimated speedup:</source>
-        <translation type="obsolete">Taxminiy tezlashtirish:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>faster</source>
-        <translation type="obsolete">tezroq</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids instead of full geometries for large datasets</source>
-        <translation type="obsolete">Katta ma&apos;lumotlar to&apos;plami uchun to&apos;liq geometriyalar o&apos;rniga markazlardan foydalaning</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids</source>
-        <translation type="obsolete">Markazlardan foydalanish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use centroids for distant layers</source>
-        <translation type="obsolete">Uzoq qatlamlar uchun markazlardan foydalanish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable buffer type</source>
-        <translation type="obsolete">Bufer turini yoqish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify complex geometries to reduce processing time</source>
-        <translation type="obsolete">Ishlash vaqtini qisqartirish uchun murakkab geometriyalarni soddalashtiring</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify geometries</source>
-        <translation type="obsolete">Geometriyalarni soddalashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter by bounding box first to eliminate distant features quickly</source>
-        <translation type="obsolete">Uzoqdagi obyektlarni tezda yo&apos;q qilish uchun avval chegaralovchi quti bo&apos;yicha filtrlang</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox pre-filtering</source>
-        <translation type="obsolete">BBox oldindan filtrlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Evaluate attribute conditions before expensive spatial operations</source>
-        <translation type="obsolete">Qimmat fazoviy operatsiyalardan oldin atribut shartlarini baholang</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Attribute-first strategy</source>
-        <translation type="obsolete">Avval atribut strategiyasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply for current session only</source>
-        <translation type="obsolete">Faqat joriy seans uchun qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Remember for this session</source>
-        <translation type="obsolete">Bu seans uchun eslab qolish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip without applying</source>
-        <translation type="obsolete">Qo&apos;llamay o&apos;tkazib yuborish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Skip</source>
-        <translation type="obsolete">O&apos;tkazib yuborish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply selected optimizations</source>
-        <translation type="obsolete">Tanlangan optimallashtirish qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Apply</source>
-        <translation type="obsolete">Qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization Settings</source>
-        <translation type="obsolete">Optimallashtirish sozlamalari</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable automatic optimizations</source>
-        <translation type="obsolete">Avtomatik optimallashtirish yoqish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable optimizations</source>
-        <translation type="obsolete">Optimallashtirish yoqish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-apply recommendations</source>
-        <translation type="obsolete">Tavsiyalarni avtomatik qo&apos;llash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Ask before applying</source>
-        <translation type="obsolete">Qo&apos;llashdan oldin so&apos;rash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show optimization dialog</source>
-        <translation type="obsolete">Optimallashtirish dialogini ko&apos;rsatish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Never apply</source>
-        <translation type="obsolete">Hech qachon qo&apos;llamang</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimizations</source>
-        <translation type="obsolete">Optimallashtirish yo&apos;q</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Simplify before buffer</source>
-        <translation type="obsolete">Buferdan oldin soddalashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Reduce buffer segments</source>
-        <translation type="obsolete">Bufer segmentlarini kamaytirish</translation>
-    </message>
-</context>
-<context>
     <name>PostgresInfoDialog</name>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="80"/>
@@ -3030,561 +1835,6 @@ PostgreSQL jadvalida PRIMARY KEY belgilanganligiga ishonch hosil qiling.</transl
         <translation>Tozalash muvaffaqiyatsiz</translation>
     </message>
     <message>
-        <location filename="." line="1936682016"/>
-        <source>All layers using auto-selection</source>
-        <translation type="obsolete">Barcha qatlamlar avtomatik tanlashdan foydalanmoqda</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Applied to &apos;{0}&apos;:</source>
-        <translation type="obsolete">&apos;{0}&apos;ga qo&apos;llanildi:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-centroid {0}</source>
-        <translation type="obsolete">Avto-sentroid {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimization {0}</source>
-        <translation type="obsolete">Avto-optimizatsiya {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimizer module not available</source>
-        <translation type="obsolete">Avto-optimizator moduli mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation type="obsolete">Avto-optimizator mavjud emas: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-select best strategy</source>
-        <translation type="obsolete">Eng yaxshi strategiyani avtomatik tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-selected backends for {0} layer(s)</source>
-        <translation type="obsolete">{0} qatlam(lar) uchun backendlar avtomatik tanlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-simplify geometries</source>
-        <translation type="obsolete">Geometriyalarni avtomatik soddalashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-use centroids for remote layers</source>
-        <translation type="obsolete">Masofaviy qatlamlar uchun sentroidlarni avtomatik ishlatish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatically choose optimal filtering strategy</source>
-        <translation type="obsolete">Optimal filtrlash strategiyasini avtomatik tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>BBox pre-filter enabled for &apos;{0}&apos;</source>
-        <translation type="obsolete">&apos;{0}&apos; uchun BBox oldindan filtri yoqildi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend controller not available</source>
-        <translation type="obsolete">Backend kontroleri mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend forced to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">&apos;{1}&apos; uchun backend {0}ga majburlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend optimization unavailable</source>
-        <translation type="obsolete">Backend optimizatsiyasi mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Backend set to Auto for &apos;{0}&apos;</source>
-        <translation type="obsolete">&apos;{0}&apos; uchun backend Avtoga o&apos;rnatildi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Centroids enabled for &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">&apos;{0}&apos; uchun sentroidlar yoqildi (~{1}x {2})</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear ALL FilterMate temporary tables from all databases</source>
-        <translation type="obsolete">Barcha ma&apos;lumotlar bazalaridan BARCHA FilterMate vaqtinchalik jadvallarini tozalash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Clear temporary tables for the current project only</source>
-        <translation type="obsolete">Faqat joriy loyiha uchun vaqtinchalik jadvallarni tozalash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleared {0} temporary table(s) for current project</source>
-        <translation type="obsolete">Joriy loyiha uchun {0} ta vaqtinchalik jadval tozalandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cleared {0} temporary table(s) globally</source>
-        <translation type="obsolete">Global miqyosda {0} ta vaqtinchalik jadval tozalandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirmation {0}</source>
-        <translation type="obsolete">Tasdiqlash {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation type="obsolete">&apos;{0}&apos; qatlamini tahlil qilib bo&apos;lmadi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Could not reload plugin automatically.</source>
-        <translation type="obsolete">Plaginni avtomatik qayta yuklab bo&apos;lmadi.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Dark mode</source>
-        <translation type="obsolete">Qorong&apos;i rejim</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Description (auto-generated, you can modify it)</source>
-        <translation type="obsolete">Tavsif (avtomatik yaratilgan, uni o&apos;zgartirishingiz mumkin)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Dialog not available: {0}</source>
-        <translation type="obsolete">Muloqot oynasi mavjud emas: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enter a name for this filter</source>
-        <translation type="obsolete">Ushbu filtr uchun nom kiriting</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation type="obsolete">Qatlamni tahlil qilishda xato: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation type="obsolete">O&apos;zgarishlarni bekor qilishda xato: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error reloading plugin: {0}</source>
-        <translation type="obsolete">Plaginni qayta yuklashda xato: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error resetting layer properties: {}</source>
-        <translation type="obsolete">Qatlam xususiyatlarini tiklashda xato: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Error: {0}</source>
-        <translation type="obsolete">Xato: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Favorites manager not available</source>
-        <translation type="obsolete">Sevimlilar menejeri mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Filter history position</source>
-        <translation type="obsolete">Filtr tarixi holati</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Add to Favorites</source>
-        <translation type="obsolete">FilterMate - Sevimlilarga qo&apos;shish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Forced {0} backend for {1} layer(s)</source>
-        <translation type="obsolete">{1} qatlam(lar) uchun {0} backend majburlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Light mode</source>
-        <translation type="obsolete">Yorug&apos; rejim</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Memory layer filtering complete for &apos;{0}&apos;</source>
-        <translation type="obsolete">&apos;{0}&apos; uchun xotira qatlami filtrlash tugallandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimization recommendations at this time.</source>
-        <translation type="obsolete">Hozirda optimizatsiya tavsiyalari yo&apos;q.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>OGR/Memory</source>
-        <translation type="obsolete">OGR/Xotira</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization applied to {0} layer(s)</source>
-        <translation type="obsolete">{0} qatlam(lar)ga optimizatsiya qo&apos;llanildi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Optimization recommendations</source>
-        <translation type="obsolete">Optimizatsiya tavsiyalari</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>PostgreSQL</source>
-        <translation type="obsolete">PostgreSQL</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo filter</source>
-        <translation type="obsolete">Filtrni qaytarish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo unavailable</source>
-        <translation type="obsolete">Qaytarish mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Save current filter</source>
-        <translation type="obsolete">Joriy filtrni saqlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Spatialite</source>
-        <translation type="obsolete">Spatialite</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Strategy set to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">&apos;{1}&apos; uchun strategiya {0}ga o&apos;rnatildi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Theme changed</source>
-        <translation type="obsolete">Mavzu o&apos;zgartirildi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Toggle dark/light mode</source>
-        <translation type="obsolete">Qorong&apos;i/yorug&apos; rejimni almashtirish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo filter</source>
-        <translation type="obsolete">Filtrni bekor qilish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo unavailable</source>
-        <translation type="obsolete">Bekor qilish mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Using QGIS expressions for filtering</source>
-        <translation type="obsolete">Filtrlash uchun QGIS ifodalari ishlatilmoqda</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>View filter history</source>
-        <translation type="obsolete">Filtr tarixini ko&apos;rish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>WKT expression threshold:</source>
-        <translation type="obsolete">WKT ifoda chegarasi:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>memory copy</source>
-        <translation type="obsolete">xotira nusxasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>pool size</source>
-        <translation type="obsolete">hovuz hajmi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>simplified to {0} vertices</source>
-        <translation type="obsolete">{0} ta cho&apos;qqiga soddalashtirildi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>temp views</source>
-        <translation type="obsolete">vaqtinchalik ko&apos;rinishlar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Allow cancellation of QGIS processing algorithms. Enables stopping long-running operations.</source>
-        <translation type="obsolete">QGIS ishlov berish algoritmlarini bekor qilishga ruxsat bering. Uzoq davom etadigan operatsiyalarni to&apos;xtatishga imkon beradi.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Analyzing your project... Recommendations will appear here.</source>
-        <translation type="obsolete">Loyihangiz tahlil qilinmoqda... Tavsiyalar bu yerda paydo bo&apos;ladi.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Centroid for Distant Layers</source>
-        <translation type="obsolete">Uzoq qatlamlar uchun avto-sentroid</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Select Best Strategy</source>
-        <translation type="obsolete">Eng yaxshi strategiyani avtomatik tanlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-Simplify Geometries ⚠️</source>
-        <translation type="obsolete">Geometriyalarni avtomatik soddalashtirish ⚠️</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Auto-detect mod_spatialite</source>
-        <translation type="obsolete">mod_spatialite avtomatik aniqlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Automatic GIST Index Usage</source>
-        <translation type="obsolete">Avtomatik GIST indeks foydalanish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cancel</source>
-        <translation type="obsolete">Bekor qilish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Cancellable Processing</source>
-        <translation type="obsolete">Bekor qilinadigan ishlov berish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Chunk size (features):</source>
-        <translation type="obsolete">Bo&apos;lak hajmi (xususiyatlar):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Confirm Before Applying</source>
-        <translation type="obsolete">Qo&apos;llashdan oldin tasdiqlang</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Connection Pooling</source>
-        <translation type="obsolete">Ulanish havzasi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Create Spatial Indexes</source>
-        <translation type="obsolete">Fazoviy indekslarni yaratish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Direct SQL for GeoPackage</source>
-        <translation type="obsolete">GeoPackage uchun to&apos;g&apos;ridan-to&apos;g&apos;ri SQL</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Auto-Centroid for Remote Layers</source>
-        <translation type="obsolete">Masofaviy qatlamlar uchun avto-sentroidni yoqing</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Auto-Optimization</source>
-        <translation type="obsolete">Avto-optimizatsiyani yoqing</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Direct SQL for GeoPackage</source>
-        <translation type="obsolete">GeoPackage uchun to&apos;g&apos;ridan-to&apos;g&apos;ri SQL yoqing</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Enable Materialized Views</source>
-        <translation type="obsolete">Materializatsiya qilingan ko&apos;rinishlarni yoqing</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Estimated performance improvement</source>
-        <translation type="obsolete">Taxminiy ishlash yaxshilanishi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>FilterMate - Backend Optimizations</source>
-        <translation type="obsolete">FilterMate - Backend optimizatsiyalari</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>GEOS-safe Geometry Handling</source>
-        <translation type="obsolete">GEOS-xavfsiz geometriya boshqaruvi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Global</source>
-        <translation type="obsolete">Global</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Initialization error: {}</source>
-        <translation type="obsolete">Ishga tushirish xatosi: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Interruptible Queries</source>
-        <translation type="obsolete">Uzish mumkin bo&apos;lgan so&apos;rovlar</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Lazy cursor threshold:</source>
-        <translation type="obsolete">Dangasa kursor chegarasi:</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Max workers (0=auto):</source>
-        <translation type="obsolete">Maks ishchilar (0=avto):</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No PostgreSQL connection available</source>
-        <translation type="obsolete">PostgreSQL ulanishi mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No alternative backends available for this layer</source>
-        <translation type="obsolete">Bu qatlam uchun muqobil backendlar mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation type="obsolete">Hech qanday qatlam tanlanmagan. Iltimos, avval qatlam tanlang.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No optimizations selected to apply.</source>
-        <translation type="obsolete">Qo&apos;llash uchun hech qanday optimizatsiya tanlanmagan.</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No temporary tables found</source>
-        <translation type="obsolete">Vaqtinchalik jadvallar topilmadi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>No temporary tables found for current project</source>
-        <translation type="obsolete">Joriy loyiha uchun vaqtinchalik jadvallar topilmadi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Save Settings</source>
-        <translation type="obsolete">Sozlamalarni saqlash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Show Optimization Hints</source>
-        <translation type="obsolete">Optimizatsiya maslahatlarini ko&apos;rsatish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Redo filter (Ctrl+Y)</source>
-        <translation type="obsolete">Filtrni qaytarish (Ctrl+Y)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Undo last filter (Ctrl+Z)</source>
-        <translation type="obsolete">Oxirgi filtrni bekor qilish (Ctrl+Z)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>disabled</source>
-        <translation type="obsolete">o&apos;chirilgan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>enabled</source>
-        <translation type="obsolete">yoqilgan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>★ No favorites saved</source>
-        <translation type="obsolete">★ Hech qanday sevimli saqlanmagan</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>★ {0} Favorites saved</source>
-        <translation type="obsolete">★ {0} Sevimli saqlandi</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⚙️ Manage favorites...</source>
-        <translation type="obsolete">⚙️ Sevimlilarni boshqarish...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add Current Filter (no filter active)</source>
-        <translation type="obsolete">⭐ Joriy filtrni qo&apos;shish (faol filtr yo&apos;q)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add Current Filter to Favorites</source>
-        <translation type="obsolete">⭐ Joriy filtrni sevimlilarga qo&apos;shish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add current filter to favorites</source>
-        <translation type="obsolete">⭐ Joriy filtrni sevimlilarga qo&apos;shish</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>⭐ Add filter (no active filter)</source>
-        <translation type="obsolete">⭐ Filtr qo&apos;shish (faol filtr yo&apos;q)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>🌐 All Projects (Global)</source>
-        <translation type="obsolete">🌐 Barcha loyihalar (Global)</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📁 Current Project</source>
-        <translation type="obsolete">📁 Joriy loyiha</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📤 Export...</source>
-        <translation type="obsolete">📤 Eksport...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>📥 Import...</source>
-        <translation type="obsolete">📥 Import...</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Restore Defaults</source>
-        <translation type="obsolete">Standartlarni tiklash</translation>
-    </message>
-    <message>
-        <location filename="." line="1936682016"/>
-        <source>Use Balanced Profile</source>
-        <translation type="obsolete">Muvozanatli profildan foydalanish</translation>
-    </message>
-    <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="119"/>
         <source>&lt;b&gt;PostgreSQL is not available&lt;/b&gt;&lt;br&gt;&lt;br&gt;To use PostgreSQL features, install psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Then restart QGIS to apply changes.</source>
         <translation>&lt;b&gt;PostgreSQL mavjud emas&lt;/b&gt;&lt;br&gt;&lt;br&gt;PostgreSQL funksiyalaridan foydalanish uchun psycopg2 ni o&apos;rnating:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;So&apos;ngra o&apos;zgarishlarni qo&apos;llash uchun QGIS ni qayta ishga tushiring.</translation>
@@ -3629,39 +1879,402 @@ Davom etilsinmi?</translation>
     </message>
 </context>
 <context>
+    <name>QFieldCloudExtension</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <source>QFieldCloud Settings...</source>
+        <translation>QFieldCloud Settings...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <source>Export filtered layers to QFieldCloud</source>
+        <translation>Export filtered layers to QFieldCloud</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudPushDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <source>Export to QFieldCloud</source>
+        <translation>Export to QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <source>Active Filter</source>
+        <translation>Active Filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <source>No active filter</source>
+        <translation>No active filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <source>Filter:</source>
+        <translation>Filter:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <source>0 layers</source>
+        <translation>0 layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <source>Layers:</source>
+        <translation>Layers:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <source>QFieldCloud Project</source>
+        <translation>QFieldCloud Project</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <source>Project name:</source>
+        <translation>Project name:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <source>Description:</source>
+        <translation>Tavsif:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <source>Create new</source>
+        <translation>Create new</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <source>Update existing:</source>
+        <translation>Update existing:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <source>Mode:</source>
+        <translation>Mode:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <source>Layer Modes</source>
+        <translation>Layer Modes</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Layer</source>
+        <translation>Qatlam</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Mode</source>
+        <translation>Mode</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <source>Export</source>
+        <translation>Eksport</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <source>{0} layers ({1} features)</source>
+        <translation>{0} layers ({1} features)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <source>{0} layers (no filter active)</source>
+        <translation>{0} layers (no filter active)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Missing Name</source>
+        <translation>Missing Name</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Please enter a project name.</source>
+        <translation>Please enter a project name.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>Not Connected</source>
+        <translation>Not Connected</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>QFieldCloud is not connected. Please configure credentials first.</source>
+        <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No Layers</source>
+        <translation>No Layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No valid layers to export.</source>
+        <translation>No valid layers to export.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>Export Error</source>
+        <translation>Export Error</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <source>Failed to export layer &apos;{0}&apos;: {1}</source>
+        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>GPKG export failed: {0}</source>
+        <translation>GPKG export failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <source>Push complete!</source>
+        <translation>Push complete!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project successfully pushed to QFieldCloud!</source>
+        <translation>Project successfully pushed to QFieldCloud!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project: {0}</source>
+        <translation>Project: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Files: {0}</source>
+        <translation>Files: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Duration: {0:.1f}s</source>
+        <translation>Duration: {0:.1f}s</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>URL: {0}</source>
+        <translation>URL: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <source>Warnings:</source>
+        <translation>Warnings:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <source>Push Complete</source>
+        <translation>Push Complete</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <source>Error: {0}</source>
+        <translation>Error: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push Failed</source>
+        <translation>Push Failed</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push failed:
+
+{0}</source>
+        <translation>Push failed:
+
+{0}</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudSettingsDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="53"/>
+        <source>QFieldCloud Configuration</source>
+        <translation>QFieldCloud Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="66"/>
+        <source>Server</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="71"/>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="77"/>
+        <source>Credentials</source>
+        <translation>Credentials</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="81"/>
+        <source>username</source>
+        <translation>username</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="82"/>
+        <source>Username:</source>
+        <translation>Username:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="86"/>
+        <source>password (for initial login)</source>
+        <translation>password (for initial login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="87"/>
+        <source>Password:</source>
+        <translation>Password:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="90"/>
+        <source>JWT token (auto-filled after login)</source>
+        <translation>JWT token (auto-filled after login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="95"/>
+        <source>Login</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="96"/>
+        <source>Login with username/password to get a token</source>
+        <translation>Login with username/password to get a token</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="98"/>
+        <source>Token:</source>
+        <translation>Token:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="102"/>
+        <source>Status:</source>
+        <translation>Holat:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="105"/>
+        <source>Test Connection</source>
+        <translation>Test Connection</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="112"/>
+        <source>Preferences</source>
+        <translation>Preferences</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="117"/>
+        <source>Default project:</source>
+        <translation>Default project:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="119"/>
+        <source>Trigger packaging after upload</source>
+        <translation>Trigger packaging after upload</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="144"/>
+        <source>Token stored</source>
+        <translation>Token stored</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Missing Fields</source>
+        <translation>Missing Fields</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Please fill in URL, username, and password.</source>
+        <translation>Please fill in URL, username, and password.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="174"/>
+        <source>Logging in...</source>
+        <translation>Logging in...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="191"/>
+        <source>Logged in as {0}</source>
+        <translation>Logged in as {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="198"/>
+        <source>Login failed: {0}</source>
+        <translation>Login failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Missing Configuration</source>
+        <translation>Missing Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Please configure URL and login first.</source>
+        <translation>Please configure URL and login first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="219"/>
+        <source>Testing connection...</source>
+        <translation>Testing connection...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="229"/>
+        <source>Connected! ({0} projects accessible)</source>
+        <translation>Connected! ({0} projects accessible)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="235"/>
+        <source>Connection failed: {0}</source>
+        <translation>Connection failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Missing URL</source>
+        <translation>Missing URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Server URL is required.</source>
+        <translation>Server URL is required.</translation>
+    </message>
+</context>
+<context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="640"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
         <source>Type to filter...</source>
         <translation>Filtrlash uchun yozing...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="649"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
         <source>Select All</source>
         <translation>Hammasini tanlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="651"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
         <source>Select All (non subset)</source>
         <translation>Hammasini tanlash (quyi to&apos;plam emas)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="653"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
         <source>Select All (subset)</source>
         <translation>Hammasini tanlash (quyi to&apos;plam)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>De-select All</source>
         <translation>Hammasini bekor qilish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>De-select All (non subset)</source>
         <translation>Hammasini bekor qilish (quyi to&apos;plam emas)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>De-select All (subset)</source>
         <translation>Hammasini bekor qilish (quyi to&apos;plam)</translation>
     </message>
@@ -3881,196 +2494,11 @@ Davom etilsinmi?</translation>
     </message>
 </context>
 <context>
-    <name>d</name>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="870"/>
-        <source>Use centroids instead of full geometries for distant layers</source>
-        <translation>Uzoq qatlamlar uchun to&apos;liq geometriya o&apos;rniga markaziy nuqtalardan foydalaning</translation>
-    </message>
-</context>
-<context>
-    <name>dw</name>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="737"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation>Manfiy bufer (eroziya): ko&apos;pburchaklarni ichkariga kichraytiradi</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="744"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Metrda bufer qiymati (musbat=kengaytirish, manfiy=ko&apos;pburchaklarni kichraytirish)</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="120"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation>O&apos;zgarishlarni bekor qilishda xatolik: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Reload Plugin</source>
-        <translation>Plaginni qayta yuklash</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation>Barcha konfiguratsiya o&apos;zgarishlarini qo&apos;llash uchun FilterMate ni qayta yuklashni xohlaysizmi?</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="56"/>
-        <source>Auto-optimization {0}</source>
-        <translation>Avtomatik optimallashtirish {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>enabled</source>
-        <translation>yoqilgan</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>disabled</source>
-        <translation>o&apos;chirilgan</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="69"/>
-        <source>Auto-centroid {0}</source>
-        <translation>Avtomatik markaziy nuqta {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>Confirmation {0}</source>
-        <translation>Tasdiqlash {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="97"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation>Qatlam tanlanmagan. Iltimos, avval qatlam tanlang.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="104"/>
-        <source>Auto-optimizer module not available</source>
-        <translation>Avtomatik optimallashtiruvchi moduli mavjud emas</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="108"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation>Qatlam &apos;{0}&apos; ni tahlil qilib bo&apos;lmadi</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="129"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation>Qatlam &apos;{0}&apos; allaqachon optimal tarzda sozlangan.
-Tur: {1}
-Xususiyatlar: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="156"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation>Avtomatik optimallashtiruvchi mavjud emas: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="161"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation>Qatlamni tahlil qilishda xatolik: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="189"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation>&apos;{0}&apos; ga qo&apos;llandi:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="196"/>
-        <source>No optimizations selected to apply.</source>
-        <translation>Qo&apos;llash uchun optimallashtirish tanlanmagan.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="231"/>
-        <source>Optimization settings saved</source>
-        <translation>Optimallashtirish sozlamalari saqlandi</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="288"/>
-        <source>Dialog not available: {0}</source>
-        <translation>Oyna mavjud emas: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="293"/>
-        <source>Error: {0}</source>
-        <translation>Xatolik: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="257"/>
-        <source>Backend optimization settings saved</source>
-        <translation>Backend optimallashtirish sozlamalari saqlandi</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="286"/>
-        <source>Backend optimizations configured</source>
-        <translation>Backend optimallashtirish sozlandi</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="406"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation>{0} qatlam optimallashtirildi</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="411"/>
-        <source>All layers using auto-selection</source>
-        <translation>Barcha qatlamlar avtomatik tanlashdan foydalanmoqda</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="420"/>
-        <source>Backend optimization unavailable</source>
-        <translation>Backend optimallashtirish mavjud emas</translation>
-    </message>
-</context>
-<context>
-    <name>self._dockwidget</name>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Expression Evaluation</source>
-        <translation>Ifoda baholash</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Error evaluating expression: {error_msg}</source>
-        <translation>Ifodani baholashda xatolik: {error_msg}</translation>
-    </message>
-</context>
-<context>
     <name>self.dockwidget</name>
     <message>
-        <location filename="../ui/managers/configuration_manager.py" line="685"/>
-        <source>Identify selected feature</source>
-        <translation>Tanlangan xususiyatni aniqlash</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="686"/>
-        <source>Zoom to selected feature</source>
-        <translation>Tanlangan xususiyatga yaqinlashtirish</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="687"/>
-        <source>Toggle feature selection on map</source>
-        <translation>Xaritada xususiyat tanlashni almashtirish</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="688"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation>Xususiyat o&apos;zgarganda avtomatik yaqinlashtirish</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="689"/>
-        <source>Link exploring widgets together</source>
-        <translation>O&apos;rganish vidjetlarini birlashtirish</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="690"/>
-        <source>Reset all layer exploring properties</source>
-        <translation>Barcha qatlam o&apos;rganish xususiyatlarini qayta tiklash</translation>
+        <location filename="../ui/controllers/config_controller.py" line="664"/>
+        <source>Language changed to &apos;{0}&apos;.</source>
+        <translation>Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

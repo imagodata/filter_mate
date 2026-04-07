@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from qgis.core import QgsProject, QgsVectorLayer
-from qgis.PyQt.QtCore import QThread, Qt, pyqtSignal
+from qgis.PyQt.QtCore import QCoreApplication, QThread, Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import (
     QComboBox,
     QDialog,
@@ -78,6 +78,10 @@ class QFieldCloudPushDialog(QDialog):
         - Progress bar during upload
     """
 
+    @staticmethod
+    def tr(message):
+        return QCoreApplication.translate('QFieldCloudPushDialog', message)
+
     def __init__(
         self,
         parent=None,
@@ -89,7 +93,7 @@ class QFieldCloudPushDialog(QDialog):
         self._iface = iface
         self._worker: Optional[PushWorker] = None
 
-        self.setWindowTitle("Export to QFieldCloud")
+        self.setWindowTitle(self.tr("Export to QFieldCloud"))
         self.setMinimumWidth(500)
         self.setMinimumHeight(500)
         self.setModal(True)
@@ -104,38 +108,38 @@ class QFieldCloudPushDialog(QDialog):
         layout = QVBoxLayout()
 
         # --- Filter info ---
-        info_group = QGroupBox("Active Filter")
+        info_group = QGroupBox(self.tr("Active Filter"))
         info_layout = QFormLayout()
 
-        self._filter_label = QLabel("No active filter")
-        info_layout.addRow("Filter:", self._filter_label)
+        self._filter_label = QLabel(self.tr("No active filter"))
+        info_layout.addRow(self.tr("Filter:"), self._filter_label)
 
-        self._layers_label = QLabel("0 layers")
-        info_layout.addRow("Layers:", self._layers_label)
+        self._layers_label = QLabel(self.tr("0 layers"))
+        info_layout.addRow(self.tr("Layers:"), self._layers_label)
 
         info_group.setLayout(info_layout)
         layout.addWidget(info_group)
 
         # --- Project settings ---
-        project_group = QGroupBox("QFieldCloud Project")
+        project_group = QGroupBox(self.tr("QFieldCloud Project"))
         project_layout = QFormLayout()
 
         self._name_edit = QLineEdit()
         self._name_edit.setPlaceholderText("WYRE-POP_001")
-        project_layout.addRow("Project name:", self._name_edit)
+        project_layout.addRow(self.tr("Project name:"), self._name_edit)
 
         self._desc_edit = QLineEdit()
         self._desc_edit.setPlaceholderText("WYRE FTTH - Zone POP 001")
-        project_layout.addRow("Description:", self._desc_edit)
+        project_layout.addRow(self.tr("Description:"), self._desc_edit)
 
         # Create new vs update existing
         mode_layout = QHBoxLayout()
-        self._radio_new = QRadioButton("Create new")
-        self._radio_update = QRadioButton("Update existing:")
+        self._radio_new = QRadioButton(self.tr("Create new"))
+        self._radio_update = QRadioButton(self.tr("Update existing:"))
         self._radio_new.setChecked(True)
         mode_layout.addWidget(self._radio_new)
         mode_layout.addWidget(self._radio_update)
-        project_layout.addRow("Mode:", mode_layout)
+        project_layout.addRow(self.tr("Mode:"), mode_layout)
 
         self._existing_combo = QComboBox()
         self._existing_combo.setEnabled(False)
@@ -145,12 +149,12 @@ class QFieldCloudPushDialog(QDialog):
         layout.addWidget(project_group)
 
         # --- Layer actions table ---
-        layers_group = QGroupBox("Layer Modes")
+        layers_group = QGroupBox(self.tr("Layer Modes"))
         layers_layout = QVBoxLayout()
 
         self._layers_table = QTableWidget()
         self._layers_table.setColumnCount(2)
-        self._layers_table.setHorizontalHeaderLabels(["Layer", "Mode"])
+        self._layers_table.setHorizontalHeaderLabels([self.tr("Layer"), self.tr("Mode")])
         self._layers_table.horizontalHeader().setStretchLastSection(True)
         self._layers_table.setMaximumHeight(200)
         layers_layout.addWidget(self._layers_table)
@@ -172,7 +176,7 @@ class QFieldCloudPushDialog(QDialog):
             QDialogButtonBox.StandardButton.Cancel
         )
         self._export_btn = self._button_box.addButton(
-            "Export", QDialogButtonBox.ButtonRole.AcceptRole
+            self.tr("Export"), QDialogButtonBox.ButtonRole.AcceptRole
         )
         layout.addWidget(self._button_box)
 
@@ -197,7 +201,7 @@ class QFieldCloudPushDialog(QDialog):
 
             total_features = sum(l.featureCount() for l in filtered_layers)
             self._layers_label.setText(
-                f"{len(filtered_layers)} layers ({total_features} features)"
+                self.tr("{0} layers ({1} features)").format(len(filtered_layers), total_features)
             )
         else:
             # Show all vector layers if no filter active
@@ -205,7 +209,7 @@ class QFieldCloudPushDialog(QDialog):
                 l for l in layers if isinstance(l, QgsVectorLayer)
             ]
             self._layers_label.setText(
-                f"{len(all_vector)} layers (no filter active)"
+                self.tr("{0} layers (no filter active)").format(len(all_vector))
             )
 
         # Populate layer actions table
@@ -278,15 +282,15 @@ class QFieldCloudPushDialog(QDialog):
         project_name = self._name_edit.text().strip()
         if not project_name:
             QMessageBox.warning(
-                self, "Missing Name", "Please enter a project name."
+                self, self.tr("Missing Name"), self.tr("Please enter a project name.")
             )
             return
 
         service = self._extension.get_qfc_service()
         if not service:
             QMessageBox.critical(
-                self, "Not Connected",
-                "QFieldCloud is not connected. Please configure credentials first.",
+                self, self.tr("Not Connected"),
+                self.tr("QFieldCloud is not connected. Please configure credentials first."),
             )
             return
 
@@ -345,7 +349,7 @@ class QFieldCloudPushDialog(QDialog):
         ]
 
         if not layers:
-            QMessageBox.warning(self, "No Layers", "No valid layers to export.")
+            QMessageBox.warning(self, self.tr("No Layers"), self.tr("No valid layers to export."))
             return None
 
         tmp_dir = Path(tempfile.mkdtemp(prefix="filtermate_qfc_"))
@@ -374,8 +378,8 @@ class QFieldCloudPushDialog(QDialog):
 
                 if error_code != QgsVectorFileWriter.WriterError.NoError:
                     QMessageBox.critical(
-                        self, "Export Error",
-                        f"Failed to export layer '{layer.name()}': {error_msg}",
+                        self, self.tr("Export Error"),
+                        self.tr("Failed to export layer '{0}': {1}").format(layer.name(), error_msg),
                     )
                     return None
 
@@ -384,7 +388,7 @@ class QFieldCloudPushDialog(QDialog):
 
         except Exception as e:
             QMessageBox.critical(
-                self, "Export Error", f"GPKG export failed: {e}"
+                self, self.tr("Export Error"), self.tr("GPKG export failed: {0}").format(e)
             )
             return None
 
@@ -400,7 +404,7 @@ class QFieldCloudPushDialog(QDialog):
 
         if result.success:
             self._progress_bar.setValue(100)
-            self._progress_label.setText("Push complete!")
+            self._progress_label.setText(self.tr("Push complete!"))
 
             from qgis.core import Qgis, QgsMessageLog
 
@@ -411,16 +415,16 @@ class QFieldCloudPushDialog(QDialog):
             )
 
             msg = (
-                f"Project successfully pushed to QFieldCloud!\n\n"
-                f"Project: {result.project_id}\n"
-                f"Files: {result.files_uploaded}\n"
-                f"Duration: {result.duration_seconds:.1f}s\n"
-                f"URL: {result.project_url}"
+                self.tr("Project successfully pushed to QFieldCloud!") + "\n\n"
+                + self.tr("Project: {0}").format(result.project_id) + "\n"
+                + self.tr("Files: {0}").format(result.files_uploaded) + "\n"
+                + self.tr("Duration: {0:.1f}s").format(result.duration_seconds) + "\n"
+                + self.tr("URL: {0}").format(result.project_url)
             )
             if result.warnings:
-                msg += "\n\nWarnings:\n" + "\n".join(result.warnings)
+                msg += "\n\n" + self.tr("Warnings:") + "\n" + "\n".join(result.warnings)
 
-            QMessageBox.information(self, "Push Complete", msg)
+            QMessageBox.information(self, self.tr("Push Complete"), msg)
             self.accept()
         else:
             self._on_push_error(result.error_message or "Unknown error")
@@ -430,7 +434,7 @@ class QFieldCloudPushDialog(QDialog):
         self._worker = None
         self._export_btn.setEnabled(True)
         self._progress_bar.setVisible(False)
-        self._progress_label.setText(f"Error: {error}")
+        self._progress_label.setText(self.tr("Error: {0}").format(error))
         self._progress_label.setStyleSheet("color: red;")
 
         from qgis.core import Qgis, QgsMessageLog
@@ -441,7 +445,7 @@ class QFieldCloudPushDialog(QDialog):
             level=Qgis.MessageLevel.Critical,
         )
 
-        QMessageBox.critical(self, "Push Failed", f"Push failed:\n\n{error}")
+        QMessageBox.critical(self, self.tr("Push Failed"), self.tr("Push failed:\n\n{0}").format(error))
 
     def _on_cancel(self):
         """Cancel push operation if running."""

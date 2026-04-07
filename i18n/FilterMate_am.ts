@@ -2,50 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="am_ET" sourcelanguage="am_ET">
 <context>
-    <name>@default</name>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="173"/>
-        <source>OptimizationManager</source>
-        <comment>Use Centroids</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="175"/>
-        <source>OptimizationManager</source>
-        <comment>Simplify before buffer</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="177"/>
-        <source>OptimizationManager</source>
-        <comment>Reduce buffer segments (3)</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-</context>
-<context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="168"/>
+        <location filename="../core/services/app_initializer.py" line="171"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>ከ{0} ንብርብር(ዎች) የተበላሹ ማጣሪያዎች ተጽድተዋል። እባክዎ ማጣሪያዎችዎን እንደገና ይተግብሩ።</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="237"/>
+        <location filename="../core/services/app_initializer.py" line="240"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>ባዶ ፕሮጀክት ተገኝቷል። ፕለጊኑን ለማግበር ቬክተር ንብርብሮችን ያክሉ።</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="304"/>
+        <location filename="../core/services/app_initializer.py" line="307"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>የFilterMate ዳታቤዝ ማግኘት አይቻልም። የፕሮጀክት ማውጫ ፈቃዶችን ያረጋግጡ።</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="318"/>
+        <location filename="../core/services/app_initializer.py" line="321"/>
         <source>Error during database verification: {0}</source>
         <translation>ዳታቤዝ ማረጋገጫ ወቅት ስህተት: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="594"/>
+        <location filename="../core/services/app_initializer.py" line="599"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>ንብርብር መጫን አልተሳካም። በግዳጅ ለማዘመን F5 ይጠቀሙ።</translation>
     </message>
@@ -84,564 +63,9 @@
     </message>
 </context>
 <context>
-    <name>BackendOptimizationWidget</name>
-    <message>
-        <location filename="." line="4"/>
-        <source>Quick Setup</source>
-        <translation type="obsolete">ፈጣን ማዋቀር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Choose a profile or customize settings below</source>
-        <translation type="obsolete">መገለጫ ይምረጡ ወይም ከታች ቅንብሮችን ያብጁ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Smart Recommendations</source>
-        <translation type="obsolete">ብልጥ ምክሮች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Balanced Profile</source>
-        <translation type="obsolete">ሚዛናዊ መገለጫ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Maximum Performance</source>
-        <translation type="obsolete">ከፍተኛ አፈጻጸም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Minimal Resources</source>
-        <translation type="obsolete">ዝቅተኛ ሀብቶች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>PostgreSQL/PostGIS Optimizations</source>
-        <translation type="obsolete">PostgreSQL/PostGIS ማጣመሞች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Materialized Views</source>
-        <translation type="obsolete">የተቀመጡ እይታዎች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Create temporary materialized views for complex filters</source>
-        <translation type="obsolete">ለውስብስብ ማጣሪያዎች ጊዜያዊ የተቀመጡ እይታዎች ይፍጠሩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Two-Phase Filtering</source>
-        <translation type="obsolete">ሁለት-ደረጃ ማጣራት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use bounding box pre-filtering before precise geometry tests</source>
-        <translation type="obsolete">ትክክለኛ ጂኦሜትሪ ፈተናዎች በፊት የወሰን ሳጥን ቅድመ-ማጣራት ይጠቀሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Progressive Loading</source>
-        <translation type="obsolete">ቀስ በቀስ መጫን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Load data in chunks for very large datasets</source>
-        <translation type="obsolete">ለበጣም ትልቅ የውሂብ ስብስቦች በክፍሎች ውሂብ ይጫኑ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Chunk Size</source>
-        <translation type="obsolete">የክፍል መጠን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Server-Side Simplification</source>
-        <translation type="obsolete">የአገልጋይ-ወገን ማቀላጠፍ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Simplify geometries on server for display purposes</source>
-        <translation type="obsolete">ለማሳየት ዓላማዎች በአገልጋይ ላይ ጂኦሜትሪዎችን ያቀላጥፉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Simplification Tolerance</source>
-        <translation type="obsolete">የማቀላጠፍ መቻቻል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Parallel Query Execution</source>
-        <translation type="obsolete">ትይዩ ጥያቄ ማስፈጸም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Execute independent queries in parallel</source>
-        <translation type="obsolete">ነፃ ጥያቄዎችን በትይዩ ያስፈጽሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Expression Caching</source>
-        <translation type="obsolete">የአገላለጽ መሸጎጫ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cache compiled expressions for reuse</source>
-        <translation type="obsolete">ለድጋሚ አጠቃቀም የተቀናበሩ አገላለጾችን ያሸጉጡ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Spatialite/GeoPackage Optimizations</source>
-        <translation type="obsolete">Spatialite/GeoPackage ማጣመሞች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>R-tree Temp Tables</source>
-        <translation type="obsolete">R-tree ጊዜያዊ ሰንጠረዦች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Create temporary tables with R-tree indexes</source>
-        <translation type="obsolete">ከR-tree ኢንዴክሶች ጋር ጊዜያዊ ሰንጠረዦችን ይፍጠሩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>BBox Pre-filtering</source>
-        <translation type="obsolete">BBox ቅድመ-ማጣራት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use bounding box filtering before precise tests</source>
-        <translation type="obsolete">ትክክለኛ ፈተናዎች በፊት የወሰን ሳጥን ማጣራት ይጠቀሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Memory-Mapped I/O</source>
-        <translation type="obsolete">ማህደረ-ትውስታ የተካተተ I/O</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use memory-mapped I/O for file access</source>
-        <translation type="obsolete">ለፋይል መዳረሻ ማህደረ-ትውስታ የተካተተ I/O ይጠቀሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Batch Processing</source>
-        <translation type="obsolete">በጅምላ ማስኬድ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Process multiple operations in batches</source>
-        <translation type="obsolete">በርካታ ክዋኔዎችን በጅምላ ያስኬዱ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Batch Size</source>
-        <translation type="obsolete">የጅምላ መጠን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>OGR/Memory Optimizations</source>
-        <translation type="obsolete">OGR/ማህደረ-ትውስታ ማጣመሞች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Automatic Spatial Index</source>
-        <translation type="obsolete">ራስ-ሰር የቦታ ኢንዴክስ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Create temporary spatial indexes automatically</source>
-        <translation type="obsolete">ጊዜያዊ የቦታ ኢንዴክሶችን በራስ-ሰር ይፍጠሩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Progressive Chunking</source>
-        <translation type="obsolete">ቀስ በቀስ መከፋፈል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Process large files in progressive chunks</source>
-        <translation type="obsolete">ትልልቅ ፋይሎችን በቀስ በቀስ ክፍሎች ያስኬዱ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Memory Feature Caching</source>
-        <translation type="obsolete">የማህደረ-ትውስታ ባህሪ መሸጎጫ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cache features in memory for faster access</source>
-        <translation type="obsolete">ለፈጣን መዳረሻ ባህሪያትን በማህደረ-ትውስታ ያሸጉጡ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cache Size (features)</source>
-        <translation type="obsolete">የመሸጎጫ መጠን (ባህሪያት)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Geometry Simplification</source>
-        <translation type="obsolete">ጂኦሜትሪ ማቀላጠፍ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Simplify complex geometries during processing</source>
-        <translation type="obsolete">በማስኬድ ወቅት ውስብስብ ጂኦሜትሪዎችን ያቀላጥፉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Global Optimizations</source>
-        <translation type="obsolete">ዓለም አቀፍ ማጣመሞች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-Optimization</source>
-        <translation type="obsolete">ራስ-ሰር ማጣመም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Automatically optimize based on data analysis</source>
-        <translation type="obsolete">በውሂብ ትንተና ላይ በመመስረት በራስ-ሰር ያጣምሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-Centroid</source>
-        <translation type="obsolete">ራስ-ሰር ማዕከል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Automatically center view on filter results</source>
-        <translation type="obsolete">እይታን በማጣሪያ ውጤቶች ላይ በራስ-ሰር ማዕከል ያድርጉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Parallel Layer Filtering</source>
-        <translation type="obsolete">ትይዩ ንብርብር ማጣራት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Filter multiple layers simultaneously</source>
-        <translation type="obsolete">በአንድ ጊዜ በርካታ ንብርብሮችን ያጣሩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Smart Expression Parsing</source>
-        <translation type="obsolete">ብልጥ አገላለጽ መተንተን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Optimize expression parsing for complex queries</source>
-        <translation type="obsolete">ለውስብስብ ጥያቄዎች የአገላለጽ መተንተንን ያጣምሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Deferred Refresh</source>
-        <translation type="obsolete">የተላለፈ ማደስ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Delay map refresh until all filters are applied</source>
-        <translation type="obsolete">ሁሉም ማጣሪያዎች እስኪተገበሩ ድረስ ካርታ ማደስ ያዘገዩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Verbose Logging</source>
-        <translation type="obsolete">ዝርዝር ምዝግብ ማስታወሻ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable detailed logging for debugging</source>
-        <translation type="obsolete">ለስህተት ማረም ዝርዝር ምዝግብ ማስታወሻ ያንቁ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Apply</source>
-        <translation type="obsolete">ተግብር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Reset to Defaults</source>
-        <translation type="obsolete">ወደ ነባሪዎች ዳግም አስጀምር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Settings applied successfully</source>
-        <translation type="obsolete">ቅንብሮች በተሳካ ሁኔታ ተተግብረዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Settings reset to defaults</source>
-        <translation type="obsolete">ቅንብሮች ወደ ነባሪዎች ዳግም ተጀምረዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Profile applied: {}</source>
-        <translation type="obsolete">መገለጫ ተተግብሯል: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Error applying settings</source>
-        <translation type="obsolete">ቅንብሮችን በመተግበር ላይ ስህተት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>MV Status: Checking...</source>
-        <translation type="obsolete">የ MV ሁኔታ: በመፈተሽ ላይ...</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>MV Status: Error</source>
-        <translation type="obsolete">የ MV ሁኔታ: ስህተት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>MV Status: Clean</source>
-        <translation type="obsolete">የ MV ሁኔታ: ንፁህ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>MV Status:</source>
-        <translation type="obsolete">የ MV ሁኔታ:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>active</source>
-        <translation type="obsolete">ንቁ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No active materialized views</source>
-        <translation type="obsolete">ምንም ንቁ materialized views የሉም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Session:</source>
-        <translation type="obsolete">ክፍለ ጊዜ:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Other sessions:</source>
-        <translation type="obsolete">ሌሎች ክፍለ ጊዜዎች:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>🧹 Session</source>
-        <translation type="obsolete">🧹 ክፍለ ጊዜ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cleanup MVs from this session</source>
-        <translation type="obsolete">የ MV ዎችን ከዚህ ክፍለ ጊዜ አጽዳ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>🗑️ Orphaned</source>
-        <translation type="obsolete">🗑️ ወላጅ አልባ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cleanup orphaned MVs (&gt;24h old)</source>
-        <translation type="obsolete">ወላጅ አልባ MV ዎችን አጽዳ (&gt;24 ሰዓት)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>⚠️ All</source>
-        <translation type="obsolete">⚠️ ሁሉም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cleanup ALL MVs (affects other sessions)</source>
-        <translation type="obsolete">ሁሉንም MV ዎች አጽዳ (ሌሎች ክፍለ ጊዜዎችን ይነካል)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Confirm Cleanup</source>
-        <translation type="obsolete">ማጽዳትን አረጋግጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Drop ALL materialized views?
-This affects other FilterMate sessions!</source>
-        <translation type="obsolete">ሁሉንም materialized views ይጣሉ?
-ይህ ሌሎች FilterMate ክፍለ ጊዜዎችን ይነካል!</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Refresh MV status</source>
-        <translation type="obsolete">የ MV ሁኔታን አድስ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Threshold:</source>
-        <translation type="obsolete">ገደብ:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>features</source>
-        <translation type="obsolete">ባህሪያት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-cleanup on exit</source>
-        <translation type="obsolete">በመውጫ ጊዜ ራስ-ሰር ያጽዱ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Automatically drop session MVs when plugin unloads</source>
-        <translation type="obsolete">ተሰኪ ሲጫን የክፍለ ጊዜ MVs ን በራስ ሰር ይጣሉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Create MVs for datasets larger than this</source>
-        <translation type="obsolete">ከዚህ የሚበልጡ የውሂብ ስብስቦች ለ MVs ይፍጠሩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>faster possible</source>
-        <translation type="obsolete">ፈጣን ይቻላል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Optimizations available</source>
-        <translation type="obsolete">ማመቻቸቶች ይገኛሉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>FilterMate - Apply Optimizations?</source>
-        <translation type="obsolete">FilterMate - ማመቻቸቶችን ይተግብሩ?</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Skip</source>
-        <translation type="obsolete">ዝለል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>✓ Apply</source>
-        <translation type="obsolete">✓ ተግብር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Don&apos;t ask for this session</source>
-        <translation type="obsolete">ለዚህ ክፍለ ጊዜ አትጠይቅ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Centroids</source>
-        <translation type="obsolete">ማእከላት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Simplify</source>
-        <translation type="obsolete">ቀለል ያድርጉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Pre-simplify</source>
-        <translation type="obsolete">ቀድሞ-ቀለል ያድርጉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Fewer segments</source>
-        <translation type="obsolete">ያነሱ ክፍሎች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Flat buffer</source>
-        <translation type="obsolete">ጠፍጣፋ ማቆያ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>BBox filter</source>
-        <translation type="obsolete">BBox ማጣሪያ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Attr-first</source>
-        <translation type="obsolete">Attr-መጀመሪያ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>PostgreSQL not available</source>
-        <translation type="obsolete">PostgreSQL አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No connection</source>
-        <translation type="obsolete">ግንኙነት የለም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation type="obsolete">ባህሪ ሲቀየር ራስ-ሰር አጉላ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Backend optimization settings saved</source>
-        <translation type="obsolete">የኋላ ማመቻቸት ቅንብሮች ተቀምጠዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Backend optimizations configured</source>
-        <translation type="obsolete">የኋላ ማመቻቸቶች ተዋቅረዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Expression Evaluation</source>
-        <translation type="obsolete">አገላለጽ ግምገማ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Identify selected feature</source>
-        <translation type="obsolete">የተመረጠውን ባህሪ ለይ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Layer properties reset to defaults</source>
-        <translation type="obsolete">የንብርብር ባህሪያት ወደ ነባሪዎች ተመልሰዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Link exploring widgets together</source>
-        <translation type="obsolete">የማስሳሻ ዊጀቶችን አገናኝ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Optimization settings saved</source>
-        <translation type="obsolete">የማመቻቸት ቅንብሮች ተቀምጠዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Reset all layer exploring properties</source>
-        <translation type="obsolete">ሁሉንም የንብርብር ማስሳሻ ባህሪያት ዳግም አስጀምር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Toggle feature selection on map</source>
-        <translation type="obsolete">በካርታ ላይ የባህሪ ምርጫን ቀያይር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons)</source>
-        <translation type="obsolete">ለርቀት ንብርብሮች ሙሉ ጂኦሜትሪዎች ፈንታ ማእከላትን ይጠቀሙ (ለውስብስብ ፖሊጎኖች ፈጣን)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">ለምንጭ ንብርብር ሙሉ ጂኦሜትሪዎች ፈንታ ማእከላትን ይጠቀሙ (ለውስብስብ ፖሊጎኖች ፈጣን)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Zoom to selected feature</source>
-        <translation type="obsolete">ወደ ተመረጠው ባህሪ አጉላ</translation>
-    </message>
-</context>
-<context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="275"/>
+        <location filename="../ui/controllers/config_controller.py" line="311"/>
         <source>Error cancelling changes: {0}</source>
         <translation>ለውጦችን ለመሰረዝ ስህተት: {0}</translation>
     </message>
@@ -690,34 +114,6 @@ This affects other FilterMate sessions!</source>
         <location filename="../adapters/database_manager.py" line="527"/>
         <source>Error during database initialization: {0}</source>
         <translation>ዳታቤዝ ማስጀመር ወቅት ስህተት: {0}</translation>
-    </message>
-</context>
-<context>
-    <name>DatasourceManager</name>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
-        <source>Database file does not exist: {db_file_path}</source>
-        <translation>ዳታቤዝ ፋይል የለም: {db_file_path}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
-        <source>Failed to connect to database {db_file_path}: {error}</source>
-        <translation>ዳታቤዝ {db_file_path} ጋር መገናኘት አልተሳካም: {error}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
-        <source>QGIS processing module not available to create spatial index</source>
-        <translation>ቦታዊ ማውጫ ለመፍጠር QGIS ማሰናጃ ሞዱል አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
-        <source>Cannot create spatial index: layer invalid or source not found.</source>
-        <translation>ቦታዊ ማውጫ መፍጠር አይቻልም: ንብርብር ልክ ያልሆነ ወይም ምንጭ አልተገኘም።</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
-        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
-        <translation>PostgreSQL ንብርብሮች ተገኝተዋል ግን psycopg2 አልተጫነም። የአካባቢ Spatialite ዳራ ይጠቀማል። ለትላልቅ ዳታዎች ተሻሻለ አፈጻጸም psycopg2 ይጫኑ።</translation>
     </message>
 </context>
 <context>
@@ -1243,59 +639,6 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
     </message>
 </context>
 <context>
-    <name>FeedbackUtils</name>
-    <message>
-        <location filename="." line="4"/>
-        <source>Starting filter on {count} layer(s)</source>
-        <translation type="obsolete">Starting filter on {count} layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Removing filters from {count} layer(s)</source>
-        <translation type="obsolete">Removing filters from {count} layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Resetting {count} layer(s)</source>
-        <translation type="obsolete">Resetting {count} layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Exporting {count} layer(s)</source>
-        <translation type="obsolete">Exporting {count} layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Successfully filtered {count} layer(s)</source>
-        <translation type="obsolete">Successfully filtered {count} layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Successfully removed filters from {count} layer(s)</source>
-        <translation type="obsolete">Successfully removed filters from {count} layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Successfully reset {count} layer(s)</source>
-        <translation type="obsolete">Successfully reset {count} layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Successfully exported {count} layer(s)</source>
-        <translation type="obsolete">Successfully exported {count} layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</source>
-        <translation type="obsolete">Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>PostgreSQL recommended for better performance.</source>
-        <translation type="obsolete">ለተሽላ አስተያየት PostgreSQL ይመከረል።</translation>
-    </message>
-</context>
-<context>
     <name>FilepathType</name>
     <message>
         <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
@@ -1352,99 +695,67 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="106"/>
+        <location filename="../filter_mate.py" line="188"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>Open FilterMate panel</source>
         <translation>FilterMate ፓነልን ክፈት</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset configuration and database</source>
         <translation>ውቅረትና ዳታቤዝ ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>ነባሪ ውቅረትን ዳግም አስጀምርና SQLite ዳታቤዝን ሰርዝ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Reset Configuration</source>
         <translation>ውቅረት ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>Are you sure you want to reset to the default configuration?
-
-This will:
-- Reset all FilterMate settings
-- Delete all filter history databases</source>
-        <translation type="obsolete">ነባሪ ውቅረት ላይ ዳግም ማስጀመር ትፈልጋለህ?
-
-ይህ:
-- ሁሉንም FilterMate ቅንብሮች ዳግም ያስጀምራል
-- ሁሉንም የማጣሪያ ታሪክ ዳታቤዞች ይሰርዛል</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1192"/>
+        <location filename="../filter_mate.py" line="1355"/>
         <source>Configuration reset successfully.</source>
         <translation>ውቅረት በተሳካ ሁኔታ ዳግም ተጀምሯል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1197"/>
+        <location filename="../filter_mate.py" line="1360"/>
         <source>Default configuration file not found.</source>
         <translation>ነባሪ ውቅረት ፋይል አልተገኘም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1218"/>
+        <location filename="../filter_mate.py" line="1381"/>
         <source>Database deleted: {filename}</source>
         <translation>ዳታቤዝ ተሰርዟል: {filename}</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>Unable to delete {filename}: {error}</source>
-        <translation type="obsolete">{filename} መሰረዝ አልተቻለም: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>Restart required</source>
         <translation>ዳግም ማስጀመር ያስፈልጋል</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>The configuration has been reset.
-
-Please restart QGIS to apply all changes.</source>
-        <translation type="obsolete">ውቅረቱ ዳግም ተጀምሯል።
-
-ሁሉንም ለውጦች ለማስፈጸም እባክዎ QGIS ን ዳግም ያስጀምሩ።</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Error during reset: {error}</source>
-        <translation type="obsolete">በዳግም ማስጀመር ወቅት ስህተት: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="350"/>
+        <location filename="../filter_mate.py" line="401"/>
         <source>Obsolete configuration detected</source>
         <translation>ያረጀ ውቅረት ተገኝቷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="351"/>
+        <location filename="../filter_mate.py" line="402"/>
         <source>unknown version</source>
         <translation>ያልታወቀ ስሪት</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="352"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1459,12 +770,12 @@ Do you want to reset to default settings?
 • No: Keep current configuration (may cause issues)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="359"/>
+        <location filename="../filter_mate.py" line="410"/>
         <source>Corrupted configuration detected</source>
         <translation>የተበላሸ ውቅረት ተገኝቷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="360"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1479,12 +790,12 @@ Do you want to reset to default settings?
 • No: Cancel (the plugin may not work correctly)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="367"/>
+        <location filename="../filter_mate.py" line="418"/>
         <source>Configuration reset</source>
         <translation>ውቅረት ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="419"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1493,57 +804,57 @@ Do you want to continue?</source>
 Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="416"/>
+        <location filename="../filter_mate.py" line="467"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>ውቅረት አልተዘዋወረም። አንዳንድ ባህሪያት በትክክል ላይሰሩ ይችላሉ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="427"/>
+        <location filename="../filter_mate.py" line="478"/>
         <source>Configuration created with default values</source>
         <translation>ውቅረት በነባሪ እሴቶች ተፈጥሯል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>የተበላሸ ውቅረት ዳግም ተጀምሯል። ነባሪ ቅንብሮች ተመልሰዋል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="484"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>ያረጀ ውቅረት ዳግም ተጀምሯል። ነባሪ ቅንብሮች ተመልሰዋል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="505"/>
         <source>Configuration updated to latest version</source>
         <translation>ውቅረት ወደ አዲሱ ስሪት ተዘምኗል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="451"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>ውቅረት ተዘምኗል: አዲስ ቅንብሮች አሉ ({sections})። በአማራጭምነው ይድረሱ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Geometry Simplification</source>
         <translation>የጂኦሜትሪ ማሳለጥ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>Optimization Thresholds</source>
         <translation>የማሳጣኘት ደረጃዎች</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="473"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error during configuration migration: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="591"/>
+        <location filename="../filter_mate.py" line="642"/>
         <source>Geometry validation setting</source>
         <translation>የጂኦሜትሪ ማረጋገጫ ቅንብር</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="593"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -1570,17 +881,17 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="621"/>
+        <location filename="../filter_mate.py" line="672"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>ልክ ያልሆነ ጂኦሜትሪ ማጣራት በተሳካ ሁኔታ ተሰናክሏል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="628"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>ልክ ያልሆነ ጂኦሜትሪ ማጣራት አልተሻሻለም። አንዳንድ ባህሪያት ከወጪዎች ሊገለሉ ይችላሉ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1597,7 +908,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1606,489 +917,386 @@ Please restart QGIS to apply the changes.</source>
 Please restart QGIS to apply the changes.</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">በሜትር ውስጥ የቋት ዋጋ (አዎንታዊ=ማስፋፋት, አሉታዊ=ፖሊጎኖችን መቀነስ)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation type="obsolete">አሉታዊ ቋት (መሸርሸር)፡ ፖሊጎኖችን ወደ ውስጥ ያሳንሳል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>point</source>
-        <translation type="obsolete">ነጥብ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>line</source>
-        <translation type="obsolete">መስመር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>non-polygon</source>
-        <translation type="obsolete">ባልሆነ-ፖሊጎን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Buffer value in meters (positive only when centroids are enabled. Negative buffers cannot be applied to points)</source>
-        <translation type="obsolete">የቋት እሴት በሜትር (ሴንትሮይድ ሲነቃ አዎንታዊ ብቻ። አሉታዊ ቋቶች በነጥቦች ላይ ሊተገበሩ አይችሉም)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Mode batch</source>
-        <translation type="obsolete">የባች ሁነታ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">ለቋት ትክክለኛነት የክፍሎች ቁጥር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Centroids</source>
-        <translation type="obsolete">ማዕከላዊ ነጥቦች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons like buildings)</source>
-        <translation type="obsolete">ለሩቅ ንብርብሮች ሙሉ ጂኦሜትሪዎች ፋንታ ማዕከላዊ ነጥቦችን ይጠቀሙ (እንደ ህንፃዎች ያሉ ውስብስብ ፖሊጎኖች ፈጣን)</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="295"/>
+        <location filename="../filter_mate.py" line="346"/>
         <source>Initialization error: {0}</source>
         <translation>ማስጀመር ስህተት: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} የተጠቀሰ(ሱ) ንብርብር(ዎች) አልተጫነ(ኑ)ም ({layers_list})። ተለዋጭ ማሳያ ይጠቀማል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1223"/>
+        <location filename="../filter_mate.py" line="1386"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename} ን መሰረዝ አልተቻለም: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1240"/>
+        <location filename="../filter_mate.py" line="1403"/>
         <source>Error during reset: {str(e)}</source>
         <translation>ዳግም ማስጀመር ወቅት ስህተት: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1273"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate&lt;/b&gt;ን ስለተጠቀሙ እናመሰግናለን!&lt;br&gt;የDiscord ማህበረሰባችንን ይቀላቀሉ:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;እርዳታ እና ድጋፍ ያግኙ&lt;/li&gt;&lt;li&gt;ስህተቶችን እና ችግሮችን ያሳውቁ&lt;/li&gt;&lt;li&gt;አዲስ ባህሪያትን ይጠቁሙ&lt;/li&gt;&lt;li&gt;ምክሮችን ከሌሎች ተጠቃሚዎች ጋር ያጋሩ&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1289"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>  Join us on Discord</source>
         <translation>  በDiscord ይቀላቀሉን</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1309"/>
+        <location filename="../filter_mate.py" line="1472"/>
         <source>Don&apos;t show this again</source>
         <translation>ይህን እንደገና አታሳይ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1312"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Close</source>
         <translation>ዝጋ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1541"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>ፕለጊን መጫን ስህተት: {0}። ዝርዝር ለማየት QGIS Python ኮንሶል ይመልከቱ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6630"/>
+        <location filename="../filter_mate_dockwidget.py" line="6691"/>
         <source>Current layer: {0}</source>
         <translation>ወቅታዊ ንብርብር: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6632"/>
+        <location filename="../filter_mate_dockwidget.py" line="6693"/>
         <source>No layer selected</source>
         <translation>ንብርብር አልተመረጠም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>Selected layers:
 {0}</source>
         <translation>የተመረጡ ንብርብሮች:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>No layers selected</source>
         <translation>ንብርብሮች አልተመረጡም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6662"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No expression defined</source>
         <translation>አገላለጽ አልተገለጸም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6674"/>
+        <location filename="../filter_mate_dockwidget.py" line="6735"/>
         <source>Display expression: {0}</source>
         <translation>ማሳያ አገላለጽ: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6750"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ባህሪ ID: {0}
 የመጀመሪያ ባህሪ: {1}</translation>
     </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="301"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation>የአቀማመጥ ለውጦችን ለመተግበር ፕለጊኑን እንደገና ያስጫኑ (የድርጊት አሞሌ ቦታ)</translation>
-    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="271"/>
+        <location filename="../filter_mate_app.py" line="274"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL ንብርብሮች ተገኝተዋል ({0}) ግን psycopg2 አልተጫነም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="358"/>
+        <location filename="../filter_mate_app.py" line="361"/>
         <source>Cleared {0} caches</source>
         <translation>{0} መሸጎጫዎች ተጽድተዋል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="769"/>
+        <location filename="../filter_mate_app.py" line="772"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>ዶክ ዊጀት መፍጠር አልተሳካም: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="779"/>
+        <location filename="../filter_mate_app.py" line="782"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>ዶክ ዊጀት ማሳየት አልተሳካም: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1229"/>
+        <location filename="../filter_mate_app.py" line="1232"/>
         <source>Error executing {0}: {1}</source>
         <translation>{0}ን ማስኬድ ስህተት: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1241"/>
+        <location filename="../filter_mate_app.py" line="1244"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>ፕለጊን በዝቅተኛ ሁነታ እየሰራ ነው (ሄክሳጎናል አገልግሎቶች አይገኙም)። አፈጻጸም ሊቀንስ ይችላል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ስህተት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>{0}ን ማስኬድ አይቻልም: ዊጀት ማስጀመር አልተሳካም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1994"/>
+        <location filename="../filter_mate_app.py" line="2144"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0} አይቻልም: ንብርብር ልክ ያልሆነ ወይም ምንጭ አልተገኘም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2131"/>
+        <location filename="../filter_mate_app.py" line="2281"/>
         <source>All filters cleared - </source>
         <translation>ሁሉም ማጣሪያዎች ተጽድተዋል - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2132"/>
+        <location filename="../filter_mate_app.py" line="2282"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>በዋና ንብርብር ውስጥ {0}{1} ባህሪያት ይታያሉ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2138"/>
+        <location filename="../filter_mate_app.py" line="2288"/>
         <source>Error: result handler missing</source>
         <translation>ስህተት: የውጤት ተቆጣጣሪ ይጎድላል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2151"/>
+        <location filename="../filter_mate_app.py" line="2301"/>
         <source>Error during filtering: {0}</source>
         <translation>ማጣራት ወቅት ስህተት: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2280"/>
+        <location filename="../filter_mate_app.py" line="2432"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} ወላጅ-አልባ ተወዳጅ(ዎች) ተመልሰዋል: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2416"/>
+        <location filename="../filter_mate_app.py" line="2568"/>
         <source>Layer loading failed - click to retry</source>
         <translation>ንብርብር መጫን አልተሳካም - እንደገና ለመሞከር ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2463"/>
+        <location filename="../filter_mate_app.py" line="2615"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} ንብርብር(ዎች) በተሳካ ሁኔታ ተጫነ(ኑ)</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1595"/>
+        <source>filter</source>
+        <translation>filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1597"/>
+        <source>unfilter</source>
+        <translation>unfilter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1600"/>
+        <source>FilterMate – Edit Mode Detected</source>
+        <translation>FilterMate – Edit Mode Detected</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1602"/>
+        <source>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</source>
+        <translation>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1612"/>
+        <source>Save Changes &amp; {0}</source>
+        <translation>Save Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1619"/>
+        <source>Discard Changes &amp; {0}</source>
+        <translation>Discard Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1626"/>
+        <source>Cancel</source>
+        <translation>ሰርዝ</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1650"/>
+        <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
+        <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="." line="4"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation type="obsolete">Reload the plugin to apply layout changes (action bar position)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Reload Plugin</source>
-        <translation type="obsolete">ፕላጊንን ዳግም ጫን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation type="obsolete">Do you want to reload FilterMate to apply all configuration changes?</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Current layer: {name}</source>
-        <translation type="obsolete">Current layer: {name}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No layer selected</source>
-        <translation type="obsolete">ምንም ንብርብር አልተመረጠም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Selected layers:</source>
-        <translation type="obsolete">Selected layers:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Multiple layers selected</source>
-        <translation type="obsolete">ብዙ ንብርብሮች ተመርጠዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No layers selected</source>
-        <translation type="obsolete">ምንም ንብርብሮች አልተመረጡም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Expression:</source>
-        <translation type="obsolete">Expression:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No expression defined</source>
-        <translation type="obsolete">ምንም አገላለጽ አልተገለጸም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Display expression: {expr}</source>
-        <translation type="obsolete">Display expression: {expr}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Feature ID: {id}</source>
-        <translation type="obsolete">Feature ID: {id}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Current layer: {0}</source>
-        <translation type="obsolete">Current layer: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Selected layers:
-{0}</source>
-        <translation type="obsolete">Selected layers:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Expression:
-{0}</source>
-        <translation type="obsolete">Expression:
-{0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Expression: {0}</source>
-        <translation type="obsolete">Expression: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Display expression: {0}</source>
-        <translation type="obsolete">Display expression: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Feature ID: {0}
-First attribute: {1}</source>
-        <translation type="obsolete">Feature ID: {0}
-First attribute: {1}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="582"/>
+        <location filename="../filter_mate_dockwidget.py" line="596"/>
         <source>Initialization error: {}</source>
         <translation>ማስጀመር ስህተት: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI ውቅር ያልተጠናቀቀ - ምዝግብ ማስታወሻዎችን ያረጋግጡ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
         <translation>UI ልኬት ስህተት: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1340"/>
+        <location filename="../filter_mate_dockwidget.py" line="1355"/>
         <source>Favorites manager not available</source>
         <translation>ተወዳጆች አስተዳዳሪ አይገኝም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1359"/>
+        <location filename="../filter_mate_dockwidget.py" line="1374"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} ተወዳጆች ተቀምጠዋል
 ለመተግበር ወይም ለማስተዳደር ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1367"/>
+        <location filename="../filter_mate_dockwidget.py" line="1382"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ ተወዳጅ አልተቀመጠም
 ወቅታዊ ማጣሪያ ለመጨመር ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1391"/>
+        <location filename="../filter_mate_dockwidget.py" line="1406"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>ለ{1} ንብርብር(ዎች) {0} ዳራ ተገድዷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1477"/>
+        <location filename="../filter_mate_dockwidget.py" line="1492"/>
         <source>Backend controller not available</source>
         <translation>ዳራ ተቆጣጣሪ አይገኝም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1415"/>
+        <location filename="../filter_mate_dockwidget.py" line="1430"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL ራስ-ሰር ጽዳት ነቅቷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1416"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL ራስ-ሰር ጽዳት ተዘግቷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL ክፍለ-ጊዜ እይታዎች ተጽድተዋል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>No views to clean or cleanup failed</source>
         <translation>የሚጸዳ እይታ የለም ወይም ጽዳት አልተሳካም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1433"/>
+        <location filename="../filter_mate_dockwidget.py" line="1448"/>
         <source>No PostgreSQL connection available</source>
         <translation>PostgreSQL ግንኙነት አይገኝም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1439"/>
+        <location filename="../filter_mate_dockwidget.py" line="1454"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>ስኬማው ከሌሎች ክፍለ-ጊዜዎች {0} እይታ(ዎች) አሉት።
 ቢሆንም ይሰረዝ?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1440"/>
+        <location filename="../filter_mate_dockwidget.py" line="1455"/>
         <source>Other Sessions Active</source>
         <translation>ሌሎች ክፍለ-ጊዜዎች ንቁ ናቸው</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1442"/>
+        <location filename="../filter_mate_dockwidget.py" line="1457"/>
         <source>Schema cleanup cancelled</source>
         <translation>ስኬማ ጽዳት ተሰርዟል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1447"/>
+        <location filename="../filter_mate_dockwidget.py" line="1462"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>ስኬማ &apos;{0}&apos; በተሳካ ሁኔታ ተሰርዟል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1464"/>
         <source>Schema cleanup failed</source>
         <translation>ስኬማ ጽዳት አልተሳካም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1475"/>
+        <location filename="../filter_mate_dockwidget.py" line="1490"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL ክፍለ-ጊዜ መረጃ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Theme adapted: {0}</source>
         <translation>ገጽታ ተስተካክሏል: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Dark mode</source>
         <translation>ጨለማ ሁነታ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Light mode</source>
         <translation>ብርሃን ሁነታ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3908"/>
+        <location filename="../filter_mate_dockwidget.py" line="3896"/>
         <source>Selected features have no geometry.</source>
         <translation>የተመረጡ ባህሪያት ጂኦሜትሪ የላቸውም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3927"/>
+        <location filename="../filter_mate_dockwidget.py" line="3915"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>ባህሪ አልተመረጠም። ከተቆልቋይ ዝርዝር ባህሪ ይምረጡ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4902"/>
+        <location filename="../filter_mate_dockwidget.py" line="4957"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>የተመረጠው ንብርብር ልክ ያልሆነ ወይም ምንጩ ሊገኝ አይችልም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5612"/>
+        <location filename="../filter_mate_dockwidget.py" line="5667"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>አሉታዊ ቋት (መሸርሸር): ብዙ-ጎኖችን ወደ ውስጥ ያሳንሳል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5615"/>
+        <location filename="../filter_mate_dockwidget.py" line="5670"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>በሜትር የቋት ዋጋ (አዎንታዊ=ማስፋት፣ አሉታዊ=ብዙ-ጎኖችን ማሳነስ)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6089"/>
+        <location filename="../filter_mate_dockwidget.py" line="6144"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>ፕለጊን ከ{0} ቬክተር ንብርብር(ዎች) ጋር ነቅቷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6172"/>
+        <location filename="../filter_mate_dockwidget.py" line="6227"/>
         <source>Could not reload plugin automatically.</source>
         <translation>ፕለጊኑን ራስ-ሰር እንደገና መጫን አልተቻለም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6174"/>
+        <location filename="../filter_mate_dockwidget.py" line="6229"/>
         <source>Error reloading plugin: {0}</source>
         <translation>ፕለጊን እንደገና መጫን ስህተት: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6224"/>
+        <location filename="../filter_mate_dockwidget.py" line="6282"/>
         <source>Layer properties reset to defaults</source>
         <translation>የንብርብር ባህሪያት ወደ ነባሪ ተመልሰዋል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6225"/>
+        <location filename="../filter_mate_dockwidget.py" line="6283"/>
         <source>Error resetting layer properties: {}</source>
         <translation>የንብርብር ባህሪያትን ዳግም ማስጀመር ስህተት: {}</translation>
     </message>
@@ -2096,417 +1304,172 @@ Drop anyway?</source>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
         <translation>ነጠላ ምርጫ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
         <source>MULTIPLE SELECTION</source>
         <translation>ብዙ ምርጫ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1545"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
         <source>CUSTOM SELECTION</source>
         <translation>ብጁ ምርጫ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
         <source>FILTERING</source>
         <translation>ማጣራት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1575"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
         <source>EXPORTING</source>
         <translation>መላክ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1576"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
         <source>CONFIGURATION</source>
         <translation>ውቅረት</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>Identify feature - Display feature attributes</source>
-        <translation type="obsolete">ባህሪ ለይ - የባህሪ ባህሪያትን አሳይ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Zoom to feature - Center the map on the selected feature</source>
-        <translation type="obsolete">ወደ ባህሪ አጉላ - ካርታውን በተመረጠው ባህሪ ላይ አስቀምጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable selection - Select features on map</source>
-        <translation type="obsolete">ምርጫን አንቃ - በካርታ ላይ ባህሪያትን ምረጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable tracking - Follow the selected feature on the map</source>
-        <translation type="obsolete">መከታተልን አንቃ - የተመረጠውን ባህሪ በካርታ ላይ ተከተል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Link widgets - Synchronize selection between widgets</source>
-        <translation type="obsolete">ዊጀቶችን አገናኝ - በዊጀቶች መካከል ምርጫን አስተባብር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Reset layer properties - Restore default layer settings</source>
-        <translation type="obsolete">የንብርብር ባህሪያትን ዳግም አስጀምር - ነባሪ የንብርብር ቅንብሮችን መልስ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-sync with current layer - Automatically update when layer changes</source>
-        <translation type="obsolete">ከአሁኑ ንብርብር ጋር በራስ-ሰር አስተባብር - ንብርብር ሲቀየር በራስ-ሰር አዘምን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable multi-layer filtering - Apply filter to multiple layers simultaneously</source>
-        <translation type="obsolete">ብዙ-ንብርብር ማጣራትን አንቃ - ማጣሪያውን በአንድ ጊዜ በብዙ ንብርብሮች ላይ ተግብር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable additive filtering - Combine multiple filters on the current layer</source>
-        <translation type="obsolete">ተጨማሪ ማጣራትን አንቃ - በአሁኑ ንብርብር ላይ ብዙ ማጣሪያዎችን አዋህድ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable spatial filtering - Filter features using geometric relationships</source>
-        <translation type="obsolete">የቦታ ማጣራትን አንቃ - ጂኦሜትሪያዊ ግንኙነቶችን በመጠቀም ባህሪያትን አጣራ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable buffer - Add a buffer zone around selected features</source>
-        <translation type="obsolete">ቋት አንቃ - በተመረጡ ባህሪያት ዙሪያ የቋት ዞን ጨምር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Buffer type - Select the buffer calculation method</source>
-        <translation type="obsolete">የቋት አይነት - የቋት ስሌት ዘዴን ምረጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Current layer - Select the layer to filter</source>
-        <translation type="obsolete">አሁኑ ንብርብር - ለማጣራት ንብርብር ምረጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Logical operator for combining filters on the source layer</source>
-        <translation type="obsolete">Logical operator for combining filters on the source layer</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Logical operator for combining filters on other layers</source>
-        <translation type="obsolete">Logical operator for combining filters on other layers</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Select geometric predicate(s) for spatial filtering</source>
-        <translation type="obsolete">Select geometric predicate(s) for spatial filtering</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Buffer distance in meters</source>
-        <translation type="obsolete">Buffer distance in meters</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Buffer type - Define how the buffer is calculated</source>
-        <translation type="obsolete">Buffer type - Define how the buffer is calculated</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Select layers to export</source>
-        <translation type="obsolete">Select layers to export</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Configure output projection</source>
-        <translation type="obsolete">Configure output projection</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Export layer styles (QML/SLD)</source>
-        <translation type="obsolete">Export layer styles (QML/SLD)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Select output format</source>
-        <translation type="obsolete">Select output format</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Configure output location and filename</source>
-        <translation type="obsolete">Configure output location and filename</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable ZIP compression - Create a compressed archive of exported files</source>
-        <translation type="obsolete">Enable ZIP compression - Create a compressed archive of exported files</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1569"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
         <source>Select CRS for export</source>
         <translation>Select CRS for export</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>Style format - Select QML or SLD format</source>
-        <translation type="obsolete">Style format - Select QML or SLD format</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Output file format</source>
-        <translation type="obsolete">Output file format</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Output folder name - Enter the name of the export folder</source>
-        <translation type="obsolete">Output folder name - Enter the name of the export folder</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enter folder name...</source>
-        <translation type="obsolete">Enter folder name...</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Batch mode - Export each layer to a separate folder</source>
-        <translation type="obsolete">Batch mode - Export each layer to a separate folder</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Batch mode</source>
-        <translation type="obsolete">ቡድን ሁነታ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>ZIP filename - Enter the name for the compressed archive</source>
-        <translation type="obsolete">ZIP filename - Enter the name for the compressed archive</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enter ZIP filename...</source>
-        <translation type="obsolete">Enter ZIP filename...</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Batch mode - Create a separate ZIP for each layer</source>
-        <translation type="obsolete">Batch mode - Create a separate ZIP for each layer</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Apply Filter - Execute the current filter on selected layers</source>
-        <translation type="obsolete">Apply Filter - Execute the current filter on selected layers</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Apply Filter</source>
-        <translation type="obsolete">ማጣሪያ ተግብር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Apply the current filter expression to filter features on the selected layer(s)</source>
-        <translation type="obsolete">Apply the current filter expression to filter features on the selected layer(s)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Undo Filter - Restore the previous filter state</source>
-        <translation type="obsolete">Undo Filter - Restore the previous filter state</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Undo Filter</source>
-        <translation type="obsolete">ማጣሪያ ሻር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Undo the last filter operation and restore the previous state</source>
-        <translation type="obsolete">Undo the last filter operation and restore the previous state</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Redo Filter - Reapply the previously undone filter</source>
-        <translation type="obsolete">Redo Filter - Reapply the previously undone filter</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Redo Filter</source>
-        <translation type="obsolete">ማጣሪያ መልስ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Redo the previously undone filter operation</source>
-        <translation type="obsolete">Redo the previously undone filter operation</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Clear All Filters - Remove all filters from all layers</source>
-        <translation type="obsolete">Clear All Filters - Remove all filters from all layers</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Clear All Filters</source>
-        <translation type="obsolete">ሁሉንም ማጣሪያዎች አጽዳ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Remove all active filters from all layers in the project</source>
-        <translation type="obsolete">Remove all active filters from all layers in the project</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Export - Save filtered layers to the specified location</source>
-        <translation type="obsolete">Export - Save filtered layers to the specified location</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
         <source>Export</source>
         <translation>ላክ</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>Export the filtered layers to the configured output location and format</source>
-        <translation type="obsolete">Export the filtered layers to the configured output location and format</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>About FilterMate - Display plugin information and help</source>
-        <translation type="obsolete">About FilterMate - Display plugin information and help</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
         <source>AND</source>
         <translation>እና</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1556"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
         <source>AND NOT</source>
         <translation>እና አይደለም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1557"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
         <source>OR</source>
         <translation>ወይም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
         <source> m</source>
         <translation> ሜ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1559"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
         <source>, </source>
         <translation>፣ </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
         <source>Multi-layer filtering</source>
         <translation>ብዙ-ንብርብር ማጣራት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1547"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
         <source>Additive filtering for the selected layer</source>
         <translation>ለተመረጠው ንብርብር ተጨማሪ ማጣራት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1548"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
         <source>Geospatial filtering</source>
         <translation>ጂኦስፓሻል ማጣራት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
         <source>Buffer</source>
         <translation>ቋት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
         <source>Expression layer</source>
         <translation>የአገላለጽ ንብርብር</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1558"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
         <source>Geometric predicate</source>
         <translation>ጂኦሜትሪያዊ ቅድመ-ሁኔታ</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>Value in meters</source>
-        <translation type="obsolete">እሴት በሜትር</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1572"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
         <source>Output format</source>
         <translation>የውጤት ቅርጸት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
         <source>Filter</source>
         <translation>ማጣሪያ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
         <source>Reset</source>
         <translation>ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
         <source>Layers to export</source>
         <translation>ለመላክ ንብርብሮች</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
         <source>Layers projection</source>
         <translation>የንብርብሮች ትንበያ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
         <source>Save styles</source>
         <translation>ቅጦችን አስቀምጥ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1567"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
         <source>Datatype export</source>
         <translation>የዳታ አይነት ወጪ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
         <source>Name of file/directory</source>
         <translation>የፋይል/ማውጫ ስም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1550"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>ለምንጭ ንብርብር ከሙሉ ጂኦሜትሪዎች ይልቅ ማዕከሎችን ይጠቀሙ (ለውስብስብ ብዙ-ጎኖች ፈጣን)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>በሜትር የቋት ዋጋ (አዎንታዊ=ማስፋት፣ አሉታዊ=ብዙ-ጎኖችን ማሳነስ)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
         <source>Number of segments for buffer precision</source>
         <translation>ለቋት ትክክለኛነት የክፍሎች ብዛት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
         <source>Mode batch</source>
         <translation>ቋሚ ሁነታ</translation>
     </message>
@@ -2614,7 +1577,7 @@ Drop anyway?</source>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="928"/>
+        <location filename="../core/tasks/layer_management_task.py" line="944"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2631,12 +1594,12 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 PostgreSQL ሰንጠረዥ PRIMARY KEY እንዳለው ያረጋግጡ።</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="954"/>
+        <location filename="../core/tasks/layer_management_task.py" line="970"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>ንብርብር &apos;{0}&apos; PRIMARY KEY የለውም። ውሱን ባህሪያት: materialized views ተዘግተዋል። ምክር: ለተሻለ አፈጻጸም PRIMARY KEY ያክሉ።</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1893"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
         <source>Exception: {0}</source>
         <translation>ልዩ ሁኔታ: {0}</translation>
     </message>
@@ -2775,164 +1738,6 @@ PostgreSQL ሰንጠረዥ PRIMARY KEY እንዳለው ያረጋግጡ።</trans
     </message>
 </context>
 <context>
-    <name>OptimizationDialogs</name>
-    <message>
-        <location filename="." line="4"/>
-        <source>FilterMate - Optimizations</source>
-        <translation type="obsolete">FilterMate - ማጣመም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Optimizations for:</source>
-        <translation type="obsolete">ማጣመም ለ:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>features</source>
-        <translation type="obsolete">ባህሪያት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Estimated speedup:</source>
-        <translation type="obsolete">የተግናበ ፍጥነት:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>faster</source>
-        <translation type="obsolete">ፍጠን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use centroids instead of full geometries for large datasets</source>
-        <translation type="obsolete">ለትልቅ የዳታ ስብስብ አከል ጂዦሜትሪ በመኀሊ አጠው ምብት ይጠቀሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use centroids</source>
-        <translation type="obsolete">ምብት ይጠቀሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use centroids for distant layers</source>
-        <translation type="obsolete">ለርቀነው ትሩፍታት ምብት ይጠቀሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable buffer type</source>
-        <translation type="obsolete">የባፍር አይነት አንቃ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Simplify complex geometries to reduce processing time</source>
-        <translation type="obsolete">የመስራት ጊዜውን ለመቀነስ ውስብስብ ጂዦሜትሪዊን ያቀሉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Simplify geometries</source>
-        <translation type="obsolete">ጂዦሜትሪ ያቀሉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Filter by bounding box first to eliminate distant features quickly</source>
-        <translation type="obsolete">ረጬም ባህሪያትን በፍጥነት ለማስወገድ መጀመሪያ በመጫጪያ ሹጡ ልከይ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>BBox pre-filtering</source>
-        <translation type="obsolete">BBox ቀድሞ-ለይ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Evaluate attribute conditions before expensive spatial operations</source>
-        <translation type="obsolete">ወደባበት የብዽትየት እርምጃዎች በቆል የባህሪ ሁኔታዎችን ይገመግሙ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Attribute-first strategy</source>
-        <translation type="obsolete">የባህሪ-መጀመሪያ ስትራቲጂ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Apply for current session only</source>
-        <translation type="obsolete">ለአሁኑ ምይት ብቻ ይተግብር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Remember for this session</source>
-        <translation type="obsolete">ለዚህ ምይት ያስታዉሱ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Skip without applying</source>
-        <translation type="obsolete">ሳይተግበር ይዘለሉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Skip</source>
-        <translation type="obsolete">ዘለሉ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Apply selected optimizations</source>
-        <translation type="obsolete">የተመረጡ ማጣመም ይተግብሩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Apply</source>
-        <translation type="obsolete">ይተግብሩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Optimization Settings</source>
-        <translation type="obsolete">የማጣመም መቄቃሪያ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable automatic optimizations</source>
-        <translation type="obsolete">ራስለሳዊ ማጣመም አንቃ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable optimizations</source>
-        <translation type="obsolete">ማጣመም አንቃ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-apply recommendations</source>
-        <translation type="obsolete">ምክሮችን በራስገር ይተግብሩ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Ask before applying</source>
-        <translation type="obsolete">ከመተግበር በፆል ይጠይቁ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Show optimization dialog</source>
-        <translation type="obsolete">የማጣመም መኀፈር አሳይ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Never apply</source>
-        <translation type="obsolete">በፋፀ አይተግብር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No optimizations</source>
-        <translation type="obsolete">ማጣመም የለም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Simplify before buffer</source>
-        <translation type="obsolete">ከብፍር በፍት አቀልል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Reduce buffer segments</source>
-        <translation type="obsolete">የብፍር ክፍሎችን ቀንስ</translation>
-    </message>
-</context>
-<context>
     <name>PostgresInfoDialog</name>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="80"/>
@@ -3030,561 +1835,6 @@ PostgreSQL ሰንጠረዥ PRIMARY KEY እንዳለው ያረጋግጡ።</trans
         <translation>ማጽዳት አልተሳካም</translation>
     </message>
     <message>
-        <location filename="." line="4"/>
-        <source>All layers using auto-selection</source>
-        <translation type="obsolete">ሁሉም ንብርብሮች አውቶማቲክ ምርጫን እየተጠቀሙ ናቸው</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Applied to &apos;{0}&apos;:</source>
-        <translation type="obsolete">ወደ &apos;{0}&apos; ተተገብሯል:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-centroid {0}</source>
-        <translation type="obsolete">አውቶ-ሴንትሮይድ {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-optimization {0}</source>
-        <translation type="obsolete">አውቶ-ማመቻቸት {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-optimizer module not available</source>
-        <translation type="obsolete">አውቶ-ማመቻቻ ሞዱል አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation type="obsolete">አውቶ-ማመቻቻ አይገኝም: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-select best strategy</source>
-        <translation type="obsolete">ምርጥ ስትራቴጂ በራስ-ሰር ምረጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-selected backends for {0} layer(s)</source>
-        <translation type="obsolete">ለ{0} ንብርብር(ዎች) ባክኤንዶች በራስ-ሰር ተመርጠዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-simplify geometries</source>
-        <translation type="obsolete">ጂኦሜትሪዎችን በራስ-ሰር ቀላል አድርግ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-use centroids for remote layers</source>
-        <translation type="obsolete">ለርቀት ንብርብሮች ሴንትሮይድዎችን በራስ-ሰር ተጠቀም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Automatically choose optimal filtering strategy</source>
-        <translation type="obsolete">ተመቹ የማጣሪያ ስትራቴጂ በራስ-ሰር ይምረጡ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>BBox pre-filter enabled for &apos;{0}&apos;</source>
-        <translation type="obsolete">ለ&apos;{0}&apos; BBox ቅድመ-ማጣሪያ ነቅቷል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Backend controller not available</source>
-        <translation type="obsolete">ባክኤንድ ተቆጣጣሪ አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Backend forced to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">ባክኤንድ ወደ {0} ለ&apos;{1}&apos; ተገድዷል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Backend optimization unavailable</source>
-        <translation type="obsolete">ባክኤንድ ማመቻቸት አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Backend set to Auto for &apos;{0}&apos;</source>
-        <translation type="obsolete">ባክኤንድ ለ&apos;{0}&apos; ወደ አውቶ ተቀናበረ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Centroids enabled for &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">ለ&apos;{0}&apos; ሴንትሮይድዎች ነቅተዋል (~{1}x {2})</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Clear ALL FilterMate temporary tables from all databases</source>
-        <translation type="obsolete">ከሁሉም ዳታቤዞች ሁሉንም FilterMate ጊዜያዊ ሰንጠረዦች አጽዳ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Clear temporary tables for the current project only</source>
-        <translation type="obsolete">ለአሁኑ ፕሮጀክት ብቻ ጊዜያዊ ሰንጠረዦችን አጽዳ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cleared {0} temporary table(s) for current project</source>
-        <translation type="obsolete">ለአሁኑ ፕሮጀክት {0} ጊዜያዊ ሰንጠረዥ(ዎች) ተጸዱ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cleared {0} temporary table(s) globally</source>
-        <translation type="obsolete">በዓለም አቀፍ ደረጃ {0} ጊዜያዊ ሰንጠረዥ(ዎች) ተጸዱ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Confirmation {0}</source>
-        <translation type="obsolete">ማረጋገጫ {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation type="obsolete">ንብርብር &apos;{0}&apos; መተንተን አልተቻለም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Could not reload plugin automatically.</source>
-        <translation type="obsolete">ተሰኪውን በራስ-ሰር ዳግም መጫን አልተቻለም።</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Dark mode</source>
-        <translation type="obsolete">ጨለማ ሁነታ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Description (auto-generated, you can modify it)</source>
-        <translation type="obsolete">መግለጫ (በራስ-ሰር የተፈጠረ፣ ማሻሻል ይችላሉ)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Dialog not available: {0}</source>
-        <translation type="obsolete">ውይይት አይገኝም: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enter a name for this filter</source>
-        <translation type="obsolete">ለዚህ ማጣሪያ ስም ያስገቡ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation type="obsolete">ንብርብር መተንተን ስህተት: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation type="obsolete">ለውጦችን መሰረዝ ስህተት: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Error reloading plugin: {0}</source>
-        <translation type="obsolete">ተሰኪውን ዳግም መጫን ስህተት: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Error resetting layer properties: {}</source>
-        <translation type="obsolete">የንብርብር ባህሪያትን ዳግም ማስጀመር ስህተት: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Error: {0}</source>
-        <translation type="obsolete">ስህተት: {0}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Favorites manager not available</source>
-        <translation type="obsolete">የተወዳጆች አስተዳዳሪ አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Filter history position</source>
-        <translation type="obsolete">የማጣሪያ ታሪክ አቀማመጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>FilterMate - Add to Favorites</source>
-        <translation type="obsolete">FilterMate - ወደ ተወዳጆች አክል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Forced {0} backend for {1} layer(s)</source>
-        <translation type="obsolete">ለ{1} ንብርብር(ዎች) {0} ባክኤንድ ተገድዷል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Light mode</source>
-        <translation type="obsolete">ብርሃን ሁነታ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Memory layer filtering complete for &apos;{0}&apos;</source>
-        <translation type="obsolete">ለ&apos;{0}&apos; የማህደረ ትውስታ ንብርብር ማጣሪያ ተጠናቅቋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No optimization recommendations at this time.</source>
-        <translation type="obsolete">በዚህ ጊዜ የማመቻቸት ምክሮች የሉም።</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>OGR/Memory</source>
-        <translation type="obsolete">OGR/ማህደረ ትውስታ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Optimization applied to {0} layer(s)</source>
-        <translation type="obsolete">ማመቻቸት በ{0} ንብርብር(ዎች) ላይ ተተግብሯል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Optimization recommendations</source>
-        <translation type="obsolete">የማመቻቸት ምክሮች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>PostgreSQL</source>
-        <translation type="obsolete">PostgreSQL</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Redo filter</source>
-        <translation type="obsolete">ማጣሪያ ድገም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Redo unavailable</source>
-        <translation type="obsolete">ድገም አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Save current filter</source>
-        <translation type="obsolete">የአሁኑን ማጣሪያ አስቀምጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Spatialite</source>
-        <translation type="obsolete">Spatialite</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Strategy set to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">ስትራቴጂ ለ&apos;{1}&apos; ወደ {0} ተቀናበረ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Theme changed</source>
-        <translation type="obsolete">ገጽታ ተቀይሯል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Toggle dark/light mode</source>
-        <translation type="obsolete">ጨለማ/ብርሃን ሁነታ ቀይር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Undo filter</source>
-        <translation type="obsolete">ማጣሪያ ቀልብስ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Undo unavailable</source>
-        <translation type="obsolete">ቀልብስ አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Using QGIS expressions for filtering</source>
-        <translation type="obsolete">ለማጣራት የQGIS መግለጫዎችን በመጠቀም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>View filter history</source>
-        <translation type="obsolete">የማጣሪያ ታሪክ ይመልከቱ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>WKT expression threshold:</source>
-        <translation type="obsolete">የWKT መግለጫ ገደብ:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>memory copy</source>
-        <translation type="obsolete">የማህደረ ትውስታ ቅጂ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>pool size</source>
-        <translation type="obsolete">የገንዳ መጠን</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>simplified to {0} vertices</source>
-        <translation type="obsolete">ወደ {0} ጫፎች ቀለል ተደርጓል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>temp views</source>
-        <translation type="obsolete">ጊዜያዊ እይታዎች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Allow cancellation of QGIS processing algorithms. Enables stopping long-running operations.</source>
-        <translation type="obsolete">የQGIS ማቀናበሪያ ስልተ ቀመሮች መሰረዝን ይፍቀዱ። ረዥም ጊዜ የሚወስዱ ስራዎችን ለማቆም ያስችላል።</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Analyzing your project... Recommendations will appear here.</source>
-        <translation type="obsolete">ፕሮጀክትዎን በመመርመር ላይ... ምክሮች እዚህ ይታያሉ።</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-Centroid for Distant Layers</source>
-        <translation type="obsolete">ለርቀት ንብርብሮች አውቶማቲክ ማዕከል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-Select Best Strategy</source>
-        <translation type="obsolete">ምርጥ ስትራቴጂ በራስ-ሰር ምረጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-Simplify Geometries ⚠️</source>
-        <translation type="obsolete">ጂኦሜትሪዎችን በራስ-ሰር ቀለል አድርግ ⚠️</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Auto-detect mod_spatialite</source>
-        <translation type="obsolete">mod_spatialite በራስ-ሰር ፈልግ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Automatic GIST Index Usage</source>
-        <translation type="obsolete">አውቶማቲክ GIST መረጃ ጠቋሚ አጠቃቀም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cancel</source>
-        <translation type="obsolete">ሰርዝ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Cancellable Processing</source>
-        <translation type="obsolete">የሚሰረዝ ማቀናበር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Chunk size (features):</source>
-        <translation type="obsolete">የቁራጭ መጠን (ባህሪያት):</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Confirm Before Applying</source>
-        <translation type="obsolete">ከመተግበርዎ በፊት ያረጋግጡ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Connection Pooling</source>
-        <translation type="obsolete">የግንኙነት ማሰባሰብ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Create Spatial Indexes</source>
-        <translation type="obsolete">የቦታ መረጃ ጠቋሚዎች ፍጠር</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Direct SQL for GeoPackage</source>
-        <translation type="obsolete">ለGeoPackage ቀጥታ SQL</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable Auto-Centroid for Remote Layers</source>
-        <translation type="obsolete">ለርቀት ንብርብሮች አውቶማቲክ ማዕከል አንቃ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable Auto-Optimization</source>
-        <translation type="obsolete">አውቶማቲክ ማመቻቸት አንቃ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable Direct SQL for GeoPackage</source>
-        <translation type="obsolete">ለGeoPackage ቀጥታ SQL አንቃ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Enable Materialized Views</source>
-        <translation type="obsolete">የተጨባጭ እይታዎች አንቃ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Estimated performance improvement</source>
-        <translation type="obsolete">የተገመተ የአፈጻጸም መሻሻል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>FilterMate - Backend Optimizations</source>
-        <translation type="obsolete">FilterMate - የኋላ ማመቻቸቶች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>GEOS-safe Geometry Handling</source>
-        <translation type="obsolete">GEOS-ደህንነቱ የተጠበቀ ጂኦሜትሪ አያያዝ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Global</source>
-        <translation type="obsolete">ዓለም አቀፍ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Initialization error: {}</source>
-        <translation type="obsolete">የማስጀመር ስህተት: {}</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Interruptible Queries</source>
-        <translation type="obsolete">ሊቋረጡ የሚችሉ ጥያቄዎች</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Lazy cursor threshold:</source>
-        <translation type="obsolete">ሰነፍ ጠቋሚ ገደብ:</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Max workers (0=auto):</source>
-        <translation type="obsolete">ከፍተኛ ሰራተኞች (0=አውቶማቲክ):</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No PostgreSQL connection available</source>
-        <translation type="obsolete">ምንም PostgreSQL ግንኙነት የለም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No alternative backends available for this layer</source>
-        <translation type="obsolete">ለዚህ ንብርብር ተለዋጭ backends የሉም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation type="obsolete">ምንም ንብርብር አልተመረጠም። እባክዎ መጀመሪያ ንብርብር ይምረጡ።</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No optimizations selected to apply.</source>
-        <translation type="obsolete">ለመተግበር ምንም ማመቻቸቶች አልተመረጡም።</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No temporary tables found</source>
-        <translation type="obsolete">ጊዜያዊ ሰንጠረዦች አልተገኙም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>No temporary tables found for current project</source>
-        <translation type="obsolete">ለአሁኑ ፕሮጀክት ጊዜያዊ ሰንጠረዦች አልተገኙም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Save Settings</source>
-        <translation type="obsolete">ቅንብሮችን አስቀምጥ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Show Optimization Hints</source>
-        <translation type="obsolete">የማመቻቸት ፍንጮችን አሳይ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Redo filter (Ctrl+Y)</source>
-        <translation type="obsolete">ማጣሪያ ድገም (Ctrl+Y)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Undo last filter (Ctrl+Z)</source>
-        <translation type="obsolete">የመጨረሻውን ማጣሪያ ቀልብስ (Ctrl+Z)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>disabled</source>
-        <translation type="obsolete">ተሰናክሏል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>enabled</source>
-        <translation type="obsolete">ነቅቷል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>★ No favorites saved</source>
-        <translation type="obsolete">★ ምንም ተወዳጆች አልተቀመጡም</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>★ {0} Favorites saved</source>
-        <translation type="obsolete">★ {0} ተወዳጆች ተቀምጠዋል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>⚙️ Manage favorites...</source>
-        <translation type="obsolete">⚙️ ተወዳጆችን ያስተዳድሩ...</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>⭐ Add Current Filter (no filter active)</source>
-        <translation type="obsolete">⭐ የአሁኑን ማጣሪያ አክል (ምንም ማጣሪያ ንቁ አይደለም)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>⭐ Add Current Filter to Favorites</source>
-        <translation type="obsolete">⭐ የአሁኑን ማጣሪያ ወደ ተወዳጆች አክል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>⭐ Add current filter to favorites</source>
-        <translation type="obsolete">⭐ የአሁኑን ማጣሪያ ወደ ተወዳጆች አክል</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>⭐ Add filter (no active filter)</source>
-        <translation type="obsolete">⭐ ማጣሪያ አክል (ንቁ ማጣሪያ የለም)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>🌐 All Projects (Global)</source>
-        <translation type="obsolete">🌐 ሁሉም ፕሮጀክቶች (ዓለም አቀፍ)</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>📁 Current Project</source>
-        <translation type="obsolete">📁 የአሁኑ ፕሮጀክት</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>📤 Export...</source>
-        <translation type="obsolete">📤 ላክ...</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>📥 Import...</source>
-        <translation type="obsolete">📥 አስመጣ...</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Restore Defaults</source>
-        <translation type="obsolete">ነባሪዎችን መልስ</translation>
-    </message>
-    <message>
-        <location filename="." line="4"/>
-        <source>Use Balanced Profile</source>
-        <translation type="obsolete">ሚዛናዊ መገለጫ ተጠቀም</translation>
-    </message>
-    <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="119"/>
         <source>&lt;b&gt;PostgreSQL is not available&lt;/b&gt;&lt;br&gt;&lt;br&gt;To use PostgreSQL features, install psycopg2:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;Then restart QGIS to apply changes.</source>
         <translation>&lt;b&gt;PostgreSQL አይገኝም&lt;/b&gt;&lt;br&gt;&lt;br&gt;PostgreSQL ባህሪያትን ለመጠቀም psycopg2 ይጫኑ:&lt;br&gt;&lt;br&gt;&lt;code&gt;pip install psycopg2-binary&lt;/code&gt;&lt;br&gt;&lt;br&gt;ከዚያ ለውጦችን ለመተግበር QGIS ን እንደገና ያስጀምሩ።</translation>
@@ -3629,39 +1879,402 @@ Continue?</source>
     </message>
 </context>
 <context>
+    <name>QFieldCloudExtension</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <source>QFieldCloud Settings...</source>
+        <translation>QFieldCloud Settings...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <source>Export filtered layers to QFieldCloud</source>
+        <translation>Export filtered layers to QFieldCloud</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudPushDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <source>Export to QFieldCloud</source>
+        <translation>Export to QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <source>Active Filter</source>
+        <translation>Active Filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <source>No active filter</source>
+        <translation>No active filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <source>Filter:</source>
+        <translation>Filter:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <source>0 layers</source>
+        <translation>0 layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <source>Layers:</source>
+        <translation>Layers:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <source>QFieldCloud Project</source>
+        <translation>QFieldCloud Project</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <source>Project name:</source>
+        <translation>Project name:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <source>Description:</source>
+        <translation>ገለጻ:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <source>Create new</source>
+        <translation>Create new</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <source>Update existing:</source>
+        <translation>Update existing:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <source>Mode:</source>
+        <translation>Mode:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <source>Layer Modes</source>
+        <translation>Layer Modes</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Layer</source>
+        <translation>ንብርብር</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Mode</source>
+        <translation>Mode</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <source>Export</source>
+        <translation>ላክ</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <source>{0} layers ({1} features)</source>
+        <translation>{0} layers ({1} features)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <source>{0} layers (no filter active)</source>
+        <translation>{0} layers (no filter active)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Missing Name</source>
+        <translation>Missing Name</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Please enter a project name.</source>
+        <translation>Please enter a project name.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>Not Connected</source>
+        <translation>Not Connected</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>QFieldCloud is not connected. Please configure credentials first.</source>
+        <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No Layers</source>
+        <translation>No Layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No valid layers to export.</source>
+        <translation>No valid layers to export.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>Export Error</source>
+        <translation>Export Error</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <source>Failed to export layer &apos;{0}&apos;: {1}</source>
+        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>GPKG export failed: {0}</source>
+        <translation>GPKG export failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <source>Push complete!</source>
+        <translation>Push complete!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project successfully pushed to QFieldCloud!</source>
+        <translation>Project successfully pushed to QFieldCloud!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project: {0}</source>
+        <translation>Project: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Files: {0}</source>
+        <translation>Files: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Duration: {0:.1f}s</source>
+        <translation>Duration: {0:.1f}s</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>URL: {0}</source>
+        <translation>URL: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <source>Warnings:</source>
+        <translation>Warnings:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <source>Push Complete</source>
+        <translation>Push Complete</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <source>Error: {0}</source>
+        <translation>ስህተት: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push Failed</source>
+        <translation>Push Failed</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push failed:
+
+{0}</source>
+        <translation>Push failed:
+
+{0}</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudSettingsDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="53"/>
+        <source>QFieldCloud Configuration</source>
+        <translation>QFieldCloud Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="66"/>
+        <source>Server</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="71"/>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="77"/>
+        <source>Credentials</source>
+        <translation>Credentials</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="81"/>
+        <source>username</source>
+        <translation>username</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="82"/>
+        <source>Username:</source>
+        <translation>Username:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="86"/>
+        <source>password (for initial login)</source>
+        <translation>password (for initial login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="87"/>
+        <source>Password:</source>
+        <translation>Password:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="90"/>
+        <source>JWT token (auto-filled after login)</source>
+        <translation>JWT token (auto-filled after login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="95"/>
+        <source>Login</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="96"/>
+        <source>Login with username/password to get a token</source>
+        <translation>Login with username/password to get a token</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="98"/>
+        <source>Token:</source>
+        <translation>Token:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="102"/>
+        <source>Status:</source>
+        <translation>ሁኔታ:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="105"/>
+        <source>Test Connection</source>
+        <translation>Test Connection</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="112"/>
+        <source>Preferences</source>
+        <translation>Preferences</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="117"/>
+        <source>Default project:</source>
+        <translation>Default project:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="119"/>
+        <source>Trigger packaging after upload</source>
+        <translation>Trigger packaging after upload</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="144"/>
+        <source>Token stored</source>
+        <translation>Token stored</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Missing Fields</source>
+        <translation>Missing Fields</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Please fill in URL, username, and password.</source>
+        <translation>Please fill in URL, username, and password.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="174"/>
+        <source>Logging in...</source>
+        <translation>Logging in...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="191"/>
+        <source>Logged in as {0}</source>
+        <translation>Logged in as {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="198"/>
+        <source>Login failed: {0}</source>
+        <translation>Login failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Missing Configuration</source>
+        <translation>Missing Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Please configure URL and login first.</source>
+        <translation>Please configure URL and login first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="219"/>
+        <source>Testing connection...</source>
+        <translation>Testing connection...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="229"/>
+        <source>Connected! ({0} projects accessible)</source>
+        <translation>Connected! ({0} projects accessible)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="235"/>
+        <source>Connection failed: {0}</source>
+        <translation>Connection failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Missing URL</source>
+        <translation>Missing URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Server URL is required.</source>
+        <translation>Server URL is required.</translation>
+    </message>
+</context>
+<context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="640"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
         <source>Type to filter...</source>
         <translation>ለማጣራት ይፃፉ...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="649"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
         <source>Select All</source>
         <translation>ሁሉንም ምረጥ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="651"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
         <source>Select All (non subset)</source>
         <translation>ሁሉንም ምረጥ (ንዑስ ስብስብ ያልሆነ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="653"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
         <source>Select All (subset)</source>
         <translation>ሁሉንም ምረጥ (ንዑስ ስብስብ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>De-select All</source>
         <translation>ሁሉንም ሰርዝ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>De-select All (non subset)</source>
         <translation>ሁሉንም ሰርዝ (ንዑስ ስብስብ ያልሆነ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>De-select All (subset)</source>
         <translation>ሁሉንም ሰርዝ (ንዑስ ስብስብ)</translation>
     </message>
@@ -3881,196 +2494,11 @@ Continue?</source>
     </message>
 </context>
 <context>
-    <name>d</name>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="870"/>
-        <source>Use centroids instead of full geometries for distant layers</source>
-        <translation>ለርቀት ንብርብሮች ከሙሉ ጂኦሜትሪዎች ይልቅ ማዕከሎችን ይጠቀሙ</translation>
-    </message>
-</context>
-<context>
-    <name>dw</name>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="737"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation>አሉታዊ ቋት (መሸርሸር): ብዙ-ጎኖችን ወደ ውስጥ ያሳንሳል</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="744"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>በሜትር የቋት ዋጋ (አዎንታዊ=ማስፋት፣ አሉታዊ=ብዙ-ጎኖችን ማሳነስ)</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="120"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation>ለውጦችን ለመሰረዝ ስህተት: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Reload Plugin</source>
-        <translation>ፕለጊን እንደገና ጫን</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation>ሁሉንም የውቅር ለውጦች ለመተግበር FilterMateን እንደገና መጫን ይፈልጋሉ?</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="56"/>
-        <source>Auto-optimization {0}</source>
-        <translation>ራስ-ሰር ማመቻቸት {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>enabled</source>
-        <translation>ነቅቷል</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>disabled</source>
-        <translation>ተዘግቷል</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="69"/>
-        <source>Auto-centroid {0}</source>
-        <translation>ራስ-ሰር ማዕከል {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>Confirmation {0}</source>
-        <translation>ማረጋገጫ {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="97"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation>ንብርብር አልተመረጠም። እባክዎ መጀመሪያ ንብርብር ይምረጡ።</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="104"/>
-        <source>Auto-optimizer module not available</source>
-        <translation>ራስ-ሰር ማመቻቸት ሞዱል አይገኝም</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="108"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation>ንብርብር &apos;{0}&apos;ን መተንተን አልተቻለም</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="129"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation>ንብርብር &apos;{0}&apos; ቀድሞ በተሻለ ሁኔታ ተዋቅሯል።
-ዓይነት: {1}
-ባህሪያት: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="156"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation>ራስ-ሰር ማመቻቸት አይገኝም: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="161"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation>ንብርብር መተንተን ስህተት: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="189"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation>ወደ &apos;{0}&apos; ተተግብሯል:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="196"/>
-        <source>No optimizations selected to apply.</source>
-        <translation>ለመተግበር ምንም ማመቻቸት አልተመረጠም።</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="231"/>
-        <source>Optimization settings saved</source>
-        <translation>ማመቻቸት ቅንብሮች ተቀምጠዋል</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="288"/>
-        <source>Dialog not available: {0}</source>
-        <translation>ውይይት አይገኝም: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="293"/>
-        <source>Error: {0}</source>
-        <translation>ስህተት: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="257"/>
-        <source>Backend optimization settings saved</source>
-        <translation>ዳራ ማመቻቸት ቅንብሮች ተቀምጠዋል</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="286"/>
-        <source>Backend optimizations configured</source>
-        <translation>ዳራ ማመቻቸቶች ተዋቅረዋል</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="406"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation>{0} ንብርብር(ዎች) ተመቻችተዋል</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="411"/>
-        <source>All layers using auto-selection</source>
-        <translation>ሁሉም ንብርብሮች ራስ-ሰር ምርጫ ይጠቀማሉ</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="420"/>
-        <source>Backend optimization unavailable</source>
-        <translation>ዳራ ማመቻቸት አይገኝም</translation>
-    </message>
-</context>
-<context>
-    <name>self._dockwidget</name>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Expression Evaluation</source>
-        <translation>አገላለጽ ግምገማ</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Error evaluating expression: {error_msg}</source>
-        <translation>አገላለጽ መገምገም ስህተት: {error_msg}</translation>
-    </message>
-</context>
-<context>
     <name>self.dockwidget</name>
     <message>
-        <location filename="../ui/managers/configuration_manager.py" line="685"/>
-        <source>Identify selected feature</source>
-        <translation>የተመረጠውን ባህሪ ለይ</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="686"/>
-        <source>Zoom to selected feature</source>
-        <translation>ወደ ተመረጠው ባህሪ አቅርብ</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="687"/>
-        <source>Toggle feature selection on map</source>
-        <translation>በካርታ ላይ ባህሪ ምርጫ ቀያይር</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="688"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation>ባህሪ ሲቀየር ራስ-ሰር አቅርብ</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="689"/>
-        <source>Link exploring widgets together</source>
-        <translation>ማሰሻ ዊጀቶችን አንድ ላይ አገናኝ</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="690"/>
-        <source>Reset all layer exploring properties</source>
-        <translation>ሁሉንም የንብርብር ማሰሻ ባህሪያት ዳግም አስጀምር</translation>
+        <location filename="../ui/controllers/config_controller.py" line="664"/>
+        <source>Language changed to &apos;{0}&apos;.</source>
+        <translation>Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

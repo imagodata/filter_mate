@@ -176,12 +176,34 @@ class ConfigController(BaseController):
                 f"Configuration change pending: {' → '.join(items_keys_values_path)}"
             )
 
+            # Apply certain changes immediately for live preview
+            self._apply_immediate_changes(change)
+
             # Emit signal
             key = items_keys_values_path[-1] if items_keys_values_path else ''
             self.config_changed.emit(key, None)
 
         except Exception as e:
             logger.error(f"Error tracking configuration change: {e}")
+
+    # === Immediate (Live Preview) Changes ===
+
+    def _apply_immediate_changes(self, change: Dict[str, Any]) -> None:
+        """Apply changes that should take effect immediately (live preview).
+
+        Language and theme changes are applied as soon as the user selects
+        a new value, without waiting for OK. This gives instant feedback.
+        OK persists the change to disk; Cancel reverts it.
+        """
+        path = change['path']
+        changes_summary: List[str] = []
+        try:
+            if 'LANGUAGE' in path:
+                self._apply_language_change(change, changes_summary)
+            elif 'ACTIVE_THEME' in path:
+                self._apply_theme_change(change, changes_summary)
+        except Exception as e:
+            logger.warning(f"_apply_immediate_changes failed: {e}")
 
     # === Apply Configuration Changes ===
 
@@ -253,6 +275,7 @@ class ConfigController(BaseController):
         Cancel pending configuration changes when Cancel button is clicked.
 
         Reloads configuration from file to revert changes in tree view.
+        Properly disconnects/reconnects the model signal to avoid stale refs.
         """
         if not self.has_pending_changes:
             logger.info("No pending configuration changes to cancel")
@@ -263,8 +286,16 @@ class ConfigController(BaseController):
         )
 
         try:
-            # Reload configuration from file
+            # Disconnect signal BEFORE replacing model to avoid stale references
+            if hasattr(self.dockwidget, '_config_model_manager'):
+                self.dockwidget._config_model_manager.disconnect_config_model_signal()
+
+            # Reload configuration from file (replaces model)
             self._reload_configuration()
+
+            # Reconnect signal to the NEW model
+            if hasattr(self.dockwidget, '_config_model_manager'):
+                self.dockwidget._config_model_manager.connect_config_model_signal()
 
             # Clear pending changes
             self._pending_changes.clear()
@@ -576,57 +607,66 @@ class ConfigController(BaseController):
 
         Reloads the Qt translator with the new locale so that all tr() calls
         return text in the selected language without restarting QGIS.
-
-        Args:
-            change: Change dictionary with 'path', 'index', 'item'
-            changes_summary: List to append change description to
+        Reads the value directly from the changed item (robust, no index navigation).
         """
-        items_keys_values_path = change['path']
-        index = change['index']
-
-        if 'LANGUAGE' not in items_keys_values_path:
+        if 'LANGUAGE' not in change['path']:
             return
 
-        try:
-            value_item = self.dockwidget.config_view.model.itemFromIndex(
-                index.siblingAtColumn(1)
-            )
-            value_data = value_item.data(Qt.ItemDataRole.UserRole)
+        logger.info(f"_apply_language_change: path={change['path']}")
 
-            # Handle ChoicesType format
+        try:
+            # Read value directly from the changed item (most robust approach)
+            item = change['item']
+            new_locale = None
+
+            # Try UserRole first (ChoicesType stores dict with 'value' key)
+            value_data = item.data(Qt.ItemDataRole.UserRole)
             if isinstance(value_data, dict) and 'value' in value_data:
                 new_locale = value_data['value']
-            else:
-                new_locale = value_item.data(Qt.ItemDataRole.DisplayRole) if value_item else None
+            elif isinstance(value_data, str):
+                new_locale = value_data
 
-            if new_locale:
-                logger.info(f"LANGUAGE changed to: {new_locale}")
+            # Fallback: try reading from sibling column via index
+            if not new_locale:
+                index = change.get('index')
+                if index and index.isValid():
+                    sibling = index.siblingAtColumn(1)
+                    if sibling.isValid():
+                        model = self.dockwidget.config_view.model
+                        sibling_item = model.itemFromIndex(sibling)
+                        if sibling_item:
+                            sib_data = sibling_item.data(Qt.ItemDataRole.UserRole)
+                            if isinstance(sib_data, dict) and 'value' in sib_data:
+                                new_locale = sib_data['value']
 
-                # Access the FilterMate plugin instance to reload the translator
-                try:
-                    from qgis.utils import plugins
-                    plugin = plugins.get('filter_mate')
-                    if plugin and hasattr(plugin, 'reload_translator'):
-                        plugin.reload_translator(new_locale)
+            if not new_locale:
+                logger.warning(f"_apply_language_change: could not extract locale from item")
+                return
 
-                        # Retranslate all existing UI with the new translator
-                        if hasattr(plugin, 'retranslate_actions'):
-                            plugin.retranslate_actions()
-                        if self.dockwidget and hasattr(self.dockwidget, 'retranslate_all_ui'):
-                            self.dockwidget.retranslate_all_ui()
+            logger.info(f"LANGUAGE changed to: {new_locale}")
 
-                        changes_summary.append(f"Language: {new_locale}")
-                        from ...infrastructure.feedback import show_info
-                        show_info(
-                            "FilterMate",
-                            self.dockwidget.tr(
-                                "Language changed to '{0}'."
-                            ).format(new_locale)
-                        )
-                    else:
-                        logger.warning("FilterMate plugin instance not found for language reload")
-                except Exception as e:
-                    logger.warning(f"Could not reload translator: {e}")
+            from qgis.utils import plugins
+            plugin = plugins.get('filter_mate')
+            if not plugin or not hasattr(plugin, 'reload_translator'):
+                logger.error("_apply_language_change: plugin not found or missing reload_translator")
+                return
+
+            plugin.reload_translator(new_locale)
+
+            if hasattr(plugin, 'retranslate_actions'):
+                plugin.retranslate_actions()
+            if self.dockwidget and hasattr(self.dockwidget, 'retranslate_all_ui'):
+                self.dockwidget.retranslate_all_ui()
+
+            changes_summary.append(f"Language: {new_locale}")
+            logger.info(f"_apply_language_change: complete ({new_locale})")
+            from ...infrastructure.feedback import show_info
+            show_info(
+                "FilterMate",
+                self.dockwidget.tr(
+                    "Language changed to '{0}'."
+                ).format(new_locale)
+            )
 
         except Exception as e:
             logger.error(f"Error applying LANGUAGE change: {e}")
@@ -757,8 +797,7 @@ class ConfigController(BaseController):
         """
         if hasattr(self.dockwidget, 'buttonBox'):
             self.dockwidget.buttonBox.setEnabled(enabled)
-            state = "enabled" if enabled else "disabled"
-            logger.debug(f"Configuration buttons {state}")
+            logger.debug(f"Configuration buttons {'enabled' if enabled else 'disabled'}")
 
     def _show_error(self, message: str) -> None:
         """

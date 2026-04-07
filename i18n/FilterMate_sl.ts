@@ -2,50 +2,29 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="sl_SI" sourcelanguage="sl_SI">
 <context>
-    <name>@default</name>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="173"/>
-        <source>OptimizationManager</source>
-        <comment>Use Centroids</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="175"/>
-        <source>OptimizationManager</source>
-        <comment>Simplify before buffer</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="177"/>
-        <source>OptimizationManager</source>
-        <comment>Reduce buffer segments (3)</comment>
-        <translation>OptimizationManager</translation>
-    </message>
-</context>
-<context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="168"/>
+        <location filename="../core/services/app_initializer.py" line="171"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Odstranjeni poškodovani filtri iz {0} plasti. Prosimo, ponovno uporabite filtre.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="237"/>
+        <location filename="../core/services/app_initializer.py" line="240"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Zaznan prazen projekt. Dodajte vektorske plasti za aktivacijo vtičnika.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="304"/>
+        <location filename="../core/services/app_initializer.py" line="307"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>Ni mogoče dostopati do baze podatkov FilterMate. Preverite dovoljenja mape projekta.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="318"/>
+        <location filename="../core/services/app_initializer.py" line="321"/>
         <source>Error during database verification: {0}</source>
         <translation>Napaka pri preverjanju baze podatkov: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="594"/>
+        <location filename="../core/services/app_initializer.py" line="599"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Nalaganje plasti ni uspelo. Uporabite F5 za prisilno ponovno nalaganje.</translation>
     </message>
@@ -84,454 +63,9 @@
     </message>
 </context>
 <context>
-    <name>BackendOptimizationWidget</name>
-    <message>
-        <source>Quick Setup</source>
-        <translation type="obsolete">Hitra nastavitev</translation>
-    </message>
-    <message>
-        <source>Choose a profile or customize settings below</source>
-        <translation type="obsolete">Izberite profil ali prilagodite nastavitve spodaj</translation>
-    </message>
-    <message>
-        <source>Smart Recommendations</source>
-        <translation type="obsolete">Pametna priporočila</translation>
-    </message>
-    <message>
-        <source>Balanced Profile</source>
-        <translation type="obsolete">Uravnotežen profil</translation>
-    </message>
-    <message>
-        <source>Maximum Performance</source>
-        <translation type="obsolete">Maksimalna zmogljivost</translation>
-    </message>
-    <message>
-        <source>Minimal Resources</source>
-        <translation type="obsolete">Minimalni viri</translation>
-    </message>
-    <message>
-        <source>PostgreSQL/PostGIS Optimizations</source>
-        <translation type="obsolete">Optimizacije PostgreSQL/PostGIS</translation>
-    </message>
-    <message>
-        <source>Materialized Views</source>
-        <translation type="obsolete">Materializirani pogledi</translation>
-    </message>
-    <message>
-        <source>Create temporary materialized views for complex filters</source>
-        <translation type="obsolete">Ustvari začasne materializirane poglede za kompleksne filtre</translation>
-    </message>
-    <message>
-        <source>Two-Phase Filtering</source>
-        <translation type="obsolete">Dvofazno filtriranje</translation>
-    </message>
-    <message>
-        <source>Use bounding box pre-filtering before precise geometry tests</source>
-        <translation type="obsolete">Uporabi predfiltriranje z omejitvenim okvirjem pred natančnimi geometrijskimi testi</translation>
-    </message>
-    <message>
-        <source>Progressive Loading</source>
-        <translation type="obsolete">Progresivno nalaganje</translation>
-    </message>
-    <message>
-        <source>Load data in chunks for very large datasets</source>
-        <translation type="obsolete">Naloži podatke v kosih za zelo velike nabore podatkov</translation>
-    </message>
-    <message>
-        <source>Chunk Size</source>
-        <translation type="obsolete">Velikost kosa</translation>
-    </message>
-    <message>
-        <source>Server-Side Simplification</source>
-        <translation type="obsolete">Poenostavitev na strežniku</translation>
-    </message>
-    <message>
-        <source>Simplify geometries on server for display purposes</source>
-        <translation type="obsolete">Poenostavi geometrije na strežniku za namene prikaza</translation>
-    </message>
-    <message>
-        <source>Simplification Tolerance</source>
-        <translation type="obsolete">Toleranca poenostavitve</translation>
-    </message>
-    <message>
-        <source>Parallel Query Execution</source>
-        <translation type="obsolete">Vzporedno izvajanje poizvedb</translation>
-    </message>
-    <message>
-        <source>Execute independent queries in parallel</source>
-        <translation type="obsolete">Izvedi neodvisne poizvedbe vzporedno</translation>
-    </message>
-    <message>
-        <source>Expression Caching</source>
-        <translation type="obsolete">Predpomnjenje izrazov</translation>
-    </message>
-    <message>
-        <source>Cache compiled expressions for reuse</source>
-        <translation type="obsolete">Predpomni prevedene izraze za ponovno uporabo</translation>
-    </message>
-    <message>
-        <source>Spatialite/GeoPackage Optimizations</source>
-        <translation type="obsolete">Optimizacije Spatialite/GeoPackage</translation>
-    </message>
-    <message>
-        <source>R-tree Temp Tables</source>
-        <translation type="obsolete">Začasne tabele R-tree</translation>
-    </message>
-    <message>
-        <source>Create temporary tables with R-tree indexes</source>
-        <translation type="obsolete">Ustvari začasne tabele z indeksi R-tree</translation>
-    </message>
-    <message>
-        <source>BBox Pre-filtering</source>
-        <translation type="obsolete">Predfiltriranje BBox</translation>
-    </message>
-    <message>
-        <source>Use bounding box filtering before precise tests</source>
-        <translation type="obsolete">Uporabi filtriranje z omejitvenim okvirjem pred natančnimi testi</translation>
-    </message>
-    <message>
-        <source>Memory-Mapped I/O</source>
-        <translation type="obsolete">Pomnilniško preslikani V/I</translation>
-    </message>
-    <message>
-        <source>Use memory-mapped I/O for file access</source>
-        <translation type="obsolete">Uporabi pomnilniško preslikan V/I za dostop do datotek</translation>
-    </message>
-    <message>
-        <source>Batch Processing</source>
-        <translation type="obsolete">Serijska obdelava</translation>
-    </message>
-    <message>
-        <source>Process multiple operations in batches</source>
-        <translation type="obsolete">Obdelaj več operacij v serijah</translation>
-    </message>
-    <message>
-        <source>Batch Size</source>
-        <translation type="obsolete">Velikost serije</translation>
-    </message>
-    <message>
-        <source>OGR/Memory Optimizations</source>
-        <translation type="obsolete">Optimizacije OGR/Pomnilnik</translation>
-    </message>
-    <message>
-        <source>Automatic Spatial Index</source>
-        <translation type="obsolete">Samodejni prostorski indeks</translation>
-    </message>
-    <message>
-        <source>Create temporary spatial indexes automatically</source>
-        <translation type="obsolete">Samodejno ustvari začasne prostorske indekse</translation>
-    </message>
-    <message>
-        <source>Progressive Chunking</source>
-        <translation type="obsolete">Progresivno razdeljevanje</translation>
-    </message>
-    <message>
-        <source>Process large files in progressive chunks</source>
-        <translation type="obsolete">Obdelaj velike datoteke v progresivnih kosih</translation>
-    </message>
-    <message>
-        <source>Memory Feature Caching</source>
-        <translation type="obsolete">Predpomnjenje značilnosti v pomnilniku</translation>
-    </message>
-    <message>
-        <source>Cache features in memory for faster access</source>
-        <translation type="obsolete">Predpomni značilnosti v pomnilniku za hitrejši dostop</translation>
-    </message>
-    <message>
-        <source>Cache Size (features)</source>
-        <translation type="obsolete">Velikost predpomnilnika (značilnosti)</translation>
-    </message>
-    <message>
-        <source>Geometry Simplification</source>
-        <translation type="obsolete">Poenostavitev geometrije</translation>
-    </message>
-    <message>
-        <source>Simplify complex geometries during processing</source>
-        <translation type="obsolete">Poenostavi kompleksne geometrije med obdelavo</translation>
-    </message>
-    <message>
-        <source>Global Optimizations</source>
-        <translation type="obsolete">Globalne optimizacije</translation>
-    </message>
-    <message>
-        <source>Auto-Optimization</source>
-        <translation type="obsolete">Samodejna optimizacija</translation>
-    </message>
-    <message>
-        <source>Automatically optimize based on data analysis</source>
-        <translation type="obsolete">Samodejno optimiziraj na podlagi analize podatkov</translation>
-    </message>
-    <message>
-        <source>Auto-Centroid</source>
-        <translation type="obsolete">Samodejni centroid</translation>
-    </message>
-    <message>
-        <source>Automatically center view on filter results</source>
-        <translation type="obsolete">Samodejno centriraj pogled na rezultate filtra</translation>
-    </message>
-    <message>
-        <source>Parallel Layer Filtering</source>
-        <translation type="obsolete">Vzporedno filtriranje slojev</translation>
-    </message>
-    <message>
-        <source>Filter multiple layers simultaneously</source>
-        <translation type="obsolete">Filtriraj več slojev hkrati</translation>
-    </message>
-    <message>
-        <source>Smart Expression Parsing</source>
-        <translation type="obsolete">Pametno razčlenjevanje izrazov</translation>
-    </message>
-    <message>
-        <source>Optimize expression parsing for complex queries</source>
-        <translation type="obsolete">Optimiziraj razčlenjevanje izrazov za kompleksne poizvedbe</translation>
-    </message>
-    <message>
-        <source>Deferred Refresh</source>
-        <translation type="obsolete">Odložena osvežitev</translation>
-    </message>
-    <message>
-        <source>Delay map refresh until all filters are applied</source>
-        <translation type="obsolete">Odloži osvežitev zemljevida, dokler niso uporabljeni vsi filtri</translation>
-    </message>
-    <message>
-        <source>Verbose Logging</source>
-        <translation type="obsolete">Podrobno beleženje</translation>
-    </message>
-    <message>
-        <source>Enable detailed logging for debugging</source>
-        <translation type="obsolete">Omogoči podrobno beleženje za odpravljanje napak</translation>
-    </message>
-    <message>
-        <source>Apply</source>
-        <translation type="obsolete">Uporabi</translation>
-    </message>
-    <message>
-        <source>Reset to Defaults</source>
-        <translation type="obsolete">Ponastavi na privzeto</translation>
-    </message>
-    <message>
-        <source>Settings applied successfully</source>
-        <translation type="obsolete">Nastavitve uspešno uporabljene</translation>
-    </message>
-    <message>
-        <source>Settings reset to defaults</source>
-        <translation type="obsolete">Nastavitve ponastavljene na privzeto</translation>
-    </message>
-    <message>
-        <source>Profile applied: {}</source>
-        <translation type="obsolete">Profil uporabljen: {}</translation>
-    </message>
-    <message>
-        <source>Error applying settings</source>
-        <translation type="obsolete">Napaka pri uporabi nastavitev</translation>
-    </message>
-    <message>
-        <source>MV Status: Checking...</source>
-        <translation type="obsolete">Stanje MV: Preverjanje...</translation>
-    </message>
-    <message>
-        <source>MV Status: Error</source>
-        <translation type="obsolete">Stanje MV: Napaka</translation>
-    </message>
-    <message>
-        <source>MV Status: Clean</source>
-        <translation type="obsolete">Stanje MV: Čisto</translation>
-    </message>
-    <message>
-        <source>MV Status:</source>
-        <translation type="obsolete">Stanje MV:</translation>
-    </message>
-    <message>
-        <source>active</source>
-        <translation type="obsolete">aktivno</translation>
-    </message>
-    <message>
-        <source>No active materialized views</source>
-        <translation type="obsolete">Ni aktivnih materializiranih pogledov</translation>
-    </message>
-    <message>
-        <source>Session:</source>
-        <translation type="obsolete">Seja:</translation>
-    </message>
-    <message>
-        <source>Other sessions:</source>
-        <translation type="obsolete">Druge seje:</translation>
-    </message>
-    <message>
-        <source>🧹 Session</source>
-        <translation type="obsolete">🧹 Seja</translation>
-    </message>
-    <message>
-        <source>Cleanup MVs from this session</source>
-        <translation type="obsolete">Počisti MV-je te seje</translation>
-    </message>
-    <message>
-        <source>🗑️ Orphaned</source>
-        <translation type="obsolete">🗑️ Osirotelih</translation>
-    </message>
-    <message>
-        <source>Cleanup orphaned MVs (&gt;24h old)</source>
-        <translation type="obsolete">Počisti osirotelih MV-jev (&gt;24h starih)</translation>
-    </message>
-    <message>
-        <source>⚠️ All</source>
-        <translation type="obsolete">⚠️ Vse</translation>
-    </message>
-    <message>
-        <source>Cleanup ALL MVs (affects other sessions)</source>
-        <translation type="obsolete">Počisti VSE MV-je (vpliva na druge seje)</translation>
-    </message>
-    <message>
-        <source>Confirm Cleanup</source>
-        <translation type="obsolete">Potrdi čiščenje</translation>
-    </message>
-    <message>
-        <source>Drop ALL materialized views?
-This affects other FilterMate sessions!</source>
-        <translation type="obsolete">Izbriši VSE materializirane poglede?
-To vpliva na druge FilterMate seje!</translation>
-    </message>
-    <message>
-        <source>Refresh MV status</source>
-        <translation type="obsolete">Osveži stanje MV</translation>
-    </message>
-    <message>
-        <source>Threshold:</source>
-        <translation type="obsolete">Prag:</translation>
-    </message>
-    <message>
-        <source>features</source>
-        <translation type="obsolete">funkcije</translation>
-    </message>
-    <message>
-        <source>Auto-cleanup on exit</source>
-        <translation type="obsolete">Samodejno čiščenje ob izhodu</translation>
-    </message>
-    <message>
-        <source>Automatically drop session MVs when plugin unloads</source>
-        <translation type="obsolete">Samodejno odstrani MV-je seje ko se vtičnik odstrani</translation>
-    </message>
-    <message>
-        <source>Create MVs for datasets larger than this</source>
-        <translation type="obsolete">Ustvari MV-je za nabore podatkov večje od tega</translation>
-    </message>
-    <message>
-        <source>faster possible</source>
-        <translation type="obsolete">hitrejše mogoče</translation>
-    </message>
-    <message>
-        <source>Optimizations available</source>
-        <translation type="obsolete">Optimizacije na voljo</translation>
-    </message>
-    <message>
-        <source>FilterMate - Apply Optimizations?</source>
-        <translation type="obsolete">FilterMate - Uporabi optimizacije?</translation>
-    </message>
-    <message>
-        <source>Skip</source>
-        <translation type="obsolete">Preskoči</translation>
-    </message>
-    <message>
-        <source>✓ Apply</source>
-        <translation type="obsolete">✓ Uporabi</translation>
-    </message>
-    <message>
-        <source>Don&apos;t ask for this session</source>
-        <translation type="obsolete">Ne sprašuj za to sejo</translation>
-    </message>
-    <message>
-        <source>Centroids</source>
-        <translation type="obsolete">Centroidi</translation>
-    </message>
-    <message>
-        <source>Simplify</source>
-        <translation type="obsolete">Poenostavi</translation>
-    </message>
-    <message>
-        <source>Pre-simplify</source>
-        <translation type="obsolete">Pred-poenostavi</translation>
-    </message>
-    <message>
-        <source>Fewer segments</source>
-        <translation type="obsolete">Manj segmentov</translation>
-    </message>
-    <message>
-        <source>Flat buffer</source>
-        <translation type="obsolete">Ploščat medpomnilnik</translation>
-    </message>
-    <message>
-        <source>BBox filter</source>
-        <translation type="obsolete">BBox filter</translation>
-    </message>
-    <message>
-        <source>Attr-first</source>
-        <translation type="obsolete">Attr-najprej</translation>
-    </message>
-    <message>
-        <source>PostgreSQL not available</source>
-        <translation type="obsolete">PostgreSQL ni na voljo</translation>
-    </message>
-    <message>
-        <source>No connection</source>
-        <translation type="obsolete">Ni povezave</translation>
-    </message>
-    <message>
-        <source>Auto-zoom when feature changes</source>
-        <translation type="obsolete">Samodejno povečavo ob spremembi funkcije</translation>
-    </message>
-    <message>
-        <source>Backend optimization settings saved</source>
-        <translation type="obsolete">Nastavitve optimizacije backend shranjene</translation>
-    </message>
-    <message>
-        <source>Backend optimizations configured</source>
-        <translation type="obsolete">Optimizacije backend konfigurirane</translation>
-    </message>
-    <message>
-        <source>Expression Evaluation</source>
-        <translation type="obsolete">Ovrednotenje izraza</translation>
-    </message>
-    <message>
-        <source>Identify selected feature</source>
-        <translation type="obsolete">Identificiraj izbrano funkcijo</translation>
-    </message>
-    <message>
-        <source>Layer properties reset to defaults</source>
-        <translation type="obsolete">Lastnosti sloja ponastavljene na privzete</translation>
-    </message>
-    <message>
-        <source>Link exploring widgets together</source>
-        <translation type="obsolete">Poveži raziskovalne pripomočke skupaj</translation>
-    </message>
-    <message>
-        <source>Optimization settings saved</source>
-        <translation type="obsolete">Nastavitve optimizacije shranjene</translation>
-    </message>
-    <message>
-        <source>Reset all layer exploring properties</source>
-        <translation type="obsolete">Ponastavi vse lastnosti raziskovanja sloja</translation>
-    </message>
-    <message>
-        <source>Toggle feature selection on map</source>
-        <translation type="obsolete">Preklopi izbiro funkcije na zemljevidu</translation>
-    </message>
-    <message>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons)</source>
-        <translation type="obsolete">Uporabi centroide namesto polnih geometrij za oddaljene sloje (hitreje za kompleksne poligone)</translation>
-    </message>
-    <message>
-        <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">Uporabi centroide namesto polnih geometrij za izvorni sloj (hitreje za kompleksne poligone)</translation>
-    </message>
-    <message>
-        <source>Zoom to selected feature</source>
-        <translation type="obsolete">Povečaj na izbrano funkcijo</translation>
-    </message>
-</context>
-<context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="275"/>
+        <location filename="../ui/controllers/config_controller.py" line="311"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Napaka pri preklicu sprememb: {0}</translation>
     </message>
@@ -580,34 +114,6 @@ To vpliva na druge FilterMate seje!</translation>
         <location filename="../adapters/database_manager.py" line="527"/>
         <source>Error during database initialization: {0}</source>
         <translation>Napaka pri inicializaciji baze podatkov: {0}</translation>
-    </message>
-</context>
-<context>
-    <name>DatasourceManager</name>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
-        <source>Database file does not exist: {db_file_path}</source>
-        <translation>Datoteka baze podatkov ne obstaja: {db_file_path}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
-        <source>Failed to connect to database {db_file_path}: {error}</source>
-        <translation>Povezava z bazo podatkov {db_file_path} ni uspela: {error}</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
-        <source>QGIS processing module not available to create spatial index</source>
-        <translation>Modul za obdelavo QGIS ni na voljo za ustvarjanje prostorskega indeksa</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
-        <source>Cannot create spatial index: layer invalid or source not found.</source>
-        <translation>Ni mogoče ustvariti prostorskega indeksa: plast je neveljavna ali vir ni najden.</translation>
-    </message>
-    <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
-        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
-        <translation>Zaznane so plasti PostgreSQL, vendar psycopg2 ni nameščen. Uporablja se lokalni zaledni sistem Spatialite. Za boljšo zmogljivost z velikimi nabori podatkov namestite psycopg2.</translation>
     </message>
 </context>
 <context>
@@ -1133,49 +639,6 @@ Kliknite kazalnik ★ in izberite &apos;Dodaj trenutni filter med priljubljene&a
     </message>
 </context>
 <context>
-    <name>FeedbackUtils</name>
-    <message>
-        <source>Starting filter on {count} layer(s)</source>
-        <translation type="obsolete">Starting filter on {count} layer(s)</translation>
-    </message>
-    <message>
-        <source>Removing filters from {count} layer(s)</source>
-        <translation type="obsolete">Removing filters from {count} layer(s)</translation>
-    </message>
-    <message>
-        <source>Resetting {count} layer(s)</source>
-        <translation type="obsolete">Resetting {count} layer(s)</translation>
-    </message>
-    <message>
-        <source>Exporting {count} layer(s)</source>
-        <translation type="obsolete">Exporting {count} layer(s)</translation>
-    </message>
-    <message>
-        <source>Successfully filtered {count} layer(s)</source>
-        <translation type="obsolete">Successfully filtered {count} layer(s)</translation>
-    </message>
-    <message>
-        <source>Successfully removed filters from {count} layer(s)</source>
-        <translation type="obsolete">Successfully removed filters from {count} layer(s)</translation>
-    </message>
-    <message>
-        <source>Successfully reset {count} layer(s)</source>
-        <translation type="obsolete">Successfully reset {count} layer(s)</translation>
-    </message>
-    <message>
-        <source>Successfully exported {count} layer(s)</source>
-        <translation type="obsolete">Successfully exported {count} layer(s)</translation>
-    </message>
-    <message>
-        <source>Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</source>
-        <translation type="obsolete">Large dataset ({count} features) without PostgreSQL. Performance may be reduced.</translation>
-    </message>
-    <message>
-        <source>PostgreSQL recommended for better performance.</source>
-        <translation type="obsolete">PostgreSQL priporočen za boljšo zmogljivost.</translation>
-    </message>
-</context>
-<context>
     <name>FilepathType</name>
     <message>
         <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
@@ -1232,95 +695,67 @@ Kliknite kazalnik ★ in izberite &apos;Dodaj trenutni filter med priljubljene&a
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="106"/>
+        <location filename="../filter_mate.py" line="188"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="266"/>
+        <location filename="../filter_mate.py" line="312"/>
         <source>Open FilterMate panel</source>
         <translation>Odpri ploščo FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset configuration and database</source>
         <translation>Ponastavi konfiguracijo in bazo podatkov</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="275"/>
+        <location filename="../filter_mate.py" line="321"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Ponastavi privzeto konfiguracijo in izbriši SQLite bazo podatkov</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Reset Configuration</source>
         <translation>Ponastavi konfiguracijo</translation>
     </message>
     <message>
-        <source>Are you sure you want to reset to the default configuration?
-
-This will:
-- Reset all FilterMate settings
-- Delete all filter history databases</source>
-        <translation type="obsolete">Ali ste prepričani, da želite ponastaviti privzeto konfiguracijo?
-
-To bo:
-- Ponastavilo vse nastavitve FilterMate
-- Izbrisalo vse baze podatkov zgodovine filtrov</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1192"/>
+        <location filename="../filter_mate.py" line="1355"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfiguracija uspešno ponastavljena.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1197"/>
+        <location filename="../filter_mate.py" line="1360"/>
         <source>Default configuration file not found.</source>
         <translation>Privzeta konfiguracijska datoteka ni bila najdena.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1218"/>
+        <location filename="../filter_mate.py" line="1381"/>
         <source>Database deleted: {filename}</source>
         <translation>Baza podatkov izbrisana: {filename}</translation>
     </message>
     <message>
-        <source>Unable to delete {filename}: {error}</source>
-        <translation type="obsolete">Ni mogoče izbrisati {filename}: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>Restart required</source>
         <translation>Potreben ponovni zagon</translation>
     </message>
     <message>
-        <source>The configuration has been reset.
-
-Please restart QGIS to apply all changes.</source>
-        <translation type="obsolete">Konfiguracija je bila ponastavljena.
-
-Prosimo, ponovno zaženite QGIS za uporabo vseh sprememb.</translation>
-    </message>
-    <message>
-        <source>Error during reset: {error}</source>
-        <translation type="obsolete">Napaka med ponastavitvijo: {error}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="350"/>
+        <location filename="../filter_mate.py" line="401"/>
         <source>Obsolete configuration detected</source>
         <translation>Zastarela konfiguracija zaznana</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="351"/>
+        <location filename="../filter_mate.py" line="402"/>
         <source>unknown version</source>
         <translation>neznana različica</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="352"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1335,12 +770,12 @@ Do you want to reset to default settings?
 • No: Keep current configuration (may cause issues)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="359"/>
+        <location filename="../filter_mate.py" line="410"/>
         <source>Corrupted configuration detected</source>
         <translation>Poškodovana konfiguracija zaznana</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="360"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1355,12 +790,12 @@ Do you want to reset to default settings?
 • No: Cancel (the plugin may not work correctly)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="367"/>
+        <location filename="../filter_mate.py" line="418"/>
         <source>Configuration reset</source>
         <translation>Ponastavitev konfiguracije</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="419"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1369,57 +804,57 @@ Do you want to continue?</source>
 Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="416"/>
+        <location filename="../filter_mate.py" line="467"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Konfiguracija ni bila ponastavljena. Nekatere funkcije morda ne bodo delovale pravilno.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="427"/>
+        <location filename="../filter_mate.py" line="478"/>
         <source>Configuration created with default values</source>
         <translation>Konfiguracija ustvarjena s privzetimi vrednostmi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Poškodovana konfiguracija ponastavljena. Privzete nastavitve so bile obnovljene.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="484"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Zastarela konfiguracija ponastavljena. Privzete nastavitve so bile obnovljene.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="505"/>
         <source>Configuration updated to latest version</source>
         <translation>Konfiguracija posodobljena na najnovejšo različico</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="451"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Konfiguracija posodobljena: nove nastavitve na voljo ({sections}). Dostop prek menija Možnosti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Geometry Simplification</source>
         <translation>Poenostavitev geometrije</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>Optimization Thresholds</source>
         <translation>Pragovi optimizacije</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="473"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error during configuration migration: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="591"/>
+        <location filename="../filter_mate.py" line="642"/>
         <source>Geometry validation setting</source>
         <translation>Nastavitev preverjanja geometrije</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="593"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -1446,17 +881,17 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="621"/>
+        <location filename="../filter_mate.py" line="672"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filtriranje neveljavnih geometrij je uspešno onemogočeno.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="628"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filtriranje neveljavnih geometrij ni bilo spremenjeno. Nekatere funkcije so lahko izključene iz izvoza.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1169"/>
+        <location filename="../filter_mate.py" line="1332"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1473,7 +908,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1232"/>
+        <location filename="../filter_mate.py" line="1395"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1482,461 +917,386 @@ Please restart QGIS to apply the changes.</source>
 Please restart QGIS to apply the changes.</translation>
     </message>
     <message>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">Vrednost medpomnilnika v metrih (pozitivno=razširi, negativno=skrči poligone)</translation>
-    </message>
-    <message>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation type="obsolete">Negativni medpomnilnik (erozija): skrči poligone navznoter</translation>
-    </message>
-    <message>
-        <source>point</source>
-        <translation type="obsolete">točka</translation>
-    </message>
-    <message>
-        <source>line</source>
-        <translation type="obsolete">črta</translation>
-    </message>
-    <message>
-        <source>non-polygon</source>
-        <translation type="obsolete">ne-poligon</translation>
-    </message>
-    <message>
-        <source>Buffer value in meters (positive only when centroids are enabled. Negative buffers cannot be applied to points)</source>
-        <translation type="obsolete">Vrednost medpomnilnika v metrih (samo pozitivna, ko so centroidi omogočeni. Negativnih medpomnilnikov ni mogoče uporabiti za točke)</translation>
-    </message>
-    <message>
-        <source>Mode batch</source>
-        <translation type="obsolete">Paketni način</translation>
-    </message>
-    <message>
-        <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">Število segmentov za natančnost medpomnilnika</translation>
-    </message>
-    <message>
-        <source>Centroids</source>
-        <translation type="obsolete">Centroidi</translation>
-    </message>
-    <message>
-        <source>Use centroids instead of full geometries for distant layers (faster for complex polygons like buildings)</source>
-        <translation type="obsolete">Uporabi centroide namesto polnih geometrij za oddaljene sloje (hitrejše za kompleksne poligone, kot so zgradbe)</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate.py" line="295"/>
+        <location filename="../filter_mate.py" line="346"/>
         <source>Initialization error: {0}</source>
         <translation>Napaka pri inicializaciji: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} referenčnih plasti ni naloženih ({layers_list}). Uporablja se nadomestni prikaz.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1223"/>
+        <location filename="../filter_mate.py" line="1386"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Ni mogoče izbrisati {filename}: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1240"/>
+        <location filename="../filter_mate.py" line="1403"/>
         <source>Error during reset: {str(e)}</source>
         <translation>Napaka pri ponastavitvi: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1273"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Hvala, da uporabljate &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Pridružite se naši skupnosti Discord za:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Pomoč in podporo&lt;/li&gt;&lt;li&gt;Prijavo napak in težav&lt;/li&gt;&lt;li&gt;Predlaganje novih funkcij&lt;/li&gt;&lt;li&gt;Deljenje nasvetov z drugimi uporabniki&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1289"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>  Join us on Discord</source>
         <translation>  Pridružite se nam na Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1309"/>
+        <location filename="../filter_mate.py" line="1472"/>
         <source>Don&apos;t show this again</source>
         <translation>Ne prikaži več</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1312"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Close</source>
         <translation>Zapri</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1541"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Napaka pri nalaganju vtičnika: {0}. Preverite konzolo Python QGIS za podrobnosti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6630"/>
+        <location filename="../filter_mate_dockwidget.py" line="6691"/>
         <source>Current layer: {0}</source>
         <translation>Trenutna plast: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6632"/>
+        <location filename="../filter_mate_dockwidget.py" line="6693"/>
         <source>No layer selected</source>
         <translation>Nobena plast ni izbrana</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>Selected layers:
 {0}</source>
         <translation>Izbrane plasti:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6642"/>
+        <location filename="../filter_mate_dockwidget.py" line="6703"/>
         <source>No layers selected</source>
         <translation>Nobena plast ni izbrana</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6662"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No expression defined</source>
         <translation>Izraz ni definiran</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6674"/>
+        <location filename="../filter_mate_dockwidget.py" line="6735"/>
         <source>Display expression: {0}</source>
         <translation>Prikazni izraz: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6750"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID objekta: {0}
 Prvi atribut: {1}</translation>
     </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="301"/>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation>Znova naložite vtičnik za uveljavitev sprememb postavitve (položaj akcijske vrstice)</translation>
-    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="271"/>
+        <location filename="../filter_mate_app.py" line="274"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Zaznane so plasti PostgreSQL ({0}), vendar psycopg2 ni nameščen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="358"/>
+        <location filename="../filter_mate_app.py" line="361"/>
         <source>Cleared {0} caches</source>
         <translation>Počiščenih {0} predpomnilnikov</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="769"/>
+        <location filename="../filter_mate_app.py" line="772"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Ustvarjanje sidrne plošče ni uspelo: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="779"/>
+        <location filename="../filter_mate_app.py" line="782"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Prikaz sidrne plošče ni uspel: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1229"/>
+        <location filename="../filter_mate_app.py" line="1232"/>
         <source>Error executing {0}: {1}</source>
         <translation>Napaka pri izvajanju {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1241"/>
+        <location filename="../filter_mate_app.py" line="1244"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Vtičnik deluje v omejenem načinu (heksagonalne storitve niso na voljo). Zmogljivost je lahko zmanjšana.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>FilterMate ERROR</source>
         <translation>Napaka FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1370"/>
+        <location filename="../filter_mate_app.py" line="1373"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Ni mogoče izvesti {0}: inicializacija gradnika ni uspela.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1994"/>
+        <location filename="../filter_mate_app.py" line="2144"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Ni mogoče {0}: plast je neveljavna ali vir ni najden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2131"/>
+        <location filename="../filter_mate_app.py" line="2281"/>
         <source>All filters cleared - </source>
         <translation>Vsi filtri odstranjeni - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2132"/>
+        <location filename="../filter_mate_app.py" line="2282"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} objektov vidnih v glavni plasti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2138"/>
+        <location filename="../filter_mate_app.py" line="2288"/>
         <source>Error: result handler missing</source>
         <translation>Napaka: manjka upravljavec rezultatov</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2151"/>
+        <location filename="../filter_mate_app.py" line="2301"/>
         <source>Error during filtering: {0}</source>
         <translation>Napaka pri filtriranju: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2280"/>
+        <location filename="../filter_mate_app.py" line="2432"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Obnovljenih {0} osirotelih priljubljenih: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2416"/>
+        <location filename="../filter_mate_app.py" line="2568"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Nalaganje plasti ni uspelo - kliknite za ponovni poskus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2463"/>
+        <location filename="../filter_mate_app.py" line="2615"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} plasti uspešno naloženih</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1595"/>
+        <source>filter</source>
+        <translation>filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1597"/>
+        <source>unfilter</source>
+        <translation>unfilter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1600"/>
+        <source>FilterMate – Edit Mode Detected</source>
+        <translation>FilterMate – Edit Mode Detected</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1602"/>
+        <source>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</source>
+        <translation>The following layer(s) are currently in edit mode:
+{0}
+
+QGIS cannot apply filters while a layer is being edited.
+What would you like to do?</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1612"/>
+        <source>Save Changes &amp; {0}</source>
+        <translation>Save Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1619"/>
+        <source>Discard Changes &amp; {0}</source>
+        <translation>Discard Changes &amp; {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1626"/>
+        <source>Cancel</source>
+        <translation>Prekliči</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1650"/>
+        <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
+        <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <source>Reload the plugin to apply layout changes (action bar position)</source>
-        <translation type="obsolete">Reload the plugin to apply layout changes (action bar position)</translation>
-    </message>
-    <message>
-        <source>Reload Plugin</source>
-        <translation type="obsolete">Ponovno naloži vtičnik</translation>
-    </message>
-    <message>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation type="obsolete">Do you want to reload FilterMate to apply all configuration changes?</translation>
-    </message>
-    <message>
-        <source>Current layer: {name}</source>
-        <translation type="obsolete">Current layer: {name}</translation>
-    </message>
-    <message>
-        <source>No layer selected</source>
-        <translation type="obsolete">Noben sloj ni izbran</translation>
-    </message>
-    <message>
-        <source>Selected layers:</source>
-        <translation type="obsolete">Selected layers:</translation>
-    </message>
-    <message>
-        <source>Multiple layers selected</source>
-        <translation type="obsolete">Več slojev izbranih</translation>
-    </message>
-    <message>
-        <source>No layers selected</source>
-        <translation type="obsolete">Nobeni sloji niso izbrani</translation>
-    </message>
-    <message>
-        <source>Expression:</source>
-        <translation type="obsolete">Expression:</translation>
-    </message>
-    <message>
-        <source>No expression defined</source>
-        <translation type="obsolete">Noben izraz ni definiran</translation>
-    </message>
-    <message>
-        <source>Display expression: {expr}</source>
-        <translation type="obsolete">Display expression: {expr}</translation>
-    </message>
-    <message>
-        <source>Feature ID: {id}</source>
-        <translation type="obsolete">Feature ID: {id}</translation>
-    </message>
-    <message>
-        <source>Current layer: {0}</source>
-        <translation type="obsolete">Current layer: {0}</translation>
-    </message>
-    <message>
-        <source>Selected layers:
-{0}</source>
-        <translation type="obsolete">Selected layers:
-{0}</translation>
-    </message>
-    <message>
-        <source>Expression:
-{0}</source>
-        <translation type="obsolete">Expression:
-{0}</translation>
-    </message>
-    <message>
-        <source>Expression: {0}</source>
-        <translation type="obsolete">Expression: {0}</translation>
-    </message>
-    <message>
-        <source>Display expression: {0}</source>
-        <translation type="obsolete">Display expression: {0}</translation>
-    </message>
-    <message>
-        <source>Feature ID: {0}
-First attribute: {1}</source>
-        <translation type="obsolete">Feature ID: {0}
-First attribute: {1}</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget.py" line="582"/>
+        <location filename="../filter_mate_dockwidget.py" line="596"/>
         <source>Initialization error: {}</source>
         <translation>Napaka pri inicializaciji: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="910"/>
+        <location filename="../filter_mate_dockwidget.py" line="925"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Konfiguracija vmesnika ni popolna - preverite dnevnike</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="914"/>
+        <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
         <translation>Napaka dimenzij vmesnika: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1340"/>
+        <location filename="../filter_mate_dockwidget.py" line="1355"/>
         <source>Favorites manager not available</source>
         <translation>Upravitelj priljubljenih ni na voljo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1359"/>
+        <location filename="../filter_mate_dockwidget.py" line="1374"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} priljubljenih shranjenih
 Kliknite za uporabo ali upravljanje</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1367"/>
+        <location filename="../filter_mate_dockwidget.py" line="1382"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Ni shranjenih priljubljenih
 Kliknite za dodajanje trenutnega filtra</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1391"/>
+        <location filename="../filter_mate_dockwidget.py" line="1406"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Prisiljen zaledni sistem {0} za {1} plasti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1477"/>
+        <location filename="../filter_mate_dockwidget.py" line="1492"/>
         <source>Backend controller not available</source>
         <translation>Krmilnik zalednega sistema ni na voljo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1415"/>
+        <location filename="../filter_mate_dockwidget.py" line="1430"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Samodejno čiščenje PostgreSQL omogočeno</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1416"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Samodejno čiščenje PostgreSQL onemogočeno</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Pogledi seje PostgreSQL počiščeni</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1422"/>
+        <location filename="../filter_mate_dockwidget.py" line="1437"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Ni pogledov za čiščenje ali čiščenje ni uspelo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1433"/>
+        <location filename="../filter_mate_dockwidget.py" line="1448"/>
         <source>No PostgreSQL connection available</source>
         <translation>Ni razpoložljive povezave PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1439"/>
+        <location filename="../filter_mate_dockwidget.py" line="1454"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Shema ima {0} pogledov iz drugih sej.
 Vseeno izbrisati?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1440"/>
+        <location filename="../filter_mate_dockwidget.py" line="1455"/>
         <source>Other Sessions Active</source>
         <translation>Druge seje so aktivne</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1442"/>
+        <location filename="../filter_mate_dockwidget.py" line="1457"/>
         <source>Schema cleanup cancelled</source>
         <translation>Čiščenje sheme preklicano</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1447"/>
+        <location filename="../filter_mate_dockwidget.py" line="1462"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Shema &apos;{0}&apos; uspešno izbrisana</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1464"/>
         <source>Schema cleanup failed</source>
         <translation>Čiščenje sheme ni uspelo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1475"/>
+        <location filename="../filter_mate_dockwidget.py" line="1490"/>
         <source>PostgreSQL Session Info</source>
         <translation>Informacije o seji PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema prilagojena: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Dark mode</source>
         <translation>Temni način</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2564"/>
+        <location filename="../filter_mate_dockwidget.py" line="2587"/>
         <source>Light mode</source>
         <translation>Svetli način</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3908"/>
+        <location filename="../filter_mate_dockwidget.py" line="3896"/>
         <source>Selected features have no geometry.</source>
         <translation>Izbrani objekti nimajo geometrije.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3927"/>
+        <location filename="../filter_mate_dockwidget.py" line="3915"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Noben objekt ni izbran. Izberite objekt iz spustnega seznama.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4902"/>
+        <location filename="../filter_mate_dockwidget.py" line="4957"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Izbrana plast je neveljavna ali njenega vira ni mogoče najti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5612"/>
+        <location filename="../filter_mate_dockwidget.py" line="5667"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negativni medpomnilnik (erozija): krči poligone navznoter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5615"/>
+        <location filename="../filter_mate_dockwidget.py" line="5670"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Vrednost medpomnilnika v metrih (pozitivno=razširi, negativno=skrči poligone)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6089"/>
+        <location filename="../filter_mate_dockwidget.py" line="6144"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Vtičnik aktiviran z {0} vektorskimi plastmi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6172"/>
+        <location filename="../filter_mate_dockwidget.py" line="6227"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Vtičnika ni mogoče samodejno znova naložiti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6174"/>
+        <location filename="../filter_mate_dockwidget.py" line="6229"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Napaka pri ponovnem nalaganju vtičnika: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6224"/>
+        <location filename="../filter_mate_dockwidget.py" line="6282"/>
         <source>Layer properties reset to defaults</source>
         <translation>Lastnosti plasti ponastavljene na privzete</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6225"/>
+        <location filename="../filter_mate_dockwidget.py" line="6283"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Napaka pri ponastavitvi lastnosti plasti: {}</translation>
     </message>
@@ -1944,368 +1304,172 @@ Vseeno izbrisati?</translation>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
         <translation>ENOJNI IZBOR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
         <source>MULTIPLE SELECTION</source>
         <translation>MNOŽIČNI IZBOR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1545"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
         <source>CUSTOM SELECTION</source>
         <translation>PRILAGOJENI IZBOR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
         <source>FILTERING</source>
         <translation>FILTRIRANJE</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1575"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
         <source>EXPORTING</source>
         <translation>IZVAŽANJE</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1576"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
         <source>CONFIGURATION</source>
         <translation>KONFIGURACIJA</translation>
     </message>
     <message>
-        <source>Identify feature - Display feature attributes</source>
-        <translation type="obsolete">Identificiraj element - Prikaži atribute elementa</translation>
-    </message>
-    <message>
-        <source>Zoom to feature - Center the map on the selected feature</source>
-        <translation type="obsolete">Povečaj na element - Centriraj zemljevid na izbrani element</translation>
-    </message>
-    <message>
-        <source>Enable selection - Select features on map</source>
-        <translation type="obsolete">Omogoči izbor - Izberi elemente na zemljevidu</translation>
-    </message>
-    <message>
-        <source>Enable tracking - Follow the selected feature on the map</source>
-        <translation type="obsolete">Omogoči sledenje - Sledi izbranemu elementu na zemljevidu</translation>
-    </message>
-    <message>
-        <source>Link widgets - Synchronize selection between widgets</source>
-        <translation type="obsolete">Poveži gradnike - Sinhroniziraj izbor med gradniki</translation>
-    </message>
-    <message>
-        <source>Reset layer properties - Restore default layer settings</source>
-        <translation type="obsolete">Ponastavi lastnosti sloja - Obnovi privzete nastavitve sloja</translation>
-    </message>
-    <message>
-        <source>Auto-sync with current layer - Automatically update when layer changes</source>
-        <translation type="obsolete">Samodejna sinhronizacija s trenutnim slojem - Samodejno posodobi ob spremembi sloja</translation>
-    </message>
-    <message>
-        <source>Enable multi-layer filtering - Apply filter to multiple layers simultaneously</source>
-        <translation type="obsolete">Omogoči večslojno filtriranje - Uporabi filter na več slojih hkrati</translation>
-    </message>
-    <message>
-        <source>Enable additive filtering - Combine multiple filters on the current layer</source>
-        <translation type="obsolete">Omogoči aditivno filtriranje - Združi več filtrov na trenutnem sloju</translation>
-    </message>
-    <message>
-        <source>Enable spatial filtering - Filter features using geometric relationships</source>
-        <translation type="obsolete">Omogoči prostorsko filtriranje - Filtriraj elemente z uporabo geometrijskih razmerij</translation>
-    </message>
-    <message>
-        <source>Enable buffer - Add a buffer zone around selected features</source>
-        <translation type="obsolete">Omogoči medpomnilnik - Dodaj območje medpomnilnika okoli izbranih elementov</translation>
-    </message>
-    <message>
-        <source>Buffer type - Select the buffer calculation method</source>
-        <translation type="obsolete">Vrsta medpomnilnika - Izberi metodo izračuna medpomnilnika</translation>
-    </message>
-    <message>
-        <source>Current layer - Select the layer to filter</source>
-        <translation type="obsolete">Trenutni sloj - Izberi sloj za filtriranje</translation>
-    </message>
-    <message>
-        <source>Logical operator for combining filters on the source layer</source>
-        <translation type="obsolete">Logical operator for combining filters on the source layer</translation>
-    </message>
-    <message>
-        <source>Logical operator for combining filters on other layers</source>
-        <translation type="obsolete">Logical operator for combining filters on other layers</translation>
-    </message>
-    <message>
-        <source>Select geometric predicate(s) for spatial filtering</source>
-        <translation type="obsolete">Select geometric predicate(s) for spatial filtering</translation>
-    </message>
-    <message>
-        <source>Buffer distance in meters</source>
-        <translation type="obsolete">Buffer distance in meters</translation>
-    </message>
-    <message>
-        <source>Buffer type - Define how the buffer is calculated</source>
-        <translation type="obsolete">Buffer type - Define how the buffer is calculated</translation>
-    </message>
-    <message>
-        <source>Select layers to export</source>
-        <translation type="obsolete">Select layers to export</translation>
-    </message>
-    <message>
-        <source>Configure output projection</source>
-        <translation type="obsolete">Configure output projection</translation>
-    </message>
-    <message>
-        <source>Export layer styles (QML/SLD)</source>
-        <translation type="obsolete">Export layer styles (QML/SLD)</translation>
-    </message>
-    <message>
-        <source>Select output format</source>
-        <translation type="obsolete">Select output format</translation>
-    </message>
-    <message>
-        <source>Configure output location and filename</source>
-        <translation type="obsolete">Configure output location and filename</translation>
-    </message>
-    <message>
-        <source>Enable ZIP compression - Create a compressed archive of exported files</source>
-        <translation type="obsolete">Enable ZIP compression - Create a compressed archive of exported files</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1569"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
         <source>Select CRS for export</source>
         <translation>Select CRS for export</translation>
     </message>
     <message>
-        <source>Style format - Select QML or SLD format</source>
-        <translation type="obsolete">Style format - Select QML or SLD format</translation>
-    </message>
-    <message>
-        <source>Output file format</source>
-        <translation type="obsolete">Output file format</translation>
-    </message>
-    <message>
-        <source>Output folder name - Enter the name of the export folder</source>
-        <translation type="obsolete">Output folder name - Enter the name of the export folder</translation>
-    </message>
-    <message>
-        <source>Enter folder name...</source>
-        <translation type="obsolete">Enter folder name...</translation>
-    </message>
-    <message>
-        <source>Batch mode - Export each layer to a separate folder</source>
-        <translation type="obsolete">Batch mode - Export each layer to a separate folder</translation>
-    </message>
-    <message>
-        <source>Batch mode</source>
-        <translation type="obsolete">Paketni način</translation>
-    </message>
-    <message>
-        <source>ZIP filename - Enter the name for the compressed archive</source>
-        <translation type="obsolete">ZIP filename - Enter the name for the compressed archive</translation>
-    </message>
-    <message>
-        <source>Enter ZIP filename...</source>
-        <translation type="obsolete">Enter ZIP filename...</translation>
-    </message>
-    <message>
-        <source>Batch mode - Create a separate ZIP for each layer</source>
-        <translation type="obsolete">Batch mode - Create a separate ZIP for each layer</translation>
-    </message>
-    <message>
-        <source>Apply Filter - Execute the current filter on selected layers</source>
-        <translation type="obsolete">Apply Filter - Execute the current filter on selected layers</translation>
-    </message>
-    <message>
-        <source>Apply Filter</source>
-        <translation type="obsolete">Uporabi filter</translation>
-    </message>
-    <message>
-        <source>Apply the current filter expression to filter features on the selected layer(s)</source>
-        <translation type="obsolete">Apply the current filter expression to filter features on the selected layer(s)</translation>
-    </message>
-    <message>
-        <source>Undo Filter - Restore the previous filter state</source>
-        <translation type="obsolete">Undo Filter - Restore the previous filter state</translation>
-    </message>
-    <message>
-        <source>Undo Filter</source>
-        <translation type="obsolete">Razveljavi filter</translation>
-    </message>
-    <message>
-        <source>Undo the last filter operation and restore the previous state</source>
-        <translation type="obsolete">Undo the last filter operation and restore the previous state</translation>
-    </message>
-    <message>
-        <source>Redo Filter - Reapply the previously undone filter</source>
-        <translation type="obsolete">Redo Filter - Reapply the previously undone filter</translation>
-    </message>
-    <message>
-        <source>Redo Filter</source>
-        <translation type="obsolete">Uveljavi filter</translation>
-    </message>
-    <message>
-        <source>Redo the previously undone filter operation</source>
-        <translation type="obsolete">Redo the previously undone filter operation</translation>
-    </message>
-    <message>
-        <source>Clear All Filters - Remove all filters from all layers</source>
-        <translation type="obsolete">Clear All Filters - Remove all filters from all layers</translation>
-    </message>
-    <message>
-        <source>Clear All Filters</source>
-        <translation type="obsolete">Počisti vse filtre</translation>
-    </message>
-    <message>
-        <source>Remove all active filters from all layers in the project</source>
-        <translation type="obsolete">Remove all active filters from all layers in the project</translation>
-    </message>
-    <message>
-        <source>Export - Save filtered layers to the specified location</source>
-        <translation type="obsolete">Export - Save filtered layers to the specified location</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
         <source>Export</source>
         <translation>Izvozi</translation>
     </message>
     <message>
-        <source>Export the filtered layers to the configured output location and format</source>
-        <translation type="obsolete">Export the filtered layers to the configured output location and format</translation>
-    </message>
-    <message>
-        <source>About FilterMate - Display plugin information and help</source>
-        <translation type="obsolete">About FilterMate - Display plugin information and help</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
         <source>AND</source>
         <translation>IN</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1556"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
         <source>AND NOT</source>
         <translation>IN NE</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1557"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
         <source>OR</source>
         <translation>ALI</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1571"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1559"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
         <source>, </source>
         <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
         <source>Multi-layer filtering</source>
         <translation>Večslojno filtriranje</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1547"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
         <source>Additive filtering for the selected layer</source>
         <translation>Aditivno filtriranje za izbrani sloj</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1548"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
         <source>Geospatial filtering</source>
         <translation>Geoprostorsko filtriranje</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
         <source>Buffer</source>
         <translation>Medpomnilnik</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
         <source>Expression layer</source>
         <translation>Sloj izraza</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1558"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
         <source>Geometric predicate</source>
         <translation>Geometrični predikat</translation>
     </message>
     <message>
-        <source>Value in meters</source>
-        <translation type="obsolete">Vrednost v metrih</translation>
-    </message>
-    <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1572"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
         <source>Output format</source>
         <translation>Izhodni format</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1582"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
         <source>Reset</source>
         <translation>Ponastavi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1564"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
         <source>Layers to export</source>
         <translation>Sloji za izvoz</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
         <source>Layers projection</source>
         <translation>Projekcija slojev</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
         <source>Save styles</source>
         <translation>Shrani sloge</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1567"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
         <source>Datatype export</source>
         <translation>Izvoz podatkovnega tipa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
         <source>Name of file/directory</source>
         <translation>Ime datoteke/mape</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1550"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>Uporabi centroide namesto polnih geometrij za izvorno plast (hitrejše za kompleksne poligone)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Vrednost medpomnilnika v metrih (pozitivno=razširi, negativno=skrči poligone)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
         <source>Number of segments for buffer precision</source>
         <translation>Število segmentov za natančnost medpomnilnika</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.py" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
         <source>Mode batch</source>
         <translation>Paketni način</translation>
     </message>
@@ -2413,7 +1577,7 @@ Vseeno izbrisati?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="928"/>
+        <location filename="../core/tasks/layer_management_task.py" line="944"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2430,12 +1594,12 @@ Rešitev: Odstranite to plast iz projekta FilterMate, nato jo znova dodajte.
 Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="954"/>
+        <location filename="../core/tasks/layer_management_task.py" line="970"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Plast &apos;{0}&apos; nima PRIMARY KEY. Omejene funkcije: materializirani pogledi onemogočeni. Priporočilo: dodajte PRIMARY KEY za optimalno zmogljivost.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1893"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
         <source>Exception: {0}</source>
         <translation>Izjema: {0}</translation>
     </message>
@@ -2574,133 +1738,6 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
     </message>
 </context>
 <context>
-    <name>OptimizationDialogs</name>
-    <message>
-        <source>FilterMate - Optimizations</source>
-        <translation type="obsolete">FilterMate - Optimizacije</translation>
-    </message>
-    <message>
-        <source>Optimizations for:</source>
-        <translation type="obsolete">Optimizacije za:</translation>
-    </message>
-    <message>
-        <source>features</source>
-        <translation type="obsolete">objektov</translation>
-    </message>
-    <message>
-        <source>Estimated speedup:</source>
-        <translation type="obsolete">Ocenjena pospešitev:</translation>
-    </message>
-    <message>
-        <source>faster</source>
-        <translation type="obsolete">hitreje</translation>
-    </message>
-    <message>
-        <source>Use centroids instead of full geometries for large datasets</source>
-        <translation type="obsolete">Uporabi centroide namesto polnih geometrij za velike nabore podatkov</translation>
-    </message>
-    <message>
-        <source>Use centroids</source>
-        <translation type="obsolete">Uporabi centroide</translation>
-    </message>
-    <message>
-        <source>Use centroids for distant layers</source>
-        <translation type="obsolete">Uporabi centroide za oddaljene sloje</translation>
-    </message>
-    <message>
-        <source>Enable buffer type</source>
-        <translation type="obsolete">Omogoči tip medpomnilnika</translation>
-    </message>
-    <message>
-        <source>Simplify complex geometries to reduce processing time</source>
-        <translation type="obsolete">Poenostavi kompleksne geometrije za zmanjšanje časa obdelave</translation>
-    </message>
-    <message>
-        <source>Simplify geometries</source>
-        <translation type="obsolete">Poenostavi geometrije</translation>
-    </message>
-    <message>
-        <source>Filter by bounding box first to eliminate distant features quickly</source>
-        <translation type="obsolete">Najprej filtriraj po omejevalnem okvirju za hitro odstranitev oddaljenih objektov</translation>
-    </message>
-    <message>
-        <source>BBox pre-filtering</source>
-        <translation type="obsolete">Predhodno filtriranje BBox</translation>
-    </message>
-    <message>
-        <source>Evaluate attribute conditions before expensive spatial operations</source>
-        <translation type="obsolete">Oceni atributne pogoje pred dragimi prostorskimi operacijami</translation>
-    </message>
-    <message>
-        <source>Attribute-first strategy</source>
-        <translation type="obsolete">Strategija atribut-najprej</translation>
-    </message>
-    <message>
-        <source>Apply for current session only</source>
-        <translation type="obsolete">Uporabi samo za trenutno sejo</translation>
-    </message>
-    <message>
-        <source>Remember for this session</source>
-        <translation type="obsolete">Zapomni za to sejo</translation>
-    </message>
-    <message>
-        <source>Skip without applying</source>
-        <translation type="obsolete">Preskoči brez uporabe</translation>
-    </message>
-    <message>
-        <source>Skip</source>
-        <translation type="obsolete">Preskoči</translation>
-    </message>
-    <message>
-        <source>Apply selected optimizations</source>
-        <translation type="obsolete">Uporabi izbrane optimizacije</translation>
-    </message>
-    <message>
-        <source>Apply</source>
-        <translation type="obsolete">Uporabi</translation>
-    </message>
-    <message>
-        <source>Optimization Settings</source>
-        <translation type="obsolete">Nastavitve optimizacije</translation>
-    </message>
-    <message>
-        <source>Enable automatic optimizations</source>
-        <translation type="obsolete">Omogoči samodejne optimizacije</translation>
-    </message>
-    <message>
-        <source>Enable optimizations</source>
-        <translation type="obsolete">Omogoči optimizacije</translation>
-    </message>
-    <message>
-        <source>Auto-apply recommendations</source>
-        <translation type="obsolete">Samodejno uporabi priporočila</translation>
-    </message>
-    <message>
-        <source>Ask before applying</source>
-        <translation type="obsolete">Vprašaj pred uporabo</translation>
-    </message>
-    <message>
-        <source>Show optimization dialog</source>
-        <translation type="obsolete">Prikaži pogovorno okno optimizacije</translation>
-    </message>
-    <message>
-        <source>Never apply</source>
-        <translation type="obsolete">Nikoli ne uporabi</translation>
-    </message>
-    <message>
-        <source>No optimizations</source>
-        <translation type="obsolete">Brez optimizacij</translation>
-    </message>
-    <message>
-        <source>Simplify before buffer</source>
-        <translation type="obsolete">Poenostavi pred medpomnilnikom</translation>
-    </message>
-    <message>
-        <source>Reduce buffer segments</source>
-        <translation type="obsolete">Zmanjšaj segmente medpomnilnika</translation>
-    </message>
-</context>
-<context>
     <name>PostgresInfoDialog</name>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="80"/>
@@ -2795,451 +1832,7 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="303"/>
         <source>Cleanup Failed</source>
-        <translation>Čiščenje ni uspelo</translation>
-    </message>
-    <message>
-        <source>All layers using auto-selection</source>
-        <translation type="obsolete">Vse plasti uporabljajo samodejno izbiro</translation>
-    </message>
-    <message>
-        <source>Applied to &apos;{0}&apos;:</source>
-        <translation type="obsolete">Uporabljeno za &apos;{0}&apos;:</translation>
-    </message>
-    <message>
-        <source>Auto-centroid {0}</source>
-        <translation type="obsolete">Samodejni centroid {0}</translation>
-    </message>
-    <message>
-        <source>Auto-optimization {0}</source>
-        <translation type="obsolete">Samodejna optimizacija {0}</translation>
-    </message>
-    <message>
-        <source>Auto-optimizer module not available</source>
-        <translation type="obsolete">Modul za samodejno optimizacijo ni na voljo</translation>
-    </message>
-    <message>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation type="obsolete">Samodejna optimizacija ni na voljo: {0}</translation>
-    </message>
-    <message>
-        <source>Auto-select best strategy</source>
-        <translation type="obsolete">Samodejno izberi najboljšo strategijo</translation>
-    </message>
-    <message>
-        <source>Auto-selected backends for {0} layer(s)</source>
-        <translation type="obsolete">Samodejno izbrani zaledni sistemi za {0} plast(i)</translation>
-    </message>
-    <message>
-        <source>Auto-simplify geometries</source>
-        <translation type="obsolete">Samodejno poenostavi geometrije</translation>
-    </message>
-    <message>
-        <source>Auto-use centroids for remote layers</source>
-        <translation type="obsolete">Samodejno uporabi centroide za oddaljene plasti</translation>
-    </message>
-    <message>
-        <source>Automatically choose optimal filtering strategy</source>
-        <translation type="obsolete">Samodejno izberi optimalno strategijo filtriranja</translation>
-    </message>
-    <message>
-        <source>BBox pre-filter enabled for &apos;{0}&apos;</source>
-        <translation type="obsolete">BBox predfilter omogočen za &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <source>Backend controller not available</source>
-        <translation type="obsolete">Krmilnik zalednega sistema ni na voljo</translation>
-    </message>
-    <message>
-        <source>Backend forced to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">Zaledni sistem prisilno nastavljen na {0} za &apos;{1}&apos;</translation>
-    </message>
-    <message>
-        <source>Backend optimization unavailable</source>
-        <translation type="obsolete">Optimizacija zalednega sistema ni na voljo</translation>
-    </message>
-    <message>
-        <source>Backend set to Auto for &apos;{0}&apos;</source>
-        <translation type="obsolete">Zaledni sistem nastavljen na Samodejno za &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <source>Centroids enabled for &apos;{0}&apos; (~{1}x {2})</source>
-        <translation type="obsolete">Centroidi omogočeni za &apos;{0}&apos; (~{1}x {2})</translation>
-    </message>
-    <message>
-        <source>Clear ALL FilterMate temporary tables from all databases</source>
-        <translation type="obsolete">Počisti VSE FilterMate začasne tabele iz vseh podatkovnih baz</translation>
-    </message>
-    <message>
-        <source>Clear temporary tables for the current project only</source>
-        <translation type="obsolete">Počisti začasne tabele samo za trenutni projekt</translation>
-    </message>
-    <message>
-        <source>Cleared {0} temporary table(s) for current project</source>
-        <translation type="obsolete">Počiščenih {0} začasnih tabel za trenutni projekt</translation>
-    </message>
-    <message>
-        <source>Cleared {0} temporary table(s) globally</source>
-        <translation type="obsolete">Globalno počiščenih {0} začasnih tabel</translation>
-    </message>
-    <message>
-        <source>Confirmation {0}</source>
-        <translation type="obsolete">Potrditev {0}</translation>
-    </message>
-    <message>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation type="obsolete">Ni bilo mogoče analizirati plasti &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <source>Could not reload plugin automatically.</source>
-        <translation type="obsolete">Vtičnika ni bilo mogoče samodejno znova naložiti.</translation>
-    </message>
-    <message>
-        <source>Dark mode</source>
-        <translation type="obsolete">Temni način</translation>
-    </message>
-    <message>
-        <source>Description (auto-generated, you can modify it)</source>
-        <translation type="obsolete">Opis (samodejno ustvarjen, lahko ga spremenite)</translation>
-    </message>
-    <message>
-        <source>Dialog not available: {0}</source>
-        <translation type="obsolete">Pogovorno okno ni na voljo: {0}</translation>
-    </message>
-    <message>
-        <source>Enter a name for this filter</source>
-        <translation type="obsolete">Vnesite ime za ta filter</translation>
-    </message>
-    <message>
-        <source>Error analyzing layer: {0}</source>
-        <translation type="obsolete">Napaka pri analiziranju plasti: {0}</translation>
-    </message>
-    <message>
-        <source>Error cancelling changes: {0}</source>
-        <translation type="obsolete">Napaka pri preklicu sprememb: {0}</translation>
-    </message>
-    <message>
-        <source>Error reloading plugin: {0}</source>
-        <translation type="obsolete">Napaka pri ponovnem nalaganju vtičnika: {0}</translation>
-    </message>
-    <message>
-        <source>Error resetting layer properties: {}</source>
-        <translation type="obsolete">Napaka pri ponastavitvi lastnosti plasti: {}</translation>
-    </message>
-    <message>
-        <source>Error: {0}</source>
-        <translation type="obsolete">Napaka: {0}</translation>
-    </message>
-    <message>
-        <source>Favorites manager not available</source>
-        <translation type="obsolete">Upravitelj priljubljenih ni na voljo</translation>
-    </message>
-    <message>
-        <source>Filter history position</source>
-        <translation type="obsolete">Položaj zgodovine filtrov</translation>
-    </message>
-    <message>
-        <source>FilterMate - Add to Favorites</source>
-        <translation type="obsolete">FilterMate - Dodaj med priljubljene</translation>
-    </message>
-    <message>
-        <source>Forced {0} backend for {1} layer(s)</source>
-        <translation type="obsolete">{0} zaledni sistem prisilno nastavljen za {1} plast(i)</translation>
-    </message>
-    <message>
-        <source>Light mode</source>
-        <translation type="obsolete">Svetli način</translation>
-    </message>
-    <message>
-        <source>Memory layer filtering complete for &apos;{0}&apos;</source>
-        <translation type="obsolete">Filtriranje pomnilniške plasti končano za &apos;{0}&apos;</translation>
-    </message>
-    <message>
-        <source>No optimization recommendations at this time.</source>
-        <translation type="obsolete">Trenutno ni priporočil za optimizacijo.</translation>
-    </message>
-    <message>
-        <source>OGR/Memory</source>
-        <translation type="obsolete">OGR/Pomnilnik</translation>
-    </message>
-    <message>
-        <source>Optimization applied to {0} layer(s)</source>
-        <translation type="obsolete">Optimizacija uporabljena za {0} plast(i)</translation>
-    </message>
-    <message>
-        <source>Optimization recommendations</source>
-        <translation type="obsolete">Priporočila za optimizacijo</translation>
-    </message>
-    <message>
-        <source>PostgreSQL</source>
-        <translation type="obsolete">PostgreSQL</translation>
-    </message>
-    <message>
-        <source>Redo filter</source>
-        <translation type="obsolete">Ponovi filter</translation>
-    </message>
-    <message>
-        <source>Redo unavailable</source>
-        <translation type="obsolete">Ponovi ni na voljo</translation>
-    </message>
-    <message>
-        <source>Save current filter</source>
-        <translation type="obsolete">Shrani trenutni filter</translation>
-    </message>
-    <message>
-        <source>Spatialite</source>
-        <translation type="obsolete">Spatialite</translation>
-    </message>
-    <message>
-        <source>Strategy set to {0} for &apos;{1}&apos;</source>
-        <translation type="obsolete">Strategija nastavljena na {0} za &apos;{1}&apos;</translation>
-    </message>
-    <message>
-        <source>Theme changed</source>
-        <translation type="obsolete">Tema spremenjena</translation>
-    </message>
-    <message>
-        <source>Toggle dark/light mode</source>
-        <translation type="obsolete">Preklopi temni/svetli način</translation>
-    </message>
-    <message>
-        <source>Undo filter</source>
-        <translation type="obsolete">Razveljavi filter</translation>
-    </message>
-    <message>
-        <source>Undo unavailable</source>
-        <translation type="obsolete">Razveljavi ni na voljo</translation>
-    </message>
-    <message>
-        <source>Using QGIS expressions for filtering</source>
-        <translation type="obsolete">Uporaba QGIS izrazov za filtriranje</translation>
-    </message>
-    <message>
-        <source>View filter history</source>
-        <translation type="obsolete">Ogled zgodovine filtrov</translation>
-    </message>
-    <message>
-        <source>WKT expression threshold:</source>
-        <translation type="obsolete">Prag WKT izraza:</translation>
-    </message>
-    <message>
-        <source>memory copy</source>
-        <translation type="obsolete">kopija v pomnilniku</translation>
-    </message>
-    <message>
-        <source>pool size</source>
-        <translation type="obsolete">velikost sklada</translation>
-    </message>
-    <message>
-        <source>simplified to {0} vertices</source>
-        <translation type="obsolete">poenostavljeno na {0} oglišč</translation>
-    </message>
-    <message>
-        <source>temp views</source>
-        <translation type="obsolete">začasni pogledi</translation>
-    </message>
-    <message>
-        <source>Allow cancellation of QGIS processing algorithms. Enables stopping long-running operations.</source>
-        <translation type="obsolete">Dovoli preklic algoritmov obdelave QGIS. Omogoča ustavitev dolgotrajnih operacij.</translation>
-    </message>
-    <message>
-        <source>Analyzing your project... Recommendations will appear here.</source>
-        <translation type="obsolete">Analiziranje vašega projekta... Priporočila se bodo pojavila tukaj.</translation>
-    </message>
-    <message>
-        <source>Auto-Centroid for Distant Layers</source>
-        <translation type="obsolete">Samodejna sredina za oddaljene plasti</translation>
-    </message>
-    <message>
-        <source>Auto-Select Best Strategy</source>
-        <translation type="obsolete">Samodejno izberi najboljšo strategijo</translation>
-    </message>
-    <message>
-        <source>Auto-Simplify Geometries ⚠️</source>
-        <translation type="obsolete">Samodejno poenostavi geometrije ⚠️</translation>
-    </message>
-    <message>
-        <source>Auto-detect mod_spatialite</source>
-        <translation type="obsolete">Samodejno zaznaj mod_spatialite</translation>
-    </message>
-    <message>
-        <source>Automatic GIST Index Usage</source>
-        <translation type="obsolete">Samodejna uporaba GIST indeksa</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="obsolete">Prekliči</translation>
-    </message>
-    <message>
-        <source>Cancellable Processing</source>
-        <translation type="obsolete">Prekličljiva obdelava</translation>
-    </message>
-    <message>
-        <source>Chunk size (features):</source>
-        <translation type="obsolete">Velikost kosa (objekti):</translation>
-    </message>
-    <message>
-        <source>Confirm Before Applying</source>
-        <translation type="obsolete">Potrdi pred uporabo</translation>
-    </message>
-    <message>
-        <source>Connection Pooling</source>
-        <translation type="obsolete">Združevanje povezav</translation>
-    </message>
-    <message>
-        <source>Create Spatial Indexes</source>
-        <translation type="obsolete">Ustvari prostorske indekse</translation>
-    </message>
-    <message>
-        <source>Direct SQL for GeoPackage</source>
-        <translation type="obsolete">Neposredni SQL za GeoPackage</translation>
-    </message>
-    <message>
-        <source>Enable Auto-Centroid for Remote Layers</source>
-        <translation type="obsolete">Omogoči samodejno sredino za oddaljene plasti</translation>
-    </message>
-    <message>
-        <source>Enable Auto-Optimization</source>
-        <translation type="obsolete">Omogoči samodejno optimizacijo</translation>
-    </message>
-    <message>
-        <source>Enable Direct SQL for GeoPackage</source>
-        <translation type="obsolete">Omogoči neposredni SQL za GeoPackage</translation>
-    </message>
-    <message>
-        <source>Enable Materialized Views</source>
-        <translation type="obsolete">Omogoči materializirane poglede</translation>
-    </message>
-    <message>
-        <source>Estimated performance improvement</source>
-        <translation type="obsolete">Ocenjeno izboljšanje zmogljivosti</translation>
-    </message>
-    <message>
-        <source>FilterMate - Backend Optimizations</source>
-        <translation type="obsolete">FilterMate - Optimizacije zaledja</translation>
-    </message>
-    <message>
-        <source>GEOS-safe Geometry Handling</source>
-        <translation type="obsolete">GEOS-varna obdelava geometrije</translation>
-    </message>
-    <message>
-        <source>Global</source>
-        <translation type="obsolete">Globalno</translation>
-    </message>
-    <message>
-        <source>Initialization error: {}</source>
-        <translation type="obsolete">Napaka inicializacije: {}</translation>
-    </message>
-    <message>
-        <source>Interruptible Queries</source>
-        <translation type="obsolete">Prekinljive poizvedbe</translation>
-    </message>
-    <message>
-        <source>Lazy cursor threshold:</source>
-        <translation type="obsolete">Prag lenega kazalca:</translation>
-    </message>
-    <message>
-        <source>Max workers (0=auto):</source>
-        <translation type="obsolete">Maks. delavcev (0=samodejno):</translation>
-    </message>
-    <message>
-        <source>No PostgreSQL connection available</source>
-        <translation type="obsolete">Povezava PostgreSQL ni na voljo</translation>
-    </message>
-    <message>
-        <source>No alternative backends available for this layer</source>
-        <translation type="obsolete">Za to plast ni alternativnih zaledij</translation>
-    </message>
-    <message>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation type="obsolete">Nobena plast ni izbrana. Najprej izberite plast.</translation>
-    </message>
-    <message>
-        <source>No optimizations selected to apply.</source>
-        <translation type="obsolete">Za uporabo ni izbrana nobena optimizacija.</translation>
-    </message>
-    <message>
-        <source>No temporary tables found</source>
-        <translation type="obsolete">Začasne tabele niso bile najdene</translation>
-    </message>
-    <message>
-        <source>No temporary tables found for current project</source>
-        <translation type="obsolete">Za trenutni projekt ni začasnih tabel</translation>
-    </message>
-    <message>
-        <source>Save Settings</source>
-        <translation type="obsolete">Shrani nastavitve</translation>
-    </message>
-    <message>
-        <source>Show Optimization Hints</source>
-        <translation type="obsolete">Pokaži namige za optimizacijo</translation>
-    </message>
-    <message>
-        <source>Redo filter (Ctrl+Y)</source>
-        <translation type="obsolete">Ponovi filter (Ctrl+Y)</translation>
-    </message>
-    <message>
-        <source>Undo last filter (Ctrl+Z)</source>
-        <translation type="obsolete">Razveljavi zadnji filter (Ctrl+Z)</translation>
-    </message>
-    <message>
-        <source>disabled</source>
-        <translation type="obsolete">onemogočeno</translation>
-    </message>
-    <message>
-        <source>enabled</source>
-        <translation type="obsolete">omogočeno</translation>
-    </message>
-    <message>
-        <source>★ No favorites saved</source>
-        <translation type="obsolete">★ Ni shranjenih priljubljenih</translation>
-    </message>
-    <message>
-        <source>★ {0} Favorites saved</source>
-        <translation type="obsolete">★ {0} Priljubljenih shranjenih</translation>
-    </message>
-    <message>
-        <source>⚙️ Manage favorites...</source>
-        <translation type="obsolete">⚙️ Upravljaj priljubljene...</translation>
-    </message>
-    <message>
-        <source>⭐ Add Current Filter (no filter active)</source>
-        <translation type="obsolete">⭐ Dodaj trenutni filter (noben filter ni aktiven)</translation>
-    </message>
-    <message>
-        <source>⭐ Add Current Filter to Favorites</source>
-        <translation type="obsolete">⭐ Dodaj trenutni filter med priljubljene</translation>
-    </message>
-    <message>
-        <source>⭐ Add current filter to favorites</source>
-        <translation type="obsolete">⭐ Dodaj trenutni filter med priljubljene</translation>
-    </message>
-    <message>
-        <source>⭐ Add filter (no active filter)</source>
-        <translation type="obsolete">⭐ Dodaj filter (ni aktivnega filtra)</translation>
-    </message>
-    <message>
-        <source>🌐 All Projects (Global)</source>
-        <translation type="obsolete">🌐 Vsi projekti (Globalno)</translation>
-    </message>
-    <message>
-        <source>📁 Current Project</source>
-        <translation type="obsolete">📁 Trenutni projekt</translation>
-    </message>
-    <message>
-        <source>📤 Export...</source>
-        <translation type="obsolete">📤 Izvozi...</translation>
-    </message>
-    <message>
-        <source>📥 Import...</source>
-        <translation type="obsolete">📥 Uvozi...</translation>
-    </message>
-    <message>
-        <source>Restore Defaults</source>
-        <translation type="obsolete">Obnovi privzeto</translation>
-    </message>
-    <message>
-        <source>Use Balanced Profile</source>
-        <translation type="obsolete">Uporabi uravnotežen profil</translation>
+        <translation>Uporabi uravnotežen profil</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/postgres_info_dialog.py" line="119"/>
@@ -3286,39 +1879,402 @@ Nadaljujem?</translation>
     </message>
 </context>
 <context>
+    <name>QFieldCloudExtension</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <source>QFieldCloud Settings...</source>
+        <translation>QFieldCloud Settings...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <source>Export filtered layers to QFieldCloud</source>
+        <translation>Export filtered layers to QFieldCloud</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudPushDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <source>Export to QFieldCloud</source>
+        <translation>Export to QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <source>Active Filter</source>
+        <translation>Active Filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <source>No active filter</source>
+        <translation>No active filter</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <source>Filter:</source>
+        <translation>Filter:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <source>0 layers</source>
+        <translation>0 layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <source>Layers:</source>
+        <translation>Layers:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <source>QFieldCloud Project</source>
+        <translation>QFieldCloud Project</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <source>Project name:</source>
+        <translation>Project name:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <source>Description:</source>
+        <translation>Opis:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <source>Create new</source>
+        <translation>Create new</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <source>Update existing:</source>
+        <translation>Update existing:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <source>Mode:</source>
+        <translation>Mode:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <source>Layer Modes</source>
+        <translation>Layer Modes</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Layer</source>
+        <translation>Plast</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <source>Mode</source>
+        <translation>Mode</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <source>Export</source>
+        <translation>Izvozi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <source>{0} layers ({1} features)</source>
+        <translation>{0} layers ({1} features)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <source>{0} layers (no filter active)</source>
+        <translation>{0} layers (no filter active)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Missing Name</source>
+        <translation>Missing Name</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <source>Please enter a project name.</source>
+        <translation>Please enter a project name.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>Not Connected</source>
+        <translation>Not Connected</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <source>QFieldCloud is not connected. Please configure credentials first.</source>
+        <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No Layers</source>
+        <translation>No Layers</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <source>No valid layers to export.</source>
+        <translation>No valid layers to export.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>Export Error</source>
+        <translation>Export Error</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <source>Failed to export layer &apos;{0}&apos;: {1}</source>
+        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <source>GPKG export failed: {0}</source>
+        <translation>GPKG export failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <source>Push complete!</source>
+        <translation>Push complete!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project successfully pushed to QFieldCloud!</source>
+        <translation>Project successfully pushed to QFieldCloud!</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Project: {0}</source>
+        <translation>Project: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Files: {0}</source>
+        <translation>Files: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>Duration: {0:.1f}s</source>
+        <translation>Duration: {0:.1f}s</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <source>URL: {0}</source>
+        <translation>URL: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <source>Warnings:</source>
+        <translation>Warnings:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <source>Push Complete</source>
+        <translation>Push Complete</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <source>Error: {0}</source>
+        <translation>Napaka: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push Failed</source>
+        <translation>Push Failed</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <source>Push failed:
+
+{0}</source>
+        <translation>Push failed:
+
+{0}</translation>
+    </message>
+</context>
+<context>
+    <name>QFieldCloudSettingsDialog</name>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="53"/>
+        <source>QFieldCloud Configuration</source>
+        <translation>QFieldCloud Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="66"/>
+        <source>Server</source>
+        <translation>Server</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="71"/>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="77"/>
+        <source>Credentials</source>
+        <translation>Credentials</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="81"/>
+        <source>username</source>
+        <translation>username</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="82"/>
+        <source>Username:</source>
+        <translation>Username:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="86"/>
+        <source>password (for initial login)</source>
+        <translation>password (for initial login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="87"/>
+        <source>Password:</source>
+        <translation>Password:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="90"/>
+        <source>JWT token (auto-filled after login)</source>
+        <translation>JWT token (auto-filled after login)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="95"/>
+        <source>Login</source>
+        <translation>Login</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="96"/>
+        <source>Login with username/password to get a token</source>
+        <translation>Login with username/password to get a token</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="98"/>
+        <source>Token:</source>
+        <translation>Token:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="102"/>
+        <source>Status:</source>
+        <translation>Stanje:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="105"/>
+        <source>Test Connection</source>
+        <translation>Test Connection</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="112"/>
+        <source>Preferences</source>
+        <translation>Preferences</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="117"/>
+        <source>Default project:</source>
+        <translation>Default project:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="119"/>
+        <source>Trigger packaging after upload</source>
+        <translation>Trigger packaging after upload</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="144"/>
+        <source>Token stored</source>
+        <translation>Token stored</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Missing Fields</source>
+        <translation>Missing Fields</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="168"/>
+        <source>Please fill in URL, username, and password.</source>
+        <translation>Please fill in URL, username, and password.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="174"/>
+        <source>Logging in...</source>
+        <translation>Logging in...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="191"/>
+        <source>Logged in as {0}</source>
+        <translation>Logged in as {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="198"/>
+        <source>Login failed: {0}</source>
+        <translation>Login failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Missing Configuration</source>
+        <translation>Missing Configuration</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="213"/>
+        <source>Please configure URL and login first.</source>
+        <translation>Please configure URL and login first.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="219"/>
+        <source>Testing connection...</source>
+        <translation>Testing connection...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="229"/>
+        <source>Connected! ({0} projects accessible)</source>
+        <translation>Connected! ({0} projects accessible)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="235"/>
+        <source>Connection failed: {0}</source>
+        <translation>Connection failed: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Missing URL</source>
+        <translation>Missing URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/qfieldcloud/ui/settings_dialog.py" line="247"/>
+        <source>Server URL is required.</source>
+        <translation>Server URL is required.</translation>
+    </message>
+</context>
+<context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="640"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
         <source>Type to filter...</source>
         <translation>Vnesite za filtriranje...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="649"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
         <source>Select All</source>
         <translation>Izberi vse</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="651"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
         <source>Select All (non subset)</source>
         <translation>Izberi vse (izven podmnožice)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="653"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
         <source>Select All (subset)</source>
         <translation>Izberi vse (podmnožica)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>De-select All</source>
         <translation>Odstrani izbor vsega</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>De-select All (non subset)</source>
         <translation>Odstrani izbor vsega (izven podmnožice)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>De-select All (subset)</source>
         <translation>Odstrani izbor vsega (podmnožica)</translation>
     </message>
@@ -3538,196 +2494,11 @@ Nadaljujem?</translation>
     </message>
 </context>
 <context>
-    <name>d</name>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="870"/>
-        <source>Use centroids instead of full geometries for distant layers</source>
-        <translation>Uporabi centroide namesto polnih geometrij za oddaljene plasti</translation>
-    </message>
-</context>
-<context>
-    <name>dw</name>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="737"/>
-        <source>Negative buffer (erosion): shrinks polygons inward</source>
-        <translation>Negativni medpomnilnik (erozija): krči poligone navznoter</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/property_controller.py" line="744"/>
-        <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Vrednost medpomnilnika v metrih (pozitivno=razširi, negativno=skrči poligone)</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="120"/>
-        <source>Error cancelling changes: {0}</source>
-        <translation>Napaka pri preklicu sprememb: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Reload Plugin</source>
-        <translation>Znova naloži vtičnik</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/config_model_manager.py" line="328"/>
-        <source>Do you want to reload FilterMate to apply all configuration changes?</source>
-        <translation>Ali želite znova naložiti FilterMate za uveljavitev vseh sprememb konfiguracije?</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="56"/>
-        <source>Auto-optimization {0}</source>
-        <translation>Samodejna optimizacija {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>enabled</source>
-        <translation>omogočeno</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>disabled</source>
-        <translation>onemogočeno</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="69"/>
-        <source>Auto-centroid {0}</source>
-        <translation>Samodejni centroid {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="81"/>
-        <source>Confirmation {0}</source>
-        <translation>Potrditev {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="97"/>
-        <source>No layer selected. Please select a layer first.</source>
-        <translation>Nobena plast ni izbrana. Najprej izberite plast.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="104"/>
-        <source>Auto-optimizer module not available</source>
-        <translation>Modul za samodejno optimizacijo ni na voljo</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="108"/>
-        <source>Could not analyze layer &apos;{0}&apos;</source>
-        <translation>Plasti &apos;{0}&apos; ni mogoče analizirati</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="129"/>
-        <source>Layer &apos;{0}&apos; is already optimally configured.
-Type: {1}
-Features: {2:,}</source>
-        <translation>Plast &apos;{0}&apos; je že optimalno konfigurirana.
-Tip: {1}
-Objekti: {2:,}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="156"/>
-        <source>Auto-optimizer not available: {0}</source>
-        <translation>Samodejni optimizator ni na voljo: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="161"/>
-        <source>Error analyzing layer: {0}</source>
-        <translation>Napaka pri analizi plasti: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="189"/>
-        <source>Applied to &apos;{0}&apos;:
-{1}</source>
-        <translation>Uporabljeno na &apos;{0}&apos;:
-{1}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="196"/>
-        <source>No optimizations selected to apply.</source>
-        <translation>Nobena optimizacija ni izbrana za uporabo.</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="231"/>
-        <source>Optimization settings saved</source>
-        <translation>Nastavitve optimizacije shranjene</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="288"/>
-        <source>Dialog not available: {0}</source>
-        <translation>Pogovorno okno ni na voljo: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="293"/>
-        <source>Error: {0}</source>
-        <translation>Napaka: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="257"/>
-        <source>Backend optimization settings saved</source>
-        <translation>Nastavitve optimizacije zalednega sistema shranjene</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="286"/>
-        <source>Backend optimizations configured</source>
-        <translation>Optimizacije zalednega sistema konfigurirane</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="406"/>
-        <source>Optimized {0} layer(s)</source>
-        <translation>Optimiziranih {0} plasti</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="411"/>
-        <source>All layers using auto-selection</source>
-        <translation>Vse plasti uporabljajo samodejno izbiro</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/optimization_manager.py" line="420"/>
-        <source>Backend optimization unavailable</source>
-        <translation>Optimizacija zalednega sistema ni na voljo</translation>
-    </message>
-</context>
-<context>
-    <name>self._dockwidget</name>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Expression Evaluation</source>
-        <translation>Vrednotenje izraza</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2100"/>
-        <source>Error evaluating expression: {error_msg}</source>
-        <translation>Napaka pri vrednotenju izraza: {error_msg}</translation>
-    </message>
-</context>
-<context>
     <name>self.dockwidget</name>
     <message>
-        <location filename="../ui/managers/configuration_manager.py" line="685"/>
-        <source>Identify selected feature</source>
-        <translation>Identificiraj izbrani objekt</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="686"/>
-        <source>Zoom to selected feature</source>
-        <translation>Približaj na izbrani objekt</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="687"/>
-        <source>Toggle feature selection on map</source>
-        <translation>Preklopi izbiro objektov na zemljevidu</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="688"/>
-        <source>Auto-zoom when feature changes</source>
-        <translation>Samodejno približanje ob spremembi objekta</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="689"/>
-        <source>Link exploring widgets together</source>
-        <translation>Poveži gradnike za raziskovanje</translation>
-    </message>
-    <message>
-        <location filename="../ui/managers/configuration_manager.py" line="690"/>
-        <source>Reset all layer exploring properties</source>
-        <translation>Ponastavi vse lastnosti raziskovanja plasti</translation>
+        <location filename="../ui/controllers/config_controller.py" line="664"/>
+        <source>Language changed to &apos;{0}&apos;.</source>
+        <translation>Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

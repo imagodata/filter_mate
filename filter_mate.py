@@ -151,26 +151,37 @@ class FilterMate:
         Args:
             locale: Language code (e.g. 'fr', 'en', 'de') or 'auto' to use QGIS locale.
         """
+        logger.info(f"reload_translator called with locale={locale}")
+
         if locale == 'auto':
             locale_setting = QSettings().value('locale/userLocale')
             if locale_setting:
                 locale = locale_setting.split('_')[0] if '_' in locale_setting else locale_setting[0:2]
             else:
                 locale = 'en'
+            logger.info(f"reload_translator: auto resolved to {locale}")
 
         locale_path = os.path.join(self.plugin_dir, 'i18n', f'FilterMate_{locale}.qm')
 
         # Remove old translator if present
         if hasattr(self, 'translator') and self.translator:
             QCoreApplication.removeTranslator(self.translator)
+            logger.info("reload_translator: removed old translator")
+        else:
+            logger.warning("reload_translator: no existing translator to remove")
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
-            self.translator.load(locale_path)
-            QCoreApplication.installTranslator(self.translator)
-            logger.info(f"Reloaded translation: {locale}")
+            loaded = self.translator.load(locale_path)
+            if loaded:
+                QCoreApplication.installTranslator(self.translator)
+                # Verify translation works
+                test = self.tr('Open FilterMate panel')
+                logger.info(f"Reloaded translation: {locale} (test: '{test}')")
+            else:
+                logger.error(f"reload_translator: QTranslator.load() returned False for {locale_path}")
         else:
-            logger.warning(f"Translation file not found: {locale_path}")
+            logger.error(f"Translation file not found: {locale_path}")
 
     def retranslate_actions(self):
         """Retranslate menu and toolbar action texts after a language change."""
@@ -739,18 +750,33 @@ class FilterMate:
             # Register dynamically-injected extension buttons in widgets dict
             dw = self.app.dockwidget
             if (hasattr(dw, 'pushButton_action_qfieldcloud')
+                    and dw.pushButton_action_qfieldcloud is not None
                     and hasattr(dw, 'widgets')
                     and 'ACTION' in dw.widgets
                     and 'QFIELDCLOUD' not in dw.widgets['ACTION']):
-                dw.widgets['ACTION']['QFIELDCLOUD'] = {
-                    'TYPE': 'PushButton',
-                    'WIDGET': dw.pushButton_action_qfieldcloud,
-                    'SIGNALS': [],
-                    'ICON': None,
-                }
-                # Sync enabled state with current panel
-                if hasattr(dw, 'select_tabTools_index'):
-                    dw.select_tabTools_index()
+                # Only register if the extension is actually enabled
+                ext_enabled = True
+                try:
+                    ext_cfg = dw.CONFIG_DATA.get('EXTENSIONS', {}).get('qfieldcloud', {})
+                    from .config.config import _get_option_value
+                    ext_enabled = bool(_get_option_value(ext_cfg.get('enabled'), True))
+                except Exception:
+                    pass
+                if ext_enabled:
+                    dw.widgets['ACTION']['QFIELDCLOUD'] = {
+                        'TYPE': 'PushButton',
+                        'WIDGET': dw.pushButton_action_qfieldcloud,
+                        'SIGNALS': [],
+                        'ICON': None,
+                    }
+                    if hasattr(dw, 'select_tabTools_index'):
+                        dw.select_tabTools_index()
+                else:
+                    # Extension disabled — hide and remove the button
+                    dw.pushButton_action_qfieldcloud.hide()
+                    dw.pushButton_action_qfieldcloud.setParent(None)
+                    dw.pushButton_action_qfieldcloud = None
+                    logger.info("QFieldCloud button hidden (extension disabled)")
         except Exception as e:
             logger.warning("FilterMate: Extension dockwidget UI error: %s", e)
 
