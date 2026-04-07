@@ -117,6 +117,79 @@ def _set_option_value(options_dict, key, new_value):
         options_dict[key] = new_value
 
 
+def _migrate_config(config_data, default_data):
+    """Migrate user config to latest structure.
+
+    Merges new keys from default, adds _hidden/_display_name metadata,
+    and removes deprecated sections. Safe to call on already-migrated configs.
+
+    Args:
+        config_data: User's current config dict (modified in place)
+        default_data: Default config dict (read-only reference)
+
+    Returns:
+        True if any changes were made, False otherwise
+    """
+    dirty = False
+
+    # 1) Merge new keys from default into user config (recursive, non-destructive)
+    merge(config_data, default_data)
+
+    app = config_data.get("APP", {})
+    dockwidget = app.get("DOCKWIDGET", {})
+    options = app.get("OPTIONS", {})
+    colors = dockwidget.get("COLORS", {})
+
+    # 2) Add _hidden metadata where missing
+    hidden_targets = {
+        # (parent_dict, key) → must have _hidden: True in value dict
+        "CONFIG_META": (config_data, "_CONFIG_META"),
+        "PushButton": (dockwidget, "PushButton"),
+        "CURRENT_PROJECT": (config_data, "CURRENT_PROJECT"),
+    }
+    # OPTIONS entries that should be hidden
+    for key in ("DISCORD_INVITE", "GITHUB_PAGE", "GITHUB_REPOSITORY",
+                "QGIS_PLUGIN_REPOSITORY", "APP_SQLITE_PATH", "FRESH_RELOAD_FLAG"):
+        hidden_targets[f"OPTIONS.{key}"] = (options, key)
+
+    for label, (parent, key) in hidden_targets.items():
+        val = parent.get(key)
+        if isinstance(val, dict):
+            if val.get("_hidden") is not True:
+                val["_hidden"] = True
+                dirty = True
+        elif key in parent:
+            # Convert raw value (str, bool, etc.) to wrapped dict with _hidden
+            parent[key] = {"_hidden": True, "value": val}
+            dirty = True
+
+    # 3) Add _display_name where missing
+    display_names = {
+        # (dict_ref, expected_display_name)
+        "APP": (app, "Settings"),
+        "DOCKWIDGET": (dockwidget, "Interface"),
+        "COLORS": (colors, "Appearance"),
+        "OPTIONS": (options, "Performance"),
+    }
+    for label, (d, name) in display_names.items():
+        if isinstance(d, dict) and d.get("_display_name") != name:
+            d["_display_name"] = name
+            dirty = True
+
+    # 4) Remove deprecated PERFORMANCE section (unused, duplicates OPTIMIZATION_THRESHOLDS)
+    if "PERFORMANCE" in options:
+        del options["PERFORMANCE"]
+        dirty = True
+
+    # 5) Remove orphan COLORS entries (BACKGROUND/FONT/ACCENT outside THEMES)
+    for orphan_key in ("BACKGROUND", "FONT", "ACCENT"):
+        if orphan_key in colors:
+            del colors[orphan_key]
+            dirty = True
+
+    return dirty
+
+
 def get_fallback_config():
     """
     Return a deep copy of the fallback configuration.
@@ -233,6 +306,25 @@ def init_env_vars():
         except Exception as validation_error:
             QgsMessageLog.logMessage(
                 f"FilterMate: Configuration validation skipped: {validation_error}",
+                "FilterMate",
+                Qgis.MessageLevel.Info
+            )
+
+        # v4.7: Migrate config structure (add _hidden, _display_name, remove dead sections)
+        try:
+            with open(config_default_path, 'r', encoding='utf-8') as f:
+                default_data = json.load(f)
+            if _migrate_config(CONFIG_DATA, default_data):
+                with open(config_json_path, 'w', encoding='utf-8') as f:
+                    json.dump(CONFIG_DATA, f, indent=4, ensure_ascii=False)
+                QgsMessageLog.logMessage(
+                    "FilterMate: Configuration migrated to latest structure",
+                    "FilterMate",
+                    Qgis.MessageLevel.Info
+                )
+        except Exception as mig_err:
+            QgsMessageLog.logMessage(
+                f"FilterMate: Config migration skipped: {mig_err}",
                 "FilterMate",
                 Qgis.MessageLevel.Info
             )

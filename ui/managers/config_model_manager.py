@@ -39,6 +39,7 @@ class ConfigModelManager:
 
     def __init__(self, dockwidget: 'FilterMateDockWidget'):
         self.dockwidget = dockwidget
+        self._language_change_pending = False
         logger.debug("ConfigModelManager initialized")
 
     # ========================================
@@ -60,10 +61,18 @@ class ConfigModelManager:
             self._try_live_language_change(input_data)
 
     def _try_live_language_change(self, item):
-        """If the changed item is the LANGUAGE setting, apply it immediately."""
+        """Apply language change live: reload translator, retranslate, save.
+
+        Patches CONFIG_DATA directly (no serialize) to avoid psycopg2.connection
+        leaking into JSON. Defers the save to next event loop tick so it doesn't
+        interfere with the delegate's setModelData still in progress.
+        No tree rebuild — the tree already shows the correct value from setModelData.
+        """
+        if self._language_change_pending:
+            return
+
         from qgis.PyQt.QtCore import Qt
         try:
-            # Check if this item's key (column 0 sibling) is LANGUAGE
             index = item.index()
             model = self.dockwidget.config_view.model
             key_item = model.itemFromIndex(index.siblingAtColumn(0))
@@ -73,7 +82,6 @@ class ConfigModelManager:
             if key_name != 'LANGUAGE':
                 return
 
-            # Extract locale from the changed value item
             value_data = item.data(Qt.ItemDataRole.UserRole)
             new_locale = None
             if isinstance(value_data, dict) and 'value' in value_data:
@@ -84,8 +92,11 @@ class ConfigModelManager:
             if not new_locale:
                 return
 
+            self._language_change_pending = True
+            self._pending_locale = new_locale
             logger.info(f"Live language change: {new_locale}")
 
+            # Reload translator + retranslate UI immediately
             from qgis.utils import plugins
             plugin = plugins.get('filter_mate')
             if plugin and hasattr(plugin, 'reload_translator'):
@@ -94,13 +105,86 @@ class ConfigModelManager:
                     plugin.retranslate_actions()
                 if hasattr(self.dockwidget, 'retranslate_all_ui'):
                     self.dockwidget.retranslate_all_ui()
-                logger.info(f"Live language change applied: {new_locale}")
 
-                # Also save to disk immediately so it persists on restart
-                self.save_configuration_model()
+            # Defer save to next event loop tick (after setModelData finishes)
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(0, self._deferred_language_save)
 
         except Exception as e:
+            self._language_change_pending = False
             logger.warning(f"_try_live_language_change failed: {e}")
+
+    def _deferred_language_save(self):
+        """Save language change to disk by patching CONFIG_DATA directly.
+
+        No full serialize (avoids psycopg2.connection leak).
+        No tree rebuild (avoids tree collapse + stale model issues).
+        """
+        try:
+            new_locale = getattr(self, '_pending_locale', None)
+            dw = self.dockwidget
+            if not new_locale or not hasattr(dw, 'CONFIG_DATA'):
+                return
+
+            # Patch CONFIG_DATA in place
+            app = dw.CONFIG_DATA.get('APP')
+            if isinstance(app, dict):
+                dock = app.get('DOCKWIDGET')
+                if isinstance(dock, dict):
+                    lang = dock.get('LANGUAGE')
+                    if isinstance(lang, dict):
+                        lang['value'] = new_locale
+                    else:
+                        dock['LANGUAGE'] = {'value': new_locale}
+
+            # Sync ENV_VARS
+            from ...config.config import ENV_VARS
+            ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
+
+            # Save to disk (sanitize to strip runtime objects like connections)
+            config_path = ENV_VARS.get(
+                'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json')
+            clean = self._sanitize_for_json(dw.CONFIG_DATA)
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(clean, f, indent=4, ensure_ascii=False)
+            logger.info(f"Language saved to disk: {new_locale}")
+
+        except Exception as e:
+            logger.error(f"_deferred_language_save failed: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+        finally:
+            self._language_change_pending = False
+            self._pending_locale = None
+
+    def _rebuild_config_tree_after_language_change(self):
+        """Rebuild the config tree model so tr()-based strings use the new locale.
+
+        Disconnects itemChanged before rebuilding to avoid infinite recursion,
+        then reconnects afterwards.
+        """
+        dw = self.dockwidget
+        try:
+            self.disconnect_config_model_signal()
+
+            from ...ui.widgets.json_view.model import JsonModel
+            dw.config_model = JsonModel(
+                data=dw.CONFIG_DATA,
+                editable_keys=False,
+                editable_values=True,
+                plugin_dir=dw.plugin_dir,
+            )
+
+            if hasattr(dw, 'config_view') and dw.config_view:
+                dw.config_view.setModel(dw.config_model)
+                dw.config_view.model = dw.config_model
+
+            self.connect_config_model_signal()
+            logger.info("Config tree rebuilt after language change")
+        except Exception as e:
+            logger.warning(f"_rebuild_config_tree_after_language_change failed: {e}")
+            # Ensure signal is reconnected even on failure
+            self.connect_config_model_signal()
 
     def apply_pending_config_changes(self):
         """Apply all pending configuration changes when OK button is clicked.
@@ -167,20 +251,58 @@ class ConfigModelManager:
         except Exception as e:
             logger.error(f"Error reloading configuration model: {e}")
 
+    @staticmethod
+    def _sanitize_for_json(obj):
+        """Recursively remove non-JSON-serializable values from a data structure.
+
+        Returns a clean copy safe for json.dumps(). Drops any value that is not
+        a JSON primitive, dict, or list (e.g. Qt objects, database connections).
+        """
+        if isinstance(obj, dict):
+            return {
+                k: ConfigModelManager._sanitize_for_json(v)
+                for k, v in obj.items()
+                if isinstance(v, (dict, list, str, int, float, bool, type(None)))
+            }
+        if isinstance(obj, list):
+            return [
+                ConfigModelManager._sanitize_for_json(v)
+                for v in obj
+                if isinstance(v, (dict, list, str, int, float, bool, type(None)))
+            ]
+        return obj
+
     def save_configuration_model(self):
         """Save current config model to file and sync ENV_VARS."""
         from ...config.config import ENV_VARS
         dw = self.dockwidget
         if not dw.widgets_initialized:
             return
-        dw.CONFIG_DATA = dw.config_model.serialize()
+        serialized = dw.config_model.serialize()
+        # Strip any non-JSON objects that leaked from Qt model data
+        serialized = self._sanitize_for_json(serialized)
+
+        # Validate critical path before accepting serialized data
+        if isinstance(serialized, dict) and 'APP' in serialized:
+            dw.CONFIG_DATA = serialized
+        else:
+            # serialize produced wrong keys (e.g. _display_name as key)
+            # — skip overwriting CONFIG_DATA, just patch from model
+            logger.warning(
+                f"save_configuration_model: serialize produced unexpected "
+                f"top-level keys {list(serialized.keys()) if isinstance(serialized, dict) else type(serialized)}, "
+                f"keeping existing CONFIG_DATA"
+            )
+
         # Sync ENV_VARS so all code reading from it sees updated values
         ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
         config_path = ENV_VARS.get(
             'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json'
         )
-        with open(config_path, 'w') as f:
-            f.write(json.dumps(dw.CONFIG_DATA, indent=4))
+        # Sanitize again before writing (CONFIG_DATA may have runtime objects)
+        clean = self._sanitize_for_json(dw.CONFIG_DATA)
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(clean, f, indent=4, ensure_ascii=False)
 
     # ========================================
     # SIGNAL MANAGEMENT
@@ -288,7 +410,7 @@ class ConfigModelManager:
             # Connect signal using centralized method
             self.connect_config_model_signal()
 
-            # Hide OK/Cancel — config changes are applied live
+            # Hide OK/Cancel — all changes are applied live
             if hasattr(dw, 'buttonBox'):
                 dw.buttonBox.hide()
         except Exception as e:

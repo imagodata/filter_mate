@@ -132,10 +132,10 @@ class ConfigController(BaseController):
 
     def data_changed_configuration_model(self, input_data: Any = None) -> None:
         """
-        Track configuration changes without applying them immediately.
+        Apply configuration changes immediately (live, no OK/Cancel).
 
         Called when user edits a value in the configuration tree view.
-        Stores the change for later application when OK is clicked.
+        LANGUAGE is handled by ConfigModelManager._try_live_language_change.
 
         Args:
             input_data: The QStandardItem that was changed
@@ -160,31 +160,46 @@ class ConfigController(BaseController):
 
             items_keys_values_path.reverse()
 
-            # Store change for later application
             change = {
                 'path': items_keys_values_path,
                 'index': index,
                 'item': input_data
             }
-            self._pending_changes.append(change)
-            self._changes_pending = True
-
-            # Enable OK/Cancel buttons when changes are pending
-            self._update_buttonbox_state(enabled=True)
 
             logger.info(
-                f"Configuration change pending: {' → '.join(items_keys_values_path)}"
+                f"Configuration change (live): {' → '.join(items_keys_values_path)}"
             )
 
-            # Apply certain changes immediately for live preview
-            self._apply_immediate_changes(change)
+            # LANGUAGE save is handled by ConfigModelManager._try_live_language_change
+            if 'LANGUAGE' in items_keys_values_path:
+                return
 
-            # Emit signal
+            # Apply the change handler
+            changes_summary: List[str] = []
+
+            if 'ICONS' in items_keys_values_path:
+                self._apply_icon_change(change, changes_summary)
+
+            self._apply_theme_change(change, changes_summary)
+            self._apply_ui_profile_change(change, changes_summary)
+            self._apply_action_bar_position_change(change, changes_summary)
+            self._apply_export_style_change(change, changes_summary)
+            self._apply_export_format_change(change, changes_summary)
+
+            # Save immediately
+            self._save_configuration()
+
+            if changes_summary:
+                logger.info(f"Applied live: {', '.join(changes_summary)}")
+
+            if hasattr(self.dockwidget, 'refresh_ui_responsiveness_params'):
+                self.dockwidget.refresh_ui_responsiveness_params()
+
             key = items_keys_values_path[-1] if items_keys_values_path else ''
             self.config_changed.emit(key, None)
 
         except Exception as e:
-            logger.error(f"Error tracking configuration change: {e}")
+            logger.error(f"Error applying configuration change: {e}")
 
     # === Immediate (Live Preview) Changes ===
 
@@ -211,8 +226,7 @@ class ConfigController(BaseController):
         """
         Apply all pending configuration changes when OK button is clicked.
 
-        Orchestrates the application of different config change types by
-        delegating to specialized methods.
+        Applies each change handler, then saves once at the end.
 
         Returns:
             True if changes were applied successfully, False otherwise
@@ -243,23 +257,17 @@ class ConfigController(BaseController):
                 self._apply_export_format_change(change, changes_summary)
                 self._apply_language_change(change, changes_summary)
 
-                # Save configuration after each change
-                self._save_configuration()
+            # Save once after all changes are applied
+            self._save_configuration()
 
-            # Clear pending changes after applying them
+            # Clear pending changes
             self._pending_changes.clear()
             self._changes_pending = False
-
-            # Disable OK/Cancel buttons after changes have been applied
             self._update_buttonbox_state(enabled=False)
 
-            # Refresh runtime UI params (debounce timers, etc.) from updated config
+            # Refresh runtime UI params (debounce timers, etc.)
             if hasattr(self.dockwidget, 'refresh_ui_responsiveness_params'):
                 self.dockwidget.refresh_ui_responsiveness_params()
-
-            logger.info(
-                "All pending configuration changes have been applied and saved"
-            )
 
             if changes_summary:
                 logger.info(f"Applied changes: {', '.join(changes_summary)}")
@@ -268,6 +276,8 @@ class ConfigController(BaseController):
 
         except Exception as e:
             logger.error(f"Error applying configuration changes: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return False
 
     def cancel_pending_config_changes(self) -> None:
@@ -275,7 +285,7 @@ class ConfigController(BaseController):
         Cancel pending configuration changes when Cancel button is clicked.
 
         Reloads configuration from file to revert changes in tree view.
-        Properly disconnects/reconnects the model signal to avoid stale refs.
+        If language was previewed, reverts the translator to the saved locale.
         """
         if not self.has_pending_changes:
             logger.info("No pending configuration changes to cancel")
@@ -283,6 +293,11 @@ class ConfigController(BaseController):
 
         logger.info(
             f"Cancelling {len(self._pending_changes)} pending configuration change(s)"
+        )
+
+        # Check if language was among the pending changes
+        had_language_change = any(
+            'LANGUAGE' in c.get('path', []) for c in self._pending_changes
         )
 
         try:
@@ -297,11 +312,29 @@ class ConfigController(BaseController):
             if hasattr(self.dockwidget, '_config_model_manager'):
                 self.dockwidget._config_model_manager.connect_config_model_signal()
 
+            # Revert language translator if it was previewed
+            if had_language_change:
+                try:
+                    saved_locale = (self.dockwidget.CONFIG_DATA
+                                    .get('APP', {})
+                                    .get('DOCKWIDGET', {})
+                                    .get('LANGUAGE', {})
+                                    .get('value', 'auto'))
+                    from qgis.utils import plugins
+                    plugin = plugins.get('filter_mate')
+                    if plugin and hasattr(plugin, 'reload_translator'):
+                        plugin.reload_translator(saved_locale)
+                        if hasattr(plugin, 'retranslate_actions'):
+                            plugin.retranslate_actions()
+                        if hasattr(self.dockwidget, 'retranslate_all_ui'):
+                            self.dockwidget.retranslate_all_ui()
+                        logger.info(f"Language reverted to saved: {saved_locale}")
+                except Exception as e:
+                    logger.warning(f"Could not revert language: {e}")
+
             # Clear pending changes
             self._pending_changes.clear()
             self._changes_pending = False
-
-            # Disable buttons after cancelling changes
             self._update_buttonbox_state(enabled=False)
 
             logger.info("Configuration changes cancelled successfully")
@@ -658,15 +691,17 @@ class ConfigController(BaseController):
             if self.dockwidget and hasattr(self.dockwidget, 'retranslate_all_ui'):
                 self.dockwidget.retranslate_all_ui()
 
+            # Patch CONFIG_DATA directly so the value persists even if
+            # serialize() fails (psycopg2.connection in CURRENT_PROJECT)
+            lang_node = (self.dockwidget.CONFIG_DATA
+                         .get('APP', {})
+                         .get('DOCKWIDGET', {})
+                         .get('LANGUAGE'))
+            if isinstance(lang_node, dict):
+                lang_node['value'] = new_locale
+
             changes_summary.append(f"Language: {new_locale}")
             logger.info(f"_apply_language_change: complete ({new_locale})")
-            from ...infrastructure.feedback import show_info
-            show_info(
-                "FilterMate",
-                self.dockwidget.tr(
-                    "Language changed to '{0}'."
-                ).format(new_locale)
-            )
 
         except Exception as e:
             logger.error(f"Error applying LANGUAGE change: {e}")
@@ -787,6 +822,17 @@ class ConfigController(BaseController):
             return False
 
     # === Helper Methods ===
+
+    def clear_pending_changes(self) -> None:
+        """Clear all pending changes and disable OK/Cancel buttons.
+
+        Used when a live change (e.g. language) saves and rebuilds the config
+        tree immediately, making any stored pending references stale.
+        """
+        self._pending_changes.clear()
+        self._changes_pending = False
+        self._update_buttonbox_state(enabled=False)
+        logger.debug("Pending config changes cleared (live change applied)")
 
     def _update_buttonbox_state(self, enabled: bool) -> None:
         """

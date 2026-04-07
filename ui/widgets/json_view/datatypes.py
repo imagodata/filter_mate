@@ -11,6 +11,7 @@ from . import themes
 
 
 TypeRole = QtCore.Qt.ItemDataRole.UserRole + 1
+HiddenDataRole = QtCore.Qt.ItemDataRole.UserRole + 10
 PLUGIN_DIR = ''
 
 
@@ -312,16 +313,57 @@ class DictType(DataType):
     """Dictionaries"""
     THEME_COLOR_KEY = 'dict'
 
+    # Keys that are config metadata, not user data — always hidden from tree
+    _META_KEYS = {'_hidden', '_display_name', '_CONFIG_VERSION'}
+
     def matches(self, data):
         return isinstance(data, dict)
 
+    def _is_hidden(self, key, value):
+        """Check if a key/value pair should be hidden from the config tree."""
+        # Skip metadata keys (start with _)
+        if isinstance(key, str) and key.startswith('_'):
+            return True
+        # Skip dicts that have explicit _hidden flag
+        if isinstance(value, dict) and value.get('_hidden') is True:
+            return True
+        return False
+
     def next(self, model, data, parent):
+        # Collect hidden entries to preserve during serialization
+        hidden_data = {}
         for key, value in data.items():
+            if self._is_hidden(key, value):
+                hidden_data[key] = value
+                continue
             type_ = match_type(value)
-            key_item = self.key_item(key, datatype=type_, model=model)
+            # Use _display_name from child dict if available
+            display_key = key
+            if isinstance(value, dict) and '_display_name' in value:
+                display_key = value['_display_name']
+            key_item = self.key_item(display_key, datatype=type_, model=model)
+            # Store the original JSON key so serialize() can reconstruct it
+            if display_key != key:
+                key_item.setData(key, QtCore.Qt.ItemDataRole.UserRole)
             value_item = type_.value_item(value, model, key)
             parent.appendRow([key_item, value_item])
             type_.next(model, data=value, parent=key_item)
+
+        # Store hidden data on the parent's value item (column 1) for roundtrip.
+        # Deep-sanitize to strip non-JSON objects (e.g. psycopg2.connection
+        # stored at runtime in CURRENT_PROJECT.OPTIONS.ACTIVE_POSTGRESQL).
+        if hidden_data:
+            clean = self._deep_sanitize(hidden_data)
+            value_sibling = parent.parent().child(parent.row(), 1) if parent.parent() else None
+            if value_sibling is None:
+                # Root level — store on invisible root via model attribute
+                if not hasattr(model, '_hidden_data'):
+                    model._hidden_data = {}
+                model._hidden_data.update(clean)
+            else:
+                existing = value_sibling.data(HiddenDataRole) or {}
+                existing.update(clean)
+                value_sibling.setData(existing, HiddenDataRole)
 
     def value_item(self, value, model, key):
         item = QtGui.QStandardItem()
@@ -332,17 +374,57 @@ class DictType(DataType):
         key_item = parent.child(item.row(), 0)
         if key_item:
             if isinstance(data, dict):
-                key = key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
+                # Use original JSON key if stored, otherwise display text
+                original_key = key_item.data(QtCore.Qt.ItemDataRole.UserRole)
+                key = original_key if original_key else key_item.data(QtCore.Qt.ItemDataRole.DisplayRole)
                 data[key] = {}
                 data = data[key]
             elif isinstance(data, list):
                 new_data = {}
                 data.append(new_data)
                 data = new_data
+
+        # Re-inject hidden data that was stripped from the tree
+        value_item = parent.child(item.row(), 1) if key_item else None
+        if value_item:
+            hidden = value_item.data(HiddenDataRole)
+            if isinstance(hidden, dict):
+                self._merge_json_safe(data, hidden)
+
         for row in range(item.rowCount()):
             child_item = item.child(row, 0)
             type_ = child_item.data(TypeRole)
             type_.serialize(model=self, item=child_item, data=data, parent=item)
+
+        # Re-inject root-level hidden data
+        if parent == getattr(model, 'invisibleRootItem', lambda: None)():
+            root_hidden = getattr(model, '_hidden_data', None)
+            if isinstance(root_hidden, dict):
+                self._merge_json_safe(data, root_hidden)
+
+    @staticmethod
+    def _deep_sanitize(obj):
+        """Recursively strip non-JSON-serializable values from a data structure."""
+        if isinstance(obj, dict):
+            return {
+                k: DictType._deep_sanitize(v)
+                for k, v in obj.items()
+                if isinstance(v, (dict, list, str, int, float, bool, type(None)))
+            }
+        if isinstance(obj, list):
+            return [
+                DictType._deep_sanitize(v)
+                for v in obj
+                if isinstance(v, (dict, list, str, int, float, bool, type(None)))
+            ]
+        return obj
+
+    @staticmethod
+    def _merge_json_safe(target, source):
+        """Merge source into target, skipping non-JSON-serializable values."""
+        for k, v in source.items():
+            if isinstance(v, (dict, list, str, int, float, bool, type(None))):
+                target[k] = DictType._deep_sanitize(v)
 
 
 # -----------------------------------------------------------------------------
@@ -639,9 +721,29 @@ class ChoicesType(DataType):
             current_idx = list(data['choices']).index(data['value'])
         except ValueError:
             current_idx = 0
+        # Block signals during init so setCurrentIndex doesn't trigger commit
+        cbx.blockSignals(True)
         cbx.setCurrentIndex(current_idx)
+        cbx.blockSignals(False)
         if 'description' in data:
             cbx.setToolTip(str(data['description']))
+
+        # Commit + close editor immediately when user selects a value
+        # (instead of waiting for click outside / focus loss)
+        def _on_index_changed(idx):
+            view = cbx.parent()
+            while view and not isinstance(view, QtWidgets.QAbstractItemView):
+                view = view.parent()
+            if view:
+                delegate = view.itemDelegate(index)
+                if delegate:
+                    delegate.commitData.emit(cbx)
+                    delegate.closeEditor.emit(
+                        cbx,
+                        QtWidgets.QAbstractItemDelegate.EndEditHint.NoHint
+                    )
+
+        cbx.currentIndexChanged.connect(_on_index_changed)
         return cbx
 
     def setModelData(self, editor, model, index):
@@ -724,33 +826,51 @@ class ConfigValueType(DataType):
                     return len(data) >= 2
         return False
 
+    def _auto_commit(self, editor, index):
+        """Connect editor signals to auto-commit + close on value change."""
+        def _commit():
+            view = editor.parent()
+            while view and not isinstance(view, QtWidgets.QAbstractItemView):
+                view = view.parent()
+            if view:
+                delegate = view.itemDelegate(index)
+                if delegate:
+                    delegate.commitData.emit(editor)
+                    delegate.closeEditor.emit(
+                        editor,
+                        QtWidgets.QAbstractItemDelegate.EndEditHint.NoHint
+                    )
+
+        if isinstance(editor, QtWidgets.QCheckBox):
+            editor.stateChanged.connect(lambda: _commit())
+        elif isinstance(editor, (QtWidgets.QSpinBox, QtWidgets.QDoubleSpinBox)):
+            editor.editingFinished.connect(_commit)
+
     def createEditor(self, parent, option, index):
         """Create appropriate editor based on value type."""
         data = index.data(QtCore.Qt.ItemDataRole.UserRole)
         value = data.get('value')
 
         if isinstance(value, bool):
-            # Use checkbox for boolean
             cbx = QtWidgets.QCheckBox(parent)
             cbx.setChecked(value)
             if 'description' in data:
                 cbx.setToolTip(str(data['description']))
+            self._auto_commit(cbx, index)
             return cbx
         elif isinstance(value, int) and not isinstance(value, bool):
-            # Use spinbox for integers with min/max from config metadata
             spinbox = QtWidgets.QSpinBox(parent)
             spinbox.setMinimum(int(data['min']) if 'min' in data else -2147483648)
             spinbox.setMaximum(int(data['max']) if 'max' in data else 2147483647)
             spinbox.setValue(value)
             if 'description' in data:
                 spinbox.setToolTip(str(data['description']))
+            self._auto_commit(spinbox, index)
             return spinbox
         elif isinstance(value, float):
-            # Use double spinbox for floats with min/max from config metadata
             spinbox = QtWidgets.QDoubleSpinBox(parent)
             min_val = data.get('min')
             max_val = data.get('max')
-            # Infer decimals from min/max precision
             decimals = 6
             for ref in (min_val, max_val, value):
                 if ref is not None:
@@ -764,9 +884,9 @@ class ConfigValueType(DataType):
             spinbox.setValue(value)
             if 'description' in data:
                 spinbox.setToolTip(str(data['description']))
+            self._auto_commit(spinbox, index)
             return spinbox
         else:
-            # Use line edit for strings and other types
             line_edit = QtWidgets.QLineEdit(parent)
             line_edit.setText(str(value) if value is not None else '')
             if 'description' in data:
