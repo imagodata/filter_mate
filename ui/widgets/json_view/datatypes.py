@@ -728,20 +728,14 @@ class ChoicesType(DataType):
         if 'description' in data:
             cbx.setToolTip(str(data['description']))
 
-        # Commit + close editor immediately when user selects a value
-        # (instead of waiting for click outside / focus loss)
+        # Commit immediately when user selects a value — update model
+        # directly instead of relying on Qt commit signals.
+        # Store reference to self (ChoicesType) for the closure.
+        choices_type = self
+
         def _on_index_changed(idx):
-            view = cbx.parent()
-            while view and not isinstance(view, QtWidgets.QAbstractItemView):
-                view = view.parent()
-            if view:
-                delegate = view.itemDelegate(index)
-                if delegate:
-                    delegate.commitData.emit(cbx)
-                    delegate.closeEditor.emit(
-                        cbx,
-                        QtWidgets.QAbstractItemDelegate.EndEditHint.NoHint
-                    )
+            # Update model data directly
+            choices_type.setModelData(cbx, index.model(), index)
 
         cbx.currentIndexChanged.connect(_on_index_changed)
         return cbx
@@ -827,19 +821,14 @@ class ConfigValueType(DataType):
         return False
 
     def _auto_commit(self, editor, index):
-        """Connect editor signals to auto-commit + close on value change."""
+        """Connect editor signals to auto-commit on value change.
+
+        Calls setModelData directly instead of relying on Qt commit signals.
+        """
+        config_type = self
+
         def _commit():
-            view = editor.parent()
-            while view and not isinstance(view, QtWidgets.QAbstractItemView):
-                view = view.parent()
-            if view:
-                delegate = view.itemDelegate(index)
-                if delegate:
-                    delegate.commitData.emit(editor)
-                    delegate.closeEditor.emit(
-                        editor,
-                        QtWidgets.QAbstractItemDelegate.EndEditHint.NoHint
-                    )
+            config_type.setModelData(editor, index.model(), index)
 
         if isinstance(editor, QtWidgets.QCheckBox):
             editor.stateChanged.connect(lambda: _commit())
