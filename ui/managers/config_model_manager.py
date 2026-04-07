@@ -142,13 +142,41 @@ class ConfigModelManager:
             # 1) Reload translator + retranslate UI
             from qgis.utils import plugins
             plugin = plugins.get('filter_mate')
+            QgsMessageLog.logMessage(
+                f"plugin={plugin is not None}, has_reload={hasattr(plugin, 'reload_translator') if plugin else False}",
+                "FilterMate", Qgis.MessageLevel.Warning
+            )
             if plugin and hasattr(plugin, 'reload_translator'):
-                plugin.reload_translator(new_locale)
-                if hasattr(plugin, 'retranslate_actions'):
-                    plugin.retranslate_actions()
-                if hasattr(dw, 'retranslate_all_ui'):
-                    dw.retranslate_all_ui()
-                logger.info(f"Language applied: {new_locale}")
+                try:
+                    plugin.reload_translator(new_locale)
+                    QgsMessageLog.logMessage(
+                        f"reload_translator OK for {new_locale}",
+                        "FilterMate", Qgis.MessageLevel.Warning
+                    )
+                except Exception as tr_err:
+                    QgsMessageLog.logMessage(
+                        f"reload_translator FAILED: {tr_err}",
+                        "FilterMate", Qgis.MessageLevel.Critical
+                    )
+                try:
+                    if hasattr(plugin, 'retranslate_actions'):
+                        plugin.retranslate_actions()
+                    if hasattr(dw, 'retranslate_all_ui'):
+                        dw.retranslate_all_ui()
+                    QgsMessageLog.logMessage(
+                        f"retranslate_all_ui OK",
+                        "FilterMate", Qgis.MessageLevel.Warning
+                    )
+                except Exception as rt_err:
+                    QgsMessageLog.logMessage(
+                        f"retranslate FAILED: {rt_err}",
+                        "FilterMate", Qgis.MessageLevel.Critical
+                    )
+            else:
+                QgsMessageLog.logMessage(
+                    f"SKIP: plugin not found or no reload_translator",
+                    "FilterMate", Qgis.MessageLevel.Critical
+                )
 
             # 2) Patch CONFIG_DATA in place
             app = dw.CONFIG_DATA.get('APP')
