@@ -728,19 +728,13 @@ class ChoicesType(DataType):
         if 'description' in data:
             cbx.setToolTip(str(data['description']))
 
-        # Auto-apply on selection: update model data directly.
-        # Track initial index to ignore the spurious signal from setEditorData.
+        # Auto-apply on user selection. Use 'activated' signal — it only fires
+        # on actual user interaction (click/Enter), never on programmatic changes
+        # (setCurrentIndex, setEditorData, etc.).
         choices_type = self
         captured_index = QtCore.QPersistentModelIndex(index)
-        initial_idx = [current_idx]  # mutable to allow closure update
 
-        def _on_index_changed(new_idx):
-            # Skip if this is the initial value (editor just opened)
-            if initial_idx[0] is not None:
-                if new_idx == initial_idx[0]:
-                    return
-                initial_idx[0] = None  # first real change clears the guard
-
+        def _on_activated(new_idx):
             if not captured_index.isValid():
                 return
             model_idx = QtCore.QModelIndex(captured_index)
@@ -749,7 +743,7 @@ class ChoicesType(DataType):
                 return
             choices_type.setModelData(cbx, m, model_idx)
 
-        cbx.currentIndexChanged.connect(_on_index_changed)
+        cbx.activated.connect(_on_activated)
         return cbx
 
     def setModelData(self, editor, model, index):

@@ -108,9 +108,22 @@ class ConfigModelManager:
             if not new_locale:
                 return
 
+            # Ignore if this matches the currently saved locale
+            # (spurious itemChanged when editor opens / setEditorData runs)
+            saved_locale = (dw.CONFIG_DATA
+                            .get('APP', {})
+                            .get('DOCKWIDGET', {})
+                            .get('LANGUAGE', {})
+                            .get('value', 'auto'))
+            if new_locale == saved_locale:
+                return
+
             self._language_change_pending = True
             self._pending_locale = new_locale
-            logger.info(f"Live language change: {new_locale}")
+            QgsMessageLog.logMessage(
+                f"Live language change: {saved_locale} -> {new_locale}",
+                "FilterMate", Qgis.MessageLevel.Warning
+            )
 
             # Defer everything to next event loop tick
             # (setModelData is still in progress — retranslateUi during it can cause issues)
