@@ -728,14 +728,20 @@ class ChoicesType(DataType):
         if 'description' in data:
             cbx.setToolTip(str(data['description']))
 
-        # Commit immediately when user selects a value — update model
-        # directly instead of relying on Qt commit signals.
-        # Store reference to self (ChoicesType) for the closure.
+        # Auto-apply on selection: update model data directly, then emit
+        # itemChanged explicitly to trigger the config save pipeline.
         choices_type = self
+        captured_index = QtCore.QPersistentModelIndex(index)
 
-        def _on_index_changed(idx):
-            # Update model data directly
-            choices_type.setModelData(cbx, index.model(), index)
+        def _on_index_changed(new_idx):
+            if not captured_index.isValid():
+                return
+            model_idx = QtCore.QModelIndex(captured_index)
+            m = model_idx.model()
+            if not m or not hasattr(m, 'itemFromIndex'):
+                return
+            # Update model data (setData inside emits itemChanged)
+            choices_type.setModelData(cbx, m, model_idx)
 
         cbx.currentIndexChanged.connect(_on_index_changed)
         return cbx

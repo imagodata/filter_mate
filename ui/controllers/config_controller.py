@@ -148,7 +148,13 @@ class ConfigController(BaseController):
 
         try:
             index = input_data.index()
-            item_key = self.dockwidget.config_view.model.itemFromIndex(
+            if not index.isValid():
+                return
+            # Use item's own model (not config_view.model which may be a proxy)
+            source_model = index.model()
+            if not source_model or not hasattr(source_model, 'itemFromIndex'):
+                return
+            item_key = source_model.itemFromIndex(
                 index.siblingAtColumn(0)
             )
 

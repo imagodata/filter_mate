@@ -73,12 +73,18 @@ class ConfigModelManager:
 
         from qgis.PyQt.QtCore import Qt
         try:
+            # Use the item's own model (not config_view.model which may be a proxy)
             index = item.index()
-            model = self.dockwidget.config_view.model
+            if not index.isValid():
+                return
+            model = index.model()
+            if not model or not hasattr(model, 'itemFromIndex'):
+                return
             key_item = model.itemFromIndex(index.siblingAtColumn(0))
             if not key_item:
                 return
             key_name = key_item.data(Qt.ItemDataRole.DisplayRole)
+            logger.debug(f"_try_live_language_change: key={key_name}")
             if key_name != 'LANGUAGE':
                 return
 
