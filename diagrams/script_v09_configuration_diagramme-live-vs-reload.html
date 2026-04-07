@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Live vs Reload</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Live vs Reload</h1>
+  <div class="source">website/SCRIPT_V09_CONFIGURATION.md</div>
+  <div class="mermaid">
+graph LR
+    subgraph LIVE["Changements LIVE (immediats)"]
+        direction TB
+        L1["LANGUAGE<br/>Langue de l'interface"]
+        L2["FEEDBACK_LEVEL<br/>minimal / normal / verbose"]
+        L3["ACTIVE_THEME<br/>auto / default / dark / light"]
+        L4["OPTIMIZATION_THRESHOLDS<br/>8 seuils de performance"]
+        L5["QUERY_CACHE<br/>Taille, TTL, options"]
+        L6["UI_RESPONSIVENESS<br/>4 debounce timers"]
+        L7["SPATIALITE<br/>batch size, timeout"]
+        L8["EXPRESSION_BUILDER<br/>4 limites"]
+        L9["QUERY_TIMEOUTS<br/>PG 60s, local 30s"]
+        L10["STREAMING_EXPORT<br/>seuil, chunk size"]
+        L11["GPKG_PRESERVE_GROUPS<br/>KML_PRESERVE_GROUPS"]
+        L12["FAVORITES<br/>recent limit"]
+    end
+
+    subgraph RELOAD["Necessite RELOAD"]
+        direction TB
+        R1["DOCK_POSITION<br/>left / right / top / bottom"]
+        R2["ACTION_BAR_POSITION<br/>top / bottom / left / right"]
+        R3["ACTION_BAR_VERTICAL_ALIGNMENT<br/>top / bottom"]
+        R4["UI_PROFILE<br/>auto / compact / normal / hidpi"]
+    end
+
+    LIVE --- NOTE1["Pas de redemarrage<br/>Effet immediat<br/>ou au prochain evenement"]
+    RELOAD --- NOTE2["Utiliser le bouton<br/>Reload Plugin"]
+
+    style LIVE fill:#388E3C,color:#fff
+    style RELOAD fill:#D32F2F,color:#fff
+    style NOTE1 fill:#C8E6C9,color:#1B5E20
+    style NOTE2 fill:#FFCDD2,color:#B71C1C
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

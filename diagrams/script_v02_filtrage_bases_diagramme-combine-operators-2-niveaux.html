@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Combine Operators (2 niveaux)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Combine Operators (2 niveaux)</h1>
+  <div class="source">website/SCRIPT_V02_FILTRAGE_BASES.md</div>
+  <div class="mermaid">
+flowchart TD
+    subgraph NIVEAU1["NIVEAU 1 — Source layer operator"]
+        S1["Feature source A"]
+        S2["Feature source B"]
+        S1 --> SOP_R["REPLACE : seule la feature B active"]
+        S1 --> SOP_A["AND : intersection A et B"]
+        S1 --> SOP_O["OR : union A et B"]
+    end
+    subgraph NIVEAU2["NIVEAU 2 — Other layers operator"]
+        T1["Couche cible 1"]
+        T2["Couche cible 2"]
+        T1 --> TOP_R["REPLACE"]
+        T1 --> TOP_A["AND"]
+        T1 --> TOP_O["OR"]
+    end
+    NIVEAU1 --> NIVEAU2
+    style NIVEAU1 fill:#1565C0,color:#fff
+    style NIVEAU2 fill:#388E3C,color:#fff
+    style SOP_R fill:#D32F2F,color:#fff
+    style TOP_R fill:#D32F2F,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

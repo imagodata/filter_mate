@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SCRIPT_V01_INSTALLATION.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="filtermate--script-video-01--installation--premier-pas">FilterMate — Script Video 01 : Installation &amp; Premier Pas</h1>
+<p><strong>Version 4.6.1 | QGIS Plugin | Mars 2026</strong></p>
+<blockquote>
+<p><strong>Duree estimee :</strong> 5-7 minutes (sans dependances externes)
+<strong>Niveau :</strong> Debutant
+<strong>Public cible :</strong> Utilisateurs QGIS, geomaticiens, urbanistes, etudiants SIG
+<strong>Ton :</strong> Pedagogique, chaleureux, accessible — on accompagne un debutant pas a pas
+<strong>Langue :</strong> Francais (sous-titres EN disponibles)
+<strong>Prerequis :</strong> QGIS 3.x ou 4.x installe
+<strong>Donnees de demo :</strong> Shapefile departements France (~100 entites), Shapefile communes (~35 000 entites)</p>
+</blockquote>
+<hr>
+<h2 id="plan-de-la-video">Plan de la video</h2>
+<table>
+<thead>
+<tr>
+<th>Sequence</th>
+<th>Titre</th>
+<th>Duree</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Hook — &quot;Filtrer 1 million d'entites en 2 secondes&quot;</td>
+<td>0:15</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Installation via le Plugin Manager</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Premier lancement — le dock widget apparait</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Architecture de l'interface : les 3 zones</td>
+<td>1:15</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Les 6 boutons de la barre laterale (Exploring Zone)</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Les 6 boutons de l'Action Bar</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Premier filtrage : Shapefile local</td>
+<td>1:30</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Theme sombre automatique</td>
+<td>0:20</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Changement de langue (22 langues)</td>
+<td>0:20</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Mode verbose — votre outil d'apprentissage</td>
+<td>0:20</td>
+</tr>
+<tr>
+<td>10</td>
+<td>QGIS Log Messages Panel — onglet FilterMate</td>
+<td>0:20</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Auto-detection du champ d'affichage</td>
+<td>0:20</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Configuration sauvegardee automatiquement</td>
+<td>0:15</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Ou trouver l'aide — Conclusion</td>
+<td>0:15</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-0--hook-000---015">SEQUENCE 0 — HOOK (0:00 - 0:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran QGIS avec une carte chargee de donnees (10+ couches), texte anime qui apparait : &quot;1 000 000 d'entites&quot; puis &quot;2 secondes&quot; avec un chronometre. Transition rapide vers le logo FilterMate.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Un million de batiments dans votre base de donnees. Vous cherchez uniquement ceux qui touchent une route precise. Temps de reponse ? Deux secondes. Bienvenue dans FilterMate.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans cette premiere video, on va installer le plugin ensemble, decouvrir son interface, et realiser votre tout premier filtrage — en moins de 7 minutes.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-1--installation-via-le-plugin-manager-015---045">SEQUENCE 1 — INSTALLATION VIA LE PLUGIN MANAGER (0:15 - 0:45)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture ecran QGIS : menu Extensions &gt; Gerer les extensions &gt; onglet &quot;Toutes&quot; &gt; barre de recherche avec &quot;FilterMate&quot; &gt; bouton &quot;Installer&quot;. Annotations fleches sur chaque etape.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;L'installation se fait en 3 clics depuis QGIS. Allez dans le menu 'Extensions', puis 'Gerer les extensions'. Dans l'onglet 'Toutes', tapez 'FilterMate' dans la barre de recherche.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le plugin apparait. Cliquez sur 'Installer'. C'est tout. FilterMate est gratuit, open source, et disponible sur le depot officiel QGIS — Windows, Linux et macOS.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--flux-dinstallation">Diagramme — Flux d'installation</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    QGIS["QGIS Desktop"] --> INSTALL["Extensions > Gerer les extensions"]
+    INSTALL --> SEARCH["Rechercher 'FilterMate'"]
+    SEARCH --> CLICK["Installer"]
+    CLICK --> DOCK["FilterMate Dock Widget"]
+
+    DOCK --> EZ["Exploring Zone<br/>Parcourir les entites"]
+    DOCK --> TOOLBOX["Toolbox"]
+    TOOLBOX --> TAB_FILT["Onglet FILTERING<br/>Source + Cible + Predicat"]
+    TOOLBOX --> TAB_EXP["Onglet EXPORTING<br/>GeoPackage & KML"]
+    DOCK --> ACTIONBAR["Action Bar (6 boutons)<br/>dont About (toujours actif)"]
+
+    DOCK --> SIDEBAR["Barre laterale<br/>Identify / Zoom / Select<br/>Track / Link / Reset"]
+
+    style DOCK fill:#1976D2,color:#fff
+    style EZ fill:#7B1FA2,color:#fff
+    style TOOLBOX fill:#388E3C,color:#fff
+    style TAB_FILT fill:#388E3C,color:#fff
+    style TAB_EXP fill:#F57C00,color:#fff
+    style ACTIONBAR fill:#1565C0,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-2--premier-lancement-045---115">SEQUENCE 2 — PREMIER LANCEMENT (0:45 - 1:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture QGIS : cliquer sur l'icone FilterMate dans la barre d'outils (ou menu Extensions &gt; FilterMate). Le dock widget s'ouvre et s'ancre a droite de l'ecran. Montrer le panneau vide — aucune couche chargee.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour lancer FilterMate, cliquez sur son icone dans la barre d'outils, ou allez dans le menu 'Extensions' puis 'FilterMate'. Un panneau lateral s'ouvre — c'est le Dock Widget.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour l'instant, il est vide. C'est normal — FilterMate detecte automatiquement les couches de votre projet. Des qu'on va charger des donnees, l'interface va se remplir.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Chargeons nos donnees de demonstration : un Shapefile des departements de France — environ 100 entites — et un Shapefile des communes — 35 000 entites.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-3--architecture-de-linterface-115---230">SEQUENCE 3 — ARCHITECTURE DE L'INTERFACE (1:15 - 2:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture annotee de l'interface FilterMate avec 3 zones clairement delimitees par des rectangles de couleur :</p>
+<ul>
+<li>Zone A (violet) : Exploring Zone en haut</li>
+<li>Zone B (vert) : Toolbox en bas (onglets FILTERING et EXPORTING)</li>
+<li>Zone C (bleu) : Action Bar (6 boutons)</li>
+<li>Header bar avec les pastilles Favoris (orange) et Backend (bleu)
+Animation : chaque zone s'eclaire a son tour pendant la narration.</li>
+</ul>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Prenons un moment pour comprendre l'interface. Elle est divisee en 3 zones principales, separees par un splitter vertical que vous pouvez ajuster selon vos besoins.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En haut, la Zone d'Exploration. C'est ici que vous parcourez et selectionnez les entites de vos couches. Vous pouvez naviguer entite par entite, faire des selections multiples, ou ecrire des expressions personnalisees.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En bas, la Toolbox. Elle contient deux onglets : FILTERING, pour configurer vos filtres spatiaux — couche source, couche cible, predicat geometrique — et EXPORTING, pour exporter vos donnees filtrees au format GeoPackage ou KML.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et enfin, l'Action Bar. Ce sont les 6 boutons d'action — on va les detailler dans un instant. C'est le coeur de l'interaction : tout le reste de l'interface sert a configurer ce que ces boutons vont executer.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Remarquez aussi le header en haut du panneau : la pastille orange indique vos favoris enregistres, et la pastille bleue affiche le backend actif — le moteur de traitement que FilterMate a selectionne automatiquement pour votre source de donnees.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="visuel--les-3-zones-de-linterface">Visuel — Les 3 zones de l'interface</h3>
+<blockquote>
+<p><strong>[CAPTURE VIDEO QGIS]</strong> Enregistrement ecran de l'interface FilterMate dans QGIS, avec mise en surbrillance successive des 3 zones.
+Chaque zone s'eclaire a son tour pendant la narration (effet highlight/overlay anime).</p>
+</blockquote>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="6" style="background: #37474F; color: #fff; text-align: center; padding: 10px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      En-tete — Pastille Favoris (orange) | Pastille Backend (bleu)
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="background: #7B1FA2; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      ZONE A — Exploring Zone
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/identify_alt.png" width="28"/><br/><small>Identify</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/zoom.png" width="28"/><br/><small>Zoom</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/select_black.png" width="28"/><br/><small>Select</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/track.png" width="28"/><br/><small>Track</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/link.png" width="28"/><br/><small>Link</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/reset_properties.png" width="28"/><br/><small>Reset</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="background: #E1BEE7; text-align: center; padding: 8px;">
+      Selecteurs : Single / Multiple / Custom
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="background: #388E3C; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      ZONE B — Toolbox
+    </td>
+    <td colspan="3" style="background: #388E3C; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      &nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="background: #4CAF50; color: #fff; text-align: center; padding: 10px;">
+      Onglet FILTERING<br/><small>Source + Cible + Predicat + Buffer</small>
+    </td>
+    <td colspan="3" style="background: #F57C00; color: #fff; text-align: center; padding: 10px;">
+      Onglet EXPORTING<br/><small>Couches + Format + Options</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="background: #1565C0; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      ZONE C — Action Bar
+    </td>
+  </tr>
+  <tr style="background: #1976D2;">
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/filter.png" width="32"/><br/><small>Filter</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/undo.png" width="32"/><br/><small>Undo</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/redo.png" width="32"/><br/><small>Redo</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/unfilter.png" width="32"/><br/><small>Unfilter</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/export.png" width="32"/><br/><small>Export</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; border-radius: 0 0 8px 0;">
+      <img src="../icons/icon.png" width="32"/><br/><small>About</small>
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-4--les-6-boutons-de-la-barre-laterale-230---300">SEQUENCE 4 — LES 6 BOUTONS DE LA BARRE LATERALE (2:30 - 3:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Zoom sur la barre laterale de la Zone d'Exploration. Chaque bouton est survole avec une annotation qui apparait a cote.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;La Zone d'Exploration possede 6 boutons dans sa barre laterale. Ce sont vos outils de navigation :&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Identify</strong> — ouvre la fenetre d'identification QGIS pour l'entite selectionnee. Pratique pour inspecter rapidement les attributs.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Zoom</strong> — centre et zoome la carte sur l'entite en cours.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Select</strong> — un bouton a bascule. Active, il surligne l'entite sur la carte. Desactive, il retire la selection.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Track</strong> — active le suivi automatique. A chaque changement d'entite dans le selecteur, la carte se recentre et la suivante est mise en surbrillance.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Link</strong> — synchronise tous les groupes de selection entre eux : simple, multiple et personnalise.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Reset</strong> — reinitialise toutes les proprietes d'exploration de la couche active. Un retour a zero propre.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--barre-laterale-exploring">Diagramme — Barre laterale Exploring</h3>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="3" style="background: #7B1FA2; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      Barre laterale — 6 boutons
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff; width: 20%;">
+      <img src="../icons/identify_alt.png" width="28"/><br/><strong>Identify</strong><br/><small>Inspecter les attributs</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff; width: 15%;"><em>1 clic</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Fenetre Identify Results
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff;">
+      <img src="../icons/zoom.png" width="28"/><br/><strong>Zoom</strong><br/><small>Centrer sur l'entite</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>1 clic</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Carte centree + zoom
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff;">
+      <img src="../icons/select_black.png" width="28"/><br/><strong>Select</strong><br/><small>Surligner (bascule)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>ON/OFF</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Entite surlignee
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff;">
+      <img src="../icons/track.png" width="28"/><br/><strong>Track</strong><br/><small>Suivi automatique (bascule)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>ON/OFF</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Navigation auto
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff;">
+      <img src="../icons/link.png" width="28"/><br/><strong>Link</strong><br/><small>Synchroniser selecteurs (bascule)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>ON/OFF</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px;">
+      Selecteurs synchronises
+    </td>
+  </tr>
+  <tr style="background: #9C27B0;">
+    <td style="text-align: center; padding: 12px; color: #fff; border-radius: 0 0 0 8px;">
+      <img src="../icons/reset_properties.png" width="28"/><br/><strong>Reset</strong><br/><small>Reinitialiser l'exploration</small>
+    </td>
+    <td style="text-align: center; padding: 8px; color: #fff;"><em>1 clic</em></td>
+    <td style="text-align: center; padding: 12px; background: #CE93D8; color: #333; border-radius: 6px 6px 8px 6px;">
+      Retour a zero
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-5--les-6-boutons-de-laction-bar-300---330">SEQUENCE 5 — LES 6 BOUTONS DE L'ACTION BAR (3:00 - 3:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Zoom sur l'Action Bar. Chaque bouton s'eclaire avec un tooltip. Mettre en evidence que About est toujours actif (jamais grise), tandis que les 5 autres changent d'etat selon le contexte.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;L'Action Bar est le coeur de FilterMate. Six boutons, chacun avec un role precis :&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Filter</strong> — applique le filtre que vous avez configure. C'est LE bouton principal. Il modifie la visibilite des entites directement sur la carte.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Undo</strong> — annule le dernier filtre. FilterMate garde en memoire jusqu'a 100 etats precedents.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Redo</strong> — retablit un filtre annule. Comme le Ctrl+Z / Ctrl+Y que vous connaissez deja.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Unfilter</strong> — retire TOUS les filtres actifs de TOUTES les couches du projet. Un retour a la case depart.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<strong>Export</strong> — exporte vos donnees filtrees au format GeoPackage, avec le projet QGIS embarque.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et <strong>About</strong> — le seul bouton qui est toujours actif, quel que soit l'etat du plugin. Il affiche les informations sur la version, les liens utiles et la configuration.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Un detail important : quand l'onglet EXPORTING est actif dans la Toolbox, les boutons Filter, Undo, Redo et Unfilter se desactivent — et inversement avec Export quand l'onglet FILTERING est actif. Chaque contexte a ses boutons.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--activation-des-boutons-selon-longlet">Diagramme — Activation des boutons selon l'onglet</h3>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="6" style="background: #388E3C; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      Onglet FILTERING actif
+    </td>
+  </tr>
+  <tr style="background: #4CAF50;">
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/filter.png" width="32"/><br/><small>Filter</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/undo.png" width="32"/><br/><small>Undo</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/redo.png" width="32"/><br/><small>Redo</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/unfilter.png" width="32"/><br/><small>Unfilter</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/export.png" width="32"/><br/><small>Export</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1565C0; color: #fff;">
+      <img src="../icons/icon.png" width="32"/><br/><small>About</small><br/>✅
+    </td>
+  </tr>
+  <tr><td colspan="6" style="padding: 6px;"></td></tr>
+  <tr>
+    <td colspan="6" style="background: #F57C00; color: #fff; text-align: center; padding: 8px; font-weight: bold;">
+      Onglet EXPORTING actif
+    </td>
+  </tr>
+  <tr style="background: #FF9800;">
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/filter.png" width="32"/><br/><small>Filter</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/undo.png" width="32"/><br/><small>Undo</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/redo.png" width="32"/><br/><small>Redo</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff; opacity: 0.4;">
+      <img src="../icons/unfilter.png" width="32"/><br/><small>Unfilter</small><br/>❌
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/export.png" width="32"/><br/><small>Export</small><br/>✅
+    </td>
+    <td style="text-align: center; padding: 10px; background: #1565C0; color: #fff; border-radius: 0 0 8px 0;">
+      <img src="../icons/icon.png" width="32"/><br/><small>About</small><br/>✅
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-6--premier-filtrage--shapefile-local-330---500">SEQUENCE 6 — PREMIER FILTRAGE : SHAPEFILE LOCAL (3:30 - 5:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live en temps reel. Etapes visibles a l'ecran :</p>
+<ol>
+<li>Les couches departements et communes sont chargees dans QGIS</li>
+<li>Dans la Zone d'Exploration, selectionner la couche &quot;departements&quot;</li>
+<li>Parcourir les entites, choisir un departement (ex: &quot;Gironde&quot;)</li>
+<li>Dans l'onglet FILTERING, la couche source est deja renseignee</li>
+<li>Selectionner la couche cible : &quot;communes&quot;</li>
+<li>Choisir le predicat : &quot;Intersects&quot;</li>
+<li>Cliquer sur Filter</li>
+<li>Resultat : seules les communes de la Gironde restent visibles</li>
+</ol>
+</blockquote>
+<h3 id="narration--partie-1-030">Narration — partie 1 (0:30)</h3>
+<blockquote>
+<p><em>&quot;Passons a la pratique. Nos deux couches sont chargees : les departements de France et les communes. Dans la Zone d'Exploration, je selectionne la couche 'departements'. Le selecteur se remplit avec les noms des departements. Je choisis 'Gironde'.&quot;</em></p>
+</blockquote>
+<h3 id="narration--partie-2-030">Narration — partie 2 (0:30)</h3>
+<blockquote>
+<p><em>&quot;Maintenant, direction l'onglet FILTERING dans la Toolbox. FilterMate a automatiquement reconnu ma selection. En couche cible, je choisis 'communes'. Pour le predicat spatial, prenons 'Intersects' — ca signifie 'toutes les communes qui touchent ou chevauchent la Gironde'.&quot;</em></p>
+</blockquote>
+<h3 id="narration--partie-3-030">Narration — partie 3 (0:30)</h3>
+<blockquote>
+<p><em>&quot;Je clique sur Filter. Et voila ! Les 35 000 communes sont filtrees instantanement. Seules celles qui intersectent la Gironde restent visibles. Le nombre d'entites filtrees s'affiche dans la barre de message.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Remarquez : FilterMate a detecte que nos couches sont des Shapefiles, et il a automatiquement selectionne le backend OGR — la pastille bleue en haut vous l'indique.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--workflow-du-premier-filtrage">Diagramme — Workflow du premier filtrage</h3>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    actor U as Utilisateur
+    participant EZ as Zone d'Exploration
+    participant TB as Toolbox (FILTERING)
+    participant AB as Action Bar
+    participant FM as FilterMate Engine
+    participant QGIS as Carte QGIS
+
+    U->>EZ: Selectionne couche "departements"
+    U->>EZ: Choisit entite "Gironde"
+    U->>TB: Verifie couche source (auto)
+    U->>TB: Selectionne cible "communes"
+    U->>TB: Choisit predicat "Intersects"
+    U->>AB: Clique "Filter"
+
+    AB->>FM: Lance FilterEngineTask (async)
+    FM->>FM: Detecte backend OGR (Shapefile)
+    FM->>FM: Construit expression spatiale
+    FM->>QGIS: setSubsetString(expression)
+    QGIS-->>U: Communes filtrees visibles
+    FM-->>AB: Sauvegarde etat dans l'historique
+</div></code></pre>
+<hr>
+<h2 id="sequence-7--theme-sombre-automatique-500---520">SEQUENCE 7 — THEME SOMBRE AUTOMATIQUE (5:00 - 5:20)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture QGIS : montrer FilterMate en theme clair, puis basculer QGIS en theme sombre (Preferences &gt; General &gt; Interface Theme &gt; &quot;Night Mapping&quot;). FilterMate bascule automatiquement — les icones, les couleurs de fond, les bordures s'adaptent.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;FilterMate s'adapte automatiquement au theme de QGIS. Vous etes en mode sombre ? Le plugin le detecte et ajuste ses couleurs, ses icones et ses bordures. Pas besoin de configurer quoi que ce soit — c'est instantane.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Trois modes sont disponibles : automatique, qui suit QGIS, ou vous pouvez forcer le theme clair ou sombre dans la configuration.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-8--changement-de-langue-520---540">SEQUENCE 8 — CHANGEMENT DE LANGUE (5:20 - 5:40)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture QGIS : ouvrir la configuration FilterMate (bouton About &gt; onglet Config ou JSON TreeView), naviguer jusqu'au parametre de langue, montrer le menu deroulant avec les 22 langues disponibles. Changer de francais vers anglais, puis vers japonais — l'interface se met a jour instantanement.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;FilterMate parle 22 langues. Francais, anglais, espagnol, allemand, chinois, japonais, arabe... La langue se change dans la configuration du plugin.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Changeons vers l'anglais... et vous voyez ? Toute l'interface se met a jour immediatement, sans relancer le plugin. C'est ideal si vous partagez vos projets avec des collegues internationaux.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--langues-disponibles">Diagramme — Langues disponibles</h3>
+<pre><code class="language-mermaid"><div class="mermaid">mindmap
+  root((FilterMate<br/>22 Langues))
+    Europe Ouest
+      Francais
+      English
+      Espanol
+      Portugues
+      Deutsch
+      Italiano
+      Nederlands
+    Europe Est & Nord
+      Polski
+      Cestina
+      Svenska
+      Norsk
+      Suomi
+      Romana
+    Asie
+      Zhongwen
+      Nihongo
+      Hangugeo
+      Hindi
+    Moyen-Orient
+      Arabi
+      Turk
+      Farsi
+    Autres
+      Bahasa Indonesia
+      Tieng Viet
+</div></code></pre>
+<hr>
+<h2 id="sequence-9--mode-verbose-540---600">SEQUENCE 9 — MODE VERBOSE (5:40 - 6:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture QGIS : ouvrir la configuration (JSON TreeView), naviguer vers <code>APP &gt; DOCKWIDGET &gt; FEEDBACK_LEVEL</code>. Montrer les 3 choix dans le menu deroulant : &quot;minimal&quot;, &quot;normal&quot;, &quot;verbose&quot;. Selectionner &quot;verbose&quot;. Effectuer un filtrage et montrer les messages detailles qui apparaissent dans la barre de message QGIS.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Astuce pour les debutants : activez le mode 'verbose'. Dans la configuration, cherchez le parametre FEEDBACK_LEVEL et changez-le de 'normal' a 'verbose'.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En mode verbose, FilterMate vous explique tout ce qu'il fait. Chaque action declenche un message detaille : quel backend est utilise, combien d'entites sont traitees, combien de temps ca prend. C'est votre meilleur outil d'apprentissage.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Trois niveaux existent : 'minimal' pour n'afficher que les erreurs, 'normal' pour un retour equilibre, et 'verbose' pour tout voir. Je vous recommande de commencer en verbose et de reduire plus tard.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--niveaux-de-feedback">Diagramme — Niveaux de feedback</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph LR
+    subgraph LEVELS["FEEDBACK_LEVEL"]
+        direction TB
+        L1["minimal<br/>Erreurs et alertes uniquement"]
+        L2["normal<br/>Succes + erreurs (defaut)"]
+        L3["verbose<br/>Tout : info, debug, timing"]
+    end
+
+    L1 --> |"Utilisateur avance"| USE1["Production<br/>Interface propre"]
+    L2 --> |"Usage quotidien"| USE2["Equilibre<br/>Messages utiles"]
+    L3 --> |"Apprentissage"| USE3["Formation<br/>Comprendre chaque etape"]
+
+    style L1 fill:#F44336,color:#fff
+    style L2 fill:#FF9800,color:#fff
+    style L3 fill:#4CAF50,color:#fff
+    style USE3 fill:#4CAF50,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-10--qgis-log-messages-panel-600---620">SEQUENCE 10 — QGIS LOG MESSAGES PANEL (6:00 - 6:20)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture QGIS : menu Vue &gt; Panneaux &gt; Messages de log (ou View &gt; Panels &gt; Log Messages). Montrer le panneau qui s'ouvre en bas. Cliquer sur l'onglet &quot;FilterMate&quot;. Effectuer un filtrage et montrer les logs detailles qui apparaissent : timestamp, niveau, message.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;En complement du mode verbose, FilterMate ecrit ses logs dans le panneau standard de QGIS. Allez dans Vue, Panneaux, Messages de log. Vous trouverez un onglet dedie 'FilterMate'.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est ici que vous pouvez suivre en detail tout ce que le plugin fait en coulisses : les requetes SQL generees, les temps d'execution, les erreurs eventuelles. Tres utile pour le diagnostic si quelque chose ne fonctionne pas comme prevu.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-11--auto-detection-du-champ-daffichage-620---640">SEQUENCE 11 — AUTO-DETECTION DU CHAMP D'AFFICHAGE (6:20 - 6:40)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : charger une couche avec un champ &quot;nom&quot; ou &quot;name&quot;. Montrer que FilterMate l'a automatiquement detecte et l'utilise pour afficher les entites dans le selecteur. Puis charger une couche avec des champs moins evidents — montrer que FilterMate cherche intelligemment le meilleur champ.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Vous avez peut-etre remarque que le selecteur d'entites affiche directement le nom des departements, pas un identifiant numerique cryptique. C'est grace a la detection automatique du champ d'affichage.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate analyse votre couche et choisit intelligemment le meilleur champ, selon 6 niveaux de priorite : d'abord l'expression d'affichage configuree dans QGIS, puis les relations de valeurs, puis les champs qui ressemblent a des noms — 'nom', 'name', 'label'... et ainsi de suite jusqu'a trouver un champ lisible avec des valeurs non vides.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est automatique. Vous n'avez rien a configurer. Et si le choix ne vous convient pas, vous pouvez toujours le changer manuellement.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--detection-du-champ-daffichage-6-niveaux">Diagramme — Detection du champ d'affichage (6 niveaux)</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    START["Nouvelle couche chargee"] --> P1
+
+    P1{"1. Expression d'affichage<br/>configuree dans QGIS ?"}
+    P1 -->|"Oui"| R1["Utilise l'expression QGIS"]
+    P1 -->|"Non"| P2
+
+    P2{"2. Champ avec<br/>ValueRelation ?"}
+    P2 -->|"Oui"| R2["Utilise represent_value()<br/>(affichage lisible)"]
+    P2 -->|"Non"| P3
+
+    P3{"3. Champ correspondant<br/>a un pattern nom/name/label ?"}
+    P3 -->|"Oui + valeurs"| R3["Utilise ce champ"]
+    P3 -->|"Non"| P4
+
+    P4{"4. Premier champ texte<br/>non-ID avec valeurs ?"}
+    P4 -->|"Oui"| R4["Utilise ce champ texte"]
+    P4 -->|"Non"| P5
+
+    P5{"5. Cle primaire<br/>disponible ?"}
+    P5 -->|"Oui"| R5["Utilise la cle primaire"]
+    P5 -->|"Non"| P6
+
+    P6["6. Premier champ<br/>avec des valeurs"] --> R6["Utilise ce champ"]
+
+    style START fill:#1976D2,color:#fff
+    style R1 fill:#4CAF50,color:#fff
+    style R2 fill:#4CAF50,color:#fff
+    style R3 fill:#4CAF50,color:#fff
+    style R4 fill:#FF9800,color:#fff
+    style R5 fill:#FF9800,color:#fff
+    style R6 fill:#F44336,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-12--configuration-sauvegardee-automatiquement-640---655">SEQUENCE 12 — CONFIGURATION SAUVEGARDEE AUTOMATIQUEMENT (6:40 - 6:55)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Schema anime : montrer les proprietes de la couche (champ d'affichage selectionne, derniere entite parcourue, etat des toggles) qui sont ecrites dans une base SQLite locale. Puis fermer QGIS, le rouvrir, et montrer que tout est restaure a l'identique.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Dernier point important : tout ce que vous configurez dans FilterMate est sauvegarde automatiquement. Le champ d'affichage choisi, vos preferences d'exploration, l'etat de vos toggles — tout est persiste dans une base SQLite locale appelee <code>fm_project_layers_properties</code>.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Fermez QGIS, rouvrez-le demain — FilterMate retrouve vos reglages exactement la ou vous les avez laisses. Aucune configuration manuelle a refaire.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--persistence-de-la-configuration">Diagramme — Persistence de la configuration</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    subgraph SESSION_1["Session 1"]
+        direction TB
+        U1["Configuration de l'exploration"]
+        U2["Champ d'affichage choisi"]
+        U3["Etat des toggles"]
+        U4["Dernier filtre applique"]
+    end
+
+    subgraph SQLITE["SQLite local"]
+        direction TB
+        DB["fm_project_layers<br/>_properties"]
+    end
+
+    subgraph SESSION_2["Session 2"]
+        direction TB
+        R1["Configuration restauree"]
+        R2["Champ d'affichage restaure"]
+        R3["Toggles restaures"]
+        R4["Historique disponible"]
+    end
+
+    SESSION_1 -->|"Sauvegarde auto"| SQLITE
+    SQLITE -->|"Restauration auto"| SESSION_2
+
+    style SQLITE fill:#1565C0,color:#fff
+    style SESSION_1 fill:#7B1FA2,color:#fff
+    style SESSION_2 fill:#388E3C,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-13--conclusion--ressources-655---710">SEQUENCE 13 — CONCLUSION &amp; RESSOURCES (6:55 - 7:10)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran de fin avec le logo FilterMate, les 3 liens (GitHub, QGIS Plugins, Documentation), et un appel a l'action. Musique legere en fond.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Voila, vous avez installe FilterMate, decouvert les 3 zones de l'interface, utilise les boutons de la barre laterale et de l'Action Bar, et realise votre premier filtrage spatial. Pas mal pour 7 minutes !&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Retrouvez le code source sur GitHub, le plugin sur le depot officiel QGIS, et la documentation complete sur le site dedie. Les liens sont dans la description.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans la prochaine video, on va approfondir le filtrage geometrique : les predicats spatiaux, les buffers, et les combine operators. A tres vite !&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="ressources-visuelles">Ressources visuelles</h2>
+<h3 id="timestamps">Timestamps</h3>
+<table>
+<thead>
+<tr>
+<th>Chrono</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0:00</td>
+<td>Hook — &quot;1 million d'entites, 2 secondes&quot;</td>
+</tr>
+<tr>
+<td>0:15</td>
+<td>Installation via Plugin Manager</td>
+</tr>
+<tr>
+<td>0:45</td>
+<td>Premier lancement — dock widget</td>
+</tr>
+<tr>
+<td>1:15</td>
+<td>Architecture de l'interface (3 zones)</td>
+</tr>
+<tr>
+<td>2:30</td>
+<td>Barre laterale (6 boutons Exploring)</td>
+</tr>
+<tr>
+<td>3:00</td>
+<td>Action Bar (6 boutons d'action)</td>
+</tr>
+<tr>
+<td>3:30</td>
+<td>Premier filtrage : Shapefile local</td>
+</tr>
+<tr>
+<td>5:00</td>
+<td>Theme sombre automatique</td>
+</tr>
+<tr>
+<td>5:20</td>
+<td>Changement de langue (22 langues)</td>
+</tr>
+<tr>
+<td>5:40</td>
+<td>Mode verbose (FEEDBACK_LEVEL)</td>
+</tr>
+<tr>
+<td>6:00</td>
+<td>QGIS Log Messages Panel</td>
+</tr>
+<tr>
+<td>6:20</td>
+<td>Auto-detection du champ d'affichage</td>
+</tr>
+<tr>
+<td>6:40</td>
+<td>Config sauvegardee automatiquement (SQLite)</td>
+</tr>
+<tr>
+<td>6:55</td>
+<td>Conclusion + Ressources</td>
+</tr>
+</tbody>
+</table>
+<h3 id="captures-qgis-requises">Captures QGIS requises</h3>
+<ol>
+<li>Plugin Manager avec &quot;FilterMate&quot; dans la barre de recherche</li>
+<li>Icone FilterMate dans la barre d'outils QGIS</li>
+<li>Dock widget vide au premier lancement</li>
+<li>Dock widget avec couches chargees — vue d'ensemble annotee (3 zones)</li>
+<li>Zoom sur la barre laterale (6 boutons) avec annotations</li>
+<li>Zoom sur l'Action Bar (6 boutons) avec annotations</li>
+<li>Couches departements + communes chargees dans QGIS</li>
+<li>Zone d'Exploration avec &quot;Gironde&quot; selectionnee</li>
+<li>Onglet FILTERING avec source/cible/predicat configures</li>
+<li>Resultat du filtrage : communes de la Gironde uniquement visibles</li>
+<li>Basculement theme clair vers theme sombre</li>
+<li>Menu deroulant de selection de langue</li>
+<li>Parametre FEEDBACK_LEVEL dans le JSON TreeView</li>
+<li>Panneau Log Messages avec onglet FilterMate</li>
+<li>Selecteur d'entites montrant les noms (pas les IDs)</li>
+<li>Ecran de fin avec liens GitHub / QGIS Plugins / Documentation</li>
+</ol>
+<h3 id="donnees-de-demo">Donnees de demo</h3>
+<table>
+<thead>
+<tr>
+<th>Fichier</th>
+<th>Type</th>
+<th>Entites</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>departements_france.shp</td>
+<td>Polygones</td>
+<td>~100</td>
+<td>Couche source (selection)</td>
+</tr>
+<tr>
+<td>communes_france.shp</td>
+<td>Polygones</td>
+<td>~35 000</td>
+<td>Couche cible (filtrage)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Aucune base PostgreSQL requise pour cette video.</p>
+</blockquote>
+<h3 id="liens-a-afficher-a-lecran">Liens a afficher a l'ecran</h3>
+<ul>
+<li><strong>GitHub</strong> : <code>https://github.com/imagodata/filter_mate</code></li>
+<li><strong>QGIS Plugins</strong> : <code>https://plugins.qgis.org/plugins/filter_mate</code></li>
+<li><strong>Documentation</strong> : <code>https://imagodata.github.io/filter_mate</code></li>
+</ul>
+<h3 id="musique-suggeree">Musique suggeree</h3>
+<ul>
+<li>Hook : Intro dynamique, 3-4 secondes, impact sonore</li>
+<li>Demo : Fond neutre, ambiance concentree</li>
+<li>Conclusion : Montee legere, positive</li>
+</ul>
+<hr>
+<h2 id="points-cles-a-mettre-en-avant">Points cles a mettre en avant</h2>
+<ol>
+<li><strong>Accessibilite</strong> : Installation en 3 clics, aucune competence technique requise</li>
+<li><strong>Simplicite</strong> : 3 zones, 6 boutons d'action, navigation intuitive</li>
+<li><strong>Intelligence</strong> : Detection automatique du backend, du champ d'affichage, du theme</li>
+<li><strong>Pedagogie</strong> : Le mode verbose transforme FilterMate en outil d'apprentissage</li>
+<li><strong>Persistence</strong> : Configuration sauvegardee entre sessions sans intervention manuelle</li>
+<li><strong>Internationalisation</strong> : 22 langues, changement instantane</li>
+</ol>
+<hr>
+<h2 id="liens-vers-les-autres-videos-de-la-serie">Liens vers les autres videos de la serie</h2>
+<table>
+<thead>
+<tr>
+<th>Video</th>
+<th>Titre</th>
+<th>Niveau</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>V01</strong></td>
+<td><strong>Installation &amp; Premier Pas</strong> (cette video)</td>
+<td>Debutant</td>
+</tr>
+<tr>
+<td>V02</td>
+<td>Filtrage Geometrique : Les Bases</td>
+<td>Debutant</td>
+</tr>
+<tr>
+<td>V03</td>
+<td>Explorer Vos Donnees</td>
+<td>Debutant</td>
+</tr>
+<tr>
+<td>V04</td>
+<td>Predicats Spatiaux &amp; Buffer</td>
+<td>Intermediaire</td>
+</tr>
+<tr>
+<td>V05</td>
+<td>Favoris &amp; Historique</td>
+<td>Intermediaire</td>
+</tr>
+<tr>
+<td>V06</td>
+<td>Export GeoPackage &amp; KML Pro</td>
+<td>Intermediaire</td>
+</tr>
+<tr>
+<td>V07</td>
+<td>Multi-Backend &amp; Optimisation</td>
+<td>Avance</td>
+</tr>
+<tr>
+<td>V08</td>
+<td>PostgreSQL Power User</td>
+<td>Avance</td>
+</tr>
+<tr>
+<td>V09</td>
+<td>Configuration Avancee</td>
+<td>Expert / Dev</td>
+</tr>
+<tr>
+<td>V10</td>
+<td>Architecture &amp; Contribution</td>
+<td>Expert / Dev</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Script cree le 14 Mars 2026 — FilterMate v4.6.1</em>
+<em>Serie de tutoriels : Video 01 sur 10</em></p>
+
+</body>
+</html>

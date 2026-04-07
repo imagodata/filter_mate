@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Arborescence Configuration</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Arborescence Configuration</h1>
+  <div class="source">website/SCRIPT_V09_CONFIGURATION.md</div>
+  <div class="mermaid">
+graph TD
+    CONFIG["Configuration FilterMate"]
+
+    CONFIG --> APP["APP"]
+    APP --> AUTO["AUTO_ACTIVATE : bool"]
+    APP --> DOCK["DOCKWIDGET"]
+    DOCK --> FEED["FEEDBACK_LEVEL<br/>minimal / normal / verbose"]
+    DOCK --> LANG["LANGUAGE<br/>auto / en / fr / de / ..."]
+    DOCK --> COLORS["COLORS"]
+    COLORS --> THEME["ACTIVE_THEME<br/>auto / default / dark / light"]
+
+    APP --> OPTIONS["OPTIONS (16 params)"]
+    OPTIONS --> DEB["Debounce Timers<br/>300-1500 ms"]
+    OPTIONS --> CACHE["Expression Cache<br/>100 entries, TTL"]
+    OPTIONS --> QUERY["Query Timeout<br/>30s local / 60s PG"]
+    OPTIONS --> SPAT["Spatialite Tuning<br/>batch 5000, timeout 120s"]
+    OPTIONS --> EXPR["Expression Limits<br/>max FIDs 5000"]
+    OPTIONS --> STREAM["Streaming Export<br/>threshold 10k"]
+
+    CONFIG --> DEFAULT["config.default.json<br/>(SOURCE OF TRUTH)"]
+    CONFIG --> USER["config.json<br/>(User overrides)"]
+
+    style DEFAULT fill:#388E3C,color:#fff
+    style OPTIONS fill:#1976D2,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

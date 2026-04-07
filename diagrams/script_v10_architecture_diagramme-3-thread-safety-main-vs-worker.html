@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme 3 — Thread safety (Main vs Worker)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme 3 — Thread safety (Main vs Worker)</h1>
+  <div class="source">website/SCRIPT_V10_ARCHITECTURE.md</div>
+  <div class="mermaid">
+graph TB
+    subgraph MAIN["MAIN THREAD (UI Thread)"]
+        direction TB
+        M1["FilterEngineTask.__init__()<br/>━━━━━━━━━━<br/>Stocker URI (string)<br/>Stocker WKT (string)<br/>Stocker parametres (dict)"]
+        M3["FilterEngineTask.finished()<br/>━━━━━━━━━━<br/>Emettre signaux PyQt<br/>Mettre a jour l'UI<br/>Ecrire logs utilisateur<br/>Afficher messages QGIS"]
+    end
+
+    subgraph WORKER["WORKER THREAD (QgsTask.run)"]
+        direction TB
+        W1["FilterEngineTask.run()<br/>━━━━━━━━━━<br/>Recreer providers (URI)<br/>Reconstruire geometries (WKT)<br/>Executer les 12 handlers<br/>Requetes SQL backend"]
+    end
+
+    M1 -->|"QgsTaskManager<br/>lance la tache"| W1
+    W1 -->|"Task terminee<br/>(automatique)"| M3
+
+    subgraph RULES["3 REGLES DE THREAD SAFETY"]
+        direction TB
+        R1["Regle 1 : URI dans __init__<br/>Provider dans run()<br/>JAMAIS stocker QgsVectorLayer"]
+        R2["Regle 2 : QgsGeometry OK<br/>si cree depuis WKT/WKB<br/>JAMAIS getFeature() dans run()"]
+        R3["Regle 3 : Signaux Qt<br/>UNIQUEMENT dans finished()<br/>JAMAIS emettre dans run()"]
+    end
+
+    subgraph INTERDIT["INTERDIT (crash/segfault)"]
+        direction TB
+        X1["worker: layer.getFeatures()"]
+        X2["worker: iface.mapCanvas()"]
+        X3["worker: signal.emit()"]
+        X4["worker: QgsProject.instance()"]
+    end
+
+    style MAIN fill:#1565C0,color:#fff
+    style WORKER fill:#E65100,color:#fff
+    style RULES fill:#2E7D32,color:#fff
+    style INTERDIT fill:#B71C1C,color:#fff
+    style R1 fill:#388E3C,color:#fff
+    style R2 fill:#388E3C,color:#fff
+    style R3 fill:#388E3C,color:#fff
+    style X1 fill:#C62828,color:#fff
+    style X2 fill:#C62828,color:#fff
+    style X3 fill:#C62828,color:#fff
+    style X4 fill:#C62828,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

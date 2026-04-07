@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SCRIPT_V10_ARCHITECTURE.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="filtermate--script-video-10--architecture--contribution">FilterMate — Script Video 10 : Architecture &amp; Contribution</h1>
+<p><strong>Version 4.6.1 | QGIS Plugin | Mars 2026</strong></p>
+<blockquote>
+<p><strong>Duree estimee :</strong> 10-12 minutes
+<strong>Niveau :</strong> Expert / Developpeur
+<strong>Public cible :</strong> Developpeurs Python, contributeurs open source, architectes logiciel, etudiants informatique
+<strong>Ton :</strong> Technique mais accessible — on demystifie l'architecture sans jargon inutile
+<strong>Langue :</strong> Francais (sous-titres EN disponibles)
+<strong>Prerequis :</strong> Connaissance de Python, notions de design patterns, avoir vu les videos 1-9</p>
+</blockquote>
+<hr>
+<h2 id="plan-de-la-video">Plan de la video</h2>
+<table>
+<thead>
+<tr>
+<th>Sequence</th>
+<th>Titre</th>
+<th>Duree</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Hook — &quot;130 000 lignes, 4 couches, 12 design patterns&quot;</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Pourquoi l'architecture hexagonale ?</td>
+<td>1:00</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Vue d'ensemble : les 4 couches</td>
+<td>1:00</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Core Domain : modeles purs Python</td>
+<td>1:00</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Ports &amp; Adapters : les interfaces</td>
+<td>1:00</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Backend Factory : ajouter un backend</td>
+<td>1:00</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Les 9 Controllers MVC</td>
+<td>0:45</td>
+</tr>
+<tr>
+<td>7</td>
+<td>FilterEngineTask : les 12 Handlers</td>
+<td>1:00</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Systeme de signaux Qt</td>
+<td>0:45</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Thread safety dans QGIS</td>
+<td>1:00</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Suite de tests : 600 tests</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>11</td>
+<td>CI/CD GitHub Actions</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Comment contribuer : fork, branch, PR</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Bonnes pratiques &amp; Recapitulatif</td>
+<td>0:30</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-0--hook-000---030">SEQUENCE 0 — HOOK (0:00 - 0:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran noir. Les chiffres apparaissent un par un en grands caracteres blancs, avec un effet de frappe clavier :
+&quot;130 000 lignes de code&quot; — &quot;4 couches architecturales&quot; — &quot;12 design patterns&quot; — &quot;4 backends&quot; — &quot;600 tests&quot;.
+Transition vers un diagramme hexagonal en rotation 3D qui se stabilise face camera.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;130 000 lignes de code. 4 couches architecturales. 12 design patterns. Et pourtant, ajouter un nouveau backend de filtrage prend moins de 100 lignes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans cette video, on va ouvrir le capot de FilterMate. On va voir comment une architecture hexagonale permet a un plugin QGIS de supporter PostgreSQL, Spatialite, OGR et Memory — sans que le coeur du systeme ait besoin de savoir lequel est utilise.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Que vous vouliez contribuer au projet, comprendre les patterns utilises, ou simplement satisfaire votre curiosite d'architecte logiciel — cette video est pour vous.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-1--pourquoi-larchitecture-hexagonale--030---130">SEQUENCE 1 — POURQUOI L'ARCHITECTURE HEXAGONALE ? (0:30 - 1:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Comparaison visuelle en split-screen :</p>
+<ul>
+<li>A gauche : architecture &quot;spaghetti&quot; classique (fleches dans tous les sens, couplage fort)</li>
+<li>A droite : hexagone propre avec ports et adapters (fleches unidirectionnelles, couplage faible)
+Animation : la version spaghetti se transforme progressivement en hexagone.</li>
+</ul>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Avant de plonger dans le code, une question fondamentale : pourquoi avoir choisi l'architecture hexagonale, aussi appelee Ports &amp; Adapters, pour un plugin QGIS ?&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La reponse tient en trois mots : independance, testabilite, extensibilite.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Independance : le coeur metier de FilterMate — la logique de filtrage, les modeles de donnees, les regles de validation — ne depend ni de Qt, ni de QGIS, ni de PostgreSQL. Ce sont des classes Python pures.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Testabilite : parce que le coeur est independant, on peut le tester unitairement sans lancer QGIS. C'est comme ca qu'on atteint 600 tests.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Extensibilite : ajouter un nouveau backend — disons un futur support GeoParquet — se fait en implementant une interface, sans toucher au coeur. On branche un nouvel adaptateur, et c'est tout.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Concretement, FilterMate est organise en 4 couches concentriques. Voyons ca de plus pres.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-2--vue-densemble--les-4-couches-130---230">SEQUENCE 2 — VUE D'ENSEMBLE : LES 4 COUCHES (1:30 - 2:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Diagramme Mermaid anime (ci-dessous) qui se construit couche par couche, de l'exterieur vers l'interieur. Chaque couche s'eclaire avec son nom, son volume de code, et ses composants principaux. Mettre en evidence la regle de dependance : les fleches pointent toujours vers l'interieur.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Voici la vue d'ensemble de FilterMate. Quatre couches, de l'exterieur vers le coeur.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La couche la plus externe, c'est l'UI — environ 32 000 lignes. On y trouve le Dockwidget PyQt5/6, les 9 controllers MVC, les widgets et dialogues personnalises, et les outils cartographiques. C'est tout ce que l'utilisateur voit et touche.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ensuite, le Core Domain — 50 000 lignes. C'est le coeur du systeme. Les 28 services, les modeles de domaine purs Python, le FilterEngineTask avec ses 12 handlers, et surtout les Ports — les interfaces abstraites qui definissent les contrats avec le monde exterieur.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Puis les Adapters — 33 000 lignes. Ce sont les implementations concretes des ports. Les 4 backends de filtrage — PostgreSQL, Spatialite, OGR, Memory — les repositories de donnees, et l'AppBridge qui fait le lien avec l'API QGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et enfin, l'Infrastructure — 15 000 lignes. Les services transversaux : cache LRU, pool de connexions base de donnees, logging avec rotation, constantes, resilience, gestion des signaux Qt, et le conteneur d'injection de dependances.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La regle d'or : les dependances pointent toujours vers l'interieur. L'UI depend du Core. Le Core ne depend de rien — sauf de ses propres Ports. Les Adapters et l'Infrastructure dependent du Core, jamais l'inverse.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme-1--architecture-hexagonale-4-couches">Diagramme 1 — Architecture hexagonale (4 couches)</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TB
+    subgraph UI_LAYER["UI LAYER — 32k LOC"]
+        direction TB
+        DW["Dockwidget<br/>PyQt5/6"]
+        CTRL["9 Controllers MVC<br/>BaseController (Template Method)<br/>ExploringController<br/>FilteringController<br/>ExportingController<br/>ConfigController<br/>BackendController<br/>FavoritesController<br/>LayerSyncController<br/>PropertyController"]
+        WDG["Widgets & Dialogs<br/>JSON TreeView<br/>Favorites Widget<br/>Custom Widgets"]
+        MT["Map Tools<br/>Select / Identify"]
+    end
+
+    subgraph CORE_LAYER["CORE DOMAIN — 50k LOC"]
+        direction TB
+        SVC["28 Services<br/>FilterService, ExportService<br/>HistoryService, FavoritesService<br/>LayerService, BackendService<br/>TaskOrchestrator, GeometryPreparer<br/>ExpressionBuilder, BufferService..."]
+        DOM["Domain Models (Pure Python)<br/>FilterExpression, FilterResult<br/>LayerInfo, ProviderType<br/>OptimizationConfig, Exceptions"]
+        FET["FilterEngineTask<br/>QgsTask async<br/>+ 12 Handlers (Chain of Resp.)"]
+        PORTS["Ports (Interfaces)<br/>BackendPort, CachePort<br/>RepositoryPort, QGISPort<br/>FilterExecutorPort<br/>MaterializedViewPort<br/>TaskManagementPort..."]
+    end
+
+    subgraph ADAPTER_LAYER["ADAPTERS — 33k LOC"]
+        direction TB
+        BE["4 Backends<br/>PostgreSQL (MV, Pool, Index)<br/>Spatialite (R-Tree, Cache)<br/>OGR (Shapefile, GPKG)<br/>Memory (in-memory layers)"]
+        REPO["Repositories<br/>Layer Properties<br/>Favorites Storage"]
+        BRIDGE["AppBridge (DI)<br/>QGIS API Adapter"]
+    end
+
+    subgraph INFRA_LAYER["INFRASTRUCTURE — 15k LOC"]
+        direction TB
+        CACHE["Cache LRU<br/>Geometry, Query,<br/>WKT, Exploring"]
+        DB["DB Connection Pool<br/>PostgreSQL, Spatialite<br/>Prepared Statements"]
+        LOG["Logging<br/>Rotation, Levels"]
+        CONST["Constants<br/>Providers, Messages"]
+        RES["Resilience<br/>Retry, Timeout"]
+        SIG["Signal Utils<br/>SignalBlocker<br/>ConnectionManager"]
+        DI["DI Container<br/>Providers, Registry"]
+    end
+
+    UI_LAYER -->|"depends on"| CORE_LAYER
+    ADAPTER_LAYER -->|"implements"| CORE_LAYER
+    INFRA_LAYER -->|"supports"| CORE_LAYER
+    UI_LAYER -->|"uses"| ADAPTER_LAYER
+
+    style UI_LAYER fill:#7B1FA2,color:#fff
+    style CORE_LAYER fill:#1565C0,color:#fff
+    style ADAPTER_LAYER fill:#388E3C,color:#fff
+    style INFRA_LAYER fill:#E65100,color:#fff
+    style PORTS fill:#0D47A1,color:#fff
+    style FET fill:#0D47A1,color:#fff
+    style BE fill:#2E7D32,color:#fff
+    style DI fill:#BF360C,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-3--core-domain--modeles-purs-python-230---330">SEQUENCE 3 — CORE DOMAIN : MODELES PURS PYTHON (2:30 - 3:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Editeur de code (VS Code theme sombre) montrant les fichiers du dossier <code>core/domain/</code>. Ouvrir successivement <code>filter_expression.py</code>, <code>layer_info.py</code>, <code>filter_result.py</code>. Mettre en evidence les imports — aucun <code>from qgis</code> ni <code>from PyQt5</code>. Annoter : &quot;Aucune dependance QGIS = testable a 100%&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Regardons le coeur du systeme : le dossier <code>core/domain/</code>. C'est ici que vivent les modeles metier de FilterMate.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ouvrons <code>filter_expression.py</code>. Vous remarquez immediatement quelque chose : pas un seul import QGIS. Pas un seul import Qt. Ce sont des classes Python pures — des dataclasses, des enums, des namedtuples.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># core/domain/filter_expression.py (extrait)</span>
+<span class="hljs-keyword">from</span> dataclasses <span class="hljs-keyword">import</span> dataclass
+<span class="hljs-keyword">from</span> enum <span class="hljs-keyword">import</span> Enum
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProviderType</span><span class="hljs-params">(Enum)</span>:</span>
+    <span class="hljs-string">"""Types de backends supportes."""</span>
+    POSTGRESQL = <span class="hljs-string">"postgresql"</span>
+    SPATIALITE = <span class="hljs-string">"spatialite"</span>
+    OGR = <span class="hljs-string">"ogr"</span>
+    MEMORY = <span class="hljs-string">"memory"</span>
+</div></code></pre>
+<blockquote>
+<p><em>&quot;L'enum <code>ProviderType</code> definit les 4 backends. C'est tout. Pas de logique d'acces base de donnees, pas de connexion — juste la definition du concept.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>LayerInfo</code> est une dataclass qui encapsule les metadonnees d'une couche — nom, type de provider, nombre d'entites, CRS. Elle est creee par l'adaptateur QGIS et transmise au coeur, qui n'a jamais besoin de toucher l'objet <code>QgsVectorLayer</code> directement.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># core/domain/layer_info.py (extrait)</span>
+<span class="hljs-meta">@dataclass(frozen=True)</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">LayerInfo</span>:</span>
+    <span class="hljs-string">"""Informations sur une couche — pur Python, pas de QGIS."""</span>
+    name: str
+    layer_id: str
+    provider_type: ProviderType
+    feature_count: Optional[int] = <span class="hljs-literal">None</span>
+    crs_auth_id: Optional[str] = <span class="hljs-literal">None</span>
+    uri: Optional[str] = <span class="hljs-literal">None</span>
+</div></code></pre>
+<blockquote>
+<p><em>&quot;<code>FilterResult</code> est le conteneur de resultats. Il supporte le pattern Result Type : soit un succes avec des IDs, soit une erreur avec un message, soit un etat annule. Encore une fois, du Python pur — entierement testable sans QGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et c'est la le coeur de l'architecture hexagonale : le domaine metier est un ilot de stabilite. Les frameworks changent, les APIs evoluent, mais les concepts de filtrage spatial restent les memes.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-4--ports--adapters--les-interfaces-330---430">SEQUENCE 4 — PORTS &amp; ADAPTERS : LES INTERFACES (3:30 - 4:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Editeur de code : ouvrir <code>core/ports/backend_port.py</code>. Montrer la classe abstraite <code>BackendPort</code> avec ses methodes <code>execute()</code>, <code>supports_layer()</code>, <code>get_info()</code>, <code>cleanup()</code>. Puis split-screen : a gauche le Port (interface), a droite une implementation concrete (ex: <code>adapters/backends/ogr/backend.py</code>). Fleches animees montrant &quot;implements&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Les Ports sont les interfaces du systeme. Ce sont des classes abstraites Python — ABC — qui definissent des contrats. Le coeur de FilterMate parle uniquement a travers ces contrats.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le port le plus important, c'est <code>BackendPort</code>. Il definit 5 methodes que tout backend doit implementer :&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># core/ports/backend_port.py (extrait)</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BackendPort</span><span class="hljs-params">(ABC)</span>:</span>
+    <span class="hljs-string">"""Interface abstraite pour tous les backends de filtrage."""</span>
+
+<span class="hljs-meta">    @abstractmethod</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">execute</span><span class="hljs-params">(self, expression, layer_info, target_layer_infos=None)</span>:</span>
+        <span class="hljs-string">"""Execute un filtre et retourne les IDs correspondants."""</span>
+
+<span class="hljs-meta">    @abstractmethod</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">supports_layer</span><span class="hljs-params">(self, layer_info)</span> -&gt; bool:</span>
+        <span class="hljs-string">"""Ce backend peut-il traiter cette couche ?"""</span>
+
+<span class="hljs-meta">    @abstractmethod</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">get_info</span><span class="hljs-params">(self)</span> -&gt; BackendInfo:</span>
+        <span class="hljs-string">"""Nom, version, capacites du backend."""</span>
+
+<span class="hljs-meta">    @abstractmethod</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">cleanup</span><span class="hljs-params">(self)</span> -&gt; <span class="hljs-keyword">None</span>:</span>
+        <span class="hljs-string">"""Nettoyage : vues materialisees, connexions, caches."""</span>
+
+<span class="hljs-meta">    @abstractmethod</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">estimate_execution_time</span><span class="hljs-params">(self, expression, layer_info)</span> -&gt; float:</span>
+        <span class="hljs-string">"""Estimation du temps d'execution (ms)."""</span>
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Il y a aussi <code>BackendCapability</code> — un Flag enum qui decrit les capacites d'un backend : filtrage spatial, vues materialisees, index spatial, execution parallele, cache, transactions...&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate possede 11 ports au total : <code>BackendPort</code>, <code>CachePort</code>, <code>RepositoryPort</code>, <code>QGISPort</code>, <code>FilterExecutorPort</code>, <code>FilterOptimizer</code>, <code>GeometricFilterPort</code>, <code>LayerLifecyclePort</code>, <code>MaterializedViewPort</code>, <code>TaskManagementPort</code>, et <code>BackendServices</code>. Chacun decouple un aspect du systeme.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'avantage est immediat : pour les tests, on cree des mocks de ces ports. Pour une migration vers QGIS 4, on reecrit les adaptateurs — le coeur ne change pas.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-5--backend-factory--ajouter-un-backend-430---530">SEQUENCE 5 — BACKEND FACTORY : AJOUTER UN BACKEND (4:30 - 5:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Editeur de code : ouvrir <code>adapters/backends/factory.py</code>. Montrer la classe <code>BackendFactory</code> et sa methode <code>_create_backend()</code>. Puis montrer l'arborescence du dossier <code>adapters/backends/</code> avec les 4 sous-dossiers : <code>postgresql/</code>, <code>spatialite/</code>, <code>ogr/</code>, <code>memory/</code>. Animation : un 5eme dossier <code>geoparquet/</code> apparait pour illustrer l'extensibilite.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le pattern Factory est au coeur de la selection de backend. La classe <code>BackendFactory</code> dans <code>adapters/backends/factory.py</code> fait deux choses : elle selectionne le meilleur backend pour une couche, et elle le cree.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La selection est intelligente. Le <code>BackendSelector</code> regarde le type de provider de la couche, verifie si psycopg2 est installe pour PostgreSQL, prend en compte les preferences utilisateur, et propose une chaine de fallback : Memory d'abord, puis OGR en dernier recours.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># adapters/backends/factory.py (extrait simplifie)</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BackendFactory</span>:</span>
+    <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">_create_backend</span><span class="hljs-params">(self, provider_type)</span>:</span>
+        <span class="hljs-keyword">if</span> provider_type == ProviderType.MEMORY:
+            <span class="hljs-keyword">from</span> .memory.backend <span class="hljs-keyword">import</span> MemoryBackend
+            <span class="hljs-keyword">return</span> MemoryBackend()
+        <span class="hljs-keyword">elif</span> provider_type == ProviderType.OGR:
+            <span class="hljs-keyword">from</span> .ogr.backend <span class="hljs-keyword">import</span> OGRBackend
+            <span class="hljs-keyword">return</span> OGRBackend()
+        <span class="hljs-keyword">elif</span> provider_type == ProviderType.SPATIALITE:
+            <span class="hljs-keyword">from</span> .spatialite.backend <span class="hljs-keyword">import</span> SpatialiteBackend
+            <span class="hljs-keyword">return</span> SpatialiteBackend()
+        <span class="hljs-keyword">elif</span> provider_type == ProviderType.POSTGRESQL:
+            <span class="hljs-keyword">from</span> .postgresql.backend <span class="hljs-keyword">import</span> PostgreSQLBackend
+            <span class="hljs-keyword">return</span> PostgreSQLBackend()
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Ajouter un nouveau backend — imaginez GeoParquet — se fait en 4 etapes. Un : creer un dossier <code>adapters/backends/geoparquet/</code>. Deux : implementer <code>BackendPort</code> dans <code>backend.py</code>. Trois : ajouter le type dans l'enum <code>ProviderType</code>. Quatre : ajouter un <code>elif</code> dans la factory.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le coeur du systeme — FilterEngineTask, les services, les controllers — n'a pas besoin de changer. C'est la puissance du pattern Ports &amp; Adapters.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Chaque backend a sa propre richesse. PostgreSQL gere les vues materialisees, le pooling de connexions, et l'optimisation de chaines de filtres. Spatialite utilise des index R-Tree et un cache persistant. OGR construit des expressions QGIS natives. Memory travaille directement en memoire pour les petits jeux de donnees.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-6--les-9-controllers-mvc-530---615">SEQUENCE 6 — LES 9 CONTROLLERS MVC (5:30 - 6:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Diagramme en arbre montrant <code>BaseController</code> au sommet, avec les 9 controllers concrets en dessous. Chaque controller est annote avec sa responsabilite principale. Animation : les controllers s'eclairent un par un pendant la narration.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;L'interface de FilterMate est geree par 9 controllers, organises selon le pattern MVC — Model-View-Controller.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Tous heritent de <code>BaseController</code>, qui est un Template Method. Il fournit l'infrastructure commune : gestion des signaux PyQt, cycle de vie setup/teardown, acces au FilterService, et hooks d'activation de tab.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Voyons les 9 controllers et leurs responsabilites :&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>ExploringController</code> — gere la navigation dans les entites : selecteur simple, multiple, personnalise, et tous les boutons de la barre laterale : Identify, Zoom, Select, Track, Link, Reset.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>FilteringController</code> — configure le filtre : couche source, couche cible, predicat spatial, buffer, combine operators. C'est lui qui appelle FilterEngineTask.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>ExportingController</code> — gere l'export GeoPackage et KML avec les options de format, le choix du dossier, et les styles QML/SLD.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>ConfigController</code> — pilote la configuration : JSON TreeView, mise a jour en temps reel, validation des parametres.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>BackendController</code> — gere la selection et le monitoring du backend actif. La pastille bleue que vous voyez dans le header, c'est lui.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>FavoritesController</code> — CRUD complet sur les favoris : creer, lire, modifier, supprimer, importer, exporter.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>LayerSyncController</code> — synchronise les couches QGIS avec FilterMate : ajout, suppression, renommage, changement de visibilite.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>PropertyController</code> — gere les proprietes persistantes des couches : champ d'affichage, derniere selection, etat des toggles.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>UILayoutController</code> — s'occupe de l'agencement de l'interface : alignement des widgets, taille de l'action bar, configuration des groupboxes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Chaque controller a une responsabilite unique et claire. C'est le principe de responsabilite unique — SRP — applique a l'UI.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme--les-9-controllers-mvc">Diagramme — Les 9 Controllers MVC</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    BC["BaseController<br/>(Abstract / Template Method)<br/>Signaux PyQt, Lifecycle,<br/>setup() / teardown()"]
+
+    BC --> EC["ExploringController<br/>Navigation entites<br/>Single / Multiple / Custom<br/>6 boutons barre laterale"]
+    BC --> FC["FilteringController<br/>Configuration filtre<br/>Source / Cible / Predicat<br/>Buffer / Combine Ops"]
+    BC --> XC["ExportingController<br/>Export GeoPackage / KML<br/>Format, Dossier, Styles"]
+    BC --> CC["ConfigController<br/>JSON TreeView<br/>Parametres en temps reel"]
+    BC --> BK["BackendController<br/>Selection backend<br/>Monitoring / Pastille"]
+    BC --> FV["FavoritesController<br/>CRUD Favoris<br/>Import / Export"]
+    BC --> LS["LayerSyncController<br/>Sync couches QGIS<br/>Add / Remove / Rename"]
+    BC --> PC["PropertyController<br/>Proprietes couches<br/>Persistence SQLite"]
+    BC --> UL["UILayoutController<br/>Layout / Spacing<br/>Action Bar positioning"]
+
+    style BC fill:#1565C0,color:#fff
+    style EC fill:#7B1FA2,color:#fff
+    style FC fill:#388E3C,color:#fff
+    style XC fill:#F57C00,color:#fff
+    style CC fill:#00838F,color:#fff
+    style BK fill:#AD1457,color:#fff
+    style FV fill:#FF6F00,color:#fff
+    style LS fill:#283593,color:#fff
+    style PC fill:#4E342E,color:#fff
+    style UL fill:#37474F,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-7--filterenginetask--les-12-handlers-615---715">SEQUENCE 7 — FILTERENGINETASK : LES 12 HANDLERS (6:15 - 7:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Diagramme Mermaid flowchart LR (ci-dessous) qui se construit de gauche a droite, handler par handler. Chaque handler s'eclaire avec son nom et un bref descriptif. Les fleches entre handlers montrent le flux sequentiel. Annotation : &quot;Chain of Responsibility pattern&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le FilterEngineTask est le moteur de FilterMate. C'est une QgsTask — donc elle s'execute en arriere-plan, de maniere asynchrone, sans bloquer l'interface de QGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;A l'interieur, 12 handlers s'executent en sequence selon le pattern Chain of Responsibility. Chaque handler a une responsabilite unique, recoit les resultats du precedent, et passe les siens au suivant.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le flux demarre avec l'<code>InitializationHandler</code> : il valide les parametres, decouvre la couche source, configure le CRS pour les calculs metriques.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Puis le <code>SourceGeometryPreparer</code> : il extrait la geometrie de la selection, la transforme en WKT/WKB, et gere la reprojection CRS si necessaire.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'<code>ExpressionFacadeHandler</code> : il construit l'expression de filtrage en faisant appel a l'ExpressionBuilder du backend selectionne. C'est la que le pattern Strategy entre en jeu — la meme interface, mais une implementation differente selon que c'est du PostgreSQL, du Spatialite, ou de l'OGR.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le <code>FilteringOrchestrator</code> : il coordonne le filtrage sur toutes les couches cibles, en gerant le parallelisme et les combine operators AND/OR/REPLACE.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'<code>AttributeFilterExecutor</code> : il execute les filtres attributaires — les conditions WHERE classiques.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le <code>SpatialFilterExecutor</code> : il execute les predicats geometriques — Intersects, Contains, Within, Touches, et les 4 autres.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le <code>BackendConnector</code> : il fait le lien avec le backend selectionne via la BackendFactory.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le <code>MaterializedViewHandler</code> : pour PostgreSQL, il cree ou rafraichit les vues materialisees pour accelerer les filtres repetitifs.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le <code>SubsetManagementHandler</code> : il applique l'expression de filtre via <code>setSubsetString()</code> sur les couches QGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'<code>ExportHandler</code> : il declenche l'export GeoPackage si demande.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le <code>CleanupHandler</code> : il nettoie les ressources temporaires — tables, connexions, caches.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et enfin, le <code>FinishedHandler</code> : il emet les signaux de completion vers le thread principal. C'est le seul handler qui peut interagir avec l'UI QGIS.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme-2--pipeline-des-12-handlers">Diagramme 2 — Pipeline des 12 Handlers</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    H1["1. Initialization<br/>Handler<br/>━━━━━━━━━━<br/>Validation params<br/>Decouverte couche<br/>Config CRS"]
+    H2["2. Source Geometry<br/>Preparer<br/>━━━━━━━━━━<br/>Extraction geom.<br/>WKT/WKB<br/>Reprojection CRS"]
+    H3["3. Expression<br/>Facade Handler<br/>━━━━━━━━━━<br/>Construction expr.<br/>Strategy backend<br/>SQL generation"]
+    H4["4. Filtering<br/>Orchestrator<br/>━━━━━━━━━━<br/>Multi-couches<br/>Combine operators<br/>AND/OR/REPLACE"]
+    H5["5. Attribute Filter<br/>Executor<br/>━━━━━━━━━━<br/>Conditions WHERE<br/>Filtres attributaires"]
+    H6["6. Spatial Filter<br/>Executor<br/>━━━━━━━━━━<br/>8 predicats geom.<br/>Intersects, Contains<br/>Within, Touches..."]
+    H7["7. Backend<br/>Connector<br/>━━━━━━━━━━<br/>BackendFactory<br/>Liaison backend<br/>4 implementations"]
+    H8["8. Materialized<br/>View Handler<br/>━━━━━━━━━━<br/>PostgreSQL MV<br/>Create/Refresh<br/>Index spatial"]
+    H9["9. Subset Mgmt<br/>Handler<br/>━━━━━━━━━━<br/>setSubsetString()<br/>Application filtre<br/>sur couches QGIS"]
+    H10["10. Export<br/>Handler<br/>━━━━━━━━━━<br/>GeoPackage export<br/>Projet QGIS embed.<br/>Styles QML/SLD"]
+    H11["11. Cleanup<br/>Handler<br/>━━━━━━━━━━<br/>Tables temporaires<br/>Connexions DB<br/>Caches invalides"]
+    H12["12. Finished<br/>Handler<br/>━━━━━━━━━━<br/>Signaux Qt<br/>Thread principal<br/>UI update"]
+
+    H1 --> H2 --> H3 --> H4 --> H5 --> H6
+    H6 --> H7 --> H8 --> H9 --> H10 --> H11 --> H12
+
+    style H1 fill:#1565C0,color:#fff
+    style H2 fill:#1565C0,color:#fff
+    style H3 fill:#0D47A1,color:#fff
+    style H4 fill:#0D47A1,color:#fff
+    style H5 fill:#2E7D32,color:#fff
+    style H6 fill:#2E7D32,color:#fff
+    style H7 fill:#388E3C,color:#fff
+    style H8 fill:#388E3C,color:#fff
+    style H9 fill:#E65100,color:#fff
+    style H10 fill:#E65100,color:#fff
+    style H11 fill:#BF360C,color:#fff
+    style H12 fill:#BF360C,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-8--systeme-de-signaux-qt-715---800">SEQUENCE 8 — SYSTEME DE SIGNAUX QT (7:15 - 8:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Diagramme de sequence anime montrant le flux de signaux entre les composants. Montrer un signal emis par un widget, capte par un controller, qui appelle un service, qui cree une task. Puis montrer le signal de retour de la task vers le thread principal. Annoter les points dangereux : &quot;Thread boundary&quot; en rouge.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;FilterMate utilise intensivement le systeme de signaux de Qt — le pattern Observer. Mais dans un plugin QGIS, les signaux ont une particularite critique : ils traversent les frontieres de threads.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Prenons un exemple. L'utilisateur clique sur le bouton Filter. Le widget emet un signal <code>clicked</code>. Le <code>FilteringController</code> capture ce signal et construit un objet <code>FilterConfiguration</code>. Le controller appelle le <code>FilterService</code>, qui cree un <code>FilterEngineTask</code> et l'envoie au <code>QgsTaskManager</code>.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le task manager lance la tache dans un worker thread. Les 12 handlers s'executent en arriere-plan. Quand c'est termine, le <code>FinishedHandler</code> emet des signaux PyQt — mais attention, on est dans un worker thread.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est la que Qt nous sauve : les signaux connectes entre threads sont automatiquement enfiles — 'queued connections'. Le signal arrive dans la boucle evenementielle du thread principal, et c'est la seulement que l'UI est mise a jour.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour gerer proprement le blocage de signaux — eviter les boucles infinies quand on met a jour un widget programmatiquement — FilterMate utilise <code>SignalBlocker</code>, un context manager maison :&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># infrastructure/signal_utils.py (extrait)</span>
+<span class="hljs-keyword">from</span> infrastructure.signal_utils <span class="hljs-keyword">import</span> SignalBlocker
+
+<span class="hljs-comment"># Mettre a jour un widget sans declencher ses signaux</span>
+<span class="hljs-keyword">with</span> SignalBlocker(self.combo_box, self.spin_box):
+    self.combo_box.setCurrentIndex(<span class="hljs-number">5</span>)
+    self.spin_box.setValue(<span class="hljs-number">100</span>)
+<span class="hljs-comment"># Les signaux sont automatiquement restaures ici</span>
+</div></code></pre>
+<blockquote>
+<p><em>&quot;C'est plus propre, plus sur, et immune aux exceptions grace au context manager.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-9--thread-safety-dans-qgis-800---900">SEQUENCE 9 — THREAD SAFETY DANS QGIS (8:00 - 9:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Diagramme Mermaid (ci-dessous) montrant deux colonnes : &quot;Main Thread&quot; et &quot;Worker Thread&quot;. Montrer les operations autorisees et interdites dans chaque thread. Trois regles en gros caracteres, annotees avec des exemples de code.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le thread safety dans QGIS est probablement le piege numero un pour les developpeurs de plugins. Les couches QGIS — les objets <code>QgsVectorLayer</code> — ne sont PAS thread-safe. Les manipuler depuis un worker thread provoque des crashes silencieux, des corruptions de memoire, ou des segfaults.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate respecte 3 regles strictes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Regle numero un : stocker l'URI dans le <code>__init__</code>, recreer le provider dans le <code>run()</code>. Quand le FilterEngineTask est cree sur le thread principal, on ne stocke jamais l'objet layer directement. On stocke son URI — une simple chaine de caracteres. Ensuite, dans la methode <code>run()</code> qui s'execute dans le worker thread, on recree un provider local a partir de cette URI.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># CORRECT : dans __init__ (thread principal)</span>
+self._layer_uri = layer.dataProvider().dataSourceUri()
+self._layer_name = layer.name()
+
+<span class="hljs-comment"># CORRECT : dans run() (worker thread)</span>
+provider = QgsVectorLayer(self._layer_uri, <span class="hljs-string">"temp"</span>, <span class="hljs-string">"ogr"</span>)
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Regle numero deux : les objets <code>QgsGeometry</code> sont OK si crees a partir de WKT ou WKB. Pas d'acces a <code>layer.getFeature()</code> depuis le worker thread. On serialise la geometrie en WKT sur le thread principal, et on la reconstruit dans le worker thread.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># Thread principal : serialiser</span>
+wkt = geometry.asWkt()
+
+<span class="hljs-comment"># Worker thread : reconstruire (OK, pas de dependance a la couche)</span>
+geom = QgsGeometry.fromWkt(wkt)
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Regle numero trois : les signaux PyQt ne doivent etre emis que dans la methode <code>finished()</code>, jamais dans <code>run()</code>. La methode <code>finished()</code> est garantie de s'executer sur le thread principal par le QgsTaskManager. C'est la qu'on met a jour l'UI, qu'on ecrit dans les logs, qu'on affiche les messages.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ces trois regles sont documentees dans le code avec le decorateur <code>@main_thread_only</code> pour les methodes qui ne doivent jamais etre appelees depuis un worker thread.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme-3--thread-safety-main-vs-worker">Diagramme 3 — Thread safety (Main vs Worker)</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TB
+    subgraph MAIN["MAIN THREAD (UI Thread)"]
+        direction TB
+        M1["FilterEngineTask.__init__()<br/>━━━━━━━━━━<br/>Stocker URI (string)<br/>Stocker WKT (string)<br/>Stocker parametres (dict)"]
+        M3["FilterEngineTask.finished()<br/>━━━━━━━━━━<br/>Emettre signaux PyQt<br/>Mettre a jour l'UI<br/>Ecrire logs utilisateur<br/>Afficher messages QGIS"]
+    end
+
+    subgraph WORKER["WORKER THREAD (QgsTask.run)"]
+        direction TB
+        W1["FilterEngineTask.run()<br/>━━━━━━━━━━<br/>Recreer providers (URI)<br/>Reconstruire geometries (WKT)<br/>Executer les 12 handlers<br/>Requetes SQL backend"]
+    end
+
+    M1 -->|"QgsTaskManager<br/>lance la tache"| W1
+    W1 -->|"Task terminee<br/>(automatique)"| M3
+
+    subgraph RULES["3 REGLES DE THREAD SAFETY"]
+        direction TB
+        R1["Regle 1 : URI dans __init__<br/>Provider dans run()<br/>JAMAIS stocker QgsVectorLayer"]
+        R2["Regle 2 : QgsGeometry OK<br/>si cree depuis WKT/WKB<br/>JAMAIS getFeature() dans run()"]
+        R3["Regle 3 : Signaux Qt<br/>UNIQUEMENT dans finished()<br/>JAMAIS emettre dans run()"]
+    end
+
+    subgraph INTERDIT["INTERDIT (crash/segfault)"]
+        direction TB
+        X1["worker: layer.getFeatures()"]
+        X2["worker: iface.mapCanvas()"]
+        X3["worker: signal.emit()"]
+        X4["worker: QgsProject.instance()"]
+    end
+
+    style MAIN fill:#1565C0,color:#fff
+    style WORKER fill:#E65100,color:#fff
+    style RULES fill:#2E7D32,color:#fff
+    style INTERDIT fill:#B71C1C,color:#fff
+    style R1 fill:#388E3C,color:#fff
+    style R2 fill:#388E3C,color:#fff
+    style R3 fill:#388E3C,color:#fff
+    style X1 fill:#C62828,color:#fff
+    style X2 fill:#C62828,color:#fff
+    style X3 fill:#C62828,color:#fff
+    style X4 fill:#C62828,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-10--suite-de-tests--600-tests-900---930">SEQUENCE 10 — SUITE DE TESTS : 600 TESTS (9:00 - 9:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Terminal (theme sombre) avec la commande <code>pytest tests/ -v</code> en cours d'execution. Les tests deroulent avec des points verts. Compteur en bas : &quot;600 passed&quot;. Puis montrer l'arborescence du dossier <code>tests/</code> avec les 34 fichiers. Montrer un exemple de test unitaire simple.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;FilterMate possede 600 tests unitaires repartis dans 34 fichiers. Tout est teste avec pytest.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'arborescence des tests suit exactement celle du code source. Pour chaque module, il y a un miroir dans <code>tests/unit/</code> :&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div>tests/
+  unit/
+    core/
+      domain/         → test_domain_models.py, test_exceptions.py
+      filter/         → test_expression_builder.py
+      tasks/          → test_handlers.py
+    adapters/
+      backends/
+        memory/       → test_backend.py
+        ogr/          → test_filter_executor.py
+        postgresql/   → test_expression_builder.py, test_cleanup.py,
+                        test_schema_manager.py
+        spatialite/   → test_expression_builder.py
+    infrastructure/
+      database/       → test_sql_utils.py
+    ui/
+      controllers/    → test_exploring_controller.py,
+                        test_filtering_controller.py,
+                        test_layer_sync_controller.py
+      managers/       → test_signal_manager.py
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Le coeur metier — domaine et handlers — est teste sans QGIS, grace a des mocks des ports. Les tests de backends utilisent des doubles de test. Les tests de controllers verifient les interactions signal-slot.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour lancer les tests : <code>python -m pytest tests/ -v</code>. C'est automatise dans la CI.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-11--cicd-github-actions-930---1000">SEQUENCE 11 — CI/CD GITHUB ACTIONS (9:30 - 10:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture d'ecran GitHub : page Actions du repository, montrant le workflow &quot;Tests&quot; avec des runs verts. Ouvrir un run : montrer la matrice Python 3.10 + 3.12. Puis montrer le fichier <code>.github/workflows/test.yml</code> dans l'editeur.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Chaque push et chaque pull request declenche automatiquement la suite de tests via GitHub Actions.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le workflow est simple mais efficace. Il tourne sur Ubuntu, avec une matrice de deux versions de Python — 3.10 et 3.12 — pour garantir la compatibilite.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># .github/workflows/test.yml</span>
+<span class="hljs-attr">name:</span> <span class="hljs-string">Tests</span>
+<span class="hljs-attr">on:</span>
+  <span class="hljs-attr">push:</span>
+    <span class="hljs-attr">branches:</span> <span class="hljs-string">[</span> <span class="hljs-string">main,</span> <span class="hljs-string">develop</span> <span class="hljs-string">]</span>
+  <span class="hljs-attr">pull_request:</span>
+    <span class="hljs-attr">branches:</span> <span class="hljs-string">[</span> <span class="hljs-string">main,</span> <span class="hljs-string">develop</span> <span class="hljs-string">]</span>
+
+<span class="hljs-attr">jobs:</span>
+  <span class="hljs-attr">test:</span>
+    <span class="hljs-attr">runs-on:</span> <span class="hljs-string">ubuntu-latest</span>
+    <span class="hljs-attr">strategy:</span>
+      <span class="hljs-attr">matrix:</span>
+        <span class="hljs-attr">python-version:</span> <span class="hljs-string">["3.10",</span> <span class="hljs-string">"3.12"</span><span class="hljs-string">]</span>
+    <span class="hljs-attr">steps:</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/checkout@v4</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">uses:</span> <span class="hljs-string">actions/setup-python@v5</span>
+      <span class="hljs-attr">with:</span>
+        <span class="hljs-attr">python-version:</span> <span class="hljs-string">${{</span> <span class="hljs-string">matrix.python-version</span> <span class="hljs-string">}}</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">pip</span> <span class="hljs-string">install</span> <span class="hljs-string">-r</span> <span class="hljs-string">requirements-test.txt</span>
+    <span class="hljs-bullet">-</span> <span class="hljs-attr">run:</span> <span class="hljs-string">python</span> <span class="hljs-string">-m</span> <span class="hljs-string">pytest</span> <span class="hljs-string">tests/</span> <span class="hljs-string">-v</span> <span class="hljs-string">-o</span> <span class="hljs-string">"addopts="</span>
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Pas de deploiement automatise pour l'instant — le plugin est publie manuellement sur le depot QGIS. Mais les tests sont le filet de securite qui garantit que chaque contribution ne casse rien.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si vous ouvrez une PR et qu'un test echoue, on le verra immediatement dans la page GitHub.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-12--comment-contribuer-1000---1030">SEQUENCE 12 — COMMENT CONTRIBUER (10:00 - 10:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Terminal avec les commandes Git en sequence. Chaque commande apparait avec une annotation explicative. Puis montrer l'interface GitHub : bouton Fork, creation de branche, ouverture de PR avec template.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Vous voulez contribuer a FilterMate ? Voici le workflow en 5 etapes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Etape 1 : forkez le repository sur GitHub.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div><span class="hljs-comment"># Depuis github.com/imagodata/filter_mate → bouton Fork</span>
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Etape 2 : clonez votre fork et creez une branche descriptive.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div>git <span class="hljs-built_in">clone</span> https://github.com/VOTRE_COMPTE/filter_mate.git
+<span class="hljs-built_in">cd</span> filter_mate
+git checkout -b feat/mon-amelioration
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Etape 3 : implementez votre modification. Suivez les conventions du projet — on y revient dans la derniere section.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Etape 4 : lancez les tests pour verifier que rien n'est casse.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div>python -m pytest tests/ -v
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Etape 5 : poussez votre branche et ouvrez une Pull Request vers <code>main</code>.&quot;</em></p>
+</blockquote>
+<pre class="hljs"><code><div>git push origin feat/mon-amelioration
+<span class="hljs-comment"># Puis sur GitHub : bouton "New Pull Request"</span>
+</div></code></pre>
+<blockquote>
+<p><em>&quot;Les tests CI se lancent automatiquement. Si tout est vert, votre PR sera reviewee par l'equipe. On verifie la qualite du code, la couverture de tests, et la coherence architecturale.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Les contributions les plus appreciees : corrections de bugs, nouveaux tests, amelioration de la documentation, traductions, et bien sur — de nouveaux backends !&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-13--bonnes-pratiques--recapitulatif-1030---1130">SEQUENCE 13 — BONNES PRATIQUES &amp; RECAPITULATIF (10:30 - 11:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Slide recapitulatif avec les bonnes pratiques en liste, puis le mindmap des design patterns (diagramme ci-dessous). Enfin, ecran de fin avec les liens.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour terminer, voici les bonnes pratiques du projet FilterMate — celles que tout contributeur devrait connaitre.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Thread safety : utilisez <code>SignalBlocker</code> pour les blocages de signaux. Stockez des URI, jamais des <code>QgsVectorLayer</code>. Utilisez <code>pointOnSurface()</code> au lieu de <code>centroid()</code> pour les polygones concaves.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;SQL security : utilisez toujours <code>sanitize_sql_identifier()</code> pour les identifiants DDL. Les f-strings sont bannies dans les requetes SQL — utilisez les parametres prepares.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Architecture : les nouvelles classes dans <code>core/domain/</code> ne doivent avoir AUCUNE dependance QGIS. Les classes non-QObject utilisent <code>QCoreApplication.translate()</code> pour l'i18n. Les QgsTask utilisent <code>self.tr()</code>.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Configuration : la source de verite est <code>config.default.json</code>. Utilisez <code>_get_option_value()</code> et <code>_set_option_value()</code> pour lire et ecrire les options. Le fichier <code>config_schema.json</code> est deprecie.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Tests : chaque nouveau module doit avoir ses tests unitaires. Visez la structure miroir dans <code>tests/unit/</code>. Utilisez les mocks pour les dependances externes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Provider types : utilisez les constantes de <code>infrastructure/constants.py</code> — <code>PROVIDER_POSTGRES</code>, <code>PROVIDER_SPATIALITE</code>, <code>PROVIDER_OGR</code>. Jamais de chaines en dur.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Finalement, jetons un oeil aux 12 design patterns utilises dans FilterMate.&quot;</em></p>
+</blockquote>
+<hr>
+<h3 id="diagramme-4--design-patterns-utilises-dans-filtermate">Diagramme 4 — Design Patterns utilises dans FilterMate</h3>
+<pre><code class="language-mermaid"><div class="mermaid">mindmap
+  root((FilterMate<br/>12 Design Patterns))
+    Creational
+      Factory<br/>(BackendFactory)
+      DI Container<br/>(AppBridge, Container)
+      Service Locator<br/>(BackendServices facade)
+    Structural
+      Adapter<br/>(QGIS Bridge, Legacy Adapter)
+      Repository<br/>(Layer Properties, Favorites)
+      Hexagonal<br/>(Ports & Adapters)
+    Behavioral
+      Chain of Responsibility<br/>(12 Handlers)
+      Strategy<br/>(Multi-backend filtering)
+      Observer<br/>(Qt Signals / Slots)
+      Template Method<br/>(BaseController)
+      Command<br/>(Undo / Redo stack)
+    Architectural
+      MVC<br/>(9 Controllers)
+</div></code></pre>
+<hr>
+<h3 id="narration--cloture">Narration — cloture</h3>
+<blockquote>
+<p><em>&quot;Et voila. FilterMate, c'est 130 000 lignes de code organisees en 4 couches, 12 design patterns, 12 handlers asynchrones, 4 backends, 11 ports, 28 services, 9 controllers, 600 tests, et un pipeline CI/CD.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Mais au final, l'architecture hexagonale, ca se resume a une idee simple : le coeur de votre logiciel ne devrait jamais dependre des details d'implementation. Les frameworks changent. Les APIs evoluent. Les bases de donnees migrent. Mais la logique metier, elle, reste.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si cette video vous a ete utile, laissez une etoile sur le repository GitHub. Et si vous avez des questions sur l'architecture, ouvrez une issue — on sera ravis d'en discuter.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Merci d'avoir suivi cette serie de 10 tutoriels FilterMate. A bientot, et bon code !&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="ressources-visuelles">Ressources visuelles</h2>
+<h3 id="timestamps">Timestamps</h3>
+<table>
+<thead>
+<tr>
+<th>Chrono</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0:00</td>
+<td>Hook — &quot;130 000 lignes, 4 couches, 12 patterns&quot;</td>
+</tr>
+<tr>
+<td>0:30</td>
+<td>Pourquoi l'architecture hexagonale ?</td>
+</tr>
+<tr>
+<td>1:30</td>
+<td>Vue d'ensemble : les 4 couches (Diagramme 1)</td>
+</tr>
+<tr>
+<td>2:30</td>
+<td>Core Domain : modeles purs Python</td>
+</tr>
+<tr>
+<td>3:30</td>
+<td>Ports &amp; Adapters : les interfaces</td>
+</tr>
+<tr>
+<td>4:30</td>
+<td>Backend Factory : ajouter un backend</td>
+</tr>
+<tr>
+<td>5:30</td>
+<td>Les 9 Controllers MVC</td>
+</tr>
+<tr>
+<td>6:15</td>
+<td>FilterEngineTask : les 12 Handlers (Diagramme 2)</td>
+</tr>
+<tr>
+<td>7:15</td>
+<td>Systeme de signaux Qt</td>
+</tr>
+<tr>
+<td>8:00</td>
+<td>Thread safety dans QGIS (Diagramme 3)</td>
+</tr>
+<tr>
+<td>9:00</td>
+<td>Suite de tests : 600 tests</td>
+</tr>
+<tr>
+<td>9:30</td>
+<td>CI/CD GitHub Actions</td>
+</tr>
+<tr>
+<td>10:00</td>
+<td>Comment contribuer : fork, branch, PR</td>
+</tr>
+<tr>
+<td>10:30</td>
+<td>Bonnes pratiques &amp; design patterns (Diagramme 4)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="captures-ecran--code-requises">Captures ecran / code requises</h3>
+<ol>
+<li>Comparaison architecture spaghetti vs hexagonale (split-screen)</li>
+<li>Diagramme 4 couches anime (Mermaid rendu)</li>
+<li>Editeur : <code>core/domain/filter_expression.py</code> — montrer les imports sans QGIS</li>
+<li>Editeur : <code>core/domain/layer_info.py</code> — dataclass pure Python</li>
+<li>Editeur : <code>core/ports/backend_port.py</code> — classe abstraite BackendPort</li>
+<li>Split-screen : Port (interface) vs Implementation concrete (backend)</li>
+<li>Editeur : <code>adapters/backends/factory.py</code> — methode <code>_create_backend()</code></li>
+<li>Arborescence <code>adapters/backends/</code> avec les 4 sous-dossiers</li>
+<li>Diagramme 9 controllers (Mermaid rendu)</li>
+<li>Diagramme pipeline 12 handlers (Mermaid rendu, flowchart LR)</li>
+<li>Diagramme sequence : signal Widget → Controller → Service → Task → finished()</li>
+<li>Editeur : <code>infrastructure/signal_utils.py</code> — SignalBlocker context manager</li>
+<li>Diagramme thread safety (Mermaid rendu)</li>
+<li>Editeur : exemple <code>__init__</code> (URI) vs <code>run()</code> (provider)</li>
+<li>Terminal : <code>pytest tests/ -v</code> avec 600 tests verts</li>
+<li>Arborescence <code>tests/unit/</code> avec les 34 fichiers</li>
+<li>GitHub Actions : page runs avec matrice Python 3.10/3.12</li>
+<li>Editeur : <code>.github/workflows/test.yml</code></li>
+<li>Terminal : commandes Git fork/clone/branch/push</li>
+<li>Mindmap design patterns (Mermaid rendu)</li>
+<li>Ecran de fin avec liens GitHub / QGIS Plugins / Documentation</li>
+</ol>
+<h3 id="fichiers-source-a-montrer-dans-la-video">Fichiers source a montrer dans la video</h3>
+<table>
+<thead>
+<tr>
+<th>Fichier</th>
+<th>Sequence</th>
+<th>Ce qu'on montre</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/domain/filter_expression.py</code></td>
+<td>3</td>
+<td>Enum ProviderType, aucun import QGIS</td>
+</tr>
+<tr>
+<td><code>core/domain/layer_info.py</code></td>
+<td>3</td>
+<td>Dataclass LayerInfo pure Python</td>
+</tr>
+<tr>
+<td><code>core/domain/filter_result.py</code></td>
+<td>3</td>
+<td>Result Type pattern</td>
+</tr>
+<tr>
+<td><code>core/ports/backend_port.py</code></td>
+<td>4</td>
+<td>Interface abstraite, BackendCapability</td>
+</tr>
+<tr>
+<td><code>adapters/backends/factory.py</code></td>
+<td>5</td>
+<td>BackendFactory, BackendSelector</td>
+</tr>
+<tr>
+<td><code>ui/controllers/base_controller.py</code></td>
+<td>6</td>
+<td>Template Method, QObjectABCMeta</td>
+</tr>
+<tr>
+<td><code>core/tasks/filter_task.py</code></td>
+<td>7</td>
+<td>FilterEngineTask, handler imports</td>
+</tr>
+<tr>
+<td><code>core/tasks/initialization_handler.py</code></td>
+<td>7</td>
+<td>Handler extrait, responsabilite unique</td>
+</tr>
+<tr>
+<td><code>infrastructure/signal_utils.py</code></td>
+<td>8</td>
+<td>SignalBlocker, ConnectionManager</td>
+</tr>
+<tr>
+<td><code>infrastructure/utils/thread_utils.py</code></td>
+<td>9</td>
+<td>@main_thread_only decorateur</td>
+</tr>
+<tr>
+<td><code>.github/workflows/test.yml</code></td>
+<td>11</td>
+<td>Pipeline CI/CD</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="donnees-et-prerequis">Donnees et prerequis</h2>
+<blockquote>
+<p>Aucune donnee de demonstration requise pour cette video.
+Seul le code source du repository est necessaire.
+Optionnel : un fork personnel pour la demonstration de contribution.</p>
+</blockquote>
+<hr>
+<h2 id="liens-a-afficher-a-lecran">Liens a afficher a l'ecran</h2>
+<ul>
+<li><strong>GitHub</strong> : <code>https://github.com/imagodata/filter_mate</code></li>
+<li><strong>QGIS Plugins</strong> : <code>https://plugins.qgis.org/plugins/filter_mate</code></li>
+<li><strong>Documentation</strong> : <code>https://imagodata.github.io/filter_mate</code></li>
+<li><strong>Issues</strong> : <code>https://github.com/imagodata/filter_mate/issues</code></li>
+<li><strong>Pull Requests</strong> : <code>https://github.com/imagodata/filter_mate/pulls</code></li>
+</ul>
+<hr>
+<h2 id="musique-suggeree">Musique suggeree</h2>
+<ul>
+<li>Hook : Intro electronique/tech, build-up rapide, impact sur &quot;12 design patterns&quot;</li>
+<li>Sequences techniques : Fond ambient minimal, pas de lyrics</li>
+<li>Cloture : Montee progressive, ton positif/inspirant</li>
+</ul>
+<hr>
+<h2 id="points-cles-a-mettre-en-avant">Points cles a mettre en avant</h2>
+<ol>
+<li><strong>Architecture hexagonale</strong> : le coeur ne depend de rien — ni Qt, ni QGIS, ni PostgreSQL</li>
+<li><strong>Testabilite</strong> : 600 tests possibles grace au decoupage en couches</li>
+<li><strong>Extensibilite</strong> : ajouter un backend = implementer une interface + 1 elif</li>
+<li><strong>Thread safety</strong> : 3 regles strictes, decorateur @main_thread_only, SignalBlocker</li>
+<li><strong>12 handlers</strong> : Chain of Responsibility pour decomposer un God Object de 6000 lignes</li>
+<li><strong>Design patterns</strong> : 12 patterns identifies, chacun avec un role precis</li>
+<li><strong>CI/CD</strong> : filet de securite automatique sur chaque push/PR</li>
+<li><strong>Contribution</strong> : workflow Git standard, conventions claires, review systematique</li>
+</ol>
+<hr>
+<h2 id="liens-vers-les-autres-videos-de-la-serie">Liens vers les autres videos de la serie</h2>
+<table>
+<thead>
+<tr>
+<th>Video</th>
+<th>Titre</th>
+<th>Niveau</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V01</td>
+<td>Installation &amp; Premier Pas</td>
+<td>Debutant</td>
+</tr>
+<tr>
+<td>V02</td>
+<td>Filtrage Geometrique : Les Bases</td>
+<td>Debutant</td>
+</tr>
+<tr>
+<td>V03</td>
+<td>Explorer Vos Donnees</td>
+<td>Debutant</td>
+</tr>
+<tr>
+<td>V04</td>
+<td>Predicats Spatiaux &amp; Buffer</td>
+<td>Intermediaire</td>
+</tr>
+<tr>
+<td>V05</td>
+<td>Favoris &amp; Historique</td>
+<td>Intermediaire</td>
+</tr>
+<tr>
+<td>V06</td>
+<td>Export GeoPackage &amp; KML Pro</td>
+<td>Intermediaire</td>
+</tr>
+<tr>
+<td>V07</td>
+<td>Multi-Backend &amp; Optimisation</td>
+<td>Avance</td>
+</tr>
+<tr>
+<td>V08</td>
+<td>PostgreSQL Power User</td>
+<td>Avance</td>
+</tr>
+<tr>
+<td>V09</td>
+<td>Configuration Avancee</td>
+<td>Expert / Dev</td>
+</tr>
+<tr>
+<td><strong>V10</strong></td>
+<td><strong>Architecture &amp; Contribution</strong> (cette video)</td>
+<td><strong>Expert / Dev</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>Script cree le 14 Mars 2026 — FilterMate v4.6.1</em>
+<em>Serie de tutoriels : Video 10 sur 10</em></p>
+
+</body>
+</html>

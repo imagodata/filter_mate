@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SCRIPT_V05_FAVORIS_HISTORIQUE.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="filtermate--script-video-v05--favoris--historique">FilterMate — Script Video V05 : Favoris &amp; Historique</h1>
+<p><strong>Version</strong> : 4.6.1 | <strong>Date</strong> : 14 Mars 2026
+<strong>Niveau</strong> : Intermediaire | <strong>Duree</strong> : 6-8 min | <strong>Prerequis</strong> : V02 (Filtrage Geometrique : Les Bases)
+<strong>Langue</strong> : Francais (sous-titres EN disponibles)</p>
+<hr>
+<h2 id="plan-de-la-video">Plan de la video</h2>
+<table>
+<thead>
+<tr>
+<th>Temps</th>
+<th>Contenu</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0:00</td>
+<td>Pourquoi sauvegarder ses filtres ?</td>
+<td>Voix + diagramme</td>
+</tr>
+<tr>
+<td>0:30</td>
+<td>Sauvegarder le filtre actuel en favori</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>1:00</td>
+<td>Badge favori — indicateur visuel</td>
+<td>Capture annotee</td>
+</tr>
+<tr>
+<td>1:30</td>
+<td>Rappeler un favori — 1 clic declenche automatiquement le filtre</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>2:00</td>
+<td>Renommer, dupliquer, supprimer</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>2:30</td>
+<td>Favoris globaux vs projet</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>3:00</td>
+<td>Favorites Manager Dialog — onglet General</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>3:30</td>
+<td>Favorites Manager Dialog — onglet Expression</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>4:00</td>
+<td>Favorites Manager Dialog — onglet Remote</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>4:30</td>
+<td>Export JSON — partager avec l'equipe</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>5:00</td>
+<td>Import JSON — dialog Merge / Replace All / Cancel</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>5:30</td>
+<td>History Widget : compteur, tooltips, Clear History</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>6:00</td>
+<td>Unfilter et historique</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>6:15</td>
+<td>Undo multi-couches (global state)</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>6:30</td>
+<td>Persistance historique : per-session vs disque</td>
+<td>Demo live</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="objectifs-pedagogiques">Objectifs pedagogiques</h2>
+<p>A la fin de cette video, l'utilisateur saura :</p>
+<ol>
+<li>Sauvegarder un filtre actif en favori (nom + contexte spatial complet)</li>
+<li>Rappeler un favori en 1 clic (application automatique, sans double clic)</li>
+<li>Gerer ses favoris : renommer, dupliquer, supprimer, editer les tags</li>
+<li>Utiliser le Favorites Manager Dialog et ses 3 onglets (General, Expression, Remote)</li>
+<li>Exporter et importer des favoris au format JSON pour le travail en equipe</li>
+<li>Naviguer dans l'historique des filtres avec Undo/Redo (Ctrl+Z / Ctrl+Y)</li>
+<li>Configurer la persistance de l'historique dans APP.OPTIONS.HISTORY</li>
+</ol>
+<hr>
+<h2 id="donnees-de-demo">Donnees de demo</h2>
+<ul>
+<li>Shapefile communes (polygones, ~35 000 entites)</li>
+<li>Shapefile departements (polygones, ~100 entites)</li>
+<li>Shapefile routes (lignes, ~5 000 entites)</li>
+<li>Shapefile batiments (polygones, ~50 000 entites)</li>
+<li>Fichier <code>filtermate_favorites.json</code> (prepare a l'avance avec 5 favoris pour l'import)</li>
+</ul>
+<hr>
+<h2 id="sequence-0--pourquoi-sauvegarder-ses-filtres--000---030">SEQUENCE 0 — POURQUOI SAUVEGARDER SES FILTRES ? (0:00 - 0:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran splitte : a gauche, un utilisateur qui refait manuellement le meme filtre tous les jours (3 etapes : selectionner source, choisir predicat, cliquer filtrer). A droite, l'utilisateur qui clique une seule fois sur un favori. Transition fluide vers le diagramme du cycle de vie.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Imaginez : chaque lundi matin, vous filtrez les batiments situes a moins de 200 metres d'une riviere, puis ceux qui intersectent une zone inondable. Les memes filtres. Les memes couches. Les memes parametres.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et si vous pouviez sauvegarder ces filtres une fois pour toutes, et les rappeler en un seul clic ? C'est exactement ce que fait le systeme de favoris de FilterMate.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et pour les moments ou vous tataonnez, l'historique avec Undo/Redo vous permet de revenir en arriere a tout moment — jusqu'a 100 etats conserves.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme--cycle-de-vie-dun-favori">Diagramme — Cycle de Vie d'un Favori</h3>
+<pre><code class="language-mermaid"><div class="mermaid">stateDiagram-v2
+    [*] --> FilterActif : Appliquer un filtre
+    FilterActif --> Sauvegarde : Clic Sauvegarder
+    Sauvegarde --> FavoriStocke : Nom + contexte spatial
+    FavoriStocke --> Rappel : 1 clic Application
+    Rappel --> FilterActif
+    FavoriStocke --> Renommer : Edition du nom
+    Renommer --> FavoriStocke
+    FavoriStocke --> Dupliquer : Creer variante
+    Dupliquer --> FavoriStocke
+    FavoriStocke --> ExportJSON : Partager
+    ExportJSON --> Fichier : favorites.json
+    Fichier --> ImportJSON : Charger
+    ImportJSON --> FavoriStocke
+    FavoriStocke --> Supprimer : Action destructive
+    Supprimer --> [*]
+    note right of FavoriStocke : Stockage SQLite<br/>Persistant entre sessions<br/>Global ou par projet
+</div></code></pre>
+<hr>
+<h2 id="sequence-1--sauvegarder-le-filtre-actuel-en-favori-030---100">SEQUENCE 1 — SAUVEGARDER LE FILTRE ACTUEL EN FAVORI (0:30 - 1:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : appliquer un filtre &quot;Intersects&quot; entre les routes et les batiments avec un buffer de 50m. Puis cliquer sur le badge favori (pilule doree dans la barre d'en-tete). Le menu contextuel apparait. Cliquer sur &quot;Add Current Filter to Favorites&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Commencons par appliquer un filtre. Je selectionne mes routes comme source, mes batiments comme cible, predicat 'Intersects', buffer 50 metres. J'applique.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Maintenant je veux sauvegarder ce filtre. Je clique sur la petite pilule doree dans la barre d'en-tete — c'est le badge favoris. Un menu apparait. Je choisis 'Ajouter le filtre actuel aux favoris'.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Une boite de dialogue s'ouvre. FilterMate genere automatiquement un nom et une description. Le nombre de couches concernees est affiche — ici 2 couches : la source et une couche cible filtree. Je peux modifier le nom, par exemple 'Batiments proches des routes (50m)'. Je valide.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Voila. Mon filtre est sauvegarde, avec tout son contexte : l'expression, les couches cibles, le nombre d'entites filtrées. Tout est la.&quot;</em></p>
+</blockquote>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>Le bouton &quot;Add Current Filter to Favorites&quot; est grise si aucun filtre n'est actif</li>
+<li>La boite de dialogue affiche le nombre de couches (<code>Name (2 layers):</code>)</li>
+<li>La description est auto-generee (date, couche source, apercu de l'expression, couches distantes)</li>
+<li>Les couches &quot;remote&quot; (cibles filtrees) sont automatiquement detectees</li>
+</ol>
+<hr>
+<h2 id="sequence-2--badge-favori--indicateur-visuel-100---130">SEQUENCE 2 — BADGE FAVORI — INDICATEUR VISUEL (1:00 - 1:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture annotee : zoom sur la barre d'en-tete. Le badge favori est une pilule arrondie de couleur or (#f5b041 au survol, #f39c12 au repos). Il affiche le nombre de favoris sauvegardes. Annotation visuelle avec fleches et legende.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Regardons de plus pres le badge favoris. C'est cette petite pilule doree dans la barre d'en-tete du plugin. Quand aucun favori n'existe, elle affiche une simple etoile grise sur fond pale.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Des qu'un favori est sauvegarde, la pilule devient doree et affiche le compteur — par exemple '3' pour trois favoris. La couleur passe du gris au dore, c'est un indicateur visuel immediat.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Un clic sur cette pilule ouvre le menu d'acces rapide. Au survol, le tooltip indique le nombre de favoris disponibles.&quot;</em></p>
+</blockquote>
+<h3 id="details-techniques-ui">Details techniques UI</h3>
+<ul>
+<li><strong>Sans favoris</strong> : etoile grise (<code>#95a5a6</code>) sur fond <code>#ecf0f1</code>, texte &quot;No favorites saved&quot;</li>
+<li><strong>Avec favoris</strong> : etoile blanche sur fond dore (<code>#f39c12</code>), texte &quot;<code>N</code> Favorites saved&quot;</li>
+<li><strong>Au survol</strong> : fond plus fonce (<code>#d68910</code> avec favoris, <code>#d5dbdb</code> sans)</li>
+<li>Padding <code>2px 8px</code>, border-radius <code>10px</code> (forme pilule)</li>
+<li>Curseur pointeur (main) au survol</li>
+</ul>
+<hr>
+<h2 id="sequence-3--rappeler-un-favori--1-clic-130---200">SEQUENCE 3 — RAPPELER UN FAVORI — 1 CLIC (1:30 - 2:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : cliquer sur le badge favori. Le menu contextuel affiche la liste des favoris recents (jusqu'a 10 par defaut, configurable dans <code>APP.OPTIONS.FAVORITES.recent_favorites_limit</code>). Cliquer sur un favori. Le filtre s'applique immediatement. La carte se met a jour en temps reel.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le rappel d'un favori, c'est UN SEUL CLIC. Pas de double clic, pas de validation supplementaire. Je clique sur le badge, je vois la liste de mes favoris, je clique sur celui que je veux — et le filtre est immediatement applique.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate montre vos favoris les plus recents en premier, jusqu'a 10 par defaut. Chaque favori affiche son nom, le nombre de couches entre crochets si c'est un favori multi-couches, et le compteur d'utilisations entre parentheses.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Par exemple, je vois '</em> Batiments proches routes (50m) [2] (3x)' — ca veut dire : favori avec 2 couches, utilise 3 fois. Un tooltip au survol montre l'apercu de l'expression.&quot;*</p>
+</blockquote>
+<blockquote>
+<p><em>&quot;S'il y a plus de 10 favoris, un lien 'X more favorites' apparait en bas du menu et ouvre le gestionnaire complet.&quot;</em></p>
+</blockquote>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>Format d'affichage : <code>  * Nom [nb_couches] (nb_utilisations x)</code></li>
+<li>Tooltip au survol avec preview de l'expression (80 caracteres max)</li>
+<li>Lien &quot;... N more favorites&quot; si plus de 10 favoris</li>
+<li>Application instantanee sans confirmation</li>
+</ol>
+<hr>
+<h2 id="sequence-4--renommer-dupliquer-supprimer-200---230">SEQUENCE 4 — RENOMMER, DUPLIQUER, SUPPRIMER (2:00 - 2:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live dans le Favorites Manager Dialog : selectionner un favori dans la liste de gauche, modifier le nom dans l'onglet General, cliquer &quot;Save Changes&quot;. Puis montrer la duplication (sauvegarder un favori existant apres modification du nom). Enfin, supprimer un favori avec confirmation.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour gerer vos favoris en detail, ouvrez le Favorites Manager. Vous y accedez via le menu du badge — cliquez 'Manage Favorites'.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Renommer : selectionnez un favori dans la liste a gauche, modifiez le nom dans le champ 'Name' a droite, et cliquez 'Save Changes'. Simple.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dupliquer : la methode la plus simple est de rappeler un favori, modifier legerement le filtre — par exemple changer le buffer de 50m a 200m — puis le sauvegarder a nouveau sous un nouveau nom. Vous avez maintenant deux variantes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Supprimer : cliquez le bouton rouge 'Delete'. FilterMate vous demande une confirmation — c'est une action destructive. Apres suppression, le favori suivant dans la liste est automatiquement selectionne.&quot;</em></p>
+</blockquote>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>Bouton &quot;Save Changes&quot; (bleu <code>#3498db</code>)</li>
+<li>Bouton &quot;Delete&quot; (rouge <code>#e74c3c</code>) avec confirmation obligatoire</li>
+<li>Auto-selection du favori suivant apres suppression</li>
+<li>Mise a jour du compteur dans l'en-tete du dialog</li>
+</ol>
+<hr>
+<h2 id="sequence-5--favoris-globaux-vs-projet-230---300">SEQUENCE 5 — FAVORIS GLOBAUX VS PROJET (2:30 - 3:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : montrer que les favoris sont sauvegardes dans le projet QGIS (save_to_project). Expliquer la difference entre favoris lies au projet et favoris portables (export JSON).</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Les favoris dans FilterMate sont sauvegardes dans votre projet QGIS. Quand vous enregistrez votre projet .qgz, les favoris sont embarques dedans. Ouvrez le projet sur un autre poste — les favoris sont la.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Mais attention : si vous creez un nouveau projet, vos favoris ne suivent pas automatiquement. C'est la qu'intervient l'export JSON, que nous verrons dans quelques instants.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Cette approche est volontaire : chaque projet a ses propres filtres metier, ses propres couches. Des favoris lies a des couches PostGIS d'un projet ne fonctionneraient pas dans un projet Shapefile.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La bonne pratique : exportez vos favoris en JSON quand vous avez des filtres reutilisables, et importez-les dans vos autres projets.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-6--favorites-manager-dialog--onglet-general-300---330">SEQUENCE 6 — FAVORITES MANAGER DIALOG — ONGLET GENERAL (3:00 - 3:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : ouvrir le Favorites Manager Dialog. Parcourir l'onglet General. Montrer les champs : nom, description, tags, couche source, provider, compteur d'utilisations, date de creation.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le Favorites Manager est le coeur de la gestion des favoris. C'est un dialogue modal avec une liste a gauche et un panneau de details a droite, divise en 3 onglets.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'onglet General contient toutes les metadonnees du favori. Le nom, bien sur, editable a tout moment. La description, auto-generee a la creation mais que vous pouvez enrichir manuellement.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ensuite, les tags. Separez-les par des virgules : 'urbanisme, population, 2024'. Les tags servent a organiser et surtout a chercher. La barre de recherche en haut du dialogue filtre par nom, expression, tags et description.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En bas, les infos en lecture seule : la couche source d'origine, le provider (PostgreSQL, SpatiaLite, OGR...), le nombre d'utilisations, et la date de creation.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme--structure-du-favorites-manager-dialog-3-onglets">Diagramme — Structure du Favorites Manager Dialog (3 onglets)</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    DIALOG["Favorites Manager Dialog<br/>(720 x 520 px, modal)"]
+
+    DIALOG --> LEFT["Panneau gauche (30%)<br/>Liste des favoris"]
+    DIALOG --> RIGHT["Panneau droit (70%)<br/>Details en 3 onglets"]
+    DIALOG --> SEARCH["Barre de recherche<br/>Filtre par nom, expression, tags, description"]
+    DIALOG --> BUTTONS["Barre de boutons"]
+
+    LEFT --> LIST["QListWidget<br/>Format : * Nom [nb_couches]<br/>Icone tag si tags presents"]
+
+    RIGHT --> TAB1["Onglet GENERAL"]
+    RIGHT --> TAB2["Onglet EXPRESSION"]
+    RIGHT --> TAB3["Onglet REMOTE"]
+
+    TAB1 --> G1["Nom (editable)"]
+    TAB1 --> G2["Description (editable, auto-generee)"]
+    TAB1 --> G3["Tags (virgules, ex: urbanisme, 2024)"]
+    TAB1 --> G4["Couche source (lecture seule)"]
+    TAB1 --> G5["Provider (lecture seule)"]
+    TAB1 --> G6["Compteur utilisation + Date creation"]
+
+    TAB2 --> E1["Expression source (monospace, editable)<br/>Police : Consolas / Monaco / Courier New"]
+
+    TAB3 --> R1["QTreeWidget : 3 colonnes<br/>Layer | Features | Expression"]
+    TAB3 --> R2["Message si aucune couche Remote"]
+
+    BUTTONS --> B1["Appliquer (vert #27ae60)"]
+    BUTTONS --> B2["Save Changes (bleu #3498db)"]
+    BUTTONS --> B3["Delete (rouge #e74c3c)"]
+    BUTTONS --> B4["Close (gris #ecf0f1)"]
+
+    style DIALOG fill:#f8f9fa,color:#2c3e50
+    style TAB1 fill:#f39c12,color:#fff
+    style TAB2 fill:#3498db,color:#fff
+    style TAB3 fill:#27ae60,color:#fff
+    style B1 fill:#27ae60,color:#fff
+    style B2 fill:#3498db,color:#fff
+    style B3 fill:#e74c3c,color:#fff
+</div></code></pre>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>Splitter horizontal 30/70 (liste / details)</li>
+<li>Les items selectionnes dans la liste ont un fond dore (<code>#f5b041</code>)</li>
+<li>Au survol sans selection : fond creme leger (<code>#fef5e7</code>)</li>
+<li>Champ de recherche avec icone loupe et bouton clear integre</li>
+</ol>
+<hr>
+<h2 id="sequence-7--favorites-manager-dialog--onglet-expression-330---400">SEQUENCE 7 — FAVORITES MANAGER DIALOG — ONGLET EXPRESSION (3:30 - 4:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : cliquer sur l'onglet &quot;Expression&quot;. Montrer le texte complet de l'expression du filtre, en police monospace. Modifier l'expression directement et sauvegarder.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;L'onglet Expression affiche le texte complet de l'expression de filtrage de la couche source. Il est affiche en police monospace — Consolas, Monaco ou Courier New — pour une lecture confortable du code.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Vous pouvez modifier l'expression directement ici. Par exemple, changer une distance, ajouter une condition. Puis cliquer 'Save Changes' pour mettre a jour le favori.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est un raccourci puissant : au lieu de recreer un filtre complet, vous editez directement l'expression sauvegardee.&quot;</em></p>
+</blockquote>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>Police monospace <code>font-family: Consolas, Monaco, Courier New</code></li>
+<li>QTextEdit en pleine hauteur pour les expressions longues</li>
+<li>Le titre &quot;Source Layer Expression:&quot; en gras au-dessus du champ</li>
+</ol>
+<hr>
+<h2 id="sequence-8--favorites-manager-dialog--onglet-remote-400---430">SEQUENCE 8 — FAVORITES MANAGER DIALOG — ONGLET REMOTE (4:00 - 4:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : cliquer sur l'onglet &quot;Remote&quot;. Montrer le QTreeWidget avec les 3 colonnes : Layer, Features, Expression. Si le favori n'a pas de couches Remote, le message italique &quot;No remote layers in this favorite&quot; s'affiche.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;L'onglet Remote montre les couches cibles qui etaient filtrees au moment de la sauvegarde. C'est un tableau a 3 colonnes : le nom de la couche, le nombre d'entites filtrées, et l'expression appliquee.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Quand un favori concerne plusieurs couches — c'est le cas quand vous appliquez un filtre avec l'operateur 'Other layers' sur plusieurs cibles — toutes les couches et leurs expressions respectives sont sauvegardees.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'intitule de l'onglet change dynamiquement : 'Remote (3)' si 3 couches cibles, ou simplement 'Remote' si aucune.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si le favori ne concerne qu'une seule couche source sans cibles, le message 'No remote layers in this favorite' s'affiche en italique.&quot;</em></p>
+</blockquote>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>Colonnes avec auto-resize (Layer, Features en ResizeToContents ; Expression en stretch)</li>
+<li>Alternating row colors activees</li>
+<li>Tooltip sur la colonne Expression pour les expressions longues (tronquees a 80 caracteres dans le tableau)</li>
+<li>Le compteur dans l'onglet : &quot;Remote (N)&quot;</li>
+</ol>
+<hr>
+<h2 id="sequence-9--export-json-430---500">SEQUENCE 9 — EXPORT JSON (4:30 - 5:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : dans le menu du badge favori, cliquer &quot;Export Favorites&quot;. La boite de dialogue de sauvegarde s'ouvre avec le nom par defaut <code>filtermate_favorites.json</code>. Sauvegarder. Ouvrir le fichier JSON dans un editeur de texte pour montrer la structure.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le partage de favoris, c'est l'export JSON. Dans le menu du badge favori, cliquez 'Export Favorites'. FilterMate propose un nom par defaut : 'filtermate_favorites.json'.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Tous vos favoris sont exportes dans un seul fichier JSON lisible. Chaque favori contient son nom, sa description, ses tags, l'expression, le provider, et les couches remote. Tout est la.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ce fichier, vous pouvez le partager par email, le mettre sur un serveur partage, l'integrer a un depot Git. Votre collegue recevra exactement les memes filtres, prets a l'emploi.&quot;</em></p>
+</blockquote>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>Nom de fichier par defaut : <code>filtermate_favorites.json</code></li>
+<li>Filtre de fichier : &quot;JSON Files (*.json)&quot;</li>
+<li>Le fichier contient un tableau JSON avec tous les favoris</li>
+</ol>
+<hr>
+<h2 id="sequence-10--import-json-500---530">SEQUENCE 10 — IMPORT JSON (5:00 - 5:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : dans le menu du badge favori, cliquer &quot;Import Favorites&quot;. Selectionner un fichier JSON prepare a l'avance. La boite de dialogue d'import s'affiche avec 3 options : Yes (Merge), No (Replace All), Cancel.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;L'import est tout aussi simple. Cliquez 'Import Favorites' dans le menu du badge. Selectionnez votre fichier JSON.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et la, FilterMate vous pose une question importante : Merge with existing favorites? Trois choix s'offrent a vous.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Yes — c'est le mode MERGE. Les favoris importes sont ajoutes a vos favoris existants. Rien n'est supprime. C'est le choix le plus sur.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;No — c'est le mode REPLACE ALL. Tous vos favoris existants sont supprimes, et seuls les favoris du fichier sont charges. Attention, c'est irreversible.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Cancel — vous annulez l'operation. Aucune modification.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Apres l'import, le badge se met a jour automatiquement avec le nouveau compteur.&quot;</em></p>
+</blockquote>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>QMessageBox avec 3 boutons : Yes / No / Cancel</li>
+<li>Yes = Merge (ajouter aux existants)</li>
+<li>No = Replace All (tout remplacer)</li>
+<li>Cancel = annuler</li>
+<li>Le badge se met a jour apres import reussi</li>
+</ol>
+<hr>
+<h2 id="sequence-11--history-widget-530---600">SEQUENCE 11 — HISTORY WIDGET (5:30 - 6:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : appliquer 5 filtres successifs sur des couches differentes. Montrer le History Widget avec le compteur &quot;3/5&quot;, les tooltips, les boutons Undo/Redo. Puis clic droit pour montrer le menu contextuel avec Clear History.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Passons a l'historique. Chaque fois que vous appliquez un filtre, FilterMate enregistre l'etat dans une pile d'historique. Le History Widget, situe dans la barre d'outils, vous donne un apercu en temps reel.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Deux boutons : Undo et Redo. A cote, un compteur comme '3/7' — ca signifie que vous etes au 3e etat sur 7 enregistres. Si vous etes au dernier etat, '7/7', le bouton Redo est grise.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Survolez le bouton Undo : le tooltip affiche une description comme 'Undo: Filter on communes (Ctrl+Z)'. Idem pour Redo. Vous savez exactement ou vous allez avant de cliquer.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Clic droit sur le widget : un menu contextuel apparait avec trois options. Undo, Redo, et Clear History — le petit icone poubelle. Clear History vide tout l'historique de la couche courante.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Il y a aussi un 'Browse History' pour explorer l'historique complet — mais on en reparlera dans une prochaine video.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme--pile-undoredo">Diagramme — Pile Undo/Redo</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    subgraph STACK["Pile d'historique (max 100)"]
+        direction LR
+        S1["Etat 1<br/>Aucun filtre"]
+        S2["Etat 2<br/>Intersects routes"]
+        S3["Etat 3<br/>+ AND riviere"]
+        S4["Etat 4<br/>Buffer 200m"]
+        CURRENT["ETAT ACTUEL<br/>Buffer 500m"]
+    end
+    UNDO["Ctrl+Z UNDO"] --> |"Revient a"| S4
+    REDO["Ctrl+Y REDO"] --> |"Retablit"| CURRENT
+    style CURRENT fill:#388E3C,color:#fff
+    style UNDO fill:#D32F2F,color:#fff
+    style REDO fill:#1565C0,color:#fff
+</div></code></pre>
+<h3 id="details-techniques-du-history-widget">Details techniques du History Widget</h3>
+<ul>
+<li>Boutons 28x28 px avec icones Unicode (fleche Undo / fleche Redo)</li>
+<li>Fond gris clair <code>#f0f0f0</code>, bordure <code>#ccc</code>, border-radius 4px</li>
+<li>Etat desactive : fond <code>#f8f8f8</code>, texte <code>#ccc</code></li>
+<li>Label compteur en gris clair, police 10px</li>
+<li>Menu contextuel : 4 actions (Undo, Redo, separateur, Clear History, separateur, Browse History)</li>
+</ul>
+<hr>
+<h2 id="sequence-12--unfilter-et-historique-600---615">SEQUENCE 12 — UNFILTER ET HISTORIQUE (6:00 - 6:15)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : avoir un filtre actif avec historique. Cliquer sur Unfilter. Montrer que FilterMate utilise l'historique pour revenir a l'etat precedent. Puis montrer le cas sans historique : Unfilter supprime directement le filtre.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le bouton Unfilter est plus intelligent que vous ne le pensez. Quand un historique est disponible, Unfilter ne se contente pas de supprimer le filtre — il revient a l'etat precedent dans l'historique. C'est un Undo intelligent.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si aucun historique n'est disponible — par exemple au premier filtre de la session — Unfilter supprime simplement le filtre directement.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La difference est subtile mais importante : avec l'historique, Unfilter preserve la chaine d'etats. Sans historique, c'est une suppression brute.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-13--undo-multi-couches-615---630">SEQUENCE 13 — UNDO MULTI-COUCHES (6:15 - 6:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : appliquer un filtre multi-couches (1 source, 3 cibles). Le filtre affecte 4 couches en meme temps. Faire un Undo : les 4 couches reviennent a leur etat precedent simultanement.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Quand vous appliquez un filtre spatial qui touche plusieurs couches — une source et trois cibles — l'historique sauvegarde un etat global. Toutes les couches filtrees sont enregistrees ensemble.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Quand vous faites Undo, ce n'est pas une seule couche qui revient en arriere — c'est l'ensemble. Les 4 couches sont restaurees simultanement a leur etat precedent. C'est le 'global state' : un seul Ctrl+Z pour tout defaire.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-14--persistance-historique-630---700">SEQUENCE 14 — PERSISTANCE HISTORIQUE (6:30 - 7:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : ouvrir la configuration FilterMate (JSON TreeView). Naviguer vers <code>APP &gt; OPTIONS &gt; HISTORY</code>. Montrer les 2 parametres : <code>max_history_size</code> (defaut 100) et <code>persist_history</code> (defaut true). Changer <code>persist_history</code> de true a false pour montrer le mode session.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Par defaut, FilterMate persiste l'historique dans votre fichier projet. Le parametre 'persist_history' est a 'true'. Quand vous sauvegardez et rouvrez votre projet, votre historique de filtres est toujours la.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si vous preferez un historique leger, par session uniquement, passez 'persist_history' a 'false'. L'historique sera vide a chaque nouvelle ouverture du projet.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le parametre 'max_history_size' controle le nombre maximum d'etats par couche. La valeur par defaut est 100. Quand la pile est pleine, le plus ancien etat est supprime automatiquement — c'est une file FIFO.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Vous trouverez ces parametres dans la configuration FilterMate, section APP, OPTIONS, HISTORY.&quot;</em></p>
+</blockquote>
+<h3 id="points-cles-a-capturer">Points cles a capturer</h3>
+<ol>
+<li>Chemin de config : <code>APP &gt; OPTIONS &gt; HISTORY</code></li>
+<li><code>max_history_size</code> : defaut 100, min non specifie, configurable</li>
+<li><code>persist_history</code> : defaut <code>true</code>, choix <code>true</code>/<code>false</code></li>
+<li>FIFO quand la pile est pleine</li>
+</ol>
+<hr>
+<h2 id="recapitulatif--raccourcis-et-interactions">RECAPITULATIF — RACCOURCIS ET INTERACTIONS</h2>
+<h3 id="tableau-recapitulatif">Tableau recapitulatif</h3>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Geste</th>
+<th>Raccourci clavier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sauvegarder en favori</td>
+<td>Clic badge &gt; &quot;Add Current Filter&quot;</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Rappeler un favori</td>
+<td>Clic badge &gt; clic favori</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Ouvrir Favorites Manager</td>
+<td>Clic badge &gt; &quot;Manage Favorites&quot;</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Export favoris</td>
+<td>Clic badge &gt; &quot;Export Favorites&quot;</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Import favoris</td>
+<td>Clic badge &gt; &quot;Import Favorites&quot;</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Undo</td>
+<td>Bouton ou raccourci</td>
+<td>Ctrl+Z</td>
+</tr>
+<tr>
+<td>Redo</td>
+<td>Bouton ou raccourci</td>
+<td>Ctrl+Y</td>
+</tr>
+<tr>
+<td>Clear History</td>
+<td>Clic droit History Widget</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="captures-qgis-requises">Captures QGIS requises</h2>
+<ol>
+<li>Badge favori sans favoris (etoile grise) vs avec favoris (pilule doree avec compteur)</li>
+<li>Menu contextuel du badge avec liste des favoris recents</li>
+<li>Boite de dialogue &quot;Add to Favorites&quot; avec nom auto-genere et description</li>
+<li>Favorites Manager Dialog — vue d'ensemble avec splitter</li>
+<li>Favorites Manager — onglet General (tous les champs remplis)</li>
+<li>Favorites Manager — onglet Expression (expression monospace)</li>
+<li>Favorites Manager — onglet Remote (tableau 3 colonnes avec donnees)</li>
+<li>Favorites Manager — onglet Remote vide (message italique)</li>
+<li>Boite de dialogue export (filtre JSON)</li>
+<li>Boite de dialogue import (3 boutons Yes/No/Cancel)</li>
+<li>History Widget avec compteur &quot;3/7&quot; et tooltips</li>
+<li>Menu contextuel du History Widget (Undo, Redo, Clear History, Browse History)</li>
+<li>Configuration HISTORY dans le JSON TreeView</li>
+</ol>
+<hr>
+<h2 id="conclusion--outro-700---730">CONCLUSION — OUTRO (7:00 - 7:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran recapitulatif avec les 3 blocs visuels : Favoris (pilule doree), Import/Export (icone JSON), Historique (fleches Undo/Redo). Liens vers les ressources.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;En resume : les favoris vous permettent de sauvegarder, organiser et partager vos filtres. L'historique vous donne la liberte d'experimenter sans risque — 100 etats, Undo/Redo, persistance configurable.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans la prochaine video, nous verrons l'export GeoPackage et KML en detail — comment exporter vos donnees filtrees avec leur projet QGIS embarque.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si cette video vous a ete utile, laissez une etoile sur le depot GitHub. Et si vous avez des questions, ouvrez une issue — on vous repondra.&quot;</em></p>
+</blockquote>
+<h3 id="liens-a-afficher">Liens a afficher</h3>
+<ul>
+<li><strong>GitHub</strong> : <code>https://github.com/imagodata/filter_mate</code></li>
+<li><strong>QGIS Plugins</strong> : <code>https://plugins.qgis.org/plugins/filter_mate</code></li>
+<li><strong>Documentation</strong> : <code>https://imagodata.github.io/filter_mate</code></li>
+</ul>
+<hr>
+<h2 id="musique-suggeree">Musique suggeree</h2>
+<ul>
+<li>Intro (0:00 - 0:30) : Fond leger, ton pedagogique</li>
+<li>Demo (0:30 - 6:30) : Ambiance neutre, pas de distraction</li>
+<li>Outro (7:00 - 7:30) : Montee legere, ton conclusif</li>
+</ul>
+<hr>
+<p><em>Script cree le 14 Mars 2026 — FilterMate v4.6.1 — Video 05 sur 10</em></p>
+
+</body>
+</html>

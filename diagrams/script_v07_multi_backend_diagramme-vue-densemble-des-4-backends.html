@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Vue d'ensemble des 4 backends</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Vue d'ensemble des 4 backends</h1>
+  <div class="source">website/SCRIPT_V07_MULTI_BACKEND.md</div>
+  <div class="mermaid">
+graph TD
+    REQ["Requete de filtrage<br/>FilterMate"]
+
+    REQ --> PG["PostgreSQL<br/>Materialized Views<br/>Index GIST<br/>Requetes paralleles"]
+    REQ --> SPAT["Spatialite<br/>Index R-tree<br/>SQL spatial<br/>GeoPackage natif"]
+    REQ --> OGR["OGR<br/>Expression QGIS<br/>Universel<br/>Shapefile, GeoJSON, WFS"]
+    REQ --> MEM["Memory<br/>In-memory query<br/>Ultra-rapide<br/>Couches temporaires"]
+
+    PG --> PERF_PG["< 2s pour 1M entites"]
+    SPAT --> PERF_SPAT["~10s pour 100k entites"]
+    OGR --> PERF_OGR["~30s pour 100k entites"]
+    MEM --> PERF_MEM["< 0.5s pour 50k entites"]
+
+    style PG fill:#58d68d,color:#fff,stroke:#27ae60
+    style SPAT fill:#bb8fce,color:#fff,stroke:#9b59b6
+    style OGR fill:#5dade2,color:#fff,stroke:#3498db
+    style MEM fill:#f0b27a,color:#fff,stroke:#e67e22
+    style REQ fill:#2c3e50,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

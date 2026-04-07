@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Persistence de la configuration</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Persistence de la configuration</h1>
+  <div class="source">website/SCRIPT_V01_INSTALLATION.md</div>
+  <div class="mermaid">
+flowchart LR
+    subgraph SESSION_1["Session 1"]
+        direction TB
+        U1["Configuration de l'exploration"]
+        U2["Champ d'affichage choisi"]
+        U3["Etat des toggles"]
+        U4["Dernier filtre applique"]
+    end
+
+    subgraph SQLITE["SQLite local"]
+        direction TB
+        DB["fm_project_layers<br/>_properties"]
+    end
+
+    subgraph SESSION_2["Session 2"]
+        direction TB
+        R1["Configuration restauree"]
+        R2["Champ d'affichage restaure"]
+        R3["Toggles restaures"]
+        R4["Historique disponible"]
+    end
+
+    SESSION_1 -->|"Sauvegarde auto"| SQLITE
+    SQLITE -->|"Restauration auto"| SESSION_2
+
+    style SQLITE fill:#1565C0,color:#fff
+    style SESSION_1 fill:#7B1FA2,color:#fff
+    style SESSION_2 fill:#388E3C,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

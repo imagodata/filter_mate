@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SCRIPT_V02_FILTRAGE_BASES.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="filtermate--script-video-02--filtrage-geometrique-les-bases">FilterMate — Script Video 02 : Filtrage Geometrique, Les Bases</h1>
+<p><strong>Version</strong> : 4.6.1 | <strong>Date</strong> : 14 Mars 2026
+<strong>Niveau</strong> : Debutant | <strong>Duree</strong> : 8-10 min | <strong>Prerequis</strong> : V01 (Installation &amp; Premier Pas)
+<strong>Langue</strong> : Francais (sous-titres EN disponibles)</p>
+<blockquote>
+<p><strong>Objectifs pedagogiques :</strong></p>
+<ul>
+<li>Comprendre la relation source / cible dans le filtrage geometrique</li>
+<li>Appliquer un premier filtre spatial avec le predicat Intersects</li>
+<li>Distinguer les boutons Unfilter et Reset</li>
+<li>Maitriser les deux niveaux de Combine Operators</li>
+<li>Savoir reagir au conflit Edit Mode</li>
+<li>Pratiquer avec deux exercices guides</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="plan-de-la-video">Plan de la video</h2>
+<table>
+<thead>
+<tr>
+<th>Sequence</th>
+<th>Titre</th>
+<th>Duree</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Rappel : qu'est-ce que le filtrage spatial ?</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Charger les donnees de demo</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Selectionner la couche source</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Selectionner la couche cible</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Appliquer le predicat Intersects</td>
+<td>1:00</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Analyser le resultat</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Bouton Unfilter — retirer un filtre</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Bouton Reset — retour aux defaults</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Niveau 1 : Source layer operator</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Niveau 2 : Other layers operator</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Conflit Edit Mode</td>
+<td>0:30</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Exercice 1 : filtrer les communes d'un departement</td>
+<td>1:30</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Exercice 2 : enchainer 2 filtres avec AND</td>
+<td>1:30</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Duree totale estimee : ~9 minutes</strong></p>
+<hr>
+<h2 id="timestamps">Timestamps</h2>
+<table>
+<thead>
+<tr>
+<th>Chrono</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0:00</td>
+<td>Rappel : qu'est-ce que le filtrage spatial ?</td>
+</tr>
+<tr>
+<td>0:30</td>
+<td>Charger 2 couches : routes + batiments</td>
+</tr>
+<tr>
+<td>1:00</td>
+<td>Selectionner source = une route specifique</td>
+</tr>
+<tr>
+<td>1:30</td>
+<td>Activer &quot;Layers to Filter&quot; et selectionner cible = batiments</td>
+</tr>
+<tr>
+<td>2:00</td>
+<td>Activer &quot;Geometric Predicates&quot; et appliquer Intersects</td>
+</tr>
+<tr>
+<td>3:00</td>
+<td>Resultat : batiments filtres visibles sur la carte</td>
+</tr>
+<tr>
+<td>3:30</td>
+<td>Bouton Unfilter — retire le filtre (historique si disponible)</td>
+</tr>
+<tr>
+<td>4:00</td>
+<td>Bouton Reset — remet FilterMate aux defaults exploration</td>
+</tr>
+<tr>
+<td>4:30</td>
+<td>Niveau 1 : Source layer operator (REPLACE / AND / OR)</td>
+</tr>
+<tr>
+<td>5:00</td>
+<td>Niveau 2 : Other layers operator</td>
+</tr>
+<tr>
+<td>5:30</td>
+<td>Conflit Edit Mode — popup de resolution</td>
+</tr>
+<tr>
+<td>6:00</td>
+<td>Exercice 1 : communes d'un departement</td>
+</tr>
+<tr>
+<td>7:30</td>
+<td>Exercice 2 : enchainer 2 filtres AND</td>
+</tr>
+<tr>
+<td>9:00</td>
+<td>Conclusion et annonce V03</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="donnees-de-demo-requises">Donnees de demo requises</h2>
+<table>
+<thead>
+<tr>
+<th>Couche</th>
+<th>Type</th>
+<th>Entites</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Routes</td>
+<td>Lignes</td>
+<td>~5 000</td>
+<td>Shapefile BDTopo</td>
+</tr>
+<tr>
+<td>Batiments</td>
+<td>Polygones</td>
+<td>~50 000</td>
+<td>Shapefile BDTopo</td>
+</tr>
+<tr>
+<td>Departements</td>
+<td>Polygones</td>
+<td>~100</td>
+<td>Shapefile Admin Express</td>
+</tr>
+<tr>
+<td>Communes</td>
+<td>Polygones</td>
+<td>~35 000</td>
+<td>Shapefile Admin Express</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Toutes les couches sont en Shapefile local pour rester accessible aux debutants.
+PostgreSQL n'est pas necessaire pour cette video.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-0--rappel--quest-ce-que-le-filtrage-spatial--000---030">SEQUENCE 0 — RAPPEL : QU'EST-CE QUE LE FILTRAGE SPATIAL ? (0:00 - 0:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran titre &quot;V02 — Filtrage Geometrique : Les Bases&quot; puis transition vers le diagramme Mermaid anime (Source -&gt; Predicat -&gt; Cible) construit progressivement de gauche a droite.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Bienvenue dans ce deuxieme tutoriel FilterMate. Aujourd'hui, on rentre dans le vif du sujet : le filtrage geometrique.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le principe est simple. Vous avez une couche source — par exemple, une route. Vous selectionnez une entite dans cette couche. Ensuite, vous choisissez un predicat spatial — est-ce que ca intersecte ? Est-ce que ca contient ? Est-ce que ca touche ? Et enfin, FilterMate teste toutes les entites de vos couches cibles contre cette geometrie source. Seules celles qui correspondent restent visibles.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est un filtre visuel — les donnees ne sont jamais supprimees. On masque ce qui ne correspond pas.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme--concept-source--cible">Diagramme — Concept Source / Cible</h3>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="text-align: center; padding: 16px; background: #1565C0; color: #fff; border-radius: 8px 0 0 8px; width: 30%;">
+      <img src="../icons/layer.png" width="32"/><br/><strong>COUCHE SOURCE</strong><br/><small>Selection geometrique<br/>(ex: une route)</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1; font-size: 24px;">&#10132;</td>
+    <td style="text-align: center; padding: 16px; background: #E65100; color: #fff; width: 30%;">
+      <img src="../icons/geo_predicates.png" width="32"/><br/><strong>PREDICAT SPATIAL</strong><br/><small>Intersects ? Contains ?<br/>Within ? Touches ?</small>
+    </td>
+    <td style="text-align: center; padding: 8px; background: #ECEFF1; font-size: 24px;">&#10132;</td>
+    <td style="text-align: center; padding: 16px; background: #388E3C; color: #fff; border-radius: 0 8px 8px 0; width: 30%;">
+      <img src="../icons/layers.png" width="32"/><br/><strong>COUCHE(S) CIBLE</strong><br/><small>Seules les entites<br/>correspondantes restent visibles</small>
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-1--charger-les-donnees-de-demo-030---100">SEQUENCE 1 — CHARGER LES DONNEES DE DEMO (0:30 - 1:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture QGIS : glisser-deposer les 2 Shapefiles (routes + batiments) dans le Layers Panel. La carte affiche un reseau routier et des batiments denses. Ouvrir le dock FilterMate (rappel rapide du bouton dans la toolbar).</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;On commence avec deux couches chargees dans QGIS : un reseau routier et des batiments — des donnees BDTopo typiques. Si vous suivez depuis la video 1, vous savez deja comment ouvrir le panneau FilterMate.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Voila notre projet : des milliers de batiments, des centaines de routes. L'objectif de la demo : isoler uniquement les batiments situes le long d'une route precise.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Afficher brievement le nombre d'entites dans la barre de statut QGIS : &quot;Batiments : 50 000 entites&quot; pour ancrer l'echelle du probleme.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-2--selectionner-la-couche-source-100---130">SEQUENCE 2 — SELECTIONNER LA COUCHE SOURCE (1:00 - 1:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : dans l'Exploring Zone de FilterMate, la combobox source affiche les couches du projet. Selectionner &quot;Routes&quot;. Puis dans la liste des valeurs, selectionner une route specifique (ex: &quot;Avenue de la Republique&quot;). La carte flash l'entite selectionnee.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Dans FilterMate, la couche source est celle depuis laquelle vous selectionnez une geometrie de reference. C'est la combobox en haut du panneau, dans l'Exploring Zone.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Je selectionne la couche Routes. FilterMate me liste automatiquement les valeurs du champ d'affichage — ici, les noms de route. Je choisis 'Avenue de la Republique'. Voyez comme la carte flash l'entite pour me confirmer laquelle c'est.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Regle d'or : la couche source fournit la geometrie de reference. Ce n'est pas elle qui sera filtree — c'est la cible.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Annoter a l'ecran : fleche pointant vers la combobox source avec le label &quot;COUCHE SOURCE&quot;. Mettre en surbrillance la route selectionnee sur la carte.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-3--selectionner-la-couche-cible-130---200">SEQUENCE 3 — SELECTIONNER LA COUCHE CIBLE (1:30 - 2:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : dans l'onglet FILTERING de la Toolbox, cliquer sur le toggle &quot;Layers to Filter&quot; pour activer la combobox a cocher des couches cibles. Cocher &quot;Batiments&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Maintenant, passons a l'onglet FILTERING dans la Toolbox. C'est ici qu'on definit quelles couches seront filtrees.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La combobox source est toujours visible en haut — c'est la meme que dans l'Exploring Zone. Mais pour choisir les couches cibles, il faut activer le toggle 'Layers to Filter'. Cliquez dessus : une combobox a cocher apparait avec toutes les couches du projet.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Je coche 'Batiments'. C'est cette couche qui va etre filtree — seuls les batiments qui satisfont le predicat spatial resteront visibles.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Vous pouvez cocher plusieurs couches cibles a la fois. Mais pour l'instant, restons sur une seule.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Annoter : fleche vers le toggle &quot;Layers to Filter&quot; avec le label &quot;ACTIVER POUR VOIR LES COUCHES CIBLES&quot;. Fleche vers la combobox a cocher avec &quot;COUCHE(S) CIBLE&quot;.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-4--appliquer-le-predicat-intersects-200---300">SEQUENCE 4 — APPLIQUER LE PREDICAT INTERSECTS (2:00 - 3:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : activer le toggle &quot;Geometric Predicates&quot;, selectionner &quot;Intersects&quot; dans la combobox des predicats, puis cliquer sur le bouton Filter dans l'Action Bar. Montrer la barre de progression. Resultat : seuls les batiments le long de la route restent visibles.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Derniere etape avant de filtrer : choisir le predicat spatial. Activez le toggle 'Geometric Predicates' — une combobox apparait avec tous les predicats disponibles.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour notre cas, on choisit 'Intersects'. Ce predicat selectionne toutes les entites cibles dont la geometrie a un point commun avec la geometrie source. C'est le predicat le plus courant — celui que vous utiliserez dans 80% des cas.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Maintenant, cliquez sur le bouton Filter dans l'Action Bar — c'est le premier bouton, celui avec l'icone de filtre.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate detecte automatiquement que nos couches sont des Shapefiles et utilise le backend OGR. La barre de progression apparait, et... voila. En quelques secondes, sur 50 000 batiments, seuls ceux qui touchent notre route restent visibles.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;A noter : le bouton Filter est desactive dans trois situations — quand l'onglet Export est actif, quand aucune feature n'est selectionnee, ou quand un filtrage est deja en cours. Si le bouton est grise, verifiez ces trois points.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Enchainement en 3 temps avec annotations :</p>
+<ol>
+<li>Fleche vers le toggle &quot;Geometric Predicates&quot; — &quot;ACTIVER&quot;</li>
+<li>Fleche vers la combobox — &quot;CHOISIR : Intersects&quot;</li>
+<li>Fleche vers le bouton Filter — &quot;APPLIQUER&quot;</li>
+</ol>
+<p>Pendant le filtrage, montrer la barre de progression. Apres, afficher un compteur anime : &quot;50 000 -&gt; 127 batiments&quot;.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-5--analyser-le-resultat-300---330">SEQUENCE 5 — ANALYSER LE RESULTAT (3:00 - 3:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture QGIS : comparaison avant/apres en split screen. A gauche, la carte complete avec tous les batiments. A droite, la meme vue avec uniquement les batiments filtres le long de la route. Zoomer sur le resultat.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Comparons avant et apres. A gauche, nos 50 000 batiments. A droite, les 127 qui intersectent notre route. Le filtre est applique via un subset string — c'est la methode native QGIS. Les donnees sont intactes, rien n'est supprime.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si vous ouvrez la table attributaire de la couche Batiments, vous verrez que seules les 127 entites sont listees. Le filtre agit partout dans QGIS — carte, table, statistiques.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Split screen anime. Afficher le subset string dans les proprietes de la couche (clic droit &gt; Proprietes &gt; Source) pour montrer la transparence du mecanisme.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-6--bouton-unfilter-330---400">SEQUENCE 6 — BOUTON UNFILTER (3:30 - 4:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : cliquer sur le bouton Unfilter dans l'Action Bar. Les 50 000 batiments reapparaissent. Montrer l'icone du bouton en gros plan.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour retirer le filtre, utilisez le bouton Unfilter dans l'Action Bar — c'est le quatrieme bouton, avec l'icone d'entonnoir barre.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Unfilter retire le filtre actif de la couche. Si un historique de filtres est disponible, il l'utilise pour revenir a l'etat precedent proprement. Sinon, il supprime simplement le subset string.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est l'operation inverse du filtrage. Vos 50 000 batiments reapparaissent instantanement.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Attention a ne pas confondre Unfilter avec Undo. Undo revient en arriere dans l'historique des actions — etape par etape. Unfilter retire directement le filtre en cours, d'un seul coup.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Gros plan sur les 6 boutons de l'Action Bar avec annotations : Filter, Undo, Redo, <strong>Unfilter</strong> (mis en evidence), Export, About.</p>
+</blockquote>
+<h3 id="diagramme--les-6-boutons-de-laction-bar">Diagramme — Les 6 Boutons de l'Action Bar</h3>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="6" style="background: #37474F; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      ACTION BAR — 6 boutons
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff; border: 1px solid #2E7D32;">
+      <img src="../icons/filter.png" width="32"/><br/><strong>Filter</strong><br/><small>Appliquer le filtre</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #455A64; color: #fff; border: 1px solid #37474F;">
+      <img src="../icons/undo.png" width="32"/><br/><strong>Undo</strong><br/><small>Etape precedente</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #455A64; color: #fff; border: 1px solid #37474F;">
+      <img src="../icons/redo.png" width="32"/><br/><strong>Redo</strong><br/><small>Etape suivante</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #D32F2F; color: #fff; border: 1px solid #B71C1C;">
+      <img src="../icons/unfilter.png" width="32"/><br/><strong>Unfilter</strong><br/><small>Retirer le filtre</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #455A64; color: #fff; border: 1px solid #37474F;">
+      <img src="../icons/export.png" width="32"/><br/><strong>Export</strong><br/><small>Exporter les donnees</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #1565C0; color: #fff; border: 1px solid #0D47A1; border-radius: 0 0 8px 0;">
+      <img src="../icons/icon.png" width="32"/><br/><strong>About</strong><br/><small>Informations plugin</small>
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-7--bouton-reset-400---430">SEQUENCE 7 — BOUTON RESET (4:00 - 4:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : appliquer un filtre, modifier des parametres d'exploration (champ, mode de selection), puis cliquer sur Reset. Montrer que tout revient aux defaults FilterMate, mais que le CRS et les styles QGIS restent inchanges.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le bouton Reset est different. Il ne se contente pas de retirer un filtre — il remet l'ensemble de l'etat d'exploration FilterMate aux valeurs par defaut.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Concretement : les filtres actifs sont retires, les parametres d'exploration reviennent aux defaults, et l'interface se reinitialise.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Mais attention — et c'est important — Reset ne touche pas a votre projet QGIS. Le systeme de coordonnees, les styles de vos couches, la mise en page : tout ca reste intact. Reset agit uniquement sur l'etat interne de FilterMate.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En resume : Unfilter retire un filtre. Reset remet FilterMate a zero.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Tableau comparatif affiche a l'ecran :</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Unfilter</th>
+<th>Reset</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Retire les filtres actifs</td>
+<td>Oui</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td>Utilise l'historique</td>
+<td>Oui (si disponible)</td>
+<td>Non</td>
+</tr>
+<tr>
+<td>Reinitialise l'exploration</td>
+<td>Non</td>
+<td>Oui</td>
+</tr>
+<tr>
+<td>Affecte le CRS QGIS</td>
+<td>Non</td>
+<td>Non</td>
+</tr>
+<tr>
+<td>Affecte les styles QGIS</td>
+<td>Non</td>
+<td>Non</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-8--niveau-1--source-layer-operator-430---500">SEQUENCE 8 — NIVEAU 1 : SOURCE LAYER OPERATOR (4:30 - 5:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : activer le toggle &quot;Combine Operator&quot; dans l'onglet FILTERING. Deux combobox apparaissent. Focus sur la premiere : Source layer operator. Demo avec REPLACE, puis AND, puis OR en selectionnant plusieurs features source successivement.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Jusqu'ici, on a filtre avec une seule feature source. Mais que se passe-t-il si on en selectionne plusieurs ? C'est la qu'interviennent les Combine Operators — et il y en a deux niveaux.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Activez le toggle 'Combine Operator'. Deux combobox apparaissent. La premiere, c'est le Source layer operator — il controle comment FilterMate combine plusieurs features de la meme couche source.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Trois choix. REPLACE : seule la derniere feature selectionnee est active. C'est le mode par defaut — chaque nouvelle selection remplace la precedente.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;AND : FilterMate fait l'intersection. Seules les entites cibles qui satisfont le predicat pour les DEUX features sources restent visibles. C'est un filtre restrictif.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;OR : FilterMate fait l'union. Les entites cibles qui satisfont le predicat pour l'UNE ou l'AUTRE des features sources restent visibles. C'est un filtre inclusif.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Montrer concretement :</p>
+<ol>
+<li>Selectionner Route A -&gt; filtrer -&gt; 127 batiments</li>
+<li>Selectionner Route B avec REPLACE -&gt; 84 batiments (les 127 disparaissent)</li>
+<li>Meme chose avec AND -&gt; 12 batiments (intersection des deux)</li>
+<li>Meme chose avec OR -&gt; 199 batiments (union des deux)</li>
+</ol>
+</blockquote>
+<hr>
+<h2 id="sequence-9--niveau-2--other-layers-operator-500---530">SEQUENCE 9 — NIVEAU 2 : OTHER LAYERS OPERATOR (5:00 - 5:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : cocher une deuxieme couche cible (ex: Parcelles). Montrer le deuxieme combobox &quot;Other layers operator&quot;. Illustrer avec REPLACE, AND, OR en comparant les resultats entre les deux couches cibles.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le deuxieme niveau agit entre les couches cibles. Si vous avez coche plusieurs couches a filtrer — par exemple Batiments ET Parcelles — l'Other layers operator definit comment les resultats se combinent entre elles.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;REPLACE : seul le resultat de la derniere couche traitee est conserve. AND : on garde uniquement les entites presentes dans les resultats des DEUX couches. OR : on garde les resultats de l'une ou l'autre.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour un usage debutant, laissez ces deux operateurs sur REPLACE. C'est le mode par defaut, et c'est le plus intuitif. On verra des cas d'usage avances dans les prochains tutoriels.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme--combine-operators-2-niveaux">Diagramme — Combine Operators (2 niveaux)</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    subgraph NIVEAU1["NIVEAU 1 — Source layer operator"]
+        S1["Feature source A"]
+        S2["Feature source B"]
+        S1 --> SOP_R["REPLACE : seule la feature B active"]
+        S1 --> SOP_A["AND : intersection A et B"]
+        S1 --> SOP_O["OR : union A et B"]
+    end
+    subgraph NIVEAU2["NIVEAU 2 — Other layers operator"]
+        T1["Couche cible 1"]
+        T2["Couche cible 2"]
+        T1 --> TOP_R["REPLACE"]
+        T1 --> TOP_A["AND"]
+        T1 --> TOP_O["OR"]
+    end
+    NIVEAU1 --> NIVEAU2
+    style NIVEAU1 fill:#1565C0,color:#fff
+    style NIVEAU2 fill:#388E3C,color:#fff
+    style SOP_R fill:#D32F2F,color:#fff
+    style TOP_R fill:#D32F2F,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-10--conflit-edit-mode-530---600">SEQUENCE 10 — CONFLIT EDIT MODE (5:30 - 6:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : passer la couche Batiments en mode edition (icone crayon). Tenter de filtrer. FilterMate affiche un popup de resolution. Montrer les options proposees.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Un cas que vous rencontrerez tot ou tard : le conflit avec le mode edition.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;QGIS ne permet pas d'appliquer un filtre subset string sur une couche en mode edition — c'est une limitation technique du moteur. Si vous essayez de filtrer alors que la couche cible est en edition, FilterMate le detecte et affiche un popup de resolution.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ce popup vous liste les couches concernees et vous propose de quitter le mode edition pour continuer. Vous pouvez accepter — FilterMate desactive le mode edition, applique le filtre, et c'est regle. Ou vous pouvez annuler si vous avez des modifications non sauvegardees.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'important, c'est que FilterMate ne force rien — il vous informe et vous laisse choisir.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Gros plan sur le popup de resolution. Annoter les boutons de choix. Montrer qu'apres avoir accepte, le filtre s'applique normalement.</p>
+</blockquote>
+<h3 id="diagramme--flux-edit-mode-conflict">Diagramme — Flux Edit Mode Conflict</h3>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="3" style="text-align: center; padding: 12px; background: #388E3C; color: #fff; border-radius: 8px 8px 0 0;">
+      <img src="../icons/filter.png" width="28"/>&nbsp; Clic sur <strong>Filter</strong>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="3" style="text-align: center; padding: 10px; background: #E65100; color: #fff; font-weight: bold;">
+      Couche cible en mode edition ?
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff; width: 33%;">
+      <strong>Non</strong><br/><small>&#8595; Filtrage normal</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #D32F2F; color: #fff; width: 34%;">
+      <strong>Oui</strong> &#8594; Popup de resolution<br/><small>Liste les couches en edition</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #78909C; color: #fff; width: 33%;">
+      &nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #66BB6A; color: #fff;">
+      <img src="../icons/filter.png" width="24"/><br/><small>Filtre applique</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #EF5350; color: #fff;">
+      <strong>Accepter</strong><br/><small>Quitter le mode edition<br/>&#8595; puis filtrage normal</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #BDBDBD; color: #333; border-radius: 0 0 8px 0;">
+      <strong>Annuler</strong><br/><small>Revenir sans filtrer</small>
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-11--exercice-1--filtrer-les-communes-dun-departement-600---730">SEQUENCE 11 — EXERCICE 1 : FILTRER LES COMMUNES D'UN DEPARTEMENT (6:00 - 7:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live guidee, etape par etape. Charger les couches Departements et Communes. Suivre le workflow complet : source = departements, feature = &quot;Herault&quot;, cible = communes, predicat = Intersects, filtrer.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Place a la pratique. Premier exercice : isoler toutes les communes d'un departement.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Etape 1 : chargez les couches Departements et Communes dans votre projet QGIS. Si vous suivez avec les donnees de demo, elles sont deja pretes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Etape 2 : dans l'Exploring Zone, selectionnez la couche source — Departements. Puis choisissez une valeur — prenons l'Herault.&quot;</em></p>
+</blockquote>
+<p><em>[Pause — laisser le temps a l'apprenant de reproduire]</em></p>
+<blockquote>
+<p><em>&quot;Etape 3 : dans l'onglet FILTERING, activez le toggle Layers to Filter et cochez la couche Communes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Etape 4 : activez le toggle Geometric Predicates et choisissez Intersects.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Etape 5 : cliquez sur Filter.&quot;</em></p>
+</blockquote>
+<p><em>[Pause — resultat a l'ecran]</em></p>
+<blockquote>
+<p><em>&quot;Et voila. Sur 35 000 communes, seules les 343 communes de l'Herault restent visibles. Vous pouvez verifier dans la table attributaire — elles sont toutes la.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est le workflow fondamental de FilterMate. Source, cible, predicat, filtrer. Quatre etapes.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Afficher un checklist anime au fur et a mesure :</p>
+<ul>
+<li><input type="checkbox" id="checkbox0" checked="true"><label for="checkbox0">Couche source : Departements</label></li>
+<li><input type="checkbox" id="checkbox1" checked="true"><label for="checkbox1">Feature : Herault</label></li>
+<li><input type="checkbox" id="checkbox2" checked="true"><label for="checkbox2">Couche cible : Communes</label></li>
+<li><input type="checkbox" id="checkbox3" checked="true"><label for="checkbox3">Predicat : Intersects</label></li>
+<li><input type="checkbox" id="checkbox4" checked="true"><label for="checkbox4">Filtrer</label></li>
+</ul>
+<p>Resultat : &quot;35 000 -&gt; 343 communes&quot;</p>
+</blockquote>
+<h3 id="diagramme--workflow-de-lexercice-1">Diagramme — Workflow de l'exercice 1</h3>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #1565C0; color: #fff; border-radius: 8px 0 0 8px;">
+      <img src="../icons/layer.png" width="24"/><br/><strong>1. Source</strong><br/><small>Departements</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #1976D2; color: #fff;">
+      <img src="../icons/pointing_black.png" width="24"/><br/><strong>2. Feature</strong><br/><small>Herault</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #42A5F5; color: #fff;">
+      <img src="../icons/layers.png" width="24"/><br/><strong>3. Cible</strong><br/><small>Communes</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #E65100; color: #fff;">
+      <img src="../icons/geo_predicates.png" width="24"/><br/><strong>4. Predicat</strong><br/><small>Intersects</small>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff;">
+      <img src="../icons/filter.png" width="24"/><br/><strong>5. Filter</strong>
+    </td>
+    <td style="text-align: center; padding: 4px; background: #ECEFF1;">&#10132;</td>
+    <td style="text-align: center; padding: 12px; background: #F57C00; color: #fff; border-radius: 0 8px 8px 0;">
+      <strong>343</strong><br/><small>communes<br/>de l'Herault</small>
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-12--exercice-2--enchainer-2-filtres-avec-and-730---900">SEQUENCE 12 — EXERCICE 2 : ENCHAINER 2 FILTRES AVEC AND (7:30 - 9:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live guidee. Reprendre le resultat de l'exercice 1. Changer le Source layer operator en AND. Selectionner un deuxieme departement (Gard). Filtrer a nouveau. Observer que seules les communes a la frontiere des deux departements restent visibles.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Deuxieme exercice, un cran au-dessus : enchainer deux filtres avec l'operateur AND.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;On repart du resultat de l'exercice precedent — les communes de l'Herault sont filtrees.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Cette fois, activez le toggle Combine Operator. Dans le Source layer operator, choisissez AND.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Maintenant, changez la feature source. Au lieu de l'Herault, selectionnez le Gard — le departement voisin.&quot;</em></p>
+</blockquote>
+<p><em>[Pause]</em></p>
+<blockquote>
+<p><em>&quot;Cliquez sur Filter.&quot;</em></p>
+</blockquote>
+<p><em>[Pause — resultat a l'ecran]</em></p>
+<blockquote>
+<p><em>&quot;Regardez le resultat. On n'a plus 343 communes — on en a 23. Pourquoi ? Parce que l'operateur AND fait l'intersection : FilterMate garde uniquement les communes qui intersectent A LA FOIS le contour de l'Herault ET le contour du Gard. Ce sont les communes frontalieres entre les deux departements.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est la puissance des Combine Operators. En combinant deux filtres successifs, vous pouvez repondre a des questions spatiales complexes sans ecrire une seule ligne de SQL.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Pour revenir a l'etat initial, cliquez sur Unfilter — ou sur Reset si vous voulez aussi reinitialiser les parametres d'exploration.&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Animation en 3 temps :</p>
+<ol>
+<li>Etat initial : 343 communes (Herault seul)</li>
+<li>Ajout du Gard avec AND : 23 communes</li>
+<li>Carte zoomee sur la zone frontaliere — les 23 communes mises en evidence</li>
+</ol>
+<p>Afficher un schema simplifie a l'ecran montrant les deux departements et leur zone d'intersection.</p>
+</blockquote>
+<h3 id="diagramme--logique-and">Diagramme — Logique AND</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    F1["Filtre 1 : Intersects Herault<br/>→ 343 communes"] --> OP["Operateur : AND"]
+    F2["Filtre 2 : Intersects Gard<br/>→ 312 communes"] --> OP
+    OP --> RES["Intersection :<br/>23 communes frontalieres"]
+    style F1 fill:#1565C0,color:#fff
+    style F2 fill:#1565C0,color:#fff
+    style OP fill:#E65100,color:#fff
+    style RES fill:#388E3C,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="conclusion-900---930">CONCLUSION (9:00 - 9:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran de synthese avec les points cles, puis transition vers le teaser V03.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Recapitulons ce qu'on a vu aujourd'hui.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le filtrage geometrique dans FilterMate repose sur trois elements : une couche source qui fournit la geometrie de reference, une ou plusieurs couches cibles qui seront filtrees, et un predicat spatial qui definit la relation a tester.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Vous savez maintenant utiliser les boutons Unfilter et Reset, configurer les Combine Operators pour enchainer des filtres, et reagir au conflit Edit Mode.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans la prochaine video, on explorera en detail l'onglet Exploration : navigation entite par entite, modes de selection simple, multiple et custom, et la synchronisation avec la selection QGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;A bientot, et bon filtrage !&quot;</em></p>
+</blockquote>
+<h3 id="note-de-montage">Note de montage</h3>
+<blockquote>
+<p>Afficher un resume visuel :</p>
+</blockquote>
+<pre class="hljs"><code><div>CE QUE VOUS SAVEZ FAIRE :
+  Source + Cible + Predicat = Filtrage geometrique
+  Unfilter = retirer un filtre
+  Reset = reinitialiser FilterMate
+  AND / OR / REPLACE = combiner des filtres
+  Edit Mode = popup de resolution
+
+PROCHAINE VIDEO :
+  V03 — Explorer Vos Donnees
+</div></code></pre>
+<hr>
+<h2 id="captures-qgis-requises">Captures QGIS requises</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Description</th>
+<th>Sequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Carte avec routes + batiments avant filtrage</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Exploring Zone : combobox source avec &quot;Routes&quot; selectionnee</td>
+<td>2</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Onglet FILTERING : toggle &quot;Layers to Filter&quot; active, &quot;Batiments&quot; cochee</td>
+<td>3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Onglet FILTERING : toggle &quot;Geometric Predicates&quot; active, &quot;Intersects&quot; selectionne</td>
+<td>4</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Resultat apres filtrage : batiments filtres le long de la route</td>
+<td>5</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Comparaison avant/apres en split screen</td>
+<td>5</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Action Bar : 6 boutons annotes (Filter, Undo, Redo, Unfilter, Export, About)</td>
+<td>6</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Bouton Unfilter en action : batiments reapparaissent</td>
+<td>6</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Bouton Reset en action : interface revient aux defaults</td>
+<td>7</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Toggle Combine Operator : 2 combobox visibles (Source layer + Other layers)</td>
+<td>8-9</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Demo REPLACE vs AND vs OR avec compteurs de resultats</td>
+<td>8</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Couche en mode edition : icone crayon active</td>
+<td>10</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Popup Edit Mode Conflict avec options de resolution</td>
+<td>10</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Exercice 1 : departements + communes, resultat Herault</td>
+<td>11</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Exercice 2 : resultat AND Herault/Gard — 23 communes frontalieres</td>
+<td>12</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="points-cles-a-mettre-en-avant">Points cles a mettre en avant</h2>
+<ol>
+<li><strong>Source / Cible / Predicat</strong> — le trio fondamental du filtrage geometrique</li>
+<li><strong>Non destructif</strong> — le filtre masque, il ne supprime jamais les donnees</li>
+<li><strong>Unfilter vs Reset</strong> — deux actions differentes, deux cas d'usage distincts</li>
+<li><strong>Combine Operators</strong> — deux niveaux pour des analyses spatiales progressives</li>
+<li><strong>Edit Mode</strong> — FilterMate detecte et gere les conflits proprement</li>
+<li><strong>4 etapes</strong> — source, cible, predicat, filtrer : le workflow de base a memoriser</li>
+</ol>
+<hr>
+<h2 id="liens-a-afficher-a-lecran">Liens a afficher a l'ecran</h2>
+<ul>
+<li><strong>GitHub</strong> : <code>https://github.com/imagodata/filter_mate</code></li>
+<li><strong>QGIS Plugins</strong> : <code>https://plugins.qgis.org/plugins/filter_mate</code></li>
+<li><strong>Documentation</strong> : <code>https://imagodata.github.io/filter_mate</code></li>
+</ul>
+<hr>
+<h2 id="musique-suggeree">Musique suggeree</h2>
+<ul>
+<li><strong>Intro</strong> (0:00 - 0:30) : Beat leger, pedagogique — type &quot;explainer video&quot;</li>
+<li><strong>Demos</strong> (0:30 - 5:30) : Fond neutre, rythme regulier — ne pas couvrir la voix</li>
+<li><strong>Exercices</strong> (6:00 - 9:00) : Legere montee en energie — accompagner la pratique</li>
+<li><strong>Conclusion</strong> (9:00 - 9:30) : Rappel du theme d'intro, resolution satisfaisante</li>
+</ul>
+<hr>
+<p><em>Script cree le 14 Mars 2026 — FilterMate v4.6.1</em>
+<em>Serie tutoriels : Video 02/10 — Filtrage Geometrique : Les Bases</em></p>
+
+</body>
+</html>

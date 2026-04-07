@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Arborescence du ExportGroupRecapDialog</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .diagram-container {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 900px;
+      width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Arborescence du ExportGroupRecapDialog</h1>
+  <div class="source">website/SCRIPT_V06_EXPORT_GPKG_KML.md</div>
+  <div class="diagram-container">
+<table style="border-collapse: collapse; width: 80%; margin: auto; font-family: sans-serif; border: 2px solid #333; border-radius: 8px;">
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #fff; font-weight: bold; font-size: 16px; border-bottom: 1px solid #ccc;">
+      <img src="../../icons/export.png" width="28"/>&nbsp; ExportGroupRecapDialog
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="padding: 8px 16px; background: #FAFAFA; border-bottom: 1px solid #eee;">
+      <strong>Titre :</strong> 'Export GeoPackage' ou 'Export KML'<br/>
+      <strong>Resume :</strong> '7 couches dans 3 groupes + 2 hors groupe'<br/>
+      <strong>Destination :</strong> <code>/home/user/export/mon_projet.gpkg</code>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="padding: 8px 16px; background: #F5F5F5; border: 1px solid #999;">
+      <strong>QTreeWidget — Arborescence</strong><br/>
+      <table style="border: none; margin: 8px 0; width: 100%;">
+        <tr><td style="padding: 4px 8px; background: #FFC107; color: #000; border-radius: 4px;"><img src="../../icons/folder_black.png" width="16"/>&nbsp; <strong>Groupe Transport</strong></td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../../icons/layer.png" width="14"/>&nbsp; Routes nationales</td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../../icons/layer.png" width="14"/>&nbsp; Routes departementales</td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../../icons/layer.png" width="14"/>&nbsp; Autoroutes</td></tr>
+        <tr><td style="padding: 4px 8px; background: #FFC107; color: #000; border-radius: 4px;"><img src="../../icons/folder_black.png" width="16"/>&nbsp; <strong>Groupe Bati</strong></td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../../icons/layer.png" width="14"/>&nbsp; Batiments publics</td></tr>
+        <tr><td style="padding: 2px 24px;"><img src="../../icons/layer.png" width="14"/>&nbsp; Batiments prives</td></tr>
+        <tr><td style="padding: 4px 32px; background: #FFE082; color: #000; border-radius: 4px;"><img src="../../icons/folder_black.png" width="14"/>&nbsp; Sous-groupe Bati historique</td></tr>
+        <tr><td style="padding: 2px 48px;"><img src="../../icons/layer.png" width="14"/>&nbsp; Monuments</td></tr>
+        <tr><td style="padding: 2px 16px; color: #666;"><img src="../../icons/layer.png" width="14"/>&nbsp; Communes (hors groupe)</td></tr>
+        <tr><td style="padding: 2px 16px; color: #666;"><img src="../../icons/layer.png" width="14"/>&nbsp; Points d'interet (hors groupe)</td></tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="padding: 8px 16px; background: #E3F2FD; border: 1px solid #1565C0;">
+      &#9745; <em>Preserve group structure in GPKG</em> (activee si groupes existent / grisee sinon)
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 10px; background: #ccc; color: #333; width: 50%; border-radius: 0 0 0 8px;">
+      Annuler
+    </td>
+    <td style="text-align: center; padding: 10px; background: #27ae60; color: #fff; font-weight: bold; width: 50%; border-radius: 0 0 8px 0;">
+      <img src="../../icons/export.png" width="20"/>&nbsp; Exporter
+    </td>
+  </tr>
+</table>
+  </div>
+</body>
+</html>

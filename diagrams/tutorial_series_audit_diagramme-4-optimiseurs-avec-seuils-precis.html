@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — 4 Optimiseurs avec Seuils Precis</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — 4 Optimiseurs avec Seuils Precis</h1>
+  <div class="source">website/TUTORIAL_SERIES_AUDIT.md</div>
+  <div class="mermaid">
+flowchart TD
+    ANALYSER["Analyse de la requete"]
+
+    ANALYSER --> OPT1["Query Cache<br/>TOUJOURS ACTIF<br/>LRU 100 entrees"]
+    ANALYSER --> OPT2["Parallel Filtering<br/>ACTIVE si >= 2 couches cibles"]
+    ANALYSER --> OPT3["Progressive Filtering<br/>ACTIVE si PostgreSQL<br/>+ complexite requete > 100"]
+    ANALYSER --> OPT4["Geometry Simplification<br/>ACTIVE si WKT source > 100K chars"]
+
+    OPT4 --> EXISTS["Si FIDs source > 500<br/>→ EXISTS subquery<br/>(evite d'inliner le WKT)"]
+
+    OPT3 --> MATVIEW["Si FIDs source > 500<br/>→ Materialized View PostgreSQL<br/>(fm_temp_mv_*)"]
+
+    OPT1 --> RESULT["Requete optimisee"]
+    OPT2 --> RESULT
+    EXISTS --> RESULT
+    MATVIEW --> RESULT
+
+    style OPT1 fill:#388E3C,color:#fff
+    style OPT2 fill:#1565C0,color:#fff
+    style OPT3 fill:#6A1B9A,color:#fff
+    style OPT4 fill:#E65100,color:#fff
+    style EXISTS fill:#D32F2F,color:#fff
+    style MATVIEW fill:#D32F2F,color:#fff
+    style ANALYSER fill:#F57C00,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

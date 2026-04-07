@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Cycle de vie de la configuration</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Cycle de vie de la configuration</h1>
+  <div class="source">website/SCRIPT_V09_CONFIGURATION.md</div>
+  <div class="mermaid">
+flowchart TD
+    subgraph STARTUP["Demarrage FilterMate"]
+        direction TB
+        DEFAULT["config.default.json<br/>SOURCE DE VERITE<br/>717 lignes, tous les parametres<br/>Jamais modifie par l'utilisateur"]
+        USER["config.json<br/>SURCHARGES UTILISATEUR<br/>Seuls les parametres modifies<br/>Cree apres premier Save"]
+        MERGE["Fusion :<br/>default + surcharges"]
+        ACTIVE["Configuration Active<br/>(en memoire)"]
+    end
+
+    DEFAULT --> MERGE
+    USER --> MERGE
+    MERGE --> ACTIVE
+
+    subgraph RUNTIME["Pendant l'utilisation"]
+        direction TB
+        EDIT["Modification dans TreeView"]
+        SAVE["Bouton Save"]
+        WRITE["Ecriture config.json<br/>(surcharges seulement)"]
+    end
+
+    ACTIVE --> EDIT
+    EDIT --> SAVE
+    SAVE --> WRITE
+    WRITE --> USER
+
+    subgraph UPDATE["Mise a jour du plugin"]
+        direction TB
+        NEW_DEFAULT["Nouveau config.default.json<br/>(parametres ajoutes)"]
+        MIGRATE["Migration automatique<br/>Ajout cles manquantes<br/>Renommage cles deprecie"]
+        PRESERVED["Surcharges utilisateur<br/>PRESERVEES"]
+    end
+
+    NEW_DEFAULT --> MIGRATE
+    USER --> MIGRATE
+    MIGRATE --> PRESERVED
+
+    style DEFAULT fill:#388E3C,color:#fff
+    style USER fill:#1976D2,color:#fff
+    style ACTIVE fill:#F57C00,color:#fff
+    style MIGRATE fill:#7B1FA2,color:#fff
+    style PRESERVED fill:#388E3C,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

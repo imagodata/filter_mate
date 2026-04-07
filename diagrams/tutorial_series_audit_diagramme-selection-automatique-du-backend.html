@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Selection Automatique du Backend</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Selection Automatique du Backend</h1>
+  <div class="source">website/TUTORIAL_SERIES_AUDIT.md</div>
+  <div class="mermaid">
+flowchart TD
+    START["Requete de filtrage lancee"]
+
+    START --> Q0{"Backend FORCE<br/>par l'utilisateur ?"}
+    Q0 -->|Oui| FORCED["Utiliser le backend<br/>selectionne"]
+    Q0 -->|Non| Q1{"Type de provider ?"}
+
+    Q1 -->|"memory"| MEM["💭 Backend MEMORY<br/>In-memory query<br/>< 0.5s / 50k"]
+
+    Q1 -->|"postgres"| Q2{"< 5k entites ?"}
+    Q2 -->|Oui| MEM2["💭 Backend MEMORY<br/>Optimisation petits PG"]
+    Q2 -->|Non| PG["🐘 Backend POSTGRESQL<br/>Materialized View<br/>Requetes paralleles<br/>Index GIST<br/>< 2s / 1M"]
+
+    Q1 -->|"spatialite<br/>GeoPackage"| SPAT["💾 Backend SPATIALITE<br/>Index R-tree<br/>SQL spatial<br/>~10s / 100k"]
+
+    Q1 -->|"ogr / shapefile<br/>GeoJSON / WFS"| OGR["📁 Backend OGR<br/>Expression QGIS<br/>Universel<br/>~30s / 100k"]
+
+    FORCED --> RESULT["Expression appliquee<br/>setSubsetString()"]
+    MEM --> RESULT
+    MEM2 --> RESULT
+    PG --> RESULT
+    SPAT --> RESULT
+    OGR --> RESULT
+
+    style PG fill:#27ae60,color:#fff
+    style SPAT fill:#9b59b6,color:#fff
+    style OGR fill:#3498db,color:#fff
+    style MEM fill:#e67e22,color:#fff
+    style MEM2 fill:#e67e22,color:#fff
+    style RESULT fill:#388E3C,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

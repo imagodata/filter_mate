@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SCRIPT_V03_EXPLORATION.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="filtermate--script-video-v03--explorer-vos-donnees">FilterMate — Script Video V03 : Explorer Vos Donnees</h1>
+<p><strong>Version</strong> : 4.6.1 | <strong>Date</strong> : 14 Mars 2026
+<strong>Niveau</strong> : Debutant | <strong>Duree estimee</strong> : 7-8 minutes
+<strong>Prerequis</strong> : V01 (Installation &amp; Premier Pas)
+<strong>Langue</strong> : Francais (sous-titres EN disponibles)</p>
+<blockquote>
+<p><strong>Public cible</strong> : Utilisateurs QGIS souhaitant naviguer dans leurs donnees attributaires et spatiales sans ecrire de requetes.
+<strong>Ton</strong> : Pedagogique, progressif, engageant — on part du plus simple vers le plus puissant.</p>
+</blockquote>
+<hr>
+<h2 id="plan-de-la-video">Plan de la video</h2>
+<table>
+<thead>
+<tr>
+<th>Sequence</th>
+<th>Temps</th>
+<th>Contenu</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0:00</td>
+<td>Hook + A quoi sert l'onglet Exploration ?</td>
+<td>Voix + diagramme</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0:30</td>
+<td>Auto Current Layer toggle</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0:50</td>
+<td>Selectionner une couche a explorer</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1:20</td>
+<td>Choisir un champ (nom, type, code...)</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1:30</td>
+<td>Liste des valeurs uniques</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2:00</td>
+<td>Flash Feature : surbrillance temporaire</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>6</td>
+<td>2:30</td>
+<td>Zoom to Feature : centrer la carte</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3:00</td>
+<td>Identify : attributs complets</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>8</td>
+<td>3:30</td>
+<td>Mode selection simple</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>9</td>
+<td>4:00</td>
+<td>Mode selection multiple (checkboxes)</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>10</td>
+<td>4:30</td>
+<td>Mode selection custom (expression libre)</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>11</td>
+<td>5:30</td>
+<td>Synchronisation avec la selection QGIS</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>12</td>
+<td>6:30</td>
+<td>Lier les widgets d'exploration (Link)</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>13</td>
+<td>7:00</td>
+<td>Recapitulatif + transition vers V04</td>
+<td>Voix + schema</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-0--hook--introduction-000---030">SEQUENCE 0 — HOOK + INTRODUCTION (0:00 - 0:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran QGIS avec une couche de 35 000 communes chargee. L'utilisateur essaie de retrouver une commune precises dans la table attributaire — scroll interminable. Puis FilterMate s'ouvre, il tape &quot;Montpellier&quot; dans le widget de recherche, la carte zoome instantanement. Transition vers le titre de la video.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Vous avez 35 000 communes dans votre couche, et vous cherchez celle qui s'appelle Montpellier. Vous ouvrez la table attributaire, vous scrollez... longtemps. Trop longtemps.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Avec FilterMate, il suffit de taper le nom dans la zone d'exploration, et la carte se centre instantanement sur la bonne entite. Pas de filtre SQL, pas de plugin externe — juste un panneau integre a QGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans ce tutoriel, on va decouvrir ensemble l'onglet Exploration de FilterMate : comment naviguer entite par entite, utiliser les outils de visualisation, et maitriser les trois modes de selection. C'est parti.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme--vue-densemble-de-lexploring-zone">Diagramme — Vue d'ensemble de l'Exploring Zone</h3>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="6" style="background: #7B1FA2; color: #fff; text-align: center; padding: 10px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      EXPLORING ZONE (section superieure du dock)
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="background: #9C27B0; color: #fff; text-align: center; padding: 6px; font-weight: bold;">
+      Barre laterale — 6 boutons
+    </td>
+  </tr>
+  <tr style="background: #AB47BC;">
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/identify_alt.png" width="28"/><br/><strong>Identify</strong><br/><small>(one-shot)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/zoom.png" width="28"/><br/><strong>Zoom</strong><br/><small>(one-shot)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/select_black.png" width="28"/><br/><strong>Select</strong><br/><small>(toggle)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/track.png" width="28"/><br/><strong>Track</strong><br/><small>(toggle)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/link.png" width="28"/><br/><strong>Link</strong><br/><small>(toggle)</small>
+    </td>
+    <td style="text-align: center; padding: 10px; color: #fff;">
+      <img src="../icons/reset_properties.png" width="28"/><br/><strong>Reset</strong><br/><small>(one-shot)</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="6" style="padding: 6px; background: #F3E5F5;"></td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      <strong>SINGLE SELECTION</strong><br/><small>(par defaut)</small>
+    </td>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #7B1FA2; color: #fff; border: 1px solid #6A1B9A;">
+      <strong>MULTIPLE SELECTION</strong><br/><small>(checkboxes)</small>
+    </td>
+    <td colspan="2" style="text-align: center; padding: 12px; background: #E65100; color: #fff; border: 1px solid #BF360C; border-radius: 0 0 8px 0;">
+      <strong>CUSTOM SELECTION</strong><br/><small>(expression libre)</small>
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-1--auto-current-layer-030---050">SEQUENCE 1 — AUTO CURRENT LAYER (0:30 - 0:50)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Le panneau Layers de QGIS est visible a gauche. On clique sur differentes couches dans la legende : la combo &quot;couche source&quot; de FilterMate suit automatiquement la selection. Le bouton toggle &quot;Auto Current Layer&quot; est mis en evidence avec une annotation.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Avant de plonger dans l'exploration, un petit raccourci tres pratique : le bouton 'Auto Current Layer'. Il se trouve dans la barre laterale de l'onglet Filtering — c'est le bouton avec l'icone de lien.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Quand il est active, la couche source dans FilterMate suit automatiquement la couche que vous selectionnez dans le panneau Couches de QGIS. Vous changez de couche dans la legende, FilterMate s'adapte. C'est le moyen le plus rapide de passer d'une couche a l'autre sans toucher aux combos.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>Le bouton est <code>pushButton_checkable_filtering_auto_current_layer</code>. Il active l'option <code>LINK_LEGEND_LAYERS_AND_CURRENT_LAYER_FLAG</code> dans les proprietes du projet. Quand il est actif, le signal <code>currentLayerChanged</code> de QGIS declenche la mise a jour de la combo source ET de l'Exploring Zone.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-2--selectionner-une-couche-050---120">SEQUENCE 2 — SELECTIONNER UNE COUCHE (0:50 - 1:20)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>On desactive &quot;Auto Current Layer&quot; pour montrer la methode manuelle. On ouvre la combo de selection de couche dans l'Exploring Zone. On voit la liste des couches chargees avec leurs icones de type de geometrie (point, ligne, polygone). On selectionne la couche &quot;communes&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Si vous preferez choisir manuellement, pas de probleme. La combo en haut de la zone d'exploration liste toutes les couches vecteur chargees dans votre projet. Chaque couche est accompagnee de son icone de geometrie : point, ligne ou polygone.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Je selectionne ma couche 'communes'. FilterMate detecte automatiquement le meilleur champ d'affichage — en general le nom — et charge la liste des entites.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>La detection automatique du champ d'affichage utilise <code>get_best_display_field()</code> avec 6 niveaux de priorite : display name QGIS &gt; nom explicite (name, nom, label...) &gt; champ texte le plus long &gt; premier champ texte &gt; premier champ tout court &gt; FID.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-3--choisir-un-champ-120---130">SEQUENCE 3 — CHOISIR UN CHAMP (1:20 - 1:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Gros plan sur le widget QgsFieldExpressionWidget. On clique dessus, un menu deroulant affiche tous les champs de la couche avec leur type (texte, entier, reel...). On selectionne &quot;code_postal&quot; a la place de &quot;nom&quot;.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le champ d'affichage determine ce qui apparait dans la liste de recherche. Par defaut, FilterMate choisit le champ le plus pertinent — souvent le nom. Mais vous pouvez changer a tout moment : code postal, identifiant, type d'occupation du sol... tout champ attributaire est disponible.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ici, je passe au code postal. Immediatement, la liste des valeurs se met a jour.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-4--liste-des-valeurs-uniques-130---200">SEQUENCE 4 — LISTE DES VALEURS UNIQUES (1:30 - 2:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Le widget QgsFeaturePickerWidget est au premier plan. On tape &quot;340&quot; dans la barre de recherche integree — la liste se filtre en temps reel et n'affiche plus que les codes postaux commencant par 340. On navigue avec les fleches de parcours (precedent/suivant). Annotation sur la limite de 10 000 entites.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le mode selection simple utilise un widget de recherche natif QGIS — le QgsFeaturePickerWidget. Il est puissant : recherche en temps reel, autocompletion, et des fleches pour naviguer d'entite en entite sans quitter le clavier.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Je tape '340' et seuls les codes postaux correspondants apparaissent. C'est instantane, meme avec des milliers d'entites. La limite est fixee a 10 000 elements pour garantir la fluidite.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Les fleches a droite du widget permettent de parcourir les entites une par une — tres pratique pour une inspection sequentielle.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-5--flash-feature-200---230">SEQUENCE 5 — FLASH FEATURE (2:00 - 2:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>On selectionne une commune dans la liste. On clique sur le bouton Identify (qui fait aussi flash). Sur le canvas QGIS, l'entite selectionnee clignote en jaune vif pendant 1-2 secondes, puis disparait. Repeter avec 2-3 entites differentes pour montrer l'effet.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Premier outil de navigation : le Flash. Quand vous cliquez sur 'Identify', FilterMate fait deux choses. D'abord, il fait clignoter l'entite en surbrillance jaune sur la carte — c'est le flash. Vous voyez immediatement ou se trouve votre entite, meme dans une carte chargee.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'effet est temporaire : apres une seconde, la surbrillance disparait. Ca ne modifie ni votre selection, ni vos filtres. C'est purement visuel — un repere instantane.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Regardez : je clique sur 'Montpellier', flash jaune. Je passe a 'Beziers', flash jaune. Simple, rapide, efficace.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>Le flash utilise <code>iface.mapCanvas().flashGeometries()</code> avec une couleur jaune par defaut (<code>QColor(255, 255, 0)</code>). La duree est configurable dans les options avancees.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-6--zoom-to-feature-230---300">SEQUENCE 6 — ZOOM TO FEATURE (2:30 - 3:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>On selectionne &quot;Montpellier&quot; dans la liste. On clique sur le bouton Zoom. La carte effectue un zoom anime jusqu'a centrer Montpellier avec une marge. Puis on selectionne une petite commune rurale — la carte zoome beaucoup plus fort. Montrer le contraste d'echelle.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Deuxieme outil : Zoom To. Un clic, et la carte se centre et zoome sur l'emprise de votre entite. L'echelle s'adapte automatiquement a la taille de la geometrie.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Regardez : sur Montpellier, une ville etendue, le zoom reste large. Sur une petite commune rurale comme Saint-Guilhem-le-Desert, le zoom se resserre. FilterMate calcule le rectangle englobant et ajoute une marge pour que l'entite soit toujours bien visible dans son contexte.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est l'outil ideal pour verifier la localisation d'une entite ou preparer une capture d'ecran centree.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>Le zoom utilise <code>iface.mapCanvas().setExtent()</code> avec un buffer de 10% autour du bounding box de l'entite. Une transformation de coordonnees (QgsCoordinateTransform) est appliquee si le CRS de la couche differe de celui du canvas.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-7--identify-300---330">SEQUENCE 7 — IDENTIFY (3:00 - 3:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>On clique sur le bouton Identify. Le panneau natif &quot;Resultats de l'identification&quot; de QGIS s'ouvre avec tous les attributs de l'entite selectionnee : nom, code_postal, population, superficie, etc. Montrer le detail complet.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Troisieme outil : Identify. Il ouvre le panneau natif de QGIS 'Resultats de l'identification' avec tous les attributs de votre entite. Nom, population, superficie, geometrie — tout est la.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est le meme panneau que celui de l'outil d'identification standard de QGIS, mais vous n'avez pas besoin de cliquer sur la carte. Vous selectionnez l'entite dans la liste FilterMate, vous cliquez Identify, et les attributs s'affichent. Pratique quand l'entite est difficile a cibler au clic sur la carte.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>L'identification utilise <code>iface.openFeatureForm()</code> ou le mecanisme d'identification natif QGIS. Tous les champs attributaires sont affiches, y compris les champs virtuels et calcules.</p>
+</blockquote>
+<hr>
+<h2 id="diagramme--outils-de-navigation">DIAGRAMME — Outils de Navigation</h2>
+<table style="border-collapse: collapse; width: 100%; font-family: sans-serif;">
+  <tr>
+    <td colspan="4" style="background: #455A64; color: #fff; text-align: center; padding: 8px; font-weight: bold; border-radius: 8px 8px 0 0;">
+      Outils Navigation
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align: center; padding: 12px; background: #FFC107; color: #000; border: 1px solid #FFA000;">
+      <img src="../icons/track.png" width="28"/><br/><strong>Flash</strong><br/><small>Surbrillance jaune temporaire</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #1976D2; color: #fff; border: 1px solid #1565C0;">
+      <img src="../icons/zoom.png" width="28"/><br/><strong>Zoom To</strong><br/><small>Centrer + zoom sur l'entite</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #388E3C; color: #fff; border: 1px solid #2E7D32;">
+      <img src="../icons/identify_alt.png" width="28"/><br/><strong>Identify</strong><br/><small>Tous les attributs et proprietes</small>
+    </td>
+    <td style="text-align: center; padding: 12px; background: #7B1FA2; color: #fff; border: 1px solid #6A1B9A;">
+      <img src="../icons/zoom_alt1.png" width="28"/><br/><strong>Zoom Selection</strong><br/><small>Vue d'ensemble des selectionnes</small>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="4" style="text-align: center; padding: 10px; background: #37474F; color: #fff; border-radius: 0 0 8px 8px;">
+      &#8594; Canvas QGIS
+    </td>
+  </tr>
+</table>
+<hr>
+<h2 id="sequence-8--mode-selection-simple-330---400">SEQUENCE 8 — MODE SELECTION SIMPLE (3:30 - 4:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Retour sur la zone d'exploration. Le GroupBox &quot;SINGLE SELECTION&quot; est deplie et coche (etat par defaut). Mettre en evidence le QgsFeaturePickerWidget (barre de recherche + fleches) et le QgsFieldExpressionWidget (champ d'affichage). On selectionne une commune — elle s'affiche en surbrillance sur la carte si le bouton Select (toggle) est actif.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Parlons maintenant des trois modes de selection. Par defaut, FilterMate s'ouvre en mode 'Selection Simple'. C'est le GroupBox du haut, celui qui est deplie.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En mode simple, vous travaillez avec une seule entite a la fois. Vous la choisissez dans le widget de recherche, et FilterMate genere l'expression correspondante : par exemple, 'nom = Montpellier'. Si le bouton 'Select' est active dans la barre laterale, l'entite est aussi mise en surbrillance sur le canvas QGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est le mode le plus intuitif — ideal pour l'inspection entite par entite.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>Expression generee en mode simple : <code>&quot;field_name&quot; = 'value'</code>. Le widget est un <code>QgsFeaturePickerWidget</code> (<code>mFeaturePickerWidget_exploring_single_selection</code>) avec autocompletion et limite a <code>MAX_EXPLORING_FEATURES</code> (10 000 par defaut). Le champ d'affichage est controle par <code>mFieldExpressionWidget_exploring_single_selection</code>.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-9--mode-selection-multiple-400---430">SEQUENCE 9 — MODE SELECTION MULTIPLE (4:00 - 4:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>On replie le GroupBox &quot;SINGLE SELECTION&quot; et on deplie &quot;MULTIPLE SELECTION&quot;. Le widget QgsCheckableComboBoxFeaturesListPickerWidget apparait avec une liste a cocher. On coche &quot;Montpellier&quot;, &quot;Beziers&quot; et &quot;Narbonne&quot;. Les trois entites se colorent sur la carte. Annotation sur l'expression generee.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Deuxieme mode : la Selection Multiple. Depliez le GroupBox du milieu. Vous voyez maintenant un widget a cases a cocher : chaque entite de la couche a sa propre case.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Je coche Montpellier... Beziers... Narbonne. Trois entites selectionnees en un instant. FilterMate genere automatiquement l'expression correspondante : 'nom IN (Montpellier, Beziers, Narbonne)'. Et si le bouton Select est actif, les trois entites sont mises en surbrillance sur la carte.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ce widget supporte aussi la recherche : tapez les premieres lettres pour filtrer la liste. Et il gere des milliers d'entites sans ralentir, grace au chargement asynchrone.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>Expression generee en mode multiple : <code>&quot;field_name&quot; IN ('value1', 'value2', 'value3')</code>. Le widget <code>QgsCheckableComboBoxFeaturesListPickerWidget</code> (<code>checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection</code>) utilise un QgsTask pour le chargement asynchrone. Population non-bloquante, annulable, avec indicateur de progression.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-10--mode-selection-custom-430---530">SEQUENCE 10 — MODE SELECTION CUSTOM (4:30 - 5:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>On replie &quot;MULTIPLE SELECTION&quot; et on deplie &quot;CUSTOM SELECTION&quot;. Le QgsFieldExpressionWidget s'affiche avec le bouton epsilon (expression builder). On clique dessus, le constructeur d'expressions QGIS s'ouvre. On ecrit une expression : <code>&quot;population&quot; &gt; 50000 AND &quot;departement&quot; = '34'</code>. On valide. Les communes correspondantes se mettent en surbrillance sur la carte.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Troisieme mode — le plus puissant : la Selection Custom. Ici, vous ecrivez n'importe quelle expression QGIS valide. Pas de contrainte sur un seul champ : vous pouvez combiner des criteres attributaires, geometriques, ou meme utiliser des fonctions de calcul.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Je clique sur le bouton expression — c'est le petit epsilon. Le constructeur d'expressions QGIS s'ouvre, avec toutes les fonctions disponibles. J'ecris : population superieure a 50 000 ET departement egal a 34.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Je valide. FilterMate evalue l'expression et met en surbrillance les communes correspondantes. On obtient Montpellier, bien sur, et les autres grandes villes de l'Herault.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ce mode est ideal pour les selections complexes : seuils numeriques, combinaisons multi-champs, ou meme des expressions geometriques comme area(geometry) superieur a un seuil.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>Le widget utilise <code>QgsFieldExpressionWidget</code> (<code>mFieldExpressionWidget_exploring_custom_selection</code>) qui ouvre le <code>QgsExpressionBuilderDialog</code> natif QGIS. Toute expression valide dans le contexte de la couche est acceptee. L'expression est transmise telle quelle au moteur QGIS.</p>
+</blockquote>
+<hr>
+<h2 id="diagramme--modes-de-selection">DIAGRAMME — Modes de Selection</h2>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    EXPLORER["Onglet Exploration"]
+    EXPLORER --> SIMPLE["Mode Simple<br/>1 entite a la fois"]
+    EXPLORER --> MULTI["Mode Multiple<br/>Checkboxes"]
+    EXPLORER --> CUSTOM["Mode Custom<br/>Expression libre"]
+    SIMPLE --> EXPR1["field = 'value'"]
+    MULTI --> EXPR2["field IN ('v1', 'v2', 'v3')"]
+    CUSTOM --> EXPR3["Toute expression QGIS valide"]
+    EXPR1 --> SYNC["Synchronisation<br/>bidirectionnelle<br/>QGIS <-> FilterMate"]
+    EXPR2 --> SYNC
+    EXPR3 --> SYNC
+    style SIMPLE fill:#1976D2,color:#fff
+    style MULTI fill:#7B1FA2,color:#fff
+    style CUSTOM fill:#E65100,color:#fff
+</div></code></pre>
+<hr>
+<h2 id="sequence-11--synchronisation-qgis-530---630">SEQUENCE 11 — SYNCHRONISATION QGIS (5:30 - 6:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Split screen : a gauche le panneau FilterMate, a droite le canvas QGIS avec la table attributaire ouverte. On selectionne une entite dans FilterMate — elle se selectionne aussi dans la table attributaire QGIS. Puis on selectionne une entite dans la table attributaire QGIS — FilterMate se met a jour aussi. Montrer la bidirectionnalite.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;L'un des points forts de FilterMate, c'est la synchronisation bidirectionnelle avec QGIS. Quand le bouton 'Select' est active dans la barre laterale, la selection dans FilterMate et la selection QGIS sont liees.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Regardez : je selectionne 'Montpellier' dans FilterMate. Dans la table attributaire QGIS, la ligne correspondante est automatiquement selectionnee. La couleur de selection par defaut de QGIS — le jaune — apparait sur la carte.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et ca marche dans l'autre sens aussi. Si je selectionne une entite directement sur la carte avec l'outil de selection QGIS, FilterMate detecte le changement et met a jour son propre widget. C'est une synchronisation en temps reel, bidirectionnelle.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le bouton 'Track' dans la barre laterale va encore plus loin : quand il est active, la carte zoome automatiquement sur l'entite a chaque changement de selection. C'est comme si la carte 'suivait' votre exploration.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>La synchronisation repose sur les signaux <code>selectionChanged</code> de <code>QgsVectorLayer</code> et les signaux internes du <code>QgsFeaturePickerWidget</code>. Le bouton Select (<code>pushButton_checkable_exploring_selecting</code>) controle si la selection FilterMate est propagee a la selection QGIS. Le bouton Track (<code>pushButton_checkable_exploring_tracking</code>) ajoute un auto-zoom sur chaque changement.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-12--lier-les-widgets-link-630---700">SEQUENCE 12 — LIER LES WIDGETS (Link) (6:30 - 7:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>On deplie les trois GroupBoxes pour les voir cotes a cotes. On active le bouton &quot;Link&quot; dans la barre laterale (il passe en surbrillance). Puis on selectionne une entite en mode Simple — immediatement, le mode Multiple coche la meme entite et le mode Custom affiche l'expression equivalente. Montrer que les trois GroupBoxes restent synchronises.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Dernier outil de la barre laterale pour aujourd'hui : le bouton 'Link', representee par l'icone de chaine. Quand il est active, les trois GroupBoxes d'exploration sont lies entre eux.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Concretement : si je selectionne une entite en mode Simple, le mode Multiple coche automatiquement la meme entite, et le mode Custom genere l'expression equivalente. Les trois modes restent synchronises en permanence.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;C'est tres utile pour affiner progressivement une selection. Vous commencez en mode Simple pour trouver une premiere entite, vous basculez en mode Multiple pour en ajouter d'autres, et a tout moment vous pouvez passer en mode Custom pour ajuster l'expression manuellement — sans perdre votre travail.&quot;</em></p>
+</blockquote>
+<h3 id="note-technique">Note technique</h3>
+<blockquote>
+<p>Le bouton Link est <code>pushButton_checkable_exploring_linking_widgets</code>. Quand il est actif, tout changement dans un GroupBox est propage aux deux autres via le controleur <code>ExploringController</code>. L'etat de liaison est persiste dans les proprietes du projet FilterMate.</p>
+</blockquote>
+<hr>
+<h2 id="sequence-13--recapitulatif-700---730">SEQUENCE 13 — RECAPITULATIF (7:00 - 7:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran recapitulatif anime avec les 6 boutons de la barre laterale annotes, les 3 modes de selection avec leurs expressions, et une fleche vers le tutoriel V04. Fond colore avec le schema de couleurs FilterMate.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Recapitulons ce qu'on a vu ensemble.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'onglet Exploration de FilterMate, c'est votre tableau de bord pour naviguer dans vos donnees. Six boutons dans la barre laterale : Identify pour voir les attributs, Zoom pour centrer la carte, Select pour synchroniser avec QGIS, Track pour le suivi automatique, Link pour lier les trois modes, et Reset pour tout remettre a zero.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Trois modes de selection mutuellement exclusifs : Simple pour une entite a la fois, Multiple pour cocher plusieurs entites, et Custom pour ecrire n'importe quelle expression QGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et tout ca se synchronise en temps reel avec QGIS — selection, zoom, identification.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans le prochain tutoriel, on verra comment combiner l'exploration avec le filtrage spatial — predicats geometriques, buffers dynamiques, et zones tampons. A bientot !&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="recapitulatif--boutons-de-la-barre-laterale">Recapitulatif — Boutons de la barre laterale</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Bouton</th>
+<th>Type</th>
+<th>Fonction</th>
+<th>Widget interne</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Identify</td>
+<td>One-shot</td>
+<td>Flash jaune + ouvre le panneau d'identification QGIS</td>
+<td><code>pushButton_exploring_identify</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Zoom</td>
+<td>One-shot</td>
+<td>Centre et zoome la carte sur l'entite</td>
+<td><code>pushButton_exploring_zoom</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Select</td>
+<td>Toggle</td>
+<td>Synchronise la selection FilterMate avec la selection QGIS</td>
+<td><code>pushButton_checkable_exploring_selecting</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Track</td>
+<td>Toggle</td>
+<td>Auto-zoom quand l'entite selectionnee change</td>
+<td><code>pushButton_checkable_exploring_tracking</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Link</td>
+<td>Toggle</td>
+<td>Lie les 3 GroupBoxes entre eux</td>
+<td><code>pushButton_checkable_exploring_linking_widgets</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Reset</td>
+<td>One-shot</td>
+<td>Remet toutes les proprietes d'exploration aux valeurs par defaut</td>
+<td><code>pushButton_exploring_reset_layer_properties</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="recapitulatif--les-3-groupboxes">Recapitulatif — Les 3 GroupBoxes</h2>
+<table>
+<thead>
+<tr>
+<th>GroupBox</th>
+<th>Widget principal</th>
+<th>Expression generee</th>
+<th>Cas d'usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SINGLE SELECTION</td>
+<td><code>QgsFeaturePickerWidget</code> (recherche + fleches)</td>
+<td><code>&quot;champ&quot; = 'valeur'</code></td>
+<td>Inspection entite par entite</td>
+</tr>
+<tr>
+<td>MULTIPLE SELECTION</td>
+<td><code>QgsCheckableComboBoxFeaturesListPickerWidget</code></td>
+<td><code>&quot;champ&quot; IN ('v1', 'v2', 'v3')</code></td>
+<td>Selection de lot (villes, parcelles...)</td>
+</tr>
+<tr>
+<td>CUSTOM SELECTION</td>
+<td><code>QgsFieldExpressionWidget</code> (constructeur expressions)</td>
+<td>Toute expression QGIS valide</td>
+<td>Criteres complexes multi-champs</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="captures-qgis-requises">Captures QGIS requises</h2>
+<ol>
+<li>Exploring Zone avec la barre laterale annotee (6 boutons avec numeros)</li>
+<li>Combo de selection de couche avec icones de geometrie</li>
+<li>QgsFieldExpressionWidget avec menu deroulant des champs</li>
+<li>QgsFeaturePickerWidget en action — recherche en cours avec autocompletion</li>
+<li>Flash d'une entite sur la carte (capture animee GIF ou sequence de 3 images)</li>
+<li>Zoom sur une entite — vue avant/apres (split screen)</li>
+<li>Panneau &quot;Resultats de l'identification&quot; avec attributs complets</li>
+<li>GroupBox SINGLE SELECTION en detail (widget + fleches + champ)</li>
+<li>GroupBox MULTIPLE SELECTION avec cases cochees (3-4 entites)</li>
+<li>GroupBox CUSTOM SELECTION avec le constructeur d'expressions ouvert</li>
+<li>Synchronisation bidirectionnelle : selection dans FilterMate refletee dans la table attributaire QGIS</li>
+<li>Bouton Link actif avec les 3 GroupBoxes synchronises</li>
+</ol>
+<hr>
+<h2 id="donnees-de-demo">Donnees de demo</h2>
+<table>
+<thead>
+<tr>
+<th>Couche</th>
+<th>Type</th>
+<th>Entites</th>
+<th>Champs cles</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Communes France</td>
+<td>Polygone</td>
+<td>~35 000</td>
+<td>nom, code_postal, population, dept</td>
+<td>Shapefile</td>
+</tr>
+<tr>
+<td>Departements France</td>
+<td>Polygone</td>
+<td>~100</td>
+<td>nom, code, region</td>
+<td>Shapefile</td>
+</tr>
+<tr>
+<td>Routes principales</td>
+<td>Ligne</td>
+<td>~5 000</td>
+<td>nom, type, longueur</td>
+<td>Shapefile</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Pas besoin de PostgreSQL pour cette video. Les donnees Shapefile ou GeoPackage suffisent.</p>
+</blockquote>
+<hr>
+<h2 id="musique-et-rythme">Musique et rythme</h2>
+<table>
+<thead>
+<tr>
+<th>Sequence</th>
+<th>Ambiance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hook (0:00-0:30)</td>
+<td>Beat dynamique, energie montante</td>
+</tr>
+<tr>
+<td>Demo (0:30-6:30)</td>
+<td>Fond leger, neutre, non intrusif</td>
+</tr>
+<tr>
+<td>Recap (7:00-7:30)</td>
+<td>Montee legere, cloturer sur une note positive</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="liens-a-afficher-a-lecran-fin-de-video">Liens a afficher a l'ecran (fin de video)</h2>
+<ul>
+<li><strong>GitHub</strong> : <code>https://github.com/imagodata/filter_mate</code></li>
+<li><strong>QGIS Plugins</strong> : <code>https://plugins.qgis.org/plugins/filter_mate</code></li>
+<li><strong>Documentation</strong> : <code>https://imagodata.github.io/filter_mate</code></li>
+<li><strong>Video suivante</strong> : V04 — Predicats Spatiaux &amp; Buffer Dynamique</li>
+</ul>
+<hr>
+<h2 id="points-cles-a-mettre-en-avant">Points cles a mettre en avant</h2>
+<ol>
+<li><strong>Zero SQL</strong> : Exploration complete sans ecrire une seule ligne de code</li>
+<li><strong>Trois modes progressifs</strong> : du plus simple (1 entite) au plus puissant (expression libre)</li>
+<li><strong>Synchronisation QGIS</strong> : bidirectionnelle, temps reel, selection + zoom</li>
+<li><strong>Performance</strong> : 10 000 entites en autocompletion, chargement asynchrone</li>
+<li><strong>Integration native</strong> : Flash, Zoom et Identify utilisent les APIs QGIS standard</li>
+</ol>
+<hr>
+<p><em>Script cree le 14 Mars 2026 — FilterMate v4.6.1</em>
+<em>Serie : VIDEO 03 sur 10 — Niveau Debutant</em></p>
+
+</body>
+</html>

@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SCRIPT_V08_POSTGRESQL_POWER.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="filtermate-tutorial-v08----postgresql-power-user">FilterMate Tutorial V08 -- PostgreSQL Power User</h1>
+<p><strong>Serie :</strong> FilterMate Tutorial Series
+<strong>Video :</strong> 08/12
+<strong>Niveau :</strong> Avance
+<strong>Duree estimee :</strong> 10-12 minutes
+<strong>Prerequis :</strong> V07 (Filtrage multi-couches), connaissances PostgreSQL/PostGIS
+<strong>Version FilterMate :</strong> 4.6.1+
+<strong>Langue :</strong> Francais (sous-titres EN disponibles)</p>
+<hr>
+<h2 id="plan-de-la-video">Plan de la video</h2>
+<table>
+<thead>
+<tr>
+<th>Temps</th>
+<th>Contenu</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0:00</td>
+<td>PostgreSQL + FilterMate = performance extreme</td>
+<td>Voix</td>
+</tr>
+<tr>
+<td>0:30</td>
+<td>Vue materialisee : qu'est-ce que c'est ?</td>
+<td>Diagramme</td>
+</tr>
+<tr>
+<td>1:30</td>
+<td>Demo : voir les MV dans pgAdmin</td>
+<td>Capture pgAdmin</td>
+</tr>
+<tr>
+<td>2:30</td>
+<td>Prefix fm_temp_mv_ : identification facile</td>
+<td>Capture pgAdmin</td>
+</tr>
+<tr>
+<td>3:00</td>
+<td>Auto-cleanup vs cleanup manuel</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>3:30</td>
+<td>Dialogue info session PostgreSQL</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>4:00</td>
+<td>Detection cle primaire (id, fid, ogc_fid, cleabs)</td>
+<td>Diagramme</td>
+</tr>
+<tr>
+<td>5:00</td>
+<td>Demo BDTopo : 1M batiments, filtrage &lt; 2s</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>6:00</td>
+<td>Demo OSM : tables sans PK standard</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>6:30</td>
+<td>Filtrage parallele multi-couches</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>7:30</td>
+<td>Configuration : timeouts, batch size, pool</td>
+<td>Demo live</td>
+</tr>
+<tr>
+<td>8:30</td>
+<td>Securite : sanitize_sql_identifier</td>
+<td>Diagramme</td>
+</tr>
+<tr>
+<td>9:30</td>
+<td>Bonnes pratiques PostgreSQL</td>
+<td>Recapitulatif</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="sequence-0----intro--postgresql--filtermate-000---030">SEQUENCE 0 -- INTRO : PostgreSQL + FilterMate (0:00 - 0:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran partage : a gauche, pgAdmin avec une base BDTopo (millions de lignes). A droite, QGIS avec FilterMate ouvert, un filtre spatial en cours. Le compteur affiche &quot;&lt;2s&quot;. Zoom progressif sur le panneau FilterMate.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Vous travaillez avec PostgreSQL et PostGIS ? Alors cette video est pour vous. On va explorer les mecanismes avances que FilterMate utilise sous le capot pour transformer vos requetes spatiales en operations de quelques secondes -- meme sur un million d'entites.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;On va parler de vues materialisees, de detection automatique de cle primaire, de securite SQL, et de configuration fine. Accrochez-vous, c'est du Power User.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-1----vue-materialisee--quest-ce-que-cest--030---130">SEQUENCE 1 -- Vue materialisee : qu'est-ce que c'est ? (0:30 - 1:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Animation du diagramme de sequence Mermaid ci-dessous. Chaque etape s'affiche progressivement avec une fleche animee. Fond sombre, police monospace pour les noms SQL.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Quand vous appliquez un filtre spatial dans FilterMate, en coulisses, le plugin ne se contente pas d'envoyer une simple requete SELECT. Sur PostgreSQL, si votre selection source depasse 500 identifiants -- c'est le seuil <code>source_mv_fid_threshold</code> -- FilterMate cree automatiquement une vue materialisee temporaire.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Une vue materialisee, c'est comme une table physique creee a partir d'une requete SELECT. Contrairement a une vue classique qui est recalculee a chaque appel, la vue materialisee stocke les resultats sur disque. Ca veut dire : un index spatial GIST automatique, et des performances de lecture quasi instantanees.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Regardez le cycle de vie complet...&quot;</em></p>
+</blockquote>
+<h3 id="diagramme-1----cycle-de-vie-dune-vue-materialisee">Diagramme 1 -- Cycle de vie d'une vue materialisee</h3>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    actor U as Utilisateur
+    participant FM as FilterMate
+    participant PG as PostgreSQL
+
+    U->>FM: Appliquer filtre spatial
+    FM->>PG: CREATE MATERIALIZED VIEW fm_temp_mv_xxx AS ...
+    PG-->>FM: Vue creee (index GIST auto)
+    FM->>PG: SELECT ... FROM fm_temp_mv_xxx WHERE ST_Intersects(...)
+    PG-->>FM: Resultats (< 2s pour 1M)
+    FM->>FM: setSubsetString() sur couche QGIS
+
+    Note over FM,PG: A la fin de session ou manuellement
+
+    U->>FM: Cleanup (auto ou manuel)
+    FM->>PG: DROP MATERIALIZED VIEW fm_temp_mv_xxx
+    PG-->>FM: Vue supprimee
+</div></code></pre>
+<h3 id="narration-suite">Narration (suite)</h3>
+<blockquote>
+<p><em>&quot;Le flux est simple : FilterMate cree la vue, PostgreSQL construit automatiquement un index GIST sur la geometrie, puis FilterMate interroge cette vue avec ST_Intersects. Le resultat est ensuite applique comme filtre QGIS via <code>setSubsetString()</code>. A la fin de votre session, ou manuellement, les vues sont supprimees.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ce mecanisme est gere par le <code>MaterializedViewManager</code>, une classe dediee dans l'adaptateur PostgreSQL. Le schema utilise s'appelle <code>filtermate_temp</code> -- un schema dedie, isole de vos donnees de production.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-2----demo-pgadmin--voir-les-vues-materialisees-130---230">SEQUENCE 2 -- Demo pgAdmin : voir les vues materialisees (1:30 - 2:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Capture ecran pgAdmin 4. Navigation : Schemas &gt; filtermate_temp &gt; Materialized Views. On voit 2-3 vues prefixees <code>fm_temp_mv_</code>. Clic droit &gt; Properties pour montrer la definition SQL.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Ouvrons pgAdmin pour voir ca en action. Dans votre base PostGIS, vous allez trouver un schema <code>filtermate_temp</code>. C'est le schema dedie que FilterMate cree automatiquement pour ses objets temporaires.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Sous 'Materialized Views', vous voyez les vues actives. Chaque nom commence par <code>fm_temp_mv_</code> suivi de l'identifiant de session -- un hash hexadecimal de 8 caracteres -- puis d'un hash de la requete. Ce prefixe unifie permet de les identifier instantanement.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si je fais clic droit &gt; Properties, je vois la requete SELECT qui definit cette vue. C'est exactement le filtre spatial que j'ai applique dans FilterMate. Et dans l'onglet Indexes, l'index GIST spatial est la, cree automatiquement.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-3----prefix-fmtempmv--identification-facile-230---300">SEQUENCE 3 -- Prefix fm_temp_mv_ : identification facile (2:30 - 3:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Zoom sur pgAdmin, liste des vues materialisees. Surbrillance du prefixe <code>fm_temp_mv_</code> sur chaque nom. Annotation flottante decomposant le format du nom.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Le format de nommage est important a comprendre. Chaque vue suit cette convention :&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>fm_temp_mv_</code> -- c'est le prefixe FilterMate. Puis <code>session_</code> suivi de votre identifiant de session, 8 caracteres hexadecimaux. Et enfin un hash MD5 de la requete, 12 caracteres. Ce hash garantit que si vous appliquez le meme filtre deux fois, FilterMate reutilise la vue existante au lieu d'en creer une nouvelle -- c'est le cache hit.&quot;</em></p>
+</blockquote>
+<h3 id="encart-texte-a-lecran">Encart texte a l'ecran</h3>
+<pre class="hljs"><code><div>Format du nom :
+fm_temp_mv_session_a1b2c3d4_e5f6a7b8c9d0
+
+|-- prefixe --|--session--|---hash requete---|
+  fm_temp_mv_   a1b2c3d4     e5f6a7b8c9d0
+</div></code></pre>
+<hr>
+<h2 id="sequence-4----auto-cleanup-vs-cleanup-manuel-300---330">SEQUENCE 4 -- Auto-cleanup vs cleanup manuel (3:00 - 3:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live : fermeture de QGIS &gt; reouverture de pgAdmin &gt; le schema filtermate_temp est vide. Puis demo du bouton cleanup manuel dans l'interface FilterMate.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Qui dit vues temporaires dit nettoyage. FilterMate propose deux modes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le mode automatique : a la fermeture de QGIS, le <code>PostgresSessionManager</code> detecte la fin de session et lance un DROP MATERIALIZED VIEW sur toutes les vues prefixees avec votre session ID. Si le schema est vide apres ca, il est supprime aussi.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Le mode manuel : dans FilterMate, le dialogue d'info session vous permet de voir combien de vues existent, combien appartiennent a votre session, et combien sont d'autres sessions -- potentiellement orphelines. Vous pouvez declencher un cleanup cible ou un cleanup total.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et si une session a crashe sans nettoyer ? FilterMate detecte les vues orphelines -- celles dont le session ID ne correspond a aucune session active -- et propose de les nettoyer. C'est la methode <code>cleanup_orphaned_views</code> du <code>PostgreSQLCleanupService</code>.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-5----dialogue-info-session-postgresql-330---400">SEQUENCE 5 -- Dialogue info session PostgreSQL (3:30 - 4:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live du dialogue d'information session. Montrer les champs : Session ID, Status (ACTIVE), Schema (filtermate_temp), Nombre de vues, Vues autres sessions, Auto-cleanup (Enabled).</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Regardons le dialogue de session. Il affiche en temps reel les informations cle : votre Session ID unique, le statut -- actif, en nettoyage, ou ferme -- le schema utilise, et le compteur de vues.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;La ligne 'Other sessions views' est particulierement utile en environnement multi-utilisateur. Si plusieurs operateurs travaillent sur la meme base PostGIS, chacun a son propre session ID. FilterMate ne touchera jamais aux vues des autres sessions, sauf si vous demandez explicitement un cleanup total.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;L'option 'Auto-cleanup' est activee par defaut. Je recommande de la laisser activee, sauf si vous debuggez et voulez inspecter les vues apres fermeture.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-6----detection-automatique-de-cle-primaire-400---500">SEQUENCE 6 -- Detection automatique de cle primaire (4:00 - 5:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Animation du diagramme flowchart Mermaid ci-dessous. Chaque branche s'illumine au fur et a mesure de l'explication. Exemples concrets pour chaque nom de colonne.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour construire les filtres SQL, FilterMate a besoin de connaitre la cle primaire de chaque table. Mais toutes les tables PostgreSQL ne sont pas modelisees de la meme facon. BDTopo utilise <code>cleabs</code>, OpenStreetMap utilise <code>osm_id</code>, d'autres utilisent <code>gid</code> ou <code>objectid</code>.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate utilise une cascade de detection intelligente en trois etapes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;D'abord, il interroge <code>pg_index</code> pour trouver la contrainte PRIMARY KEY native de la table. C'est la methode la plus fiable.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Si aucune cle primaire n'est declaree -- et ca arrive souvent avec des imports bruts -- FilterMate essaie une liste de noms courants : <code>id</code>, <code>fid</code>, <code>ogc_fid</code>, <code>cleabs</code> pour la BDTopo, <code>gid</code>, <code>objectid</code>. Il verifie si la colonne existe reellement dans la table.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;En dernier recours, si aucune colonne ne correspond, FilterMate utilise un fallback : <code>row_number()</code> comme cle synthetique, ou <code>ctid</code> -- l'identifiant physique de ligne dans PostgreSQL. Le ctid fonctionne toujours, mais il peut changer apres un VACUUM, donc c'est vraiment le dernier recours.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme-2----detection-automatique-de-cle-primaire">Diagramme 2 -- Detection automatique de cle primaire</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    START["Table PostgreSQL"]
+    START --> Q1{"pg_index primary key ?"}
+    Q1 -->|Trouvee| FOUND["PK detectee automatiquement"]
+    Q1 -->|Non trouvee| Q2{"Essayer noms courants ?"}
+    Q2 --> F1["id"]
+    Q2 --> F2["fid"]
+    Q2 --> F3["ogc_fid"]
+    Q2 --> F4["cleabs (BDTopo)"]
+    Q2 --> F5["gid"]
+    Q2 --> F6["objectid"]
+    F1 --> CHECK{"Colonne existe ?"}
+    F2 --> CHECK
+    F3 --> CHECK
+    F4 --> CHECK
+    F5 --> CHECK
+    F6 --> CHECK
+    CHECK -->|Oui| FOUND
+    CHECK -->|Non| FALLBACK["Fallback : row_number() ou ctid"]
+
+    style FOUND fill:#388E3C,color:#fff
+    style FALLBACK fill:#F57C00,color:#fff
+</div></code></pre>
+<h3 id="narration-suite">Narration (suite)</h3>
+<blockquote>
+<p><em>&quot;Et pour le formatage SQL, c'est aussi automatique. FilterMate detecte si la cle est numerique -- les <code>id</code>, <code>fid</code>, <code>gid</code> classiques -- ou textuelle comme les UUID. Les cles numeriques sont ecrites sans guillemets dans le SQL : <code>IN (1, 2, 3)</code>. Les UUID sont correctement quotees avec un cast PostgreSQL : <code>IN ('uuid-value'::uuid)</code>. Cette detection evite les erreurs de type qui sont le cauchemar des filtres PostgreSQL.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-7----demo-bdtopo--1m-batiments-500---600">SEQUENCE 7 -- Demo BDTopo : 1M batiments (5:00 - 6:00)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live QGIS. Charger la couche BDTopo batiments (~1M entites). Panneau FilterMate ouvert. Selectionner une zone source, appliquer un filtre spatial ST_Intersects. Chronometre visible a l'ecran.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Place a la demo. J'ai ici la couche BDTopo batiments d'un departement entier -- un peu plus d'un million d'entites, stockees dans PostGIS.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Je selectionne ma couche de routes comme source, je choisis le predicat 'intersecte' avec un buffer de 100 metres. Voyez : les routes selectionnees dans la source sont environ 800 entites, donc FilterMate detecte que c'est au-dessus du seuil de 500 -- le <code>source_mv_fid_threshold</code> -- et va creer une vue materialisee.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;J'applique... et voila. 1.2 secondes. Sur un million d'entites. Le secret, c'est que PostgreSQL utilise l'index GIST de la vue materialisee pour le ST_Intersects. Sans cet index, la meme requete prendrait facilement 30 secondes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans les logs FilterMate -- accessible via le panneau Messages de QGIS -- vous pouvez voir chaque etape : creation du schema <code>filtermate_temp</code>, creation de la vue <code>fm_temp_mv_...</code>, creation de l'index GIST, execution de la requete spatiale, et application du filtre final via <code>setSubsetString()</code>.&quot;</em></p>
+</blockquote>
+<h3 id="encart-technique-a-lecran">Encart technique a l'ecran</h3>
+<pre class="hljs"><code><div>Metriques de la demo :
+- Couche cible : batiments BDTopo (1.02M entites)
+- Couche source : routes (selection : 823 entites)
+- Seuil MV : 500 FIDs (source_mv_fid_threshold)
+- Vue materialisee : fm_temp_mv_session_4f2a1b8c_a9c3e7d012f4
+- Index : GIST sur geometrie
+- Temps total : 1.2s
+- Dont creation MV : 0.3s
+- Dont requete spatiale : 0.8s
+- Dont setSubsetString : 0.1s
+</div></code></pre>
+<hr>
+<h2 id="sequence-8----demo-osm--tables-sans-pk-standard-600---630">SEQUENCE 8 -- Demo OSM : tables sans PK standard (6:00 - 6:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live. Charger une couche OSM routes depuis PostGIS. Montrer dans pgAdmin que la table n'a pas de PRIMARY KEY declaree. Appliquer un filtre dans FilterMate -- ca fonctionne quand meme.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Maintenant, un cas plus vicieux. J'ai ici des routes OpenStreetMap importees via <code>osm2pgsql</code>. La table <code>planet_osm_line</code> n'a pas de contrainte PRIMARY KEY declaree. Beaucoup de plugins QGIS echoueraient ici.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Mais FilterMate, grace a sa cascade de detection, trouve la colonne <code>osm_id</code> -- qui n'est pas dans la liste standard, mais elle est detectee via <code>pg_index</code> car <code>osm2pgsql</code> cree un index unique dessus. Et meme sans ca, <code>ogc_fid</code> ou <code>gid</code> seraient testes en fallback.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Resultat : le filtre s'applique normalement, et les performances restent excellentes -- 500 000 entites filtrees en 1.8 secondes.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-9----filtrage-parallele-multi-couches-630---730">SEQUENCE 9 -- Filtrage parallele multi-couches (6:30 - 7:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live. 4 couches PostgreSQL chargees simultanement (batiments, routes, vegetation, hydrographie). Appliquer un filtre global. Montrer dans pgAdmin les 4 vues materialisees creees en parallele.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;FilterMate supporte le filtrage parallele sur plusieurs couches. Quand vous appliquez un filtre spatial avec plusieurs couches cibles, chaque couche est traitee dans sa propre tache de fond -- un <code>QgsTask</code> dedie.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Ici, j'ai 4 couches PostgreSQL : batiments, routes, vegetation, hydrographie. Je selectionne une zone dans ma couche source et j'applique le filtre sur les 4. Chaque couche obtient sa propre vue materialisee, avec son propre index GIST.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans pgAdmin, je vois maintenant 4 vues dans le schema <code>filtermate_temp</code>, toutes avec le meme prefixe de session. Le filtrage total a pris 3.2 secondes pour 4 couches et plus de 2 millions d'entites cumulees. C'est la puissance du parallelisme QGIS combine avec les index PostgreSQL.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Point important sur la securite des threads : les couches QGIS ne sont PAS thread-safe. C'est pour ca que FilterMate stocke l'URI de connexion a l'initialisation du task, puis recree un provider PostgreSQL independant dans la methode <code>run()</code>. Chaque thread a sa propre connexion, aucun conflit possible.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-10----configuration-avancee-730---830">SEQUENCE 10 -- Configuration avancee (7:30 - 8:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Demo live. Ouvrir la configuration FilterMate (JSON TreeView). Naviguer vers APP &gt; SETTINGS &gt; OPTIMIZATION_THRESHOLDS. Modifier <code>source_mv_fid_threshold</code>. Puis montrer SMALL_DATASET_OPTIMIZATION et PROGRESSIVE_FILTERING.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;La configuration PostgreSQL est accessible dans les parametres FilterMate, section <code>OPTIMIZATION_THRESHOLDS</code>. Voyons les cles les plus importantes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>source_mv_fid_threshold</code> -- par defaut 500. C'est le nombre d'identifiants source au-dela duquel FilterMate cree une vue materialisee au lieu d'une clause IN inline. Si vous travaillez avec des selections source toujours petites, vous pouvez monter ce seuil a 1000 pour eviter la creation de MV inutiles. A l'inverse, si vos requetes spatiales sont complexes, descendez-le a 200.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>SMALL_DATASET_OPTIMIZATION</code> -- quand il est active et que votre couche PostgreSQL a moins de 5000 entites, FilterMate bascule automatiquement sur le backend OGR en memoire. Pourquoi ? Parce que pour les petits jeux, le cout reseau d'une requete PostgreSQL depasse le cout d'un filtre local. C'est du smart routing.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;<code>PROGRESSIVE_FILTERING</code> -- pour les requetes complexes sur les gros datasets, FilterMate decoupe le filtrage en deux phases. Phase 1 : un filtre grossier rapide par bounding box. Phase 2 : le filtre spatial precis sur le sous-ensemble reduit. Ca divise le temps de calcul par 3 a 5 sur les geometries complexes.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Vous avez aussi <code>exists_subquery_threshold</code> a 100 000 -- au-dela de cette taille de WKT, FilterMate passe du mode inline au mode EXISTS avec sous-requete, bien plus performant pour les geometries tres detaillees.&quot;</em></p>
+</blockquote>
+<h3 id="encart-tableau-a-lecran">Encart tableau a l'ecran</h3>
+<pre class="hljs"><code><div>Parametres cle PostgreSQL :
++-------------------------------+----------+-----------------------------------------+
+| Parametre                     | Defaut   | Description                             |
++-------------------------------+----------+-----------------------------------------+
+| source_mv_fid_threshold       | 500      | Seuil FIDs pour creation MV             |
+| exists_subquery_threshold     | 100 000  | Seuil WKT pour mode EXISTS              |
+| feature_threshold (MVConfig)  | 100 000  | Seuil entites pour MV auto              |
+| complexity_threshold          | 5        | Complexite expression pour MV auto      |
+| SMALL_DATASET_OPTIMIZATION    | 5 000    | Seuil OGR memory fallback               |
+| PROGRESSIVE_FILTERING         | active   | Filtrage 2 phases (bbox + precis)       |
++-------------------------------+----------+-----------------------------------------+
+</div></code></pre>
+<hr>
+<h2 id="sequence-11----securite-sql--sanitizesqlidentifier-830---930">SEQUENCE 11 -- Securite SQL : sanitize_sql_identifier (8:30 - 9:30)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran partage : a gauche, code source de <code>sanitize_sql_identifier()</code> avec surbrillance du regex. A droite, le diagramme Mermaid du pipeline d'optimisation. Animation montrant une injection SQL bloquee.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Un point critique quand on genere du SQL dynamiquement, c'est la securite. Les injections SQL sont un risque reel quand les noms de tables, de schemas ou de colonnes viennent de donnees utilisateur -- et dans QGIS, les noms de couches SONT des donnees utilisateur.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;FilterMate utilise systematiquement la fonction <code>sanitize_sql_identifier()</code> pour tous les identifiants DDL -- noms de schemas, noms de vues, noms de colonnes. Cette fonction supprime tout caractere dangereux : point-virgule, parentheses, tirets doubles, commentaires SQL. Elle ne conserve que les caracteres alphanumeriques, les underscores, les points pour la notation schema.table, et les guillemets doubles pour les identifiants PostgreSQL.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Par exemple, si quelqu'un nommait sa couche <code>batiments; DROP TABLE users;</code> -- oui, ca semble absurde, mais ca arrive -- le sanitizer le transformerait en <code>batiments_DROP_TABLE_users</code>. L'injection est neutralisee.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Tous les identifiants sont ensuite enveloppes dans des guillemets doubles dans le SQL genere. <code>DROP MATERIALIZED VIEW IF EXISTS &quot;filtermate_temp&quot;.&quot;fm_temp_mv_xxx&quot; CASCADE</code> -- les guillemets garantissent que PostgreSQL traite le nom comme un identifiant litteral, jamais comme du SQL executable.&quot;</em></p>
+</blockquote>
+<h3 id="diagramme-3----pipeline-doptimisation-postgresql">Diagramme 3 -- Pipeline d'optimisation PostgreSQL</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    subgraph ENTREE["Entree utilisateur"]
+        U1["Couche source\n(selection)"]
+        U2["Couche cible\n(1M entites)"]
+        U3["Predicat spatial\n(ST_Intersects)"]
+    end
+
+    subgraph SECURITE["Securite"]
+        S1["sanitize_sql_identifier()\nNom de schema"]
+        S2["sanitize_sql_identifier()\nNom de vue"]
+        S3["Parametres lies\n(anti-injection)"]
+    end
+
+    subgraph DECISION["Decisions d'optimisation"]
+        D1{"FIDs source\n> 500 ?"}
+        D2{"Dataset cible\n> 100k ?"}
+        D3{"WKT source\n> 100k chars ?"}
+    end
+
+    subgraph EXECUTION["Execution PostgreSQL"]
+        E1["CREATE SCHEMA\nfiltermate_temp"]
+        E2["CREATE MATERIALIZED VIEW\nfm_temp_mv_xxx"]
+        E3["CREATE INDEX GIST\ngeometrie"]
+        E4["SELECT ... WHERE\nST_Intersects(...)"]
+    end
+
+    subgraph RESULTAT["Resultat"]
+        R1["setSubsetString()\nsur couche QGIS"]
+        R2["Rafraichissement\ncarte"]
+    end
+
+    U1 --> S1
+    U2 --> S2
+    U3 --> S3
+
+    S1 --> D1
+    S2 --> D2
+    S3 --> D3
+
+    D1 -->|Oui| E2
+    D1 -->|Non| E4
+    D2 -->|Oui| E2
+    D3 -->|Oui| E2
+
+    E1 --> E2
+    E2 --> E3
+    E3 --> E4
+
+    E4 --> R1
+    R1 --> R2
+
+    style SECURITE fill:#C62828,color:#fff
+    style EXECUTION fill:#1565C0,color:#fff
+    style RESULTAT fill:#388E3C,color:#fff
+    style DECISION fill:#F57C00,color:#fff
+</div></code></pre>
+<h3 id="narration-suite">Narration (suite)</h3>
+<blockquote>
+<p><em>&quot;Ce diagramme resume le pipeline complet. L'entree utilisateur passe d'abord par la couche de securite -- sanitization des identifiants et parametres lies. Ensuite, le moteur de decision evalue les seuils : taille de la selection, taille du dataset, complexite de la geometrie. Selon les resultats, il choisit la strategie optimale -- vue materialisee avec index, ou requete directe. Le tout aboutit a un <code>setSubsetString()</code> sur la couche QGIS, et la carte se met a jour.&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="sequence-12----bonnes-pratiques-postgresql-930---fin">SEQUENCE 12 -- Bonnes pratiques PostgreSQL (9:30 - fin)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Ecran avec une liste de bonnes pratiques, chaque point apparaissant un par un avec une animation de checkmark. Fond sombre, typographie soignee.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Pour conclure, voici les bonnes pratiques que je recommande quand vous utilisez FilterMate avec PostgreSQL.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Numero un : declararez toujours une cle primaire sur vos tables. C'est la base. FilterMate fonctionne sans, mais c'est plus rapide et plus fiable avec. Un simple <code>ALTER TABLE batiments ADD PRIMARY KEY (id)</code> peut faire la difference.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Numero deux : gardez vos statistiques a jour. FilterMate lance automatiquement un <code>ANALYZE</code> si les statistiques de la colonne geometrique sont manquantes -- c'est la fonction <code>ensure_table_stats</code> -- mais un <code>ANALYZE</code> regulier sur vos tables reste recommande.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Numero trois : surveillez le schema <code>filtermate_temp</code> dans pgAdmin, surtout en environnement multi-utilisateur. Si vous voyez des vues qui s'accumulent, c'est probablement des sessions orphelines. Utilisez le cleanup manuel de FilterMate.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Numero quatre : pour les tres gros datasets -- plus de 5 millions d'entites -- pensez a activer le <code>PROGRESSIVE_FILTERING</code>. Le filtrage en deux phases -- bounding box puis precis -- reduit considerablement la charge sur PostgreSQL.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Numero cinq : ne desactivez pas le <code>SMALL_DATASET_OPTIMIZATION</code>. Pour les petites couches, le backend OGR en memoire est systematiquement plus rapide que PostgreSQL. Le seuil de 5000 entites est bien calibre.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Et numero six : faites confiance au cleanup automatique. Le <code>PostgresSessionManager</code> gere tout ca proprement. Si votre session se ferme normalement, toutes les vues sont supprimees. Si elle crashe, les vues restent -- mais elles seront detectees comme orphelines a la prochaine ouverture.&quot;</em></p>
+</blockquote>
+<h3 id="encart-recapitulatif-a-lecran">Encart recapitulatif a l'ecran</h3>
+<pre class="hljs"><code><div>Bonnes pratiques PostgreSQL + FilterMate
+=========================================
+1. Declarer des PRIMARY KEY sur vos tables
+2. Maintenir les statistiques (ANALYZE)
+3. Surveiller filtermate_temp dans pgAdmin
+4. Activer PROGRESSIVE_FILTERING pour &gt; 5M entites
+5. Garder SMALL_DATASET_OPTIMIZATION active
+6. Faire confiance au cleanup automatique
+</div></code></pre>
+<hr>
+<h2 id="outro-020">OUTRO (0:20)</h2>
+<h3 id="visuel-suggere">Visuel suggere</h3>
+<blockquote>
+<p>Retour sur l'ecran QGIS. Zoom arriere montrant la carte filtree. Logo FilterMate. Liens vers la documentation.</p>
+</blockquote>
+<h3 id="narration">Narration</h3>
+<blockquote>
+<p><em>&quot;Et voila, vous savez maintenant comment FilterMate exploite PostgreSQL a fond. Vues materialisees, detection de cle primaire, securite SQL, et configuration fine -- tout est automatique, mais transparent pour ceux qui veulent comprendre.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Dans la prochaine video, on parlera performances et debug : comment lire les logs, identifier les goulots d'etranglement, et optimiser vos projets.&quot;</em></p>
+</blockquote>
+<blockquote>
+<p><em>&quot;Mettez un pouce si cette video vous a ete utile, et abonnez-vous pour ne pas rater la suite. A bientot !&quot;</em></p>
+</blockquote>
+<hr>
+<h2 id="annexe-technique----references-code-source">Annexe technique -- References code source</h2>
+<h3 id="fichiers-cle-mentionnes-dans-cette-video">Fichiers cle mentionnes dans cette video</h3>
+<table>
+<thead>
+<tr>
+<th>Composant</th>
+<th>Fichier</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MaterializedViewManager</td>
+<td><code>adapters/backends/postgresql/mv_manager.py</code></td>
+<td>Creation, refresh, drop des MV</td>
+</tr>
+<tr>
+<td>PostgreSQLCleanupService</td>
+<td><code>adapters/backends/postgresql/cleanup.py</code></td>
+<td>Nettoyage session, orphelines</td>
+</tr>
+<tr>
+<td>PostgresSessionManager</td>
+<td><code>core/services/postgres_session_manager.py</code></td>
+<td>Cycle de vie session</td>
+</tr>
+<tr>
+<td>SchemaManager</td>
+<td><code>adapters/backends/postgresql/schema_manager.py</code></td>
+<td>Schema filtermate_temp</td>
+</tr>
+<tr>
+<td>sanitize_sql_identifier</td>
+<td><code>infrastructure/database/sql_utils.py</code></td>
+<td>Securite SQL</td>
+</tr>
+<tr>
+<td>PK Formatter</td>
+<td><code>core/filter/pk_formatter.py</code></td>
+<td>Detection et formatage PK</td>
+</tr>
+<tr>
+<td>ConfigProvider</td>
+<td><code>core/optimization/config_provider.py</code></td>
+<td>Seuils d'optimisation</td>
+</tr>
+</tbody>
+</table>
+<h3 id="constantes-et-seuils">Constantes et seuils</h3>
+<table>
+<thead>
+<tr>
+<th>Constante</th>
+<th>Valeur</th>
+<th>Fichier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MV_PREFIX</code></td>
+<td><code>fm_temp_mv_</code></td>
+<td>mv_manager.py</td>
+</tr>
+<tr>
+<td><code>MV_SCHEMA</code></td>
+<td><code>filtermate_temp</code></td>
+<td>mv_manager.py</td>
+</tr>
+<tr>
+<td><code>source_mv_fid_threshold</code></td>
+<td>500</td>
+<td>config_provider.py</td>
+</tr>
+<tr>
+<td><code>feature_threshold</code></td>
+<td>100 000</td>
+<td>mv_manager.py (MVConfig)</td>
+</tr>
+<tr>
+<td><code>complexity_threshold</code></td>
+<td>5</td>
+<td>mv_manager.py (MVConfig)</td>
+</tr>
+<tr>
+<td><code>exists_subquery_threshold</code></td>
+<td>100 000</td>
+<td>config_provider.py</td>
+</tr>
+<tr>
+<td><code>SMALL_DATASET_OPTIMIZATION</code></td>
+<td>5 000</td>
+<td>config.default.json</td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture-cle">Architecture cle</h3>
+<pre class="hljs"><code><div>adapters/backends/postgresql/
+    mv_manager.py            -- MaterializedViewManager (MaterializedViewPort)
+    cleanup.py               -- PostgreSQLCleanupService
+    schema_manager.py        -- ensure_temp_schema_exists()
+    filter_executor.py       -- apply_postgresql_type_casting()
+    filter_actions.py        -- Orchestration des actions de filtre
+
+core/
+    services/
+        postgres_session_manager.py  -- PostgresSessionManager (QObject)
+    filter/
+        pk_formatter.py              -- is_pk_numeric(), format_pk_values_for_sql()
+        expression_builder.py        -- Seuil MV, creation filtre source
+    optimization/
+        config_provider.py           -- DEFAULT_OPTIMIZATION_THRESHOLDS
+    ports/
+        materialized_view_port.py    -- Interface unifiee MV/TempTable
+
+infrastructure/
+    database/
+        sql_utils.py                 -- sanitize_sql_identifier()
+</div></code></pre>
+<hr>
+<h2 id="notes-de-production">Notes de production</h2>
+<ul>
+<li><strong>B-roll necessaire</strong> : captures pgAdmin (schema filtermate_temp, liste des MV, proprietes MV, index GIST)</li>
+<li><strong>Datasets demo</strong> : BDTopo batiments PostGIS (~1M), OSM routes PostGIS (~500k)</li>
+<li><strong>Prealable</strong> : avoir psycopg2 installe, PostGIS active, connexion configuree dans QGIS</li>
+<li><strong>Timing serre</strong> : la demo BDTopo (Sequence 7) et la demo OSM (Sequence 8) doivent etre preparees et testees avant tournage pour garantir les temps &lt; 2s</li>
+<li><strong>Diagrammes Mermaid</strong> : 3 diagrammes a rendre en animation (sequence MV, flowchart PK, pipeline optimisation)</li>
+<li><strong>Sous-titres</strong> : preparer les sous-titres EN en parallele, vocabulaire technique identique (materialized view, primary key, sanitize)</li>
+</ul>
+
+</body>
+</html>

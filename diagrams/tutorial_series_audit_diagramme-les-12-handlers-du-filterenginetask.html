@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme — Les 12 Handlers du FilterEngineTask</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme — Les 12 Handlers du FilterEngineTask</h1>
+  <div class="source">website/TUTORIAL_SERIES_AUDIT.md</div>
+  <div class="mermaid">
+flowchart LR
+    TASK["FilterEngineTask.run()"]
+
+    TASK --> H1["1. Initialization<br/>Handler"]
+    H1 --> H2["2. Source Geometry<br/>Preparer"]
+    H2 --> H3["3. Expression<br/>Facade"]
+    H3 --> H4["4. Filtering<br/>Orchestrator"]
+    H4 --> H5["5. Attribute Filter<br/>Executor"]
+    H5 --> H6["6. Spatial Filter<br/>Executor"]
+    H6 --> H7["7. Backend<br/>Connector"]
+    H7 --> H8["8. Materialized View<br/>Handler"]
+    H8 --> H9["9. Subset Management<br/>Handler"]
+    H9 --> H10["10. Export<br/>Handler"]
+    H10 --> H11["11. Cleanup<br/>Handler"]
+    H11 --> H12["12. Finished<br/>Handler"]
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Diagramme 3 — Tableau Comparatif des 8 Predicats</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4fc3f7;
+      font-size: 1.3em;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .source {
+      color: #888;
+      font-size: 0.75em;
+      margin-bottom: 20px;
+    }
+    .mermaid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 95vw;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagramme 3 — Tableau Comparatif des 8 Predicats</h1>
+  <div class="source">website/SCRIPT_V04_PREDICATS_BUFFER.md</div>
+  <div class="mermaid">
+graph TD
+    subgraph RECAP["COMPARAISON DES 8 PREDICATS SPATIAUX"]
+        direction TB
+
+        subgraph CONTACT["PREDICATS DE CONTACT"]
+            direction LR
+            R_TOUCH["TOUCHES<br/>---<br/>Bord commun uniquement<br/>Interieur exclus<br/>---<br/>Parcelles mitoyennes"]
+            R_INTER["INTERSECTS<br/>---<br/>Tout contact spatial<br/>Le plus permissif<br/>---<br/>Choix par defaut"]
+        end
+
+        subgraph INCLUSION["PREDICATS D'INCLUSION"]
+            direction LR
+            R_CONT["CONTAINS<br/>---<br/>Source englobe cible<br/>100% a l'interieur<br/>---<br/>Zone contient batiment"]
+            R_WITH["WITHIN<br/>---<br/>Cible englobe source<br/>Inverse de Contains<br/>---<br/>Batiment dans zone"]
+        end
+
+        subgraph PARTIEL["PREDICATS PARTIELS"]
+            direction LR
+            R_OVER["OVERLAPS<br/>---<br/>Chevauchement partiel<br/>Zone commune + exclusive<br/>---<br/>Zonages a cheval"]
+            R_CROSS["CROSSES<br/>---<br/>Ligne traverse polygone<br/>Entre et sort<br/>---<br/>Route traverse commune"]
+        end
+
+        subgraph SPECIAL["PREDICATS SPECIAUX"]
+            direction LR
+            R_DISJ["DISJOINT<br/>---<br/>Aucun contact<br/>Inverse de Intersects<br/>---<br/>Hors zone de danger"]
+            R_DIST["IS WITHIN DISTANCE<br/>---<br/>Distance inferieure a N<br/>Buffer implicite<br/>---<br/>Proximite sans buffer"]
+        end
+    end
+
+    style CONTACT fill:#1565C0,color:#fff
+    style INCLUSION fill:#2E7D32,color:#fff
+    style PARTIEL fill:#E65100,color:#fff
+    style SPECIAL fill:#6A1B9A,color:#fff
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { htmlLabels: true, curve: 'basis' },
+      sequence: { mirrorActors: false }
+    });
+  </script>
+</body>
+</html>
