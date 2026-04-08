@@ -2,6 +2,27 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.6.5] - 2026-04-08
+
+### Config Restructure & Language Switching Fixes
+
+Restructured config tree with live save, auto-migration, and multiple fixes to live language switching.
+
+#### New
+
+- **Config tree restructure**: New hierarchical config tree with live save on change and auto-migration from flat to tree format
+- **79 missing translations**: Added missing i18n entries + QFieldCloud extension internationalization + cleanup of obsolete entries
+
+#### Bug Fixes
+
+- **Live language switching**: Fix NameError and stale reentrant guard that broke language change
+- **Spurious `currentIndexChanged`**: Skip spurious signal on editor open to prevent unwanted language reloads
+- **Config model**: Use item's own model instead of `config_view.model` for correct `setModelData` calls
+- **Deferred retranslate**: Defer language retranslation to next event loop tick to avoid reentrancy issues
+- **Ignore matching value**: Skip language change signal when new value matches the already-saved value
+
+---
+
 ## [4.6.3] - 2026-04-07
 
 ### i18n - 34 Languages & Live Language Switching
