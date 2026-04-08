@@ -2,6 +2,19 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.6.6] - 2026-04-08
+
+### Security Fixes
+
+Addresses Bandit security scan findings from QGIS plugin repository.
+
+#### Bug Fixes
+
+- **XML parsing**: Use `defusedxml` for XML parsing in GPKG and KML exporters (with stdlib fallback)
+- **Temp files**: Replace insecure `tempfile.mktemp()` with `tempfile.mkstemp()` in F5-TTS narrator
+
+---
+
 ## [4.6.5] - 2026-04-08
 
 ### Config Restructure & Language Switching Fixes
