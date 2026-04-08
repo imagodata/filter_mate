@@ -18,7 +18,13 @@ import uuid
 import zipfile
 from datetime import datetime
 from typing import Dict, List, Optional
-from xml.etree import ElementTree as ET
+try:
+    from defusedxml.ElementTree import fromstring as _xml_fromstring, ParseError
+    from xml.etree import ElementTree as ET
+except ImportError:
+    from xml.etree import ElementTree as ET
+    _xml_fromstring = ET.fromstring
+    ParseError = ET.ParseError
 
 logger = logging.getLogger(__name__)
 
@@ -376,8 +382,8 @@ def _embed_style_elements(maplayer: ET.Element, style_xml: str) -> None:
     <labeling>, <blendMode>, etc. We extract these and append to maplayer.
     """
     try:
-        style_root = ET.fromstring(style_xml)
-    except ET.ParseError as e:
+        style_root = _xml_fromstring(style_xml)
+    except (ParseError, ET.ParseError) as e:
         logger.debug(f"Could not parse style XML: {e}")
         return
 

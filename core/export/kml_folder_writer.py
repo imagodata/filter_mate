@@ -12,7 +12,12 @@ Pure Python (xml.etree), no QGIS objects created.
 import logging
 import os
 from typing import Dict, List, Optional
-from xml.etree import ElementTree as ET
+try:
+    from defusedxml.ElementTree import parse as _xml_parse
+    from xml.etree import ElementTree as ET
+except ImportError:
+    from xml.etree import ElementTree as ET
+    _xml_parse = ET.parse
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +103,7 @@ def _extract_kml_content(kml_path: str) -> tuple:
         Styles, StyleMaps, etc. found in the Document.
     """
     try:
-        tree = ET.parse(kml_path)
+        tree = _xml_parse(kml_path)
         root = tree.getroot()
     except ET.ParseError as e:
         logger.warning(f"Failed to parse KML {kml_path}: {e}")

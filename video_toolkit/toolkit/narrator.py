@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -261,8 +262,12 @@ class Narrator:
             )
 
         import tempfile
-        gen_text_file = Path(tempfile.mktemp(suffix="_gen.txt"))
-        ref_text_file = Path(tempfile.mktemp(suffix="_ref.txt"))
+        gen_fd, gen_path = tempfile.mkstemp(suffix="_gen.txt")
+        os.close(gen_fd)
+        gen_text_file = Path(gen_path)
+        ref_fd, ref_path = tempfile.mkstemp(suffix="_ref.txt")
+        os.close(ref_fd)
+        ref_text_file = Path(ref_path)
         gen_text_file.write_text(text, encoding="utf-8")
         ref_text_file.write_text(self.f5_ref_text, encoding="utf-8")
 
