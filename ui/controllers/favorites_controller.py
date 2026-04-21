@@ -401,12 +401,24 @@ class FavoritesController(BaseController):
         if not filepath or not self._favorites_manager:
             return False
 
-        if self._favorites_manager.export_to_file(filepath):
-            self._show_success(self.tr("Exported {0} favorites").format(self.count))
-            return True
+        # FIX 2026-04-21: route through FavoritesService.export_favorites
+        # which produces the portable v2 format (signature-based).
+        export_fn = getattr(self._favorites_manager, 'export_favorites', None)
+        if callable(export_fn):
+            result = export_fn(filepath)
+            success = getattr(result, 'success', False)
+            count = getattr(result, 'favorites_count', self.count)
         else:
-            self._show_warning(self.tr("Failed to export favorites"))
-            return False
+            # Fallback for managers that still expose export_to_file
+            legacy_fn = getattr(self._favorites_manager, 'export_to_file', None)
+            success = bool(legacy_fn(filepath)) if callable(legacy_fn) else False
+            count = self.count
+
+        if success:
+            self._show_success(self.tr("Exported {0} favorites").format(count))
+            return True
+        self._show_warning(self.tr("Failed to export favorites"))
+        return False
 
     def import_favorites(
         self,
@@ -447,7 +459,21 @@ class FavoritesController(BaseController):
                 return 0
             merge = (result == QMessageBox.StandardButton.Yes)
 
-        count = self._favorites_manager.import_from_file(filepath, merge=merge)
+        # FIX 2026-04-21: route through FavoritesService.import_favorites which
+        # re-resolves portable signatures against the current project.
+        import_fn = getattr(self._favorites_manager, 'import_favorites', None)
+        if callable(import_fn):
+            # skip_duplicates is the inverse of merge:
+            #   merge=True  -> skip_duplicates=True  (add the rest alongside existing)
+            #   merge=False -> skip_duplicates=False (replace - currently we still
+            #                  skip duplicates because the underlying manager only
+            #                  supports additive import; replace semantics would
+            #                  need a prior remove_all which is out of scope here).
+            result = import_fn(filepath, skip_duplicates=True)
+            count = getattr(result, 'imported_count', 0)
+        else:
+            legacy_fn = getattr(self._favorites_manager, 'import_from_file', None)
+            count = legacy_fn(filepath, merge=merge) if callable(legacy_fn) else 0
 
         if count > 0:
             self._favorites_manager.save_to_project()
@@ -568,28 +594,81 @@ class FavoritesController(BaseController):
         try:
             config = favorite.spatial_config
 
+            # FIX 2026-04-21: restore the exploring groupbox mode FIRST so
+            # downstream widgets (picker, multi-select combo, custom
+            # selection expression) are in the right state when
+            # task_features / predicates are read back.
+            saved_groupbox = config.get('exploring_groupbox')
+            if saved_groupbox and hasattr(self.dockwidget, '_restore_groupbox_ui_state'):
+                try:
+                    self.dockwidget._restore_groupbox_ui_state(saved_groupbox)
+                    logger.info(f"  ✓ Restored exploring_groupbox = {saved_groupbox}")
+                except (AttributeError, RuntimeError) as e:
+                    logger.debug(f"Could not restore exploring_groupbox: {e}")
+
+            # Repopulate the EXPLORING custom_selection expression widget
+            # when the favorite was saved in that mode.
+            custom_expr = config.get('custom_selection_expression')
+            if custom_expr:
+                try:
+                    widget = self.dockwidget.widgets.get("EXPLORING", {}) \
+                        .get("CUSTOM_SELECTION_EXPRESSION", {}).get("WIDGET")
+                    if widget is not None and hasattr(widget, 'setExpression'):
+                        widget.setExpression(custom_expr)
+                        logger.info(f"  ✓ Restored custom_selection_expression")
+                except (AttributeError, KeyError, RuntimeError) as e:
+                    logger.debug(f"Could not restore custom_selection_expression: {e}")
+
             # Restore selected feature IDs (task_features)
             if 'task_feature_ids' in config and self.dockwidget.current_layer:
                 feature_ids = config['task_feature_ids']
                 logger.info(f"Restoring {len(feature_ids)} task_feature IDs from favorite")
 
-                # Fetch actual QgsFeature objects from the source layer
                 source_layer = self.dockwidget.current_layer
-                features = []
-                for fid in feature_ids:
-                    feature = source_layer.getFeature(fid)
-                    if feature and feature.isValid():
-                        features.append(feature)
-                    else:
-                        logger.warning(f"  ⚠️ Could not fetch feature {fid} from {source_layer.name()}")
 
-                if features:
-                    logger.info(f"  → Loaded {len(features)} features from {len(feature_ids)} FIDs")
-                    # Store in dockwidget for get_current_features() to pick up
-                    self.dockwidget._restored_task_features = features
-                    logger.info(f"  ✓ Stored {len(features)} features in dockwidget._restored_task_features")
+                # FIX 2026-04-21: only push IDs / fetch features when the
+                # current layer is the same one the favorite was captured
+                # against. If the user applies a favorite while on a
+                # different layer (cross-layer apply), pushing those FIDs
+                # would corrupt the wrong layer's selection with IDs from
+                # an unrelated feature set.
+                if self._favorite_matches_current_layer(favorite, source_layer):
+                    # Push feature IDs into the QGIS layer selection so the
+                    # feature picker / multi-select widgets surface them.
+                    # Without this the single_selection picker may still
+                    # report no feature after project reopen even though
+                    # _restored_task_features is set, causing the filter
+                    # to abort with "single_selection mode requires a
+                    # selected feature".
+                    try:
+                        source_layer.selectByIds(feature_ids)
+                        logger.info(
+                            f"  ✓ Pushed {len(feature_ids)} feature IDs to QGIS selection on '{source_layer.name()}'"
+                        )
+                    except (AttributeError, RuntimeError) as e:
+                        logger.debug(f"Could not selectByIds on source layer: {e}")
+
+                    # Fetch actual QgsFeature objects from the source layer
+                    features = []
+                    for fid in feature_ids:
+                        feature = source_layer.getFeature(fid)
+                        if feature and feature.isValid():
+                            features.append(feature)
+                        else:
+                            logger.warning(f"  ⚠️ Could not fetch feature {fid} from {source_layer.name()}")
+
+                    if features:
+                        logger.info(f"  → Loaded {len(features)} features from {len(feature_ids)} FIDs")
+                        # Store in dockwidget for get_current_features() to pick up
+                        self.dockwidget._restored_task_features = features
+                        logger.info(f"  ✓ Stored {len(features)} features in dockwidget._restored_task_features")
+                    else:
+                        logger.warning(f"  ⚠️ Could not load any features from {len(feature_ids)} FIDs!")
                 else:
-                    logger.warning(f"  ⚠️ Could not load any features from {len(feature_ids)} FIDs!")
+                    logger.info(
+                        f"  ↪ Skipping selectByIds: current layer '{source_layer.name()}' "
+                        f"does not match favorite's source layer — FIDs would be meaningless."
+                    )
 
             # Restore predicates if present
             if 'predicates' in config:
@@ -841,7 +920,11 @@ class FavoritesController(BaseController):
             layer_provider = layer.providerType() if layer else None
 
             # Collect all filtered layers (remote layers with active filters)
-            # Iterate through all vector layers to find those with filters
+            # Iterate through all vector layers to find those with filters.
+            # FIX 2026-04-21: also persist a project-portable layer_signature
+            # (provider::schema.table) so favorites can be re-resolved after
+            # project reopen OR imported into a sibling project with different
+            # layer UUIDs (multi-project JSON sharing).
             remote_layers = {}
             source_layer_id = layer.id() if layer else None
             project = QgsProject.instance()
@@ -856,15 +939,24 @@ class FavoritesController(BaseController):
                 # Check if layer has an active filter
                 subset = map_layer.subsetString()
                 if subset and subset.strip():
+                    signature = self._layer_signature_for(map_layer)
                     remote_layers[map_layer.name()] = {
                         'expression': subset,
                         'feature_count': map_layer.featureCount() if map_layer.isValid() else 0,
                         'layer_id': layer_id,
+                        'layer_signature': signature,
                         'provider': map_layer.providerType()
                     }
 
             # ENHANCEMENT 2026-01-18: Capture spatial configuration
             spatial_config = self._capture_spatial_config()
+
+            # FIX 2026-04-21: embed source layer signature in spatial_config so
+            # the export/import path can resolve the source layer across projects.
+            if layer is not None:
+                if spatial_config is None:
+                    spatial_config = {}
+                spatial_config['source_layer_signature'] = self._layer_signature_for(layer)
 
             # Use FavoritesService.add_favorite() with individual parameters
             favorite_id = self._favorites_manager.add_favorite(
@@ -903,6 +995,31 @@ class FavoritesController(BaseController):
         config = {}
 
         try:
+            # FIX 2026-04-21: capture the exploring groupbox mode so the
+            # favorite restores into the same selection context on apply.
+            # Without this, a favorite created in custom_selection fires
+            # after reopen with the default single_selection mode and
+            # aborts because no source feature is selected.
+            groupbox = getattr(self.dockwidget, 'current_exploring_groupbox', None)
+            if groupbox:
+                config['exploring_groupbox'] = groupbox
+                logger.info(f"Captured exploring_groupbox: {groupbox}")
+
+                # For custom_selection, also capture the expression driving
+                # source feature selection so the exploring widget can be
+                # repopulated on apply.
+                if groupbox == 'custom_selection':
+                    try:
+                        widget = self.dockwidget.widgets.get("EXPLORING", {}) \
+                            .get("CUSTOM_SELECTION_EXPRESSION", {}).get("WIDGET")
+                        if widget is not None and hasattr(widget, 'expression'):
+                            custom_expr = widget.expression()
+                            if custom_expr and custom_expr.strip():
+                                config['custom_selection_expression'] = custom_expr
+                                logger.info(f"Captured custom_selection_expression ({len(custom_expr)} chars)")
+                    except (AttributeError, KeyError, RuntimeError) as e:
+                        logger.debug(f"Could not capture custom_selection_expression: {e}")
+
             # Capture task_features (selected feature IDs)
             features, _ = self.dockwidget.get_current_features()
             if features:
@@ -937,7 +1054,14 @@ class FavoritesController(BaseController):
         return config if config else None
 
     def _apply_favorite_expression(self, favorite: 'FilterFavorite') -> bool:
-        """Apply a favorite's expression to the filtering widgets and execute the filter."""
+        """Apply a favorite's expression to the filtering widgets and execute the filter.
+
+        FIX 2026-04-21: Restore the full filtering UI state (layers_to_filter
+        checkboxes, predicate button, buffer, expression) BEFORE launching the
+        task. Previously only spatial_config was cached on the dockwidget while
+        the checkboxes stayed unchecked, so the filter task fired with empty
+        predicates / zero target layers and ended with "Task failed: Task failed".
+        """
         try:
             # Set expression in widget
             if hasattr(self.dockwidget, 'mQgsFieldExpressionWidget_filtering_active_expression'):
@@ -963,6 +1087,19 @@ class FavoritesController(BaseController):
             else:
                 logger.warning(f"Favorite '{favorite.name}' has no spatial_config - remote layers may not filter correctly")
 
+            # FIX 2026-04-21: materialize the favorite into the dockwidget UI
+            # so launchTaskEvent reads a complete filtering config.
+            self._restore_filtering_ui_from_favorite(favorite)
+
+            # SAFETY NET 2026-04-21: if the favorite would fire in
+            # single_selection mode without a resolvable source feature
+            # (e.g. legacy favorite with no captured task_feature_ids, or
+            # task_feature_ids that no longer resolve after reopen),
+            # downgrade to custom_selection so the task runs against the
+            # full source layer instead of aborting with
+            # "single_selection mode requires a selected feature".
+            self._ensure_applicable_groupbox_for_favorite(favorite)
+
             # Trigger the filter action to apply the main expression
             if hasattr(self.dockwidget, 'launchTaskEvent'):
                 self.dockwidget.launchTaskEvent(False, 'filter')
@@ -973,6 +1110,303 @@ class FavoritesController(BaseController):
         except Exception as e:
             logger.error(f"Failed to apply favorite: {e}")
             return False
+
+    def _favorite_matches_current_layer(
+        self,
+        favorite: 'FilterFavorite',
+        current_layer: Any,
+    ) -> bool:
+        """Decide whether task_feature_ids from the favorite can be safely
+        pushed onto `current_layer`.
+
+        Matching order (strongest first):
+        1. spatial_config.source_layer_signature matches current layer's
+           signature — portable across projects (v2 favorites).
+        2. favorite.layer_id matches current_layer.id() — same QGIS project.
+        3. favorite.layer_name matches current_layer.name() — last-chance fuzzy.
+
+        Returns False as soon as we can prove mismatch; returns True only
+        with a positive match on at least one of the three.
+        """
+        if current_layer is None:
+            return False
+
+        try:
+            current_layer_id = current_layer.id()
+        except (RuntimeError, AttributeError):
+            current_layer_id = None
+        try:
+            current_layer_name = current_layer.name()
+        except (RuntimeError, AttributeError):
+            current_layer_name = None
+
+        # Strongest check: project-portable signature
+        spatial_config = getattr(favorite, 'spatial_config', None) or {}
+        source_sig = spatial_config.get('source_layer_signature') if isinstance(spatial_config, dict) else None
+        if source_sig:
+            try:
+                current_sig = self._layer_signature_for(current_layer)
+                if current_sig == source_sig:
+                    return True
+            except Exception as e:
+                logger.debug(f"Could not compute signature for current layer: {e}")
+
+        # UUID match (same project)
+        fav_layer_id = getattr(favorite, 'layer_id', None)
+        if fav_layer_id and current_layer_id and fav_layer_id == current_layer_id:
+            return True
+
+        # Name match as last resort
+        fav_layer_name = getattr(favorite, 'layer_name', None)
+        if fav_layer_name and current_layer_name and fav_layer_name == current_layer_name:
+            return True
+
+        return False
+
+    @staticmethod
+    def _should_downgrade_single_selection(
+        current_groupbox: Optional[str],
+        has_restored_features: bool,
+        picker_feature_valid: bool,
+        selected_feature_count: int,
+    ) -> bool:
+        """Pure predicate: should we swap single_selection -> custom_selection?
+
+        single_selection aborts when no source feature is available.
+        custom_selection with an empty source expression runs with
+        skip_source_filter=True and filters against the full source layer,
+        which is what legacy favourites (no captured task_feature_ids) expect.
+        """
+        if current_groupbox != 'single_selection':
+            return False
+        if has_restored_features:
+            return False
+        if picker_feature_valid:
+            return False
+        if selected_feature_count > 0:
+            return False
+        return True
+
+    def _ensure_applicable_groupbox_for_favorite(self, favorite: 'FilterFavorite') -> None:
+        """Downgrade the exploring groupbox when the favorite cannot supply a
+        source feature, so launchTaskEvent doesn't abort in single_selection.
+        """
+        dw = self.dockwidget
+        if not dw or not getattr(dw, 'widgets_initialized', False):
+            return
+
+        current_groupbox = getattr(dw, 'current_exploring_groupbox', None)
+        has_restored = bool(getattr(dw, '_restored_task_features', None))
+
+        picker_feature = None
+        try:
+            picker = dw.widgets.get("EXPLORING", {}) \
+                .get("SINGLE_SELECTION_FEATURES", {}).get("WIDGET")
+            if picker is not None and hasattr(picker, 'feature'):
+                picker_feature = picker.feature()
+        except (AttributeError, KeyError, RuntimeError):
+            picker_feature = None
+
+        picker_valid = bool(picker_feature and getattr(picker_feature, 'isValid', lambda: False)())
+
+        selected_count = 0
+        current_layer = getattr(dw, 'current_layer', None)
+        if current_layer is not None:
+            try:
+                selected_count = current_layer.selectedFeatureCount()
+            except (AttributeError, RuntimeError):
+                selected_count = 0
+
+        if not self._should_downgrade_single_selection(
+            current_groupbox=current_groupbox,
+            has_restored_features=has_restored,
+            picker_feature_valid=picker_valid,
+            selected_feature_count=selected_count,
+        ):
+            return
+
+        if not hasattr(dw, '_restore_groupbox_ui_state'):
+            logger.debug("Cannot downgrade groupbox: _restore_groupbox_ui_state missing")
+            return
+
+        logger.info(
+            f"Favorite '{favorite.name}': single_selection has no feature — "
+            "downgrading to custom_selection so the filter doesn't abort."
+        )
+        try:
+            dw._restore_groupbox_ui_state('custom_selection')
+        except (AttributeError, RuntimeError) as e:
+            logger.debug(f"Could not downgrade groupbox to custom_selection: {e}")
+
+    def _restore_filtering_ui_from_favorite(self, favorite: 'FilterFavorite') -> None:
+        """Restore filtering UI state (checkboxes, predicate toggle, buffer, layers list)
+        from a favorite so launchTaskEvent runs with a fully populated config.
+
+        Mirrors the non-UI restoration done in _restore_spatial_config but
+        actually ticks the widgets (Intersect predicate button, layers_to_filter
+        combobox, has_layers_to_filter button) and persists into PROJECT_LAYERS.
+        """
+        from qgis.PyQt.QtCore import Qt
+
+        dw = self.dockwidget
+        if not dw or not getattr(dw, 'widgets_initialized', False):
+            logger.debug("Skipping UI restore: dockwidget not ready")
+            return
+
+        spatial_config = favorite.spatial_config or {}
+        predicates = spatial_config.get('predicates') or {}
+        buffer_value = spatial_config.get('buffer_value')
+        target_layer_keys = list((favorite.remote_layers or {}).keys())
+
+        current_layer = getattr(dw, 'current_layer', None)
+        layer_props = None
+        if current_layer is not None and hasattr(dw, 'PROJECT_LAYERS'):
+            try:
+                layer_props = dw.PROJECT_LAYERS.get(current_layer.id())
+            except (RuntimeError, AttributeError):
+                layer_props = None
+
+        # --- 1. Resolve target layer ids from remote_layers payload ---
+        resolved_layer_ids: List[str] = []
+        try:
+            from qgis.core import QgsProject
+            project = QgsProject.instance()
+            name_to_id = {}
+            signature_to_id = {}
+            for lid, lobj in project.mapLayers().items():
+                try:
+                    name_to_id[lobj.name()] = lid
+                    signature_to_id[self._layer_signature_for(lobj)] = lid
+                except (RuntimeError, AttributeError):
+                    continue
+            for key, payload in (favorite.remote_layers or {}).items():
+                resolved = None
+                # New (v2) format stores the signature as key
+                if isinstance(payload, dict) and payload.get('layer_signature'):
+                    resolved = signature_to_id.get(payload['layer_signature'])
+                # Legacy format: key is layer name, payload carries layer_id (UUID)
+                if not resolved and isinstance(payload, dict):
+                    legacy_id = payload.get('layer_id')
+                    if legacy_id and legacy_id in project.mapLayers():
+                        resolved = legacy_id
+                # Last-chance resolution by name
+                if not resolved:
+                    resolved = name_to_id.get(key)
+                if resolved and resolved != getattr(current_layer, 'id', lambda: None)():
+                    resolved_layer_ids.append(resolved)
+        except Exception as e:
+            logger.debug(f"Could not resolve favorite target layers: {e}")
+
+        # --- 2. Tick the layers_to_filter combobox ---
+        try:
+            layers_widget = dw.widgets.get("FILTERING", {}).get("LAYERS_TO_FILTER", {}).get("WIDGET")
+            if layers_widget is not None and resolved_layer_ids:
+                resolved_set = set(resolved_layer_ids)
+                for i in range(layers_widget.count()):
+                    data = layers_widget.itemData(i, Qt.ItemDataRole.UserRole)
+                    lid = data.get("layer_id") if isinstance(data, dict) else data
+                    state = Qt.CheckState.Checked if lid in resolved_set else Qt.CheckState.Unchecked
+                    layers_widget.model().item(i).setCheckState(state)
+                logger.info(f"  ✓ Favorite restore: ticked {len(resolved_set)} target layer(s)")
+        except Exception as e:
+            logger.debug(f"Could not tick layers_to_filter: {e}")
+
+        # --- 3. Tick the HAS_LAYERS_TO_FILTER button ---
+        try:
+            has_layers_btn = getattr(dw, 'pushButton_checkable_filtering_layers_to_filter', None)
+            if has_layers_btn is not None:
+                has_layers_btn.setChecked(bool(resolved_layer_ids))
+        except Exception as e:
+            logger.debug(f"Could not toggle HAS_LAYERS_TO_FILTER: {e}")
+
+        # --- 4. Tick the HAS_GEOMETRIC_PREDICATES button + propagate predicates ---
+        try:
+            has_pred_btn = getattr(dw, 'pushButton_checkable_filtering_geometric_predicates', None)
+            if has_pred_btn is not None:
+                has_pred_btn.setChecked(bool(predicates))
+        except Exception as e:
+            logger.debug(f"Could not toggle HAS_GEOMETRIC_PREDICATES: {e}")
+
+        # --- 5. Tick the HAS_BUFFER_VALUE button ---
+        # FIX 2026-04-21: the spinbox value is set in _restore_spatial_config,
+        # but sync_ui_to_project_layers reads has_buffer_value from the
+        # pushButton_checkable_filtering_buffer_value toggle state, not from
+        # the spinbox. Without this, a favorite with buffer_value=2.0
+        # restored as expected in the spinbox but has_buffer_value stayed
+        # False — meaning the buffer was silently ignored in the filter.
+        try:
+            has_buffer_btn = getattr(dw, 'pushButton_checkable_filtering_buffer_value', None)
+            if has_buffer_btn is not None:
+                wants_buffer = buffer_value is not None and float(buffer_value) != 0.0
+                has_buffer_btn.setChecked(bool(wants_buffer))
+        except (AttributeError, TypeError, ValueError) as e:
+            logger.debug(f"Could not toggle HAS_BUFFER_VALUE: {e}")
+
+        # --- 6. Persist restored state into PROJECT_LAYERS so sync_ui_to_project_layers sees it ---
+        if layer_props is not None:
+            filtering_props = layer_props.setdefault("filtering", {})
+            filtering_props["has_layers_to_filter"] = bool(resolved_layer_ids)
+            filtering_props["layers_to_filter"] = resolved_layer_ids
+            filtering_props["has_geometric_predicates"] = bool(predicates)
+            if predicates:
+                filtering_props["predicates"] = predicates
+            if buffer_value is not None:
+                filtering_props["has_buffer_value"] = float(buffer_value) != 0.0
+                filtering_props["buffer_value"] = float(buffer_value)
+            logger.debug(
+                f"Favorite restore persisted into PROJECT_LAYERS[{current_layer.id()}]: "
+                f"layers={len(resolved_layer_ids)}, predicates={list(predicates.keys())}"
+            )
+
+    @staticmethod
+    def _layer_signature_for(layer: Any) -> str:
+        """Build a project-portable signature for a QgsMapLayer.
+
+        Format: "<provider>::<schema>.<table>" for PostgreSQL, "<provider>::<table>"
+        for GPKG/Spatialite, "<provider>::<basename>" for OGR files, and a fallback
+        "<provider>::<layer_name>" when nothing else is available. Used to resolve
+        favorites across different projects where UUIDs differ.
+        """
+        try:
+            provider = layer.providerType() if hasattr(layer, 'providerType') else ''
+        except (RuntimeError, AttributeError):
+            provider = ''
+
+        # PostgreSQL: use QgsDataSourceUri to get schema.table
+        try:
+            from qgis.core import QgsDataSourceUri
+            if provider == 'postgres':
+                uri = QgsDataSourceUri(layer.source())
+                schema = uri.schema() or 'public'
+                table = uri.table() or ''
+                if table:
+                    return f"postgres::{schema}.{table}"
+            if provider == 'spatialite':
+                uri = QgsDataSourceUri(layer.source())
+                table = uri.table() or ''
+                if table:
+                    return f"spatialite::{table}"
+            if provider == 'ogr':
+                src = layer.source() or ''
+                # GPKG layers: "path.gpkg|layername=xxx"
+                if '|layername=' in src:
+                    tail = src.split('|layername=', 1)[1]
+                    layername = tail.split('|', 1)[0]
+                    return f"ogr::{layername}"
+                # Shapefile etc. — use basename without extension
+                import os
+                base = os.path.basename(src.split('|', 1)[0])
+                if base:
+                    stem, _ = os.path.splitext(base)
+                    return f"ogr::{stem}"
+        except Exception:
+            pass
+
+        # Fallback: provider + layer name
+        try:
+            return f"{provider or 'unknown'}::{layer.name()}"
+        except (RuntimeError, AttributeError):
+            return f"{provider or 'unknown'}::?"
 
     def _show_success(self, message: str) -> None:
         """Show success message."""

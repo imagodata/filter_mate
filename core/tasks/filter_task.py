@@ -746,9 +746,24 @@ class FilterEngineTask(QgsTask):
             Use empty string to clear the layer's filter.
         """
         if layer and expression is not None:
-            self._pending_subset_requests.append((layer, expression))
-            expr_preview = (expression[:60] + '...') if len(expression) > 60 else expression
-            logger.debug(f"📥 Queued subset request for {layer.name()}: {expr_preview}")
+            # DEDUP FIX 2026-04-21: avoid duplicate (layer, expression) entries
+            # Duplicates caused "Applying 2 pending subset requests" spam with
+            # identical payloads and noisy "Task failed" on reopen.
+            try:
+                layer_id = layer.id()
+            except (RuntimeError, AttributeError):
+                layer_id = None
+            already_queued = any(
+                (getattr(existing_layer, 'id', lambda: None)() == layer_id and existing_expr == expression)
+                for existing_layer, existing_expr in self._pending_subset_requests
+                if existing_layer is not None
+            )
+            if not already_queued:
+                self._pending_subset_requests.append((layer, expression))
+                expr_preview = (expression[:60] + '...') if len(expression) > 60 else expression
+                logger.debug(f"📥 Queued subset request for {layer.name()}: {expr_preview}")
+            else:
+                logger.debug(f"↩️ Dedup: subset request already queued for {layer.name()}")
         else:
             logger.warning(f"⚠️ queue_subset_request called with invalid params: layer={layer}, expression={expression is not None}")
         return True  # Return True to indicate success (actual application is deferred)
@@ -908,9 +923,9 @@ class FilterEngineTask(QgsTask):
         We must add to BOTH to ensure proper application.
         """
         # Add to task's _pending_subset_requests (used by finished())
+        # DEDUP FIX 2026-04-21: route through queue_subset_request() so dedup logic applies
         if layer and expression is not None:
-            self._pending_subset_requests.append((layer, expression))
-            logger.debug(f"📥 _queue_subset_string: Queued for {layer.name()}: {len(expression)} chars")
+            self.queue_subset_request(layer, expression)
 
         # Also delegate to builder for consistency
         builder = self._get_subset_builder()
@@ -1103,10 +1118,23 @@ class FilterEngineTask(QgsTask):
                     # For 'unfilter' and 'reset' actions, requests are added directly to
                     # self._pending_subset_requests in execute_unfiltering()/execute_reseting().
                     # We must extend the existing list, not replace it.
+                    # DEDUP FIX 2026-04-21: dedup on (layer_id, expression) to avoid the
+                    # "Applying 2 pending subset requests" artifact seen on reopen.
                     if result.context.result_processor._pending_subset_requests:
-                        self._pending_subset_requests.extend(
-                            result.context.result_processor._pending_subset_requests
-                        )
+                        existing_keys = set()
+                        for existing_layer, existing_expr in self._pending_subset_requests:
+                            try:
+                                existing_keys.add((existing_layer.id() if existing_layer else None, existing_expr))
+                            except (RuntimeError, AttributeError):
+                                continue
+                        for new_layer, new_expr in result.context.result_processor._pending_subset_requests:
+                            try:
+                                key = (new_layer.id() if new_layer else None, new_expr)
+                            except (RuntimeError, AttributeError):
+                                key = (None, new_expr)
+                            if key not in existing_keys:
+                                self._pending_subset_requests.append((new_layer, new_expr))
+                                existing_keys.add(key)
                     self.warning_messages = result.context.result_processor.warning_messages
 
                 if hasattr(result.context, 'expression_builder'):

@@ -6597,6 +6597,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             try:
                 datatype_widget = self.widgets.get('EXPORTING', {}).get('DATATYPE_TO_EXPORT', {}).get('WIDGET')
                 current_datatype = datatype_widget.currentText().strip().upper() if datatype_widget and hasattr(datatype_widget, 'currentText') else ''
+                # Normalize LIBKML to KML for preserve-groups settings (both
+                # drivers produce KML output).
+                if current_datatype == 'LIBKML':
+                    current_datatype = 'KML'
                 show_group_dialog = current_datatype in ('GPKG', 'KML')
 
                 if show_group_dialog and layers_to_export:
@@ -6657,6 +6661,22 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 f"in_PROJECT_LAYERS={self.current_layer.id() in self.PROJECT_LAYERS if self.current_layer else False}"
             )
             return
+
+        # FIX 2026-04-21: Block spurious filter task emission while project is still
+        # initializing. Before this guard, favorite apply (or Qt-restored widget state)
+        # could fire launchTaskEvent on a half-populated dockwidget, producing tasks
+        # with empty predicates/layers_to_filter that failed with "Task failed: Task failed".
+        app = getattr(self, 'app', None)
+        if task_name == 'filter' and app is not None:
+            is_initializing = getattr(app, '_initializing_project', False)
+            is_loading = getattr(app, '_loading_new_project', False)
+            if is_initializing or is_loading:
+                logger.info(
+                    f"launchTaskEvent DEFERRED: project init in progress "
+                    f"(initializing={is_initializing}, loading={is_loading})"
+                )
+                self._pending_filter_after_init = True
+                return
 
         self.PROJECT_LAYERS[self.current_layer.id()]["filtering"]["layers_to_filter"] = self.get_layers_to_filter()
         self.setLayerVariableEvent(self.current_layer, [("filtering", "layers_to_filter")])

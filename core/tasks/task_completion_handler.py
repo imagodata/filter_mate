@@ -106,6 +106,27 @@ def apply_pending_subset_requests(
     if not pending_requests:
         return 0
 
+    # DEDUP FIX 2026-04-21: defensive dedup on (layer_id, expression) at apply time.
+    # Upstream queueing already dedups, but a second guard avoids noisy double-apply
+    # when multiple code paths feed the same request.
+    seen_keys = set()
+    deduped_requests: List[Tuple[Any, str]] = []
+    for layer, expression in pending_requests:
+        try:
+            key = (layer.id() if layer is not None else None, expression)
+        except (RuntimeError, AttributeError):
+            key = (None, expression)
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        deduped_requests.append((layer, expression))
+
+    if len(deduped_requests) != len(pending_requests):
+        logger.debug(
+            f"Deduped subset requests: {len(pending_requests)} -> {len(deduped_requests)}"
+        )
+    pending_requests = deduped_requests
+
     QgsMessageLog.logMessage(
         f"📥 Applying {len(pending_requests)} pending subset requests on main thread",
         "FilterMate", Qgis.MessageLevel.Info

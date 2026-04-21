@@ -411,7 +411,15 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
         )
 
         if filepath:
-            if self._favorites_manager.export_to_file(filepath):
+            # FIX 2026-04-21: use portable v2 export via FavoritesService.
+            export_fn = getattr(self._favorites_manager, 'export_favorites', None)
+            if callable(export_fn):
+                result = export_fn(filepath)
+                success = getattr(result, 'success', False)
+            else:
+                legacy_fn = getattr(self._favorites_manager, 'export_to_file', None)
+                success = bool(legacy_fn(filepath)) if callable(legacy_fn) else False
+            if success:
                 self.favoritesExported.emit(filepath)
                 logger.info(f"Exported favorites to {filepath}")
             else:
@@ -445,10 +453,20 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
                 return
 
             merge = (result == QMessageBox.StandardButton.Yes)
-            count = self._favorites_manager.import_from_file(filepath, merge=merge)
+            # FIX 2026-04-21: route through FavoritesService.import_favorites so
+            # portable signatures are re-resolved against the current project.
+            import_fn = getattr(self._favorites_manager, 'import_favorites', None)
+            if callable(import_fn):
+                import_result = import_fn(filepath, skip_duplicates=True)
+                count = getattr(import_result, 'imported_count', 0)
+            else:
+                legacy_fn = getattr(self._favorites_manager, 'import_from_file', None)
+                count = legacy_fn(filepath, merge=merge) if callable(legacy_fn) else 0
 
             if count > 0:
-                self._favorites_manager.save_to_project()
+                save_fn = getattr(self._favorites_manager, 'save_to_project', None)
+                if callable(save_fn):
+                    save_fn()
                 self.update_indicator()
                 self.favoritesImported.emit(filepath)
                 logger.info(f"Imported {count} favorites from {filepath}")
