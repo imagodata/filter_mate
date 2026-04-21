@@ -748,7 +748,7 @@
                    <widget class="QgsCollapsibleGroupBox" name="mGroupBox_exploring_single_selection">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                      <horstretch>50</horstretch>
+                      <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
@@ -777,9 +777,6 @@
                     <property name="title">
                      <string>SINGLE SELECTION</string>
                     </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
                     <property name="flat">
                      <bool>true</bool>
                     </property>
@@ -800,7 +797,7 @@
                     </property>
                     <layout class="QVBoxLayout" name="verticalLayout_exploring_single_content">
                      <property name="spacing">
-                      <number>4</number>
+                      <number>2</number>
                      </property>
                      <property name="sizeConstraint">
                       <enum>QLayout::SetMinimumSize</enum>
@@ -828,7 +825,7 @@
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
-                         <height>26</height>
+                         <height>24</height>
                         </size>
                        </property>
                        <property name="font">
@@ -866,7 +863,7 @@
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
-                         <height>26</height>
+                         <height>24</height>
                         </size>
                        </property>
                        <property name="font">
@@ -929,7 +926,7 @@
                       <bold>true</bold>
                       <underline>false</underline>
                       <strikeout>false</strikeout>
-                      <stylestrategy>PreferAntialias</stylestrategy>
+                      <stylestrategy>PreferDefault</stylestrategy>
                       <kerning>true</kerning>
                      </font>
                     </property>
@@ -938,9 +935,6 @@
                     </property>
                     <property name="title">
                      <string>MULTIPLE SELECTION</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="flat">
                      <bool>true</bool>
@@ -1018,18 +1012,18 @@
                        <property name="font">
                         <font>
                          <family>Segoe UI</family>
-                         <pointsize>10</pointsize>
+                         <pointsize>8</pointsize>
                          <weight>75</weight>
                          <italic>false</italic>
                          <bold>true</bold>
                          <underline>false</underline>
                          <strikeout>false</strikeout>
-                         <stylestrategy>PreferAntialias</stylestrategy>
+                         <stylestrategy>PreferDefault</stylestrategy>
                          <kerning>true</kerning>
                         </font>
                        </property>
                        <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
+                        <cursorShape>IBeamCursor</cursorShape>
                        </property>
                       </widget>
                      </item>
@@ -1055,7 +1049,7 @@
                   <item>
                    <widget class="QgsCollapsibleGroupBox" name="mGroupBox_exploring_custom_selection">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
@@ -1103,6 +1097,9 @@
                     <layout class="QVBoxLayout" name="verticalLayout_exploring_custom_container">
                      <property name="spacing">
                       <number>2</number>
+                     </property>
+                     <property name="sizeConstraint">
+                      <enum>QLayout::SetMinimumSize</enum>
                      </property>
                      <property name="leftMargin">
                       <number>8</number>
