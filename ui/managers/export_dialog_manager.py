@@ -71,18 +71,23 @@ class ExportDialogManager:
             if dw.widgets["EXPORTING"]["HAS_LAYERS_TO_EXPORT"]["WIDGET"].isChecked():
                 layers = dw.widgets["EXPORTING"]["LAYERS_TO_EXPORT"]["WIDGET"].checkedItems()
                 if len(layers) == 1 and datatype:
+                    from core.export.layer_exporter import get_extension_for_format
                     layer = layers[0]
                     match = re.search('.* ', layer)
                     layer = match.group() if match else layer
+                    ext = get_extension_for_format(datatype)
+                    default_path = os.path.join(
+                        dw.current_project_path,
+                        dw.output_name + '_' + layer.strip() + ext
+                    )
                     path = str(QtWidgets.QFileDialog.getSaveFileName(
                         dw,
                         QCoreApplication.translate("ExportDialogManager", "Save your layer to a file"),
-                        os.path.join(
-                            dw.current_project_path,
-                            dw.output_name + '_' + layer.strip()
-                        ),
-                        f'*.{datatype}'
+                        default_path,
+                        f'*{ext}'
                     )[0])
+                    if path and os.path.splitext(path)[1].lower() != ext.lower():
+                        path = path + ext
                 elif datatype.upper() == 'GPKG':
                     path = str(QtWidgets.QFileDialog.getSaveFileName(
                         dw,

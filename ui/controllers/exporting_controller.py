@@ -398,13 +398,26 @@ class ExportingController(BaseController):
 
             logger.info(f"populate_export_combobox: Added {item_index} layers to export combobox")
 
-            # Populate datatype/format combobox
+            # Populate datatype/format combobox — writable vector drivers only
+            # (DCAP_CREATE). Read-only drivers like XLS would otherwise fail at
+            # export time with an opaque GDAL error.
             if ogr_available:
+                from osgeo import gdal
                 datatype_widget = dockwidget.widgets["EXPORTING"]["DATATYPE_TO_EXPORT"]["WIDGET"]
                 datatype_widget.clear()
-                ogr_driver_list = sorted([ogr.GetDriver(i).GetDescription() for i in range(ogr.GetDriverCount())])
+                ogr_driver_list = []
+                for i in range(ogr.GetDriverCount()):
+                    drv = ogr.GetDriver(i)
+                    try:
+                        meta = drv.GetMetadata_Dict()
+                    except Exception:
+                        meta = {}
+                    if meta.get(gdal.DCAP_CREATE) != 'YES':
+                        continue
+                    ogr_driver_list.append(drv.GetDescription())
+                ogr_driver_list = sorted(ogr_driver_list)
                 datatype_widget.addItems(ogr_driver_list)
-                logger.info(f"populate_export_combobox: Added {len(ogr_driver_list)} export formats")
+                logger.info(f"populate_export_combobox: Added {len(ogr_driver_list)} writable export formats")
 
                 if datatype_to_export:
                     idx = datatype_widget.findText(datatype_to_export)

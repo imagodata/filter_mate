@@ -193,8 +193,8 @@ class ParallelFilterExecutor:
                         file_path = source.split('|')[0].lower()
                         if file_path.endswith(('.gpkg', '.sqlite', '.db', '.spatialite')):
                             database_file_counts[file_path] = database_file_counts.get(file_path, 0) + 1
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug("Skipping layer source inspection: %s", exc)
 
         # Check if any database file has multiple layers - force sequential for shared databases
         shared_database_files = [f for f, count in database_file_counts.items() if count > 1]
@@ -397,8 +397,8 @@ class ParallelFilterExecutor:
             if hasattr(layer, 'featureCount'):
                 try:
                     feature_count = layer.featureCount()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug("featureCount() failed for layer %s: %s", layer_name, exc)
 
             execution_time = (time.time() - start_time) * 1000
 

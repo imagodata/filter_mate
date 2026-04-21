@@ -244,13 +244,26 @@ class ExportHandler:
                 export_crs=projection,
             )
 
-        # STREAMING MODE: For large datasets (non-GPKG)
+        # Detect file-path vs directory-path output. The dialog returns a full
+        # file path for single-layer export when a datatype is chosen, but a
+        # directory path otherwise.
+        from ..export.layer_exporter import get_extension_for_format
+        ext = get_extension_for_format(datatype)
+        output_is_file = (
+            len(layers) == 1
+            and os.path.splitext(output_folder)[1] != ''
+            and not os.path.isdir(output_folder)
+        )
+
+        # STREAMING MODE: For large datasets (non-GPKG, directory output only).
+        # Streaming writes one file per layer into a directory, so skip it when
+        # the user selected a single target file.
         streaming_config = task_parameters.get('config', {}).get('APP', {}).get('OPTIONS', {}).get('STREAMING_EXPORT', {})
         streaming_enabled = streaming_config.get('enabled', {}).get('value', True)
         feature_threshold = streaming_config.get('feature_threshold', {}).get('value', 10000)
         chunk_size = streaming_config.get('chunk_size', {}).get('value', 5000)
 
-        if streaming_enabled:
+        if streaming_enabled and not output_is_file:
             total_features = self.calculate_total_features(layers, project)
             if total_features >= feature_threshold:
                 logger.info(f"Using STREAMING export mode ({total_features} features >= {feature_threshold} threshold)")
@@ -265,19 +278,35 @@ class ExportHandler:
                 return success, message, None
 
         # STANDARD MODE: Single or multiple layers
-        if not os.path.exists(output_folder):
+
+        if output_is_file:
+            parent_dir = os.path.dirname(output_folder)
+            if parent_dir and not os.path.exists(parent_dir):
+                try:
+                    os.makedirs(parent_dir, exist_ok=True)
+                except OSError as e:
+                    logger.error(f"Failed to create output directory: {e}")
+                    return False, f'Failed to create output directory: {parent_dir}', None
+        elif not os.path.exists(output_folder):
             return False, f'Output path does not exist: {output_folder}', None
 
         export_success = False
         message = ''
+        single_output = None
 
         if len(layers) == 1:
             layer_name = layers[0]['layer_name'] if isinstance(layers[0], dict) else layers[0]
             logger.info(f"Single layer export - delegating to LayerExporter: {layer_name}")
-            # Build proper file path (output_folder is a directory)
-            from ..export.layer_exporter import get_extension_for_format
-            ext = get_extension_for_format(datatype)
-            single_output = os.path.join(output_folder, f"{sanitize_filename(layer_name)}{ext}")
+            if output_is_file:
+                # User picked full file path via save-file dialog — use as-is,
+                # ensuring the extension matches the selected datatype.
+                single_output = output_folder
+                if os.path.splitext(single_output)[1].lower() != ext.lower():
+                    single_output = os.path.splitext(single_output)[0] + ext
+            else:
+                single_output = os.path.join(
+                    output_folder, f"{sanitize_filename(layer_name)}{ext}"
+                )
             result = layer_exporter.export_single_layer(
                 layer_name, single_output, projection, datatype, style_format, save_styles
             )
@@ -310,16 +339,30 @@ class ExportHandler:
         if is_canceled():
             return False, 'Export cancelled by user', None
 
+        # Resolve the reported output location — for file-output mode, report
+        # the exported file itself, and zip the parent directory.
+        reported_output = single_output if output_is_file else output_folder
+        zip_source_dir = (
+            os.path.dirname(single_output) if output_is_file else output_folder
+        )
+
         # Create zip archive if requested
         zip_created = False
         if zip_path:
-            zip_created = BatchExporter.create_zip_archive(zip_path, output_folder)
+            zip_created = BatchExporter.create_zip_archive(zip_path, zip_source_dir)
             if not zip_created:
                 return False, 'Failed to create ZIP archive', None
 
-        # Store deferred KML folder merge for main thread execution (in finished())
+        # Store deferred KML folder merge for main thread execution (in finished()).
+        # Group merging only makes sense when multiple KML files live in a folder;
+        # skip it for single-file output (no siblings to merge).
+        # Accept both OGR drivers that produce KML output ('KML' and 'LIBKML').
         preserve_groups = export_config.get('preserve_groups', False)
-        if preserve_groups and datatype == 'KML':
+        if (
+            preserve_groups
+            and datatype.upper() in ('KML', 'LIBKML')
+            and not output_is_file
+        ):
             layer_ids = []
             for l in layers:
                 if isinstance(l, dict):
@@ -333,7 +376,7 @@ class ExportHandler:
             }
             logger.info("KML folder merge deferred to main thread (finished callback)")
 
-        message = f'Layer(s) has been exported to <a href="file:///{output_folder}">{output_folder}</a>'
+        message = f'Layer(s) has been exported to <a href="file:///{reported_output}">{reported_output}</a>'
         if zip_created:
             message += f' and Zip file has been exported to <a href="file:///{zip_path}">{zip_path}</a>'
 
@@ -468,11 +511,12 @@ class ExportHandler:
             config = StreamingConfig(batch_size=chunk_size)
             exporter = StreamingExporter(config)
 
-            format_map = {
-                'GPKG': 'gpkg', 'SHP': 'shp', 'GEOJSON': 'geojson',
-                'GML': 'gml', 'KML': 'kml', 'CSV': 'csv'
-            }
-            export_format = format_map.get(datatype.upper(), datatype.lower())
+            # Resolve the OGR driver name using the authoritative map — covers
+            # XLSX, MapInfo File, FlatGeobuf, SpatiaLite, etc. StreamingExporter
+            # accepts the driver name directly (unknown format strings are
+            # passed through case-preserved).
+            from ..export.layer_exporter import LayerExporter
+            export_format = LayerExporter.DRIVER_MAP.get(datatype.upper(), datatype)
 
             if not os.path.exists(output_folder):
                 try:

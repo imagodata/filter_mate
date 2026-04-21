@@ -204,7 +204,7 @@ def validate_export_parameters(
 
     # Preserve layer group structure (GPKG embeds project, KML uses Folders)
     preserve_groups = config.get("HAS_PRESERVE_GROUPS", False)
-    if preserve_groups and datatype not in ('GPKG', 'KML'):
+    if preserve_groups and datatype.upper() not in ('GPKG', 'KML', 'LIBKML'):
         preserve_groups = False
     logger.debug(f"Preserve groups: {preserve_groups}")
 

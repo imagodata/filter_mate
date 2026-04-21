@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch, PropertyMock
 
 import pytest
 
-from filter_mate.extensions.qfieldcloud.exceptions import (
+from extensions.qfieldcloud.exceptions import (
     QFieldCloudAuthError,
     QFieldCloudError,
     QFieldCloudProjectError,
@@ -41,7 +41,7 @@ def adapter(mock_nam):
         'qfieldsync.core': MagicMock(),
         'qfieldsync.core.cloud_api': MagicMock(),
     }):
-        from filter_mate.extensions.qfieldcloud.sdk_adapter import QFieldCloudAdapter
+        from extensions.qfieldcloud.sdk_adapter import QFieldCloudAdapter
         return QFieldCloudAdapter(network_manager=mock_nam)
 
 

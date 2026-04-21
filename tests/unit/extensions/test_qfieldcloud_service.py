@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from filter_mate.extensions.qfieldcloud.service import (
+from extensions.qfieldcloud.service import (
     QFieldCloudPushResult,
     QFieldCloudService,
 )
@@ -56,8 +56,8 @@ def service(mock_adapter, mock_credentials, mock_signals):
 class TestQFieldCloudService:
     """Tests for push workflow."""
 
-    @patch('filter_mate.extensions.qfieldcloud.service.shutil')
-    @patch('filter_mate.extensions.qfieldcloud.service.tempfile')
+    @patch('extensions.qfieldcloud.service.shutil')
+    @patch('extensions.qfieldcloud.service.tempfile')
     def test_push_project_creates_project_and_uploads(
         self, mock_tempfile, mock_shutil, service, mock_adapter, tmp_path
     ):
@@ -69,7 +69,7 @@ class TestQFieldCloudService:
 
         # Mock project builder
         with patch(
-            'filter_mate.extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
+            'extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
         ) as MockBuilder:
             builder_instance = MagicMock()
             builder_instance.build.return_value = tmp_path / "test.qgs"
@@ -95,8 +95,8 @@ class TestQFieldCloudService:
         mock_adapter.upload_project_files.assert_called_once()
         mock_adapter.trigger_package.assert_called_once_with('proj-123')
 
-    @patch('filter_mate.extensions.qfieldcloud.service.shutil')
-    @patch('filter_mate.extensions.qfieldcloud.service.tempfile')
+    @patch('extensions.qfieldcloud.service.shutil')
+    @patch('extensions.qfieldcloud.service.tempfile')
     def test_push_updates_existing_project(
         self, mock_tempfile, mock_shutil, service, mock_adapter, tmp_path
     ):
@@ -107,7 +107,7 @@ class TestQFieldCloudService:
         gpkg_path.write_text("fake")
 
         with patch(
-            'filter_mate.extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
+            'extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
         ) as MockBuilder:
             MockBuilder.return_value.build.return_value = tmp_path / "t.qgs"
 
@@ -121,8 +121,8 @@ class TestQFieldCloudService:
         assert result.project_id == "existing-id"
         mock_adapter.create_project.assert_not_called()
 
-    @patch('filter_mate.extensions.qfieldcloud.service.shutil')
-    @patch('filter_mate.extensions.qfieldcloud.service.tempfile')
+    @patch('extensions.qfieldcloud.service.shutil')
+    @patch('extensions.qfieldcloud.service.tempfile')
     def test_push_emits_signals(
         self, mock_tempfile, mock_shutil, service, mock_signals, tmp_path
     ):
@@ -132,7 +132,7 @@ class TestQFieldCloudService:
         gpkg.write_text("data")
 
         with patch(
-            'filter_mate.extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
+            'extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
         ) as MockBuilder:
             MockBuilder.return_value.build.return_value = tmp_path / "t.qgs"
             service.push_project("TEST", gpkg)
@@ -140,8 +140,8 @@ class TestQFieldCloudService:
         mock_signals.project_pushed.emit.assert_called_once()
         assert mock_signals.progress_updated.emit.call_count > 0
 
-    @patch('filter_mate.extensions.qfieldcloud.service.shutil')
-    @patch('filter_mate.extensions.qfieldcloud.service.tempfile')
+    @patch('extensions.qfieldcloud.service.shutil')
+    @patch('extensions.qfieldcloud.service.tempfile')
     def test_push_failure_emits_failed_signal(
         self, mock_tempfile, mock_shutil, service, mock_adapter, mock_signals, tmp_path
     ):
@@ -153,7 +153,7 @@ class TestQFieldCloudService:
         mock_adapter.create_project.side_effect = Exception("Server error")
 
         with patch(
-            'filter_mate.extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
+            'extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
         ) as MockBuilder:
             MockBuilder.return_value.build.return_value = tmp_path / "t.qgs"
             result = service.push_project("TEST", gpkg)
@@ -162,8 +162,8 @@ class TestQFieldCloudService:
         assert "Server error" in result.error_message
         mock_signals.push_failed.emit.assert_called_once()
 
-    @patch('filter_mate.extensions.qfieldcloud.service.shutil')
-    @patch('filter_mate.extensions.qfieldcloud.service.tempfile')
+    @patch('extensions.qfieldcloud.service.shutil')
+    @patch('extensions.qfieldcloud.service.tempfile')
     def test_push_calls_progress_callback(
         self, mock_tempfile, mock_shutil, service, tmp_path
     ):
@@ -175,7 +175,7 @@ class TestQFieldCloudService:
         progress_calls = []
 
         with patch(
-            'filter_mate.extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
+            'extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
         ) as MockBuilder:
             MockBuilder.return_value.build.return_value = tmp_path / "t.qgs"
             service.push_project(
@@ -191,8 +191,8 @@ class TestQFieldCloudService:
 class TestQFieldCloudBatchPush:
     """Tests for batch push."""
 
-    @patch('filter_mate.extensions.qfieldcloud.service.shutil')
-    @patch('filter_mate.extensions.qfieldcloud.service.tempfile')
+    @patch('extensions.qfieldcloud.service.shutil')
+    @patch('extensions.qfieldcloud.service.tempfile')
     def test_batch_push_three_zones(
         self, mock_tempfile, mock_shutil, service, mock_signals, tmp_path
     ):
@@ -209,7 +209,7 @@ class TestQFieldCloudBatchPush:
             })
 
         with patch(
-            'filter_mate.extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
+            'extensions.qfieldcloud.project_builder.QFieldProjectBuilder'
         ) as MockBuilder:
             MockBuilder.return_value.build.return_value = tmp_path / "t.qgs"
             results = service.batch_push_zones(zone_configs, project_prefix="WYRE")

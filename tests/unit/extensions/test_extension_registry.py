@@ -7,12 +7,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from filter_mate.extensions.base import (
+from extensions.base import (
     BaseExtension,
     ExtensionMetadata,
     ExtensionState,
 )
-from filter_mate.extensions.registry import (
+from extensions.registry import (
     ExtensionRegistry,
     reset_extension_registry,
 )

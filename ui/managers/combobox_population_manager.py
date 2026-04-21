@@ -397,20 +397,29 @@ class ComboboxPopulationManager:
                 f"populate_export_direct: Added {item_index} layers to combobox"
             )
 
-            # Populate datatype/format combobox
+            # Populate datatype/format combobox — only expose writable vector
+            # drivers (GDAL's DCAP_CREATE). This filters out read-only formats
+            # such as XLS which would otherwise fail silently at export time.
             try:
-                from osgeo import ogr
+                from osgeo import ogr, gdal
                 datatype_widget = dw.widgets["EXPORTING"]["DATATYPE_TO_EXPORT"]["WIDGET"]
                 with SignalBlocker(datatype_widget):
                     datatype_widget.clear()
-                    ogr_driver_list = sorted([
-                        ogr.GetDriver(i).GetDescription()
-                        for i in range(ogr.GetDriverCount())
-                    ])
+                    ogr_driver_list = []
+                    for i in range(ogr.GetDriverCount()):
+                        drv = ogr.GetDriver(i)
+                        try:
+                            meta = drv.GetMetadata_Dict()
+                        except Exception:
+                            meta = {}
+                        if meta.get(gdal.DCAP_CREATE) != 'YES':
+                            continue
+                        ogr_driver_list.append(drv.GetDescription())
+                    ogr_driver_list = sorted(ogr_driver_list)
                     datatype_widget.addItems(ogr_driver_list)
                 logger.info(
                     f"populate_export_direct: Added {len(ogr_driver_list)} "
-                    f"export formats"
+                    f"writable export formats"
                 )
 
                 if datatype_to_export:

@@ -231,7 +231,10 @@ class StreamingExporter:
                 QgsFields
             )
 
-            # Determine driver name
+            # Determine driver name. Accepts either a short alias (e.g. 'shp',
+            # 'gpkg') or the exact OGR driver description (e.g. 'MapInfo File',
+            # 'XLSX', 'FlatGeobuf'). Unknown values are passed through
+            # case-preserved so case-sensitive driver names keep working.
             driver_map = {
                 'gpkg': 'GPKG',
                 'geopackage': 'GPKG',
@@ -243,7 +246,7 @@ class StreamingExporter:
                 'kml': 'KML',
                 'gml': 'GML'
             }
-            driver_name = driver_map.get(format.lower(), format.upper())
+            driver_name = driver_map.get(format.lower(), format)
 
             # Create batch iterator
             batch_iterator = FeatureBatchIterator(

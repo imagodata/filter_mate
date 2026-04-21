@@ -26,7 +26,7 @@ def mock_qgs_settings():
         def remove(self, key):
             store.pop(key, None)
 
-    with patch('filter_mate.extensions.qfieldcloud.credentials_manager.QgsSettings', None):
+    with patch('extensions.qfieldcloud.credentials_manager.QgsSettings', None):
         # We'll patch at the import level in each method
         pass
 
@@ -37,10 +37,10 @@ def mock_qgs_settings():
 def credentials_manager():
     """Create a CredentialsManager with mocked backends."""
     with patch(
-        'filter_mate.extensions.qfieldcloud.credentials_manager._keyring_available',
+        'extensions.qfieldcloud.credentials_manager._keyring_available',
         return_value=False,
     ):
-        from filter_mate.extensions.qfieldcloud.credentials_manager import (
+        from extensions.qfieldcloud.credentials_manager import (
             CredentialsManager,
         )
 

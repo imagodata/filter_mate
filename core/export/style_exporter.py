@@ -94,15 +94,20 @@ class StyleExporter:
         """
         Save layer style using QGIS native saveNamedStyle.
 
+        Follows the standard sidecar convention where ``data.shp`` is paired
+        with ``data.qml`` (same basename, different extension), not
+        ``data.shp.qml``.
+
         Args:
             layer: QgsVectorLayer
-            output_path: Base path without extension
-            format_name: Format extension (qml or sld)
+            output_path: Full path to the exported data file (extension kept)
+            format_name: Style extension (qml or sld)
 
         Returns:
             True if saved successfully
         """
-        style_path = os.path.normcase(f"{output_path}.{format_name}")
+        base, _ = os.path.splitext(output_path)
+        style_path = os.path.normcase(f"{base}.{format_name}")
         try:
             layer.saveNamedStyle(style_path)
             logger.debug(f"Style saved: {style_path}")
@@ -126,7 +131,8 @@ class StyleExporter:
         Returns:
             True if export succeeded
         """
-        style_path = os.path.normcase(f"{output_path}.lyrx")
+        base, _ = os.path.splitext(output_path)
+        style_path = os.path.normcase(f"{base}.lyrx")
 
         try:
             # Build ArcGIS-compatible layer definition
