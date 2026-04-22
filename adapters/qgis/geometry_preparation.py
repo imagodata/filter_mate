@@ -543,7 +543,7 @@ class GeometryPreparationAdapter:
                 skipped += 1
                 continue
 
-            centroid = geom.centroid()
+            centroid = geom.pointOnSurface()
             if not centroid or centroid.isEmpty():
                 skipped += 1
                 continue
@@ -627,7 +627,7 @@ class GeometryPreparationAdapter:
 
             # Apply centroid if requested
             if use_centroids:
-                centroid = geom.centroid()
+                centroid = geom.pointOnSurface()
                 if centroid and not centroid.isEmpty():
                     geom = centroid
 
@@ -750,7 +750,7 @@ class GeometryPreparationAdapter:
                 continue
 
             if use_centroids:
-                centroid = geom.centroid()
+                centroid = geom.pointOnSurface()
                 if centroid and not centroid.isEmpty():
                     geom = centroid
 

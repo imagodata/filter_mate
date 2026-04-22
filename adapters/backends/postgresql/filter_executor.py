@@ -62,7 +62,7 @@ def prepare_postgresql_source_geom(
         buffer_value: Static buffer value in meters
         buffer_segments: Number of segments for buffer (quad_segs)
         buffer_type: "Round", "Flat", or "Square"
-        use_centroids: Apply ST_Centroid to source geometry
+        use_centroids: Apply ST_PointOnSurface to source geometry
         primary_key_name: Primary key column (for materialized views)
         session_id: Session identifier for MV name prefix (multi-client isolation)
         mv_schema: Schema for materialized views (default: filter_mate_temp)
@@ -93,10 +93,12 @@ def prepare_postgresql_source_geom(
     postgresql_source_geom = base_geom
     materialized_view_name = None
 
-    # CENTROID OPTIMIZATION: Wrap geometry in ST_Centroid if enabled for source layer
+    # CENTROID OPTIMIZATION: Wrap geometry in ST_PointOnSurface if enabled for source layer
     # This significantly speeds up queries for complex polygons (e.g., buildings)
     # CENTROID + BUFFER OPTIMIZATION v2.5.13: Combine centroid and buffer when both are enabled
-    # Order: ST_Buffer(ST_Centroid(geom)) - buffer is applied to the centroid point
+    # Order: ST_Buffer(ST_PointOnSurface(geom)) - buffer is applied to the centroid point
+    # NOTE: ST_PointOnSurface preferred over ST_Centroid to guarantee point is inside polygon
+    # (critical for concave shapes like communes along rivers)
 
     if buffer_expression is not None and buffer_expression != '':
         # Buffer expression mode (dynamic buffer from field/expression)
@@ -135,8 +137,10 @@ def prepare_postgresql_source_geom(
             # Centroids can be applied with inline buffer
             if use_centroids:
                 # Apply centroid BEFORE buffer for efficiency
-                postgresql_source_geom = f'ST_Buffer(ST_Centroid({base_geom}), {adjusted_buffer_expr}, \'{style_params}\')'
-                logger.info("[PostgreSQL] ✓ Using ST_Centroid + inline ST_Buffer")
+                # Use ST_PointOnSurface (guaranteed inside polygon) instead of ST_Centroid
+                # which can fall outside concave polygons (e.g. communes le long d'une rivière)
+                postgresql_source_geom = f'ST_Buffer(ST_PointOnSurface({base_geom}), {adjusted_buffer_expr}, \'{style_params}\')'
+                logger.info("[PostgreSQL] ✓ Using ST_PointOnSurface + inline ST_Buffer")
 
             logger.info(f"[PostgreSQL] ✓ Inline buffer expression: {postgresql_source_geom[:100]}...")
             # No MV created in inline mode
@@ -204,15 +208,16 @@ def prepare_postgresql_source_geom(
             style_params += f" endcap={endcap_style}"
 
         # CENTROID + BUFFER: Determine the geometry to buffer
-        # ORDER OF APPLICATION: ST_Buffer(ST_Centroid(geom)) - centroid first, then buffer
-        # If centroid is enabled, buffer the centroid point instead of the full geometry
+        # ORDER OF APPLICATION: ST_Buffer(ST_PointOnSurface(geom)) - centroid first, then buffer
+        # Use ST_PointOnSurface (guaranteed inside polygon) instead of ST_Centroid
+        # which can fall outside concave polygons
         if use_centroids:
             geom_to_buffer = (
-                f'ST_Centroid("{source_schema}"."{source_table}".'
+                f'ST_PointOnSurface("{source_schema}"."{source_table}".'
                 f'"{source_geom}")'
             )
             logger.info(
-                "✓ PostgreSQL: Using ST_Centroid + ST_Buffer "
+                "✓ PostgreSQL: Using ST_PointOnSurface + ST_Buffer "
                 "for source layer"
             )
         else:
@@ -244,9 +249,11 @@ def prepare_postgresql_source_geom(
 
     else:
         # No buffer - just apply centroid if enabled
+        # Use ST_PointOnSurface (guaranteed inside polygon) instead of ST_Centroid
+        # which can fall outside concave polygons
         if use_centroids:
-            postgresql_source_geom = f"ST_Centroid({base_geom})"
-            logger.info("[PostgreSQL] ✓ PostgreSQL: Using ST_Centroid for source layer geometry simplification")
+            postgresql_source_geom = f"ST_PointOnSurface({base_geom})"
+            logger.info("[PostgreSQL] ✓ PostgreSQL: Using ST_PointOnSurface for source layer geometry simplification")
         else:
             postgresql_source_geom = base_geom
 

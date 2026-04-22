@@ -424,11 +424,13 @@ def process_spatialite_geometries(
         # Centroid optimization
         # ORDER OF APPLICATION: Centroid first, then multipart conversion, then reprojection
         # This creates points from source geometries before union to WKT
+        # Use pointOnSurface (guaranteed inside polygon) instead of centroid()
+        # which can fall outside concave polygons (e.g. communes along rivers)
         if context.param_use_centroids_source_layer:
-            centroid = geom_copy.centroid()
+            centroid = geom_copy.pointOnSurface()
             if centroid and not centroid.isEmpty():
                 geom_copy = centroid
-                logger.debug("[Spatialite] Converted to centroid")
+                logger.debug("[Spatialite] Converted to pointOnSurface")
 
         if geom_copy.isMultipart():
             geom_copy.convertToSingleType()
