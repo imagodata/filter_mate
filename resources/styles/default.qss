@@ -149,6 +149,19 @@ END OF REMOVED SECTION */
     background-color: transparent;
 }
 
+/* QgsCheckableComboBoxLayer — custom paintEvent draws via QStyle so QSS padding
+   clips text when forced to 20px height. Tighten vertical padding so the
+   Segoe UI Semibold 8pt line fits inside the content rect. */
+#dockWidgetContents QgsCheckableComboBoxLayer {
+    padding: 1px 8px;
+}
+#dockWidgetContents QgsCheckableComboBoxLayer:hover {
+    padding: 0px 7px;
+}
+#dockWidgetContents QgsCheckableComboBoxLayer:focus {
+    padding: 0px 6px;
+}
+
 /* ========================================================================
    INPUT FIELDS - Standardized 20px height
    SCOPED to FilterMate only

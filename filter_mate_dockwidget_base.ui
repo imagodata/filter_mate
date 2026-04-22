@@ -196,7 +196,7 @@
                <height>247</height>
               </rect>
              </property>
-             <layout class="QGridLayout" name="gridLayout_main_header">
+             <layout class="QGridLayout" name="gridLayout_main_header" columnstretch="0,1" columnminimumwidth="48,0">
               <property name="leftMargin">
                <number>1</number>
               </property>
@@ -1049,7 +1049,7 @@
                   <item>
                    <widget class="QgsCollapsibleGroupBox" name="mGroupBox_exploring_custom_selection">
                     <property name="sizePolicy">
-                     <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                     <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
                       <horstretch>0</horstretch>
                       <verstretch>0</verstretch>
                      </sizepolicy>
@@ -1115,6 +1115,21 @@
                      </property>
                      <item>
                       <layout class="QVBoxLayout" name="verticalLayout_exploring_custom_selection">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
                        <item>
                         <widget class="QgsFieldExpressionWidget" name="mFieldExpressionWidget_exploring_custom_selection">
                          <property name="enabled">
@@ -1161,7 +1176,7 @@
                      <enum>Qt::Vertical</enum>
                     </property>
                     <property name="sizeType">
-                     <enum>QSizePolicy::Fixed</enum>
+                     <enum>QSizePolicy::Expanding</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
