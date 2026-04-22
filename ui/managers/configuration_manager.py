@@ -768,12 +768,17 @@ class ConfigurationManager(QObject):
                     widget_obj.setFont(font)
 
     def configure_key_widgets_sizes(self, icons_sizes):
-        """v4.0 Sprint 16: Configure sizes for widget_keys and frame_actions (migrated from dockwidget)."""
+        """v4.0 Sprint 16: Configure sizes for widget_keys and frame_actions (migrated from dockwidget).
+
+        NOTE: Currently not wired (FilterMateDockWidget._configure_key_widgets_sizes
+        is defined but never called). Kept as reserve for Sprint 16 integration.
+        Fixed import path: ui.config (package __init__) — previously tried
+        ui.config.ui_config which does not exist, silently falling back to 80px.
+        """
         from qgis.PyQt.QtWidgets import QSizePolicy
 
-        # Check if UI config available
         try:
-            from ..config.ui_config import UIConfig
+            from ..config import UIConfig
             UI_CONFIG_AVAILABLE = True
         except ImportError:
             UI_CONFIG_AVAILABLE = False
@@ -781,13 +786,16 @@ class ConfigurationManager(QObject):
         d = self.dockwidget
 
         if UI_CONFIG_AVAILABLE:
-            # Get widget_keys width directly from config
-            widget_keys_width = UIConfig.get_config('widget_keys', 'max_width') or 56
+            # Match _apply_frame_dimensions: use min_width..max_width range,
+            # not a Fixed width. Using Fixed broke HIDPI/EXPANDED profiles where
+            # min (88) and max (104) differ by design.
+            wk_min = UIConfig.get_config('widget_keys', 'min_width') or 38
+            wk_max = UIConfig.get_config('widget_keys', 'max_width') or 56
 
             for widget in [d.widget_exploring_keys, d.widget_filtering_keys, d.widget_exporting_keys]:
-                widget.setMinimumWidth(widget_keys_width)
-                widget.setMaximumWidth(widget_keys_width)
-                widget.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+                widget.setMinimumWidth(wk_min)
+                widget.setMaximumWidth(wk_max)
+                widget.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
 
             # Set frame actions size (convert to int to avoid float)
             action_button_height = UIConfig.get_button_height("action_button")

@@ -361,31 +361,10 @@ QWidget#widget_exporting_content {
     color: {color_font_0};
 }
 
-/* Collapsible Group Box */
-#dockWidgetContents QgsCollapsibleGroupBox {
-    background-color: {color_1};
-    border: 1px solid {color_2};
-    border-radius: 4px;
-    padding: 4px;
-    padding-top: 20px;
-    margin: 0px;
-    color: {color_font_0};
-    min-height: 40px;
-}
-
-#dockWidgetContents QgsCollapsibleGroupBox::title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    padding: 2px 6px;
-    margin-left: 20px;
-    margin-top: 1px;
-    left: 0px;
-    top: 3px;
-    max-width: 340px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-}
+/* Collapsible Group Box — consolidated rule is further down at
+   "Collapsible GroupBox - QGIS specific". Keep this section empty
+   to avoid cascade conflicts (previously defined a competing padding-top
+   and min-height that pushed titles out of the title bar). */
 
 /* Property Override Button */
 #dockWidgetContents QgsPropertyOverrideButton {
@@ -590,6 +569,9 @@ QWidget#widget_exporting_content {
     padding: 4px 10px;
     margin-left: 28px;
     margin-top: 4px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 /* Exploring Section GroupBox - Subtle styling */
@@ -915,10 +897,13 @@ QWidget#widget_exporting_keys {
     margin: 0px;
 }
 
-/* Buttons inside widget_exploring_keys - Non-checkable - Responsive sizing */
+/* Buttons inside widget_exploring_keys - Non-checkable - Responsive sizing
+   Non-transparent background ensures the sidebar column is visible even when
+   icons fail to load (resource-path regressions would otherwise render the
+   whole column invisible on top of the groupbox column). */
 QWidget#widget_exploring_keys QPushButton:!checkable {
-    background-color: transparent;
-    border: 2px solid transparent;
+    background-color: {color_1};
+    border: 1px solid {color_2};
     border-radius: 6px;
     padding: 2px;
     margin: 1px 0px;
@@ -946,8 +931,8 @@ QWidget#widget_exploring_keys QPushButton:!checkable:pressed {
 
 /* Buttons inside widget_exploring_keys - Checkable - Enhanced visibility */
 QWidget#widget_exploring_keys QPushButton:checkable {
-    background-color: transparent;
-    border: 2px solid transparent;
+    background-color: {color_1};
+    border: 1px solid {color_2};
     border-radius: 6px;
     padding: 2px;
     margin: 1px 0px;
@@ -998,8 +983,8 @@ QWidget#widget_exploring_keys QPushButton:checkable:checked:pressed {
 
 /* Buttons inside widget_filtering_keys - Checkable only - Enhanced visibility */
 QWidget#widget_filtering_keys QPushButton:checkable {
-    background-color: transparent;
-    border: 2px solid transparent;
+    background-color: {color_1};
+    border: 1px solid {color_2};
     border-radius: 6px;
     padding: 2px;
     margin: 1px 0px;
@@ -1050,8 +1035,8 @@ QWidget#widget_filtering_keys QPushButton:checkable:checked:pressed {
 
 /* Buttons inside widget_exporting_keys - Checkable only - Enhanced visibility */
 QWidget#widget_exporting_keys QPushButton:checkable {
-    background-color: transparent;
-    border: 2px solid transparent;
+    background-color: {color_1};
+    border: 1px solid {color_2};
     border-radius: 6px;
     padding: 2px;
     margin: 1px 0px;

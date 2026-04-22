@@ -328,27 +328,45 @@ class AppInitializer:
             return False
 
     def _initialize_ui_profile(self):
-        """Initialize UI profile based on screen resolution."""
+        """Initialize UI profile based on screen resolution and DPI.
+
+        Selection matrix:
+        - HIDPI    : devicePixelRatio >= 1.5 OR logicalDotsPerInch > 120
+                     (covers 4K, Retina, Windows 125/150/200% scaling)
+        - COMPACT  : logical resolution < 1920x1080 (laptops, tablets)
+        - NORMAL   : default for standard desktop screens
+        """
         try:
             screen = QApplication.primaryScreen()
             if screen:
                 screen_geometry = screen.geometry()
                 screen_width = screen_geometry.width()
                 screen_height = screen_geometry.height()
+                dpr = float(screen.devicePixelRatio() or 1.0)
+                try:
+                    dpi = float(screen.logicalDotsPerInch() or 96.0)
+                except Exception:
+                    dpi = 96.0
 
-                # v4.0.2 FIX: Activate NORMAL mode for 1080p and above
-                # COMPACT: Small screens (< 1920x1080) - laptops, tablets
-                # NORMAL: Standard screens (≥ 1920x1080) - desktops, large laptops
-                # Small screens (below 1080p) → COMPACT
-                if screen_width < 1920 or screen_height < 1080:
+                if dpr >= 1.5 or dpi > 120.0:
+                    UIConfig.set_profile(DisplayProfile.HIDPI)
+                    logger.info(
+                        f"FilterMate: Using HIDPI profile "
+                        f"({screen_width}x{screen_height}, dpr={dpr:g}, dpi={dpi:g})"
+                    )
+                elif screen_width < 1920 or screen_height < 1080:
                     UIConfig.set_profile(DisplayProfile.COMPACT)
-                    logger.info(f"FilterMate: Using COMPACT profile for small screen {screen_width}x{screen_height}")
-                # Standard and large screens (1080p+) → NORMAL
+                    logger.info(
+                        f"FilterMate: Using COMPACT profile "
+                        f"({screen_width}x{screen_height}, dpr={dpr:g})"
+                    )
                 else:
                     UIConfig.set_profile(DisplayProfile.NORMAL)
-                    logger.info(f"FilterMate: Using NORMAL profile for resolution {screen_width}x{screen_height}")
+                    logger.info(
+                        f"FilterMate: Using NORMAL profile "
+                        f"({screen_width}x{screen_height}, dpr={dpr:g})"
+                    )
             else:
-                # v4.0.2 FIX: Fallback to NORMAL (better for desktop QGIS)
                 UIConfig.set_profile(DisplayProfile.NORMAL)
                 logger.warning("FilterMate: Could not detect screen, using NORMAL profile (desktop default)")
         except Exception as e:
