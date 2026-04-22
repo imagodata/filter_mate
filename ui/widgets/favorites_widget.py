@@ -347,27 +347,55 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
     def _save_favorite(self, name: str, expression: str, description: str,
                        layer_name: str = None, layer_provider: str = None,
                        remote_layers: dict = None):
-        """Save a new favorite."""
-        try:
-            from ...core.domain.favorites_manager import FilterFavorite
-        except ImportError:
-            logger.error("Could not import FilterFavorite")
+        """Save a new favorite.
+
+        FIX 2026-04-22: FavoritesService.add_favorite() expects keyword args
+        (name, expression, ...) and returns a favorite id. Passing a single
+        FilterFavorite positional argument raised TypeError and silently
+        dropped the save. Also call save() — FavoritesService does not
+        expose save_to_project().
+        """
+        add_fn = getattr(self._favorites_manager, 'add_favorite', None)
+        if not callable(add_fn):
+            logger.error("favorites manager does not expose add_favorite()")
             return
 
-        fav = FilterFavorite(
-            name=name,
-            expression=expression,
-            layer_name=layer_name,
-            layer_provider=layer_provider,
-            remote_layers=remote_layers if remote_layers else None,
-            description=description
-        )
+        fav_id = None
+        try:
+            fav_id = add_fn(
+                name=name,
+                expression=expression,
+                layer_name=layer_name,
+                layer_provider=layer_provider,
+                remote_layers=remote_layers if remote_layers else None,
+                description=description,
+            )
+        except TypeError:
+            # Fallback for a raw FavoritesManager which wants a FilterFavorite.
+            try:
+                from ...core.domain.favorites_manager import FilterFavorite
+            except ImportError:
+                logger.error("Could not import FilterFavorite for fallback")
+                return
+            fav = FilterFavorite(
+                name=name,
+                expression=expression,
+                layer_name=layer_name,
+                layer_provider=layer_provider,
+                remote_layers=remote_layers if remote_layers else None,
+                description=description,
+            )
+            success = bool(add_fn(fav))
+            fav_id = fav.id if success else None
 
-        self._favorites_manager.add_favorite(fav)
-        self._favorites_manager.save_to_project()
+        save_fn = getattr(self._favorites_manager, 'save', None) \
+            or getattr(self._favorites_manager, 'save_to_project', None)
+        if callable(save_fn):
+            save_fn()
 
         self.update_indicator()
-        self.favoriteAdded.emit(fav.id)
+        if fav_id:
+            self.favoriteAdded.emit(fav_id)
 
         logger.info(f"Favorite saved: {name}")
 

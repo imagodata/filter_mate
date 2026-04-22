@@ -279,6 +279,11 @@ class FavoritesController(BaseController):
             # Update use count
             self._favorites_manager.mark_favorite_used(favorite_id)
             self.favorite_applied.emit(favorite.name)
+            # FIX 2026-04-22: surface the use_count bump so consumers (manager
+            # dialog, menu preview) can redraw. mark_favorite_used() only
+            # updates the SQLite row; no signal was emitted and the menu's
+            # "Used N times" label stayed frozen until full reload.
+            self.favorites_changed.emit()
             logger.info(f"Applied favorite: {favorite.name}")
 
         return success
@@ -476,7 +481,13 @@ class FavoritesController(BaseController):
             count = legacy_fn(filepath, merge=merge) if callable(legacy_fn) else 0
 
         if count > 0:
-            self._favorites_manager.save_to_project()
+            # FIX 2026-04-22: FavoritesService exposes save() (not save_to_project),
+            # which delegates to the underlying manager. Calling save_to_project()
+            # directly raised AttributeError and swallowed the import success
+            # signal + indicator update.
+            save_fn = getattr(self._favorites_manager, 'save', None)
+            if callable(save_fn):
+                save_fn()
             self.favorites_changed.emit()
             self.update_indicator()
             self._show_success(self.tr("Imported {0} favorites").format(count))
@@ -1061,48 +1072,60 @@ class FavoritesController(BaseController):
         task. Previously only spatial_config was cached on the dockwidget while
         the checkboxes stayed unchecked, so the filter task fired with empty
         predicates / zero target layers and ended with "Task failed: Task failed".
+
+        FIX 2026-04-22: wrap the whole widget-mutation sequence in a single
+        SignalBlocker pass. setExpression / setChecked fire per-widget slots
+        (some connected to launchTaskEvent), producing a phantom filter task
+        on the intermediate state before the final explicit launchTaskEvent
+        below. The double emission yielded spurious "Task failed" banners.
         """
         try:
-            # Set expression in widget
-            if hasattr(self.dockwidget, 'mQgsFieldExpressionWidget_filtering_active_expression'):
-                widget = self.dockwidget.mQgsFieldExpressionWidget_filtering_active_expression
-                if hasattr(widget, 'setExpression'):
-                    widget.setExpression(favorite.expression)
-                elif hasattr(widget, 'setCurrentText'):
-                    widget.setCurrentText(favorite.expression)
+            dw = self.dockwidget
+            widgets_to_block = self._collect_filtering_widgets_for_favorite(dw)
 
-            # CRITICAL FIX 2026-01-18: Do NOT apply remote layer filters directly via setSubsetString!
-            # The filters contain __source alias which _clean_corrupted_subsets() will erase.
-            # Instead, we restore the spatial context (task_features, predicates, etc.) from
-            # favorite.spatial_config so the filter task can REBUILD the remote filters properly.
-            if favorite.remote_layers:
-                logger.info(f"Favorite has {len(favorite.remote_layers)} remote layers")
-                logger.info("  → Remote layers will be re-filtered by main filter task")
-                logger.info("  → NOT applying filters directly to avoid __source cleanup")
+            from ...infrastructure.signal_utils import SignalBlocker
+            with SignalBlocker(*widgets_to_block):
+                # Set expression in widget
+                expression_widget = getattr(dw, 'mQgsFieldExpressionWidget_filtering_active_expression', None)
+                if expression_widget is not None:
+                    if hasattr(expression_widget, 'setExpression'):
+                        expression_widget.setExpression(favorite.expression)
+                    elif hasattr(expression_widget, 'setCurrentText'):
+                        expression_widget.setCurrentText(favorite.expression)
 
-            # Restore spatial configuration (task_features, predicates, buffer, etc.)
-            if favorite.spatial_config:
-                logger.info(f"Restoring spatial_config from favorite '{favorite.name}'...")
-                self._restore_spatial_config(favorite)
-            else:
-                logger.warning(f"Favorite '{favorite.name}' has no spatial_config - remote layers may not filter correctly")
+                # CRITICAL FIX 2026-01-18: Do NOT apply remote layer filters directly via setSubsetString!
+                # The filters contain __source alias which _clean_corrupted_subsets() will erase.
+                # Instead, we restore the spatial context (task_features, predicates, etc.) from
+                # favorite.spatial_config so the filter task can REBUILD the remote filters properly.
+                if favorite.remote_layers:
+                    logger.info(f"Favorite has {len(favorite.remote_layers)} remote layers")
+                    logger.info("  → Remote layers will be re-filtered by main filter task")
+                    logger.info("  → NOT applying filters directly to avoid __source cleanup")
 
-            # FIX 2026-04-21: materialize the favorite into the dockwidget UI
-            # so launchTaskEvent reads a complete filtering config.
-            self._restore_filtering_ui_from_favorite(favorite)
+                # Restore spatial configuration (task_features, predicates, buffer, etc.)
+                if favorite.spatial_config:
+                    logger.info(f"Restoring spatial_config from favorite '{favorite.name}'...")
+                    self._restore_spatial_config(favorite)
+                else:
+                    logger.warning(f"Favorite '{favorite.name}' has no spatial_config - remote layers may not filter correctly")
 
-            # SAFETY NET 2026-04-21: if the favorite would fire in
-            # single_selection mode without a resolvable source feature
-            # (e.g. legacy favorite with no captured task_feature_ids, or
-            # task_feature_ids that no longer resolve after reopen),
-            # downgrade to custom_selection so the task runs against the
-            # full source layer instead of aborting with
-            # "single_selection mode requires a selected feature".
-            self._ensure_applicable_groupbox_for_favorite(favorite)
+                # FIX 2026-04-21: materialize the favorite into the dockwidget UI
+                # so launchTaskEvent reads a complete filtering config.
+                self._restore_filtering_ui_from_favorite(favorite)
 
-            # Trigger the filter action to apply the main expression
-            if hasattr(self.dockwidget, 'launchTaskEvent'):
-                self.dockwidget.launchTaskEvent(False, 'filter')
+                # SAFETY NET 2026-04-21: if the favorite would fire in
+                # single_selection mode without a resolvable source feature
+                # (e.g. legacy favorite with no captured task_feature_ids, or
+                # task_feature_ids that no longer resolve after reopen),
+                # downgrade to custom_selection so the task runs against the
+                # full source layer instead of aborting with
+                # "single_selection mode requires a selected feature".
+                self._ensure_applicable_groupbox_for_favorite(favorite)
+
+            # Trigger the filter action to apply the main expression (signals
+            # are re-enabled at this point so the task actually fires).
+            if hasattr(dw, 'launchTaskEvent'):
+                dw.launchTaskEvent(False, 'filter')
                 logger.info(f"Filter triggered for favorite: {favorite.name}")
 
             return True
@@ -1110,6 +1133,27 @@ class FavoritesController(BaseController):
         except Exception as e:
             logger.error(f"Failed to apply favorite: {e}")
             return False
+
+    @staticmethod
+    def _collect_filtering_widgets_for_favorite(dw: Any) -> List[Any]:
+        """Collect the widgets whose signals must be silenced while we
+        restore a favorite, so only the final launchTaskEvent fires a task.
+        """
+        candidates = [
+            getattr(dw, 'mQgsFieldExpressionWidget_filtering_active_expression', None),
+            getattr(dw, 'pushButton_checkable_filtering_layers_to_filter', None),
+            getattr(dw, 'pushButton_checkable_filtering_geometric_predicates', None),
+            getattr(dw, 'pushButton_checkable_filtering_buffer_value', None),
+            getattr(dw, 'mQgsDoubleSpinBox_filtering_buffer_value', None),
+            getattr(dw, 'checkableComboBoxLayer_filtering_layers_to_filter', None),
+        ]
+        try:
+            layers_widget = dw.widgets.get("FILTERING", {}).get("LAYERS_TO_FILTER", {}).get("WIDGET")
+            if layers_widget is not None:
+                candidates.append(layers_widget)
+        except (AttributeError, TypeError):
+            pass
+        return [w for w in candidates if w is not None]
 
     def _favorite_matches_current_layer(
         self,

@@ -172,6 +172,21 @@ class FavoritesService(QObject):
         """
         if self._favorites_manager and hasattr(self._favorites_manager, 'set_database'):
             self._favorites_manager.set_database(db_path, project_uuid)
+
+            # FIX 2026-04-22: if the SQLite DB is empty but the .qgz project file
+            # carries a favorites backup (e.g. the plugin was re-installed, the
+            # user moved the project to another machine, or the sqlite was wiped),
+            # silently re-import the backup so favorites persist across transfer.
+            if self.count == 0:
+                try:
+                    restored = self.restore_from_project_file()
+                    if restored > 0:
+                        logger.info(
+                            f"✓ Auto-restored {restored} favorites from project file (.qgz) backup"
+                        )
+                except Exception as e:
+                    logger.debug(f"Auto-restore from project file skipped: {e}")
+
             # CRITICAL: Emit favorites_changed to update UI after loading
             self.favorites_changed.emit()
             logger.info(f"✓ Favorites loaded from database and UI notified (count: {self.count})")

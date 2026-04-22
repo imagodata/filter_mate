@@ -676,6 +676,22 @@ class FilterMateApp:
         setattr(self, flag_name, value)
         setattr(self, f"{flag_name}_timestamp", time.time() * 1000 if value else 0)
 
+        # FIX 2026-04-22: when both init flags fall back to False, replay any
+        # filter that launchTaskEvent deferred while init was in progress
+        # (e.g. a favorite applied right after project reopen).
+        if value is False and flag_name in ('_loading_new_project', '_initializing_project'):
+            if getattr(self, '_loading_new_project', False) or getattr(self, '_initializing_project', False):
+                return
+            dw = getattr(self, 'dockwidget', None)
+            if dw is not None and getattr(dw, '_pending_filter_after_init', False):
+                dw._pending_filter_after_init = False
+                try:
+                    from qgis.PyQt.QtCore import QTimer
+                    QTimer.singleShot(0, lambda: dw.launchTaskEvent(False, 'filter'))
+                    logger.info("Replayed deferred filter task after project init complete")
+                except Exception as e:
+                    logger.debug(f"Could not replay deferred filter: {e}")
+
     def _set_loading_flag(self, loading: bool):
         """Set _loading_new_project flag with timestamp tracking."""
         self._set_flag_with_timestamp('_loading_new_project', loading)
@@ -762,6 +778,13 @@ class FilterMateApp:
 
                 # CRITICAL: Initialize UI from .ui file
                 self.dockwidget.setupUi(self.dockwidget)
+
+                # FIX 2026-04-22: back-reference for code that needs to read
+                # init flags on the app (launchTaskEvent guard, exporting
+                # controller's manage_task fallback). Without this, every
+                # `getattr(dockwidget, 'app', None)` returns None and the
+                # guards are silently bypassed.
+                self.dockwidget.app = self
 
                 logger.info("Created FilterMateDockWidget (legacy mode)")
             except Exception as e:

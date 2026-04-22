@@ -81,9 +81,37 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._favorites_manager = favorites_manager
         self._current_fav_id = None
         self._all_favorites = []
+        # FIX 2026-04-22: re-entrancy guard so our own update/delete don't bounce
+        # back through the external-change refresh slot.
+        self._suppress_external_refresh = False
 
         if HAS_QGIS:
             self._setup_ui()
+
+            # FIX 2026-04-22: keep the dialog in sync when favorites change
+            # externally (import, apply updating use_count, another controller
+            # editing the same manager). Without this the list stayed stale.
+            if self._favorites_manager is not None and hasattr(self._favorites_manager, 'favorites_changed'):
+                try:
+                    self._favorites_manager.favorites_changed.connect(self._on_external_favorites_changed)
+                except (TypeError, RuntimeError):
+                    pass
+
+    def _on_external_favorites_changed(self) -> None:
+        """Refresh list when favorites change outside this dialog."""
+        if self._suppress_external_refresh:
+            return
+        try:
+            previous_id = self._current_fav_id
+            self.refresh()
+            # Keep the user's previous selection if still present
+            if previous_id:
+                for i in range(self._list_widget.count()):
+                    if self._list_widget.item(i).data(Qt.ItemDataRole.UserRole) == previous_id:
+                        self._list_widget.setCurrentRow(i)
+                        break
+        except (RuntimeError, AttributeError) as e:
+            logger.debug(f"Could not refresh dialog on external change: {e}")
 
     def _setup_ui(self):
         """Build the dialog UI."""
@@ -647,14 +675,20 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         ]
 
         if new_name:
-            self._favorites_manager.update_favorite(
-                self._current_fav_id,
-                name=new_name,
-                expression=new_expr,
-                description=new_desc,
-                tags=new_tags
-            )
-            self._favorites_manager.save()
+            # FIX 2026-04-22: suppress re-entrant external refresh triggered by
+            # the manager's own favorites_changed emission.
+            self._suppress_external_refresh = True
+            try:
+                self._favorites_manager.update_favorite(
+                    self._current_fav_id,
+                    name=new_name,
+                    expression=new_expr,
+                    description=new_desc,
+                    tags=new_tags
+                )
+                self._favorites_manager.save()
+            finally:
+                self._suppress_external_refresh = False
 
             # Update list item
             item = self._list_widget.currentItem()
@@ -672,7 +706,14 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                     item_text += " 🏷️"
                 item.setText(item_text)
 
+            # FIX 2026-04-22: refresh the local cache so the next search or
+            # populate_list() call reflects the edited name/tags. Without this,
+            # _all_favorites still held the pre-edit FilterFavorite and
+            # clearing the search box silently restored the old display.
+            self._all_favorites = self._favorites_manager.get_all_favorites()
+
             self.favoriteUpdated.emit(self._current_fav_id)
+            self.favoritesChanged.emit()
             logger.info(f"Favorite updated: {new_name}")
 
     def _on_delete(self):
@@ -695,8 +736,21 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
 
         deleted_id = self._current_fav_id
-        self._favorites_manager.remove_favorite(self._current_fav_id)
+        # FIX 2026-04-22: suppress re-entrant external refresh from manager's
+        # own favorites_changed emission during delete + save.
+        self._suppress_external_refresh = True
+        try:
+            self._favorites_manager.remove_favorite(self._current_fav_id)
+        finally:
+            self._suppress_external_refresh = False
         self._list_widget.takeItem(self._list_widget.currentRow())
+
+        # FIX 2026-04-22: keep the local cache in sync with the manager, else
+        # clearing the search box re-populated the list with the deleted entry.
+        self._all_favorites = [
+            f for f in self._all_favorites
+            if getattr(f, 'id', None) != deleted_id
+        ]
 
         fav_count = self._favorites_manager.count if self._favorites_manager else 0
         self._header_label.setText(
