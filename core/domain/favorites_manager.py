@@ -12,6 +12,7 @@ Date: January 2026
 import logging
 import json
 import uuid
+from enum import Enum
 from typing import List, Dict, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass, asdict, field
@@ -20,6 +21,23 @@ logger = logging.getLogger('FilterMate.FavoritesManager')
 
 # UUID for global favorites (available in all projects)
 GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
+
+
+class FavoriteScope(Enum):
+    """Four scopes a favorite can have (see ``FavoritesManager.list_by_scope``).
+
+    Two independent dimensions combined:
+
+    - **Project** : this project (``project_uuid = <current>``) vs. all
+      projects (``project_uuid = GLOBAL_PROJECT_UUID``).
+    - **Owner**   : mine (``owner = <current user>``) vs. shared
+      (``owner IS NULL`` — visible to everyone on this DB).
+    """
+    ALL = "all"
+    GLOBAL_SHARED = "global_shared"       # project=GLOBAL, owner=NULL
+    PROJECT_SHARED = "project_shared"     # project=current, owner=NULL
+    GLOBAL_MINE = "global_mine"            # project=GLOBAL, owner=me
+    PROJECT_MINE = "project_mine"          # project=current, owner=me
 
 
 def normalize_remote_layers_keys(remote_layers: Dict[str, Any]) -> Dict[str, Any]:
@@ -89,6 +107,11 @@ class FilterFavorite:
     last_used_at: Optional[str] = None
     remote_layers: Optional[Dict] = None
     spatial_config: Optional[Dict] = None
+    # Scope columns (v5.1+): owner is NULL for "shared with everyone" or
+    # a user identity string (see core.domain.user_identity). project_uuid
+    # is handled at the manager level (not carried on the dataclass) — it
+    # maps to the current project or GLOBAL_PROJECT_UUID.
+    owner: Optional[str] = None
     # FIX 2026-04-23 (v3): forward-compat escape hatch. Any unknown key
     # encountered in from_dict is stashed here and re-emitted by to_dict, so
     # a JSON file written by a newer plugin version round-trips through an
@@ -195,6 +218,11 @@ class FavoritesManager:
         """
         self._db_path = db_path
         self._project_uuid = project_uuid
+        # Current user context — resolved lazily on first use. Callers can
+        # override via ``set_current_user()`` for tests or explicit
+        # identity switching.
+        self._current_user: Optional[str] = None
+        self._current_user_resolved: bool = False
         self._favorites: Dict[str, FilterFavorite] = {}
         self._initialized = False
 
@@ -249,13 +277,31 @@ class FavoritesManager:
                     'use_count': 'INTEGER DEFAULT 0',
                     'last_used_at': 'TEXT',
                     'remote_layers': 'TEXT',
-                    'spatial_config': 'TEXT'
+                    'spatial_config': 'TEXT',
+                    # v5.1: per-user scope. NULL means "shared" (everyone
+                    # who opens this DB sees it); a username string means
+                    # "personal to that user". See _backfill_owner_on_migration
+                    # for the one-shot migration.
+                    'owner': 'TEXT',
                 }
+
+                owner_was_missing = 'owner' not in existing_columns
 
                 for col_name, col_type in required_columns.items():
                     if col_name not in existing_columns:
                         logger.info(f"Adding missing column '{col_name}' to fm_favorites table")
                         cursor.execute(f"ALTER TABLE fm_favorites ADD COLUMN {col_name} {col_type}")  # nosec B608
+
+                # One-shot ``owner`` backfill: when the column was just
+                # introduced, all existing favorites belong to the user who
+                # created them. The safest proxy is "current user" — the
+                # person running the migration. Users who prefer the
+                # permissive pre-v5.1 behaviour can bulk-update to NULL.
+                if owner_was_missing:
+                    try:
+                        self._backfill_owner_on_migration(cursor)
+                    except Exception as exc:
+                        logger.debug(f"Owner backfill skipped: {exc}")
 
                 # FIX 2026-04-23 (HIGH-1): one-shot backfill of
                 # remote_layers.layer_signature + display_name for rows saved
@@ -289,7 +335,8 @@ class FavoritesManager:
                         use_count INTEGER DEFAULT 0,
                         last_used_at TEXT,
                         remote_layers TEXT,
-                        spatial_config TEXT
+                        spatial_config TEXT,
+                        owner TEXT
                     )
                 """)
 
@@ -310,6 +357,15 @@ class FavoritesManager:
                 CREATE INDEX IF NOT EXISTS idx_favorites_project_name
                 ON fm_favorites(project_uuid, name)
             """)
+            # v5.1: owner-scoped queries (project_uuid + owner) are the
+            # common hot path when the scope filter is "mine" / "mine this
+            # project". Partial index skips rows with NULL owner to keep
+            # the index small for the "shared" bulk.
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_favorites_owner
+                ON fm_favorites(project_uuid, owner)
+                WHERE owner IS NOT NULL
+            """)
             conn.commit()
 
             conn.close()
@@ -320,6 +376,42 @@ class FavoritesManager:
         except Exception as e:
             logger.error(f"Failed to initialize favorites database: {e}")
             self._initialized = False
+
+    def _backfill_owner_on_migration(self, cursor) -> None:
+        """Stamp existing rows with the current user when ``owner`` is
+        introduced for the first time.
+
+        Rationale (locked with user 2026-04-23): before v5.1 the schema
+        carried no identity, so every favorite was implicitly "the one
+        who created it on this workstation". The user confirmed they
+        want those to migrate to the current user rather than to NULL
+        (= shared with everyone), matching the real semantics of who
+        *authored* them.
+
+        Idempotent: only touches rows where ``owner IS NULL``. Users
+        who prefer a shared default can bulk-update after the fact.
+        """
+        try:
+            from .user_identity import resolve_current_user
+        except Exception:
+            return
+        current = resolve_current_user()
+        if not current:
+            logger.info(
+                "Owner backfill skipped — no user identity resolved; "
+                "existing favorites stay shared (owner=NULL)."
+            )
+            return
+        try:
+            cursor.execute(
+                "UPDATE fm_favorites SET owner = ? WHERE owner IS NULL",
+                (current,),
+            )
+            logger.info(
+                f"Owner backfill: stamped {cursor.rowcount} favorite(s) with owner='{current}'"
+            )
+        except Exception as exc:
+            logger.warning(f"Owner backfill update failed: {exc}")
 
     def _backfill_remote_layer_signatures(self, cursor) -> None:
         """Backfill missing ``layer_signature`` and ``display_name`` in
@@ -466,7 +558,8 @@ class FavoritesManager:
                 'use_count': 'use_count',
                 'last_used_at': 'last_used_at',
                 'remote_layers': 'remote_layers',
-                'spatial_config': 'spatial_config'
+                'spatial_config': 'spatial_config',
+                'owner': 'owner',
             }
 
             for col in column_map.keys():
@@ -500,6 +593,7 @@ class FavoritesManager:
                     'last_used_at': row['last_used_at'] if 'last_used_at' in available_columns else None,
                     'remote_layers': json.loads(row['remote_layers']) if 'remote_layers' in available_columns and row['remote_layers'] else None,
                     'spatial_config': json.loads(row['spatial_config']) if 'spatial_config' in available_columns and row['spatial_config'] else None,
+                    'owner': row['owner'] if 'owner' in available_columns else None,
                 }
                 favorite = FilterFavorite.from_dict(data)
                 self._favorites[favorite.id] = favorite
@@ -537,6 +631,87 @@ class FavoritesManager:
                 return fav
         return None
 
+    # ─────────────────────────────────────────────────────────────────
+    # User-scope API (v5.1+)
+    # ─────────────────────────────────────────────────────────────────
+
+    def set_current_user(self, user: Optional[str]) -> None:
+        """Override the current-user identity for this manager.
+
+        When None is passed, the manager falls back to the cascade
+        (``APP.USER_IDENTITY → qgis/userName → OS``) the next time an
+        identity is needed.
+        """
+        self._current_user = user
+        self._current_user_resolved = True
+
+    def get_current_user(self) -> Optional[str]:
+        """Return the identity used to stamp new favorites' ``owner``.
+
+        First call triggers a cascade resolve via
+        ``core.domain.user_identity.resolve_current_user`` and caches
+        the result on the instance. Subsequent calls are free.
+        """
+        if self._current_user_resolved:
+            return self._current_user
+        try:
+            from .user_identity import resolve_current_user
+        except Exception:
+            self._current_user = None
+            self._current_user_resolved = True
+            return None
+        self._current_user = resolve_current_user()
+        self._current_user_resolved = True
+        return self._current_user
+
+    def list_by_scope(
+        self,
+        scope: 'FavoriteScope',
+        *,
+        current_user: Optional[str] = None,
+    ) -> List[FilterFavorite]:
+        """Filter the in-memory cache by ``(project × owner)`` scope.
+
+        ``current_user`` lets callers pin the identity for a single call
+        (e.g. "show Alice's favorites" in an admin tool); omitted, it
+        falls back to ``get_current_user()``.
+        """
+        if scope == FavoriteScope.ALL:
+            return list(self._favorites.values())
+
+        user = current_user if current_user is not None else self.get_current_user()
+        favs = self._favorites.values()
+
+        def _is_mine(fav: FilterFavorite) -> bool:
+            return user is not None and fav.owner == user
+
+        def _is_shared(fav: FilterFavorite) -> bool:
+            return fav.owner is None
+
+        # _load_favorites only loads the current project's rows into the
+        # cache, so "project" filters boil down to "not global".
+        project_uuid = self._project_uuid or GLOBAL_PROJECT_UUID
+
+        def _is_global(fav_project_uuid: Optional[str]) -> bool:
+            # Rows loaded into memory don't carry their own project_uuid
+            # (manager scopes the load). A global row sitting in the
+            # cache must have been fetched explicitly via
+            # ``get_global_favorites`` — those rows have no project_uuid
+            # attribute on the dataclass, so we approximate "global" as
+            # "the manager's project is GLOBAL".
+            return project_uuid == GLOBAL_PROJECT_UUID
+
+        predicates = {
+            FavoriteScope.GLOBAL_SHARED: lambda f: _is_shared(f) and _is_global(None),
+            FavoriteScope.PROJECT_SHARED: lambda f: _is_shared(f) and not _is_global(None),
+            FavoriteScope.GLOBAL_MINE: lambda f: _is_mine(f) and _is_global(None),
+            FavoriteScope.PROJECT_MINE: lambda f: _is_mine(f) and not _is_global(None),
+        }
+        pred = predicates.get(scope)
+        if pred is None:
+            return list(favs)
+        return [f for f in favs if pred(f)]
+
     def add_favorite(self, favorite: FilterFavorite, preserve_timestamps: bool = False) -> bool:
         """
         Add a new favorite.
@@ -571,6 +746,15 @@ class FavoritesManager:
             if not preserve_timestamps or not favorite.updated_at:
                 favorite.updated_at = favorite.created_at
 
+            # v5.1: auto-stamp owner from the resolved current user when
+            # the caller didn't specify one. ``preserve_timestamps`` also
+            # signals an import/restore path — we never stomp an
+            # explicitly-set owner coming from a bundle / qgz backup.
+            if favorite.owner is None and not preserve_timestamps:
+                resolved = self.get_current_user()
+                if resolved:
+                    favorite.owner = resolved
+
             conn = sqlite3.connect(self._db_path)
             cursor = conn.cursor()
 
@@ -578,8 +762,8 @@ class FavoritesManager:
                 INSERT INTO fm_favorites (
                     id, project_uuid, name, expression, layer_name, layer_id,
                     layer_provider, description, tags, created_at, updated_at,
-                    use_count, last_used_at, remote_layers, spatial_config
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    use_count, last_used_at, remote_layers, spatial_config, owner
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 favorite.id,
                 self._project_uuid,
@@ -596,6 +780,7 @@ class FavoritesManager:
                 favorite.last_used_at,
                 json.dumps(favorite.remote_layers) if favorite.remote_layers else None,
                 json.dumps(favorite.spatial_config) if favorite.spatial_config else None,
+                favorite.owner,
             ))
 
             conn.commit()
@@ -681,7 +866,8 @@ class FavoritesManager:
                 UPDATE fm_favorites SET
                     name = ?, expression = ?, layer_name = ?, layer_id = ?,
                     layer_provider = ?, description = ?, tags = ?, updated_at = ?,
-                    use_count = ?, last_used_at = ?, remote_layers = ?, spatial_config = ?
+                    use_count = ?, last_used_at = ?, remote_layers = ?, spatial_config = ?,
+                    owner = ?
                 WHERE id = ?
             """, (
                 favorite.name,
@@ -696,6 +882,7 @@ class FavoritesManager:
                 favorite.last_used_at,
                 json.dumps(favorite.remote_layers) if favorite.remote_layers else None,
                 json.dumps(favorite.spatial_config) if favorite.spatial_config else None,
+                favorite.owner,
                 favorite_id
             ))
 

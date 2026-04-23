@@ -335,18 +335,59 @@ class BaseExtension(ABC):
         return True
 
     def _persist_config(self) -> bool:
-        """Write the current in-memory CONFIG_DATA back to config.json."""
+        """Write the extension's config back to config.json defensively.
+
+        Uses a read-modify-write pattern: we re-load the on-disk config
+        just before writing, overlay *only* this extension's namespace
+        (``EXTENSIONS.<ext_id>``) from in-memory state, then write back.
+
+        Rationale: other parts of FilterMate (dockwidget, config
+        controller, database manager) may have written a stale snapshot
+        of ``CONFIG_DATA`` to disk in between our in-memory mutations
+        and this persist. A naive ``json.dump(ENV_VARS['CONFIG_DATA'])``
+        would clobber those sibling writes — or, worse, resurrect a
+        stale EXTENSIONS section that no longer has our schema.
+        """
         try:
             from filter_mate.config.config import ENV_VARS
         except Exception:
             return False
         config_path = ENV_VARS.get("CONFIG_JSON_PATH")
-        config_data = ENV_VARS.get("CONFIG_DATA")
-        if not config_path or not isinstance(config_data, dict):
+        live_data = ENV_VARS.get("CONFIG_DATA")
+        if not config_path or not isinstance(live_data, dict):
             return False
+
+        # In-memory snapshot of just this extension's namespace
+        live_extensions = live_data.get("EXTENSIONS", {})
+        if not isinstance(live_extensions, dict):
+            live_extensions = {}
+        our_slice = live_extensions.get(self.metadata.id)
+        if not isinstance(our_slice, dict):
+            return False  # Nothing to persist
+
+        # Re-read disk (or fall back to the in-memory snapshot on read failure)
+        try:
+            with open(config_path, "r", encoding="utf-8") as fh:
+                disk_data = json.load(fh)
+            if not isinstance(disk_data, dict):
+                disk_data = live_data
+        except (OSError, ValueError):
+            disk_data = live_data
+
+        # Overlay our slice on top of whatever is on disk
+        disk_ext = disk_data.setdefault("EXTENSIONS", {})
+        if not isinstance(disk_ext, dict):
+            disk_data["EXTENSIONS"] = {}
+            disk_ext = disk_data["EXTENSIONS"]
+        disk_ext[self.metadata.id] = our_slice
+
+        # Sync back into ENV_VARS so whoever reads it next sees the
+        # merged state rather than our slice-only view.
+        ENV_VARS["CONFIG_DATA"] = disk_data
+
         try:
             with open(config_path, "w", encoding="utf-8") as fh:
-                json.dump(config_data, fh, indent=2, ensure_ascii=False)
+                json.dump(disk_data, fh, indent=2, ensure_ascii=False)
             return True
         except OSError as exc:
             logger.warning(

@@ -14,6 +14,11 @@
       "description": "Auto-activate plugin when a project with vector layers is loaded: true (automatically open plugin), false (manual activation only)",
       "applies_to": "Plugin initialization behavior"
     },
+    "USER_IDENTITY": {
+      "value": "",
+      "description": "Identity used to stamp the 'owner' column on new favorites. Cascade fallback when empty: QgsSettings 'qgis/userName' → OS user. Set explicitly to stabilize identity across machines or when running as a shared OS user (e.g. a kiosk session).",
+      "applies_to": "Per-user scope on favorites (v5.1+)"
+    },
     "DOCKWIDGET": {
       "_display_name": "Interface",
       "FEEDBACK_LEVEL": {

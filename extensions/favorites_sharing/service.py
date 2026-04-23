@@ -161,6 +161,10 @@ class FavoritesSharingService:
         # Strip identity fields that would collide with existing rows
         rebound.pop('id', None)
         rebound.pop('project_uuid', None)
+        # v5.1: also strip ``owner`` — a shared bundle should never pin
+        # the forker to the author's identity. ``add_favorite`` will
+        # re-stamp with the current user via the cascade.
+        rebound.pop('owner', None)
         # Reset usage stats on fork — it's a brand-new copy
         rebound['use_count'] = 0
         rebound['last_used_at'] = None
@@ -410,6 +414,13 @@ class FavoritesSharingService:
                 ),
             )
 
+        # v5.1: strip ``owner`` from every favorite before shipping the
+        # bundle. owner is a local/team scope attribute — it identifies
+        # the author inside a single DB and must never leak when a
+        # bundle crosses organisation boundaries (fork, share via git,
+        # upload to QGIS Resource Sharing index).
+        self._strip_owner_from_bundle(bundle_path)
+
         # Write / refresh collection.json manifest
         manifest_path = os.path.join(collection_dir, 'collection.json')
         manifest_written = self._write_collection_manifest(
@@ -429,6 +440,50 @@ class FavoritesSharingService:
             collection_manifest_path=manifest_path if manifest_written else "",
             favorites_count=getattr(result, 'favorites_count', len(favorite_ids)),
         )
+
+    @staticmethod
+    def _strip_owner_from_bundle(bundle_path: str) -> None:
+        """Remove the ``owner`` key from every favorite in a bundle file.
+
+        Covers every plausible envelope shape:
+
+        - ``{"favorites": [...]}`` (v3 canonical)
+        - ``{"favorites": {id: {...}}}`` (dict-keyed variant)
+        - top-level list (legacy single-file export)
+
+        Best-effort: a malformed bundle is logged and left untouched so
+        publishing never fails on a stripping concern alone.
+        """
+        try:
+            with open(bundle_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except (OSError, ValueError) as exc:
+            logger.debug("Cannot strip owner from %s: %s", bundle_path, exc)
+            return
+
+        def _strip_one(fav: Any) -> None:
+            if isinstance(fav, dict) and 'owner' in fav:
+                fav.pop('owner', None)
+
+        if isinstance(data, dict):
+            favorites = data.get('favorites')
+            if isinstance(favorites, list):
+                for fav in favorites:
+                    _strip_one(fav)
+            elif isinstance(favorites, dict):
+                for fav in favorites.values():
+                    _strip_one(fav)
+        elif isinstance(data, list):
+            for fav in data:
+                _strip_one(fav)
+        else:
+            return  # Unknown envelope shape — leave as-is
+
+        try:
+            with open(bundle_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        except OSError as exc:
+            logger.warning("Could not rewrite bundle after owner strip: %s", exc)
 
     @staticmethod
     def _inject_collection_metadata(bundle_path: str, metadata: Dict[str, Any]) -> None:

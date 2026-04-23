@@ -26,6 +26,46 @@ from .git_client import GitClient, GitError, GitResult
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
 
 
+def _profile_repos_root() -> str:
+    """Return the standard parent directory for FilterMate-managed clones.
+
+    Convention (v5.1): clones live under the QGIS roaming profile dir —
+    specifically ``PLUGIN_CONFIG_DIRECTORY/repos``. This keeps them
+    co-located with ``config.json`` and ``filterMate_db.sqlite`` and
+    survives a plugin reinstall (the plugin folder itself may be wiped
+    when QGIS updates the plugin).
+
+    Returns an empty string when the plugin env has not been initialised
+    yet (tests, standalone imports). Callers must handle the empty case.
+    """
+    try:
+        from filter_mate.config.config import ENV_VARS
+    except Exception:
+        return ""
+    base = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY") or ""
+    if not base:
+        return ""
+    return os.path.join(base, "repos")
+
+
+def _slugify_repo_name(name: str) -> str:
+    """Make a repo name safe for use as a filesystem directory.
+
+    Only ``[A-Za-z0-9._-]`` survive; everything else becomes ``_``.
+    Empty input yields ``repo`` to guarantee a non-empty path segment.
+    """
+    if not name:
+        return "repo"
+    safe = []
+    for ch in name:
+        if ch.isalnum() or ch in "._-":
+            safe.append(ch)
+        else:
+            safe.append("_")
+    slug = "".join(safe).strip("._-") or "repo"
+    return slug.lower()
+
+
 class RepoStatus(Enum):
     """Disk-level status of a configured repo."""
 
@@ -55,9 +95,43 @@ class RemoteRepo:
 
     @property
     def expanded_local_clone(self) -> str:
-        """Resolve ``~``, environment variables in ``local_clone``."""
-        path = os.path.expandvars(os.path.expanduser(self.local_clone or ""))
-        return os.path.abspath(path) if path else ""
+        """Resolve ``local_clone`` to an absolute path.
+
+        Resolution rules (v5.1, user-locked 2026-04-23):
+
+        - Empty → default to ``[profile]/FilterMate/repos/<name>`` so new
+          installs don't need to pick a path. This keeps all FilterMate
+          state (config, SQLite, repos) under the QGIS roaming profile
+          dir, never inside the plugin folder itself (which gets wiped
+          on plugin updates).
+        - Relative (no leading ``/``, ``\\``, drive letter, or ``~``) →
+          resolved relative to the same profile dir (``repos/acme`` →
+          ``[profile]/FilterMate/repos/acme``).
+        - Absolute or ``~``-prefixed → kept as-is, expanded. Use this
+          for shared network mounts or explicit overrides.
+        """
+        raw = (self.local_clone or "").strip()
+
+        # Empty → derive from the repo name under the profile's repos dir
+        if not raw:
+            root = _profile_repos_root()
+            if not root:
+                return ""
+            return os.path.join(root, _slugify_repo_name(self.name))
+
+        # Expand ~ and env vars first — user-provided absolute paths win
+        expanded = os.path.expandvars(os.path.expanduser(raw))
+
+        # Relative paths are anchored at the profile's repos dir rather
+        # than the current working dir (which is QGIS' runtime cwd, a
+        # terrible anchor). Users who truly want cwd-relative should
+        # pass an absolute path.
+        if not os.path.isabs(expanded):
+            root = _profile_repos_root()
+            if root:
+                expanded = os.path.join(root, expanded)
+
+        return os.path.abspath(expanded)
 
     @property
     def collection_dir(self) -> str:

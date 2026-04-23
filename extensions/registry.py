@@ -201,19 +201,51 @@ class ExtensionRegistry:
         return results
 
     def _persist_config(self) -> bool:
-        """Write ENV_VARS['CONFIG_DATA'] back to config.json (single I/O point)."""
+        """Persist all extensions' seeded config namespaces defensively.
+
+        Read-modify-write against disk (see ``BaseExtension._persist_config``
+        for the rationale): other FilterMate components may have written
+        a stale CONFIG_DATA between the seed mutations and this persist.
+        We overlay only the ``EXTENSIONS`` dict on top of the current
+        disk state, preserving sibling sections even if they diverged.
+        """
         try:
             from filter_mate.config.config import ENV_VARS
             import json
         except Exception:
             return False
         config_path = ENV_VARS.get("CONFIG_JSON_PATH")
-        config_data = ENV_VARS.get("CONFIG_DATA")
-        if not config_path or not isinstance(config_data, dict):
+        live_data = ENV_VARS.get("CONFIG_DATA")
+        if not config_path or not isinstance(live_data, dict):
             return False
+
+        live_extensions = live_data.get("EXTENSIONS", {})
+        if not isinstance(live_extensions, dict):
+            live_extensions = {}
+
+        # Re-read disk state (best-effort) and overlay our EXTENSIONS
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                disk_data = json.load(f)
+            if not isinstance(disk_data, dict):
+                disk_data = live_data
+        except (OSError, ValueError):
+            disk_data = live_data
+
+        merged_ext = disk_data.get("EXTENSIONS", {})
+        if not isinstance(merged_ext, dict):
+            merged_ext = {}
+        for ext_id, slice_data in live_extensions.items():
+            if isinstance(slice_data, dict):
+                merged_ext[ext_id] = slice_data
+        disk_data["EXTENSIONS"] = merged_ext
+
+        # Sync ENV_VARS so subsequent readers see the merged state
+        ENV_VARS["CONFIG_DATA"] = disk_data
+
         try:
             with open(config_path, 'w', encoding='utf-8') as f:
-                json.dump(config_data, f, indent=2, ensure_ascii=False)
+                json.dump(disk_data, f, indent=2, ensure_ascii=False)
             return True
         except OSError as exc:
             logger.warning("Could not persist config.json: %s", exc)

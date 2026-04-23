@@ -461,17 +461,72 @@ class TestConfigAPI:
 
     @pytest.fixture
     def in_memory_config(self, tmp_path, monkeypatch):
-        """Wire ENV_VARS to an in-memory CONFIG_DATA + tmp config.json."""
-        from filter_mate.config import config as fm_config
+        """Wire ENV_VARS to an in-memory CONFIG_DATA + tmp config.json.
+
+        Defends against ``tests/unit/core/tasks/conftest.py`` — it
+        replaces ``sys.modules['filter_mate.config.config']`` with a
+        ``MagicMock`` and never restores it. Any later test pulling
+        ``ENV_VARS`` from that module would get a MagicMock instead of
+        a real dict, and every call to ``.get(...)`` would return
+        another MagicMock rather than our seeded values.
+        """
+        import sys
+        import types
 
         cfg_path = tmp_path / "config.json"
         cfg_data = {"EXTENSIONS": {}}
-        original = dict(fm_config.ENV_VARS)
-        fm_config.ENV_VARS["CONFIG_DATA"] = cfg_data
-        fm_config.ENV_VARS["CONFIG_JSON_PATH"] = str(cfg_path)
-        yield cfg_data, cfg_path
-        fm_config.ENV_VARS.clear()
-        fm_config.ENV_VARS.update(original)
+
+        saved_cc = sys.modules.get("filter_mate.config.config")
+        saved_c = sys.modules.get("filter_mate.config")
+        saved_fm = sys.modules.get("filter_mate")
+
+        # Build a minimal but real module tree so `from filter_mate.config.config
+        # import ENV_VARS` returns our dict.
+        real_cc = types.ModuleType("filter_mate.config.config")
+        real_cc.ENV_VARS = {
+            "CONFIG_DATA": cfg_data,
+            "CONFIG_JSON_PATH": str(cfg_path),
+        }
+
+        def _get_option_value(option, default=""):
+            if option is None:
+                return default
+            if isinstance(option, dict) and "value" in option:
+                return option["value"]
+            return option
+
+        real_cc._get_option_value = _get_option_value
+
+        real_c = types.ModuleType("filter_mate.config")
+        real_c.__path__ = []
+        real_c.config = real_cc
+
+        # Preserve or synthesize the top-level ``filter_mate`` package
+        if saved_fm is None or not hasattr(saved_fm, "__path__"):
+            real_fm = types.ModuleType("filter_mate")
+            real_fm.__path__ = []
+            sys.modules["filter_mate"] = real_fm
+        sys.modules["filter_mate.config"] = real_c
+        sys.modules["filter_mate.config.config"] = real_cc
+
+        try:
+            yield cfg_data, cfg_path
+        finally:
+            # Restore prior module state exactly
+            if saved_cc is not None:
+                sys.modules["filter_mate.config.config"] = saved_cc
+            else:
+                sys.modules.pop("filter_mate.config.config", None)
+            if saved_c is not None:
+                sys.modules["filter_mate.config"] = saved_c
+            else:
+                sys.modules.pop("filter_mate.config", None)
+            if saved_fm is not None:
+                sys.modules["filter_mate"] = saved_fm
+            elif "filter_mate" in sys.modules and not hasattr(
+                sys.modules["filter_mate"], "__real__"
+            ):
+                sys.modules.pop("filter_mate", None)
 
     def test_full_schema_merges_common_keys(self):
         ext = SchemaExtension()

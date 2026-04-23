@@ -23,6 +23,10 @@ FALLBACK_CONFIG = {
             "value": False,
             "description": "Auto-activate plugin when a project with vector layers is loaded"
         },
+        "USER_IDENTITY": {
+            "value": "",
+            "description": "Identity string stamped on new favorites (cascade: this → qgis/userName → OS user)"
+        },
         "DOCKWIDGET": {
             "FEEDBACK_LEVEL": {
                 "value": "normal",
