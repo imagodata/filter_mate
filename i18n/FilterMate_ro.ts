@@ -279,7 +279,7 @@ Nu = Înlocuire toate existentele</translation>
         <translation>Dialogul managerului de favorite nu este disponibil</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1779"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1801"/>
         <source>Error: {0}</source>
         <translation>Eroare: {0}</translation>
     </message>
@@ -381,22 +381,22 @@ Do you want to replace it?</source>
 Doriți să îl înlocuiți?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1555"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1577"/>
         <source>Favorite copied to global favorites</source>
         <translation>Favoritul a fost copiat în favoritele globale</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1558"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1580"/>
         <source>Failed to copy to global favorites</source>
         <translation>Copierea în favoritele globale a eșuat</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>Global Favorites</source>
         <translation>Favorite globale</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
@@ -405,37 +405,37 @@ Global favorites are shared across all projects.</source>
 Favoritele globale sunt partajate între toate proiectele.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1581"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1603"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>{0} favorit(e) salvat(e) în fișierul proiectului</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1583"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1605"/>
         <source>Save failed</source>
         <translation>Salvare eșuată</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1595"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1617"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>{0} favorit(e) restaurat(e) din fișierul proiectului</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1597"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1619"/>
         <source>No favorites to restore found in project</source>
         <translation>Niciun favorit de restaurat găsit în proiect</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1624"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1646"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>{0} proiect(e) orfan(e) curățat(e)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1626"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1648"/>
         <source>No orphan projects to clean up</source>
         <translation>Niciun proiect orfan de curățat</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1751"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1773"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -452,12 +452,12 @@ Total favorite: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1767"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1789"/>
         <source>Top projects by favorites:</source>
         <translation>Proiecte principale după favorite:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1771"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1793"/>
         <source>FilterMate Statistics</source>
         <translation>Statistici FilterMate</translation>
     </message>
@@ -491,32 +491,32 @@ Aplicați un filtru unui strat, apoi apăsați indicatorul ★ și alegeți «Ad
         <translation>Publică (niciun favorit salvat)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1734"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1756"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>Directorul de configurare FilterMate nu este încă inițializat — deschideți mai întâi un proiect QGIS cu FilterMate.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1692"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
         <translation>Extensia Resource Sharing nu este activă. Activați &apos;favorites_sharing&apos; în setările FilterMate.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1700"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
         <source>Shared favorites service is not available.</source>
         <translation>Serviciul de favorite partajate nu este disponibil.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1686"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
         <source>Shared picker failed: {0}</source>
         <translation>Selectorul de favorite partajate a eșuat: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1704"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
         <translation>Nu aveți încă favorite de publicat. Salvați mai întâi un filtru prin meniul ★.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1720"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
         <source>Publish dialog failed: {0}</source>
         <translation>Deschiderea ferestrei de publicare a eșuat: {0}</translation>
     </message>
@@ -524,199 +524,199 @@ Aplicați un filtru unui strat, apoi apăsați indicatorul ★ și alegeți «Ad
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="118"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="156"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - Manager favorite</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="946"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1243"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Favorite salvate ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="180"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="218"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>Căutare după nume, expresie, etichete sau descriere...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="444"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
         <source>General</source>
         <translation>General</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Expression</source>
         <translation>Expresie</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="697"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="969"/>
         <source>Remote</source>
         <translation>La distanță</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="466"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="523"/>
         <source>Favorite name</source>
         <translation>Numele favoritului</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="467"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="524"/>
         <source>Name:</source>
         <translation>Nume:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="471"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="528"/>
         <source>Description (auto-generated, editable)</source>
         <translation>Descriere (generată automat, editabilă)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="529"/>
         <source>Description:</source>
         <translation>Descriere:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="475"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="532"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>Introduceți etichete separate prin virgule (ex.: urban, populație, 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="478"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="535"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>Etichetele ajută la organizarea și căutarea favoritelor.
 Separați mai multe etichete cu virgule.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="481"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="538"/>
         <source>Tags:</source>
         <translation>Etichete:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="486"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="543"/>
         <source>Source Layer:</source>
         <translation>Strat sursă:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="490"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="547"/>
         <source>Provider:</source>
         <translation>Furnizor:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="498"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="555"/>
         <source>Used:</source>
         <translation>Utilizat:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
         <source>Created:</source>
         <translation>Creat:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="514"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Expresia stratului sursă:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="518"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="629"/>
         <source>Filter expression for source layer</source>
         <translation>Expresie de filtrare pentru stratul sursă</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="533"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="644"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Straturi la distanță filtrate:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Layer</source>
         <translation>Strat</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Features</source>
         <translation>Entități</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="545"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="656"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;Niciun strat la distanță în acest favorit&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="669"/>
         <source>Apply</source>
         <translation>Aplică</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="561"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="672"/>
         <source>Apply this favorite filter to the project</source>
         <translation>Aplicați acest filtru favorit la proiect</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="675"/>
         <source>Save Changes</source>
         <translation>Salvare modificări</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="567"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="678"/>
         <source>Save modifications to this favorite</source>
         <translation>Salvați modificările la acest favorit</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="570"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
         <source>Delete</source>
         <translation>Ștergere</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="684"/>
         <source>Permanently delete this favorite</source>
         <translation>Ștergeți definitiv acest favorit</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
         <source>Close</source>
         <translation>Închidere</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="578"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="689"/>
         <source>Close this dialog</source>
         <translation>Închideți acest dialog</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="797"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Favorite ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="691"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="963"/>
         <source>Remote ({0})</source>
         <translation>La distanță ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
         <source>Delete Favorite</source>
         <translation>Ștergere favorit</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="774"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1056"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
         <translation>Ștergeți favoritul &apos;{0}&apos;?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="870"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1167"/>
         <source>Remote Layers</source>
         <translation>Straturi la distanță</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="942"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1239"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;Favorite salvate (0)&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>Favorites Manager</source>
         <translation>Manager favorite</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>No favorites saved yet.
 
 Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
@@ -725,29 +725,104 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 Faceți clic pe indicatorul ★ și selectați &apos;Adăugați filtrul curent la favorite&apos; pentru a salva primul favorit.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="146"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="184"/>
         <source>Shared...</source>
         <translation>Partajate…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="148"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="186"/>
         <source>Browse favorites shared via QGIS Resource Sharing collections</source>
         <translation>Răsfoiți favoritele partajate prin colecțiile QGIS Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="158"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="196"/>
         <source>Publish...</source>
         <translation>Publică…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="160"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="198"/>
         <source>Publish selected favorites into a Resource Sharing collection</source>
         <translation>Publicați favoritele selectate într-o colecție Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
         <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
         <translation>Nu s-a putut șterge „{0}”. Favoritul este încă în baza de date — consultați jurnalul FilterMate pentru detalii.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="231"/>
+        <source>Filter favorites by scope (owner × project).</source>
+        <translation>Filtrează favoritele după domeniu (proprietar × proiect).</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="236"/>
+        <source>All</source>
+        <translation>Toate</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="237"/>
+        <source>Shared · All projects</source>
+        <translation>Partajate · Toate proiectele</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="238"/>
+        <source>Shared · This project</source>
+        <translation>Partajate · Acest proiect</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="239"/>
+        <source>Mine · All projects</source>
+        <translation>Ale mele · Toate proiectele</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="240"/>
+        <source>Mine · This project</source>
+        <translation>Ale mele · Acest proiect</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <source>Mine</source>
+        <translation>Ale mele</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="574"/>
+        <source>Shared</source>
+        <translation>Partajate</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="585"/>
+        <source>This project</source>
+        <translation>Acest proiect</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="586"/>
+        <source>All projects</source>
+        <translation>Toate proiectele</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="593"/>
+        <source>Project scope is set when the favorite is created. Move it via the filtering tab (coming soon) to switch projects.</source>
+        <translation>Domeniul proiectului este stabilit la crearea favoritului. Mutați-l prin fila de filtrare (în curând) pentru a schimba proiectele.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="614"/>
+        <source>Visibility:</source>
+        <translation>Vizibilitate:</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="914"/>
+        <source>— (shared with everyone)</source>
+        <translation>— (partajat cu toți)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="916"/>
+        <source>{0} (you)</source>
+        <translation>{0} (dvs.)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="920"/>
+        <source>{0} — selecting &apos;Mine&apos; on save will transfer ownership to you</source>
+        <translation>{0} — selectarea &apos;Ale mele&apos; la salvare vă va transfera dreptul de proprietate</translation>
     </message>
 </context>
 <context>
@@ -1993,202 +2068,202 @@ Continuați?</translation>
 <context>
     <name>PublishFavoritesDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="125"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="161"/>
         <source>FilterMate — Publish to Resource Sharing</source>
         <translation>FilterMate — Publică în Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="133"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="169"/>
         <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
         <translation>&lt;b&gt;Publică favorite&lt;/b&gt; — scrie un pachet partajabil într-o colecție QGIS Resource Sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="153"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="189"/>
         <source>Overwrite existing bundle</source>
         <translation>Suprascrie pachetul existent</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="163"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="199"/>
         <source>Publish</source>
         <translation>Publică</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="177"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
         <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
         <translation>&lt;b&gt;1. Colecția țintă&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="190"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
         <source>Browse...</source>
         <translation>Răsfoiește…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="198"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="234"/>
         <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
         <translation>&lt;b&gt;2. Numele fișierului pachet&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="200"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="236"/>
         <source>e.g. zones_bruxelles</source>
         <translation>ex. zone_bruxelles</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="203"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="239"/>
         <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
         <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;țintă&amp;gt;/filter_mate/favorites/&amp;lt;nume&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
         <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
         <translation>&lt;b&gt;3. Metadate ale colecției&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="214"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
         <source>Collection display name</source>
         <translation>Numele afișat al colecției</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="215"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
         <source>Name:</source>
         <translation>Nume:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="218"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
         <source>Author / organisation</source>
         <translation>Autor / organizație</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="219"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="255"/>
         <source>Author:</source>
         <translation>Autor:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="222"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="258"/>
         <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
         <translation>ex. CC-BY-4.0, MIT, Proprietar</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="223"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="259"/>
         <source>License:</source>
         <translation>Licență:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="262"/>
         <source>Comma-separated tags</source>
         <translation>Etichete separate prin virgulă</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="263"/>
         <source>Tags:</source>
         <translation>Etichete:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="230"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="266"/>
         <source>https://...</source>
         <translation>https://…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="231"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="267"/>
         <source>Homepage:</source>
         <translation>Pagina web:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="235"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="271"/>
         <source>Short description (optional, supports plain text)</source>
         <translation>Descriere scurtă (opțional, text simplu)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="238"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="274"/>
         <source>Description:</source>
         <translation>Descriere:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="286"/>
         <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
         <translation>&lt;b&gt;4. Favorite de inclus&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
         <source>Select all</source>
         <translation>Selectează tot</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="257"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="293"/>
         <source>Select none</source>
         <translation>Deselectează tot</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="284"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="332"/>
         <source>New collection in Resource Sharing root...</source>
         <translation>Colecție nouă în rădăcina Resource Sharing…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="288"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="336"/>
         <source>Custom directory...</source>
         <translation>Director personalizat…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="340"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="410"/>
         <source>Will be created under the Resource Sharing root.</source>
         <translation>Va fi creat sub rădăcina Resource Sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="345"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="415"/>
         <source>Click &apos;Browse...&apos; to choose a directory.</source>
         <translation>Apăsați &apos;Răsfoiește…&apos; pentru a alege un director.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="351"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="421"/>
         <source>Choose a collection directory</source>
         <translation>Alegeți un director de colecție</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="402"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="472"/>
         <source>{0} / {1} selected</source>
         <translation>{0} / {1} selectate</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
         <source>Cannot create collection</source>
         <translation>Nu se poate crea colecția</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
         <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
         <translation>Rădăcina Resource Sharing nu a fost găsită. Folosiți &apos;Răsfoiește…&apos; pentru a alege un director.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Choose a directory</source>
         <translation>Alegeți un director</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Click &apos;Browse...&apos; to pick a target directory.</source>
         <translation>Apăsați &apos;Răsfoiește…&apos; pentru a alege un director țintă.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
         <source>No favorites selected</source>
         <translation>Niciun favorit selectat</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
         <source>Select at least one favorite to publish.</source>
         <translation>Selectați cel puțin un favorit de publicat.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
         <source>Publish failed</source>
         <translation>Publicare eșuată</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
         <source>Unknown error.</source>
         <translation>Eroare necunoscută.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="505"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="727"/>
         <source>Published {0} favorite(s) to:
 
 &lt;code&gt;{1}&lt;/code&gt;</source>
@@ -2197,27 +2272,67 @@ Continuați?</translation>
 &lt;code&gt;{1}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="509"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="731"/>
         <source>Collection manifest updated:
 &lt;code&gt;{0}&lt;/code&gt;</source>
         <translation>Manifestul colecției a fost actualizat:
 &lt;code&gt;{0}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="512"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="734"/>
         <source>Publish succeeded</source>
         <translation>Publicare reușită</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <source>Remote repos unavailable</source>
+        <translation>Depozite la distanță indisponibile</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <source>Remote repo manager is not initialized.</source>
+        <translation>Managerul de depozite la distanță nu este inițializat.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
+        <source>Publishing to &lt;b&gt;{0}&lt;/b&gt; failed.</source>
+        <translation>Publicarea către &lt;b&gt;{0}&lt;/b&gt; a eșuat.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="642"/>
+        <source>Open clone...</source>
+        <translation>Deschide clona…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="653"/>
+        <source>Wrote bundle to:</source>
+        <translation>Pachet scris în:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
+        <source>Pushed commit &lt;code&gt;{0}&lt;/code&gt; to &lt;b&gt;{1}&lt;/b&gt;.</source>
+        <translation>Commit &lt;code&gt;{0}&lt;/code&gt; trimis către &lt;b&gt;{1}&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
+        <source>No git_url configured — bundle written locally. Push manually via your own tooling.</source>
+        <translation>Fără git_url configurat — pachet scris local. Trimiteți manual cu propriile unelte.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="666"/>
+        <source>Nothing to commit — bundle content unchanged.</source>
+        <translation>Nimic de confirmat — conținutul pachetului nemodificat.</translation>
     </message>
 </context>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="114"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="179"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="146"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="211"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>

@@ -279,7 +279,7 @@ No = Replace all existing</source>
         <translation>पसंदीदा प्रबंधक संवाद उपलब्ध नहीं है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1779"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1801"/>
         <source>Error: {0}</source>
         <translation>त्रुटि: {0}</translation>
     </message>
@@ -381,22 +381,22 @@ Do you want to replace it?</source>
 क्या आप इसे बदलना चाहते हैं?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1555"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1577"/>
         <source>Favorite copied to global favorites</source>
         <translation>पसंदीदा वैश्विक पसंदीदा में कॉपी किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1558"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1580"/>
         <source>Failed to copy to global favorites</source>
         <translation>वैश्विक पसंदीदा में कॉपी करने में विफल</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>Global Favorites</source>
         <translation>वैश्विक पसंदीदा</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
@@ -405,37 +405,37 @@ Global favorites are shared across all projects.</source>
 वैश्विक पसंदीदा सभी प्रोजेक्ट्स में साझा किए जाते हैं।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1581"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1603"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>{0} पसंदीदा प्रोजेक्ट फ़ाइल में सहेजे गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1583"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1605"/>
         <source>Save failed</source>
         <translation>सहेजना विफल</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1595"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1617"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>प्रोजेक्ट फ़ाइल से {0} पसंदीदा पुनर्स्थापित किए गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1597"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1619"/>
         <source>No favorites to restore found in project</source>
         <translation>प्रोजेक्ट में पुनर्स्थापित करने के लिए कोई पसंदीदा नहीं मिला</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1624"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1646"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>{0} अनाथ प्रोजेक्ट साफ़ किए गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1626"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1648"/>
         <source>No orphan projects to clean up</source>
         <translation>साफ़ करने के लिए कोई अनाथ प्रोजेक्ट नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1751"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1773"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -452,12 +452,12 @@ Total favorites: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1767"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1789"/>
         <source>Top projects by favorites:</source>
         <translation>पसंदीदा के अनुसार शीर्ष प्रोजेक्ट:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1771"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1793"/>
         <source>FilterMate Statistics</source>
         <translation>FilterMate सांख्यिकी</translation>
     </message>
@@ -491,32 +491,32 @@ Apply a filter to a layer, then click the ★ indicator and choose &apos;Add cur
         <translation>प्रकाशित करें (कोई पसंदीदा सहेजा नहीं गया)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1734"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1756"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>FilterMate कॉन्फ़िग निर्देशिका अभी तक आरंभ नहीं की गई है — पहले FilterMate के साथ QGIS परियोजना खोलें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1692"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
         <translation>Resource Sharing एक्सटेंशन सक्रिय नहीं है। FilterMate सेटिंग्स में &apos;favorites_sharing&apos; सक्षम करें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1700"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
         <source>Shared favorites service is not available.</source>
         <translation>साझा पसंदीदा सेवा उपलब्ध नहीं है।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1686"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
         <source>Shared picker failed: {0}</source>
         <translation>साझा पसंदीदा चयनकर्ता विफल: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1704"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
         <translation>आपके पास अभी तक प्रकाशित करने के लिए पसंदीदा नहीं हैं। पहले ★ मेनू से फ़िल्टर सहेजें।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1720"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
         <source>Publish dialog failed: {0}</source>
         <translation>प्रकाशन संवाद खोलने में विफल: {0}</translation>
     </message>
@@ -524,199 +524,199 @@ Apply a filter to a layer, then click the ★ indicator and choose &apos;Add cur
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="118"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="156"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - पसंदीदा प्रबंधक</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="946"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1243"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;सहेजे गए पसंदीदा ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="180"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="218"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>नाम, व्यंजक, टैग, या विवरण से खोजें...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="444"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
         <source>General</source>
         <translation>सामान्य</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Expression</source>
         <translation>व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="697"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="969"/>
         <source>Remote</source>
         <translation>रिमोट</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="466"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="523"/>
         <source>Favorite name</source>
         <translation>पसंदीदा नाम</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="467"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="524"/>
         <source>Name:</source>
         <translation>नाम:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="471"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="528"/>
         <source>Description (auto-generated, editable)</source>
         <translation>विवरण (स्वचालित, संपादनयोग्य)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="529"/>
         <source>Description:</source>
         <translation>विवरण:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="475"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="532"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>अल्पविराम से अलग टैग दर्ज करें (उदा., urban, population, 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="478"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="535"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>टैग पसंदीदा को व्यवस्थित और खोजने में सहायता करते हैं।
 एकाधिक टैग अल्पविराम से अलग करें।</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="481"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="538"/>
         <source>Tags:</source>
         <translation>टैग:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="486"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="543"/>
         <source>Source Layer:</source>
         <translation>स्रोत परत:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="490"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="547"/>
         <source>Provider:</source>
         <translation>प्रदाता:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="498"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="555"/>
         <source>Used:</source>
         <translation>उपयोग:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
         <source>Created:</source>
         <translation>बनाया गया:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="514"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;स्रोत परत व्यंजक:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="518"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="629"/>
         <source>Filter expression for source layer</source>
         <translation>स्रोत परत के लिए फ़िल्टर व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="533"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="644"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;फ़िल्टर की गई रिमोट परतें:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Layer</source>
         <translation>परत</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Features</source>
         <translation>फ़ीचर</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="545"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="656"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;इस पसंदीदा में कोई रिमोट परत नहीं&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="669"/>
         <source>Apply</source>
         <translation>लागू करें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="561"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="672"/>
         <source>Apply this favorite filter to the project</source>
         <translation>इस पसंदीदा फ़िल्टर को प्रोजेक्ट पर लागू करें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="675"/>
         <source>Save Changes</source>
         <translation>परिवर्तन सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="567"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="678"/>
         <source>Save modifications to this favorite</source>
         <translation>इस पसंदीदा में संशोधन सहेजें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="570"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
         <source>Delete</source>
         <translation>हटाएं</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="684"/>
         <source>Permanently delete this favorite</source>
         <translation>इस पसंदीदा को स्थायी रूप से हटाएं</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
         <source>Close</source>
         <translation>बंद करें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="578"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="689"/>
         <source>Close this dialog</source>
         <translation>यह संवाद बंद करें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="797"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;पसंदीदा ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="691"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="963"/>
         <source>Remote ({0})</source>
         <translation>रिमोट ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
         <source>Delete Favorite</source>
         <translation>पसंदीदा हटाएं</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="774"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1056"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
         <translation>पसंदीदा &apos;{0}&apos; हटाएं?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="870"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1167"/>
         <source>Remote Layers</source>
         <translation>रिमोट परतें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="942"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1239"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;सहेजे गए पसंदीदा (0)&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>Favorites Manager</source>
         <translation>पसंदीदा प्रबंधक</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>No favorites saved yet.
 
 Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
@@ -725,29 +725,104 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 अपना पहला पसंदीदा सहेजने के लिए ★ संकेतक पर क्लिक करें और &apos;वर्तमान फ़िल्टर को पसंदीदा में जोड़ें&apos; चुनें।</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="146"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="184"/>
         <source>Shared...</source>
         <translation>साझा…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="148"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="186"/>
         <source>Browse favorites shared via QGIS Resource Sharing collections</source>
         <translation>QGIS Resource Sharing संग्रहों के माध्यम से साझा पसंदीदा ब्राउज़ करें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="158"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="196"/>
         <source>Publish...</source>
         <translation>प्रकाशित करें…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="160"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="198"/>
         <source>Publish selected favorites into a Resource Sharing collection</source>
         <translation>चयनित पसंदीदा को Resource Sharing संग्रह में प्रकाशित करें</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
         <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
         <translation>«{0}» को हटाया नहीं जा सका। पसंदीदा अभी भी डेटाबेस में है — विवरण के लिए FilterMate लॉग जाँचें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="231"/>
+        <source>Filter favorites by scope (owner × project).</source>
+        <translation>दायरे (स्वामी × परियोजना) के अनुसार पसंदीदा फ़िल्टर करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="236"/>
+        <source>All</source>
+        <translation>सभी</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="237"/>
+        <source>Shared · All projects</source>
+        <translation>साझा · सभी परियोजनाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="238"/>
+        <source>Shared · This project</source>
+        <translation>साझा · यह परियोजना</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="239"/>
+        <source>Mine · All projects</source>
+        <translation>मेरे · सभी परियोजनाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="240"/>
+        <source>Mine · This project</source>
+        <translation>मेरे · यह परियोजना</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <source>Mine</source>
+        <translation>मेरे</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="574"/>
+        <source>Shared</source>
+        <translation>साझा</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="585"/>
+        <source>This project</source>
+        <translation>यह परियोजना</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="586"/>
+        <source>All projects</source>
+        <translation>सभी परियोजनाएँ</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="593"/>
+        <source>Project scope is set when the favorite is created. Move it via the filtering tab (coming soon) to switch projects.</source>
+        <translation>पसंदीदा बनाते समय परियोजना का दायरा सेट किया जाता है। परियोजनाएँ बदलने के लिए इसे फ़िल्टरिंग टैब (जल्द आ रहा है) के माध्यम से स्थानांतरित करें।</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="614"/>
+        <source>Visibility:</source>
+        <translation>दृश्यता:</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="914"/>
+        <source>— (shared with everyone)</source>
+        <translation>— (सभी के साथ साझा)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="916"/>
+        <source>{0} (you)</source>
+        <translation>{0} (आप)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="920"/>
+        <source>{0} — selecting &apos;Mine&apos; on save will transfer ownership to you</source>
+        <translation>{0} — सहेजते समय &apos;मेरे&apos; चुनने से स्वामित्व आपको स्थानांतरित हो जाएगा</translation>
     </message>
 </context>
 <context>
@@ -1993,202 +2068,202 @@ Continue?</source>
 <context>
     <name>PublishFavoritesDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="125"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="161"/>
         <source>FilterMate — Publish to Resource Sharing</source>
         <translation>FilterMate — Resource Sharing पर प्रकाशित करें</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="133"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="169"/>
         <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
         <translation>&lt;b&gt;पसंदीदा प्रकाशित करें&lt;/b&gt; — QGIS Resource Sharing संग्रह में साझा करने योग्य बंडल लिखें।</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="153"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="189"/>
         <source>Overwrite existing bundle</source>
         <translation>मौजूदा बंडल को अधिलेखित करें</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="163"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="199"/>
         <source>Publish</source>
         <translation>प्रकाशित करें</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="177"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
         <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
         <translation>&lt;b&gt;1. लक्ष्य संग्रह&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="190"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
         <source>Browse...</source>
         <translation>ब्राउज़ करें…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="198"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="234"/>
         <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
         <translation>&lt;b&gt;2. बंडल फ़ाइल नाम&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="200"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="236"/>
         <source>e.g. zones_bruxelles</source>
         <translation>जैसे zones_bruxelles</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="203"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="239"/>
         <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
         <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;लक्ष्य&amp;gt;/filter_mate/favorites/&amp;lt;नाम&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
         <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
         <translation>&lt;b&gt;3. संग्रह मेटाडेटा&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="214"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
         <source>Collection display name</source>
         <translation>संग्रह प्रदर्शन नाम</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="215"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
         <source>Name:</source>
         <translation>नाम:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="218"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
         <source>Author / organisation</source>
         <translation>लेखक / संगठन</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="219"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="255"/>
         <source>Author:</source>
         <translation>लेखक:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="222"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="258"/>
         <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
         <translation>जैसे CC-BY-4.0, MIT, मालिकाना</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="223"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="259"/>
         <source>License:</source>
         <translation>लाइसेंस:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="262"/>
         <source>Comma-separated tags</source>
         <translation>अल्पविराम से अलग किए गए टैग</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="263"/>
         <source>Tags:</source>
         <translation>टैग:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="230"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="266"/>
         <source>https://...</source>
         <translation>https://…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="231"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="267"/>
         <source>Homepage:</source>
         <translation>होमपेज:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="235"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="271"/>
         <source>Short description (optional, supports plain text)</source>
         <translation>संक्षिप्त विवरण (वैकल्पिक, सादा टेक्स्ट)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="238"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="274"/>
         <source>Description:</source>
         <translation>विवरण:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="286"/>
         <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
         <translation>&lt;b&gt;4. शामिल करने के लिए पसंदीदा&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
         <source>Select all</source>
         <translation>सभी चुनें</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="257"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="293"/>
         <source>Select none</source>
         <translation>कोई भी न चुनें</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="284"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="332"/>
         <source>New collection in Resource Sharing root...</source>
         <translation>Resource Sharing रूट में नया संग्रह…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="288"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="336"/>
         <source>Custom directory...</source>
         <translation>कस्टम निर्देशिका…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="340"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="410"/>
         <source>Will be created under the Resource Sharing root.</source>
         <translation>Resource Sharing रूट के तहत बनाया जाएगा।</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="345"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="415"/>
         <source>Click &apos;Browse...&apos; to choose a directory.</source>
         <translation>निर्देशिका चुनने के लिए &apos;ब्राउज़ करें…&apos; पर क्लिक करें।</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="351"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="421"/>
         <source>Choose a collection directory</source>
         <translation>संग्रह निर्देशिका चुनें</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="402"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="472"/>
         <source>{0} / {1} selected</source>
         <translation>{0} / {1} चयनित</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
         <source>Cannot create collection</source>
         <translation>संग्रह नहीं बना सकते</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
         <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
         <translation>Resource Sharing रूट नहीं मिला। इसके बजाय निर्देशिका चुनने के लिए &apos;ब्राउज़ करें…&apos; का उपयोग करें।</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Choose a directory</source>
         <translation>एक निर्देशिका चुनें</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Click &apos;Browse...&apos; to pick a target directory.</source>
         <translation>लक्ष्य निर्देशिका चुनने के लिए &apos;ब्राउज़ करें…&apos; पर क्लिक करें।</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
         <source>No favorites selected</source>
         <translation>कोई पसंदीदा नहीं चुना गया</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
         <source>Select at least one favorite to publish.</source>
         <translation>प्रकाशित करने के लिए कम से कम एक पसंदीदा चुनें।</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
         <source>Publish failed</source>
         <translation>प्रकाशन विफल</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
         <source>Unknown error.</source>
         <translation>अज्ञात त्रुटि।</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="505"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="727"/>
         <source>Published {0} favorite(s) to:
 
 &lt;code&gt;{1}&lt;/code&gt;</source>
@@ -2197,27 +2272,67 @@ Continue?</source>
 &lt;code&gt;{1}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="509"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="731"/>
         <source>Collection manifest updated:
 &lt;code&gt;{0}&lt;/code&gt;</source>
         <translation>संग्रह मैनिफेस्ट अद्यतन किया गया:
 &lt;code&gt;{0}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="512"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="734"/>
         <source>Publish succeeded</source>
         <translation>प्रकाशन सफल</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <source>Remote repos unavailable</source>
+        <translation>दूरस्थ रिपो उपलब्ध नहीं हैं</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <source>Remote repo manager is not initialized.</source>
+        <translation>दूरस्थ रिपो प्रबंधक आरंभ नहीं किया गया है।</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
+        <source>Publishing to &lt;b&gt;{0}&lt;/b&gt; failed.</source>
+        <translation>&lt;b&gt;{0}&lt;/b&gt; पर प्रकाशित करना विफल।</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="642"/>
+        <source>Open clone...</source>
+        <translation>क्लोन खोलें…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="653"/>
+        <source>Wrote bundle to:</source>
+        <translation>बंडल यहाँ लिखा गया:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
+        <source>Pushed commit &lt;code&gt;{0}&lt;/code&gt; to &lt;b&gt;{1}&lt;/b&gt;.</source>
+        <translation>कमिट &lt;code&gt;{0}&lt;/code&gt; को &lt;b&gt;{1}&lt;/b&gt; पर पुश किया गया।</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
+        <source>No git_url configured — bundle written locally. Push manually via your own tooling.</source>
+        <translation>git_url कॉन्फ़िगर नहीं — बंडल स्थानीय रूप से लिखा गया। अपने उपकरणों से मैन्युअल रूप से पुश करें।</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="666"/>
+        <source>Nothing to commit — bundle content unchanged.</source>
+        <translation>कमिट करने के लिए कुछ नहीं — बंडल सामग्री अपरिवर्तित।</translation>
     </message>
 </context>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="114"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="179"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="146"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="211"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>

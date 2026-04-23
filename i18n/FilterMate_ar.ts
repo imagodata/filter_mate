@@ -279,7 +279,7 @@ No = Replace all existing</source>
         <translation>حوار مدير المفضلات غير متوفر</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1779"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1801"/>
         <source>Error: {0}</source>
         <translation>خطأ: {0}</translation>
     </message>
@@ -381,22 +381,22 @@ Do you want to replace it?</source>
 هل تريد استبدالها؟</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1555"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1577"/>
         <source>Favorite copied to global favorites</source>
         <translation>تم نسخ المفضلة إلى المفضلات العامة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1558"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1580"/>
         <source>Failed to copy to global favorites</source>
         <translation>فشل النسخ إلى المفضلات العامة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>Global Favorites</source>
         <translation>المفضلات العامة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
@@ -405,37 +405,37 @@ Global favorites are shared across all projects.</source>
 المفضلات العامة مشتركة بين جميع المشاريع.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1581"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1603"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>تم حفظ {0} مفضلة (مفضلات) في ملف المشروع</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1583"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1605"/>
         <source>Save failed</source>
         <translation>فشل الحفظ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1595"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1617"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>تمت استعادة {0} مفضلة (مفضلات) من ملف المشروع</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1597"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1619"/>
         <source>No favorites to restore found in project</source>
         <translation>لم يتم العثور على مفضلات للاستعادة في المشروع</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1624"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1646"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>تم تنظيف {0} مشروع (مشاريع) يتيم</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1626"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1648"/>
         <source>No orphan projects to clean up</source>
         <translation>لا توجد مشاريع يتيمة للتنظيف</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1751"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1773"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -452,12 +452,12 @@ Total favorites: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1767"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1789"/>
         <source>Top projects by favorites:</source>
         <translation>أفضل المشاريع حسب المفضلات:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1771"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1793"/>
         <source>FilterMate Statistics</source>
         <translation>إحصائيات FilterMate</translation>
     </message>
@@ -491,32 +491,32 @@ Apply a filter to a layer, then click the ★ indicator and choose &apos;Add cur
         <translation>نشر (لا توجد مفضلة محفوظة)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1734"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1756"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>لم يتم تهيئة دليل إعدادات FilterMate بعد — افتح مشروع QGIS مع FilterMate أولاً.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1692"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
         <translation>امتداد Resource Sharing غير نشط. فعّل &apos;favorites_sharing&apos; في إعدادات FilterMate.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1700"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
         <source>Shared favorites service is not available.</source>
         <translation>خدمة المفضلة المشتركة غير متاحة.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1686"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
         <source>Shared picker failed: {0}</source>
         <translation>فشل منتقي المفضلة المشتركة: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1704"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
         <translation>ليس لديك مفضلة لنشرها بعد. احفظ مرشحًا عبر قائمة ★ أولاً.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1720"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
         <source>Publish dialog failed: {0}</source>
         <translation>فشل فتح نافذة النشر: {0}</translation>
     </message>
@@ -524,199 +524,199 @@ Apply a filter to a layer, then click the ★ indicator and choose &apos;Add cur
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="118"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="156"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - مدير المفضلات</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="946"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1243"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;المفضلات المحفوظة ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="180"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="218"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>بحث بالاسم أو التعبير أو الوسوم أو الوصف...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="444"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
         <source>General</source>
         <translation>عام</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Expression</source>
         <translation>تعبير</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="697"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="969"/>
         <source>Remote</source>
         <translation>بعيد</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="466"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="523"/>
         <source>Favorite name</source>
         <translation>اسم المفضلة</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="467"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="524"/>
         <source>Name:</source>
         <translation>الاسم:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="471"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="528"/>
         <source>Description (auto-generated, editable)</source>
         <translation>الوصف (مُنشأ تلقائياً، قابل للتعديل)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="529"/>
         <source>Description:</source>
         <translation>الوصف:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="475"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="532"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>أدخل الوسوم مفصولة بفواصل (مثال: حضري، سكان، 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="478"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="535"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>تساعد الوسوم في تنظيم المفضلات والبحث فيها.
 افصل الوسوم المتعددة بفواصل.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="481"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="538"/>
         <source>Tags:</source>
         <translation>الوسوم:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="486"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="543"/>
         <source>Source Layer:</source>
         <translation>الطبقة المصدر:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="490"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="547"/>
         <source>Provider:</source>
         <translation>المزود:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="498"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="555"/>
         <source>Used:</source>
         <translation>الاستخدام:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
         <source>Created:</source>
         <translation>تاريخ الإنشاء:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="514"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;تعبير الطبقة المصدر:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="518"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="629"/>
         <source>Filter expression for source layer</source>
         <translation>تعبير الفلتر للطبقة المصدر</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="533"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="644"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;الطبقات البعيدة المُصفّاة:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Layer</source>
         <translation>طبقة</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Features</source>
         <translation>المعالم</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="545"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="656"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;لا توجد طبقات بعيدة في هذه المفضلة&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="669"/>
         <source>Apply</source>
         <translation>تطبيق</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="561"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="672"/>
         <source>Apply this favorite filter to the project</source>
         <translation>تطبيق فلتر المفضلة هذا على المشروع</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="675"/>
         <source>Save Changes</source>
         <translation>حفظ التغييرات</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="567"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="678"/>
         <source>Save modifications to this favorite</source>
         <translation>حفظ التعديلات على هذه المفضلة</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="570"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
         <source>Delete</source>
         <translation>حذف</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="684"/>
         <source>Permanently delete this favorite</source>
         <translation>حذف هذه المفضلة نهائياً</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
         <source>Close</source>
         <translation>إغلاق</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="578"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="689"/>
         <source>Close this dialog</source>
         <translation>إغلاق هذا الحوار</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="797"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;المفضلات ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="691"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="963"/>
         <source>Remote ({0})</source>
         <translation>بعيد ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
         <source>Delete Favorite</source>
         <translation>حذف المفضلة</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="774"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1056"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
         <translation>حذف المفضلة &apos;{0}&apos;؟</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="870"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1167"/>
         <source>Remote Layers</source>
         <translation>الطبقات البعيدة</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="942"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1239"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;المفضلات المحفوظة (0)&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>Favorites Manager</source>
         <translation>مدير المفضلات</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>No favorites saved yet.
 
 Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
@@ -725,29 +725,104 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 انقر على مؤشر ★ وحدد &apos;إضافة الفلتر الحالي إلى المفضلات&apos; لحفظ أول مفضلة.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="146"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="184"/>
         <source>Shared...</source>
         <translation>مشتركة…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="148"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="186"/>
         <source>Browse favorites shared via QGIS Resource Sharing collections</source>
         <translation>تصفح المفضلات المشتركة عبر مجموعات QGIS Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="158"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="196"/>
         <source>Publish...</source>
         <translation>نشر…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="160"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="198"/>
         <source>Publish selected favorites into a Resource Sharing collection</source>
         <translation>نشر المفضلات المحددة في مجموعة Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
         <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
         <translation>تعذر حذف «{0}». المفضلة لا تزال في قاعدة البيانات — تحقق من سجل FilterMate للحصول على التفاصيل.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="231"/>
+        <source>Filter favorites by scope (owner × project).</source>
+        <translation>تصفية المفضلة حسب النطاق (المالك × المشروع).</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="236"/>
+        <source>All</source>
+        <translation>الكل</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="237"/>
+        <source>Shared · All projects</source>
+        <translation>مشتركة · جميع المشاريع</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="238"/>
+        <source>Shared · This project</source>
+        <translation>مشتركة · هذا المشروع</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="239"/>
+        <source>Mine · All projects</source>
+        <translation>خاصتي · جميع المشاريع</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="240"/>
+        <source>Mine · This project</source>
+        <translation>خاصتي · هذا المشروع</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <source>Mine</source>
+        <translation>خاصتي</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="574"/>
+        <source>Shared</source>
+        <translation>مشتركة</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="585"/>
+        <source>This project</source>
+        <translation>هذا المشروع</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="586"/>
+        <source>All projects</source>
+        <translation>جميع المشاريع</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="593"/>
+        <source>Project scope is set when the favorite is created. Move it via the filtering tab (coming soon) to switch projects.</source>
+        <translation>يتم تحديد نطاق المشروع عند إنشاء المفضلة. انقلها عبر علامة تبويب التصفية (قريبًا) لتبديل المشاريع.</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="614"/>
+        <source>Visibility:</source>
+        <translation>الرؤية:</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="914"/>
+        <source>— (shared with everyone)</source>
+        <translation>— (مشتركة مع الجميع)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="916"/>
+        <source>{0} (you)</source>
+        <translation>{0} (أنت)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="920"/>
+        <source>{0} — selecting &apos;Mine&apos; on save will transfer ownership to you</source>
+        <translation>{0} — اختيار &apos;خاصتي&apos; عند الحفظ سينقل الملكية إليك</translation>
     </message>
 </context>
 <context>
@@ -1993,202 +2068,202 @@ Continue?</source>
 <context>
     <name>PublishFavoritesDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="125"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="161"/>
         <source>FilterMate — Publish to Resource Sharing</source>
         <translation>FilterMate — نشر إلى Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="133"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="169"/>
         <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
         <translation>&lt;b&gt;نشر المفضلة&lt;/b&gt; — كتابة حزمة قابلة للمشاركة في مجموعة QGIS Resource Sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="153"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="189"/>
         <source>Overwrite existing bundle</source>
         <translation>استبدال الحزمة الموجودة</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="163"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="199"/>
         <source>Publish</source>
         <translation>نشر</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="177"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
         <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
         <translation>&lt;b&gt;1. المجموعة المستهدفة&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="190"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
         <source>Browse...</source>
         <translation>استعراض…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="198"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="234"/>
         <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
         <translation>&lt;b&gt;2. اسم ملف الحزمة&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="200"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="236"/>
         <source>e.g. zones_bruxelles</source>
         <translation>مثال: zones_bruxelles</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="203"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="239"/>
         <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
         <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;الهدف&amp;gt;/filter_mate/favorites/&amp;lt;الاسم&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
         <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
         <translation>&lt;b&gt;3. بيانات وصفية للمجموعة&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="214"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
         <source>Collection display name</source>
         <translation>اسم العرض للمجموعة</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="215"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
         <source>Name:</source>
         <translation>الاسم:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="218"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
         <source>Author / organisation</source>
         <translation>المؤلف / المؤسسة</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="219"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="255"/>
         <source>Author:</source>
         <translation>المؤلف:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="222"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="258"/>
         <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
         <translation>مثال: CC-BY-4.0, MIT, ملكية</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="223"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="259"/>
         <source>License:</source>
         <translation>الترخيص:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="262"/>
         <source>Comma-separated tags</source>
         <translation>وسوم مفصولة بفواصل</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="263"/>
         <source>Tags:</source>
         <translation>الوسوم:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="230"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="266"/>
         <source>https://...</source>
         <translation>https://…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="231"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="267"/>
         <source>Homepage:</source>
         <translation>الصفحة الرئيسية:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="235"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="271"/>
         <source>Short description (optional, supports plain text)</source>
         <translation>وصف قصير (اختياري، نص عادي)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="238"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="274"/>
         <source>Description:</source>
         <translation>الوصف:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="286"/>
         <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
         <translation>&lt;b&gt;4. المفضلة المراد تضمينها&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
         <source>Select all</source>
         <translation>تحديد الكل</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="257"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="293"/>
         <source>Select none</source>
         <translation>إلغاء التحديد</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="284"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="332"/>
         <source>New collection in Resource Sharing root...</source>
         <translation>مجموعة جديدة في جذر Resource Sharing…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="288"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="336"/>
         <source>Custom directory...</source>
         <translation>دليل مخصص…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="340"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="410"/>
         <source>Will be created under the Resource Sharing root.</source>
         <translation>سيتم إنشاؤه ضمن جذر Resource Sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="345"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="415"/>
         <source>Click &apos;Browse...&apos; to choose a directory.</source>
         <translation>انقر &apos;استعراض…&apos; لاختيار دليل.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="351"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="421"/>
         <source>Choose a collection directory</source>
         <translation>اختر دليل مجموعة</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="402"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="472"/>
         <source>{0} / {1} selected</source>
         <translation>تم تحديد {0} / {1}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
         <source>Cannot create collection</source>
         <translation>لا يمكن إنشاء المجموعة</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
         <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
         <translation>لم يتم العثور على جذر Resource Sharing. استخدم &apos;استعراض…&apos; لاختيار دليل بدلاً من ذلك.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Choose a directory</source>
         <translation>اختر دليلاً</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Click &apos;Browse...&apos; to pick a target directory.</source>
         <translation>انقر &apos;استعراض…&apos; لاختيار دليل الهدف.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
         <source>No favorites selected</source>
         <translation>لم يتم تحديد مفضلة</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
         <source>Select at least one favorite to publish.</source>
         <translation>اختر مفضلة واحدة على الأقل للنشر.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
         <source>Publish failed</source>
         <translation>فشل النشر</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
         <source>Unknown error.</source>
         <translation>خطأ غير معروف.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="505"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="727"/>
         <source>Published {0} favorite(s) to:
 
 &lt;code&gt;{1}&lt;/code&gt;</source>
@@ -2197,27 +2272,67 @@ Continue?</source>
 &lt;code&gt;{1}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="509"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="731"/>
         <source>Collection manifest updated:
 &lt;code&gt;{0}&lt;/code&gt;</source>
         <translation>تم تحديث بيان المجموعة:
 &lt;code&gt;{0}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="512"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="734"/>
         <source>Publish succeeded</source>
         <translation>نجح النشر</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <source>Remote repos unavailable</source>
+        <translation>المستودعات البعيدة غير متوفرة</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <source>Remote repo manager is not initialized.</source>
+        <translation>مدير المستودعات البعيدة غير مُهيّأ.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
+        <source>Publishing to &lt;b&gt;{0}&lt;/b&gt; failed.</source>
+        <translation>فشل النشر إلى &lt;b&gt;{0}&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="642"/>
+        <source>Open clone...</source>
+        <translation>فتح النسخة…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="653"/>
+        <source>Wrote bundle to:</source>
+        <translation>تمت كتابة الحزمة إلى:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
+        <source>Pushed commit &lt;code&gt;{0}&lt;/code&gt; to &lt;b&gt;{1}&lt;/b&gt;.</source>
+        <translation>تم دفع commit &lt;code&gt;{0}&lt;/code&gt; إلى &lt;b&gt;{1}&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
+        <source>No git_url configured — bundle written locally. Push manually via your own tooling.</source>
+        <translation>لم يتم تكوين git_url — الحزمة مكتوبة محليًا. ادفع يدويًا باستخدام أدواتك.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="666"/>
+        <source>Nothing to commit — bundle content unchanged.</source>
+        <translation>لا شيء لإرساله — محتوى الحزمة دون تغيير.</translation>
     </message>
 </context>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="114"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="179"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="146"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="211"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>

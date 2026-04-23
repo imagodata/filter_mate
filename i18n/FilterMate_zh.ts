@@ -279,7 +279,7 @@ No = Replace all existing</source>
         <translation>收藏管理器对话框不可用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1779"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1801"/>
         <source>Error: {0}</source>
         <translation>错误：{0}</translation>
     </message>
@@ -381,22 +381,22 @@ Do you want to replace it?</source>
 是否要替换它？</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1555"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1577"/>
         <source>Favorite copied to global favorites</source>
         <translation>收藏已复制到全局收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1558"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1580"/>
         <source>Failed to copy to global favorites</source>
         <translation>复制到全局收藏失败</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>Global Favorites</source>
         <translation>全局收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
@@ -405,37 +405,37 @@ Global favorites are shared across all projects.</source>
 全局收藏在所有项目之间共享。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1581"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1603"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>已保存 {0} 个收藏到项目文件</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1583"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1605"/>
         <source>Save failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1595"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1617"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>已从项目文件恢复 {0} 个收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1597"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1619"/>
         <source>No favorites to restore found in project</source>
         <translation>在项目中未找到可恢复的收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1624"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1646"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>已清理 {0} 个孤立项目</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1626"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1648"/>
         <source>No orphan projects to clean up</source>
         <translation>没有可清理的孤立项目</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1751"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1773"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -452,12 +452,12 @@ Total favorites: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1767"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1789"/>
         <source>Top projects by favorites:</source>
         <translation>按收藏数排名的项目：</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1771"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1793"/>
         <source>FilterMate Statistics</source>
         <translation>FilterMate 统计</translation>
     </message>
@@ -491,32 +491,32 @@ Apply a filter to a layer, then click the ★ indicator and choose &apos;Add cur
         <translation>发布（未保存收藏）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1734"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1756"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>FilterMate 配置目录尚未初始化 — 请先打开启用 FilterMate 的 QGIS 项目。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1692"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
         <translation>Resource Sharing 扩展未启用。请在 FilterMate 设置中启用 &apos;favorites_sharing&apos;。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1700"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
         <source>Shared favorites service is not available.</source>
         <translation>共享收藏服务不可用。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1686"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
         <source>Shared picker failed: {0}</source>
         <translation>共享收藏选择器失败：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1704"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
         <translation>您还没有可发布的收藏。请先通过 ★ 菜单保存一个筛选器。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1720"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
         <source>Publish dialog failed: {0}</source>
         <translation>打开发布对话框失败：{0}</translation>
     </message>
@@ -524,199 +524,199 @@ Apply a filter to a layer, then click the ★ indicator and choose &apos;Add cur
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="118"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="156"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - 收藏管理器</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="946"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1243"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;已保存的收藏 ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="180"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="218"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>按名称、表达式、标签或描述搜索...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="444"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
         <source>General</source>
         <translation>常规</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Expression</source>
         <translation>表达式</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="697"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="969"/>
         <source>Remote</source>
         <translation>远程</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="466"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="523"/>
         <source>Favorite name</source>
         <translation>收藏名称</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="467"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="524"/>
         <source>Name:</source>
         <translation>名称：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="471"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="528"/>
         <source>Description (auto-generated, editable)</source>
         <translation>描述（自动生成，可编辑）</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="529"/>
         <source>Description:</source>
         <translation>描述：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="475"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="532"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>输入以逗号分隔的标签（例如：urban, population, 2024）</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="478"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="535"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>标签有助于组织和搜索收藏。
 使用逗号分隔多个标签。</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="481"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="538"/>
         <source>Tags:</source>
         <translation>标签：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="486"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="543"/>
         <source>Source Layer:</source>
         <translation>源图层：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="490"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="547"/>
         <source>Provider:</source>
         <translation>数据提供者：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="498"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="555"/>
         <source>Used:</source>
         <translation>已使用：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
         <source>Created:</source>
         <translation>创建时间：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="514"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;源图层表达式：&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="518"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="629"/>
         <source>Filter expression for source layer</source>
         <translation>源图层的过滤表达式</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="533"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="644"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;已过滤的远程图层：&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Layer</source>
         <translation>图层</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
         <source>Features</source>
         <translation>要素</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="545"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="656"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;此收藏中没有远程图层&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="669"/>
         <source>Apply</source>
         <translation>应用</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="561"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="672"/>
         <source>Apply this favorite filter to the project</source>
         <translation>将此收藏过滤器应用到项目</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="675"/>
         <source>Save Changes</source>
         <translation>保存更改</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="567"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="678"/>
         <source>Save modifications to this favorite</source>
         <translation>保存对此收藏的修改</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="570"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="684"/>
         <source>Permanently delete this favorite</source>
         <translation>永久删除此收藏</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="578"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="689"/>
         <source>Close this dialog</source>
         <translation>关闭此对话框</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="797"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;收藏 ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="691"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="963"/>
         <source>Remote ({0})</source>
         <translation>远程 ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
         <source>Delete Favorite</source>
         <translation>删除收藏</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="774"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1056"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
         <translation>删除收藏 &apos;{0}&apos;？</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="870"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1167"/>
         <source>Remote Layers</source>
         <translation>远程图层</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="942"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1239"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;已保存的收藏 (0)&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>Favorites Manager</source>
         <translation>收藏管理器</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>No favorites saved yet.
 
 Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
@@ -725,29 +725,104 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 点击 ★ 指示器并选择“将当前过滤器添加到收藏”来保存您的第一个收藏。</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="146"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="184"/>
         <source>Shared...</source>
         <translation>共享…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="148"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="186"/>
         <source>Browse favorites shared via QGIS Resource Sharing collections</source>
         <translation>浏览通过 QGIS Resource Sharing 集合共享的收藏</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="158"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="196"/>
         <source>Publish...</source>
         <translation>发布…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="160"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="198"/>
         <source>Publish selected favorites into a Resource Sharing collection</source>
         <translation>将选定的收藏发布到 Resource Sharing 集合</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
         <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
         <translation>无法删除「{0}」。收藏仍在数据库中 — 详情请查看 FilterMate 日志。</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="231"/>
+        <source>Filter favorites by scope (owner × project).</source>
+        <translation>按范围（所有者 × 项目）筛选收藏。</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="236"/>
+        <source>All</source>
+        <translation>全部</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="237"/>
+        <source>Shared · All projects</source>
+        <translation>共享 · 所有项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="238"/>
+        <source>Shared · This project</source>
+        <translation>共享 · 此项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="239"/>
+        <source>Mine · All projects</source>
+        <translation>我的 · 所有项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="240"/>
+        <source>Mine · This project</source>
+        <translation>我的 · 此项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <source>Mine</source>
+        <translation>我的</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="574"/>
+        <source>Shared</source>
+        <translation>共享</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="585"/>
+        <source>This project</source>
+        <translation>此项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="586"/>
+        <source>All projects</source>
+        <translation>所有项目</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="593"/>
+        <source>Project scope is set when the favorite is created. Move it via the filtering tab (coming soon) to switch projects.</source>
+        <translation>项目范围在创建收藏时设置。通过筛选标签页（即将推出）移动收藏以切换项目。</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="614"/>
+        <source>Visibility:</source>
+        <translation>可见性：</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="914"/>
+        <source>— (shared with everyone)</source>
+        <translation>— （与所有人共享）</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="916"/>
+        <source>{0} (you)</source>
+        <translation>{0}（您）</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="920"/>
+        <source>{0} — selecting &apos;Mine&apos; on save will transfer ownership to you</source>
+        <translation>{0} — 保存时选择「我的」将把所有权转移给您</translation>
     </message>
 </context>
 <context>
@@ -1993,202 +2068,202 @@ Continue?</source>
 <context>
     <name>PublishFavoritesDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="125"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="161"/>
         <source>FilterMate — Publish to Resource Sharing</source>
         <translation>FilterMate — 发布到 Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="133"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="169"/>
         <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
         <translation>&lt;b&gt;发布收藏&lt;/b&gt; — 将可共享的捆绑包写入 QGIS Resource Sharing 集合。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="153"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="189"/>
         <source>Overwrite existing bundle</source>
         <translation>覆盖现有捆绑包</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="163"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="199"/>
         <source>Publish</source>
         <translation>发布</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="177"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
         <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
         <translation>&lt;b&gt;1. 目标集合&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="190"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
         <source>Browse...</source>
         <translation>浏览…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="198"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="234"/>
         <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
         <translation>&lt;b&gt;2. 捆绑包文件名&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="200"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="236"/>
         <source>e.g. zones_bruxelles</source>
         <translation>例如：zones_bruxelles</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="203"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="239"/>
         <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
         <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;目标&amp;gt;/filter_mate/favorites/&amp;lt;名称&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
         <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
         <translation>&lt;b&gt;3. 集合元数据&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="214"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
         <source>Collection display name</source>
         <translation>集合显示名称</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="215"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
         <source>Name:</source>
         <translation>名称：</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="218"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
         <source>Author / organisation</source>
         <translation>作者 / 组织</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="219"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="255"/>
         <source>Author:</source>
         <translation>作者：</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="222"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="258"/>
         <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
         <translation>例如：CC-BY-4.0、MIT、专有</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="223"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="259"/>
         <source>License:</source>
         <translation>许可证：</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="262"/>
         <source>Comma-separated tags</source>
         <translation>以逗号分隔的标签</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="263"/>
         <source>Tags:</source>
         <translation>标签：</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="230"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="266"/>
         <source>https://...</source>
         <translation>https://…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="231"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="267"/>
         <source>Homepage:</source>
         <translation>主页：</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="235"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="271"/>
         <source>Short description (optional, supports plain text)</source>
         <translation>简短描述（可选，纯文本）</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="238"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="274"/>
         <source>Description:</source>
         <translation>描述：</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="286"/>
         <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
         <translation>&lt;b&gt;4. 要包含的收藏&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
         <source>Select all</source>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="257"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="293"/>
         <source>Select none</source>
         <translation>全不选</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="284"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="332"/>
         <source>New collection in Resource Sharing root...</source>
         <translation>在 Resource Sharing 根目录新建集合…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="288"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="336"/>
         <source>Custom directory...</source>
         <translation>自定义目录…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="340"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="410"/>
         <source>Will be created under the Resource Sharing root.</source>
         <translation>将在 Resource Sharing 根目录下创建。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="345"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="415"/>
         <source>Click &apos;Browse...&apos; to choose a directory.</source>
         <translation>点击 &apos;浏览…&apos; 选择目录。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="351"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="421"/>
         <source>Choose a collection directory</source>
         <translation>选择集合目录</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="402"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="472"/>
         <source>{0} / {1} selected</source>
         <translation>已选 {0} / {1}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
         <source>Cannot create collection</source>
         <translation>无法创建集合</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
         <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
         <translation>未找到 Resource Sharing 根目录。请改用 &apos;浏览…&apos; 选择目录。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Choose a directory</source>
         <translation>选择目录</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Click &apos;Browse...&apos; to pick a target directory.</source>
         <translation>点击 &apos;浏览…&apos; 选择目标目录。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
         <source>No favorites selected</source>
         <translation>未选择收藏</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
         <source>Select at least one favorite to publish.</source>
         <translation>请至少选择一个要发布的收藏。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
         <source>Publish failed</source>
         <translation>发布失败</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
         <source>Unknown error.</source>
         <translation>未知错误。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="505"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="727"/>
         <source>Published {0} favorite(s) to:
 
 &lt;code&gt;{1}&lt;/code&gt;</source>
@@ -2197,27 +2272,67 @@ Continue?</source>
 &lt;code&gt;{1}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="509"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="731"/>
         <source>Collection manifest updated:
 &lt;code&gt;{0}&lt;/code&gt;</source>
         <translation>集合清单已更新：
 &lt;code&gt;{0}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="512"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="734"/>
         <source>Publish succeeded</source>
         <translation>发布成功</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <source>Remote repos unavailable</source>
+        <translation>远程仓库不可用</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <source>Remote repo manager is not initialized.</source>
+        <translation>远程仓库管理器未初始化。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
+        <source>Publishing to &lt;b&gt;{0}&lt;/b&gt; failed.</source>
+        <translation>发布到 &lt;b&gt;{0}&lt;/b&gt; 失败。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="642"/>
+        <source>Open clone...</source>
+        <translation>打开克隆…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="653"/>
+        <source>Wrote bundle to:</source>
+        <translation>已将捆绑包写入：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
+        <source>Pushed commit &lt;code&gt;{0}&lt;/code&gt; to &lt;b&gt;{1}&lt;/b&gt;.</source>
+        <translation>已将提交 &lt;code&gt;{0}&lt;/code&gt; 推送到 &lt;b&gt;{1}&lt;/b&gt;。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
+        <source>No git_url configured — bundle written locally. Push manually via your own tooling.</source>
+        <translation>未配置 git_url — 捆绑包已写入本地。请使用您自己的工具手动推送。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="666"/>
+        <source>Nothing to commit — bundle content unchanged.</source>
+        <translation>无需提交 — 捆绑包内容未更改。</translation>
     </message>
 </context>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="114"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="179"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="146"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="211"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
