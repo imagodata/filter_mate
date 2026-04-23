@@ -892,9 +892,14 @@ class ConfigurationManager(QObject):
             d.checkBox_filtering_use_centroids_distant_layers.setLayoutDirection(QtCore.Qt.RightToLeft)
             d.checkBox_filtering_use_centroids_distant_layers.setSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 
-        # Create horizontal layout and insert widgets
+        # Create horizontal layout and insert widgets.
+        # Contents margins set to 0 to match the UI-declared sibling rows
+        # (horizontalLayout_filtering_source_layer / _values_search) inside
+        # verticalLayout_filtering_values — otherwise style-default margins
+        # squeeze the inserted row vertically vs neighbors.
         d.horizontalLayout_filtering_distant_layers = QtWidgets.QHBoxLayout()
         d.horizontalLayout_filtering_distant_layers.setSpacing(4)
+        d.horizontalLayout_filtering_distant_layers.setContentsMargins(0, 0, 0, 0)
         d.horizontalLayout_filtering_distant_layers.addWidget(d.checkableComboBoxLayer_filtering_layers_to_filter)
         d.horizontalLayout_filtering_distant_layers.addWidget(d.checkBox_filtering_use_centroids_distant_layers)
 
@@ -906,13 +911,17 @@ class ConfigurationManager(QObject):
             d.checkBox_filtering_use_centroids_distant_layers.show()
             logger.debug(f"Inserted filtering layers layout, widget visible: {d.checkableComboBoxLayer_filtering_layers_to_filter.isVisible()}")
 
-        try:
-            from ..config import UIConfig
-            h = UIConfig.get_config('combobox', 'height')
-            d.checkableComboBoxLayer_filtering_layers_to_filter.setMinimumHeight(h)
-            d.checkableComboBoxLayer_filtering_layers_to_filter.setMaximumHeight(h)
-        except Exception:
-            pass
+        # Height is owned by dimensions_manager.apply_qgis_widget_dimensions
+        # (now extended to include QgsCheckableComboBoxLayer) + QSS min/max 20px.
+        # Do NOT apply a local setMinimumHeight/setMaximumHeight here — the
+        # local call was racing with dimensions_manager (called later from
+        # apply_dynamic_dimensions) and leaving the widget wedged between two
+        # inconsistent policies, which manifested as a squeezed row vs the
+        # sibling QgsMapLayerComboBox row. Only the size policy is set here.
+        d.checkableComboBoxLayer_filtering_layers_to_filter.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
 
     def setup_exporting_tab_widgets(self):
         """v4.0 Sprint 16: Configure widgets for Exporting tab (migrated from dockwidget)."""
@@ -927,13 +936,11 @@ class ConfigurationManager(QObject):
             logger.debug(f"Inserted exporting layers widget, visible: {d.checkableComboBoxLayer_exporting_layers.isVisible()}")
             d.verticalLayout_exporting_values.insertItem(1, QtWidgets.QSpacerItem(20, 4, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding))
 
-        try:
-            from ..config import UIConfig
-            h = UIConfig.get_config('combobox', 'height')
-            d.checkableComboBoxLayer_exporting_layers.setMinimumHeight(h)
-            d.checkableComboBoxLayer_exporting_layers.setMaximumHeight(h)
-        except Exception:
-            pass
+        # Same rationale as setup_filtering_tab_widgets: let QSS own the height.
+        d.checkableComboBoxLayer_exporting_layers.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Fixed,
+        )
 
         for btn in ['pushButton_checkable_exporting_layers', 'pushButton_checkable_exporting_projection',
                     'pushButton_checkable_exporting_styles', 'pushButton_checkable_exporting_datatype',

@@ -149,17 +149,14 @@ END OF REMOVED SECTION */
     background-color: transparent;
 }
 
-/* QgsCheckableComboBoxLayer — custom paintEvent draws via QStyle so QSS padding
-   clips text when forced to 20px height. Tighten vertical padding so the
-   Segoe UI Semibold 8pt line fits inside the content rect. */
+/* QgsCheckableComboBoxLayer — iconSize 36x20 + Segoe UI Semibold 10pt set in
+   custom_widgets.py drive the sizeHint to match the sibling QgsMapLayerComboBox
+   row height. Generic combobox selector above forces max-height:20px for all
+   QComboBox descendants, which would clamp this widget back down; unset the
+   upper bound here so the iconSize-driven sizeHint governs. Default padding
+   from the generic combobox selector applies. */
 #dockWidgetContents QgsCheckableComboBoxLayer {
-    padding: 1px 8px;
-}
-#dockWidgetContents QgsCheckableComboBoxLayer:hover {
-    padding: 0px 7px;
-}
-#dockWidgetContents QgsCheckableComboBoxLayer:focus {
-    padding: 0px 6px;
+    max-height: none;
 }
 
 /* ========================================================================

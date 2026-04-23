@@ -194,9 +194,15 @@ class QgsCheckableComboBoxLayer(QComboBox):
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
-        font = QFont("Segoe UI Semibold", 8)
+        # Match comboBox_filtering_current_layer (QgsMapLayerComboBox) visual sizing:
+        # - font Segoe UI Semibold 10pt (vs the historical 8pt that rendered ~16px tall)
+        # - iconSize 36x20 forces sizeHint to ~26-28px so QSS's max-height:20px on the
+        #   generic combobox selector does NOT clamp the widget shorter than the sibling
+        #   QgsMapLayerComboBox row.
+        font = QFont("Segoe UI Semibold", 10)
         font.setBold(True)
         self.setFont(font)
+        self.setIconSize(QSize(36, 20))
 
         self.setModel(QtGui.QStandardItemModel(self))
         self.setItemDelegate(ItemDelegate(self))

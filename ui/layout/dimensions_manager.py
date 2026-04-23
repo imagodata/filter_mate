@@ -504,10 +504,22 @@ class DimensionsManager(LayoutManagerBase):
                 bottom = margins_frame.get('bottom', 10)
 
                 # Exploring groupbox layouts
+                # NOTE: 'gridLayout_exploring_single_content' and
+                # 'gridLayout_exploring_multiple_content' are stale names that
+                # no longer exist in filter_mate_dockwidget_base.ui (the real
+                # layouts are 'verticalLayout_exploring_single_content' and
+                # 'verticalLayout_exploring_multiple_selection'). Keeping them
+                # here means SINGLE/MULTIPLE keep their XML topMargin=8.
+                # 'verticalLayout_exploring_custom_container' was previously
+                # listed here, so CUSTOM was the only groupbox getting its
+                # topMargin overridden by margins_frame (2px in COMPACT) — the
+                # title->widget gap collapsed to ~2px while siblings kept 8px.
+                # Dropped from the list to restore parity; profile-driven
+                # margins for these groupboxes should be reintroduced once
+                # correct layout names are wired for all three at once.
                 groupbox_layouts = [
                     'gridLayout_exploring_single_content',
                     'gridLayout_exploring_multiple_content',
-                    'verticalLayout_exploring_custom_container'
                 ]
 
                 for layout_name in groupbox_layouts:
@@ -678,6 +690,20 @@ class DimensionsManager(LayoutManagerBase):
                 widget.setMinimumHeight(combobox_height)
                 widget.setMaximumHeight(combobox_height)
                 widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+            # QgsCheckableComboBoxLayer (custom widget - inherits QComboBox directly,
+            # so it is not matched by QgsCheckableComboBox findChildren above).
+            # Only setMinimumHeight: the widget's iconSize 36x20 + Segoe UI Semibold
+            # 10pt drive a sizeHint matching the sibling QgsMapLayerComboBox. Setting
+            # setMaximumHeight(combobox_height) would clamp it back to 20px and
+            # reintroduce the visual height mismatch the user reported.
+            try:
+                from ..widgets.custom_widgets import QgsCheckableComboBoxLayer
+                for widget in self.dockwidget.findChildren(QgsCheckableComboBoxLayer):
+                    widget.setMinimumHeight(combobox_height)
+                    widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            except ImportError:
+                pass
 
             # QgsPropertyOverrideButton - size from UIConfig
             for widget in self.dockwidget.findChildren(QgsPropertyOverrideButton):
