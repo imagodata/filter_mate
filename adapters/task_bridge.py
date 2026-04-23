@@ -366,14 +366,22 @@ class TaskBridge:
         start_time = time.time()
 
         try:
-            from .app_bridge import layer_info_from_qgis_layer
+            from .app_bridge import layer_info_from_qgis_layer, get_expression_service
             from ..core.domain.filter_expression import FilterExpression
 
             layer_info = layer_info_from_qgis_layer(layer)
             backend = self._backend_factory.get_backend(layer_info)
 
+            # SECURITY (H1 2026-04-23): translate raw QGIS expression to
+            # provider-specific SQL before the backend interpolates it into WHERE.
+            # Without this, expression.sql defaults to raw user input and lands
+            # unescaped in PostgreSQLBackend._execute_direct / _execute_with_mv.
+            translated_sql = get_expression_service().to_sql(
+                expression, layer_info.provider_type
+            )
             filter_expr = FilterExpression.create(
                 raw=expression,
+                sql=translated_sql,
                 provider=layer_info.provider_type,
                 source_layer_id=layer.id()
             )
@@ -451,18 +459,18 @@ class TaskBridge:
             return (expression, 'qgis')
 
         try:
-            from .app_bridge import layer_info_from_qgis_layer
-            from ..core.domain.filter_expression import FilterExpression
+            from .app_bridge import layer_info_from_qgis_layer, get_expression_service
 
             layer_info = layer_info_from_qgis_layer(layer)
 
-            filter_expr = FilterExpression.create(
-                raw=expression,
-                provider=layer_info.provider_type,
-                source_layer_id=layer.id()
+            # FIX (H1 2026-04-23): actually translate — previously this path
+            # constructed FilterExpression without `sql=`, so filter_expr.sql
+            # fell back to raw and the function returned the input unchanged.
+            translated_sql = get_expression_service().to_sql(
+                expression, layer_info.provider_type
             )
 
-            return (filter_expr.sql, layer_info.provider_type.value)
+            return (translated_sql, layer_info.provider_type.value)
 
         except Exception as e:
             logger.debug(f"Expression conversion failed: {e}")
