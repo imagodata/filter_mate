@@ -23,6 +23,129 @@ from typing import Optional
 logger = logging.getLogger('FilterMate.Core.Filter.Sanitizer')
 
 
+# Display functions whose outer call produces a non-boolean value. When a
+# subset string *is* one of these calls (no trailing boolean operator), the
+# SQL backend rejects it at WHERE-clause evaluation. Kept here — not in
+# validation_utils — because the sanitizer is the only boundary that must
+# keep stripping them even when upstream validation lets them through (e.g.
+# the <NULL> placeholder false-positive in is_filter_expression).
+_DISPLAY_FUNCTION_PREFIXES = (
+    'COALESCE(',
+    'CONCAT(',
+    'FORMAT(',
+    'FORMAT_DATE(',
+    'FORMAT_NUMBER(',
+    'TO_STRING(',
+    'UPPER(',
+    'LOWER(',
+    'TRIM(',
+    'SUBSTR(',
+    'REPLACE(',
+    'SUM(',
+    'COUNT(',
+    'AVG(',
+    'MIN(',
+    'MAX(',
+    'ARRAY_AGG(',
+    'AGGREGATE(',
+    'RELATION_AGGREGATE(',
+)
+
+# Top-level boolean operators. If any of these appear *outside* string
+# literals and outside balanced parentheses, the expression IS a filter
+# (e.g. `COALESCE("a", '') = 'x'`) and must be preserved.
+_TOPLEVEL_BOOLEAN_MARKERS = (
+    '=', '!=', '<>', '>', '<', '>=', '<=',
+    ' IN ', ' IN(', ' NOT IN ',
+    ' LIKE ', ' ILIKE ', ' SIMILAR TO ',
+    ' IS NULL', ' IS NOT NULL',
+    ' AND ', ' OR ',
+    ' BETWEEN ',
+)
+
+
+def _strip_toplevel_string_literals(expr: str) -> str:
+    """Replace single-quoted literals with placeholders so characters inside
+    them (notably '<', '>', '=') don't fool the top-level-operator scan."""
+    out = []
+    i = 0
+    n = len(expr)
+    while i < n:
+        c = expr[i]
+        if c == "'":
+            # skip until the closing quote (handle '' as an escape)
+            i += 1
+            while i < n:
+                if expr[i] == "'":
+                    # doubled '' is an escape, not a terminator
+                    if i + 1 < n and expr[i + 1] == "'":
+                        i += 2
+                        continue
+                    i += 1
+                    break
+                i += 1
+            out.append("''")
+            continue
+        out.append(c)
+        i += 1
+    return ''.join(out)
+
+
+def _has_toplevel_boolean_operator(expr: str) -> bool:
+    """True if expr contains a boolean operator at parenthesis-depth 0,
+    ignoring characters inside single-quoted string literals.
+    """
+    stripped = _strip_toplevel_string_literals(expr)
+    upper = stripped.upper()
+
+    depth = 0
+    toplevel_chars = []
+    # Build a depth-0 only projection, replacing nested content with spaces
+    # (so the substring scan below only sees the outer skeleton).
+    for ch in upper:
+        if ch == '(':
+            depth += 1
+            toplevel_chars.append(' ')
+        elif ch == ')':
+            depth -= 1
+            toplevel_chars.append(' ')
+        else:
+            toplevel_chars.append(ch if depth == 0 else ' ')
+    toplevel = ''.join(toplevel_chars)
+
+    for marker in _TOPLEVEL_BOOLEAN_MARKERS:
+        if marker in toplevel:
+            return True
+    return False
+
+
+def _is_standalone_display_expression(expr: str) -> bool:
+    """True if `expr` is a display function call / field reference with no
+    outer boolean operator — i.e. it cannot be used as a SQL WHERE clause.
+    """
+    if not expr or not expr.strip():
+        return False
+
+    stripped = expr.strip()
+    upper = stripped.upper()
+
+    # Field-only reference: "field" or "table"."field" with nothing else.
+    if stripped.startswith('"') and stripped.endswith('"'):
+        inner = stripped[1:-1]
+        # Must not contain any top-level operator — if it does, it's a weird
+        # edge case and we leave it alone (let QGIS/Postgres reject it).
+        if '"' not in inner or inner.replace('"."', '').replace('"', '') == inner.replace('"."', '').replace('"', ''):
+            if not _has_toplevel_boolean_operator(stripped):
+                return True
+
+    # Display function prefix (COALESCE, CONCAT, …)
+    for prefix in _DISPLAY_FUNCTION_PREFIXES:
+        if upper.startswith(prefix):
+            return not _has_toplevel_boolean_operator(stripped)
+
+    return False
+
+
 def sanitize_subset_string(subset_string: str) -> str:
     """
     Remove non-boolean display expressions and fix type casting issues in subset string.
@@ -47,6 +170,29 @@ def sanitize_subset_string(subset_string: str) -> str:
         return subset_string
 
     sanitized = subset_string
+
+    # ========================================================================
+    # PHASE -1: Reject standalone display expressions
+    # ========================================================================
+    # FIX 2026-04-23: the AND/OR-prefixed coalesce/CASE patterns below only
+    # strip display expressions that are *glued onto* a boolean filter. When
+    # the WHOLE subset is a display expression (e.g. the favorite stored the
+    # layer's displayExpression by mistake, or QGIS left a sticky invalid
+    # subset after a prior rejected setSubsetString call), it reaches
+    # PostgreSQL as `WHERE COALESCE(...)` → "argument of WHERE must be type
+    # boolean, not type character varying".
+    #
+    # We detect this by checking whether the expression starts with a known
+    # display function and *does not* contain a top-level boolean operator
+    # after the outer function call. A direct prefix check avoids the
+    # is_filter_expression() false positive where '<' inside a '<NULL>'
+    # placeholder is mistaken for a comparison operator.
+    if _is_standalone_display_expression(sanitized):
+        logger.info(
+            "FilterMate: Dropping non-boolean subset string "
+            f"(display expression, not a filter): '{sanitized[:80]}...'"
+        )
+        return ''
 
     # ========================================================================
     # PHASE 0: Normalize French SQL operators to English

@@ -1117,14 +1117,36 @@ class FavoritesController(BaseController):
             widgets_to_block = self._collect_filtering_widgets_for_favorite(dw)
 
             from ...infrastructure.signal_utils import SignalBlocker
+
+            # FIX 2026-04-23: legacy favorites can carry a display expression
+            # (e.g. COALESCE("field", '<NULL>')) in .expression — pushing that
+            # into the filtering widget ends up as PostgreSQL
+            # "WHERE COALESCE(...)" → "argument of WHERE must be type boolean"
+            # on the next filter task. Blank the payload before it propagates
+            # so the task falls back to feature-id filtering from spatial_config.
+            fav_expression = favorite.expression or ''
+            if fav_expression:
+                try:
+                    from ...infrastructure.utils.validation_utils import should_skip_expression_for_filtering
+                    should_skip, reason = should_skip_expression_for_filtering(fav_expression)
+                    if should_skip:
+                        logger.warning(
+                            f"Favorite '{favorite.name}' carries a non-filter expression "
+                            f"({reason}): '{fav_expression[:80]}...' — ignoring the expression; "
+                            "filter will rely on spatial_config / feature ids."
+                        )
+                        fav_expression = ''
+                except ImportError:
+                    logger.debug("validation_utils unavailable — skipping favorite expression check")
+
             with SignalBlocker(*widgets_to_block):
                 # Set expression in widget
                 expression_widget = getattr(dw, 'mQgsFieldExpressionWidget_filtering_active_expression', None)
                 if expression_widget is not None:
                     if hasattr(expression_widget, 'setExpression'):
-                        expression_widget.setExpression(favorite.expression)
+                        expression_widget.setExpression(fav_expression)
                     elif hasattr(expression_widget, 'setCurrentText'):
-                        expression_widget.setCurrentText(favorite.expression)
+                        expression_widget.setCurrentText(fav_expression)
 
                 # CRITICAL FIX 2026-01-18: Do NOT apply remote layer filters directly via setSubsetString!
                 # The filters contain __source alias which _clean_corrupted_subsets() will erase.
