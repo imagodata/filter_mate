@@ -26,6 +26,51 @@ from .service import FavoritesSharingService
 logger = logging.getLogger('FilterMate.Extensions.FavoritesSharing')
 
 
+# Lazy availability flag — set on first check_dependencies() call.
+# Mirrors the qfieldcloud pattern so both extensions gate activation
+# on the presence of their companion QGIS plugin, visibly in the
+# Configuration panel under EXTENSIONS.<ext_id>.enabled.
+_RESOURCE_SHARING_AVAILABLE: Optional[bool] = None
+
+
+def _check_resource_sharing_available() -> bool:
+    """True when the QGIS ``resource_sharing`` plugin is installed.
+
+    Detection order:
+      1. ``qgis.utils.plugins['resource_sharing']`` — the authoritative
+         registry, populated only when the plugin is *loaded* by QGIS.
+      2. ``import resource_sharing`` — catches installed-but-not-loaded
+         cases (plugin present on disk but disabled in the plugin
+         manager). We still enable the extension in that case so the
+         user can opt in by simply enabling the plugin — no FilterMate
+         restart needed.
+    """
+    global _RESOURCE_SHARING_AVAILABLE
+    if _RESOURCE_SHARING_AVAILABLE is not None:
+        return _RESOURCE_SHARING_AVAILABLE
+
+    try:
+        from qgis.utils import plugins as _qgis_plugins  # type: ignore
+        if 'resource_sharing' in _qgis_plugins:
+            _RESOURCE_SHARING_AVAILABLE = True
+            return True
+    except ImportError:
+        pass
+
+    try:
+        import resource_sharing  # noqa: F401
+        _RESOURCE_SHARING_AVAILABLE = True
+    except ImportError:
+        _RESOURCE_SHARING_AVAILABLE = False
+    return _RESOURCE_SHARING_AVAILABLE
+
+
+def reset_resource_sharing_cache() -> None:
+    """Clear the availability cache (used by tests + after plugin toggle)."""
+    global _RESOURCE_SHARING_AVAILABLE
+    _RESOURCE_SHARING_AVAILABLE = None
+
+
 class FavoritesSharingExtension(BaseExtension):
     """Favorites collections via QGIS Resource Sharing."""
 
@@ -55,8 +100,13 @@ class FavoritesSharingExtension(BaseExtension):
             ),
             author="FilterMate Team",
             min_qgis_version="3.28",
-            dependencies=[],
-            optional_dependencies=["resource_sharing"],
+            # Hard dep on the Resource Sharing plugin: without it, there's
+            # no canonical collections/ tree to scan and publishing has
+            # nowhere to target. The extension still seeds its config so
+            # it shows up in the panel (greyed/disabled) until the user
+            # installs the companion plugin — same UX as qfieldcloud.
+            dependencies=["resource_sharing"],
+            optional_dependencies=[],
             icon_name="favorites_shared.png",
         )
 
@@ -129,14 +179,18 @@ class FavoritesSharingExtension(BaseExtension):
         }
 
     def check_dependencies(self) -> bool:
-        """No hard dependencies — always available.
+        """Gate activation on the QGIS ``resource_sharing`` plugin.
 
-        The resource_sharing plugin is optional: when absent, we still
-        scan the conventional ``~/.qgis/.../resource_sharing/collections``
-        tree (users can populate it manually). When present, nothing
-        changes — we just read the same directory.
+        FIX 2026-04-23: previously always True, which meant the extension
+        reported "ready" even when the Resource Sharing plugin wasn't
+        installed — at which point every publish/fork action would fail
+        with a confusing "collections root not found" error. Aligning
+        with the qfieldcloud pattern: the extension config still seeds
+        (so it's visible under EXTENSIONS in the Configuration panel),
+        but the extension is flagged as ``MISSING_DEPS`` until the user
+        installs the companion plugin.
         """
-        return True
+        return _check_resource_sharing_available()
 
     def initialize(self, iface: Any) -> None:
         self._iface = iface
