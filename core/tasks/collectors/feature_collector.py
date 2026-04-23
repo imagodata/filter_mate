@@ -14,7 +14,7 @@ Location: core/tasks/collectors/feature_collector.py
 """
 
 import logging
-from typing import Optional, List, Dict, Any, Tuple, Union, Callable
+from typing import Optional, List, Dict, Any, Tuple, Union, Callable, Iterable
 from dataclasses import dataclass
 
 from qgis.core import QgsVectorLayer, QgsFeature, QgsFeatureRequest
@@ -255,9 +255,8 @@ class FeatureCollector:
             if limit:
                 request.setLimit(limit)
 
-            # Collect features
-            features = list(self.layer.getFeatures(request))
-            ids = self._extract_ids_from_features(features)
+            # Stream feature IDs directly — do not materialize the full list
+            ids = self._extract_ids_from_features(self.layer.getFeatures(request))
 
             # Cache if enabled
             if self.cache_enabled:
@@ -311,8 +310,8 @@ class FeatureCollector:
             if limit:
                 request.setLimit(limit)
 
-            features = list(self.layer.getFeatures(request))
-            ids = self._extract_ids_from_features(features)
+            # Stream feature IDs directly — do not materialize the full list
+            ids = self._extract_ids_from_features(self.layer.getFeatures(request))
 
             # Cache if enabled
             if self.cache_enabled:
@@ -338,18 +337,21 @@ class FeatureCollector:
 
     def _extract_ids_from_features(
         self,
-        features: List[Union[QgsFeature, Dict]]
+        features: Iterable[Union[QgsFeature, Dict]]
     ) -> List[Any]:
         """
-        Extract IDs from feature list.
+        Extract IDs from a feature iterable.
 
         Uses attribute(pk_field) for proper DB primary key extraction,
         NOT f.id() which returns QGIS internal FID.
 
+        Accepts any iterable (list or QgsFeatureIterator) to avoid
+        materializing large layers just to extract PKs.
+
         v4.2.8: Checks for cancellation every CANCEL_CHECK_INTERVAL features.
 
         Args:
-            features: List of features
+            features: Iterable of features
 
         Returns:
             List of primary key values (may be partial if canceled)
@@ -362,7 +364,7 @@ class FeatureCollector:
             # Periodic cancellation check
             if i > 0 and i % check_interval == 0:
                 if self.is_canceled():
-                    logger.info(f"Feature extraction canceled at {i}/{len(features)} features")
+                    logger.info(f"Feature extraction canceled at {i} features")
                     break
 
             try:
