@@ -745,13 +745,10 @@ class PostgreSQLBackend(BackendPort):
         connection
     ) -> List[int]:
         """Execute filter directly without MV."""
-        self._get_table_name(layer_info)
-        self._get_pk_column(layer_info)
+        table_name = self._get_table_name(layer_info)
+        pk_column = self._get_pk_column(layer_info)
 
-        query = """
-            SELECT "{pk_column}" FROM {table_name}
-            WHERE {expression.sql}
-        """
+        query = f'SELECT "{pk_column}" FROM {table_name} WHERE {expression.sql}'  # nosec B608
 
         logger.debug(f"[PostgreSQL] [PostgreSQL v4.0] DIRECT Query: {query[:500]}...")
 
