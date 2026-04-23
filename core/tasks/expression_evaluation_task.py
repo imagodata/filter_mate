@@ -135,6 +135,9 @@ class ExpressionEvaluationTask(QgsTask):
         self._feature_source = None
         self._total_count = 0
 
+        # Parsed expression cached between _validate_inputs and _build_feature_request
+        self._qgs_expr: Optional[QgsExpression] = None
+
         # Results
         self.result_features: List[QgsFeature] = []
         self.result_expression: str = expression
@@ -235,10 +238,10 @@ class ExpressionEvaluationTask(QgsTask):
             self.exception = ValueError("Expression string is empty")
             return False
 
-        # Validate expression syntax
-        qgs_expr = QgsExpression(self.expression_string)
-        if qgs_expr.hasParserError():
-            self.exception = ValueError(f"Invalid expression: {qgs_expr.parserErrorString()}")
+        # Validate expression syntax (parse once, reuse in _build_feature_request)
+        self._qgs_expr = QgsExpression(self.expression_string)
+        if self._qgs_expr.hasParserError():
+            self.exception = ValueError(f"Invalid expression: {self._qgs_expr.parserErrorString()}")
             return False
 
         return True
@@ -251,7 +254,7 @@ class ExpressionEvaluationTask(QgsTask):
             Configured QgsFeatureRequest or None on error
         """
         try:
-            qgs_expr = QgsExpression(self.expression_string)
+            qgs_expr = self._qgs_expr if self._qgs_expr is not None else QgsExpression(self.expression_string)
             request = QgsFeatureRequest(qgs_expr)
 
             # Set limit if specified
