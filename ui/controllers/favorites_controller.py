@@ -1526,10 +1526,23 @@ class FavoritesController(BaseController):
             logger.debug(f"Could not toggle HAS_LAYERS_TO_FILTER: {e}")
 
         # --- 4. Tick the HAS_GEOMETRIC_PREDICATES button + propagate predicates ---
+        #
+        # FIX 2026-04-23: previously only the push-button was toggled, so the
+        # combobox items came from whatever QGIS had persisted at the project
+        # level — typically out-of-sync with the favorite. We now drive both
+        # widgets from the favorite's ``geometric_predicates`` list so
+        # ``sync_ui_to_project_layers`` / task_builder see a consistent state.
+        try:
+            combo_widget = getattr(dw, 'comboBox_filtering_geometric_predicates', None)
+            if combo_widget is not None and hasattr(combo_widget, 'setCheckedItems'):
+                combo_widget.setCheckedItems(predicate_list)
+        except Exception as e:
+            logger.debug(f"Could not set checkedItems on geometric_predicates combobox: {e}")
+
         try:
             has_pred_btn = getattr(dw, 'pushButton_checkable_filtering_geometric_predicates', None)
             if has_pred_btn is not None:
-                has_pred_btn.setChecked(bool(predicates))
+                has_pred_btn.setChecked(bool(has_predicates_flag))
         except Exception as e:
             logger.debug(f"Could not toggle HAS_GEOMETRIC_PREDICATES: {e}")
 
@@ -1549,19 +1562,25 @@ class FavoritesController(BaseController):
             logger.debug(f"Could not toggle HAS_BUFFER_VALUE: {e}")
 
         # --- 6. Persist restored state into PROJECT_LAYERS so sync_ui_to_project_layers sees it ---
+        #
+        # FIX 2026-04-23: write to the canonical keys (has_geometric_predicates
+        # + geometric_predicates list) that task_builder + filtering orchestrator
+        # actually read. The previous ``filtering_props["predicates"] = dict``
+        # write was dead: nothing in the task pipeline ever reads it.
         if layer_props is not None:
             filtering_props = layer_props.setdefault("filtering", {})
             filtering_props["has_layers_to_filter"] = bool(resolved_layer_ids)
             filtering_props["layers_to_filter"] = resolved_layer_ids
-            filtering_props["has_geometric_predicates"] = bool(predicates)
-            if predicates:
-                filtering_props["predicates"] = predicates
+            filtering_props["has_geometric_predicates"] = bool(has_predicates_flag)
+            filtering_props["geometric_predicates"] = list(predicate_list)
             if buffer_value is not None:
                 filtering_props["has_buffer_value"] = float(buffer_value) != 0.0
                 filtering_props["buffer_value"] = float(buffer_value)
             logger.debug(
                 f"Favorite restore persisted into PROJECT_LAYERS[{current_layer.id()}]: "
-                f"layers={len(resolved_layer_ids)}, predicates={list(predicates.keys())}"
+                f"layers={len(resolved_layer_ids)}, "
+                f"geometric_predicates={predicate_list} "
+                f"(has_geometric_predicates={bool(has_predicates_flag)})"
             )
 
     @staticmethod
