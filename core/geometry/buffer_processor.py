@@ -82,11 +82,15 @@ def evaluate_buffer_distance(
         float: Evaluated buffer distance (0 if cannot be evaluated)
     """
     if isinstance(buffer_param, QgsProperty):
-        # Expression-based buffer: use first feature to evaluate
-        features = list(layer.getFeatures())
-        if features:
+        # Expression-based buffer: only the first feature is needed to seed context.
+        from qgis.core import QgsFeatureRequest
+        first_feature = next(
+            iter(layer.getFeatures(QgsFeatureRequest().setLimit(1))),
+            None,
+        )
+        if first_feature is not None:
             context = QgsExpressionContext()
-            context.setFeature(features[0])
+            context.setFeature(first_feature)
             return buffer_param.value(context, 0)
         return 0
     return float(buffer_param)
@@ -442,13 +446,17 @@ def apply_qgis_buffer(
 
     # CRITICAL: Check if CRS is geographic with large buffer value
     if is_geographic:
-        # Evaluate buffer distance to get actual value
+        # Evaluate buffer distance to get actual value (only first feature is needed)
         eval_distance = buffer_distance
         if isinstance(buffer_distance, QgsProperty):
-            features = list(layer.getFeatures())
-            if features:
+            from qgis.core import QgsFeatureRequest
+            first_feature = next(
+                iter(layer.getFeatures(QgsFeatureRequest().setLimit(1))),
+                None,
+            )
+            if first_feature is not None:
                 context = QgsExpressionContext()
-                context.setFeature(features[0])
+                context.setFeature(first_feature)
                 eval_distance = buffer_distance.value(context, 0)
 
         if eval_distance and float(eval_distance) > 1:
@@ -555,13 +563,18 @@ def simplify_buffer_result(
     if layer is None or not layer.isValid() or layer.featureCount() == 0:
         return layer
 
-    # Evaluate buffer distance if it's a QgsProperty
+    # Evaluate buffer distance if it's a QgsProperty — only the first feature
+    # is needed to seed the expression context, so cap the request at 1.
     buffer_dist = buffer_distance
     if isinstance(buffer_distance, QgsProperty):
-        features = list(layer.getFeatures())
-        if features:
+        from qgis.core import QgsFeatureRequest
+        first_feature = next(
+            iter(layer.getFeatures(QgsFeatureRequest().setLimit(1))),
+            None,
+        )
+        if first_feature is not None:
             context = QgsExpressionContext()
-            context.setFeature(features[0])
+            context.setFeature(first_feature)
             buffer_dist = buffer_distance.value(context, 0)
 
     try:
