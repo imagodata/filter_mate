@@ -98,8 +98,21 @@ class ExtensionRegistry:
                             "Config seeding failed for '%s': %s",
                             ext_id, seed_err,
                         )
+                else:
+                    # FIX 2026-04-23: surface silent load failures. Before,
+                    # _load_extension_module returned None on import error /
+                    # missing Extension class with only a DEBUG log — the
+                    # user ended up with an empty EXTENSIONS panel and no
+                    # way to diagnose why. Push a WARNING to QgsMessageLog
+                    # so the QGIS log panel shows it.
+                    self._log_discovery_failure(
+                        entry, "module loaded without an 'Extension' class or failed to import",
+                    )
             except Exception as e:
-                logger.warning("Failed to load extension '%s': %s", entry, e)
+                import traceback
+                tb = traceback.format_exc()
+                logger.warning("Failed to load extension '%s': %s\n%s", entry, e, tb)
+                self._log_discovery_failure(entry, f"{type(e).__name__}: {e}\n{tb}")
 
         # Persist when something changed. Also persist when discover_extensions
         # inserted *any* new extension namespace (even empty) — callers rely
@@ -126,16 +139,21 @@ class ExtensionRegistry:
 
         Returns:
             Extension instance or None
+
+        Raises:
+            ImportError (and other exceptions) when the extension subpackage
+            cannot be imported at all — the caller surfaces these to the
+            user via the QGIS log so discovery failures are never silent.
         """
         module_path = f".extensions.{package_name}"
-        try:
-            # Import relative to filter_mate package
-            module = importlib.import_module(
-                module_path, package="filter_mate"
-            )
-        except ImportError as e:
-            logger.debug("Cannot import %s: %s", module_path, e)
-            return None
+        # Import relative to filter_mate package. Let import errors bubble
+        # up to the caller so _log_discovery_failure can attach the full
+        # traceback to the QGIS log panel — historically this was a
+        # silent debug log, which made "extension vanished from the
+        # Configuration panel" impossible to diagnose.
+        module = importlib.import_module(
+            module_path, package="filter_mate"
+        )
 
         extension_cls = getattr(module, 'Extension', None)
         if extension_cls is None:
@@ -149,6 +167,25 @@ class ExtensionRegistry:
             return None
 
         return extension_cls()
+
+    def _log_discovery_failure(self, package_name: str, detail: str) -> None:
+        """Push a discovery failure to the QGIS log panel.
+
+        The python logger is normally invisible to end users; without this,
+        a broken extension simply didn't show up anywhere and support had
+        no entry point. This method is best-effort — any failure to reach
+        QgsMessageLog is swallowed because discovery must never crash the
+        plugin startup.
+        """
+        try:
+            from qgis.core import Qgis, QgsMessageLog  # type: ignore
+            QgsMessageLog.logMessage(
+                f"Extension '{package_name}' failed to load — see details below.\n{detail}",
+                "FilterMate",
+                Qgis.MessageLevel.Warning,
+            )
+        except Exception:
+            pass
 
     def register(self, extension: BaseExtension) -> None:
         """
