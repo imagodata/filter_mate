@@ -801,12 +801,21 @@ class FavoritesController(BaseController):
         import_action = menu.addAction("📥 " + self.tr("Import..."))
         import_action.setData('__IMPORT__')
 
-        # Optional: shared-favorites picker when the favorites_sharing
-        # extension is active. The entry is hidden when the extension is
-        # not installed — keeps the menu clean for users who don't use it.
+        # Optional: shared-favorites picker + publish when the
+        # favorites_sharing extension is active. Entries are hidden when
+        # the extension is not installed.
         if self._is_sharing_extension_active():
             shared_action = menu.addAction("📡 " + self.tr("Import from Resource Sharing..."))
             shared_action.setData('__SHARED_PICKER__')
+
+            publish_action = menu.addAction("📤 " + self.tr("Publish to Resource Sharing..."))
+            publish_action.setData('__PUBLISH_SHARING__')
+            # Disable publishing when there is nothing to publish.
+            if self.count == 0:
+                publish_action.setEnabled(False)
+                publish_action.setText(
+                    "📤 " + self.tr("Publish (no favorites saved)")
+                )
 
         # === GLOBAL FAVORITES SUBMENU ===
         menu.addSeparator()
@@ -884,6 +893,8 @@ class FavoritesController(BaseController):
             self._show_database_stats()
         elif action_data == '__SHARED_PICKER__':
             self._open_shared_picker()
+        elif action_data == '__PUBLISH_SHARING__':
+            self._open_publish_dialog()
         elif isinstance(action_data, tuple):
             if action_data[0] == 'apply':
                 self.apply_favorite(action_data[1])
@@ -1673,6 +1684,40 @@ class FavoritesController(BaseController):
         except Exception as e:
             logger.exception("Shared picker failed to open")
             self._show_warning(self.tr("Shared picker failed: {0}").format(e))
+
+    def _open_publish_dialog(self) -> None:
+        """Open the PublishFavoritesDialog when the extension is active."""
+        ext = self._get_sharing_extension()
+        if ext is None or self._favorites_manager is None:
+            self._show_warning(self.tr(
+                "Resource Sharing extension is not active. "
+                "Enable 'favorites_sharing' in FilterMate settings."
+            ))
+            return
+
+        service = ext.get_service('service')
+        if service is None:
+            self._show_warning(self.tr("Shared favorites service is not available."))
+            return
+
+        if self.count == 0:
+            self._show_warning(self.tr(
+                "You have no favorites to publish yet. Save a filter via "
+                "the ★ menu first."
+            ))
+            return
+
+        try:
+            from ...extensions.favorites_sharing.ui import PublishFavoritesDialog
+            dialog = PublishFavoritesDialog(
+                service,
+                self._favorites_manager,
+                parent=self.dockwidget,
+            )
+            dialog.exec()
+        except Exception as e:
+            logger.exception("Publish dialog failed to open")
+            self._show_warning(self.tr("Publish dialog failed: {0}").format(e))
 
     def _show_database_stats(self) -> None:
         """Show database statistics dialog."""

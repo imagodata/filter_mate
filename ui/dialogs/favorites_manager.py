@@ -152,6 +152,20 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._shared_btn.setVisible(self._is_sharing_active())
         header_row.addWidget(self._shared_btn)
 
+        # Publish button — symmetric counterpart that pushes favorites into
+        # a Resource Sharing collection. Hidden when the extension is
+        # inactive or when there is nothing to publish.
+        self._publish_btn = QPushButton("📤 " + self.tr("Publish..."))
+        self._publish_btn.setObjectName("publishBtn")
+        self._publish_btn.setToolTip(self.tr(
+            "Publish selected favorites into a Resource Sharing collection"
+        ))
+        self._publish_btn.clicked.connect(self._on_publish_clicked)
+        self._publish_btn.setVisible(
+            self._is_sharing_active() and fav_count > 0
+        )
+        header_row.addWidget(self._publish_btn)
+
         layout.addLayout(header_row)
 
         # Search box
@@ -894,6 +908,31 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             self.refresh()
         except Exception as e:
             logger.debug(f"Could not open shared picker: {e}")
+
+    def _on_publish_clicked(self) -> None:
+        """Open the PublishFavoritesDialog pre-selecting the current row.
+
+        When there is a selected favorite we pass its id as the default
+        check — the user can still toggle others on/off in the publish
+        dialog's favorites list.
+        """
+        if not self._is_sharing_active() or self._favorites_manager is None:
+            return
+        try:
+            from ...extensions.registry import get_extension_registry
+            from ...extensions.favorites_sharing.ui import PublishFavoritesDialog
+            ext = get_extension_registry().get_extension('favorites_sharing')
+            service = ext.get_service('service') if ext else None
+            if service is None:
+                return
+            preselected = [self._current_fav_id] if self._current_fav_id else []
+            dialog = PublishFavoritesDialog(
+                service, self._favorites_manager,
+                parent=self, preselected_ids=preselected,
+            )
+            dialog.exec()
+        except Exception as e:
+            logger.debug(f"Could not open publish dialog: {e}")
 
     def refresh(self):
         """Refresh the favorites list."""

@@ -80,13 +80,26 @@ class ResourceSharingScanner:
     def get_collections_root(self) -> Optional[str]:
         """Resolve the Resource Sharing collections directory.
 
-        Tries ``QgsApplication.qgisSettingsDirPath()`` first (matches the
-        convention used by the resource_sharing plugin), then the legacy
-        ``QGIS_CUSTOM_CONFIG_PATH``, then a hard-coded profile path.
+        Resolution order (first hit wins):
+        1. explicit ``collections_root`` passed to the constructor;
+        2. ``EXTENSIONS.favorites_sharing.resource_sharing_root`` in
+           FilterMate config — lets users override the auto-detected
+           path (e.g., point at a shared network mount);
+        3. ``QgsApplication.qgisSettingsDirPath()`` + ``/resource_sharing/collections``
+           (matches the resource_sharing plugin convention);
+        4. ``QGIS_CUSTOM_CONFIG_PATH`` / ``QGIS_AUTH_CUSTOM_CONFIG_PATH``
+           environment overrides;
+        5. Platform-specific fallbacks under ``~``.
+
         Returns ``None`` when nothing resolves to an existing directory.
         """
         if self._explicit_root and os.path.isdir(self._explicit_root):
             return self._explicit_root
+
+        # Config override — users can point at a custom collections dir
+        configured = self._read_configured_root()
+        if configured and os.path.isdir(configured):
+            return configured
 
         candidate_roots: List[str] = []
         try:
@@ -178,16 +191,61 @@ class ResourceSharingScanner:
     # ─── Helpers ───────────────────────────────────────────────────────
 
     @staticmethod
-    def _iter_collections(root: str) -> Iterable[Tuple[str, str]]:
+    def _read_configured_root() -> Optional[str]:
+        """Read ``EXTENSIONS.favorites_sharing.resource_sharing_root``
+        from FilterMate config, if set.
+        """
+        try:
+            from filter_mate.config.config import ENV_VARS, _get_option_value
+        except Exception:
+            return None
+        try:
+            cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
+                .get("EXTENSIONS", {}) \
+                .get("favorites_sharing", {})
+            value = _get_option_value(cfg.get("resource_sharing_root"), default="")
+            return str(value) if value else None
+        except Exception:
+            return None
+
+    @staticmethod
+    def _read_allowed_collections() -> List[str]:
+        """Read the opt-in allow-list of collection basenames from config.
+
+        Empty list means "allow everything" — mirrors the config default.
+        """
+        try:
+            from filter_mate.config.config import ENV_VARS, _get_option_value
+        except Exception:
+            return []
+        try:
+            cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
+                .get("EXTENSIONS", {}) \
+                .get("favorites_sharing", {})
+            value = _get_option_value(cfg.get("allowed_collections"), default=[])
+            if isinstance(value, list):
+                return [str(v) for v in value if v]
+        except Exception:
+            pass
+        return []
+
+    @classmethod
+    def _iter_collections(cls, root: str) -> Iterable[Tuple[str, str]]:
         try:
             entries = sorted(os.listdir(root))
         except OSError as e:
             logger.debug(f"Cannot list Resource Sharing root {root}: {e}")
             return []
+
+        allowed = set(cls._read_allowed_collections())
         for name in entries:
             path = os.path.join(root, name)
-            if os.path.isdir(path) and not name.startswith('.'):
-                yield name, path
+            if not os.path.isdir(path) or name.startswith('.'):
+                continue
+            # Opt-in allow-list: when non-empty only accept whitelisted basenames.
+            if allowed and name not in allowed:
+                continue
+            yield name, path
 
     @staticmethod
     def _read_collection_metadata(collection_dir: str) -> Dict[str, Any]:

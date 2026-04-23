@@ -10,6 +10,7 @@ you just can't browse curated collections from within the dialog.
 
 ## What it does
 
+**Consume** (import favorites published by others):
 - **Scans** `{profile}/resource_sharing/collections/**/filter_mate/favorites/*.fmfav{,-pack}.json`
   on every plugin load and on project change.
 - **Exposes** discovered favorites in a read-only "📡 Shared..." picker,
@@ -21,6 +22,21 @@ you just can't browse curated collections from within the dialog.
   user's local layer UUIDs.
 - **Preserves provenance**: forked favorites carry
   `_extra.forked_from = {collection, file}` for traceability.
+
+**Publish** (share your favorites with others):
+- Accessible from:
+  - the favorites ★ menu → "📤 Publish to Resource Sharing..."
+  - the Favorites Manager dialog → "📤 Publish..." button
+- Target selection: pick an **existing** collection under your Resource
+  Sharing root, create a **new collection** in the root (one click), or
+  **browse to a custom directory** for collections hosted outside the
+  default path.
+- Multi-select favorites with checkboxes, pre-fill collection metadata
+  (name, author, license, tags, homepage, description) from config.
+- Writes the bundle at `<target>/filter_mate/favorites/<name>.fmfav-pack.json`
+  using the canonical v3 format, and **merges** the collection-level
+  `collection.json` manifest (preserves pre-existing keys like
+  `qgis_min`, `tags` set by the Resource Sharing plugin).
 
 ## Publishing a collection
 
@@ -113,17 +129,38 @@ same `name()` — which is fragile across users.
 
 ## Config
 
-Toggle via `config.json`:
+All entries live under `EXTENSIONS.favorites_sharing` in your
+FilterMate `config.json`. Defaults ship in `config.default.json`.
 
 ```json
 {
   "EXTENSIONS": {
     "favorites_sharing": {
-      "enabled": {"value": true}
+      "enabled": {"value": true},
+      "resource_sharing_root": {"value": ""},
+      "default_publish_collection": {"value": ""},
+      "default_publish_metadata": {
+        "value": {
+          "author": "Your Name",
+          "license": "CC-BY-4.0",
+          "homepage": "https://example.org"
+        }
+      },
+      "allowed_collections": {"value": []},
+      "auto_refresh_on_project_load": {"value": true}
     }
   }
 }
 ```
+
+| Key | Purpose |
+|---|---|
+| `enabled` | Toggle the whole extension. When `false`, menu / dialog entries are hidden. |
+| `resource_sharing_root` | Override the auto-detected Resource Sharing `collections/` directory. Leave empty to let the scanner find it from the QGIS profile. Useful for shared network mounts or custom setups. |
+| `default_publish_collection` | Absolute path (or directory basename under the root) of the collection pre-selected in the Publish dialog. When empty the first available collection is used. |
+| `default_publish_metadata` | `author` / `license` / `homepage` pre-filled in the Publish dialog — saves re-typing for organisations publishing many bundles. |
+| `allowed_collections` | Opt-in allow-list of collection directory names (basenames only). When non-empty the scanner **only** ingests favorites from these collections — useful to restrict an org to curated repos. Empty list = scan everything. |
+| `auto_refresh_on_project_load` | Re-scan on every project load so signature resolution picks up the current project's layers. |
 
 ## Unit tests
 

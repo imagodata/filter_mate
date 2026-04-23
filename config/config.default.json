@@ -778,6 +778,30 @@
       "dismiss_missing_deps_warning": {
         "value": false,
         "description": "Do not show the missing dependencies warning for this extension"
+      },
+      "resource_sharing_root": {
+        "value": "",
+        "description": "Absolute path to the Resource Sharing 'collections' directory. Leave empty to auto-detect from QGIS profile. Example: /home/user/.local/share/QGIS/QGIS3/profiles/default/resource_sharing/collections"
+      },
+      "default_publish_collection": {
+        "value": "",
+        "description": "Absolute path (or sub-directory name under the resource_sharing_root) of the collection pre-selected when publishing a bundle. When empty the Publish dialog opens on the first available collection."
+      },
+      "default_publish_metadata": {
+        "value": {
+          "author": "",
+          "license": "",
+          "homepage": ""
+        },
+        "description": "Default metadata pre-filled in the Publish dialog (author, license, homepage). Saves re-typing across publishes."
+      },
+      "allowed_collections": {
+        "value": [],
+        "description": "Opt-in allow-list of collection directory names (basenames, NOT full paths). When non-empty, the scanner ONLY ingests favorites from these collections — useful to restrict an organisation to curated repositories. Empty list (default) means 'scan everything under resource_sharing_root'."
+      },
+      "auto_refresh_on_project_load": {
+        "value": true,
+        "description": "Re-scan Resource Sharing collections whenever a QGIS project is loaded so signature resolution always uses the current project's layers."
       }
     }
   }
