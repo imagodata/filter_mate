@@ -128,7 +128,33 @@ class ExtensionRegistry:
                     len(discovered),
                 )
 
+        # Diagnostic summary (2026-04-23): push the list of discovered
+        # extensions + their persisted config slice to the QGIS log panel
+        # so users can see at a glance whether the Configuration panel
+        # should be showing their extension. Only logged on first call
+        # (initial discovery) so we don't spam when the registry is
+        # re-scanned.
+        self._log_discovery_summary(discovered)
+
         return discovered
+
+    def _log_discovery_summary(self, discovered: List[str]) -> None:
+        """Push a compact snapshot of discovery results to the QGIS log."""
+        try:
+            from qgis.core import Qgis, QgsMessageLog  # type: ignore
+            from filter_mate.config.config import ENV_VARS
+
+            cfg = ENV_VARS.get("CONFIG_DATA", {})
+            ext_keys = list((cfg.get("EXTENSIONS") or {}).keys()) if isinstance(cfg, dict) else []
+
+            QgsMessageLog.logMessage(
+                f"Extension discovery: {len(discovered)} loaded ({', '.join(discovered) or 'none'}); "
+                f"EXTENSIONS config keys: {ext_keys or 'none'}",
+                "FilterMate",
+                Qgis.MessageLevel.Info,
+            )
+        except Exception:
+            pass
 
     def _load_extension_module(self, package_name: str) -> Optional[BaseExtension]:
         """
