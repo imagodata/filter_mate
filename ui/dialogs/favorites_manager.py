@@ -9,10 +9,10 @@ import logging
 
 try:
     from qgis.PyQt.QtWidgets import (
-        QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QListWidgetItem,
-        QPushButton, QLabel, QLineEdit, QTextEdit, QMessageBox, QFormLayout,
-        QDialogButtonBox, QSplitter, QTreeWidget, QTreeWidgetItem, QHeaderView,
-        QTabWidget, QWidget
+        QButtonGroup, QComboBox, QDialog, QVBoxLayout, QHBoxLayout, QListWidget,
+        QListWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QMessageBox,
+        QFormLayout, QDialogButtonBox, QRadioButton, QSplitter, QTreeWidget,
+        QTreeWidgetItem, QHeaderView, QTabWidget, QWidget
     )
     from qgis.PyQt.QtCore import Qt, pyqtSignal
     HAS_QGIS = True
@@ -32,6 +32,9 @@ except ImportError:
     QMessageBox = None
     QFormLayout = object
     QDialogButtonBox = object
+    QButtonGroup = object
+    QComboBox = object
+    QRadioButton = object
     QSplitter = object
     QTreeWidget = object
     QTreeWidgetItem = object
@@ -39,6 +42,41 @@ except ImportError:
     QTabWidget = object
     Qt = None
     pyqtSignal = lambda *args: None
+
+# Scope badge + label constants — kept close to the UI so copywriter
+# tweaks don't require touching the domain layer.
+_SCOPE_BADGES = {
+    "shared_here":   "👥",   # project=this, owner=NULL
+    "shared_global": "🌐",   # project=GLOBAL, owner=NULL
+    "mine_here":     "🔒",   # project=this, owner=me
+    "mine_global":   "👤",   # project=GLOBAL, owner=me
+    "foreign":       "•",    # someone else's favorite (visible in shared DB)
+}
+
+
+def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
+    """Classify a favorite for badge/filter purposes.
+
+    Returns one of the keys in ``_SCOPE_BADGES``. "foreign" means the
+    favorite belongs to another user — kept visible because forbidding
+    the owner column would be surprising, but flagged so users can tell
+    which ones aren't theirs.
+    """
+    owner = getattr(fav, "owner", None)
+    is_mine = bool(current_user) and owner == current_user
+    is_shared = owner is None
+    is_foreign = (not is_mine) and (not is_shared)
+    # The manager's cache is pinned to ONE project_uuid — so every row
+    # in the cache has the manager's project. The "global" vs "here"
+    # distinction therefore depends on which project the manager is
+    # pinned to, not on the favorite's own project_uuid (absent from
+    # the dataclass).
+    is_global = current_project_uuid == global_uuid
+    if is_foreign:
+        return "foreign"
+    if is_mine:
+        return "mine_global" if is_global else "mine_here"
+    return "shared_global" if is_global else "shared_here"
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +206,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         layout.addLayout(header_row)
 
-        # Search box
+        # Search box + scope filter (v5.1)
         search_layout = QHBoxLayout()
         search_layout.setSpacing(8)
         search_label = QLabel("🔍")
@@ -182,7 +220,26 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         )
         self._search_edit.setClearButtonEnabled(True)
         self._search_edit.textChanged.connect(self._on_search_changed)
-        search_layout.addWidget(self._search_edit)
+        search_layout.addWidget(self._search_edit, 1)
+
+        # Scope filter — dropdown between search and the count badge.
+        # Stays visible even when the extension/owner cascade resolves to
+        # None (the user can still filter by "Shared" vs "All"); the
+        # "Mine ..." entries simply match nothing when no identity is set.
+        self._scope_combo = QComboBox()
+        self._scope_combo.setObjectName("scopeCombo")
+        self._scope_combo.setToolTip(self.tr(
+            "Filter favorites by scope (owner × project)."
+        ))
+        # Keep enum keys in sync with FavoriteScope so the lookup is
+        # a direct dict access — no parallel mapping to maintain.
+        self._scope_combo.addItem("🔎 " + self.tr("All"), "all")
+        self._scope_combo.addItem("🌐 " + self.tr("Shared · All projects"), "global_shared")
+        self._scope_combo.addItem("👥 " + self.tr("Shared · This project"), "project_shared")
+        self._scope_combo.addItem("👤 " + self.tr("Mine · All projects"), "global_mine")
+        self._scope_combo.addItem("🔒 " + self.tr("Mine · This project"), "project_mine")
+        self._scope_combo.currentIndexChanged.connect(self._on_scope_changed)
+        search_layout.addWidget(self._scope_combo)
         layout.addLayout(search_layout)
 
         # Main content with splitter
@@ -502,6 +559,60 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         stats_layout.addWidget(self._created_label)
         general_layout.addRow(stats_layout)
 
+        # Scope controls (v5.1) — two independent dimensions: owner (mine
+        # vs shared) and project (this vs all). Each dimension is a pair
+        # of mutually exclusive radios; the combination gives the 4
+        # scopes surfaced in the header filter combo.
+        scope_container = QWidget()
+        scope_v = QVBoxLayout(scope_container)
+        scope_v.setContentsMargins(0, 0, 0, 0)
+        scope_v.setSpacing(4)
+
+        owner_row = QHBoxLayout()
+        owner_row.setSpacing(8)
+        self._scope_mine_radio = QRadioButton(self.tr("Mine"))
+        self._scope_shared_radio = QRadioButton(self.tr("Shared"))
+        self._scope_owner_group = QButtonGroup(self)
+        self._scope_owner_group.addButton(self._scope_mine_radio)
+        self._scope_owner_group.addButton(self._scope_shared_radio)
+        owner_row.addWidget(self._scope_mine_radio)
+        owner_row.addWidget(self._scope_shared_radio)
+        owner_row.addStretch()
+        scope_v.addLayout(owner_row)
+
+        project_row = QHBoxLayout()
+        project_row.setSpacing(8)
+        self._scope_proj_here_radio = QRadioButton(self.tr("This project"))
+        self._scope_proj_all_radio = QRadioButton(self.tr("All projects"))
+        # Project dimension is read-only for now: moving a favorite
+        # across projects would require cross-cache bookkeeping that
+        # belongs in a dedicated "move/duplicate" flow. Radios show the
+        # current project scope for transparency but can't be flipped.
+        self._scope_proj_here_radio.setEnabled(False)
+        self._scope_proj_all_radio.setEnabled(False)
+        ro_tip = self.tr(
+            "Project scope is set when the favorite is created. Move it "
+            "via the filtering tab (coming soon) to switch projects."
+        )
+        self._scope_proj_here_radio.setToolTip(ro_tip)
+        self._scope_proj_all_radio.setToolTip(ro_tip)
+        self._scope_project_group = QButtonGroup(self)
+        self._scope_project_group.addButton(self._scope_proj_here_radio)
+        self._scope_project_group.addButton(self._scope_proj_all_radio)
+        project_row.addWidget(self._scope_proj_here_radio)
+        project_row.addWidget(self._scope_proj_all_radio)
+        project_row.addStretch()
+        scope_v.addLayout(project_row)
+
+        # A small owner label showing who currently owns this favorite —
+        # useful when editing someone else's shared favorite so the user
+        # isn't surprised when "Mine" gets auto-selected on save.
+        self._owner_label = QLabel("-")
+        self._owner_label.setObjectName("infoLabel")
+        scope_v.addWidget(self._owner_label)
+
+        general_layout.addRow(self.tr("Visibility:"), scope_container)
+
         return general_tab
 
     def _create_expression_tab(self) -> QWidget:
@@ -590,9 +701,24 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         """Populate list widget with given favorites."""
         self._list_widget.clear()
 
+        # Pre-resolve identity / project once — avoids a per-item cascade
+        # lookup that would otherwise fire for every favorite.
+        current_user = self._resolve_current_user()
+        project_uuid = getattr(self._favorites_manager, "_project_uuid", None)
+        try:
+            from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
+        except Exception:
+            GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
+
         for fav in favorites_to_show:
             layers_count = fav.get_layers_count() if hasattr(fav, 'get_layers_count') else 1
-            item_text = f"★ {fav.name}"
+
+            kind = _favorite_scope_kind(
+                fav, current_user, project_uuid, GLOBAL_PROJECT_UUID,
+            )
+            badge = _SCOPE_BADGES.get(kind, "")
+            # Layout: "<badge> ★ <name> [<layers>] 🏷️"
+            item_text = (f"{badge} " if badge else "") + f"★ {fav.name}"
             if layers_count > 1:
                 item_text += f" [{layers_count}]"
             if fav.tags:
@@ -601,30 +727,125 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             item = QListWidgetItem(item_text)
             item.setData(Qt.ItemDataRole.UserRole, fav.id)
 
-            tooltip = f"Layer: {fav.layer_name}\nUsed: {fav.use_count} times"
+            owner = getattr(fav, "owner", None)
+            owner_line = self._format_owner_line(owner, current_user)
+            tooltip_lines = [
+                f"Layer: {fav.layer_name}",
+                f"Used: {fav.use_count} times",
+                owner_line,
+            ]
             if fav.tags:
-                tooltip += f"\nTags: {', '.join(fav.tags)}"
+                tooltip_lines.append(f"Tags: {', '.join(fav.tags)}")
             if fav.description:
-                tooltip += f"\n\n{fav.description}"
-            item.setToolTip(tooltip)
+                tooltip_lines.append("")
+                tooltip_lines.append(fav.description)
+            item.setToolTip("\n".join(tooltip_lines))
 
             self._list_widget.addItem(item)
 
+    @staticmethod
+    def _format_owner_line(owner, current_user) -> str:
+        """Human-readable 'Owner: ...' line for list tooltips."""
+        if owner is None:
+            return "Owner: — (shared)"
+        if current_user and owner == current_user:
+            return f"Owner: {owner} (you)"
+        return f"Owner: {owner}"
+
     def _on_search_changed(self, text: str):
-        """Filter favorites based on search text."""
+        """Refresh the list using the current search + scope combo."""
+        self._refresh_filtered_list()
+
+    def _on_scope_changed(self, _index: int = 0):
+        """Refresh the list when the scope combo changes."""
+        self._refresh_filtered_list()
+
+    def _refresh_filtered_list(self):
+        """Recompute and repopulate the list from search × scope state.
+
+        Ordering matters: we filter by scope first (cheap attribute check
+        in-memory), then apply the text search on the narrowed subset so
+        ``search_favorites()`` doesn't re-walk every row.
+        """
         if not self._favorites_manager:
             return
-        if not text.strip():
-            self._populate_list(self._all_favorites)
+
+        scope_key = self._current_scope_key()
+        scoped = self._apply_scope_filter(self._all_favorites, scope_key)
+
+        text = self._search_edit.text().strip() if self._search_edit else ""
+        if text:
+            query = text.lower()
+            visible = [
+                f for f in scoped
+                if query in f.name.lower()
+                or query in (f.expression or "").lower()
+                or any(query in (t or "").lower() for t in (f.tags or []))
+                or query in (f.description or "").lower()
+            ]
+        else:
+            visible = scoped
+
+        self._populate_list(visible)
+
+        total = self._favorites_manager.count
+        if len(visible) == total:
             self._header_label.setText(
-                self.tr("<b>Saved Favorites ({0})</b>").format(self._favorites_manager.count)
+                self.tr("<b>Saved Favorites ({0})</b>").format(total)
             )
         else:
-            filtered = self._favorites_manager.search_favorites(text)
-            self._populate_list(filtered)
             self._header_label.setText(
-                self.tr("<b>Favorites ({0}/{1})</b>").format(len(filtered), self._favorites_manager.count)
+                self.tr("<b>Favorites ({0}/{1})</b>").format(len(visible), total)
             )
+
+    def _current_scope_key(self) -> str:
+        """Key of the currently-selected scope combo entry (defaults to 'all')."""
+        if not hasattr(self, "_scope_combo") or self._scope_combo is None:
+            return "all"
+        data = self._scope_combo.currentData()
+        return str(data) if data else "all"
+
+    def _apply_scope_filter(self, favorites: list, scope_key: str) -> list:
+        """Filter ``favorites`` in-memory by the given scope key.
+
+        Mirrors ``FavoritesManager.list_by_scope`` but stays in the UI
+        layer so the manager cache (already loaded + search-friendly)
+        is reused rather than re-queried. Keeps "foreign" favorites
+        (those owned by another user) visible in the ALL scope so users
+        never get confused about missing rows.
+        """
+        if scope_key == "all" or not favorites:
+            return list(favorites)
+
+        current_user = self._resolve_current_user()
+        project_uuid = getattr(self._favorites_manager, "_project_uuid", None)
+        try:
+            from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
+        except Exception:
+            GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
+
+        def _kind(fav):
+            return _favorite_scope_kind(
+                fav, current_user, project_uuid, GLOBAL_PROJECT_UUID,
+            )
+
+        # "shared_*" scopes: owner IS NULL × project dimension
+        # "mine_*" scopes: owner == me × project dimension
+        # "foreign" never matches a filter entry — always only visible in ALL.
+        return [f for f in favorites if _kind(f) == scope_key]
+
+    def _resolve_current_user(self):
+        """Pull the current user identity from the manager (cached)."""
+        mgr = self._favorites_manager
+        if mgr is None:
+            return None
+        getter = getattr(mgr, "get_current_user", None)
+        if callable(getter):
+            try:
+                return getter()
+            except Exception:
+                return None
+        return None
 
     def _on_selection_changed(self):
         """Handle selection change in list."""
@@ -648,6 +869,57 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._provider_label.setText(fav.layer_provider or "-")
         self._use_count_label.setText(f"{fav.use_count} times")
         self._created_label.setText(fav.created_at[:16] if fav.created_at else "-")
+
+        # Scope radios — owner dimension
+        current_user = self._resolve_current_user()
+        owner = getattr(fav, "owner", None)
+        # ``blockSignals`` keeps the radios from triggering save-state
+        # side effects while we initialise them from the loaded favorite.
+        for radio in (
+            self._scope_mine_radio, self._scope_shared_radio,
+            self._scope_proj_here_radio, self._scope_proj_all_radio,
+        ):
+            radio.blockSignals(True)
+        try:
+            if owner is None:
+                self._scope_shared_radio.setChecked(True)
+            else:
+                # Mine when the owner matches the resolved current user,
+                # otherwise we still show "Mine" so saving doesn't silently
+                # strip someone else's ownership — the owner label below
+                # disambiguates for the user.
+                self._scope_mine_radio.setChecked(True)
+
+            # Scope radios — project dimension. _load_favorites only ever
+            # loads one project at a time, so there's no per-row info here
+            # — the dialog offers the choice as a "move on save" control.
+            try:
+                from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
+            except Exception:
+                GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
+            project_uuid = getattr(self._favorites_manager, "_project_uuid", None)
+            if project_uuid == GLOBAL_PROJECT_UUID:
+                self._scope_proj_all_radio.setChecked(True)
+            else:
+                self._scope_proj_here_radio.setChecked(True)
+        finally:
+            for radio in (
+                self._scope_mine_radio, self._scope_shared_radio,
+                self._scope_proj_here_radio, self._scope_proj_all_radio,
+            ):
+                radio.blockSignals(False)
+
+        # Owner identity label
+        if owner is None:
+            self._owner_label.setText(self.tr("— (shared with everyone)"))
+        elif current_user and owner == current_user:
+            self._owner_label.setText(self.tr("{0} (you)").format(owner))
+        else:
+            # Editing someone else's favorite — highlight it so saving
+            # as "Mine" doesn't feel surreptitious.
+            self._owner_label.setText(self.tr(
+                "{0} — selecting 'Mine' on save will transfer ownership to you"
+            ).format(owner))
 
         # Update Expression tab
         self._expression_edit.setText(fav.expression)
@@ -720,6 +992,20 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             if tag.strip()
         ]
 
+        # Resolve the target owner from the scope radios. "Shared" →
+        # owner NULL; "Mine" → current resolved user. We never write
+        # "Mine" when no identity is resolvable — would produce an
+        # empty-string owner that the scope filter treats as a foreign
+        # user, confusing everyone.
+        desired_owner = None
+        if hasattr(self, "_scope_mine_radio") and self._scope_mine_radio.isChecked():
+            desired_owner = self._resolve_current_user() or None
+
+        # Project dimension isn't editable inline (changing project_uuid
+        # would require moving the row across caches, out of scope for
+        # this dialog). The radio stays read-only: enabled visually so
+        # the user sees the current state, but save does not act on it.
+
         if new_name:
             # FIX 2026-04-22: suppress re-entrant external refresh triggered by
             # the manager's own favorites_changed emission.
@@ -730,33 +1016,29 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                     name=new_name,
                     expression=new_expr,
                     description=new_desc,
-                    tags=new_tags
+                    tags=new_tags,
+                    owner=desired_owner,
                 )
                 self._favorites_manager.save()
             finally:
                 self._suppress_external_refresh = False
-
-            # Update list item
-            item = self._list_widget.currentItem()
-            if item:
-                fav = self._favorites_manager.get_favorite(self._current_fav_id)
-                layers_count = (
-                    fav.get_layers_count()
-                    if fav and hasattr(fav, 'get_layers_count')
-                    else 1
-                )
-                item_text = f"★ {new_name}"
-                if layers_count > 1:
-                    item_text += f" [{layers_count}]"
-                if new_tags:
-                    item_text += " 🏷️"
-                item.setText(item_text)
 
             # FIX 2026-04-22: refresh the local cache so the next search or
             # populate_list() call reflects the edited name/tags. Without this,
             # _all_favorites still held the pre-edit FilterFavorite and
             # clearing the search box silently restored the old display.
             self._all_favorites = self._favorites_manager.get_all_favorites()
+            # v5.1: re-render the list via the unified refresh so the
+            # scope badge reflects the freshly-persisted owner. The
+            # manual per-item text edit we used to do was out of sync
+            # with the new badge prefix and lost the current scope filter.
+            self._refresh_filtered_list()
+            # Re-select the same id after repopulation so the details
+            # pane keeps showing the user's edit.
+            for i in range(self._list_widget.count()):
+                if self._list_widget.item(i).data(Qt.ItemDataRole.UserRole) == self._current_fav_id:
+                    self._list_widget.setCurrentRow(i)
+                    break
 
             self.favoriteUpdated.emit(self._current_fav_id)
             self.favoritesChanged.emit()
@@ -859,6 +1141,21 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._provider_label.setText("-")
         self._use_count_label.setText("-")
         self._created_label.setText("-")
+        # Scope radios — reset without firing signals so the next
+        # selection starts from a clean state.
+        for radio in (
+            getattr(self, "_scope_mine_radio", None),
+            getattr(self, "_scope_shared_radio", None),
+            getattr(self, "_scope_proj_here_radio", None),
+            getattr(self, "_scope_proj_all_radio", None),
+        ):
+            if radio is None:
+                continue
+            radio.blockSignals(True)
+            radio.setChecked(False)
+            radio.blockSignals(False)
+        if hasattr(self, "_owner_label") and self._owner_label is not None:
+            self._owner_label.setText("-")
 
         # Tab 2: Expression
         self._expression_edit.clear()
