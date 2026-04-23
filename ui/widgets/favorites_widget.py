@@ -171,8 +171,14 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
                 tooltip = fav.get_preview(80)
                 if fav.remote_layers:
                     tooltip += f"\n\nLayers ({layers_count}):\n• {fav.layer_name or 'Source'}"
-                    for remote_name in list(fav.remote_layers.keys())[:5]:
-                        tooltip += f"\n• {remote_name}"
+                    # FIX 2026-04-23 (CRIT-3): remote_layers keys can be
+                    # signatures (postgres::schema.table); prefer payload's
+                    # display_name for user-friendly tooltip.
+                    for remote_key, payload in list(fav.remote_layers.items())[:5]:
+                        if isinstance(payload, dict) and payload.get('display_name'):
+                            tooltip += f"\n• {payload['display_name']}"
+                        else:
+                            tooltip += f"\n• {remote_key}"
                     if len(fav.remote_layers) > 5:
                         tooltip += f"\n... and {len(fav.remote_layers) - 5} more"
                 action.setToolTip(tooltip)
@@ -492,9 +498,23 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
                 count = legacy_fn(filepath, merge=merge) if callable(legacy_fn) else 0
 
             if count > 0:
-                save_fn = getattr(self._favorites_manager, 'save_to_project', None)
+                # FIX 2026-04-23: FavoritesService exposes save() (the backward-
+                # compat alias for save_to_project on the raw FavoritesManager).
+                # Calling save_to_project() on the service raised AttributeError
+                # and the import-success emission + indicator update were
+                # silently skipped — same class of bug as favorites_controller.py.
+                save_fn = getattr(self._favorites_manager, 'save', None) \
+                    or getattr(self._favorites_manager, 'save_to_project', None)
                 if callable(save_fn):
                     save_fn()
+                # Also push a backup to the .qgz project file so a reinstall /
+                # machine transfer survives SQLite loss.
+                backup_fn = getattr(self._favorites_manager, 'save_to_project_file', None)
+                if callable(backup_fn):
+                    try:
+                        backup_fn()
+                    except Exception as e:
+                        logger.debug(f"Could not back up favorites to .qgz: {e}")
                 self.update_indicator()
                 self.favoritesImported.emit(filepath)
                 logger.info(f"Imported {count} favorites from {filepath}")

@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import (
     QLabel
 )
 from qgis.PyQt.QtGui import QCursor
-from qgis.core import QgsExpressionContextUtils, QgsProject
+from qgis.core import QgsProject
 
 from .base_controller import BaseController
 
@@ -504,6 +504,24 @@ class FavoritesController(BaseController):
                 self._show_warning(self.tr("Favorites manager not initialized. Please restart FilterMate."))
                 return
 
+            # FIX 2026-04-23 (LOW-3): when there are no favorites AND the
+            # favorites_sharing extension isn't active, opening an empty
+            # manager is confusing — surface the suggested next step
+            # instead. When sharing IS active we still open the dialog so
+            # the user can reach the "📡 Shared..." button.
+            if self.count == 0 and not self._is_sharing_extension_active():
+                QMessageBox.information(
+                    self.dockwidget,
+                    self.tr("Favorites Manager"),
+                    self.tr(
+                        "No favorites saved yet.\n\n"
+                        "Apply a filter to a layer, then click the ★ indicator "
+                        "and choose 'Add current filter to favorites' to save "
+                        "your first favorite."
+                    ),
+                )
+                return
+
             from ..dialogs import FavoritesManagerDialog
             # Note: FavoritesManagerDialog(favorites_manager, parent) - order matters!
             dialog = FavoritesManagerDialog(self._favorites_manager, self.dockwidget)
@@ -533,56 +551,32 @@ class FavoritesController(BaseController):
         """
         Initialize the favorites manager.
 
-        FIX 2026-01-19: The controller should NOT create its own FavoritesService.
-        The FavoritesService is created by FilterMateApp and should be passed via
-        dockwidget._favorites_manager AFTER init_filterMate_db() configures it.
+        FIX 2026-04-23 (CRIT-4): the controller no longer creates its own
+        FavoritesService. FilterMateApp owns the singleton and assigns it
+        to ``dockwidget._favorites_manager`` once ``init_filterMate_db()``
+        has resolved the project uuid. Creating a rogue service here meant
+        signals emitted before the sync were silently lost, and if the
+        sync was ever skipped (unit tests, dockwidget re-open on a project
+        reload without a db re-init) the UI pointed at a permanently-empty
+        service.
 
-        If _favorites_manager is not available yet, we create a temporary empty one
-        and wait for sync_with_dockwidget_manager() to be called later.
+        The controller now binds to whatever dockwidget exposes, or stays
+        dormant (None) until ``sync_with_dockwidget_manager()`` is called.
         """
 
-        # PRIORITY 1: Check if already initialized on dockwidget (from FilterMateApp)
+        # PRIORITY 1: Use the service that FilterMateApp attached to the
+        # dockwidget. This is the canonical path in production.
         if hasattr(self.dockwidget, '_favorites_manager') and self.dockwidget._favorites_manager:
             self._favorites_manager = self.dockwidget._favorites_manager
             return
 
-        # PRIORITY 2: Try to read project_uuid from QGIS project variables
-        # This works if init_filterMate_db() was called BEFORE dockwidget creation
-        project = getattr(self.dockwidget, 'PROJECT', None) or QgsProject.instance()
-        project_uuid = None
-        db_path = None
-
-        if project:
-            scope = QgsExpressionContextUtils.projectScope(project)
-            project_uuid = scope.variable('filterMate_db_project_uuid')
-
-            if project_uuid:
-                from ...config.config import ENV_VARS
-                import os
-                db_path = os.path.normpath(
-                    ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "") + os.sep + 'filterMate_db.sqlite'
-                )
-                if not os.path.exists(db_path):
-                    db_path = None
-
-        # PRIORITY 3: Create FavoritesService and configure if possible
-        try:
-            from ...core.services.favorites_service import FavoritesService
-            self._favorites_manager = FavoritesService()
-
-            # Configure with database if available
-            if project_uuid and db_path:
-                self._favorites_manager.set_database(db_path, str(project_uuid))
-            else:
-                pass  # block was empty
-
-            # Store reference on dockwidget (may be overwritten by FilterMateApp later)
-            self.dockwidget._favorites_manager = self._favorites_manager
-            logger.debug(f"FavoritesManager initialized with {self.count} favorites")
-
-        except Exception as e:
-            logger.error(f"Failed to initialize FavoritesManager: {e}")
-            self._favorites_manager = None
+        # No service available yet — stay dormant. sync_with_dockwidget_manager()
+        # will wire us up once FilterMateApp finishes init_filterMate_db.
+        self._favorites_manager = None
+        logger.debug(
+            "FavoritesController: no favorites service yet — waiting for "
+            "FilterMateApp to publish one via sync_with_dockwidget_manager()."
+        )
 
     def _restore_spatial_config(self, favorite: 'FilterFavorite') -> bool:
         """
@@ -708,22 +702,25 @@ class FavoritesController(BaseController):
 
     def _get_indicator_style(self, state: str) -> str:
         """Get stylesheet for indicator state."""
-        FAVORITES_STYLES.get(state, FAVORITES_STYLES['empty'])
-        # v4.0: Harmonized with BackendIndicatorWidget - soft "mousse" style
-        return """
-            QLabel#label_favorites_indicator {{
-                color: {style_data['color']};
-                font-size: 8pt;
-                font-weight: 500;
-                padding: 2px 8px;
-                border-radius: 10px;
-                border: none;
-                background-color: {style_data['background']};
-            }}
-            QLabel#label_favorites_indicator:hover {{
-                background-color: {style_data['hover']};
-            }}
-        """
+        # FIX 2026-04-23: the template was never interpolated (stray double
+        # braces, no .format() / f-string, style_data lookup discarded).
+        # Qt's QSS parser silently rejected the literal `{style_data['...']}`
+        # tokens and the ★ indicator fell back to default Qt styling.
+        style_data = FAVORITES_STYLES.get(state, FAVORITES_STYLES['empty'])
+        return (
+            "QLabel#label_favorites_indicator {\n"
+            f"    color: {style_data['color']};\n"
+            "    font-size: 8pt;\n"
+            "    font-weight: 500;\n"
+            "    padding: 2px 8px;\n"
+            "    border-radius: 10px;\n"
+            "    border: none;\n"
+            f"    background-color: {style_data['background']};\n"
+            "}\n"
+            "QLabel#label_favorites_indicator:hover {\n"
+            f"    background-color: {style_data['hover']};\n"
+            "}\n"
+        )
 
     def _show_favorites_menu(self) -> None:
         """Show context menu with favorites options."""
@@ -804,6 +801,13 @@ class FavoritesController(BaseController):
         import_action = menu.addAction("📥 " + self.tr("Import..."))
         import_action.setData('__IMPORT__')
 
+        # Optional: shared-favorites picker when the favorites_sharing
+        # extension is active. The entry is hidden when the extension is
+        # not installed — keeps the menu clean for users who don't use it.
+        if self._is_sharing_extension_active():
+            shared_action = menu.addAction("📡 " + self.tr("Import from Resource Sharing..."))
+            shared_action.setData('__SHARED_PICKER__')
+
         # === GLOBAL FAVORITES SUBMENU ===
         menu.addSeparator()
         global_menu = menu.addMenu("🌐 " + self.tr("Global favorites"))
@@ -878,6 +882,8 @@ class FavoritesController(BaseController):
             self._cleanup_orphan_projects()
         elif action_data == '__SHOW_STATS__':
             self._show_database_stats()
+        elif action_data == '__SHARED_PICKER__':
+            self._open_shared_picker()
         elif isinstance(action_data, tuple):
             if action_data[0] == 'apply':
                 self.apply_favorite(action_data[1])
@@ -951,11 +957,25 @@ class FavoritesController(BaseController):
                 subset = map_layer.subsetString()
                 if subset and subset.strip():
                     signature = self._layer_signature_for(map_layer)
-                    remote_layers[map_layer.name()] = {
+                    display_name = map_layer.name()
+                    # FIX 2026-04-23 (CRIT-3): key remote_layers by the
+                    # portable signature (postgres::schema.table, ...) so the
+                    # dict is stable across users and never collides when two
+                    # PG tables share a display name. display_name stays in
+                    # the payload for UI rendering.
+                    canonical_key = signature if signature else display_name
+                    if canonical_key in remote_layers:
+                        logger.debug(
+                            "Skipping duplicate remote layer signature '%s' (display '%s')",
+                            canonical_key, display_name,
+                        )
+                        continue
+                    remote_layers[canonical_key] = {
                         'expression': subset,
                         'feature_count': map_layer.featureCount() if map_layer.isValid() else 0,
                         'layer_id': layer_id,
                         'layer_signature': signature,
+                        'display_name': display_name,
                         'provider': map_layer.providerType()
                     }
 
@@ -993,7 +1013,7 @@ class FavoritesController(BaseController):
             logger.error(f"Failed to create favorite: {e}")
             return False
 
-    def _capture_spatial_config(self) -> dict:
+    def _capture_spatial_config(self) -> Optional[dict]:
         """
         Capture current spatial configuration for favorite restoration.
 
@@ -1001,7 +1021,9 @@ class FavoritesController(BaseController):
         including selected features, predicates, buffer settings, etc.
 
         Returns:
-            dict: Spatial configuration
+            Spatial configuration dict, or ``None`` when nothing worth
+            capturing was present (callers must handle None — matches
+            the contract used by ``_create_favorite``).
         """
         config = {}
 
@@ -1325,17 +1347,31 @@ class FavoritesController(BaseController):
                     continue
             for key, payload in (favorite.remote_layers or {}).items():
                 resolved = None
-                # New (v2) format stores the signature as key
+                # Signature stored in payload (v2+) — portable across projects
                 if isinstance(payload, dict) and payload.get('layer_signature'):
                     resolved = signature_to_id.get(payload['layer_signature'])
+                # FIX 2026-04-23 (CRIT-3): when dict key itself is a signature
+                # (v3 canonical form produced by _create_favorite), resolve
+                # directly from the signature->id map.
+                if not resolved and isinstance(key, str) and '::' in key:
+                    resolved = signature_to_id.get(key)
                 # Legacy format: key is layer name, payload carries layer_id (UUID)
                 if not resolved and isinstance(payload, dict):
                     legacy_id = payload.get('layer_id')
                     if legacy_id and legacy_id in project.mapLayers():
                         resolved = legacy_id
-                # Last-chance resolution by name
+                # Last-chance resolution by display name. Skip when key is a
+                # signature (contains "::") — that lookup would always miss
+                # and might accidentally hit a user-named layer called
+                # "postgres::..." — unlikely but not worth risking.
                 if not resolved:
-                    resolved = name_to_id.get(key)
+                    candidate_name = None
+                    if isinstance(payload, dict):
+                        candidate_name = payload.get('display_name')
+                    if not candidate_name and isinstance(key, str) and '::' not in key:
+                        candidate_name = key
+                    if candidate_name:
+                        resolved = name_to_id.get(candidate_name)
                 if resolved and resolved != getattr(current_layer, 'id', lambda: None)():
                     resolved_layer_ids.append(resolved)
         except Exception as e:
@@ -1556,8 +1592,18 @@ class FavoritesController(BaseController):
             from ...config.config import ENV_VARS
             import os
 
+            # MED-1 fix: guard against an uninitialized ENV_VARS — without this
+            # we'd build '/filterMate_db.sqlite' on Linux (filesystem root) or
+            # a Windows-drive-free path, then silently hit a bogus location.
+            plugin_dir = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "") or ""
+            if not plugin_dir:
+                self._show_warning(self.tr(
+                    "FilterMate config directory is not initialized yet — "
+                    "open a QGIS project with FilterMate first."
+                ))
+                return
             db_path = os.path.normpath(
-                ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "") + os.sep + 'filterMate_db.sqlite'
+                os.path.join(plugin_dir, 'filterMate_db.sqlite')
             )
 
             migration_service = FavoritesMigrationService(db_path)
@@ -1572,6 +1618,62 @@ class FavoritesController(BaseController):
             logger.error(f"Error cleaning up orphan projects: {e}")
             self._show_warning(self.tr("Error: {0}").format(e))
 
+    # ─────────────────────────────────────────────────────────────────
+    # favorites_sharing extension integration (optional)
+    # ─────────────────────────────────────────────────────────────────
+
+    def _get_sharing_extension(self) -> Optional[Any]:
+        """Return the favorites_sharing extension instance if loaded."""
+        try:
+            from ...extensions.registry import get_extension_registry
+        except ImportError:
+            return None
+        try:
+            ext = get_extension_registry().get_extension('favorites_sharing')
+            return ext
+        except Exception:
+            return None
+
+    def _is_sharing_extension_active(self) -> bool:
+        ext = self._get_sharing_extension()
+        if ext is None:
+            return False
+        try:
+            from ...extensions.base import ExtensionState
+            return ext.state in (ExtensionState.INITIALIZED, ExtensionState.UI_CREATED)
+        except Exception:
+            return False
+
+    def _open_shared_picker(self) -> None:
+        """Open the Resource Sharing picker dialog when the extension is active."""
+        ext = self._get_sharing_extension()
+        if ext is None or self._favorites_manager is None:
+            self._show_warning(self.tr(
+                "Resource Sharing extension is not active. "
+                "Enable 'favorites_sharing' in FilterMate settings."
+            ))
+            return
+
+        service = ext.get_service('service')
+        if service is None:
+            self._show_warning(self.tr("Shared favorites service is not available."))
+            return
+
+        try:
+            from ...extensions.favorites_sharing.ui import SharedFavoritesPickerDialog
+            dialog = SharedFavoritesPickerDialog(
+                service,
+                self._favorites_manager,
+                parent=self.dockwidget,
+            )
+            dialog.exec()
+            # Refresh indicator / list after potential forks
+            self.update_indicator()
+            self.favorites_changed.emit()
+        except Exception as e:
+            logger.exception("Shared picker failed to open")
+            self._show_warning(self.tr("Shared picker failed: {0}").format(e))
+
     def _show_database_stats(self) -> None:
         """Show database statistics dialog."""
         try:
@@ -1579,8 +1681,18 @@ class FavoritesController(BaseController):
             from ...config.config import ENV_VARS
             import os
 
+            # MED-1 fix: guard against an uninitialized ENV_VARS — without this
+            # we'd build '/filterMate_db.sqlite' on Linux (filesystem root) or
+            # a Windows-drive-free path, then silently hit a bogus location.
+            plugin_dir = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "") or ""
+            if not plugin_dir:
+                self._show_warning(self.tr(
+                    "FilterMate config directory is not initialized yet — "
+                    "open a QGIS project with FilterMate first."
+                ))
+                return
             db_path = os.path.normpath(
-                ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "") + os.sep + 'filterMate_db.sqlite'
+                os.path.join(plugin_dir, 'filterMate_db.sqlite')
             )
 
             migration_service = FavoritesMigrationService(db_path)

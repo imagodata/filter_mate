@@ -102,7 +102,13 @@ class TestRebindImportedFavorite:
         }
         rebound = FavoritesService._rebind_imported_favorite(fav, file_version="2.0")
         assert rebound["layer_id"] is None
-        assert rebound["remote_layers"]["Foo"]["layer_id"] is None
+        # CRIT-3 fix 2026-04-23: remote_layers is now canonicalized to
+        # signature keys during rebind. The original layer name is
+        # preserved inside the payload as display_name.
+        assert "postgres::public.foo" in rebound["remote_layers"]
+        entry = rebound["remote_layers"]["postgres::public.foo"]
+        assert entry["layer_id"] is None
+        assert entry["display_name"] == "Foo"
 
     def test_spatial_config_roundtrips_through_strip_and_rebind(self, monkeypatch):
         """spatial_config (incl. exploring_groupbox added 2026-04-21) must be
@@ -167,4 +173,8 @@ class TestRebindImportedFavorite:
         }
         rebound = FavoritesService._rebind_imported_favorite(fav, file_version="2.0")
         assert rebound["layer_id"] == "local-uuid-A"
-        assert rebound["remote_layers"]["Parcelles"]["layer_id"] == "local-uuid-B"
+        # CRIT-3 fix 2026-04-23: signature-keyed canonical form.
+        assert "ogr::parcelles" in rebound["remote_layers"]
+        entry = rebound["remote_layers"]["ogr::parcelles"]
+        assert entry["layer_id"] == "local-uuid-B"
+        assert entry["display_name"] == "Parcelles"

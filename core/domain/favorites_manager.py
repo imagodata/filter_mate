@@ -22,6 +22,55 @@ logger = logging.getLogger('FilterMate.FavoritesManager')
 GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
 
 
+def normalize_remote_layers_keys(remote_layers: Dict[str, Any]) -> Dict[str, Any]:
+    """Rewrite a remote_layers dict so each entry is keyed by its
+    portable ``layer_signature`` (``postgres::schema.table`` etc.) when one
+    is present in the payload. The original dict key is preserved as
+    ``display_name`` inside the payload for UI purposes.
+
+    CRIT-3 fix rationale: legacy favorites (v1/v2) keyed the dict by
+    ``layer.name()``, which collides when two layers share the same display
+    name in the source project (e.g. ``public.zones`` and ``staging.zones``
+    both named "zones"), and exposes the author's local naming when shared
+    across users. Signatures are stable, unique per table, and the same for
+    every user who has the PG/GPKG/Spatialite table in their project.
+
+    Payloads without a ``layer_signature`` are left keyed as-is (legacy
+    fallback); the caller is responsible for later resolution by name.
+    """
+    if not isinstance(remote_layers, dict) or not remote_layers:
+        return remote_layers or {}
+
+    normalized: Dict[str, Any] = {}
+    for key, payload in remote_layers.items():
+        if not isinstance(payload, dict):
+            # Unexpected shape — keep as-is to preserve data.
+            normalized[key] = payload
+            continue
+
+        new_payload = dict(payload)
+        # Preserve the original key as display_name so the UI keeps the
+        # author's label (favorite cards, tooltips, remote layers tree).
+        if 'display_name' not in new_payload:
+            new_payload['display_name'] = key
+
+        signature = new_payload.get('layer_signature')
+        canonical_key = signature if signature else key
+
+        # Collision handling: if two payloads resolve to the same signature,
+        # keep the first (deterministic across reloads) and log the loss.
+        if canonical_key in normalized:
+            logger.debug(
+                "normalize_remote_layers_keys: collision on '%s' — "
+                "skipping duplicate entry (original key '%s')",
+                canonical_key, key,
+            )
+            continue
+        normalized[canonical_key] = new_payload
+
+    return normalized
+
+
 @dataclass
 class FilterFavorite:
     """Filter favorite data class."""
@@ -40,18 +89,62 @@ class FilterFavorite:
     last_used_at: Optional[str] = None
     remote_layers: Optional[Dict] = None
     spatial_config: Optional[Dict] = None
+    # FIX 2026-04-23 (v3): forward-compat escape hatch. Any unknown key
+    # encountered in from_dict is stashed here and re-emitted by to_dict, so
+    # a JSON file written by a newer plugin version round-trips through an
+    # older one without silent data loss. Not persisted to SQLite columns
+    # (schema is closed); JSON import/export and .qgz backup preserve it.
+    _extra: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
-        return asdict(self)
+        """Convert to dictionary. Merges ``_extra`` back at the top level so
+        unknown fields from future plugin versions survive a round-trip.
+        """
+        data = asdict(self)
+        extra = data.pop('_extra', None) or {}
+        # `_extra` never shadows known fields
+        for k, v in extra.items():
+            if k not in data:
+                data[k] = v
+        return data
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'FilterFavorite':
-        """Create from dictionary."""
+        """Create from dictionary.
+
+        FIX 2026-04-23: remote_layers keys are normalized to signatures
+        (``postgres::schema.table`` etc.) when the payload carries one, so
+        in-memory representation is consistent regardless of the favorite's
+        origin (legacy name-keyed v1/v2, signature-keyed v3, DB row loaded
+        before the signature-keying migration). The original layer name is
+        preserved as payload['display_name'] for UI.
+
+        v3 forward-compat: unknown keys are retained under ``_extra`` so
+        export re-emits them untouched — a newer plugin's JSON never loses
+        data when passed through an older installation.
+        """
         # Ensure tags is a list
         if 'tags' in data and isinstance(data['tags'], str):
-            data['tags'] = json.loads(data['tags']) if data['tags'] else []
-        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+            try:
+                data['tags'] = json.loads(data['tags']) if data['tags'] else []
+            except (ValueError, TypeError):
+                data['tags'] = []
+
+        # Normalize remote_layers keys to signatures (CRIT-3 fix)
+        remote = data.get('remote_layers')
+        if isinstance(remote, dict) and remote:
+            data['remote_layers'] = normalize_remote_layers_keys(remote)
+
+        known = {k: v for k, v in data.items() if k in cls.__dataclass_fields__}
+        # Everything else is stashed in _extra, minus the few keys we
+        # deliberately drop (id/project_uuid during import).
+        extra = {
+            k: v for k, v in data.items()
+            if k not in cls.__dataclass_fields__ and k not in ('project_uuid',)
+        }
+        if extra:
+            known['_extra'] = extra
+        return cls(**known)
 
     def get_layers_count(self) -> int:
         """Get total number of layers (1 + remote layers)."""
@@ -164,6 +257,18 @@ class FavoritesManager:
                         logger.info(f"Adding missing column '{col_name}' to fm_favorites table")
                         cursor.execute(f"ALTER TABLE fm_favorites ADD COLUMN {col_name} {col_type}")  # nosec B608
 
+                # FIX 2026-04-23 (HIGH-1): one-shot backfill of
+                # remote_layers.layer_signature + display_name for rows saved
+                # before the v2 portable format. Without the signature, legacy
+                # favorites can't be exported or shared across projects. We
+                # attempt resolution against the current QgsProject; layers
+                # that cannot be resolved stay untouched and will backfill on
+                # the next load once they are present.
+                try:
+                    self._backfill_remote_layer_signatures(cursor)
+                except Exception as e:
+                    logger.debug(f"Signature backfill skipped: {e}")
+
                 conn.commit()
                 logger.debug("fm_favorites table migrated to new schema")
             else:
@@ -197,6 +302,16 @@ class FavoritesManager:
                 conn.commit()
                 logger.debug("fm_favorites table created with full schema")
 
+            # FIX 2026-04-23 (LOW-4): composite index on (project_uuid, name)
+            # speeds up get_favorite_by_name / dedup-on-import flows that now
+            # run more frequently (Resource Sharing scans + .qgz restore dedup).
+            # IF NOT EXISTS makes this safe on both branches (new + migrated).
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_favorites_project_name
+                ON fm_favorites(project_uuid, name)
+            """)
+            conn.commit()
+
             conn.close()
 
             self._initialized = True
@@ -205,6 +320,115 @@ class FavoritesManager:
         except Exception as e:
             logger.error(f"Failed to initialize favorites database: {e}")
             self._initialized = False
+
+    def _backfill_remote_layer_signatures(self, cursor) -> None:
+        """Backfill missing ``layer_signature`` and ``display_name`` in
+        persisted favorites' ``remote_layers`` JSON (HIGH-1).
+
+        Only rows whose JSON is missing at least one ``layer_signature`` are
+        rewritten. Resolution uses the current QgsProject's map layers when
+        available; unresolved entries keep the legacy name-only shape and
+        will be backfilled on the next load when the layer is present.
+        """
+        try:
+            from qgis.core import QgsProject, QgsDataSourceUri
+        except ImportError:
+            return  # Not running inside QGIS — nothing to backfill.
+
+        try:
+            cursor.execute("SELECT id, remote_layers FROM fm_favorites WHERE remote_layers IS NOT NULL")
+            rows = cursor.fetchall()
+        except Exception as e:
+            logger.debug(f"Signature backfill: could not scan rows: {e}")
+            return
+
+        # Build id_to_signature map once
+        id_to_signature: Dict[str, str] = {}
+        name_to_signature: Dict[str, str] = {}
+        try:
+            import os
+            for lid, layer in QgsProject.instance().mapLayers().items():
+                try:
+                    provider = layer.providerType()
+                    signature = None
+                    if provider == 'postgres':
+                        uri = QgsDataSourceUri(layer.source())
+                        table = uri.table() or ''
+                        if table:
+                            signature = f"postgres::{(uri.schema() or 'public')}.{table}"
+                    elif provider == 'spatialite':
+                        uri = QgsDataSourceUri(layer.source())
+                        table = uri.table() or ''
+                        if table:
+                            signature = f"spatialite::{table}"
+                    elif provider == 'ogr':
+                        src = layer.source() or ''
+                        if '|layername=' in src:
+                            layername = src.split('|layername=', 1)[1].split('|', 1)[0]
+                            signature = f"ogr::{layername}"
+                        else:
+                            stem, _ = os.path.splitext(os.path.basename(src.split('|', 1)[0]))
+                            if stem:
+                                signature = f"ogr::{stem}"
+                    if signature is None:
+                        signature = f"{provider or 'unknown'}::{layer.name()}"
+                    id_to_signature[lid] = signature
+                    name_to_signature.setdefault(layer.name(), signature)
+                except (RuntimeError, AttributeError):
+                    continue
+        except Exception as e:
+            logger.debug(f"Signature backfill: could not enumerate layers: {e}")
+            return
+
+        updated = 0
+        for row_id, remote_json in rows:
+            if not remote_json:
+                continue
+            try:
+                remote = json.loads(remote_json)
+            except (ValueError, TypeError):
+                continue
+            if not isinstance(remote, dict) or not remote:
+                continue
+
+            rewrite_needed = False
+            new_remote: Dict[str, Any] = {}
+            for key, payload in remote.items():
+                if not isinstance(payload, dict):
+                    new_remote[key] = payload
+                    continue
+                cleaned = dict(payload)
+                if 'display_name' not in cleaned:
+                    cleaned['display_name'] = key
+                    rewrite_needed = True
+                if not cleaned.get('layer_signature'):
+                    legacy_id = cleaned.get('layer_id')
+                    sig = id_to_signature.get(legacy_id) if legacy_id else None
+                    if not sig:
+                        sig = name_to_signature.get(key)
+                    if sig:
+                        cleaned['layer_signature'] = sig
+                        rewrite_needed = True
+                canonical_key = cleaned.get('layer_signature') or key
+                if canonical_key in new_remote:
+                    rewrite_needed = True  # collision collapse
+                    continue
+                if canonical_key != key:
+                    rewrite_needed = True
+                new_remote[canonical_key] = cleaned
+
+            if rewrite_needed:
+                try:
+                    cursor.execute(
+                        "UPDATE fm_favorites SET remote_layers = ? WHERE id = ?",
+                        (json.dumps(new_remote), row_id),
+                    )
+                    updated += 1
+                except Exception as e:
+                    logger.debug(f"Signature backfill: update failed for {row_id}: {e}")
+
+        if updated:
+            logger.info(f"✓ Backfilled layer_signature on {updated} favorite(s)")
 
     def _load_favorites(self) -> None:
         """Load favorites from database."""
@@ -313,12 +537,16 @@ class FavoritesManager:
                 return fav
         return None
 
-    def add_favorite(self, favorite: FilterFavorite) -> bool:
+    def add_favorite(self, favorite: FilterFavorite, preserve_timestamps: bool = False) -> bool:
         """
         Add a new favorite.
 
         Args:
             favorite: FilterFavorite instance
+            preserve_timestamps: When True, keep the favorite's existing
+                ``created_at`` / ``updated_at`` instead of overwriting them
+                with ``now()``. Used by import / restore paths so
+                provenance survives round-trips (CRIT-1).
 
         Returns:
             bool: True if added successfully
@@ -334,8 +562,14 @@ class FavoritesManager:
             if not favorite.id:
                 favorite.id = str(uuid.uuid4())
 
-            favorite.created_at = datetime.now().isoformat()
-            favorite.updated_at = favorite.created_at
+            # FIX 2026-04-23 (CRIT-1): don't stomp timestamps when caller
+            # supplied them (restore_from_project_file, import_favorites, etc.).
+            # Only set them when missing, so a legacy favorite with empty
+            # created_at still gets a sensible default.
+            if not preserve_timestamps or not favorite.created_at:
+                favorite.created_at = datetime.now().isoformat()
+            if not preserve_timestamps or not favorite.updated_at:
+                favorite.updated_at = favorite.created_at
 
             conn = sqlite3.connect(self._db_path)
             cursor = conn.cursor()
@@ -378,8 +612,21 @@ class FavoritesManager:
             return False
 
     def remove_favorite(self, favorite_id: str) -> bool:
-        """Remove a favorite."""
-        if not self._initialized or favorite_id not in self._favorites:
+        """Remove a favorite.
+
+        FIX 2026-04-23 (MED-5): returns False with a log warning when the
+        database was not initialised OR the row is unknown — the UI layer
+        must decide whether to surface that failure. The previous silent
+        False return made deleted-UI/remaining-in-DB divergence invisible.
+        """
+        if not self._initialized:
+            logger.warning(
+                f"remove_favorite({favorite_id}): DB not initialised — in-memory "
+                "entry kept, UI state and SQLite will diverge. Caller should show a warning."
+            )
+            return False
+        if favorite_id not in self._favorites:
+            logger.debug(f"remove_favorite({favorite_id}): no such id in cache")
             return False
 
         try:
@@ -401,9 +648,18 @@ class FavoritesManager:
             return False
 
     def update_favorite(self, favorite_id: str, **kwargs) -> bool:
-        """Update a favorite."""
+        """Update a favorite.
+
+        FIX 2026-04-23 (HIGH-3): ``updated_at`` is bumped only when the
+        caller did not pass ``_touch_updated_at=False``. This lets
+        ``increment_use_count()`` mutate use_count / last_used_at without
+        polluting the "last content modification" timestamp. Usage stats
+        and content edits carry distinct semantics now.
+        """
         if not self._initialized or favorite_id not in self._favorites:
             return False
+
+        touch_updated_at = kwargs.pop('_touch_updated_at', True)
 
         try:
             import sqlite3
@@ -415,7 +671,8 @@ class FavoritesManager:
                 if hasattr(favorite, key):
                     setattr(favorite, key, value)
 
-            favorite.updated_at = datetime.now().isoformat()
+            if touch_updated_at:
+                favorite.updated_at = datetime.now().isoformat()
 
             conn = sqlite3.connect(self._db_path)
             cursor = conn.cursor()
@@ -453,7 +710,10 @@ class FavoritesManager:
             return False
 
     def increment_use_count(self, favorite_id: str) -> bool:
-        """Increment use count for a favorite."""
+        """Increment use count for a favorite.
+
+        Usage stats update last_used_at but NOT updated_at (HIGH-3).
+        """
         if favorite_id not in self._favorites:
             return False
 
@@ -463,7 +723,8 @@ class FavoritesManager:
         return self.update_favorite(
             favorite_id,
             use_count=self._favorites[favorite_id].use_count,
-            last_used_at=self._favorites[favorite_id].last_used_at
+            last_used_at=self._favorites[favorite_id].last_used_at,
+            _touch_updated_at=False,
         )
 
     def search_favorites(self, query: str) -> List[FilterFavorite]:

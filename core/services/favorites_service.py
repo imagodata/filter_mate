@@ -191,66 +191,18 @@ class FavoritesService(QObject):
             self.favorites_changed.emit()
             logger.info(f"✓ Favorites loaded from database and UI notified (count: {self.count})")
         else:
-            # v5.0: Internal database storage when manager not available
-            self._db_path = db_path
-            self._project_uuid = project_uuid
-            self._init_internal_storage()
-            self.favorites_changed.emit()
-            logger.info(f"FavoritesService: Internal database initialized at {db_path}")
-
-    def _init_internal_storage(self) -> None:
-        """
-        Initialize internal SQLite storage for favorites when manager not available.
-
-        v5.0: Standalone favorites storage capability.
-        """
-        import sqlite3
-        import os
-
-        if not hasattr(self, '_db_path') or not self._db_path:
-            return
-
-        try:
-            # Ensure directory exists
-            db_dir = os.path.dirname(self._db_path)
-            if db_dir and not os.path.exists(db_dir):
-                os.makedirs(db_dir, exist_ok=True)
-
-            # Create database and tables
-            conn = sqlite3.connect(self._db_path)
-            cursor = conn.cursor()
-
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS favorites (
-                    id TEXT PRIMARY KEY,
-                    project_uuid TEXT,
-                    name TEXT NOT NULL,
-                    expression TEXT,
-                    layer_name TEXT,
-                    layer_provider TEXT,
-                    spatial_config TEXT,
-                    remote_layers TEXT,
-                    tags TEXT,
-                    description TEXT,
-                    created_at TEXT,
-                    updated_at TEXT,
-                    use_count INTEGER DEFAULT 0,
-                    is_global INTEGER DEFAULT 0
-                )
-            ''')
-
-            cursor.execute('''
-                CREATE INDEX IF NOT EXISTS idx_project_uuid
-                ON favorites(project_uuid)
-            ''')
-
-            conn.commit()
-            conn.close()
-
-            logger.info(f"Internal favorites storage initialized: {self._db_path}")
-
-        except Exception as e:
-            logger.error(f"Failed to initialize internal storage: {e}")
+            # FIX 2026-04-23 (LOW-1): the previous "internal storage" fallback
+            # created a divergent `favorites` table schema (vs the canonical
+            # `fm_favorites`) that no downstream code could read. It was only
+            # reachable when the __init__ failed to create an internal
+            # FavoritesManager — which in practice never happens. We now
+            # fail loudly so the bug surfaces instead of silently creating a
+            # half-broken SQLite file.
+            logger.error(
+                "FavoritesService.set_database called without a working "
+                "FavoritesManager. This indicates a plugin bootstrap failure — "
+                "check earlier logs for FavoritesManager import errors."
+            )
 
     def load_from_project(self) -> None:
         """
@@ -665,17 +617,34 @@ class FavoritesService(QObject):
     # Import/Export
     # ─────────────────────────────────────────────────────────────────
 
+    # FIX 2026-04-23 (v3): plugin version embedded in each export so the
+    # receiving side can render "min plugin version" warnings and downgrade
+    # paths gracefully. Kept module-level for discoverability.
+    EXPORT_SCHEMA = "filter_mate.favorites"
+    EXPORT_SCHEMA_VERSION = 3
+    EXPORT_MIN_COMPAT_PLUGIN_VERSION = "4.0.0"
+
     def export_favorites(
         self,
         file_path: str,
-        favorite_ids: Optional[List[str]] = None
+        favorite_ids: Optional[List[str]] = None,
+        collection_metadata: Optional[Dict[str, Any]] = None,
     ) -> FavoriteExportResult:
         """
         Export favorites to a JSON file.
 
+        Writes **schema v3** — an envelope with explicit ``schema_version``,
+        generator info, optional ``collection`` metadata (name, author,
+        description, license, tags) and a signature-keyed ``remote_layers``
+        canonical payload. Readers of v1/v2 can still ignore new fields;
+        readers of v3 get provenance + upgrade hints.
+
         Args:
             file_path: Path to export file
             favorite_ids: Optional list of IDs to export (None = all)
+            collection_metadata: Optional metadata dict to describe the
+                bundle (name, author, license, description, tags). Used by
+                the resource_sharing extension to ship curated collections.
 
         Returns:
             FavoriteExportResult with status
@@ -700,27 +669,52 @@ class FavoritesService(QObject):
             else:
                 favorites = self.get_all_favorites()
 
-            # FIX 2026-04-21: v2 portable format.
-            # UUID layer_ids are stripped and replaced by the layer_signature
-            # (provider::schema.table for PostgreSQL, provider::table for SQLite/GPKG,
-            # provider::basename for shapefiles/OGR). Project UUID is also stripped
-            # so favorites can be imported into a sibling project.
+            # v2 signature substitution + v3 canonical keying — both handled
+            # by _strip_project_bindings (updated for CRIT-3).
             serialized = [self._strip_project_bindings(f.to_dict()) for f in favorites]
+            # v3: stamp each favorite with its portability status so readers
+            # can decide whether to accept legacy entries.
+            for fav in serialized:
+                fav.setdefault('portable', bool(
+                    (fav.get('spatial_config') or {}).get('source_layer_signature')
+                    or any(
+                        isinstance(p, dict) and p.get('layer_signature')
+                        for p in (fav.get('remote_layers') or {}).values()
+                    )
+                    or not fav.get('remote_layers')
+                ))
 
-            data = {
-                "version": "2.0",
+            plugin_version = self._read_plugin_version() or "unknown"
+            envelope: Dict[str, Any] = {
+                "schema": self.EXPORT_SCHEMA,
+                "schema_version": self.EXPORT_SCHEMA_VERSION,
+                "min_compat_plugin_version": self.EXPORT_MIN_COMPAT_PLUGIN_VERSION,
+                "generator": f"filter_mate/{plugin_version}",
                 "exported_at": self._get_timestamp(),
-                "favorites": serialized
+                # Legacy field for v1/v2 readers — they only look at "version"
+                # and "favorites". Reading v3 with a v2-era FilterMate still
+                # works because the per-favorite layout is backward-compatible.
+                "version": "3.0",
+                "favorites": serialized,
             }
+            if collection_metadata and isinstance(collection_metadata, dict):
+                envelope["collection"] = {
+                    k: v for k, v in collection_metadata.items()
+                    if k in {'name', 'author', 'license', 'description',
+                             'tags', 'homepage', 'icon'}
+                }
 
             # Write file
             with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
+                json.dump(envelope, f, indent=2, ensure_ascii=False)
 
             count = len(favorites)
             self.favorites_exported.emit(count, file_path)
 
-            logger.info(f"Exported {count} favorites to {file_path} (v2 portable format)")
+            logger.info(
+                f"Exported {count} favorites to {file_path} "
+                f"(schema v{self.EXPORT_SCHEMA_VERSION})"
+            )
 
             return FavoriteExportResult(
                 success=True,
@@ -735,6 +729,25 @@ class FavoritesService(QObject):
                 file_path=file_path,
                 error_message=str(e)
             )
+
+    @staticmethod
+    def _read_plugin_version() -> Optional[str]:
+        """Best-effort read of the plugin version from metadata.txt."""
+        try:
+            import os
+            # plugin root = parent of core/services
+            here = os.path.dirname(os.path.abspath(__file__))
+            root = os.path.dirname(os.path.dirname(here))
+            metadata_path = os.path.join(root, 'metadata.txt')
+            if not os.path.isfile(metadata_path):
+                return None
+            with open(metadata_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.startswith('version='):
+                        return line.split('=', 1)[1].strip()
+        except Exception:
+            pass
+        return None
 
     def import_favorites(
         self,
@@ -792,7 +805,10 @@ class FavoritesService(QObject):
                 favorite = FilterFavorite.from_dict(rebound)
                 favorite.id = None  # Will generate new ID
 
-                if self._favorites_manager.add_favorite(favorite):
+                # CRIT-1: keep the author's original timestamps so the
+                # import UI shows the real provenance; add a fresh id but
+                # preserve created_at/updated_at from the JSON.
+                if self._favorites_manager.add_favorite(favorite, preserve_timestamps=True):
                     imported_count += 1
                 else:
                     skipped_count += 1
@@ -928,7 +944,10 @@ class FavoritesService(QObject):
         # Drop the source layer_id UUID — the source layer is identified by
         # spatial_config.source_layer_signature (populated in _create_favorite).
         out['layer_id'] = None
-        # Rewrite remote_layers: drop the UUID, keep the portable signature.
+        # Rewrite remote_layers: drop the UUID, keep the portable signature,
+        # and normalize keys to signatures so the JSON is deterministic across
+        # users (CRIT-3: keying by layer.name() was collision-prone and leaked
+        # the author's local layer labels).
         remote_layers = out.get('remote_layers')
         if isinstance(remote_layers, dict):
             portable_remote: Dict[str, Any] = {}
@@ -938,7 +957,15 @@ class FavoritesService(QObject):
                     continue
                 cleaned = {k: v for k, v in payload.items() if k != 'layer_id'}
                 cleaned['layer_id'] = None
-                portable_remote[key] = cleaned
+                # Ensure display_name is present so the receiving side can
+                # render the author's original label without the signature.
+                if 'display_name' not in cleaned:
+                    cleaned['display_name'] = key
+                signature = cleaned.get('layer_signature')
+                canonical_key = signature if signature else key
+                # Deduplicate when two legacy entries share a signature.
+                if canonical_key not in portable_remote:
+                    portable_remote[canonical_key] = cleaned
             out['remote_layers'] = portable_remote
         # Reset use_count and last_used_at on export.
         out['use_count'] = 0
@@ -982,6 +1009,9 @@ class FavoritesService(QObject):
                     rebound_remote[key] = payload
                     continue
                 new_payload = dict(payload)
+                # CRIT-3 fix: preserve the author's layer name for the UI.
+                if 'display_name' not in new_payload:
+                    new_payload['display_name'] = key
                 sig = new_payload.get('layer_signature')
                 if sig:
                     resolved = cls._resolve_signature_to_layer_id(sig)
@@ -990,7 +1020,11 @@ class FavoritesService(QObject):
                         logger.debug(
                             f"Import rebind: remote '{sig}' -> {resolved}"
                         )
-                rebound_remote[key] = new_payload
+                # Canonical key: signature when available, else keep the
+                # original (legacy v1/v2) name as key.
+                canonical_key = sig if sig else key
+                if canonical_key not in rebound_remote:
+                    rebound_remote[canonical_key] = new_payload
             out['remote_layers'] = rebound_remote
 
         logger.debug(f"Imported favorite '{out.get('name')}' from v{file_version}")
@@ -1174,24 +1208,68 @@ class FavoritesService(QObject):
             if not favorites_data:
                 return 0
 
-            # Import favorites (skip duplicates by name)
+            # Import favorites — dedup by id, then by (name, updated_at).
+            # HIGH-4: dedup-by-name alone silently dropped newer edits from
+            # the .qgz when the DB had a stale version (or vice versa).
+            # Comparing updated_at now surfaces the newer version instead
+            # of the first-seen one.
             from ..domain.favorites_manager import FilterFavorite
+            from datetime import datetime as _dt
+
+            def _parse_ts(value: Optional[str]) -> float:
+                if not value:
+                    return 0.0
+                try:
+                    return _dt.fromisoformat(value).timestamp()
+                except (ValueError, TypeError):
+                    return 0.0
 
             imported = 0
+            updated = 0
             for fav_data in favorites_data:
                 name = fav_data.get('name', '')
+                fav_id_from_backup = fav_data.get('id')
+                backup_updated_at = fav_data.get('updated_at')
 
-                # Check for existing favorite with same name
-                existing = self.get_favorite_by_name(name)
-                if existing:
+                # Check for existing favorite (id match first, name fallback)
+                existing = None
+                if fav_id_from_backup:
+                    existing = self._favorites_manager.get_favorite(fav_id_from_backup)
+                if existing is None:
+                    existing = self.get_favorite_by_name(name)
+
+                if existing is not None:
+                    # Keep the newer version — if the backup is strictly
+                    # newer, refresh the in-DB row with its content; else
+                    # skip silently (DB already has equal/newer data).
+                    existing_ts = _parse_ts(getattr(existing, 'updated_at', None))
+                    backup_ts = _parse_ts(backup_updated_at)
+                    if backup_ts > existing_ts:
+                        updatable_fields = {
+                            k: v for k, v in fav_data.items()
+                            if k in FilterFavorite.__dataclass_fields__
+                            and k not in ('id', 'created_at')
+                        }
+                        if self._favorites_manager.update_favorite(
+                            existing.id, **updatable_fields
+                        ):
+                            updated += 1
                     continue
 
                 # Create and add favorite
                 favorite = FilterFavorite.from_dict(fav_data)
                 favorite.id = None  # Generate new ID
 
-                if self._favorites_manager.add_favorite(favorite):
+                # CRIT-1: restore_from_project_file is a DB rebuild, not a
+                # user "add". The original created_at must survive so the
+                # user doesn't see every favorite suddenly re-stamped with
+                # today's date after a plugin reinstall.
+                if self._favorites_manager.add_favorite(favorite, preserve_timestamps=True):
                     imported += 1
+
+            if updated:
+                logger.info(f"✓ Refreshed {updated} favorite(s) from newer .qgz backup")
+            imported += updated
 
             if imported > 0:
                 self.favorites_changed.emit()

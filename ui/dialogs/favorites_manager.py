@@ -127,13 +127,32 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(12)
 
-        # Header with count (handle None favorites_manager)
+        # Header row with count + optional shared-favorites shortcut
+        header_row = QHBoxLayout()
+        header_row.setContentsMargins(0, 0, 0, 0)
+        header_row.setSpacing(8)
+
         fav_count = self._favorites_manager.count if self._favorites_manager else 0
         self._header_label = QLabel(
             self.tr("<b>Saved Favorites ({0})</b>").format(fav_count)
         )
         self._header_label.setObjectName("dialogHeader")
-        layout.addWidget(self._header_label)
+        header_row.addWidget(self._header_label)
+        header_row.addStretch()
+
+        # FIX 2026-04-23: discoverable shortcut to the Resource Sharing
+        # picker — only shown when the favorites_sharing extension is active
+        # so regular users never see a button they can't use.
+        self._shared_btn = QPushButton("📡 " + self.tr("Shared..."))
+        self._shared_btn.setObjectName("sharedBtn")
+        self._shared_btn.setToolTip(self.tr(
+            "Browse favorites shared via QGIS Resource Sharing collections"
+        ))
+        self._shared_btn.clicked.connect(self._on_shared_clicked)
+        self._shared_btn.setVisible(self._is_sharing_active())
+        header_row.addWidget(self._shared_btn)
+
+        layout.addLayout(header_row)
 
         # Search box
         search_layout = QHBoxLayout()
@@ -625,21 +644,34 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             self._no_remote_label.hide()
             self._remote_tree.show()
 
-            for layer_name, layer_data in fav.remote_layers.items():
+            for key, layer_data in fav.remote_layers.items():
                 # Handle both new format (dict) and legacy format (string layer_id)
                 if isinstance(layer_data, dict):
                     expr = layer_data.get('expression', '')
                     feature_count = layer_data.get('feature_count', '?')
+                    # FIX 2026-04-23 (CRIT-3): key may be a portable signature
+                    # (postgres::schema.table) when the favorite is v3 canonical.
+                    # Prefer the payload's display_name so the UI shows the
+                    # author's original label; fall back to the key (which is
+                    # a layer name in legacy v1/v2 favorites).
+                    display = layer_data.get('display_name') or key
+                    signature = layer_data.get('layer_signature')
                 else:
                     # Legacy format: layer_data is just the layer_id string
                     expr = ''
                     feature_count = '?'
+                    display = key
+                    signature = None
                 tree_item = QTreeWidgetItem([
-                    layer_name,
+                    display,
                     str(feature_count),
                     expr[:80] + "..." if len(expr) > 80 else expr
                 ])
-                tree_item.setToolTip(2, expr)
+                tooltip = expr
+                if signature and signature != display:
+                    tooltip = f"[{signature}]\n{expr}" if expr else f"[{signature}]"
+                tree_item.setToolTip(0, signature or display)
+                tree_item.setToolTip(2, tooltip)
                 self._remote_tree.addTopLevelItem(tree_item)
 
             self._tab_widget.setTabText(
@@ -740,9 +772,25 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # own favorites_changed emission during delete + save.
         self._suppress_external_refresh = True
         try:
-            self._favorites_manager.remove_favorite(self._current_fav_id)
+            removed = self._favorites_manager.remove_favorite(deleted_id)
         finally:
             self._suppress_external_refresh = False
+
+        # FIX 2026-04-23 (MED-5): surface silent failures instead of
+        # optimistically updating the UI. If the manager refused (DB not
+        # initialised, unknown id, IO error), the row is still in SQLite
+        # — pretending otherwise creates a ghost entry on next reload.
+        if not removed:
+            QMessageBox.warning(
+                self,
+                self.tr("Delete Favorite"),
+                self.tr(
+                    "Could not delete '{0}'. The favorite is still in the "
+                    "database — check the FilterMate log for details."
+                ).format(fav.name),
+            )
+            return
+
         self._list_widget.takeItem(self._list_widget.currentRow())
 
         # FIX 2026-04-22: keep the local cache in sync with the manager, else
@@ -757,20 +805,32 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             self.tr("<b>Saved Favorites ({0})</b>").format(fav_count)
         )
 
-        # Clear all fields
-        self._clear_details()
-
-        self._current_fav_id = None
-        self._apply_btn.setEnabled(False)
-        self._save_btn.setEnabled(False)
-        self._delete_btn.setEnabled(False)
-
         # Save changes
         self._favorites_manager.save()
 
-        # Auto-select next item
+        # FIX 2026-04-23: after takeItem, Qt may auto-advance selection to the
+        # next row and fire currentItemChanged. Resetting _current_fav_id=None
+        # and calling setCurrentRow(0) afterwards silently fails (row is already
+        # 0 -> no signal), leaving the remaining item visually selected but
+        # with empty details and a disabled Delete button, making it impossible
+        # to delete the last favorite without reopening the manager.
         if self._list_widget.count() > 0:
+            # Force the selection handler to fire even if row 0 is already
+            # current, so details/buttons reflect the remaining favorite.
+            # Belt-and-braces: clear selection, reassign row 0, and invoke
+            # the handler directly in case neither setCurrentRow call emits
+            # (seen on some Qt versions when the list was rebuilt and the
+            # internal "previous index" equals the target index).
+            self._list_widget.clearSelection()
+            self._list_widget.setCurrentRow(-1)
             self._list_widget.setCurrentRow(0)
+            self._on_selection_changed()
+        else:
+            self._clear_details()
+            self._current_fav_id = None
+            self._apply_btn.setEnabled(False)
+            self._save_btn.setEnabled(False)
+            self._delete_btn.setEnabled(False)
 
         self.favoriteDeleted.emit(deleted_id)
         self.favoritesChanged.emit()
@@ -794,6 +854,46 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._no_remote_label.show()
         self._remote_tree.hide()
         self._tab_widget.setTabText(2, "🗂️ " + self.tr("Remote Layers"))
+
+    # ─── favorites_sharing integration (optional) ─────────────────────
+
+    def _is_sharing_active(self) -> bool:
+        """True when the favorites_sharing extension is loaded + initialized."""
+        try:
+            from ...extensions.registry import get_extension_registry
+            from ...extensions.base import ExtensionState
+            ext = get_extension_registry().get_extension('favorites_sharing')
+            return ext is not None and ext.state in (
+                ExtensionState.INITIALIZED, ExtensionState.UI_CREATED,
+            )
+        except Exception:
+            return False
+
+    def _on_shared_clicked(self) -> None:
+        """Open the shared-favorites picker, then refresh the list on close.
+
+        The picker materialises chosen shared favorites into the user's DB
+        via FavoritesSharingService.fork(), which emits favorites_changed
+        and triggers _on_external_favorites_changed — so the list updates
+        automatically. We still call refresh() defensively for the case
+        where the external signal was somehow suppressed.
+        """
+        if not self._is_sharing_active() or self._favorites_manager is None:
+            return
+        try:
+            from ...extensions.registry import get_extension_registry
+            from ...extensions.favorites_sharing.ui import SharedFavoritesPickerDialog
+            ext = get_extension_registry().get_extension('favorites_sharing')
+            service = ext.get_service('service') if ext else None
+            if service is None:
+                return
+            dialog = SharedFavoritesPickerDialog(
+                service, self._favorites_manager, parent=self,
+            )
+            dialog.exec()
+            self.refresh()
+        except Exception as e:
+            logger.debug(f"Could not open shared picker: {e}")
 
     def refresh(self):
         """Refresh the favorites list."""
