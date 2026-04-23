@@ -292,3 +292,128 @@ class TestExtensionRegistry:
         assert summary["dummy"]["state"] == "initialized"
         assert summary["dummy"]["available"] is True
         assert summary["dummy"]["version"] == "1.0.0"
+
+    def test_initialize_continues_after_failure(self, registry):
+        """One extension crashing during init must not prevent others from initializing."""
+        class OkExt(DummyExtension):
+            @property
+            def metadata(self):
+                return ExtensionMetadata(
+                    id="ok", name="Ok", version="1.0", description=""
+                )
+
+        failing = FailingExtension()
+        ok = OkExt()
+
+        registry.register(failing)
+        registry.register(ok)
+
+        results = registry.initialize_all(MagicMock())
+
+        assert results["failing"] is False
+        assert results["ok"] is True
+        assert failing.state == ExtensionState.ERROR
+        assert ok.state == ExtensionState.INITIALIZED
+
+    def test_register_duplicate_id_replaces_and_keeps_order(self, registry):
+        """Registering a second extension with the same ID replaces in place."""
+        ext_a = DummyExtension()
+        ext_b = DummyExtension()
+
+        registry.register(ext_a)
+        registry.register(ext_b)
+
+        assert registry.get_extension("dummy") is ext_b
+        # load order should not duplicate the ID
+        assert registry._load_order.count("dummy") == 1
+
+    def test_teardown_skips_errored_extensions(self, registry):
+        """Extensions in ERROR state must not have teardown() called."""
+        teardown_calls = []
+
+        class TrackingFailing(FailingExtension):
+            def teardown(self):
+                teardown_calls.append("failing")
+
+        class TrackingOk(DummyExtension):
+            @property
+            def metadata(self):
+                return ExtensionMetadata(
+                    id="ok", name="Ok", version="1.0", description=""
+                )
+            def teardown(self):
+                teardown_calls.append("ok")
+                super().teardown()
+
+        failing = TrackingFailing()
+        ok = TrackingOk()
+        registry.register(failing)
+        registry.register(ok)
+        registry.initialize_all(MagicMock())
+
+        registry.teardown_all()
+
+        # Only the successfully-initialized extension gets torn down
+        assert teardown_calls == ["ok"]
+        assert failing.state == ExtensionState.ERROR  # unchanged
+
+    def test_teardown_swallows_exception_in_one_extension(self, registry):
+        """An exception in one teardown() must not prevent others from running."""
+        teardown_calls = []
+
+        class RaisingTeardown(DummyExtension):
+            @property
+            def metadata(self):
+                return ExtensionMetadata(
+                    id="raiser", name="Raiser", version="1.0", description=""
+                )
+            def teardown(self):
+                teardown_calls.append("raiser")
+                raise RuntimeError("teardown boom")
+
+        class OkTeardown(DummyExtension):
+            @property
+            def metadata(self):
+                return ExtensionMetadata(
+                    id="survivor", name="Survivor", version="1.0", description=""
+                )
+            def teardown(self):
+                teardown_calls.append("survivor")
+
+        raiser = RaisingTeardown()
+        survivor = OkTeardown()
+        registry.register(raiser)
+        registry.register(survivor)
+        registry.initialize_all(MagicMock())
+
+        # Must not propagate — teardown order is reverse, so survivor first then raiser
+        registry.teardown_all()
+        assert teardown_calls == ["survivor", "raiser"]
+
+    def test_create_ui_skips_non_initialized_extensions(self, registry):
+        """Extensions not in INITIALIZED state must be skipped by create_all_ui."""
+        failing = FailingExtension()
+        ok = DummyExtension()
+
+        registry.register(failing)
+        registry.register(ok)
+        registry.initialize_all(MagicMock())
+
+        ui_results = registry.create_all_ui(MagicMock(), "TestMenu")
+
+        assert "dummy" in ui_results
+        # failing extension is in ERROR state, so create_ui wasn't called and no entry was recorded
+        assert "failing" not in ui_results
+
+    def test_teardown_all_after_unavailable_extension(self, registry):
+        """Extensions skipped at init (unavailable) must not raise on teardown."""
+        unavailable = UnavailableExtension()
+        ok = DummyExtension()
+
+        registry.register(unavailable)
+        registry.register(ok)
+        registry.initialize_all(MagicMock())
+
+        # Should not raise
+        registry.teardown_all()
+        assert ok.state == ExtensionState.TORN_DOWN
