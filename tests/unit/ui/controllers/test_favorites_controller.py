@@ -426,3 +426,254 @@ class TestFavoriteMatchesCurrentLayer:
         fav.layer_name = "Foo"
         # No match possible, but the predicate should return False gracefully
         assert ctrl._favorite_matches_current_layer(fav, layer) is False
+
+
+# ---------------------------------------------------------------------------
+# Geometric predicate capture/restore — 2026-04-23 regression
+# ---------------------------------------------------------------------------
+#
+# The favorites controller used to read/write ``PROJECT_LAYERS[id]['filtering']
+# ['predicates']`` as a dict — a key that nothing in the code actually writes.
+# Favorites therefore lost their predicate configuration on save, and after
+# project reopen the filter task ran with ``has_geometric_predicates=False``
+# while the combobox still showed ``['Intersect']`` (persisted by QGIS at the
+# project level). The tests below pin the capture → serialize → restore
+# round-trip against the canonical keys.
+
+
+def _make_dockwidget_for_predicate_capture(combobox_items, button_checked):
+    dw = MagicMock()
+
+    combo = MagicMock()
+    combo.checkedItems.return_value = list(combobox_items)
+    dw.comboBox_filtering_geometric_predicates = combo
+
+    btn = MagicMock()
+    btn.isChecked.return_value = button_checked
+    dw.pushButton_checkable_filtering_geometric_predicates = btn
+
+    # Keep _capture_spatial_config from branching into feature / groupbox /
+    # custom-expression capture paths we don't care about for this test.
+    dw.current_exploring_groupbox = None
+    dw.get_current_features.return_value = ([], None)
+    dw.widgets = {"EXPLORING": {"CUSTOM_SELECTION_EXPRESSION": {"WIDGET": None}}}
+    dw.PROJECT_LAYERS = {}
+    dw.current_layer = None
+
+    spinbox = MagicMock()
+    spinbox.value.return_value = 0.0
+    dw.mQgsDoubleSpinBox_filtering_buffer_value = spinbox
+
+    return dw, combo, btn
+
+
+class TestCapturePredicates:
+    """_capture_spatial_config must write the canonical keys from live widgets."""
+
+    def test_captures_predicates_list_and_flag_from_widgets(self):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        dw, _, _ = _make_dockwidget_for_predicate_capture(
+            combobox_items=['Intersect'], button_checked=True
+        )
+        ctrl._dockwidget = dw
+
+        config = ctrl._capture_spatial_config()
+
+        assert config is not None
+        assert config['geometric_predicates'] == ['Intersect']
+        assert config['has_geometric_predicates'] is True
+        # Legacy bogus key must not be written anymore.
+        assert 'predicates' not in config
+
+    def test_returns_none_when_no_predicates_and_no_other_state(self):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        dw, _, _ = _make_dockwidget_for_predicate_capture(
+            combobox_items=[], button_checked=False
+        )
+        ctrl._dockwidget = dw
+
+        # Nothing to capture → None so _create_favorite's guard still fires.
+        assert ctrl._capture_spatial_config() is None
+
+    def test_captures_multiple_predicates(self):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        dw, _, _ = _make_dockwidget_for_predicate_capture(
+            combobox_items=['Intersect', 'Contain', 'Are within'],
+            button_checked=True,
+        )
+        ctrl._dockwidget = dw
+
+        config = ctrl._capture_spatial_config()
+        assert config['geometric_predicates'] == ['Intersect', 'Contain', 'Are within']
+        assert config['has_geometric_predicates'] is True
+
+    def test_falls_back_to_project_layers_when_widget_missing(self):
+        """Headless contexts (no dockwidget widgets) must still read stored state."""
+        ctrl = FavoritesController.__new__(FavoritesController)
+        dw = MagicMock(spec=[
+            'PROJECT_LAYERS', 'current_layer', 'widgets',
+            'current_exploring_groupbox', 'get_current_features',
+            'mQgsDoubleSpinBox_filtering_buffer_value',
+        ])
+        # Simulate absent attributes — getattr returns None through spec.
+        current_layer = MagicMock()
+        current_layer.id.return_value = 'layer-xyz'
+        dw.PROJECT_LAYERS = {
+            'layer-xyz': {
+                'filtering': {
+                    'has_geometric_predicates': True,
+                    'geometric_predicates': ['Intersect'],
+                }
+            }
+        }
+        dw.current_layer = current_layer
+        dw.current_exploring_groupbox = None
+        dw.get_current_features.return_value = ([], None)
+        dw.widgets = {"EXPLORING": {"CUSTOM_SELECTION_EXPRESSION": {"WIDGET": None}}}
+        spinbox = MagicMock()
+        spinbox.value.return_value = 0.0
+        dw.mQgsDoubleSpinBox_filtering_buffer_value = spinbox
+        ctrl._dockwidget = dw
+
+        config = ctrl._capture_spatial_config()
+        assert config is not None
+        assert config['geometric_predicates'] == ['Intersect']
+        assert config['has_geometric_predicates'] is True
+
+
+def _make_dockwidget_for_predicate_restore(layer_props=None):
+    """Build a dockwidget wired for _restore_filtering_ui_from_favorite.
+
+    Only the widgets the restore path actually touches are populated so the
+    test's assertions stay focused on the predicate flow. We bypass the
+    ``QgsProject.instance().mapLayers()`` scan by leaving remote_layers empty.
+    """
+    dw = MagicMock()
+    dw.widgets_initialized = True
+
+    combo = MagicMock()
+    dw.comboBox_filtering_geometric_predicates = combo
+
+    btn = MagicMock()
+    dw.pushButton_checkable_filtering_geometric_predicates = btn
+
+    layers_btn = MagicMock()
+    dw.pushButton_checkable_filtering_layers_to_filter = layers_btn
+
+    buffer_btn = MagicMock()
+    dw.pushButton_checkable_filtering_buffer_value = buffer_btn
+
+    # widgets dict keeps the LAYERS_TO_FILTER lookup harmless.
+    dw.widgets = {"FILTERING": {"LAYERS_TO_FILTER": {"WIDGET": None}}}
+
+    current_layer = MagicMock()
+    current_layer.id.return_value = 'source-layer'
+    dw.current_layer = current_layer
+
+    dw.PROJECT_LAYERS = {'source-layer': layer_props if layer_props is not None else {}}
+
+    return dw, combo, btn
+
+
+class TestRestorePredicates:
+    """_restore_filtering_ui_from_favorite must tick both widgets and persist
+    the canonical keys in PROJECT_LAYERS so task_builder sees a consistent state."""
+
+    def test_restores_new_format_canonical_keys(self):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        layer_props = {}
+        dw, combo, btn = _make_dockwidget_for_predicate_restore(layer_props)
+        ctrl._dockwidget = dw
+
+        fav = MagicMock()
+        fav.name = "WithPred"
+        fav.spatial_config = {
+            'has_geometric_predicates': True,
+            'geometric_predicates': ['Intersect'],
+        }
+        fav.remote_layers = {}
+
+        ctrl._restore_filtering_ui_from_favorite(fav)
+
+        combo.setCheckedItems.assert_called_once_with(['Intersect'])
+        btn.setChecked.assert_called_once_with(True)
+        assert layer_props['filtering']['has_geometric_predicates'] is True
+        assert layer_props['filtering']['geometric_predicates'] == ['Intersect']
+
+    def test_restores_legacy_predicates_dict(self):
+        """Old favorites stored a dict under ``predicates`` — still supported."""
+        ctrl = FavoritesController.__new__(FavoritesController)
+        layer_props = {}
+        dw, combo, btn = _make_dockwidget_for_predicate_restore(layer_props)
+        ctrl._dockwidget = dw
+
+        fav = MagicMock()
+        fav.name = "Legacy"
+        fav.spatial_config = {'predicates': {'Intersect': True, 'Contain': True}}
+        fav.remote_layers = {}
+
+        ctrl._restore_filtering_ui_from_favorite(fav)
+
+        # Dict keys become the predicate list; order not guaranteed but contents are.
+        args, _ = combo.setCheckedItems.call_args
+        assert set(args[0]) == {'Intersect', 'Contain'}
+        btn.setChecked.assert_called_once_with(True)
+        assert layer_props['filtering']['has_geometric_predicates'] is True
+        assert set(layer_props['filtering']['geometric_predicates']) == {'Intersect', 'Contain'}
+
+    def test_restores_empty_predicates_unticks_button(self):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        layer_props = {
+            'filtering': {
+                # Pre-existing stale state from before favorite load.
+                'has_geometric_predicates': True,
+                'geometric_predicates': ['Intersect'],
+            }
+        }
+        dw, combo, btn = _make_dockwidget_for_predicate_restore(layer_props)
+        ctrl._dockwidget = dw
+
+        fav = MagicMock()
+        fav.name = "NoPred"
+        fav.spatial_config = {}  # capture skipped predicates
+        fav.remote_layers = {}
+
+        ctrl._restore_filtering_ui_from_favorite(fav)
+
+        combo.setCheckedItems.assert_called_once_with([])
+        btn.setChecked.assert_called_once_with(False)
+        # Stale state must be cleared, not preserved.
+        assert layer_props['filtering']['has_geometric_predicates'] is False
+        assert layer_props['filtering']['geometric_predicates'] == []
+
+
+class TestCaptureRestoreRoundTrip:
+    """End-to-end: capture → spatial_config → restore must keep the state."""
+
+    def test_round_trip_single_predicate(self):
+        # Capture
+        ctrl_cap = FavoritesController.__new__(FavoritesController)
+        dw_cap, _, _ = _make_dockwidget_for_predicate_capture(
+            combobox_items=['Intersect'], button_checked=True
+        )
+        ctrl_cap._dockwidget = dw_cap
+        captured = ctrl_cap._capture_spatial_config()
+        assert captured is not None
+
+        # Restore from the captured config
+        ctrl_res = FavoritesController.__new__(FavoritesController)
+        layer_props = {}
+        dw_res, combo, btn = _make_dockwidget_for_predicate_restore(layer_props)
+        ctrl_res._dockwidget = dw_res
+
+        fav = MagicMock()
+        fav.name = "RT"
+        fav.spatial_config = captured
+        fav.remote_layers = {}
+
+        ctrl_res._restore_filtering_ui_from_favorite(fav)
+
+        combo.setCheckedItems.assert_called_once_with(['Intersect'])
+        btn.setChecked.assert_called_once_with(True)
+        assert layer_props['filtering']['has_geometric_predicates'] is True
+        assert layer_props['filtering']['geometric_predicates'] == ['Intersect']
