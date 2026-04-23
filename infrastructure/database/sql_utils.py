@@ -128,6 +128,37 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
             logger.debug(f"[SQL]   Provider: {layer.providerType()}")
             logger.debug(f"[SQL]   Expression length: {len(subset_expression) if subset_expression else 0} chars")
 
+            # H2 FIX (2026-04-23): defense-in-depth sanitization at the universal
+            # setSubsetString chokepoint. Upstream callers (favorites apply,
+            # filter task) already sanitize on capture, but a tampered config
+            # or stale favorite can re-enter the subset layer through other
+            # paths (undo/redo, public API, legacy task paths). The sanitizer
+            # is idempotent on already-clean expressions and strips standalone
+            # display expressions (COALESCE/CONCAT/CASE-as-boolean) that would
+            # otherwise reach PostgreSQL as "WHERE COALESCE(...)" → type error.
+            if subset_expression:
+                sanitize_subset_string = None
+                try:
+                    # Plugin context: loaded as filter_mate.infrastructure.database.sql_utils
+                    from ...core.filter import sanitize_subset_string as _sanitize
+                    sanitize_subset_string = _sanitize
+                except ImportError:
+                    try:
+                        # Test context: plugin root on sys.path
+                        from core.filter import sanitize_subset_string as _sanitize
+                        sanitize_subset_string = _sanitize
+                    except ImportError:
+                        logger.debug("[SQL]   sanitize_subset_string unavailable; skipping")
+
+                if sanitize_subset_string is not None:
+                    sanitized = sanitize_subset_string(subset_expression)
+                    if sanitized != subset_expression:
+                        logger.info(
+                            f"[SQL]   Sanitized subset string for layer '{layer.name()}': "
+                            f"'{subset_expression[:80]}...' → '{sanitized[:80]}...'"
+                        )
+                    subset_expression = sanitized
+
             # FIX v4.8.2: Detect type mismatches BEFORE applying to PostgreSQL
             # Prevents "operator does not exist: character varying < integer" errors
             if subset_expression and layer.providerType() == 'postgres':

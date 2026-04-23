@@ -245,3 +245,85 @@ class TestBuildFeatureIdExpression:
         result = format_pk_values_for_sql(values, pk_field="id")
         assert "9999" in result
         assert len(result.split(",")) == 10000
+
+
+# =========================================================================
+# safe_set_subset_string — H2 sanitization chokepoint (audit 2026-04-23)
+# =========================================================================
+
+class TestSafeSetSubsetStringSanitization:
+    """Regression tests for H2 (audit 2026-04-23): defense-in-depth sanitization
+    at the universal setSubsetString chokepoint. A tampered favorite or legacy
+    subset must not reach layer.setSubsetString() verbatim.
+    """
+
+    def _make_layer(self, provider_type='ogr', initial_subset=''):
+        """Minimal QgsVectorLayer-like mock; non-postgres avoids the type-cast branch."""
+        from unittest.mock import MagicMock
+
+        layer = MagicMock()
+        layer.name.return_value = 'test_layer'
+        layer.providerType.return_value = provider_type
+        layer.subsetString.return_value = initial_subset
+        layer.featureCount.return_value = 10
+        layer.source.return_value = 'memory:'
+        layer.setSubsetString.return_value = True
+        return layer
+
+    def test_standalone_coalesce_is_sanitized_to_empty(self):
+        """COALESCE display expression must be blanked before setSubsetString."""
+        from infrastructure.database.sql_utils import safe_set_subset_string
+
+        layer = self._make_layer()
+        tampered = "COALESCE(\"label\", '<NULL>')"
+
+        safe_set_subset_string(layer, tampered)
+
+        # setSubsetString was called — assert with the sanitized (empty) form, not the tampered input.
+        call_args = layer.setSubsetString.call_args[0][0]
+        assert "COALESCE" not in call_args, (
+            "REGRESSION H2: COALESCE display expression reached setSubsetString; "
+            "sanitizer should have blanked it."
+        )
+        assert call_args == "", "Display expression must sanitize to empty string"
+
+    def test_valid_filter_passes_through(self):
+        """Legitimate boolean filter must reach setSubsetString unchanged."""
+        from infrastructure.database.sql_utils import safe_set_subset_string
+
+        layer = self._make_layer()
+        valid = "\"population\" > 1000"
+
+        safe_set_subset_string(layer, valid)
+
+        call_args = layer.setSubsetString.call_args[0][0]
+        assert call_args == valid, "Valid filter must pass through unchanged"
+
+    def test_feature_id_in_clause_passes_through(self):
+        """Feature-id IN-list (spatial filter output) must not be stripped."""
+        from infrastructure.database.sql_utils import safe_set_subset_string
+
+        layer = self._make_layer()
+        expr = '"fid" IN (1, 2, 3, 45, 78)'
+
+        safe_set_subset_string(layer, expr)
+
+        call_args = layer.setSubsetString.call_args[0][0]
+        assert call_args == expr, "fid IN (...) must reach setSubsetString verbatim"
+
+    def test_empty_string_clears_filter(self):
+        """Empty subset (unfilter operation) must stay empty."""
+        from infrastructure.database.sql_utils import safe_set_subset_string
+
+        layer = self._make_layer()
+
+        safe_set_subset_string(layer, "")
+
+        call_args = layer.setSubsetString.call_args[0][0]
+        assert call_args == ""
+
+    def test_none_layer_is_rejected(self):
+        """Sanity: None layer still returns False without calling anything."""
+        from infrastructure.database.sql_utils import safe_set_subset_string
+
+        assert safe_set_subset_string(None, "anything") is False
