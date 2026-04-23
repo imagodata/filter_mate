@@ -183,6 +183,7 @@ def _setup_handler_mocks():
         'initialization_handler',
         'source_geometry_preparer',
         'subset_management_handler',
+        'expression_evaluation_task',
     ]
 
     for handler_name in handler_files:
