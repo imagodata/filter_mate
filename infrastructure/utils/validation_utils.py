@@ -424,6 +424,45 @@ def get_layer_validation_info(layer: Any) -> dict:
 # Expression Type Detection
 # =============================================================================
 
+def _blank_sql_string_literals(expr: str) -> str:
+    """Replace the contents of single-quoted SQL string literals with spaces.
+
+    Keeps the surrounding quotes and preserves string length so downstream
+    regex indices stay aligned. Doubled '' inside a literal is treated as an
+    escaped quote, matching SQL semantics.
+
+    Used by is_filter_expression() to prevent operator characters trapped
+    inside literals (notably `<` / `>` in `'<NULL>'` placeholders) from
+    being mistaken for top-level comparison operators.
+    """
+    if not expr or "'" not in expr:
+        return expr
+    out = []
+    i = 0
+    n = len(expr)
+    while i < n:
+        c = expr[i]
+        if c != "'":
+            out.append(c)
+            i += 1
+            continue
+        out.append("'")
+        i += 1
+        while i < n:
+            if expr[i] == "'":
+                if i + 1 < n and expr[i + 1] == "'":
+                    # escaped '' inside the literal — blank both, stay inside
+                    out.append("  ")
+                    i += 2
+                    continue
+                out.append("'")
+                i += 1
+                break
+            out.append(' ')
+            i += 1
+    return ''.join(out)
+
+
 def is_filter_expression(expression: str) -> bool:
     """
     Determine if an expression is a filter expression (returns boolean).
@@ -462,7 +501,15 @@ def is_filter_expression(expression: str) -> bool:
         return False
 
     expr = expression.strip()
-    expr_upper = expr.upper()
+
+    # FIX 2026-04-23: blank single-quoted string literals before scanning for
+    # operators. Without this, a display expression like
+    # `COALESCE("id", '<NULL>')` leaks the '<' and '>' inside the '<NULL>'
+    # literal into the operator scan, making the function report "this is a
+    # filter" and causing the favorites controller to push a non-boolean
+    # subset to PostgreSQL (→ "argument of WHERE must be type boolean").
+    expr_scan = _blank_sql_string_literals(expr)
+    expr_upper = expr_scan.upper()
 
     # List of comparison/logical operators that make an expression a filter
     # These operators return boolean values
@@ -499,7 +546,7 @@ def is_filter_expression(expression: str) -> bool:
 
     # Pattern for comparisons like "field"=value, "field">value, etc.
     comparison_pattern = r'["\']?\w+["\']?\s*[!=<>]+\s*'
-    if re.search(comparison_pattern, expr):
+    if re.search(comparison_pattern, expr_scan):
         return True
 
     # If we get here, it's likely a non-filter expression
