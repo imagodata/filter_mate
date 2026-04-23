@@ -271,6 +271,19 @@ class ExtensionRegistry:
         a stale CONFIG_DATA between the seed mutations and this persist.
         We overlay only the ``EXTENSIONS`` dict on top of the current
         disk state, preserving sibling sections even if they diverged.
+
+        FIX 2026-04-23: the previous implementation reassigned
+        ``ENV_VARS["CONFIG_DATA"] = disk_data``, but ``app.CONFIG_DATA``
+        and ``dockwidget.CONFIG_DATA`` hold a *reference* to the live
+        dict captured earlier. Reassigning the module-level slot leaves
+        those references pointing at the old object, so the config
+        panel tree (built from ``dw.CONFIG_DATA``) silently misses the
+        newly-seeded extension entries — exactly the symptom reported
+        when ``favorites_sharing`` was discovered and seeded yet the
+        EXTENSIONS panel kept showing only ``qfieldcloud``.
+        We now **mutate in place**: merge disk-only sections back into
+        the live dict, then overwrite the live EXTENSIONS with the
+        merged slice. Every holder of the old reference sees the fix.
         """
         try:
             from filter_mate.config.config import ENV_VARS
@@ -286,29 +299,52 @@ class ExtensionRegistry:
         if not isinstance(live_extensions, dict):
             live_extensions = {}
 
-        # Re-read disk state (best-effort) and overlay our EXTENSIONS
+        # Re-read disk state (best-effort) to pull in any sibling sections
+        # written by other components between our seed and this persist.
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 disk_data = json.load(f)
             if not isinstance(disk_data, dict):
-                disk_data = live_data
+                disk_data = {}
         except (OSError, ValueError):
-            disk_data = live_data
+            disk_data = {}
 
-        merged_ext = disk_data.get("EXTENSIONS", {})
-        if not isinstance(merged_ext, dict):
-            merged_ext = {}
+        # 1. Merge disk-only sibling sections into live_data (preserves any
+        #    sibling that another component wrote directly to disk).
+        for key, value in disk_data.items():
+            if key == "EXTENSIONS":
+                continue  # handled below
+            if key not in live_data:
+                live_data[key] = value
+
+        # 2. Build the merged EXTENSIONS dict: disk version + live overrides.
+        disk_extensions = disk_data.get("EXTENSIONS", {})
+        if not isinstance(disk_extensions, dict):
+            disk_extensions = {}
+        merged_ext: Dict[str, Any] = {}
+        # Start from disk (preserves user edits that only exist on disk).
+        for ext_id, slice_data in disk_extensions.items():
+            if isinstance(slice_data, (dict, str, bool, int, float, list)):
+                merged_ext[ext_id] = slice_data
+        # Overlay with live slices (fresh seed wins over stale disk).
         for ext_id, slice_data in live_extensions.items():
             if isinstance(slice_data, dict):
                 merged_ext[ext_id] = slice_data
-        disk_data["EXTENSIONS"] = merged_ext
 
-        # Sync ENV_VARS so subsequent readers see the merged state
-        ENV_VARS["CONFIG_DATA"] = disk_data
+        # 3. Mutate live_data["EXTENSIONS"] in place — do NOT reassign
+        #    ENV_VARS["CONFIG_DATA"]. Every reader holding the live ref
+        #    (app.CONFIG_DATA, dockwidget.CONFIG_DATA, config tree model)
+        #    will see the merged state on the next access.
+        existing = live_data.get("EXTENSIONS")
+        if isinstance(existing, dict):
+            existing.clear()
+            existing.update(merged_ext)
+        else:
+            live_data["EXTENSIONS"] = merged_ext
 
         try:
             with open(config_path, 'w', encoding='utf-8') as f:
-                json.dump(disk_data, f, indent=2, ensure_ascii=False)
+                json.dump(live_data, f, indent=2, ensure_ascii=False)
             return True
         except OSError as exc:
             logger.warning("Could not persist config.json: %s", exc)

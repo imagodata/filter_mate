@@ -391,29 +391,44 @@ class BaseExtension(ABC):
         if not isinstance(our_slice, dict):
             return False  # Nothing to persist
 
-        # Re-read disk (or fall back to the in-memory snapshot on read failure)
+        # Re-read disk just for *sibling* sections we might clobber on
+        # write (FIX 2026-04-23: we no longer reassign ENV_VARS['CONFIG_DATA']
+        # — see ExtensionRegistry._persist_config for the rationale. Keeping
+        # the live dict as the single source of truth means app.CONFIG_DATA
+        # and dockwidget.CONFIG_DATA don't desync).
         try:
             with open(config_path, "r", encoding="utf-8") as fh:
                 disk_data = json.load(fh)
             if not isinstance(disk_data, dict):
-                disk_data = live_data
+                disk_data = {}
         except (OSError, ValueError):
-            disk_data = live_data
+            disk_data = {}
 
-        # Overlay our slice on top of whatever is on disk
-        disk_ext = disk_data.setdefault("EXTENSIONS", {})
-        if not isinstance(disk_ext, dict):
-            disk_data["EXTENSIONS"] = {}
-            disk_ext = disk_data["EXTENSIONS"]
-        disk_ext[self.metadata.id] = our_slice
+        # Pull in disk-only sibling sections we haven't touched in memory,
+        # so the upcoming write doesn't drop them.
+        for key, value in disk_data.items():
+            if key == "EXTENSIONS":
+                continue
+            if key not in live_data:
+                live_data[key] = value
 
-        # Sync back into ENV_VARS so whoever reads it next sees the
-        # merged state rather than our slice-only view.
-        ENV_VARS["CONFIG_DATA"] = disk_data
+        # Ensure EXTENSIONS exists and has our slice written in place.
+        existing_ext = live_data.get("EXTENSIONS")
+        if not isinstance(existing_ext, dict):
+            live_data["EXTENSIONS"] = {}
+            existing_ext = live_data["EXTENSIONS"]
+        # Also overlay sibling extensions that only exist on disk (e.g.
+        # another session seeded them while this session was offline).
+        disk_ext = disk_data.get("EXTENSIONS")
+        if isinstance(disk_ext, dict):
+            for ext_id, slice_data in disk_ext.items():
+                if ext_id not in existing_ext and isinstance(slice_data, (dict, str, bool, int, float, list)):
+                    existing_ext[ext_id] = slice_data
+        existing_ext[self.metadata.id] = our_slice
 
         try:
             with open(config_path, "w", encoding="utf-8") as fh:
-                json.dump(disk_data, fh, indent=2, ensure_ascii=False)
+                json.dump(live_data, fh, indent=2, ensure_ascii=False)
             return True
         except OSError as exc:
             logger.warning(

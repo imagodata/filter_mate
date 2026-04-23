@@ -623,3 +623,57 @@ class TestConfigAPI:
         import json
         on_disk = json.loads(cfg_path.read_text())
         assert on_disk["EXTENSIONS"]["schema_ext"]["timeout"]["value"] == 30
+
+    def test_persist_preserves_env_vars_reference(self, in_memory_config, registry):
+        """Regression 2026-04-23: _persist_config must mutate the live
+        CONFIG_DATA dict in place, never reassign ENV_VARS['CONFIG_DATA'].
+
+        Before the fix, reassignment broke every other holder of the live
+        reference (app.CONFIG_DATA, dockwidget.CONFIG_DATA, config tree
+        model) — seeded extensions disappeared from the Configuration
+        panel even though they were persisted to disk.
+        """
+        import sys
+        cfg_data, cfg_path = in_memory_config
+        # Capture the reference the way app/dockwidget do at init
+        caller_ref = cfg_data
+
+        real_cc = sys.modules["filter_mate.config.config"]
+        env_vars = real_cc.ENV_VARS
+        assert env_vars["CONFIG_DATA"] is caller_ref
+
+        ext = SchemaExtension()
+        registry.register(ext)
+        ext.seed_default_config()
+        registry._persist_config()
+
+        # ENV_VARS slot must still point at the ORIGINAL dict
+        assert env_vars["CONFIG_DATA"] is caller_ref, (
+            "ExtensionRegistry._persist_config reassigned "
+            "ENV_VARS['CONFIG_DATA'] — callers holding the live reference "
+            "would desync and miss the seeded extension keys."
+        )
+        # And the mutation is visible through the caller's reference
+        assert "schema_ext" in caller_ref["EXTENSIONS"]
+
+    def test_base_persist_preserves_env_vars_reference(self, in_memory_config):
+        """Same contract for BaseExtension._persist_config (called from
+        set_config(persist=True))."""
+        import sys
+        cfg_data, cfg_path = in_memory_config
+        caller_ref = cfg_data
+
+        real_cc = sys.modules["filter_mate.config.config"]
+        env_vars = real_cc.ENV_VARS
+        assert env_vars["CONFIG_DATA"] is caller_ref
+
+        ext = SchemaExtension()
+        ext.seed_default_config()
+        # set_config triggers BaseExtension._persist_config
+        ext.set_config("timeout", 60, persist=True)
+
+        assert env_vars["CONFIG_DATA"] is caller_ref, (
+            "BaseExtension._persist_config reassigned "
+            "ENV_VARS['CONFIG_DATA'] — same reference-desync bug."
+        )
+        assert caller_ref["EXTENSIONS"]["schema_ext"]["timeout"]["value"] == 60
