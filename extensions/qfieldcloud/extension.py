@@ -61,6 +61,8 @@ class QFieldCloudExtension(BaseExtension):
         self._signals = None
         self._qfc_button = None
         self._dockwidget = None
+        self._menu_name = None
+        self._settings_action = None
 
     @property
     def metadata(self) -> ExtensionMetadata:
@@ -114,6 +116,8 @@ class QFieldCloudExtension(BaseExtension):
         self._iface.addPluginToVectorMenu(menu_name, settings_action)
         actions.append(settings_action)
 
+        self._menu_name = menu_name
+        self._settings_action = settings_action
         self._actions = actions
         return actions
 
@@ -186,9 +190,13 @@ class QFieldCloudExtension(BaseExtension):
 
     def teardown(self) -> None:
         """Cleanup all QFieldCloud resources."""
-        # Remove dockwidget button and attribute
+        # Disconnect and remove the dockwidget button
         if self._qfc_button is not None:
-            if hasattr(self, '_dockwidget') and self._dockwidget is not None:
+            try:
+                self._qfc_button.clicked.disconnect(self._on_push_triggered)
+            except (TypeError, RuntimeError):
+                pass
+            if self._dockwidget is not None:
                 try:
                     delattr(self._dockwidget, 'pushButton_action_qfieldcloud')
                 except AttributeError:
@@ -198,23 +206,26 @@ class QFieldCloudExtension(BaseExtension):
             self._qfc_button.deleteLater()
             self._qfc_button = None
 
-        # Remove UI actions (menu entries)
-        for action in self._actions:
-            if hasattr(action, 'removeAction'):
-                continue
-            if hasattr(action, 'parent') and callable(action.parent) and action.parent():
-                action.parent().removeAction(action)
+        # Disconnect and remove the settings action from the plugin vector menu
+        if self._settings_action is not None:
+            try:
+                self._settings_action.triggered.disconnect(self._on_settings_triggered)
+            except (TypeError, RuntimeError):
+                pass
+            if self._iface is not None and self._menu_name:
+                try:
+                    self._iface.removePluginVectorMenu(self._menu_name, self._settings_action)
+                except Exception as exc:
+                    logger.warning("Failed to remove QFieldCloud menu entry: %s", exc)
+            self._settings_action = None
+        self._menu_name = None
         self._actions.clear()
 
         # Cleanup services
-        if self._sdk_adapter:
-            self._sdk_adapter = None
-        if self._qfc_service:
-            self._qfc_service = None
-        if self._credentials_manager:
-            self._credentials_manager = None
-        if self._signals:
-            self._signals = None
+        self._sdk_adapter = None
+        self._qfc_service = None
+        self._credentials_manager = None
+        self._signals = None
 
         self._services.clear()
         self._iface = None
