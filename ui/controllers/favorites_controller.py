@@ -1092,15 +1092,66 @@ class FavoritesController(BaseController):
                     config['task_feature_ids'] = feature_ids
                     logger.info(f"Captured {len(feature_ids)} task_feature IDs for favorite")
 
-            # Capture predicates from dockwidget if available
-            if hasattr(self.dockwidget, 'PROJECT_LAYERS') and self.dockwidget.current_layer:
+            # Capture geometric predicates from the actual filtering widgets.
+            #
+            # FIX 2026-04-23: the previous implementation read a dict from
+            # ``PROJECT_LAYERS[layer_id]['filtering']['predicates']`` — but that
+            # key is never populated anywhere in the codebase. The canonical
+            # keys (written by sync_ui_to_project_layers and task_builder) are
+            # ``has_geometric_predicates`` (bool) and ``geometric_predicates``
+            # (list, e.g. ``['Intersect']``). As a result, favorites were
+            # silently saved *without* predicate info, and on restore the
+            # ``pushButton_checkable_filtering_geometric_predicates`` toggle
+            # stayed off even though the combobox still showed Intersect
+            # checked (from QGIS' own project persistence) — the task then
+            # reported ``has_geometric_predicates=False`` and refused to
+            # filter the distant layers.
+            #
+            # We now read both values, preferring the live widget state and
+            # falling back to PROJECT_LAYERS so the capture works even when
+            # the widgets are not reachable (headless / test contexts).
+            predicate_list: list = []
+            has_predicates: bool = False
+
+            combo_widget = getattr(
+                self.dockwidget, 'comboBox_filtering_geometric_predicates', None
+            )
+            if combo_widget is not None and hasattr(combo_widget, 'checkedItems'):
+                try:
+                    predicate_list = list(combo_widget.checkedItems() or [])
+                except (RuntimeError, AttributeError) as e:
+                    logger.debug(f"Could not read checkedItems from combobox: {e}")
+
+            has_pred_btn = getattr(
+                self.dockwidget, 'pushButton_checkable_filtering_geometric_predicates', None
+            )
+            if has_pred_btn is not None and hasattr(has_pred_btn, 'isChecked'):
+                try:
+                    has_predicates = bool(has_pred_btn.isChecked())
+                except (RuntimeError, AttributeError) as e:
+                    logger.debug(f"Could not read isChecked from geometric predicates button: {e}")
+
+            # Fallback to PROJECT_LAYERS when the widgets are unavailable.
+            if (not predicate_list or not has_predicates) and \
+                    hasattr(self.dockwidget, 'PROJECT_LAYERS') and \
+                    self.dockwidget.current_layer:
                 layer_id = self.dockwidget.current_layer.id()
-                if layer_id in self.dockwidget.PROJECT_LAYERS:
-                    layer_data = self.dockwidget.PROJECT_LAYERS[layer_id]
-                    predicates = layer_data.get('filtering', {}).get('predicates', {})
-                    if predicates:
-                        config['predicates'] = predicates
-                        logger.info(f"Captured predicates: {list(predicates.keys())}")
+                layer_data = self.dockwidget.PROJECT_LAYERS.get(layer_id, {})
+                filtering_data = layer_data.get('filtering', {}) if isinstance(layer_data, dict) else {}
+                if not predicate_list:
+                    stored_list = filtering_data.get('geometric_predicates', [])
+                    if isinstance(stored_list, (list, tuple)):
+                        predicate_list = list(stored_list)
+                if not has_predicates:
+                    has_predicates = bool(filtering_data.get('has_geometric_predicates', False))
+
+            if predicate_list or has_predicates:
+                config['geometric_predicates'] = predicate_list
+                config['has_geometric_predicates'] = bool(has_predicates or predicate_list)
+                logger.info(
+                    f"Captured geometric_predicates: {predicate_list} "
+                    f"(has_geometric_predicates={config['has_geometric_predicates']})"
+                )
 
             # Capture buffer value if set
             # v5.0: Read buffer value from widget
@@ -1373,7 +1424,29 @@ class FavoritesController(BaseController):
             return
 
         spatial_config = favorite.spatial_config or {}
-        predicates = spatial_config.get('predicates') or {}
+
+        # FIX 2026-04-23: resolve geometric predicates from the canonical
+        # fields first. Fall back to the legacy ``predicates`` dict shape
+        # (written by pre-fix favorites and a handful of portability tests)
+        # so existing favorites keep restoring without a manual rebuild.
+        predicate_list = spatial_config.get('geometric_predicates')
+        if isinstance(predicate_list, (list, tuple)):
+            predicate_list = list(predicate_list)
+        else:
+            legacy_predicates = spatial_config.get('predicates') or {}
+            if isinstance(legacy_predicates, dict):
+                predicate_list = list(legacy_predicates.keys())
+            elif isinstance(legacy_predicates, (list, tuple)):
+                predicate_list = list(legacy_predicates)
+            else:
+                predicate_list = []
+
+        has_predicates_flag = spatial_config.get('has_geometric_predicates')
+        if has_predicates_flag is None:
+            has_predicates_flag = bool(predicate_list)
+        else:
+            has_predicates_flag = bool(has_predicates_flag)
+
         buffer_value = spatial_config.get('buffer_value')
         target_layer_keys = list((favorite.remote_layers or {}).keys())
 
