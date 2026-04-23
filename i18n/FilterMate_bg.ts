@@ -24,7 +24,7 @@
         <translation>Грешка по време на проверка на базата данни: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="599"/>
+        <location filename="../core/services/app_initializer.py" line="617"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Зареждането на слоя е неуспешно. Използвайте F5 за принудително презареждане.</translation>
     </message>
@@ -65,7 +65,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="311"/>
+        <location filename="../ui/controllers/config_controller.py" line="350"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Грешка при отмяна на промените: {0}</translation>
     </message>
@@ -117,19 +117,47 @@
     </message>
 </context>
 <context>
+    <name>DatasourceManager</name>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="146"/>
+        <source>Database file does not exist: {db_file_path}</source>
+        <translation>Файлът на базата данни не съществува: {db_file_path}</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="157"/>
+        <source>Failed to connect to database {db_file_path}: {error}</source>
+        <translation>Неуспешно свързване с базата данни {db_file_path}: {error}</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="182"/>
+        <source>QGIS processing module not available to create spatial index</source>
+        <translation>Модулът QGIS Processing не е наличен за създаване на пространствен индекс</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="188"/>
+        <source>Cannot create spatial index: layer invalid or source not found.</source>
+        <translation>Не може да се създаде пространствен индекс: слоят е невалиден или източникът не е намерен.</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="398"/>
+        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
+        <translation>Открити са слоеве PostgreSQL, но psycopg2 не е инсталиран. Използва се локалният Spatialite бекенд. За по-добра производителност с големи набори от данни инсталирайте psycopg2.</translation>
+    </message>
+</context>
+<context>
     <name>ExportDialogManager</name>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="87"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="92"/>
         <source>Save your layer to a file</source>
         <translation>Запазване на слоя във файл</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="103"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="108"/>
         <source>Select a folder where to export your layers</source>
         <translation>Изберете папка за експортиране на слоевете</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="153"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="158"/>
         <source>Save your exported data to a zip file</source>
         <translation>Запазване на експортираните данни в zip файл</translation>
     </message>
@@ -200,27 +228,27 @@
         <translation>Любим &apos;{0}&apos; е добавен успешно</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="394"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="399"/>
         <source>Export Favorites</source>
         <translation>Експорт на любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="405"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="423"/>
         <source>Exported {0} favorites</source>
         <translation>{0} любими експортирани</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="408"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="425"/>
         <source>Failed to export favorites</source>
         <translation>Неуспешен експорт на любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="438"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
         <source>Import Favorites</source>
         <translation>Импорт на любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="438"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
@@ -231,144 +259,144 @@ No = Replace all existing</source>
 Не = Замяна на всички съществуващи</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="456"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="493"/>
         <source>Imported {0} favorites</source>
         <translation>{0} любими импортирани</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="458"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="495"/>
         <source>No favorites imported</source>
         <translation>Не са импортирани любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="467"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="504"/>
         <source>Favorites manager not initialized. Please restart FilterMate.</source>
         <translation>Управлението на любими не е инициализирано. Моля, рестартирайте FilterMate.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="483"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="538"/>
         <source>Favorites manager dialog not available</source>
         <translation>Диалогът за управление на любими не е наличен</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1144"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1779"/>
         <source>Error: {0}</source>
         <translation>Грешка: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="688"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="775"/>
         <source>Used {0} times</source>
         <translation>Използван {0} пъти</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="699"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
         <source>Add current filter to favorites</source>
         <translation>Добавяне на текущия филтър към любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="703"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="790"/>
         <source>Add filter (no active filter)</source>
         <translation>Добавяне на филтър (няма активен филтър)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="708"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="795"/>
         <source>Manage favorites...</source>
         <translation>Управление на любими...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="711"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="798"/>
         <source>Export...</source>
         <translation>Експорт...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="714"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="801"/>
         <source>Import...</source>
         <translation>Импорт...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="719"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="822"/>
         <source>Global favorites</source>
         <translation>Глобални любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="723"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="826"/>
         <source>Copy to global...</source>
         <translation>Копиране в глобални...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="734"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="837"/>
         <source>── Available global favorites ──</source>
         <translation>── Налични глобални любими ──</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="742"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="845"/>
         <source>(No global favorites)</source>
         <translation>(Няма глобални любими)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="746"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="849"/>
         <source>Maintenance</source>
         <translation>Поддръжка</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="748"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="851"/>
         <source>Save to project (.qgz)</source>
         <translation>Запазване в проект (.qgz)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="751"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="854"/>
         <source>Restore from project</source>
         <translation>Възстановяване от проект</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="756"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="859"/>
         <source>Clean up orphan projects</source>
         <translation>Почистване на осиротели проекти</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="759"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="862"/>
         <source>Database statistics</source>
         <translation>Статистика на базата данни</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="802"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Invalid Name</source>
         <translation>Невалидно име</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="802"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Favorite name cannot be empty.</source>
         <translation>Името на любимия не може да бъде празно.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="813"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
         <source>Duplicate Name</source>
         <translation>Дублиращо се име</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="813"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
         <source>A favorite named &apos;{0}&apos; already exists.
 Do you want to replace it?</source>
         <translation>Вече съществува любим с име &apos;{0}&apos;.
 Искате ли да го замените?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1030"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1555"/>
         <source>Favorite copied to global favorites</source>
         <translation>Любимият е копиран в глобалните любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1033"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1558"/>
         <source>Failed to copy to global favorites</source>
         <translation>Неуспешно копиране в глобалните любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1040"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
         <source>Global Favorites</source>
         <translation>Глобални любими</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1040"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
@@ -377,37 +405,37 @@ Global favorites are shared across all projects.</source>
 Глобалните любими са споделени между всички проекти.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1056"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1581"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>{0} любими запазени във файла на проекта</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1058"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1583"/>
         <source>Save failed</source>
         <translation>Запазването е неуспешно</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1070"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1595"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>{0} любими възстановени от файла на проекта</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1072"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1597"/>
         <source>No favorites to restore found in project</source>
         <translation>Не са намерени любими за възстановяване в проекта</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1089"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1624"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>{0} осиротели проект(а) почистени</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1091"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1626"/>
         <source>No orphan projects to clean up</source>
         <translation>Няма осиротели проекти за почистване</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1116"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1751"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -424,212 +452,271 @@ Total favorites: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1132"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1767"/>
         <source>Top projects by favorites:</source>
         <translation>Водещи проекти по любими:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1136"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1771"/>
         <source>FilterMate Statistics</source>
         <translation>Статистика на FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="513"/>
+        <source>Favorites Manager</source>
+        <translation>Мениджър на любими</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="513"/>
+        <source>No favorites saved yet.
+
+Apply a filter to a layer, then click the ★ indicator and choose &apos;Add current filter to favorites&apos; to save your first favorite.</source>
+        <translation>Все още няма запазени любими.
+
+Приложете филтър към слой, после щракнете върху индикатора ★ и изберете «Добави текущия филтър към любимите», за да запазите първия си любим.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="808"/>
+        <source>Import from Resource Sharing...</source>
+        <translation>Импортиране от Resource Sharing…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="811"/>
+        <source>Publish to Resource Sharing...</source>
+        <translation>Публикуване в Resource Sharing…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="816"/>
+        <source>Publish (no favorites saved)</source>
+        <translation>Публикуване (няма запазени любими)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1734"/>
+        <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
+        <translation>Конфигурационната директория на FilterMate все още не е инициализирана — първо отворете QGIS проект с FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1692"/>
+        <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
+        <translation>Разширението Resource Sharing не е активно. Активирайте &apos;favorites_sharing&apos; в настройките на FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1700"/>
+        <source>Shared favorites service is not available.</source>
+        <translation>Услугата за споделени любими не е налична.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1686"/>
+        <source>Shared picker failed: {0}</source>
+        <translation>Избирачът на споделени любими се провали: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1704"/>
+        <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
+        <translation>Все още нямате любими за публикуване. Първо запазете филтър чрез менюто ★.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1720"/>
+        <source>Publish dialog failed: {0}</source>
+        <translation>Отварянето на диалога за публикуване се провали: {0}</translation>
     </message>
 </context>
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="90"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="118"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - Управление на любими</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="753"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="946"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Запазени любими ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="119"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="180"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>Търсене по име, израз, тагове или описание...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="383"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="444"/>
         <source>General</source>
         <translation>Общи</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Expression</source>
         <translation>Израз</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="623"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="697"/>
         <source>Remote</source>
         <translation>Отдалечен</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="405"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="466"/>
         <source>Favorite name</source>
         <translation>Име на любим</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="406"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="467"/>
         <source>Name:</source>
         <translation>Име:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="410"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="471"/>
         <source>Description (auto-generated, editable)</source>
         <translation>Описание (автоматично генерирано, редактируемо)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="411"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
         <source>Description:</source>
         <translation>Описание:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="414"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="475"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>Въведете тагове, разделени със запетаи (напр. градски, население, 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="417"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="478"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>Таговете помагат за организиране и търсене на любими.
 Разделете множество тагове със запетаи.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="420"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="481"/>
         <source>Tags:</source>
         <translation>Тагове:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="425"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="486"/>
         <source>Source Layer:</source>
         <translation>Източник слой:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="429"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="490"/>
         <source>Provider:</source>
         <translation>Доставчик:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="437"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="498"/>
         <source>Used:</source>
         <translation>Използван:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="440"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
         <source>Created:</source>
         <translation>Създаден:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="453"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="514"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Израз за източник слой:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="457"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="518"/>
         <source>Filter expression for source layer</source>
         <translation>Филтърен израз за източник слой</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="533"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Филтрирани отдалечени слоеве:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Layer</source>
         <translation>Слой</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Features</source>
         <translation>Обекти</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="484"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="545"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;Няма отдалечени слоеве в този любим&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="497"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
         <source>Apply</source>
         <translation>Приложи</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="500"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="561"/>
         <source>Apply this favorite filter to the project</source>
         <translation>Прилагане на този любим филтър към проекта</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="503"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
         <source>Save Changes</source>
         <translation>Запазване на промените</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="506"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="567"/>
         <source>Save modifications to this favorite</source>
         <translation>Запазване на промените в този любим</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="509"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="570"/>
         <source>Delete</source>
         <translation>Изтриване</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="512"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
         <source>Permanently delete this favorite</source>
         <translation>Окончателно изтриване на този любим</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="515"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
         <source>Close</source>
         <translation>Затваряне</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="517"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="578"/>
         <source>Close this dialog</source>
         <translation>Затваряне на този диалог</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Любими ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="617"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="691"/>
         <source>Remote ({0})</source>
         <translation>Отдалечен ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
         <source>Delete Favorite</source>
         <translation>Изтриване на любим</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="774"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
         <translation>Изтриване на любим &apos;{0}&apos;?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="742"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="870"/>
         <source>Remote Layers</source>
         <translation>Отдалечени слоеве</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="749"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="942"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;Запазени любими (0)&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="772"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
         <source>Favorites Manager</source>
         <translation>Управление на любими</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="772"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
         <source>No favorites saved yet.
 
 Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
@@ -637,31 +724,56 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 
 Щракнете върху индикатора ★ и изберете &apos;Добавяне на текущия филтър към любими&apos;, за да запазите първия си любим.</translation>
     </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="146"/>
+        <source>Shared...</source>
+        <translation>Споделени…</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="148"/>
+        <source>Browse favorites shared via QGIS Resource Sharing collections</source>
+        <translation>Преглед на любими, споделени чрез колекции QGIS Resource Sharing</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="158"/>
+        <source>Publish...</source>
+        <translation>Публикуване…</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="160"/>
+        <source>Publish selected favorites into a Resource Sharing collection</source>
+        <translation>Публикуване на избраните любими в колекция Resource Sharing</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
+        <translation>Не можа да се изтрие «{0}». Любимият все още е в базата данни — проверете лога на FilterMate за подробности.</translation>
+    </message>
 </context>
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="588"/>
         <source>View</source>
         <translation>Изглед</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="508"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="590"/>
         <source>Change</source>
         <translation>Промяна</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="519"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="601"/>
         <source>Select a folder</source>
         <translation>Изберете папка</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="526"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="608"/>
         <source>Select a file</source>
         <translation>Изберете файл</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="534"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="616"/>
         <source>Save to a file</source>
         <translation>Запазване във файл</translation>
     </message>
@@ -669,17 +781,17 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="566"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="648"/>
         <source>View</source>
         <translation>Изглед</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="650"/>
         <source>Change</source>
         <translation>Промяна</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="577"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="659"/>
         <source>Select an icon</source>
         <translation>Изберете икона</translation>
     </message>
@@ -695,67 +807,67 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="188"/>
+        <location filename="../filter_mate.py" line="190"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="312"/>
+        <location filename="../filter_mate.py" line="314"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="312"/>
+        <location filename="../filter_mate.py" line="314"/>
         <source>Open FilterMate panel</source>
         <translation>Отваряне на панела FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="321"/>
+        <location filename="../filter_mate.py" line="323"/>
         <source>Reset configuration and database</source>
         <translation>Възстановяване на конфигурацията и базата данни</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="321"/>
+        <location filename="../filter_mate.py" line="323"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Възстановяване на конфигурацията по подразбиране и изтриване на SQLite базата данни</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1332"/>
+        <location filename="../filter_mate.py" line="1334"/>
         <source>Reset Configuration</source>
         <translation>Възстановяване на конфигурацията</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1357"/>
         <source>Configuration reset successfully.</source>
         <translation>Конфигурацията е възстановена успешно.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1360"/>
+        <location filename="../filter_mate.py" line="1362"/>
         <source>Default configuration file not found.</source>
         <translation>Файлът с конфигурация по подразбиране не е намерен.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1381"/>
+        <location filename="../filter_mate.py" line="1383"/>
         <source>Database deleted: {filename}</source>
         <translation>Базата данни е изтрита: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1395"/>
+        <location filename="../filter_mate.py" line="1397"/>
         <source>Restart required</source>
         <translation>Изисква се рестартиране</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="401"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>Obsolete configuration detected</source>
         <translation>Открита е остаряла конфигурация</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="402"/>
+        <location filename="../filter_mate.py" line="404"/>
         <source>unknown version</source>
         <translation>неизвестна версия</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="403"/>
+        <location filename="../filter_mate.py" line="405"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -770,12 +882,12 @@ Do you want to reset to default settings?
 • Не: Запазване на текущата конфигурация (може да причини проблеми)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="410"/>
+        <location filename="../filter_mate.py" line="412"/>
         <source>Corrupted configuration detected</source>
         <translation>Открита е повредена конфигурация</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="411"/>
+        <location filename="../filter_mate.py" line="413"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -790,12 +902,12 @@ Do you want to reset to default settings?
 • Не: Отказ (добавката може да не работи правилно)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="418"/>
+        <location filename="../filter_mate.py" line="420"/>
         <source>Configuration reset</source>
         <translation>Конфигурацията е възстановена</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="419"/>
+        <location filename="../filter_mate.py" line="421"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -804,57 +916,57 @@ Do you want to continue?</source>
 Искате ли да продължите?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="467"/>
+        <location filename="../filter_mate.py" line="469"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Конфигурацията не е възстановена. Някои функции може да не работят правилно.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="478"/>
+        <location filename="../filter_mate.py" line="480"/>
         <source>Configuration created with default values</source>
         <translation>Конфигурацията е създадена с подразбиращи се стойности</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="481"/>
+        <location filename="../filter_mate.py" line="483"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Повредената конфигурация е възстановена. Настройките по подразбиране са възстановени.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="484"/>
+        <location filename="../filter_mate.py" line="486"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Остарялата конфигурация е възстановена. Настройките по подразбиране са възстановени.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="505"/>
+        <location filename="../filter_mate.py" line="507"/>
         <source>Configuration updated to latest version</source>
         <translation>Конфигурацията е обновена до последната версия</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="502"/>
+        <location filename="../filter_mate.py" line="504"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Конфигурацията е обновена: нови настройки са налични ({sections}). Достъп чрез менюто Опции.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="496"/>
+        <location filename="../filter_mate.py" line="498"/>
         <source>Geometry Simplification</source>
         <translation>Опростяване на геометрия</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="497"/>
+        <location filename="../filter_mate.py" line="499"/>
         <source>Optimization Thresholds</source>
         <translation>Прагове за оптимизация</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="524"/>
+        <location filename="../filter_mate.py" line="526"/>
         <source>Error during configuration migration: {}</source>
         <translation>Грешка по време на миграция на конфигурацията: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="642"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>Geometry validation setting</source>
         <translation>Настройка за валидиране на геометрия</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="644"/>
+        <location filename="../filter_mate.py" line="646"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -881,17 +993,17 @@ FilterMate препоръчва деактивиране на тази наст�
 • Не: Запазване на текущата настройка</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="672"/>
+        <location filename="../filter_mate.py" line="674"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Филтрирането на невалидна геометрия е деактивирано успешно.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="679"/>
+        <location filename="../filter_mate.py" line="681"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Филтрирането на невалидна геометрия не е променено. Някои обекти може да бъдат изключени от експорта.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1332"/>
+        <location filename="../filter_mate.py" line="1334"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -908,7 +1020,7 @@ QGIS must be restarted to apply the changes.</source>
 QGIS трябва да бъде рестартиран, за да се приложат промените.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1395"/>
+        <location filename="../filter_mate.py" line="1397"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -917,84 +1029,84 @@ Please restart QGIS to apply the changes.</source>
 Моля, рестартирайте QGIS, за да приложите промените.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="346"/>
+        <location filename="../filter_mate.py" line="348"/>
         <source>Initialization error: {0}</source>
         <translation>Грешка при инициализация: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="583"/>
+        <location filename="../filter_mate.py" line="585"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} реферирани слой(а) не са заредени ({layers_list}). Използва се резервно показване.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1386"/>
+        <location filename="../filter_mate.py" line="1388"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Не може да се изтрие {filename}: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1403"/>
+        <location filename="../filter_mate.py" line="1405"/>
         <source>Error during reset: {str(e)}</source>
         <translation>Грешка по време на възстановяване: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1436"/>
+        <location filename="../filter_mate.py" line="1438"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Благодарим ви, че използвате &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Присъединете се към нашата Discord общност, за да:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Получите помощ и поддръжка&lt;/li&gt;&lt;li&gt;Докладвате грешки и проблеми&lt;/li&gt;&lt;li&gt;Предложите нови функции&lt;/li&gt;&lt;li&gt;Споделите съвети с други потребители&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1452"/>
+        <location filename="../filter_mate.py" line="1454"/>
         <source>  Join us on Discord</source>
         <translation>  Присъединете се към нас в Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1472"/>
+        <location filename="../filter_mate.py" line="1474"/>
         <source>Don&apos;t show this again</source>
         <translation>Не показвай отново</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1475"/>
+        <location filename="../filter_mate.py" line="1477"/>
         <source>Close</source>
         <translation>Затваряне</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1541"/>
+        <location filename="../filter_mate.py" line="1543"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Грешка при зареждане на добавката: {0}. Проверете конзолата на QGIS Python за подробности.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6691"/>
+        <location filename="../filter_mate_dockwidget.py" line="6711"/>
         <source>Current layer: {0}</source>
         <translation>Текущ слой: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6693"/>
+        <location filename="../filter_mate_dockwidget.py" line="6713"/>
         <source>No layer selected</source>
         <translation>Не е избран слой</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6703"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>Selected layers:
 {0}</source>
         <translation>Избрани слоеве:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6703"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No layers selected</source>
         <translation>Не са избрани слоеве</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6743"/>
         <source>No expression defined</source>
         <translation>Не е дефиниран израз</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6735"/>
+        <location filename="../filter_mate_dockwidget.py" line="6755"/>
         <source>Display expression: {0}</source>
         <translation>Израз за показване: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6750"/>
+        <location filename="../filter_mate_dockwidget.py" line="6770"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Идентификатор на обект: {0}
@@ -1014,92 +1126,92 @@ First attribute: {1}</source>
         <translation>{0} кеша изчистени</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="772"/>
+        <location filename="../filter_mate_app.py" line="795"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Неуспешно създаване на докинг панел: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="782"/>
+        <location filename="../filter_mate_app.py" line="805"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Неуспешно показване на докинг панел: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1232"/>
+        <location filename="../filter_mate_app.py" line="1255"/>
         <source>Error executing {0}: {1}</source>
         <translation>Грешка при изпълнение на {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1244"/>
+        <location filename="../filter_mate_app.py" line="1267"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Добавката работи в ограничен режим (хексагоналните услуги не са налични). Производителността може да бъде намалена.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1373"/>
+        <location filename="../filter_mate_app.py" line="1396"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ГРЕШКА</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1373"/>
+        <location filename="../filter_mate_app.py" line="1396"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Не може да се изпълни {0}: инициализацията на уиджета е неуспешна.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2144"/>
+        <location filename="../filter_mate_app.py" line="2167"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Не може да се изпълни {0}: невалиден слой или източникът не е намерен.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2281"/>
+        <location filename="../filter_mate_app.py" line="2304"/>
         <source>All filters cleared - </source>
         <translation>Всички филтри изчистени - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2282"/>
+        <location filename="../filter_mate_app.py" line="2305"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} обекта видими в основния слой</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2288"/>
+        <location filename="../filter_mate_app.py" line="2311"/>
         <source>Error: result handler missing</source>
         <translation>Грешка: липсва обработчик на резултата</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2301"/>
+        <location filename="../filter_mate_app.py" line="2324"/>
         <source>Error during filtering: {0}</source>
         <translation>Грешка по време на филтриране: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2432"/>
+        <location filename="../filter_mate_app.py" line="2455"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} осиротели любими възстановени: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2568"/>
+        <location filename="../filter_mate_app.py" line="2591"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Зареждането на слоя е неуспешно - щракнете за повторен опит</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2615"/>
+        <location filename="../filter_mate_app.py" line="2638"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} слой(а) заредени успешно</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1595"/>
+        <location filename="../filter_mate_app.py" line="1618"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1597"/>
+        <location filename="../filter_mate_app.py" line="1620"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1600"/>
+        <location filename="../filter_mate_app.py" line="1623"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1602"/>
+        <location filename="../filter_mate_app.py" line="1625"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1112,22 +1224,22 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1612"/>
+        <location filename="../filter_mate_app.py" line="1635"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1619"/>
+        <location filename="../filter_mate_app.py" line="1642"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1626"/>
+        <location filename="../filter_mate_app.py" line="1649"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1650"/>
+        <location filename="../filter_mate_app.py" line="1673"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
@@ -1314,162 +1426,162 @@ Drop anyway?</source>
         <translation>ЕДИНИЧЕН ИЗБОР</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
         <source>MULTIPLE SELECTION</source>
         <translation>МНОЖЕСТВЕН ИЗБОР</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
         <source>CUSTOM SELECTION</source>
         <translation>ПЕРСОНАЛИЗИРАН ИЗБОР</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
         <source>FILTERING</source>
         <translation>ФИЛТРИРАНЕ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
         <source>EXPORTING</source>
         <translation>ЕКСПОРТИРАНЕ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
         <source>CONFIGURATION</source>
         <translation>КОНФИГУРАЦИЯ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>Select CRS for export</source>
         <translation>Избор на CRS за експорт</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
         <source>Export</source>
         <translation>Експорт</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
         <source>AND</source>
         <translation>И</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
         <source>AND NOT</source>
         <translation>И НЕ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
         <source>OR</source>
         <translation>ИЛИ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
         <source>, </source>
         <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
         <source>Multi-layer filtering</source>
         <translation>Филтриране на множество слоеве</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
         <source>Additive filtering for the selected layer</source>
         <translation>Адитивно филтриране за избрания слой</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
         <source>Geospatial filtering</source>
         <translation>Геопространствено филтриране</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
         <source>Buffer</source>
         <translation>Буфер</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
         <source>Expression layer</source>
         <translation>Слой с израз</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
         <source>Geometric predicate</source>
         <translation>Геометричен предикат</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
         <source>Output format</source>
         <translation>Изходен формат</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
         <source>Filter</source>
         <translation>Филтър</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
         <source>Reset</source>
         <translation>Възстановяване</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
         <source>Layers to export</source>
         <translation>Слоеве за експорт</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
         <source>Layers projection</source>
         <translation>Проекция на слоевете</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
         <source>Save styles</source>
         <translation>Запазване на стилове</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
         <source>Datatype export</source>
         <translation>Експорт на типове данни</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
         <source>Name of file/directory</source>
         <translation>Име на файл/директория</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>Използване на центроиди вместо пълни геометрии за източник слоя (по-бързо за сложни полигони)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Стойност на буфера в метри (положителна=разширяване, отрицателна=свиване на полигони)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
         <source>Number of segments for buffer precision</source>
         <translation>Брой сегменти за точност на буфера</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
         <source>Mode batch</source>
         <translation>Пакетен режим</translation>
     </message>
@@ -1879,14 +1991,233 @@ Continue?</source>
     </message>
 </context>
 <context>
+    <name>PublishFavoritesDialog</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="125"/>
+        <source>FilterMate — Publish to Resource Sharing</source>
+        <translation>FilterMate — Публикуване в Resource Sharing</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="133"/>
+        <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
+        <translation>&lt;b&gt;Публикуване на любими&lt;/b&gt; — запис на споделим пакет в колекция QGIS Resource Sharing.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="153"/>
+        <source>Overwrite existing bundle</source>
+        <translation>Презаписване на съществуващия пакет</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="163"/>
+        <source>Publish</source>
+        <translation>Публикуване</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="177"/>
+        <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
+        <translation>&lt;b&gt;1. Целева колекция&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="190"/>
+        <source>Browse...</source>
+        <translation>Преглед…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="198"/>
+        <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
+        <translation>&lt;b&gt;2. Име на файла на пакета&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="200"/>
+        <source>e.g. zones_bruxelles</source>
+        <translation>напр. зони_брюксел</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="203"/>
+        <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
+        <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;цел&amp;gt;/filter_mate/favorites/&amp;lt;име&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
+        <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
+        <translation>&lt;b&gt;3. Метаданни на колекцията&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="214"/>
+        <source>Collection display name</source>
+        <translation>Показвано име на колекцията</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="215"/>
+        <source>Name:</source>
+        <translation>Име:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="218"/>
+        <source>Author / organisation</source>
+        <translation>Автор / организация</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="219"/>
+        <source>Author:</source>
+        <translation>Автор:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="222"/>
+        <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
+        <translation>напр. CC-BY-4.0, MIT, Собствен</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="223"/>
+        <source>License:</source>
+        <translation>Лиценз:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <source>Comma-separated tags</source>
+        <translation>Тагове, разделени със запетая</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="227"/>
+        <source>Tags:</source>
+        <translation>Тагове:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="230"/>
+        <source>https://...</source>
+        <translation>https://…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="231"/>
+        <source>Homepage:</source>
+        <translation>Уебсайт:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="235"/>
+        <source>Short description (optional, supports plain text)</source>
+        <translation>Кратко описание (по избор, обикновен текст)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="238"/>
+        <source>Description:</source>
+        <translation>Описание:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
+        <translation>&lt;b&gt;4. Любими за включване&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <source>Select all</source>
+        <translation>Избор на всички</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="257"/>
+        <source>Select none</source>
+        <translation>Размаркиране</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="284"/>
+        <source>New collection in Resource Sharing root...</source>
+        <translation>Нова колекция в корена на Resource Sharing…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="288"/>
+        <source>Custom directory...</source>
+        <translation>Потребителска директория…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="340"/>
+        <source>Will be created under the Resource Sharing root.</source>
+        <translation>Ще бъде създадено под корена на Resource Sharing.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="345"/>
+        <source>Click &apos;Browse...&apos; to choose a directory.</source>
+        <translation>Щракнете върху &apos;Преглед…&apos;, за да изберете директория.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="351"/>
+        <source>Choose a collection directory</source>
+        <translation>Изберете директория на колекция</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="402"/>
+        <source>{0} / {1} selected</source>
+        <translation>Избрани: {0} / {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <source>Cannot create collection</source>
+        <translation>Не може да се създаде колекция</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
+        <translation>Коренът на Resource Sharing не е намерен. Използвайте &apos;Преглед…&apos;, за да изберете директория.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <source>Choose a directory</source>
+        <translation>Изберете директория</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <source>Click &apos;Browse...&apos; to pick a target directory.</source>
+        <translation>Щракнете върху &apos;Преглед…&apos;, за да изберете целева директория.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <source>No favorites selected</source>
+        <translation>Няма избрани любими</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <source>Select at least one favorite to publish.</source>
+        <translation>Изберете поне един любим за публикуване.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <source>Publish failed</source>
+        <translation>Публикуването се провали</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <source>Unknown error.</source>
+        <translation>Неизвестна грешка.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="505"/>
+        <source>Published {0} favorite(s) to:
+
+&lt;code&gt;{1}&lt;/code&gt;</source>
+        <translation>Публикувани {0} любим(и) в:
+
+&lt;code&gt;{1}&lt;/code&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="509"/>
+        <source>Collection manifest updated:
+&lt;code&gt;{0}&lt;/code&gt;</source>
+        <translation>Манифестът на колекцията е актуализиран:
+&lt;code&gt;{0}&lt;/code&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="512"/>
+        <source>Publish succeeded</source>
+        <translation>Публикуването е успешно</translation>
+    </message>
+</context>
+<context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="114"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="146"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -2244,37 +2575,37 @@ Continue?</source>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="652"/>
         <source>Type to filter...</source>
         <translation>Въведете за филтриране...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>Select All</source>
         <translation>Избиране на всички</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>Select All (non subset)</source>
         <translation>Избиране на всички (не подмножество)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>Select All (subset)</source>
         <translation>Избиране на всички (подмножество)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="667"/>
         <source>De-select All</source>
         <translation>Премахване на целия избор</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="669"/>
         <source>De-select All (non subset)</source>
         <translation>Премахване на целия избор (не подмножество)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="671"/>
         <source>De-select All (subset)</source>
         <translation>Премахване на целия избор (подмножество)</translation>
     </message>
@@ -2282,42 +2613,42 @@ Continue?</source>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="214"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
         <source>Select All</source>
         <translation>Избиране на всички</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="216"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
         <source>De-select All</source>
         <translation>Премахване на целия избор</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="218"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Избиране на всички слоеве по тип геометрия (Линии)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Премахване на избора на всички слоеве по тип геометрия (Линии)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Избиране на всички слоеве по тип геометрия (Точки)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="230"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Премахване на избора на всички слоеве по тип геометрия (Точки)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="232"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Избиране на всички слоеве по тип геометрия (Полигони)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="234"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Премахване на избора на всички слоеве по тип геометрия (Полигони)</translation>
     </message>
@@ -2366,6 +2697,129 @@ Continue?</source>
         <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
         <source>No match</source>
         <translation>Няма съвпадение</translation>
+    </message>
+</context>
+<context>
+    <name>SharedFavoritesPickerDialog</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="55"/>
+        <source>FilterMate — Shared Favorites</source>
+        <translation>FilterMate — Споделени любими</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="63"/>
+        <source>&lt;b&gt;Shared Favorites&lt;/b&gt; — discovered from QGIS Resource Sharing collections</source>
+        <translation>&lt;b&gt;Споделени любими&lt;/b&gt; — открити в колекции QGIS Resource Sharing</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="76"/>
+        <source>Search by name, description, collection, or tags...</source>
+        <translation>Търсене по име, описание, колекция или тагове…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="98"/>
+        <source>Select a shared favorite to preview.</source>
+        <translation>Изберете споделен любим за предварителен преглед.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="114"/>
+        <source>Rescan</source>
+        <translation>Повторно сканиране</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="118"/>
+        <source>Fork to my project</source>
+        <translation>Fork към моя проект</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="124"/>
+        <source>Close</source>
+        <translation>Затвори</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="139"/>
+        <source>No shared collections found. Subscribe to a Resource Sharing repository that ships a &lt;code&gt;filter_mate/favorites&lt;/code&gt; folder, or drop a &lt;code&gt;.fmfav.json&lt;/code&gt; bundle in your resource_sharing collections directory.</source>
+        <translation>Не са намерени споделени колекции. Абонирайте се за хранилище на Resource Sharing с папка &lt;code&gt;filter_mate/favorites&lt;/code&gt;, или поставете пакет &lt;code&gt;.fmfav.json&lt;/code&gt; в директорията с колекции resource_sharing.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="147"/>
+        <source>{0} favorite(s) across {1} collection(s): {2}</source>
+        <translation>{0} любим(и) в {1} колекция(и): {2}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="160"/>
+        <source>Collection: {0}</source>
+        <translation>Колекция: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="172"/>
+        <source>No shared favorites match your search.</source>
+        <translation>Няма споделени любими, отговарящи на търсенето.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="194"/>
+        <source>&lt;b&gt;{0}&lt;/b&gt; — from &lt;i&gt;{1}&lt;/i&gt;</source>
+        <translation>&lt;b&gt;{0}&lt;/b&gt; — от &lt;i&gt;{1}&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="208"/>
+        <source>&lt;b&gt;Expression&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Израз&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="213"/>
+        <source>&lt;b&gt;Remote layers&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Отдалечени слоеве&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="227"/>
+        <source>&lt;b&gt;Tags:&lt;/b&gt; {0}</source>
+        <translation>&lt;b&gt;Тагове:&lt;/b&gt; {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="234"/>
+        <source>&lt;b&gt;Provenance&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Произход&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="236"/>
+        <source>Author: {0}</source>
+        <translation>Автор: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="238"/>
+        <source>License: {0}</source>
+        <translation>Лиценз: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <source>Fork shared favorite</source>
+        <translation>Fork на споделен любим</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <source>Name in your project:</source>
+        <translation>Име във вашия проект:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <source>Fork successful</source>
+        <translation>Fork-ването е успешно</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <source>&apos;{0}&apos; was added to your favorites.</source>
+        <translation>«{0}» беше добавен към любимите.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <source>Fork failed</source>
+        <translation>Fork-ването се провали</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <source>Could not add the shared favorite to your project.</source>
+        <translation>Не можа да се добави споделеният любим към проекта.</translation>
     </message>
 </context>
 <context>
@@ -2488,7 +2942,7 @@ Continue?</source>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="474"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="556"/>
         <source>Explore ...</source>
         <translation>Разглеждане ...</translation>
     </message>
@@ -2498,7 +2952,7 @@ Continue?</source>
     <message>
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
-        <translation>Language changed to &apos;{0}&apos;.</translation>
+        <translation type="obsolete">Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

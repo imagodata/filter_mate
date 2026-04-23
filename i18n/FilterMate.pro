@@ -10,10 +10,14 @@ SOURCES = \
     ../adapters/task_builder.py \
     ../adapters/undo_redo_handler.py \
     ../core/services/app_initializer.py \
+    ../core/services/datasource_manager.py \
     ../core/services/filter_application_service.py \
     ../core/services/layer_lifecycle_service.py \
     ../core/tasks/finished_handler.py \
     ../core/tasks/layer_management_task.py \
+    ../extensions/favorites_sharing/extension.py \
+    ../extensions/favorites_sharing/ui/publish_dialog.py \
+    ../extensions/favorites_sharing/ui/shared_picker_dialog.py \
     ../extensions/qfieldcloud/extension.py \
     ../extensions/qfieldcloud/ui/push_dialog.py \
     ../extensions/qfieldcloud/ui/settings_dialog.py \

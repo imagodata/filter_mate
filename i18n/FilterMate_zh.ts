@@ -24,7 +24,7 @@
         <translation>数据库验证期间出错：{0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="599"/>
+        <location filename="../core/services/app_initializer.py" line="617"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>图层加载失败。使用 F5 强制重新加载。</translation>
     </message>
@@ -65,7 +65,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="311"/>
+        <location filename="../ui/controllers/config_controller.py" line="350"/>
         <source>Error cancelling changes: {0}</source>
         <translation>取消更改时出错：{0}</translation>
     </message>
@@ -117,19 +117,47 @@
     </message>
 </context>
 <context>
+    <name>DatasourceManager</name>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="146"/>
+        <source>Database file does not exist: {db_file_path}</source>
+        <translation>数据库文件不存在：{db_file_path}</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="157"/>
+        <source>Failed to connect to database {db_file_path}: {error}</source>
+        <translation>连接数据库 {db_file_path} 失败：{error}</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="182"/>
+        <source>QGIS processing module not available to create spatial index</source>
+        <translation>无法使用 QGIS Processing 模块创建空间索引</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="188"/>
+        <source>Cannot create spatial index: layer invalid or source not found.</source>
+        <translation>无法创建空间索引：图层无效或未找到数据源。</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="398"/>
+        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
+        <translation>检测到 PostgreSQL 图层，但未安装 psycopg2。正在使用本地 Spatialite 后端。若要获得更大数据集的更好性能，请安装 psycopg2。</translation>
+    </message>
+</context>
+<context>
     <name>ExportDialogManager</name>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="87"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="92"/>
         <source>Save your layer to a file</source>
         <translation>将图层保存到文件</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="103"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="108"/>
         <source>Select a folder where to export your layers</source>
         <translation>选择导出图层的文件夹</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="153"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="158"/>
         <source>Save your exported data to a zip file</source>
         <translation>将导出数据保存为 zip 文件</translation>
     </message>
@@ -200,27 +228,27 @@
         <translation>收藏 &apos;{0}&apos; 已成功添加</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="394"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="399"/>
         <source>Export Favorites</source>
         <translation>导出收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="405"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="423"/>
         <source>Exported {0} favorites</source>
         <translation>已导出 {0} 个收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="408"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="425"/>
         <source>Failed to export favorites</source>
         <translation>导出收藏失败</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="438"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
         <source>Import Favorites</source>
         <translation>导入收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="438"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
@@ -231,144 +259,144 @@ No = Replace all existing</source>
 否 = 替换所有现有收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="456"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="493"/>
         <source>Imported {0} favorites</source>
         <translation>已导入 {0} 个收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="458"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="495"/>
         <source>No favorites imported</source>
         <translation>未导入任何收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="467"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="504"/>
         <source>Favorites manager not initialized. Please restart FilterMate.</source>
         <translation>收藏管理器未初始化。请重新启动 FilterMate。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="483"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="538"/>
         <source>Favorites manager dialog not available</source>
         <translation>收藏管理器对话框不可用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1144"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1779"/>
         <source>Error: {0}</source>
         <translation>错误：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="688"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="775"/>
         <source>Used {0} times</source>
         <translation>已使用 {0} 次</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="699"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
         <source>Add current filter to favorites</source>
         <translation>将当前过滤器添加到收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="703"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="790"/>
         <source>Add filter (no active filter)</source>
         <translation>添加过滤器（无活动过滤器）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="708"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="795"/>
         <source>Manage favorites...</source>
         <translation>管理收藏...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="711"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="798"/>
         <source>Export...</source>
         <translation>导出...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="714"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="801"/>
         <source>Import...</source>
         <translation>导入...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="719"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="822"/>
         <source>Global favorites</source>
         <translation>全局收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="723"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="826"/>
         <source>Copy to global...</source>
         <translation>复制到全局...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="734"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="837"/>
         <source>── Available global favorites ──</source>
         <translation>── 可用的全局收藏 ──</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="742"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="845"/>
         <source>(No global favorites)</source>
         <translation>（无全局收藏）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="746"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="849"/>
         <source>Maintenance</source>
         <translation>维护</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="748"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="851"/>
         <source>Save to project (.qgz)</source>
         <translation>保存到项目 (.qgz)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="751"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="854"/>
         <source>Restore from project</source>
         <translation>从项目恢复</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="756"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="859"/>
         <source>Clean up orphan projects</source>
         <translation>清理孤立项目</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="759"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="862"/>
         <source>Database statistics</source>
         <translation>数据库统计</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="802"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Invalid Name</source>
         <translation>无效名称</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="802"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Favorite name cannot be empty.</source>
         <translation>收藏名称不能为空。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="813"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
         <source>Duplicate Name</source>
         <translation>重复名称</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="813"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
         <source>A favorite named &apos;{0}&apos; already exists.
 Do you want to replace it?</source>
         <translation>名为 &apos;{0}&apos; 的收藏已存在。
 是否要替换它？</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1030"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1555"/>
         <source>Favorite copied to global favorites</source>
         <translation>收藏已复制到全局收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1033"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1558"/>
         <source>Failed to copy to global favorites</source>
         <translation>复制到全局收藏失败</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1040"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
         <source>Global Favorites</source>
         <translation>全局收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1040"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
@@ -377,37 +405,37 @@ Global favorites are shared across all projects.</source>
 全局收藏在所有项目之间共享。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1056"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1581"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>已保存 {0} 个收藏到项目文件</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1058"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1583"/>
         <source>Save failed</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1070"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1595"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>已从项目文件恢复 {0} 个收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1072"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1597"/>
         <source>No favorites to restore found in project</source>
         <translation>在项目中未找到可恢复的收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1089"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1624"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>已清理 {0} 个孤立项目</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1091"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1626"/>
         <source>No orphan projects to clean up</source>
         <translation>没有可清理的孤立项目</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1116"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1751"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -424,212 +452,271 @@ Total favorites: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1132"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1767"/>
         <source>Top projects by favorites:</source>
         <translation>按收藏数排名的项目：</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1136"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1771"/>
         <source>FilterMate Statistics</source>
         <translation>FilterMate 统计</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="513"/>
+        <source>Favorites Manager</source>
+        <translation>收藏管理器</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="513"/>
+        <source>No favorites saved yet.
+
+Apply a filter to a layer, then click the ★ indicator and choose &apos;Add current filter to favorites&apos; to save your first favorite.</source>
+        <translation>尚未保存任何收藏。
+
+请对图层应用筛选器，然后点击 ★ 指示器并选择「将当前筛选器添加到收藏」以保存您的第一个收藏。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="808"/>
+        <source>Import from Resource Sharing...</source>
+        <translation>从 Resource Sharing 导入…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="811"/>
+        <source>Publish to Resource Sharing...</source>
+        <translation>发布到 Resource Sharing…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="816"/>
+        <source>Publish (no favorites saved)</source>
+        <translation>发布（未保存收藏）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1734"/>
+        <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
+        <translation>FilterMate 配置目录尚未初始化 — 请先打开启用 FilterMate 的 QGIS 项目。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1692"/>
+        <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
+        <translation>Resource Sharing 扩展未启用。请在 FilterMate 设置中启用 &apos;favorites_sharing&apos;。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1700"/>
+        <source>Shared favorites service is not available.</source>
+        <translation>共享收藏服务不可用。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1686"/>
+        <source>Shared picker failed: {0}</source>
+        <translation>共享收藏选择器失败：{0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1704"/>
+        <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
+        <translation>您还没有可发布的收藏。请先通过 ★ 菜单保存一个筛选器。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1720"/>
+        <source>Publish dialog failed: {0}</source>
+        <translation>打开发布对话框失败：{0}</translation>
     </message>
 </context>
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="90"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="118"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - 收藏管理器</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="753"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="946"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;已保存的收藏 ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="119"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="180"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>按名称、表达式、标签或描述搜索...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="383"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="444"/>
         <source>General</source>
         <translation>常规</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Expression</source>
         <translation>表达式</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="623"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="697"/>
         <source>Remote</source>
         <translation>远程</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="405"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="466"/>
         <source>Favorite name</source>
         <translation>收藏名称</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="406"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="467"/>
         <source>Name:</source>
         <translation>名称：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="410"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="471"/>
         <source>Description (auto-generated, editable)</source>
         <translation>描述（自动生成，可编辑）</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="411"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
         <source>Description:</source>
         <translation>描述：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="414"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="475"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>输入以逗号分隔的标签（例如：urban, population, 2024）</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="417"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="478"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>标签有助于组织和搜索收藏。
 使用逗号分隔多个标签。</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="420"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="481"/>
         <source>Tags:</source>
         <translation>标签：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="425"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="486"/>
         <source>Source Layer:</source>
         <translation>源图层：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="429"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="490"/>
         <source>Provider:</source>
         <translation>数据提供者：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="437"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="498"/>
         <source>Used:</source>
         <translation>已使用：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="440"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
         <source>Created:</source>
         <translation>创建时间：</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="453"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="514"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;源图层表达式：&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="457"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="518"/>
         <source>Filter expression for source layer</source>
         <translation>源图层的过滤表达式</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="533"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;已过滤的远程图层：&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Layer</source>
         <translation>图层</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Features</source>
         <translation>要素</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="484"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="545"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;此收藏中没有远程图层&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="497"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
         <source>Apply</source>
         <translation>应用</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="500"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="561"/>
         <source>Apply this favorite filter to the project</source>
         <translation>将此收藏过滤器应用到项目</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="503"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
         <source>Save Changes</source>
         <translation>保存更改</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="506"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="567"/>
         <source>Save modifications to this favorite</source>
         <translation>保存对此收藏的修改</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="509"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="570"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="512"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
         <source>Permanently delete this favorite</source>
         <translation>永久删除此收藏</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="515"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="517"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="578"/>
         <source>Close this dialog</source>
         <translation>关闭此对话框</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;收藏 ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="617"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="691"/>
         <source>Remote ({0})</source>
         <translation>远程 ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
         <source>Delete Favorite</source>
         <translation>删除收藏</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="774"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
         <translation>删除收藏 &apos;{0}&apos;？</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="742"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="870"/>
         <source>Remote Layers</source>
         <translation>远程图层</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="749"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="942"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;已保存的收藏 (0)&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="772"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
         <source>Favorites Manager</source>
         <translation>收藏管理器</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="772"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
         <source>No favorites saved yet.
 
 Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
@@ -637,31 +724,56 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 
 点击 ★ 指示器并选择“将当前过滤器添加到收藏”来保存您的第一个收藏。</translation>
     </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="146"/>
+        <source>Shared...</source>
+        <translation>共享…</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="148"/>
+        <source>Browse favorites shared via QGIS Resource Sharing collections</source>
+        <translation>浏览通过 QGIS Resource Sharing 集合共享的收藏</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="158"/>
+        <source>Publish...</source>
+        <translation>发布…</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="160"/>
+        <source>Publish selected favorites into a Resource Sharing collection</source>
+        <translation>将选定的收藏发布到 Resource Sharing 集合</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
+        <translation>无法删除「{0}」。收藏仍在数据库中 — 详情请查看 FilterMate 日志。</translation>
+    </message>
 </context>
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="588"/>
         <source>View</source>
         <translation>查看</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="508"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="590"/>
         <source>Change</source>
         <translation>更改</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="519"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="601"/>
         <source>Select a folder</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="526"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="608"/>
         <source>Select a file</source>
         <translation>选择文件</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="534"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="616"/>
         <source>Save to a file</source>
         <translation>保存到文件</translation>
     </message>
@@ -669,17 +781,17 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="566"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="648"/>
         <source>View</source>
         <translation>查看</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="650"/>
         <source>Change</source>
         <translation>更改</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="577"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="659"/>
         <source>Select an icon</source>
         <translation>选择图标</translation>
     </message>
@@ -695,127 +807,127 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="188"/>
+        <location filename="../filter_mate.py" line="190"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="312"/>
+        <location filename="../filter_mate.py" line="314"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="312"/>
+        <location filename="../filter_mate.py" line="314"/>
         <source>Open FilterMate panel</source>
         <translation>打开 FilterMate 面板</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="321"/>
+        <location filename="../filter_mate.py" line="323"/>
         <source>Reset configuration and database</source>
         <translation>重置配置和数据库</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="321"/>
+        <location filename="../filter_mate.py" line="323"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>恢复默认配置并删除 SQLite 数据库</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1332"/>
+        <location filename="../filter_mate.py" line="1334"/>
         <source>Reset Configuration</source>
         <translation>重置配置</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1357"/>
         <source>Configuration reset successfully.</source>
         <translation>配置重置成功。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1360"/>
+        <location filename="../filter_mate.py" line="1362"/>
         <source>Default configuration file not found.</source>
         <translation>未找到默认配置文件。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1381"/>
+        <location filename="../filter_mate.py" line="1383"/>
         <source>Database deleted: {filename}</source>
         <translation>数据库已删除：{filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1395"/>
+        <location filename="../filter_mate.py" line="1397"/>
         <source>Restart required</source>
         <translation>需要重新启动</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="401"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>Obsolete configuration detected</source>
         <translation>检测到过时配置</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="402"/>
+        <location filename="../filter_mate.py" line="404"/>
         <source>unknown version</source>
         <translation>未知版本</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="410"/>
+        <location filename="../filter_mate.py" line="412"/>
         <source>Corrupted configuration detected</source>
         <translation>检测到损坏的配置</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="467"/>
+        <location filename="../filter_mate.py" line="469"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>配置未重置。某些功能可能无法正常工作。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="478"/>
+        <location filename="../filter_mate.py" line="480"/>
         <source>Configuration created with default values</source>
         <translation>已使用默认值创建配置</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="481"/>
+        <location filename="../filter_mate.py" line="483"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>损坏的配置已重置。默认设置已恢复。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="484"/>
+        <location filename="../filter_mate.py" line="486"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>过时的配置已重置。默认设置已恢复。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="505"/>
+        <location filename="../filter_mate.py" line="507"/>
         <source>Configuration updated to latest version</source>
         <translation>配置已更新至最新版本</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="502"/>
+        <location filename="../filter_mate.py" line="504"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>配置已更新：新设置可用 ({sections})。通过选项菜单访问。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="496"/>
+        <location filename="../filter_mate.py" line="498"/>
         <source>Geometry Simplification</source>
         <translation>几何简化</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="497"/>
+        <location filename="../filter_mate.py" line="499"/>
         <source>Optimization Thresholds</source>
         <translation>优化阈值</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="642"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>Geometry validation setting</source>
         <translation>几何验证设置</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="672"/>
+        <location filename="../filter_mate.py" line="674"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>无效几何过滤已成功禁用。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="679"/>
+        <location filename="../filter_mate.py" line="681"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>无效几何过滤未修改。某些要素可能会从导出中排除。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="403"/>
+        <location filename="../filter_mate.py" line="405"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -830,7 +942,7 @@ Do you want to reset to default settings?
 • 否：保留当前配置（可能导致问题）</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="411"/>
+        <location filename="../filter_mate.py" line="413"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -845,12 +957,12 @@ Do you want to reset to default settings?
 • 否：取消（插件可能无法正常工作）</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="418"/>
+        <location filename="../filter_mate.py" line="420"/>
         <source>Configuration reset</source>
         <translation>重置配置</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="419"/>
+        <location filename="../filter_mate.py" line="421"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -859,12 +971,12 @@ Do you want to continue?</source>
 是否要继续？</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="524"/>
+        <location filename="../filter_mate.py" line="526"/>
         <source>Error during configuration migration: {}</source>
         <translation>配置迁移时出错：{}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="644"/>
+        <location filename="../filter_mate.py" line="646"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -891,7 +1003,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1332"/>
+        <location filename="../filter_mate.py" line="1334"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -908,7 +1020,7 @@ QGIS must be restarted to apply the changes.</source>
 必须重启 QGIS 才能应用更改。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1395"/>
+        <location filename="../filter_mate.py" line="1397"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -917,84 +1029,84 @@ Please restart QGIS to apply the changes.</source>
 请重启 QGIS 以应用更改。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="346"/>
+        <location filename="../filter_mate.py" line="348"/>
         <source>Initialization error: {0}</source>
         <translation>初始化错误：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="583"/>
+        <location filename="../filter_mate.py" line="585"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} 个引用的图层未加载 ({layers_list})。使用备用显示。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1386"/>
+        <location filename="../filter_mate.py" line="1388"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>无法删除 {filename}：{e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1403"/>
+        <location filename="../filter_mate.py" line="1405"/>
         <source>Error during reset: {str(e)}</source>
         <translation>重置期间出错：{str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1436"/>
+        <location filename="../filter_mate.py" line="1438"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;感谢您使用 &lt;b&gt;FilterMate&lt;/b&gt;！&lt;br&gt;加入我们的 Discord 社区：&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;获取帮助和支持&lt;/li&gt;&lt;li&gt;报告错误和问题&lt;/li&gt;&lt;li&gt;建议新功能&lt;/li&gt;&lt;li&gt;与其他用户分享技巧&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1452"/>
+        <location filename="../filter_mate.py" line="1454"/>
         <source>  Join us on Discord</source>
         <translation>  加入我们的 Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1472"/>
+        <location filename="../filter_mate.py" line="1474"/>
         <source>Don&apos;t show this again</source>
         <translation>不再显示</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1475"/>
+        <location filename="../filter_mate.py" line="1477"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1541"/>
+        <location filename="../filter_mate.py" line="1543"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>加载插件出错：{0}。查看 QGIS Python 控制台了解详情。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6691"/>
+        <location filename="../filter_mate_dockwidget.py" line="6711"/>
         <source>Current layer: {0}</source>
         <translation>当前图层：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6693"/>
+        <location filename="../filter_mate_dockwidget.py" line="6713"/>
         <source>No layer selected</source>
         <translation>未选择图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6703"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>Selected layers:
 {0}</source>
         <translation>选定的图层：
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6703"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No layers selected</source>
         <translation>未选择图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6743"/>
         <source>No expression defined</source>
         <translation>未定义表达式</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6735"/>
+        <location filename="../filter_mate_dockwidget.py" line="6755"/>
         <source>Display expression: {0}</source>
         <translation>显示表达式：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6750"/>
+        <location filename="../filter_mate_dockwidget.py" line="6770"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>要素 ID：{0}
@@ -1014,92 +1126,92 @@ First attribute: {1}</source>
         <translation>已清除 {0} 个缓存</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="772"/>
+        <location filename="../filter_mate_app.py" line="795"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>创建停靠部件失败：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="782"/>
+        <location filename="../filter_mate_app.py" line="805"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>显示停靠部件失败：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1232"/>
+        <location filename="../filter_mate_app.py" line="1255"/>
         <source>Error executing {0}: {1}</source>
         <translation>执行 {0} 时出错：{1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1244"/>
+        <location filename="../filter_mate_app.py" line="1267"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>插件在降级模式下运行（六角形服务不可用）。性能可能降低。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1373"/>
+        <location filename="../filter_mate_app.py" line="1396"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate 错误</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1373"/>
+        <location filename="../filter_mate_app.py" line="1396"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>无法执行 {0}：部件初始化失败。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2144"/>
+        <location filename="../filter_mate_app.py" line="2167"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>无法执行 {0}：图层无效或未找到数据源。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2281"/>
+        <location filename="../filter_mate_app.py" line="2304"/>
         <source>All filters cleared - </source>
         <translation>所有过滤器已清除 - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2282"/>
+        <location filename="../filter_mate_app.py" line="2305"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>主图层中可见 {0}{1} 个要素</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2288"/>
+        <location filename="../filter_mate_app.py" line="2311"/>
         <source>Error: result handler missing</source>
         <translation>错误：结果处理程序缺失</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2301"/>
+        <location filename="../filter_mate_app.py" line="2324"/>
         <source>Error during filtering: {0}</source>
         <translation>过滤期间出错：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2432"/>
+        <location filename="../filter_mate_app.py" line="2455"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>已恢复 {0} 个孤立收藏：{1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2568"/>
+        <location filename="../filter_mate_app.py" line="2591"/>
         <source>Layer loading failed - click to retry</source>
         <translation>图层加载失败 - 点击重试</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2615"/>
+        <location filename="../filter_mate_app.py" line="2638"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} 个图层已成功加载</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1595"/>
+        <location filename="../filter_mate_app.py" line="1618"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1597"/>
+        <location filename="../filter_mate_app.py" line="1620"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1600"/>
+        <location filename="../filter_mate_app.py" line="1623"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1602"/>
+        <location filename="../filter_mate_app.py" line="1625"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1112,22 +1224,22 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1612"/>
+        <location filename="../filter_mate_app.py" line="1635"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1619"/>
+        <location filename="../filter_mate_app.py" line="1642"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1626"/>
+        <location filename="../filter_mate_app.py" line="1649"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1650"/>
+        <location filename="../filter_mate_app.py" line="1673"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
@@ -1314,162 +1426,162 @@ Drop anyway?</source>
         <translation>单选</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
         <source>MULTIPLE SELECTION</source>
         <translation>多选</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
         <source>CUSTOM SELECTION</source>
         <translation>自定义选择</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
         <source>FILTERING</source>
         <translation>过滤</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
         <source>EXPORTING</source>
         <translation>导出</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
         <source>CONFIGURATION</source>
         <translation>配置</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>Select CRS for export</source>
         <translation>选择导出的坐标参考系</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
         <source>Export</source>
         <translation>导出</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
         <source>AND</source>
         <translation>与</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
         <source>AND NOT</source>
         <translation>与非</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
         <source>OR</source>
         <translation>或</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
         <source> m</source>
         <translation> 米</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
         <source>, </source>
         <translation>，</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
         <source>Multi-layer filtering</source>
         <translation>多图层过滤</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
         <source>Additive filtering for the selected layer</source>
         <translation>选定图层的叠加过滤</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
         <source>Geospatial filtering</source>
         <translation>地理空间过滤</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
         <source>Buffer</source>
         <translation>缓冲区</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
         <source>Expression layer</source>
         <translation>表达式图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
         <source>Geometric predicate</source>
         <translation>几何谓词</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
         <source>Output format</source>
         <translation>输出格式</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
         <source>Filter</source>
         <translation>过滤</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
         <source>Reset</source>
         <translation>重置</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
         <source>Layers to export</source>
         <translation>要导出的图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
         <source>Layers projection</source>
         <translation>图层投影</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
         <source>Save styles</source>
         <translation>保存样式</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
         <source>Datatype export</source>
         <translation>数据类型导出</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
         <source>Name of file/directory</source>
         <translation>文件/目录名称</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>对源图层使用质心而不是完整几何（复杂多边形更快）</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>缓冲区值（米）（正值=扩展，负值=收缩多边形）</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
         <source>Number of segments for buffer precision</source>
         <translation>缓冲区精度的段数</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
         <source>Mode batch</source>
         <translation>批处理模式</translation>
     </message>
@@ -1879,14 +1991,233 @@ Continue?</source>
     </message>
 </context>
 <context>
+    <name>PublishFavoritesDialog</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="125"/>
+        <source>FilterMate — Publish to Resource Sharing</source>
+        <translation>FilterMate — 发布到 Resource Sharing</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="133"/>
+        <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
+        <translation>&lt;b&gt;发布收藏&lt;/b&gt; — 将可共享的捆绑包写入 QGIS Resource Sharing 集合。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="153"/>
+        <source>Overwrite existing bundle</source>
+        <translation>覆盖现有捆绑包</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="163"/>
+        <source>Publish</source>
+        <translation>发布</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="177"/>
+        <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
+        <translation>&lt;b&gt;1. 目标集合&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="190"/>
+        <source>Browse...</source>
+        <translation>浏览…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="198"/>
+        <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
+        <translation>&lt;b&gt;2. 捆绑包文件名&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="200"/>
+        <source>e.g. zones_bruxelles</source>
+        <translation>例如：zones_bruxelles</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="203"/>
+        <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
+        <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;目标&amp;gt;/filter_mate/favorites/&amp;lt;名称&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
+        <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
+        <translation>&lt;b&gt;3. 集合元数据&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="214"/>
+        <source>Collection display name</source>
+        <translation>集合显示名称</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="215"/>
+        <source>Name:</source>
+        <translation>名称：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="218"/>
+        <source>Author / organisation</source>
+        <translation>作者 / 组织</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="219"/>
+        <source>Author:</source>
+        <translation>作者：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="222"/>
+        <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
+        <translation>例如：CC-BY-4.0、MIT、专有</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="223"/>
+        <source>License:</source>
+        <translation>许可证：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <source>Comma-separated tags</source>
+        <translation>以逗号分隔的标签</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="227"/>
+        <source>Tags:</source>
+        <translation>标签：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="230"/>
+        <source>https://...</source>
+        <translation>https://…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="231"/>
+        <source>Homepage:</source>
+        <translation>主页：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="235"/>
+        <source>Short description (optional, supports plain text)</source>
+        <translation>简短描述（可选，纯文本）</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="238"/>
+        <source>Description:</source>
+        <translation>描述：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
+        <translation>&lt;b&gt;4. 要包含的收藏&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <source>Select all</source>
+        <translation>全选</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="257"/>
+        <source>Select none</source>
+        <translation>全不选</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="284"/>
+        <source>New collection in Resource Sharing root...</source>
+        <translation>在 Resource Sharing 根目录新建集合…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="288"/>
+        <source>Custom directory...</source>
+        <translation>自定义目录…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="340"/>
+        <source>Will be created under the Resource Sharing root.</source>
+        <translation>将在 Resource Sharing 根目录下创建。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="345"/>
+        <source>Click &apos;Browse...&apos; to choose a directory.</source>
+        <translation>点击 &apos;浏览…&apos; 选择目录。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="351"/>
+        <source>Choose a collection directory</source>
+        <translation>选择集合目录</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="402"/>
+        <source>{0} / {1} selected</source>
+        <translation>已选 {0} / {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <source>Cannot create collection</source>
+        <translation>无法创建集合</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
+        <translation>未找到 Resource Sharing 根目录。请改用 &apos;浏览…&apos; 选择目录。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <source>Choose a directory</source>
+        <translation>选择目录</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <source>Click &apos;Browse...&apos; to pick a target directory.</source>
+        <translation>点击 &apos;浏览…&apos; 选择目标目录。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <source>No favorites selected</source>
+        <translation>未选择收藏</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <source>Select at least one favorite to publish.</source>
+        <translation>请至少选择一个要发布的收藏。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <source>Publish failed</source>
+        <translation>发布失败</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <source>Unknown error.</source>
+        <translation>未知错误。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="505"/>
+        <source>Published {0} favorite(s) to:
+
+&lt;code&gt;{1}&lt;/code&gt;</source>
+        <translation>已将 {0} 个收藏发布到：
+
+&lt;code&gt;{1}&lt;/code&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="509"/>
+        <source>Collection manifest updated:
+&lt;code&gt;{0}&lt;/code&gt;</source>
+        <translation>集合清单已更新：
+&lt;code&gt;{0}&lt;/code&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="512"/>
+        <source>Publish succeeded</source>
+        <translation>发布成功</translation>
+    </message>
+</context>
+<context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="114"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="146"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -2244,37 +2575,37 @@ Continue?</source>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="652"/>
         <source>Type to filter...</source>
         <translation>输入以过滤...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>Select All</source>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>Select All (non subset)</source>
         <translation>全选（非子集）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>Select All (subset)</source>
         <translation>全选（子集）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="667"/>
         <source>De-select All</source>
         <translation>取消全选</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="669"/>
         <source>De-select All (non subset)</source>
         <translation>取消全选（非子集）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="671"/>
         <source>De-select All (subset)</source>
         <translation>取消全选（子集）</translation>
     </message>
@@ -2282,42 +2613,42 @@ Continue?</source>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="214"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
         <source>Select All</source>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="216"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
         <source>De-select All</source>
         <translation>取消全选</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="218"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>按几何类型选择所有图层（线）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>按几何类型取消选择所有图层（线）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>按几何类型选择所有图层（点）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="230"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>按几何类型取消选择所有图层（点）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="232"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>按几何类型选择所有图层（面）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="234"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>按几何类型取消选择所有图层（面）</translation>
     </message>
@@ -2366,6 +2697,129 @@ Continue?</source>
         <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
         <source>No match</source>
         <translation>无匹配</translation>
+    </message>
+</context>
+<context>
+    <name>SharedFavoritesPickerDialog</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="55"/>
+        <source>FilterMate — Shared Favorites</source>
+        <translation>FilterMate — 共享收藏</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="63"/>
+        <source>&lt;b&gt;Shared Favorites&lt;/b&gt; — discovered from QGIS Resource Sharing collections</source>
+        <translation>&lt;b&gt;共享收藏&lt;/b&gt; — 从 QGIS Resource Sharing 集合中发现</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="76"/>
+        <source>Search by name, description, collection, or tags...</source>
+        <translation>按名称、描述、集合或标签搜索…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="98"/>
+        <source>Select a shared favorite to preview.</source>
+        <translation>选择共享收藏以预览。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="114"/>
+        <source>Rescan</source>
+        <translation>重新扫描</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="118"/>
+        <source>Fork to my project</source>
+        <translation>Fork 到我的项目</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="124"/>
+        <source>Close</source>
+        <translation>关闭</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="139"/>
+        <source>No shared collections found. Subscribe to a Resource Sharing repository that ships a &lt;code&gt;filter_mate/favorites&lt;/code&gt; folder, or drop a &lt;code&gt;.fmfav.json&lt;/code&gt; bundle in your resource_sharing collections directory.</source>
+        <translation>未找到共享集合。请订阅包含 &lt;code&gt;filter_mate/favorites&lt;/code&gt; 文件夹的 Resource Sharing 仓库，或将 &lt;code&gt;.fmfav.json&lt;/code&gt; 捆绑包放入 resource_sharing 集合目录。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="147"/>
+        <source>{0} favorite(s) across {1} collection(s): {2}</source>
+        <translation>{1} 个集合中的 {0} 个收藏：{2}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="160"/>
+        <source>Collection: {0}</source>
+        <translation>集合：{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="172"/>
+        <source>No shared favorites match your search.</source>
+        <translation>没有与您的搜索匹配的共享收藏。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="194"/>
+        <source>&lt;b&gt;{0}&lt;/b&gt; — from &lt;i&gt;{1}&lt;/i&gt;</source>
+        <translation>&lt;b&gt;{0}&lt;/b&gt; — 来自 &lt;i&gt;{1}&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="208"/>
+        <source>&lt;b&gt;Expression&lt;/b&gt;</source>
+        <translation>&lt;b&gt;表达式&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="213"/>
+        <source>&lt;b&gt;Remote layers&lt;/b&gt;</source>
+        <translation>&lt;b&gt;远程图层&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="227"/>
+        <source>&lt;b&gt;Tags:&lt;/b&gt; {0}</source>
+        <translation>&lt;b&gt;标签：&lt;/b&gt; {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="234"/>
+        <source>&lt;b&gt;Provenance&lt;/b&gt;</source>
+        <translation>&lt;b&gt;来源&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="236"/>
+        <source>Author: {0}</source>
+        <translation>作者：{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="238"/>
+        <source>License: {0}</source>
+        <translation>许可证：{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <source>Fork shared favorite</source>
+        <translation>Fork 共享收藏</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <source>Name in your project:</source>
+        <translation>您的项目中的名称：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <source>Fork successful</source>
+        <translation>Fork 成功</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <source>&apos;{0}&apos; was added to your favorites.</source>
+        <translation>「{0}」已添加到您的收藏。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <source>Fork failed</source>
+        <translation>Fork 失败</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <source>Could not add the shared favorite to your project.</source>
+        <translation>无法将共享收藏添加到您的项目。</translation>
     </message>
 </context>
 <context>
@@ -2488,7 +2942,7 @@ Continue?</source>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="474"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="556"/>
         <source>Explore ...</source>
         <translation>浏览...</translation>
     </message>
@@ -2498,7 +2952,7 @@ Continue?</source>
     <message>
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
-        <translation>Language changed to &apos;{0}&apos;.</translation>
+        <translation type="obsolete">Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>

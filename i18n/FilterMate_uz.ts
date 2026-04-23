@@ -24,7 +24,7 @@
         <translation>Ma&apos;lumotlar bazasini tekshirishda xatolik: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="599"/>
+        <location filename="../core/services/app_initializer.py" line="617"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Qatlamni yuklash muvaffaqiyatsiz. Majburiy qayta yuklash uchun F5 tugmasini bosing.</translation>
     </message>
@@ -65,7 +65,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="311"/>
+        <location filename="../ui/controllers/config_controller.py" line="350"/>
         <source>Error cancelling changes: {0}</source>
         <translation>O&apos;zgarishlarni bekor qilishda xatolik: {0}</translation>
     </message>
@@ -117,19 +117,47 @@
     </message>
 </context>
 <context>
+    <name>DatasourceManager</name>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="146"/>
+        <source>Database file does not exist: {db_file_path}</source>
+        <translation>Maʼlumotlar bazasi fayli mavjud emas: {db_file_path}</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="157"/>
+        <source>Failed to connect to database {db_file_path}: {error}</source>
+        <translation>{db_file_path} maʼlumotlar bazasiga ulanib boʻlmadi: {error}</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="182"/>
+        <source>QGIS processing module not available to create spatial index</source>
+        <translation>Fazoviy indeksni yaratish uchun QGIS Processing moduli mavjud emas</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="188"/>
+        <source>Cannot create spatial index: layer invalid or source not found.</source>
+        <translation>Fazoviy indeksni yaratib boʻlmaydi: qatlam yaroqsiz yoki manba topilmadi.</translation>
+    </message>
+    <message>
+        <location filename="../core/services/datasource_manager.py" line="398"/>
+        <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
+        <translation>PostgreSQL qatlamlari aniqlandi, lekin psycopg2 oʻrnatilmagan. Mahalliy Spatialite backendi ishlatilmoqda. Katta maʼlumotlar majmuasi bilan yaxshiroq ishlash uchun psycopg2 oʻrnating.</translation>
+    </message>
+</context>
+<context>
     <name>ExportDialogManager</name>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="87"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="92"/>
         <source>Save your layer to a file</source>
         <translation>Qatlaminigizni faylga saqlang</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="103"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="108"/>
         <source>Select a folder where to export your layers</source>
         <translation>Qatlamlarni eksport qilish uchun papka tanlang</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="153"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="158"/>
         <source>Save your exported data to a zip file</source>
         <translation>Eksport qilingan ma&apos;lumotlarni zip faylga saqlang</translation>
     </message>
@@ -200,27 +228,27 @@
         <translation>Sevimli &apos;{0}&apos; muvaffaqiyatli qo&apos;shildi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="394"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="399"/>
         <source>Export Favorites</source>
         <translation>Sevimlilarni eksport qilish</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="405"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="423"/>
         <source>Exported {0} favorites</source>
         <translation>{0} sevimli eksport qilindi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="408"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="425"/>
         <source>Failed to export favorites</source>
         <translation>Sevimlilarni eksport qilish muvaffaqiyatsiz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="438"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
         <source>Import Favorites</source>
         <translation>Sevimlilarni import qilish</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="438"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
@@ -231,144 +259,144 @@ Ha = Mavjudlarga qo&apos;shish
 Yo&apos;q = Barcha mavjudlarni almashtirish</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="456"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="493"/>
         <source>Imported {0} favorites</source>
         <translation>{0} sevimli import qilindi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="458"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="495"/>
         <source>No favorites imported</source>
         <translation>Hech qanday sevimli import qilinmadi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="467"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="504"/>
         <source>Favorites manager not initialized. Please restart FilterMate.</source>
         <translation>Sevimlilar boshqaruvchisi ishga tushirilmagan. Iltimos, FilterMate ni qayta ishga tushiring.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="483"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="538"/>
         <source>Favorites manager dialog not available</source>
         <translation>Sevimlilar boshqaruvchi oynasi mavjud emas</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1144"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1779"/>
         <source>Error: {0}</source>
         <translation>Xatolik: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="688"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="775"/>
         <source>Used {0} times</source>
         <translation>{0} marta ishlatilgan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="699"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
         <source>Add current filter to favorites</source>
         <translation>Joriy filtrni sevimlilarga qo&apos;shish</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="703"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="790"/>
         <source>Add filter (no active filter)</source>
         <translation>Filtr qo&apos;shish (faol filtr yo&apos;q)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="708"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="795"/>
         <source>Manage favorites...</source>
         <translation>Sevimlilarni boshqarish...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="711"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="798"/>
         <source>Export...</source>
         <translation>Eksport...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="714"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="801"/>
         <source>Import...</source>
         <translation>Import...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="719"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="822"/>
         <source>Global favorites</source>
         <translation>Global sevimlilar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="723"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="826"/>
         <source>Copy to global...</source>
         <translation>Globalga nusxalash...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="734"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="837"/>
         <source>── Available global favorites ──</source>
         <translation>── Mavjud global sevimlilar ──</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="742"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="845"/>
         <source>(No global favorites)</source>
         <translation>(Global sevimlilar yo&apos;q)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="746"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="849"/>
         <source>Maintenance</source>
         <translation>Texnik xizmat</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="748"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="851"/>
         <source>Save to project (.qgz)</source>
         <translation>Loyihaga saqlash (.qgz)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="751"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="854"/>
         <source>Restore from project</source>
         <translation>Loyihadan tiklash</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="756"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="859"/>
         <source>Clean up orphan projects</source>
         <translation>Yetim loyihalarni tozalash</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="759"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="862"/>
         <source>Database statistics</source>
         <translation>Ma&apos;lumotlar bazasi statistikasi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="802"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Invalid Name</source>
         <translation>Noto&apos;g&apos;ri nom</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="802"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Favorite name cannot be empty.</source>
         <translation>Sevimli nomi bo&apos;sh bo&apos;lishi mumkin emas.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="813"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
         <source>Duplicate Name</source>
         <translation>Takroriy nom</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="813"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
         <source>A favorite named &apos;{0}&apos; already exists.
 Do you want to replace it?</source>
         <translation>&apos;{0}&apos; nomli sevimli allaqachon mavjud.
 Uni almashtirishni xohlaysizmi?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1030"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1555"/>
         <source>Favorite copied to global favorites</source>
         <translation>Sevimli global sevimlilarga nusxalandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1033"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1558"/>
         <source>Failed to copy to global favorites</source>
         <translation>Global sevimlilarga nusxalash muvaffaqiyatsiz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1040"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
         <source>Global Favorites</source>
         <translation>Global sevimlilar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1040"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1565"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
@@ -377,37 +405,37 @@ Global favorites are shared across all projects.</source>
 Global sevimlilar barcha loyihalar orasida bo&apos;lishiladi.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1056"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1581"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>{0} sevimli loyiha fayliga saqlandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1058"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1583"/>
         <source>Save failed</source>
         <translation>Saqlash muvaffaqiyatsiz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1070"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1595"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>Loyiha faylidan {0} sevimli tiklandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1072"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1597"/>
         <source>No favorites to restore found in project</source>
         <translation>Loyihada tiklanadigan sevimli topilmadi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1089"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1624"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>{0} yetim loyiha tozalandi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1091"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1626"/>
         <source>No orphan projects to clean up</source>
         <translation>Tozalanadigan yetim loyiha yo&apos;q</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1116"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1751"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -424,212 +452,271 @@ Jami sevimlilar: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1132"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1767"/>
         <source>Top projects by favorites:</source>
         <translation>Sevimlilar bo&apos;yicha eng yaxshi loyihalar:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1136"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1771"/>
         <source>FilterMate Statistics</source>
         <translation>FilterMate statistikasi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="513"/>
+        <source>Favorites Manager</source>
+        <translation>Sevimlilar boshqaruvchisi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="513"/>
+        <source>No favorites saved yet.
+
+Apply a filter to a layer, then click the ★ indicator and choose &apos;Add current filter to favorites&apos; to save your first favorite.</source>
+        <translation>Hali sevimlilar saqlanmagan.
+
+Qatlamga filtr qoʻllang, soʻng ★ koʻrsatkichini bosing va birinchi sevimlini saqlash uchun «Joriy filtrni sevimlilarga qoʻshish» ni tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="808"/>
+        <source>Import from Resource Sharing...</source>
+        <translation>Resource Sharing dan import qilish…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="811"/>
+        <source>Publish to Resource Sharing...</source>
+        <translation>Resource Sharing ga nashr qilish…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="816"/>
+        <source>Publish (no favorites saved)</source>
+        <translation>Nashr qilish (saqlangan sevimlilar yoʻq)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1734"/>
+        <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
+        <translation>FilterMate konfiguratsiya katalogi hali boshlanmagan — avval FilterMate bilan QGIS loyihasini oching.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1692"/>
+        <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
+        <translation>Resource Sharing kengaytmasi faol emas. FilterMate sozlamalarida &apos;favorites_sharing&apos; ni yoqing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1700"/>
+        <source>Shared favorites service is not available.</source>
+        <translation>Umumiy sevimlilar xizmati mavjud emas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1686"/>
+        <source>Shared picker failed: {0}</source>
+        <translation>Umumiy sevimlilar tanlagichi muvaffaqiyatsiz: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1704"/>
+        <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
+        <translation>Sizda hali nashr qilish uchun sevimlilar yoʻq. Avval ★ menyusi orqali filtrni saqlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1720"/>
+        <source>Publish dialog failed: {0}</source>
+        <translation>Nashr oynasini ochish muvaffaqiyatsiz: {0}</translation>
     </message>
 </context>
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="90"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="118"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - Sevimlilar boshqaruvchisi</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="753"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="946"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Saqlangan sevimlilar ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="119"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="180"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>Nom, ifoda, teglar yoki tavsif bo&apos;yicha qidirish...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="383"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="444"/>
         <source>General</source>
         <translation>Umumiy</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Expression</source>
         <translation>Ifoda</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="623"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="697"/>
         <source>Remote</source>
         <translation>Masofaviy</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="405"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="466"/>
         <source>Favorite name</source>
         <translation>Sevimli nomi</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="406"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="467"/>
         <source>Name:</source>
         <translation>Nomi:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="410"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="471"/>
         <source>Description (auto-generated, editable)</source>
         <translation>Tavsif (avtomatik yaratilgan, tahrir qilinadi)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="411"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
         <source>Description:</source>
         <translation>Tavsif:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="414"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="475"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>Vergul bilan ajratilgan teglarni kiriting (mas., urban, population, 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="417"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="478"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>Teglar sevimlilarni tartibga solish va qidirishga yordam beradi.
 Bir nechta teglarni vergul bilan ajrating.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="420"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="481"/>
         <source>Tags:</source>
         <translation>Teglar:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="425"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="486"/>
         <source>Source Layer:</source>
         <translation>Manba qatlami:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="429"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="490"/>
         <source>Provider:</source>
         <translation>Ta&apos;minotchi:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="437"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="498"/>
         <source>Used:</source>
         <translation>Ishlatilgan:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="440"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
         <source>Created:</source>
         <translation>Yaratilgan:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="453"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="514"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Manba qatlami ifodasi:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="457"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="518"/>
         <source>Filter expression for source layer</source>
         <translation>Manba qatlami uchun filtr ifodasi</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="472"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="533"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Filtrlangan masofaviy qatlamlar:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Layer</source>
         <translation>Qatlam</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="476"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="537"/>
         <source>Features</source>
         <translation>Xususiyatlar</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="484"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="545"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;Bu sevimilda masofaviy qatlam yo&apos;q&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="497"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
         <source>Apply</source>
         <translation>Qo&apos;llash</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="500"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="561"/>
         <source>Apply this favorite filter to the project</source>
         <translation>Bu sevimli filtrni loyihaga qo&apos;llash</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="503"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
         <source>Save Changes</source>
         <translation>O&apos;zgarishlarni saqlash</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="506"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="567"/>
         <source>Save modifications to this favorite</source>
         <translation>Bu sevimliga kiritilgan o&apos;zgarishlarni saqlash</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="509"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="570"/>
         <source>Delete</source>
         <translation>O&apos;chirish</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="512"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
         <source>Permanently delete this favorite</source>
         <translation>Bu sevimlini doimiy o&apos;chirish</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="515"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
         <source>Close</source>
         <translation>Yopish</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="517"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="578"/>
         <source>Close this dialog</source>
         <translation>Bu oynani yopish</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="564"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Sevimlilar ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="617"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="691"/>
         <source>Remote ({0})</source>
         <translation>Masofaviy ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
         <source>Delete Favorite</source>
         <translation>Sevimlini o&apos;chirish</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="774"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
         <translation>Sevimli &apos;{0}&apos; ni o&apos;chirishmi?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="742"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="870"/>
         <source>Remote Layers</source>
         <translation>Masofaviy qatlamlar</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="749"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="942"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;Saqlangan sevimlilar (0)&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="772"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
         <source>Favorites Manager</source>
         <translation>Sevimlilar boshqaruvchisi</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="772"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="965"/>
         <source>No favorites saved yet.
 
 Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
@@ -637,31 +724,56 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 
 Birinchi sevimlingizni saqlash uchun ★ ko&apos;rsatkichini bosing va &apos;Joriy filtrni sevimlilarga qo&apos;shish&apos; ni tanlang.</translation>
     </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="146"/>
+        <source>Shared...</source>
+        <translation>Umumiy…</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="148"/>
+        <source>Browse favorites shared via QGIS Resource Sharing collections</source>
+        <translation>QGIS Resource Sharing toʻplamlari orqali ulashilgan sevimlilarni koʻrish</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="158"/>
+        <source>Publish...</source>
+        <translation>Nashr qilish…</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="160"/>
+        <source>Publish selected favorites into a Resource Sharing collection</source>
+        <translation>Tanlangan sevimlilarni Resource Sharing toʻplamiga nashr qilish</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="798"/>
+        <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
+        <translation>«{0}» ni oʻchirib boʻlmadi. Sevimli hali ham maʼlumotlar bazasida — tafsilotlar uchun FilterMate jurnalini tekshiring.</translation>
+    </message>
 </context>
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="506"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="588"/>
         <source>View</source>
         <translation>Ko&apos;rish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="508"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="590"/>
         <source>Change</source>
         <translation>O&apos;zgartirish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="519"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="601"/>
         <source>Select a folder</source>
         <translation>Papka tanlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="526"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="608"/>
         <source>Select a file</source>
         <translation>Fayl tanlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="534"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="616"/>
         <source>Save to a file</source>
         <translation>Faylga saqlash</translation>
     </message>
@@ -669,17 +781,17 @@ Birinchi sevimlingizni saqlash uchun ★ ko&apos;rsatkichini bosing va &apos;Jor
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="566"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="648"/>
         <source>View</source>
         <translation>Ko&apos;rish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="650"/>
         <source>Change</source>
         <translation>O&apos;zgartirish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="577"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="659"/>
         <source>Select an icon</source>
         <translation>Belgini tanlash</translation>
     </message>
@@ -695,67 +807,67 @@ Birinchi sevimlingizni saqlash uchun ★ ko&apos;rsatkichini bosing va &apos;Jor
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="188"/>
+        <location filename="../filter_mate.py" line="190"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="312"/>
+        <location filename="../filter_mate.py" line="314"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="312"/>
+        <location filename="../filter_mate.py" line="314"/>
         <source>Open FilterMate panel</source>
         <translation>FilterMate panelini ochish</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="321"/>
+        <location filename="../filter_mate.py" line="323"/>
         <source>Reset configuration and database</source>
         <translation>Sozlamalar va ma&apos;lumotlar bazasini tiklash</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="321"/>
+        <location filename="../filter_mate.py" line="323"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Standart sozlamalarni tiklash va SQLite ma&apos;lumotlar bazasini o&apos;chirish</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1332"/>
+        <location filename="../filter_mate.py" line="1334"/>
         <source>Reset Configuration</source>
         <translation>Sozlamalarni tiklash</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1355"/>
+        <location filename="../filter_mate.py" line="1357"/>
         <source>Configuration reset successfully.</source>
         <translation>Sozlamalar muvaffaqiyatli tiklandi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1360"/>
+        <location filename="../filter_mate.py" line="1362"/>
         <source>Default configuration file not found.</source>
         <translation>Standart sozlamalar fayli topilmadi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1381"/>
+        <location filename="../filter_mate.py" line="1383"/>
         <source>Database deleted: {filename}</source>
         <translation>Ma&apos;lumotlar bazasi o&apos;chirildi: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1395"/>
+        <location filename="../filter_mate.py" line="1397"/>
         <source>Restart required</source>
         <translation>Qayta ishga tushirish talab qilinadi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="401"/>
+        <location filename="../filter_mate.py" line="403"/>
         <source>Obsolete configuration detected</source>
         <translation>Eskirgan sozlamalar aniqlandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="402"/>
+        <location filename="../filter_mate.py" line="404"/>
         <source>unknown version</source>
         <translation>noma&apos;lum versiya</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="403"/>
+        <location filename="../filter_mate.py" line="405"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -770,12 +882,12 @@ Standart sozlamalarga tiklamoqchimisiz?
 • Yo&apos;q: Joriy sozlamalarni saqlash (muammolar yuzaga kelishi mumkin)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="410"/>
+        <location filename="../filter_mate.py" line="412"/>
         <source>Corrupted configuration detected</source>
         <translation>Buzilgan sozlamalar aniqlandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="411"/>
+        <location filename="../filter_mate.py" line="413"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -790,12 +902,12 @@ Standart sozlamalarga tiklamoqchimisiz?
 • Yo&apos;q: Bekor qilish (plagin to&apos;g&apos;ri ishlamasligi mumkin)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="418"/>
+        <location filename="../filter_mate.py" line="420"/>
         <source>Configuration reset</source>
         <translation>Sozlamalar tiklandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="419"/>
+        <location filename="../filter_mate.py" line="421"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -804,57 +916,57 @@ Do you want to continue?</source>
 Davom etmoqchimisiz?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="467"/>
+        <location filename="../filter_mate.py" line="469"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Sozlamalar tiklanmadi. Ba&apos;zi funksiyalar to&apos;g&apos;ri ishlamasligi mumkin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="478"/>
+        <location filename="../filter_mate.py" line="480"/>
         <source>Configuration created with default values</source>
         <translation>Standart qiymatlar bilan sozlamalar yaratildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="481"/>
+        <location filename="../filter_mate.py" line="483"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Buzilgan sozlamalar tiklandi. Standart sozlamalar qayta tiklandi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="484"/>
+        <location filename="../filter_mate.py" line="486"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Eskirgan sozlamalar tiklandi. Standart sozlamalar qayta tiklandi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="505"/>
+        <location filename="../filter_mate.py" line="507"/>
         <source>Configuration updated to latest version</source>
         <translation>Sozlamalar eng so&apos;nggi versiyaga yangilandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="502"/>
+        <location filename="../filter_mate.py" line="504"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Sozlamalar yangilandi: yangi sozlamalar mavjud ({sections}). Tanlovlar menyusi orqali kirish.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="496"/>
+        <location filename="../filter_mate.py" line="498"/>
         <source>Geometry Simplification</source>
         <translation>Geometriyani soddalashtirish</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="497"/>
+        <location filename="../filter_mate.py" line="499"/>
         <source>Optimization Thresholds</source>
         <translation>Optimallashtirish chegaralari</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="524"/>
+        <location filename="../filter_mate.py" line="526"/>
         <source>Error during configuration migration: {}</source>
         <translation>Sozlamalarni ko&apos;chirish vaqtida xatolik: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="642"/>
+        <location filename="../filter_mate.py" line="644"/>
         <source>Geometry validation setting</source>
         <translation>Geometriya tekshirish sozlamalari</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="644"/>
+        <location filename="../filter_mate.py" line="646"/>
         <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
 
 FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
@@ -881,17 +993,17 @@ Hozir bu sozlamani o&apos;chirmoqchimisiz?
 • Yo&apos;q: Joriy sozlamani saqlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="672"/>
+        <location filename="../filter_mate.py" line="674"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Noto&apos;g&apos;ri geometriya filtrlash muvaffaqiyatli o&apos;chirildi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="679"/>
+        <location filename="../filter_mate.py" line="681"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Noto&apos;g&apos;ri geometriya filtrlash o&apos;zgartirilmadi. Ba&apos;zi obyektlar eksportdan chiqarib tashlanishi mumkin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1332"/>
+        <location filename="../filter_mate.py" line="1334"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -908,7 +1020,7 @@ Bu quyidagilarni bajaradi:
 O&apos;zgarishlarni qo&apos;llash uchun QGIS qayta ishga tushirilishi kerak.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1395"/>
+        <location filename="../filter_mate.py" line="1397"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -917,84 +1029,84 @@ Please restart QGIS to apply the changes.</source>
 O&apos;zgarishlarni qo&apos;llash uchun QGIS ni qayta ishga tushiring.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="346"/>
+        <location filename="../filter_mate.py" line="348"/>
         <source>Initialization error: {0}</source>
         <translation>Ishga tushirish xatoligi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="583"/>
+        <location filename="../filter_mate.py" line="585"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} havola qilingan qatlam(lar) yuklanmadi ({layers_list}). Zaxira ko&apos;rinish ishlatilmoqda.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1386"/>
+        <location filename="../filter_mate.py" line="1388"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename} ni o&apos;chirib bo&apos;lmadi: {e}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1403"/>
+        <location filename="../filter_mate.py" line="1405"/>
         <source>Error during reset: {str(e)}</source>
         <translation>Qayta tiklashda xatolik: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1436"/>
+        <location filename="../filter_mate.py" line="1438"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate&lt;/b&gt; dan foydalanganingiz uchun rahmat!&lt;br&gt;Discord hamjamiyatimizga qo&apos;shiling:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Yordam va qo&apos;llab-quvvatlash oling&lt;/li&gt;&lt;li&gt;Xatolar va muammolarni xabar qiling&lt;/li&gt;&lt;li&gt;Yangi funksiyalarni taklif qiling&lt;/li&gt;&lt;li&gt;Boshqa foydalanuvchilar bilan maslahatlar bo&apos;lishing&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1452"/>
+        <location filename="../filter_mate.py" line="1454"/>
         <source>  Join us on Discord</source>
         <translation>  Discord da bizga qo&apos;shiling</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1472"/>
+        <location filename="../filter_mate.py" line="1474"/>
         <source>Don&apos;t show this again</source>
         <translation>Buni boshqa ko&apos;rsatmang</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1475"/>
+        <location filename="../filter_mate.py" line="1477"/>
         <source>Close</source>
         <translation>Yopish</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1541"/>
+        <location filename="../filter_mate.py" line="1543"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Plaginni yuklashda xatolik: {0}. Tafsilotlar uchun QGIS Python konsolini tekshiring.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6691"/>
+        <location filename="../filter_mate_dockwidget.py" line="6711"/>
         <source>Current layer: {0}</source>
         <translation>Joriy qatlam: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6693"/>
+        <location filename="../filter_mate_dockwidget.py" line="6713"/>
         <source>No layer selected</source>
         <translation>Qatlam tanlanmagan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6703"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>Selected layers:
 {0}</source>
         <translation>Tanlangan qatlamlar:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6703"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>No layers selected</source>
         <translation>Qatlam tanlanmagan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6743"/>
         <source>No expression defined</source>
         <translation>Ifoda belgilanmagan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6735"/>
+        <location filename="../filter_mate_dockwidget.py" line="6755"/>
         <source>Display expression: {0}</source>
         <translation>Ko&apos;rsatish ifodasi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6750"/>
+        <location filename="../filter_mate_dockwidget.py" line="6770"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Xususiyat ID: {0}
@@ -1014,92 +1126,92 @@ Birinchi atribut: {1}</translation>
         <translation>{0} kesh tozalandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="772"/>
+        <location filename="../filter_mate_app.py" line="795"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Dockwidget yaratish muvaffaqiyatsiz: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="782"/>
+        <location filename="../filter_mate_app.py" line="805"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Dockwidget ko&apos;rsatish muvaffaqiyatsiz: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1232"/>
+        <location filename="../filter_mate_app.py" line="1255"/>
         <source>Error executing {0}: {1}</source>
         <translation>{0} ni bajarishda xatolik: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1244"/>
+        <location filename="../filter_mate_app.py" line="1267"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plagin pasaytirilgan rejimda ishlayapti (olti burchakli xizmatlar mavjud emas). Ishlash tezligi pasayishi mumkin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1373"/>
+        <location filename="../filter_mate_app.py" line="1396"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate XATOLIK</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1373"/>
+        <location filename="../filter_mate_app.py" line="1396"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>{0} ni bajarib bo&apos;lmaydi: vidjet ishga tushirilishi muvaffaqiyatsiz.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2144"/>
+        <location filename="../filter_mate_app.py" line="2167"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0} ni bajarib bo&apos;lmaydi: qatlam noto&apos;g&apos;ri yoki manba topilmadi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2281"/>
+        <location filename="../filter_mate_app.py" line="2304"/>
         <source>All filters cleared - </source>
         <translation>Barcha filtrlar tozalandi - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2282"/>
+        <location filename="../filter_mate_app.py" line="2305"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>Asosiy qatlamda {0}{1} xususiyat ko&apos;rinadi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2288"/>
+        <location filename="../filter_mate_app.py" line="2311"/>
         <source>Error: result handler missing</source>
         <translation>Xatolik: natija ishlov beruvchi yo&apos;q</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2301"/>
+        <location filename="../filter_mate_app.py" line="2324"/>
         <source>Error during filtering: {0}</source>
         <translation>Filtrlashda xatolik: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2432"/>
+        <location filename="../filter_mate_app.py" line="2455"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} yetim sevimli tiklandi: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2568"/>
+        <location filename="../filter_mate_app.py" line="2591"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Qatlam yuklash muvaffaqiyatsiz - qayta urinish uchun bosing</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2615"/>
+        <location filename="../filter_mate_app.py" line="2638"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} qatlam muvaffaqiyatli yuklandi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1595"/>
+        <location filename="../filter_mate_app.py" line="1618"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1597"/>
+        <location filename="../filter_mate_app.py" line="1620"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1600"/>
+        <location filename="../filter_mate_app.py" line="1623"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1602"/>
+        <location filename="../filter_mate_app.py" line="1625"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1112,22 +1224,22 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1612"/>
+        <location filename="../filter_mate_app.py" line="1635"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1619"/>
+        <location filename="../filter_mate_app.py" line="1642"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1626"/>
+        <location filename="../filter_mate_app.py" line="1649"/>
         <source>Cancel</source>
         <translation>Bekor qilish</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1650"/>
+        <location filename="../filter_mate_app.py" line="1673"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
@@ -1314,162 +1426,162 @@ Baribir o&apos;chirilsinmi?</translation>
         <translation>YAKKA TANLASH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="940"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
         <source>MULTIPLE SELECTION</source>
         <translation>KO&apos;P TANLASH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1086"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
         <source>CUSTOM SELECTION</source>
         <translation>MAXSUS TANLASH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1314"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
         <source>FILTERING</source>
         <translation>FILTRLASH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2587"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
         <source>EXPORTING</source>
         <translation>EKSPORT QILISH</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3419"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
         <source>CONFIGURATION</source>
         <translation>SOZLAMALAR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3165"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>Select CRS for export</source>
         <translation>Eksport uchun CRS ni tanlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3687"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
         <source>Export</source>
         <translation>Eksport</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2273"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
         <source>AND</source>
         <translation>VA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2278"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
         <source>AND NOT</source>
         <translation>VA EMAS</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2283"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
         <source>OR</source>
         <translation>YOKI</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3220"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
         <source>QML</source>
         <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
         <source>SLD</source>
         <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2476"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
         <source> m</source>
         <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2349"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
         <source>, </source>
         <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1514"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
         <source>Multi-layer filtering</source>
         <translation>Ko&apos;p qatlamli filtrlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1601"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
         <source>Additive filtering for the selected layer</source>
         <translation>Tanlangan qatlam uchun qo&apos;shimcha filtrlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1887"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
         <source>Geospatial filtering</source>
         <translation>Geofazoviy filtrlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1977"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
         <source>Buffer</source>
         <translation>Bufer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2222"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
         <source>Expression layer</source>
         <translation>Ifoda qatlami</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2334"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
         <source>Geometric predicate</source>
         <translation>Geometrik predikat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3265"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
         <source>Output format</source>
         <translation>Chiqish formati</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3523"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
         <source>Filter</source>
         <translation>Filtr</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3585"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
         <source>Reset</source>
         <translation>Tiklash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2691"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
         <source>Layers to export</source>
         <translation>Eksport qilinadigan qatlamlar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2772"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
         <source>Layers projection</source>
         <translation>Qatlamlar proyeksiyasi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2856"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
         <source>Save styles</source>
         <translation>Uslublarni saqlash</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2937"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
         <source>Datatype export</source>
         <translation>Ma&apos;lumot turi eksporti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3018"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
         <source>Name of file/directory</source>
         <translation>Fayl/katalog nomi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2145"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
         <translation>Manba qatlami uchun to&apos;liq geometriya o&apos;rniga markaziy nuqtalardan foydalaning (murakkab ko&apos;pburchaklar uchun tezroq)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2461"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Metrda bufer qiymati (musbat=kengaytirish, manfiy=ko&apos;pburchaklarni kichraytirish)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2549"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
         <source>Number of segments for buffer precision</source>
         <translation>Bufer aniqligi uchun segmentlar soni</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3361"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
         <source>Mode batch</source>
         <translation>Paketli rejim</translation>
     </message>
@@ -1879,14 +1991,233 @@ Davom etilsinmi?</translation>
     </message>
 </context>
 <context>
+    <name>PublishFavoritesDialog</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="125"/>
+        <source>FilterMate — Publish to Resource Sharing</source>
+        <translation>FilterMate — Resource Sharing ga nashr qilish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="133"/>
+        <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
+        <translation>&lt;b&gt;Sevimlilarni nashr qilish&lt;/b&gt; — QGIS Resource Sharing toʻplamiga ulashiladigan paketni yozish.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="153"/>
+        <source>Overwrite existing bundle</source>
+        <translation>Mavjud paketni ustiga yozish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="163"/>
+        <source>Publish</source>
+        <translation>Nashr qilish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="177"/>
+        <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
+        <translation>&lt;b&gt;1. Maqsadli toʻplam&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="190"/>
+        <source>Browse...</source>
+        <translation>Koʻrish…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="198"/>
+        <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
+        <translation>&lt;b&gt;2. Paket fayl nomi&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="200"/>
+        <source>e.g. zones_bruxelles</source>
+        <translation>masalan, zones_bruxelles</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="203"/>
+        <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
+        <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;maqsad&amp;gt;/filter_mate/favorites/&amp;lt;nom&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
+        <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
+        <translation>&lt;b&gt;3. Toʻplam metamaʼlumotlari&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="214"/>
+        <source>Collection display name</source>
+        <translation>Toʻplam koʻrsatiladigan nomi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="215"/>
+        <source>Name:</source>
+        <translation>Nomi:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="218"/>
+        <source>Author / organisation</source>
+        <translation>Muallif / tashkilot</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="219"/>
+        <source>Author:</source>
+        <translation>Muallif:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="222"/>
+        <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
+        <translation>masalan, CC-BY-4.0, MIT, Mulkdorlik</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="223"/>
+        <source>License:</source>
+        <translation>Litsenziya:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <source>Comma-separated tags</source>
+        <translation>Vergul bilan ajratilgan teglar</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="227"/>
+        <source>Tags:</source>
+        <translation>Teglar:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="230"/>
+        <source>https://...</source>
+        <translation>https://…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="231"/>
+        <source>Homepage:</source>
+        <translation>Bosh sahifa:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="235"/>
+        <source>Short description (optional, supports plain text)</source>
+        <translation>Qisqa tavsif (ixtiyoriy, oddiy matn)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="238"/>
+        <source>Description:</source>
+        <translation>Tavsif:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
+        <translation>&lt;b&gt;4. Kiritiladigan sevimlilar&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <source>Select all</source>
+        <translation>Barchasini tanlash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="257"/>
+        <source>Select none</source>
+        <translation>Hech birini tanlamang</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="284"/>
+        <source>New collection in Resource Sharing root...</source>
+        <translation>Resource Sharing ildizida yangi toʻplam…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="288"/>
+        <source>Custom directory...</source>
+        <translation>Maxsus katalog…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="340"/>
+        <source>Will be created under the Resource Sharing root.</source>
+        <translation>Resource Sharing ildizi ostida yaratiladi.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="345"/>
+        <source>Click &apos;Browse...&apos; to choose a directory.</source>
+        <translation>Katalogni tanlash uchun &apos;Koʻrish…&apos; ni bosing.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="351"/>
+        <source>Choose a collection directory</source>
+        <translation>Toʻplam katalogini tanlang</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="402"/>
+        <source>{0} / {1} selected</source>
+        <translation>{0} / {1} tanlangan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <source>Cannot create collection</source>
+        <translation>Toʻplamni yaratib boʻlmaydi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="428"/>
+        <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
+        <translation>Resource Sharing ildizi topilmadi. Buning oʻrniga katalogni tanlash uchun &apos;Koʻrish…&apos; dan foydalaning.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <source>Choose a directory</source>
+        <translation>Katalogni tanlang</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="445"/>
+        <source>Click &apos;Browse...&apos; to pick a target directory.</source>
+        <translation>Maqsadli katalogni tanlash uchun &apos;Koʻrish…&apos; ni bosing.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <source>No favorites selected</source>
+        <translation>Sevimlilar tanlanmagan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="474"/>
+        <source>Select at least one favorite to publish.</source>
+        <translation>Nashr qilish uchun kamida bitta sevimlini tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <source>Publish failed</source>
+        <translation>Nashr qilib boʻlmadi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="498"/>
+        <source>Unknown error.</source>
+        <translation>Nomaʼlum xato.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="505"/>
+        <source>Published {0} favorite(s) to:
+
+&lt;code&gt;{1}&lt;/code&gt;</source>
+        <translation>{0} sevimli quyidagi manzilga nashr qilindi:
+
+&lt;code&gt;{1}&lt;/code&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="509"/>
+        <source>Collection manifest updated:
+&lt;code&gt;{0}&lt;/code&gt;</source>
+        <translation>Toʻplam manifesti yangilandi:
+&lt;code&gt;{0}&lt;/code&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="512"/>
+        <source>Publish succeeded</source>
+        <translation>Nashr qilish muvaffaqiyatli</translation>
+    </message>
+</context>
+<context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="112"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="114"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="142"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="146"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -2244,37 +2575,37 @@ Davom etilsinmi?</translation>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="646"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="652"/>
         <source>Type to filter...</source>
         <translation>Filtrlash uchun yozing...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="655"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
         <source>Select All</source>
         <translation>Hammasini tanlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="657"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
         <source>Select All (non subset)</source>
         <translation>Hammasini tanlash (quyi to&apos;plam emas)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="659"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
         <source>Select All (subset)</source>
         <translation>Hammasini tanlash (quyi to&apos;plam)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="667"/>
         <source>De-select All</source>
         <translation>Hammasini bekor qilish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="669"/>
         <source>De-select All (non subset)</source>
         <translation>Hammasini bekor qilish (quyi to&apos;plam emas)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="671"/>
         <source>De-select All (subset)</source>
         <translation>Hammasini bekor qilish (quyi to&apos;plam)</translation>
     </message>
@@ -2282,42 +2613,42 @@ Davom etilsinmi?</translation>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="214"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
         <source>Select All</source>
         <translation>Hammasini tanlash</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="216"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
         <source>De-select All</source>
         <translation>Hammasini bekor qilish</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="218"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Geometriya turi bo&apos;yicha barcha qatlamlarni tanlash (Chiziqlar)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Geometriya turi bo&apos;yicha barcha qatlamlarni bekor qilish (Chiziqlar)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Geometriya turi bo&apos;yicha barcha qatlamlarni tanlash (Nuqtalar)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="230"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Geometriya turi bo&apos;yicha barcha qatlamlarni bekor qilish (Nuqtalar)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="232"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Geometriya turi bo&apos;yicha barcha qatlamlarni tanlash (Ko&apos;pburchaklar)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="234"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Geometriya turi bo&apos;yicha barcha qatlamlarni bekor qilish (Ko&apos;pburchaklar)</translation>
     </message>
@@ -2366,6 +2697,129 @@ Davom etilsinmi?</translation>
         <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
         <source>No match</source>
         <translation>Moslik topilmadi</translation>
+    </message>
+</context>
+<context>
+    <name>SharedFavoritesPickerDialog</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="55"/>
+        <source>FilterMate — Shared Favorites</source>
+        <translation>FilterMate — Umumiy sevimlilar</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="63"/>
+        <source>&lt;b&gt;Shared Favorites&lt;/b&gt; — discovered from QGIS Resource Sharing collections</source>
+        <translation>&lt;b&gt;Umumiy sevimlilar&lt;/b&gt; — QGIS Resource Sharing toʻplamlaridan aniqlangan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="76"/>
+        <source>Search by name, description, collection, or tags...</source>
+        <translation>Nom, tavsif, toʻplam yoki teglar boʻyicha qidirish…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="98"/>
+        <source>Select a shared favorite to preview.</source>
+        <translation>Oldindan koʻrish uchun umumiy sevimlini tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="114"/>
+        <source>Rescan</source>
+        <translation>Qayta skanerlash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="118"/>
+        <source>Fork to my project</source>
+        <translation>Mening loyihamga Fork qilish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="124"/>
+        <source>Close</source>
+        <translation>Yopish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="139"/>
+        <source>No shared collections found. Subscribe to a Resource Sharing repository that ships a &lt;code&gt;filter_mate/favorites&lt;/code&gt; folder, or drop a &lt;code&gt;.fmfav.json&lt;/code&gt; bundle in your resource_sharing collections directory.</source>
+        <translation>Umumiy toʻplamlar topilmadi. &lt;code&gt;filter_mate/favorites&lt;/code&gt; papkasi boʻlgan Resource Sharing omboriga obuna boʻling yoki resource_sharing toʻplamlari katalogiga &lt;code&gt;.fmfav.json&lt;/code&gt; paketini joylashtiring.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="147"/>
+        <source>{0} favorite(s) across {1} collection(s): {2}</source>
+        <translation>{1} toʻplamdagi {0} sevimli: {2}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="160"/>
+        <source>Collection: {0}</source>
+        <translation>Toʻplam: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="172"/>
+        <source>No shared favorites match your search.</source>
+        <translation>Qidiruvingizga mos umumiy sevimlilar yoʻq.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="194"/>
+        <source>&lt;b&gt;{0}&lt;/b&gt; — from &lt;i&gt;{1}&lt;/i&gt;</source>
+        <translation>&lt;b&gt;{0}&lt;/b&gt; — manba: &lt;i&gt;{1}&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="208"/>
+        <source>&lt;b&gt;Expression&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Ifoda&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="213"/>
+        <source>&lt;b&gt;Remote layers&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Uzoqdagi qatlamlar&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="227"/>
+        <source>&lt;b&gt;Tags:&lt;/b&gt; {0}</source>
+        <translation>&lt;b&gt;Teglar:&lt;/b&gt; {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="234"/>
+        <source>&lt;b&gt;Provenance&lt;/b&gt;</source>
+        <translation>&lt;b&gt;Manba&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="236"/>
+        <source>Author: {0}</source>
+        <translation>Muallif: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="238"/>
+        <source>License: {0}</source>
+        <translation>Litsenziya: {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <source>Fork shared favorite</source>
+        <translation>Umumiy sevimlini Fork qilish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <source>Name in your project:</source>
+        <translation>Loyihangizda nom:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <source>Fork successful</source>
+        <translation>Fork muvaffaqiyatli</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <source>&apos;{0}&apos; was added to your favorites.</source>
+        <translation>«{0}» sevimlilaringizga qoʻshildi.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <source>Fork failed</source>
+        <translation>Fork muvaffaqiyatsiz</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <source>Could not add the shared favorite to your project.</source>
+        <translation>Umumiy sevimlini loyihangizga qoʻshib boʻlmadi.</translation>
     </message>
 </context>
 <context>
@@ -2488,7 +2942,7 @@ Davom etilsinmi?</translation>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="474"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="556"/>
         <source>Explore ...</source>
         <translation>O&apos;rganish...</translation>
     </message>
@@ -2498,7 +2952,7 @@ Davom etilsinmi?</translation>
     <message>
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
-        <translation>Language changed to &apos;{0}&apos;.</translation>
+        <translation type="obsolete">Language changed to &apos;{0}&apos;.</translation>
     </message>
 </context>
 </TS>
