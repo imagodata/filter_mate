@@ -146,6 +146,20 @@ class QFieldCloudExtension(BaseExtension):
         """Check if QFieldSync plugin is installed."""
         return _check_qfieldsync_available()
 
+    def missing_deps_hint(self) -> Dict[str, str]:
+        """QFieldSync is a QGIS plugin — not a pip package."""
+        return {
+            "method": "qgis_plugin",
+            "install_command": (
+                "Extensions → Installer/Gérer les extensions → "
+                "Chercher « QFieldSync » → Installer"
+            ),
+            "details": (
+                "QFieldSync est publié par OPENGIS.ch dans le dépôt "
+                "QGIS officiel. Aucun pip install requis."
+            ),
+        }
+
     def initialize(self, iface: Any) -> None:
         """
         Initialize QFieldCloud services.

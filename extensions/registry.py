@@ -262,21 +262,50 @@ class ExtensionRegistry:
             from qgis.PyQt.QtWidgets import QCheckBox, QMessageBox
 
             deps = ", ".join(ext.metadata.dependencies) if ext.metadata.dependencies else "?"
+
+            # FIX 2026-04-23: per-extension install hint so the dialog
+            # stops telling users "pip install resource_sharing" when
+            # the dep is actually a QGIS plugin installed via the
+            # Plugin Manager. Falls back to the legacy pip wording for
+            # extensions that don't override missing_deps_hint().
+            try:
+                hint = ext.missing_deps_hint() or {}
+            except Exception as hint_err:
+                logger.debug("missing_deps_hint() failed for %s: %s", ext_id, hint_err)
+                hint = {}
+            method = (hint.get("method") or "pip").lower()
+            install_cmd = hint.get("install_command") or f"pip install {deps}"
+            details = hint.get("details") or ""
+
+            if method == "qgis_plugin":
+                step_one = f"Installez le plugin QGIS : {install_cmd}"
+            elif method == "manual":
+                step_one = install_cmd
+            else:
+                step_one = f"Installez : {install_cmd}"
+
             msg = QMessageBox(iface.mainWindow())
             msg.setIcon(QMessageBox.Icon.Information)
             msg.setWindowTitle(f"FilterMate — Extension {ext.metadata.name}")
             msg.setText(
-                f"L'extension <b>{ext.metadata.name}</b> est désactivée car "
-                f"les dépendances requises ne sont pas installées.\n"
+                f"L'extension <b>{ext.metadata.name}</b> n'a pas pu démarrer "
+                f"car les dépendances requises ne sont pas disponibles.\n"
             )
-            msg.setInformativeText(
-                f"Paquets manquants : {deps}\n\n"
-                f"Pour l'activer :\n"
-                f"  1. Installez : pip install {deps}\n"
-                f"  2. Redémarrez QGIS\n\n"
-                f"L'extension peut aussi être activée/désactivée dans\n"
-                f"config.json → EXTENSIONS → {ext_id} → enabled"
-            )
+            informative_lines = [
+                f"Paquets manquants : {deps}",
+                "",
+                "Pour l'activer :",
+                f"  1. {step_one}",
+                "  2. Redémarrez QGIS (ou rechargez le plugin FilterMate)",
+            ]
+            if details:
+                informative_lines.extend(["", details])
+            informative_lines.extend([
+                "",
+                "Réglages :",
+                f"  config.json → EXTENSIONS → {ext_id} → enabled",
+            ])
+            msg.setInformativeText("\n".join(informative_lines))
 
             checkbox = QCheckBox("Ne plus afficher ce message")
             msg.setCheckBox(checkbox)
@@ -303,8 +332,13 @@ class ExtensionRegistry:
                     "Extension '%s' not available (missing dependencies)",
                     ext_id,
                 )
-                # Auto-disable in config and notify user
-                ext.set_enabled(False)
+                # FIX 2026-04-23: do NOT flip enabled=False here. Previously
+                # we did, which meant installing the missing dep + reloading
+                # was insufficient — the user also had to re-flip enabled
+                # to True by hand. Leaving the config flag alone lets the
+                # extension auto-resume on the next session once the dep
+                # is available. is_available() remains the single source
+                # of truth per session.
                 self._show_missing_deps_message(ext, iface)
                 return False
 

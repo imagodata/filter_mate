@@ -149,6 +149,32 @@ class BaseExtension(ABC):
         """
         ...
 
+    def missing_deps_hint(self) -> Dict[str, str]:
+        """
+        Actionable install hint surfaced when ``check_dependencies()`` fails.
+
+        Override when the dependency is something other than a PyPI
+        package — e.g. a QGIS plugin (installed via the Plugin Manager,
+        not pip) or a system library. The registry's missing-deps dialog
+        reads these fields instead of hard-coding "pip install …", so
+        users get correct instructions.
+
+        Returns:
+            dict with keys:
+              - ``method``: one of ``'pip'`` (default), ``'qgis_plugin'``,
+                ``'manual'`` — drives the icon/wording in the dialog.
+              - ``install_command``: exact string to display (e.g.
+                ``'pip install qfieldcloud-sdk'`` or
+                ``'Extensions → Installer/Gérer les extensions → Resource Sharing'``).
+              - ``details``: optional extra context (URL, caveats…).
+        """
+        deps = ", ".join(self.metadata.dependencies) if self.metadata.dependencies else "?"
+        return {
+            "method": "pip",
+            "install_command": f"pip install {deps}",
+            "details": "",
+        }
+
     def create_ui(self, toolbar: Any, menu_name: str) -> List[Any]:
         """
         Create UI elements (toolbar buttons, menu entries).

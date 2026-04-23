@@ -32,18 +32,24 @@ logger = logging.getLogger('FilterMate.Extensions.FavoritesSharing')
 # Configuration panel under EXTENSIONS.<ext_id>.enabled.
 _RESOURCE_SHARING_AVAILABLE: Optional[bool] = None
 
+# The QGIS plugin is published under two package names depending on the
+# source: the official repo installs it as ``qgis_resource_sharing``; some
+# forks / zip installs keep the historical ``resource_sharing`` name. Probe
+# both so FilterMate works with either.
+_RESOURCE_SHARING_PLUGIN_NAMES = ('qgis_resource_sharing', 'resource_sharing')
+
 
 def _check_resource_sharing_available() -> bool:
-    """True when the QGIS ``resource_sharing`` plugin is installed.
+    """True when a QGIS Resource Sharing plugin is installed.
 
     Detection order:
-      1. ``qgis.utils.plugins['resource_sharing']`` — the authoritative
-         registry, populated only when the plugin is *loaded* by QGIS.
-      2. ``import resource_sharing`` — catches installed-but-not-loaded
-         cases (plugin present on disk but disabled in the plugin
-         manager). We still enable the extension in that case so the
-         user can opt in by simply enabling the plugin — no FilterMate
-         restart needed.
+      1. ``qgis.utils.plugins[<name>]`` for each candidate — the
+         authoritative registry, populated only when the plugin is
+         *loaded* by QGIS.
+      2. ``import <name>`` — catches installed-but-not-loaded cases
+         (plugin present on disk but disabled in the plugin manager).
+         FilterMate still accepts that state so users can simply enable
+         the plugin without restarting.
     """
     global _RESOURCE_SHARING_AVAILABLE
     if _RESOURCE_SHARING_AVAILABLE is not None:
@@ -51,18 +57,24 @@ def _check_resource_sharing_available() -> bool:
 
     try:
         from qgis.utils import plugins as _qgis_plugins  # type: ignore
-        if 'resource_sharing' in _qgis_plugins:
-            _RESOURCE_SHARING_AVAILABLE = True
-            return True
+        for name in _RESOURCE_SHARING_PLUGIN_NAMES:
+            if name in _qgis_plugins:
+                _RESOURCE_SHARING_AVAILABLE = True
+                return True
     except ImportError:
         pass
 
-    try:
-        import resource_sharing  # noqa: F401
-        _RESOURCE_SHARING_AVAILABLE = True
-    except ImportError:
-        _RESOURCE_SHARING_AVAILABLE = False
-    return _RESOURCE_SHARING_AVAILABLE
+    import importlib
+    for name in _RESOURCE_SHARING_PLUGIN_NAMES:
+        try:
+            importlib.import_module(name)
+            _RESOURCE_SHARING_AVAILABLE = True
+            return True
+        except ImportError:
+            continue
+
+    _RESOURCE_SHARING_AVAILABLE = False
+    return False
 
 
 def reset_resource_sharing_cache() -> None:
@@ -176,6 +188,21 @@ class FavoritesSharingExtension(BaseExtension):
                     "push to the user (fallback A: SMB mount / external sync)."
                 ),
             },
+        }
+
+    def missing_deps_hint(self) -> Dict[str, str]:
+        """Resource Sharing is a QGIS plugin — not a pip package."""
+        return {
+            "method": "qgis_plugin",
+            "install_command": (
+                "Extensions → Installer/Gérer les extensions → "
+                "Chercher « Resource Sharing » → Installer"
+            ),
+            "details": (
+                "Le plugin officiel est disponible dans le dépôt QGIS "
+                "standard (packages: qgis_resource_sharing ou "
+                "resource_sharing). Aucun pip install requis."
+            ),
         }
 
     def check_dependencies(self) -> bool:
