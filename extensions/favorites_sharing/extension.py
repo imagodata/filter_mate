@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional
 from qgis.PyQt.QtCore import QCoreApplication
 
 from ..base import BaseExtension, ExtensionMetadata
+from .remote_repo_manager import RemoteRepoManager
 from .scanner import ResourceSharingScanner
 from .service import FavoritesSharingService
 
@@ -40,6 +41,7 @@ class FavoritesSharingExtension(BaseExtension):
         self._iface = None
         self._scanner: Optional[ResourceSharingScanner] = None
         self._service: Optional[FavoritesSharingService] = None
+        self._remote_repos: Optional[RemoteRepoManager] = None
 
     @property
     def metadata(self) -> ExtensionMetadata:
@@ -103,6 +105,21 @@ class FavoritesSharingExtension(BaseExtension):
                     "current project's layers."
                 ),
             },
+            "remote_repos": {
+                "value": [],
+                "description": (
+                    "List of git-backed collection repos that can be "
+                    "selected as publish targets. Each entry: "
+                    "{name, git_url, branch, local_clone, "
+                    "target_collection, is_default?, auth_header?}. "
+                    "local_clone is a FilterMate-managed cache path (hidden "
+                    "from the user). target_collection is the sub-directory "
+                    "under the repo where bundles are written. "
+                    "When git_url is omitted and local_clone exists, "
+                    "FilterMate writes the bundle locally and leaves the "
+                    "push to the user (fallback A: SMB mount / external sync)."
+                ),
+            },
         }
 
     def check_dependencies(self) -> bool:
@@ -119,8 +136,10 @@ class FavoritesSharingExtension(BaseExtension):
         self._iface = iface
         self._scanner = ResourceSharingScanner(extension=self)
         self._service = FavoritesSharingService(self._scanner)
+        self._remote_repos = RemoteRepoManager(extension=self)
         self.register_service('scanner', self._scanner)
         self.register_service('service', self._service)
+        self.register_service('remote_repos', self._remote_repos)
         logger.info("FavoritesSharing extension initialized")
 
     # ------------------------------------------------------------------
@@ -156,6 +175,25 @@ class FavoritesSharingExtension(BaseExtension):
     def is_auto_refresh_enabled(self) -> bool:
         return bool(self.get_config("auto_refresh_on_project_load", default=True))
 
+    def get_remote_repos(self) -> List[Dict[str, Any]]:
+        """Return the configured remote repos (never None, never malformed).
+
+        Entries with no ``name`` are dropped; unknown fields are preserved
+        for forward compatibility.
+        """
+        raw = self.get_config("remote_repos", default=[])
+        if not isinstance(raw, list):
+            return []
+        repos: List[Dict[str, Any]] = []
+        for entry in raw:
+            if not isinstance(entry, dict):
+                continue
+            name = str(entry.get("name") or "").strip()
+            if not name:
+                continue
+            repos.append(entry)
+        return repos
+
     def create_ui(self, toolbar: Any, menu_name: str) -> List[Any]:
         """No toolbar button — UI is injected into the Favorites Manager
         dialog via the service when the dialog opens.
@@ -165,6 +203,7 @@ class FavoritesSharingExtension(BaseExtension):
     def teardown(self) -> None:
         self._scanner = None
         self._service = None
+        self._remote_repos = None
         self._iface = None
 
     def on_project_loaded(self) -> None:

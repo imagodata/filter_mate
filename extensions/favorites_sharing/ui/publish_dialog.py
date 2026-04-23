@@ -33,6 +33,7 @@ try:
 except ImportError:  # pragma: no cover
     HAS_QT = False
 
+from ..remote_repo_manager import RemoteRepo, RemoteRepoManager
 from ..service import CollectionTarget, FavoritesSharingService
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.UI.Publish')
@@ -46,6 +47,8 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
     # Sentinel keys in the target combo
     _TARGET_NEW_IN_ROOT = "__NEW_IN_ROOT__"
     _TARGET_CUSTOM_DIR = "__CUSTOM_DIR__"
+    # Prefix to disambiguate configured-repo items from scanned collections
+    _REMOTE_REPO_DATA_PREFIX = "__REPO__:"
 
     def __init__(
         self,
@@ -63,12 +66,33 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         # Defaults pulled from config — author/license/homepage prefill so
         # publishing repeatedly into the same org doesn't require re-typing.
         self._config_defaults = self._read_config_defaults(sharing_service)
+        # Optional: remote git-backed repos configured by IT
+        self._remote_repo_manager: Optional[RemoteRepoManager] = \
+            self._resolve_remote_repo_manager(sharing_service)
 
         if HAS_QT:
             self._setup_ui()
             self._refresh_targets()
             self._populate_favorites()
             self._apply_default_metadata_prefill()
+
+    @staticmethod
+    def _resolve_remote_repo_manager(
+        sharing_service: Optional[FavoritesSharingService],
+    ) -> Optional[RemoteRepoManager]:
+        """Return the RemoteRepoManager registered on the owning extension.
+
+        Falls back to None when no extension is wired (legacy tests) or
+        when the service isn't registered — the dialog then renders its
+        pre-v5 behavior (scanned collections only, no git).
+        """
+        extension = getattr(sharing_service, "extension", None)
+        if extension is None:
+            return None
+        mgr = extension.get_service("remote_repos") if hasattr(extension, "get_service") else None
+        if isinstance(mgr, RemoteRepoManager):
+            return mgr
+        return None
 
     @staticmethod
     def _read_config_defaults(sharing_service: Optional[FavoritesSharingService]) -> dict:
@@ -286,12 +310,24 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         self._target_combo.blockSignals(True)
         self._target_combo.clear()
 
+        # 1) Configured remote repos (git-backed or local-only) first —
+        # these are typically pushed by IT and should be the prominent
+        # choice. Entries appear independently of on-disk clone state.
+        if self._remote_repo_manager is not None:
+            for repo in self._remote_repo_manager.list_repos():
+                icon = "🌐 " if repo.has_remote else "📁 "
+                label = f"{icon}{repo.name}  [{repo.status_badge()}]"
+                self._target_combo.addItem(
+                    label, f"{self._REMOTE_REPO_DATA_PREFIX}{repo.name}",
+                )
+
+        # 2) Filesystem-scanned collections
         for t in self._targets:
             icon = "📁 " if not t.is_new else "✨ "
             label = f"{icon}{t.display_name}  ({os.path.basename(t.collection_dir)})"
             self._target_combo.addItem(label, t)
 
-        # Virtual options
+        # 3) Virtual options
         if self._sharing_service._scanner.get_collections_root() is not None:
             self._target_combo.addItem(
                 "✨ " + self.tr("New collection in Resource Sharing root..."),
@@ -304,11 +340,22 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
 
         self._target_combo.blockSignals(False)
 
-        # Pre-select the default collection from config when it matches
-        # an existing target; otherwise fall back to the first one.
-        default_path = (self._config_defaults.get('default_publish_collection') or '').strip()
+        # Pre-selection order:
+        #   a) Default remote repo (is_default) when one is configured
+        #   b) default_publish_collection path from config
+        #   c) First available target
         selected_index = -1
-        if default_path:
+        if self._remote_repo_manager is not None:
+            default_repo = self._remote_repo_manager.get_default()
+            if default_repo is not None:
+                needle = f"{self._REMOTE_REPO_DATA_PREFIX}{default_repo.name}"
+                for i in range(self._target_combo.count()):
+                    if self._target_combo.itemData(i) == needle:
+                        selected_index = i
+                        break
+
+        default_path = (self._config_defaults.get('default_publish_collection') or '').strip()
+        if selected_index < 0 and default_path:
             abs_default = os.path.abspath(default_path)
             for i in range(self._target_combo.count()):
                 data = self._target_combo.itemData(i)
@@ -348,6 +395,17 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
                 self._meta_tags_edit.setText("")
             self._meta_homepage_edit.setText(str(meta.get('homepage') or ""))
             self._meta_desc_edit.setPlainText(str(meta.get('description') or ""))
+        elif isinstance(data, str) and data.startswith(self._REMOTE_REPO_DATA_PREFIX):
+            repo = self._resolve_selected_repo(data)
+            if repo is not None:
+                hint = self._format_repo_hint(repo)
+                self._set_path_hint(hint)
+                # Prefill metadata name from the repo's target_collection
+                # so the bundle manifest has a sensible default.
+                if not self._meta_name_edit.text().strip():
+                    self._meta_name_edit.setText(
+                        repo.target_collection or repo.name
+                    )
         elif data == self._TARGET_NEW_IN_ROOT:
             self._set_path_hint(self.tr("Will be created under the Resource Sharing root."))
         elif data == self._TARGET_CUSTOM_DIR:
@@ -425,6 +483,30 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
                     ids.append(fav_id)
         return ids
 
+    # ─── Remote repo helpers ──────────────────────────────────────────
+
+    def _resolve_selected_repo(self, data: str) -> Optional[RemoteRepo]:
+        """Resolve the RemoteRepo corresponding to a combo data sentinel."""
+        if self._remote_repo_manager is None:
+            return None
+        if not isinstance(data, str) or not data.startswith(self._REMOTE_REPO_DATA_PREFIX):
+            return None
+        name = data[len(self._REMOTE_REPO_DATA_PREFIX):]
+        return self._remote_repo_manager.get_by_name(name)
+
+    def _format_repo_hint(self, repo: RemoteRepo) -> str:
+        """Build the tooltip/path hint shown under the combo for a repo."""
+        parts: List[str] = []
+        if repo.has_remote:
+            parts.append(f"git: {repo.git_url}")
+            if repo.branch:
+                parts.append(f"branch: {repo.branch}")
+        parts.append(f"clone: {repo.expanded_local_clone or '(not set)'}")
+        if repo.target_collection:
+            parts.append(f"collection: {repo.target_collection}")
+        parts.append(f"status: {repo.status_badge()}")
+        return "  ·  ".join(parts)
+
     # ─── Publish ──────────────────────────────────────────────────────
 
     def _resolve_target(self) -> Optional[CollectionTarget]:
@@ -480,6 +562,125 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             'homepage': self._meta_homepage_edit.text().strip(),
         }
 
+    # ─── Git-backed publish (Option B) ────────────────────────────────
+
+    def _publish_to_remote_repo(self, repo: RemoteRepo, fav_ids: List[str]) -> None:
+        """Run the clone/pull → write → commit → push pipeline.
+
+        On any git failure, surface the clone path so the user can open
+        their own tooling. No auto-rebase, no force-push.
+        """
+        if self._remote_repo_manager is None:
+            QMessageBox.warning(
+                self, self.tr("Remote repos unavailable"),
+                self.tr("Remote repo manager is not initialized."),
+            )
+            return
+
+        bundle_name = self._bundle_name_edit.text().strip() or "favorites"
+        metadata = self._collect_metadata()
+
+        # Block the UI — git calls are sync. A worker thread would be
+        # nicer but the blocking window is already bounded by the 30s
+        # GitClient timeout and publish is a rare/intentional action.
+        try:
+            from qgis.PyQt.QtCore import Qt
+            from qgis.PyQt.QtWidgets import QApplication
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        except Exception:
+            QApplication = None  # type: ignore
+
+        try:
+            # Inline closure: lets RemoteRepoManager call back into the
+            # FilterMate bundle writer without knowing about favorites.
+            def _write_bundle(collection_dir: str) -> str:
+                result = self._sharing_service.publish_bundle(
+                    favorites_service=self._favorites_service,
+                    target=CollectionTarget(
+                        collection_dir=collection_dir,
+                        display_name=metadata.get('name') or repo.name,
+                        is_new=not os.path.isdir(collection_dir),
+                    ),
+                    bundle_filename=bundle_name,
+                    favorite_ids=fav_ids,
+                    collection_metadata=metadata,
+                    overwrite=self._overwrite_check.isChecked(),
+                )
+                if not result.success:
+                    raise RuntimeError(
+                        result.error_message or "bundle write failed"
+                    )
+                return result.bundle_path
+
+            # Build a plausible commit author from the metadata form
+            author_name = metadata.get('author') or ''
+            commit_author: Optional[str] = None
+            if author_name:
+                commit_author = f"{author_name} <filter_mate@imagodata.local>"
+
+            sync = self._remote_repo_manager.publish_bundle(
+                repo, _write_bundle, commit_author=commit_author,
+            )
+        finally:
+            try:
+                if QApplication is not None:
+                    QApplication.restoreOverrideCursor()
+            except Exception:
+                pass
+
+        # Report outcome
+        if not sync.success:
+            detail = sync.error_message or self.tr("Unknown error.")
+            box = QMessageBox(self)
+            box.setIcon(QMessageBox.Icon.Warning)
+            box.setWindowTitle(self.tr("Publish failed"))
+            box.setText(self.tr("Publishing to <b>{0}</b> failed.").format(repo.name))
+            box.setInformativeText(detail)
+            # Offer a way out: open the clone dir so the user can resolve
+            open_btn = None
+            if sync.clone_path and os.path.isdir(sync.clone_path):
+                open_btn = box.addButton(
+                    self.tr("Open clone..."), QMessageBox.ButtonRole.ActionRole,
+                )
+            box.addButton(QMessageBox.StandardButton.Close)
+            box.exec()
+            if open_btn is not None and box.clickedButton() is open_btn:
+                self._open_path(sync.clone_path)
+            return
+
+        # Success
+        lines = [
+            self.tr("Wrote bundle to:") + f"\n<code>{sync.bundle_written_at}</code>",
+        ]
+        if sync.pushed:
+            lines.append(
+                self.tr("Pushed commit <code>{0}</code> to <b>{1}</b>.")
+                .format(sync.commit_sha or "?", repo.name)
+            )
+        elif sync.skipped_push_reason == "no_remote":
+            lines.append(self.tr(
+                "No git_url configured — bundle written locally. "
+                "Push manually via your own tooling."
+            ))
+        elif sync.skipped_push_reason == "no_changes":
+            lines.append(self.tr("Nothing to commit — bundle content unchanged."))
+
+        QMessageBox.information(
+            self, self.tr("Publish succeeded"),
+            "<br><br>".join(lines),
+        )
+        self.accept()
+
+    @staticmethod
+    def _open_path(path: str) -> None:
+        """Open a filesystem path in the OS file manager."""
+        try:
+            from qgis.PyQt.QtCore import QUrl
+            from qgis.PyQt.QtGui import QDesktopServices
+            QDesktopServices.openUrl(QUrl.fromLocalFile(path))
+        except Exception as exc:
+            logger.debug("Could not open %s: %s", path, exc)
+
     def _on_publish(self) -> None:
         fav_ids = self._selected_favorite_ids()
         if not fav_ids:
@@ -488,6 +689,15 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
                 self.tr("No favorites selected"),
                 self.tr("Select at least one favorite to publish."),
             )
+            return
+
+        # Branch: when a configured remote repo is selected, take the
+        # git flow (clone/pull → write → commit → push). Otherwise fall
+        # through to the legacy local collection publish.
+        data = self._target_combo.currentData()
+        repo = self._resolve_selected_repo(data) if isinstance(data, str) else None
+        if repo is not None:
+            self._publish_to_remote_repo(repo, fav_ids)
             return
 
         target = self._resolve_target()

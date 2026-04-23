@@ -89,17 +89,31 @@ class ExtensionRegistry:
                     try:
                         if extension.seed_default_config():
                             config_dirty = True
+                            logger.info(
+                                "Seeded missing config keys for extension '%s'",
+                                ext_id,
+                            )
                     except Exception as seed_err:
-                        logger.debug(
+                        logger.warning(
                             "Config seeding failed for '%s': %s",
                             ext_id, seed_err,
                         )
             except Exception as e:
                 logger.warning("Failed to load extension '%s': %s", entry, e)
 
-        # Persist once for all extensions that seeded new keys.
+        # Persist when something changed. Also persist when discover_extensions
+        # inserted *any* new extension namespace (even empty) — callers rely
+        # on EXTENSIONS.<ext_id> existing on disk so the Configuration UI
+        # enumerates them.
         if config_dirty:
-            self._persist_config()
+            if self._persist_config():
+                logger.info("Extension config persisted to config.json")
+            else:
+                logger.warning(
+                    "Could not persist extension config — %d extension(s) "
+                    "may show stale options in the Configuration panel",
+                    len(discovered),
+                )
 
         return discovered
 
