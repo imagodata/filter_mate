@@ -77,6 +77,18 @@ FALLBACK_CONFIG = {
                 "choices": [True, False],
                 "description": "Do not show the missing dependencies warning"
             }
+        },
+        "favorites_sharing": {
+            "enabled": {
+                "value": True,
+                "choices": [True, False],
+                "description": "Enable/disable the Favorites Sharing extension (Resource Sharing integration)"
+            },
+            "dismiss_missing_deps_warning": {
+                "value": False,
+                "choices": [True, False],
+                "description": "Do not show the missing dependencies warning"
+            }
         }
     }
 }

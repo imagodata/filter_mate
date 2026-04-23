@@ -769,6 +769,16 @@
         "value": false,
         "description": "Do not show the missing dependencies warning for this extension"
       }
+    },
+    "favorites_sharing": {
+      "enabled": {
+        "value": true,
+        "description": "Enable/disable the Favorites Sharing extension. When enabled, the favorites menu exposes 'Import from Resource Sharing...' and the manager dialog shows a '📡 Shared...' button to browse favorite collections distributed via the QGIS Resource Sharing plugin."
+      },
+      "dismiss_missing_deps_warning": {
+        "value": false,
+        "description": "Do not show the missing dependencies warning for this extension"
+      }
     }
   }
 }

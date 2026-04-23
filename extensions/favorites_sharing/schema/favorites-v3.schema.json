@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filtermate.qgis/favorites/v3.schema.json",
+  "title": "FilterMate Favorites Bundle v3",
+  "type": "object",
+  "required": ["schema", "schema_version", "favorites"],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "filter_mate.favorites"
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3
+    },
+    "min_compat_plugin_version": {
+      "type": "string",
+      "description": "Minimum FilterMate version able to read this bundle without data loss (semver)."
+    },
+    "generator": {
+      "type": "string",
+      "description": "Identifier of the tool/version that wrote this file (e.g. 'filter_mate/5.0.12')."
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "version": {
+      "type": "string",
+      "description": "Legacy version field for v1/v2 readers. Mirrors schema_version as a decimal."
+    },
+    "collection": {
+      "type": "object",
+      "description": "Optional collection metadata when the bundle is published via Resource Sharing.",
+      "properties": {
+        "name": { "type": "string" },
+        "author": { "type": "string" },
+        "license": { "type": "string" },
+        "description": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "homepage": { "type": "string" },
+        "icon": { "type": "string" }
+      }
+    },
+    "favorites": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/favorite" }
+    }
+  },
+  "definitions": {
+    "favorite": {
+      "type": "object",
+      "required": ["name", "expression"],
+      "properties": {
+        "id": {
+          "type": ["string", "null"],
+          "description": "UUID — stripped on export, generated on import."
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "expression": { "type": "string" },
+        "description": { "type": "string" },
+        "layer_name": { "type": ["string", "null"] },
+        "layer_id": {
+          "type": ["string", "null"],
+          "description": "Local QgsMapLayer UUID — always null in portable bundles."
+        },
+        "layer_provider": { "type": ["string", "null"] },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "created_at": { "type": ["string", "null"] },
+        "updated_at": { "type": ["string", "null"] },
+        "use_count": { "type": "integer", "minimum": 0 },
+        "last_used_at": { "type": ["string", "null"] },
+        "portable": {
+          "type": "boolean",
+          "description": "True when the favorite carries layer_signature(s) and can be resolved in a sibling project."
+        },
+        "remote_layers": {
+          "type": ["object", "null"],
+          "description": "Remote layer filters, keyed by portable signature (v3) or layer name (v1/v2).",
+          "additionalProperties": { "$ref": "#/definitions/remoteLayer" }
+        },
+        "spatial_config": {
+          "type": ["object", "null"],
+          "description": "Spatial context (selected FIDs, predicates, buffer, source_layer_signature)."
+        }
+      }
+    },
+    "remoteLayer": {
+      "type": "object",
+      "properties": {
+        "expression": { "type": "string" },
+        "feature_count": { "type": ["integer", "string"] },
+        "layer_id": { "type": ["string", "null"] },
+        "layer_signature": {
+          "type": "string",
+          "description": "Portable identifier: 'postgres::schema.table', 'ogr::layername', 'spatialite::table', etc."
+        },
+        "display_name": {
+          "type": "string",
+          "description": "Original author's layer display name for UI rendering."
+        },
+        "provider": { "type": "string" }
+      }
+    }
+  }
+}
