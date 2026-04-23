@@ -234,6 +234,25 @@ def build_combined_expression(
     if not old_subset:
         return new_where_clause
 
+    # FIX 2026-04-23: strip stale non-boolean subsets (e.g. COALESCE/CONCAT
+    # display expressions persisted in the layer from an earlier bad write).
+    # Without this, the next filter becomes `(coalesce(...)) AND (...)` and
+    # PostgreSQL rejects it with "argument of AND must be type boolean, not
+    # type character varying". The sanitizer returns '' when the whole subset
+    # is a standalone display expression, so we replace instead of combining.
+    try:
+        from ....core.filter import sanitize_subset_string
+        sanitized_old = sanitize_subset_string(old_subset)
+        if not sanitized_old or not sanitized_old.strip():
+            logger.info(
+                "[PostgreSQL] Old subset is a non-boolean display expression "
+                f"(sanitizer stripped it): '{old_subset[:80]}...' - replacing"
+            )
+            return new_where_clause
+        old_subset = sanitized_old
+    except ImportError:
+        logger.debug("[PostgreSQL] Sanitizer unavailable - proceeding without stale-subset cleanup")
+
     should_combine, reason = should_combine_filters(old_subset)
 
     if not should_combine:

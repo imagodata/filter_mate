@@ -323,6 +323,40 @@ def get_primary_key_name(layer) -> Optional[str]:
 # Display Field Detection
 # =============================================================================
 
+_NON_BOOLEAN_DISPLAY_PREFIXES = (
+    'COALESCE(', 'CONCAT(', 'FORMAT(', 'FORMAT_DATE(', 'FORMAT_NUMBER(',
+    'TO_STRING(', 'UPPER(', 'LOWER(', 'TRIM(', 'SUBSTR(', 'REPLACE(',
+    'SUM(', 'COUNT(', 'AVG(', 'MIN(', 'MAX(', 'ARRAY_AGG(',
+    'AGGREGATE(', 'RELATION_AGGREGATE(',
+)
+
+
+def _is_non_boolean_display_expression(expression: str) -> bool:
+    """True if `expression` starts with a known display function (COALESCE,
+    CONCAT, FORMAT, …) and has no outer boolean operator — reusing it as a
+    SQL WHERE clause would hit PostgreSQL's "argument of WHERE must be type
+    boolean" check.
+
+    Plain field references (``"name"``, ``"table"."field"``) are NOT treated
+    as non-boolean here: they round-trip safely as a display label, and any
+    downstream path that tries to use them as a filter is already guarded by
+    `should_skip_expression_for_filtering()`.
+    """
+    if not expression or not expression.strip():
+        return False
+    stripped = expression.strip()
+    upper = stripped.upper()
+    if not any(upper.startswith(prefix) for prefix in _NON_BOOLEAN_DISPLAY_PREFIXES):
+        return False
+    # Function-form detected — defer to the sanitizer's depth-0 operator scan
+    # (it knows to preserve valid filters like `COALESCE(...) = 'x'`).
+    try:
+        from ...core.filter.expression_sanitizer import _is_standalone_display_expression
+        return _is_standalone_display_expression(stripped)
+    except ImportError:
+        return True  # conservative: treat it as non-boolean
+
+
 def _field_has_values(layer, field_name: str, sample_size: int = 5) -> bool:
     """
     Check if a field has at least one non-null, non-empty value.
@@ -405,10 +439,22 @@ def get_best_display_field(layer, sample_size: int = 10, use_value_relations: bo
         return ""
 
     # Priority 1: Check if layer has a configured display expression
+    # FIX 2026-04-23: skip standalone display-function expressions (COALESCE,
+    # CONCAT, FORMAT…). These are labelling helpers — when FilterMate adopts
+    # them as `custom_selection_expression` / exploring display they end up
+    # pushed into `layer.subsetString()` on downstream paths, and PostgreSQL
+    # rejects `WHERE COALESCE(...)` as "argument of WHERE must be type
+    # boolean". Fall through to a real filterable field instead.
     layer_display_expr = get_layer_display_expression(layer)
     if layer_display_expr:
-        logger.debug(f"Using layer display expression for {layer.name()}: {layer_display_expr}")
-        return layer_display_expr
+        if _is_non_boolean_display_expression(layer_display_expr):
+            logger.info(
+                f"Skipping non-boolean display expression for {layer.name()}: "
+                f"'{layer_display_expr[:80]}...' — falling back to a concrete field."
+            )
+        else:
+            logger.debug(f"Using layer display expression for {layer.name()}: {layer_display_expr}")
+            return layer_display_expr
 
     # Priority 2: Check for ValueRelation fields that could provide better display
     first_vr_expression = None

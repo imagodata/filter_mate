@@ -327,33 +327,53 @@ class FavoritesController(BaseController):
 
         Returns:
             The current filter expression, or empty string if none
+
+        FIX 2026-04-23: filter out standalone display expressions (COALESCE,
+        CONCAT, bare field refs…) so favorites never capture a non-boolean
+        clause that would blow up as `WHERE COALESCE(...)` on reapply.
         """
+        def _clean(candidate: Optional[str]) -> str:
+            if not candidate or not candidate.strip():
+                return ""
+            try:
+                from ...core.filter import sanitize_subset_string
+                sanitized = sanitize_subset_string(candidate)
+            except ImportError:
+                return candidate
+            if not sanitized or not sanitized.strip():
+                logger.info(
+                    "get_current_filter_expression: dropping non-boolean expression "
+                    f"(display expr, not a filter): '{candidate[:80]}...'"
+                )
+                return ""
+            return sanitized
+
         try:
             # Source 1: Try expression widget
             if hasattr(self.dockwidget, 'mQgsFieldExpressionWidget_filtering_active_expression'):
                 widget = self.dockwidget.mQgsFieldExpressionWidget_filtering_active_expression
                 if hasattr(widget, 'expression'):
-                    expr = widget.expression()
-                    if expr and expr.strip():
-                        return expr
+                    cleaned = _clean(widget.expression())
+                    if cleaned:
+                        return cleaned
                 elif hasattr(widget, 'currentText'):
-                    expr = widget.currentText()
-                    if expr and expr.strip():
-                        return expr
+                    cleaned = _clean(widget.currentText())
+                    if cleaned:
+                        return cleaned
 
             # Source 2: Try current layer's subsetString
             if hasattr(self.dockwidget, 'current_layer') and self.dockwidget.current_layer:
-                subset = self.dockwidget.current_layer.subsetString()
-                if subset and subset.strip():
-                    return subset
+                cleaned = _clean(self.dockwidget.current_layer.subsetString())
+                if cleaned:
+                    return cleaned
 
             # Source 3: Try filtering source layer combobox
             if hasattr(self.dockwidget, 'comboBox_filtering_current_layer'):
                 layer = self.dockwidget.comboBox_filtering_current_layer.currentLayer()
                 if layer:
-                    subset = layer.subsetString()
-                    if subset and subset.strip():
-                        return subset
+                    cleaned = _clean(layer.subsetString())
+                    if cleaned:
+                        return cleaned
 
             return ""
         except Exception as e:
