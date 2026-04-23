@@ -58,6 +58,11 @@ class FavoritesSharingService:
     def __init__(self, scanner: ResourceSharingScanner):
         self._scanner = scanner
 
+    @property
+    def extension(self):
+        """Owning FavoritesSharingExtension (or None when used standalone)."""
+        return getattr(self._scanner, "_extension", None)
+
     # ─── Discovery ─────────────────────────────────────────────────────
 
     def list_shared(self, search_query: Optional[str] = None) -> List[SharedFavorite]:

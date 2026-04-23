@@ -14,7 +14,7 @@ list. Users can still install collections manually under that tree.
 """
 
 import logging
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from qgis.PyQt.QtCore import QCoreApplication
 
@@ -58,6 +58,53 @@ class FavoritesSharingExtension(BaseExtension):
             icon_name="favorites_shared.png",
         )
 
+    def config_schema(self) -> Dict[str, Dict[str, Any]]:
+        """Declare user-facing options under ``EXTENSIONS.favorites_sharing``."""
+        return {
+            "resource_sharing_root": {
+                "value": "",
+                "description": (
+                    "Absolute path to the Resource Sharing 'collections' "
+                    "directory. Leave empty to auto-detect from QGIS profile. "
+                    "Example: /home/user/.local/share/QGIS/QGIS3/profiles/"
+                    "default/resource_sharing/collections"
+                ),
+            },
+            "default_publish_collection": {
+                "value": "",
+                "description": (
+                    "Absolute path (or sub-directory name under "
+                    "resource_sharing_root) of the collection pre-selected "
+                    "when publishing a bundle. Empty = first available."
+                ),
+            },
+            "default_publish_metadata": {
+                "value": {"author": "", "license": "", "homepage": ""},
+                "description": (
+                    "Default metadata pre-filled in the Publish dialog "
+                    "(author, license, homepage). Saves re-typing across "
+                    "publishes."
+                ),
+            },
+            "allowed_collections": {
+                "value": [],
+                "description": (
+                    "Opt-in allow-list of collection directory basenames. "
+                    "When non-empty, only these collections are scanned. "
+                    "Empty list = scan everything under resource_sharing_root."
+                ),
+            },
+            "auto_refresh_on_project_load": {
+                "value": True,
+                "choices": [True, False],
+                "description": (
+                    "Re-scan Resource Sharing collections whenever a QGIS "
+                    "project is loaded so signature resolution uses the "
+                    "current project's layers."
+                ),
+            },
+        }
+
     def check_dependencies(self) -> bool:
         """No hard dependencies — always available.
 
@@ -70,11 +117,44 @@ class FavoritesSharingExtension(BaseExtension):
 
     def initialize(self, iface: Any) -> None:
         self._iface = iface
-        self._scanner = ResourceSharingScanner()
+        self._scanner = ResourceSharingScanner(extension=self)
         self._service = FavoritesSharingService(self._scanner)
         self.register_service('scanner', self._scanner)
         self.register_service('service', self._service)
         logger.info("FavoritesSharing extension initialized")
+
+    # ------------------------------------------------------------------
+    # Convenience typed accessors (keep call sites short & untyped-safe)
+    # ------------------------------------------------------------------
+
+    def get_resource_sharing_root(self) -> Optional[str]:
+        value = self.get_config("resource_sharing_root", default="")
+        return str(value) if value else None
+
+    def get_allowed_collections(self) -> List[str]:
+        value = self.get_config("allowed_collections", default=[])
+        if isinstance(value, list):
+            return [str(v) for v in value if v]
+        return []
+
+    def get_default_publish_collection(self) -> str:
+        return str(self.get_config("default_publish_collection", default="") or "")
+
+    def get_default_publish_metadata(self) -> Dict[str, str]:
+        meta = self.get_config(
+            "default_publish_metadata",
+            default={"author": "", "license": "", "homepage": ""},
+        )
+        if not isinstance(meta, dict):
+            meta = {}
+        return {
+            "author": str(meta.get("author") or ""),
+            "license": str(meta.get("license") or ""),
+            "homepage": str(meta.get("homepage") or ""),
+        }
+
+    def is_auto_refresh_enabled(self) -> bool:
+        return bool(self.get_config("auto_refresh_on_project_load", default=True))
 
     def create_ui(self, toolbar: Any, menu_name: str) -> List[Any]:
         """No toolbar button — UI is injected into the Favorites Manager
@@ -89,10 +169,12 @@ class FavoritesSharingExtension(BaseExtension):
 
     def on_project_loaded(self) -> None:
         """Re-scan so a newly-loaded project's layers can resolve shared
-        favorites' signatures.
+        favorites' signatures — unless the user has opted out via
+        ``auto_refresh_on_project_load``.
         """
-        if self._service is not None:
-            try:
-                self._service.invalidate_cache()
-            except Exception as e:
-                logger.debug(f"Scanner cache invalidation skipped: {e}")
+        if self._service is None or not self.is_auto_refresh_enabled():
+            return
+        try:
+            self._service.invalidate_cache()
+        except Exception as e:
+            logger.debug(f"Scanner cache invalidation skipped: {e}")

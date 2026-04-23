@@ -65,53 +65,10 @@ FALLBACK_CONFIG = {
             }
         }
     },
-    "EXTENSIONS": {
-        "qfieldcloud": {
-            "enabled": {
-                "value": False,
-                "choices": [True, False],
-                "description": "Enable/disable the QFieldCloud extension"
-            },
-            "dismiss_missing_deps_warning": {
-                "value": False,
-                "choices": [True, False],
-                "description": "Do not show the missing dependencies warning"
-            }
-        },
-        "favorites_sharing": {
-            "enabled": {
-                "value": True,
-                "choices": [True, False],
-                "description": "Enable/disable the Favorites Sharing extension (Resource Sharing integration)"
-            },
-            "dismiss_missing_deps_warning": {
-                "value": False,
-                "choices": [True, False],
-                "description": "Do not show the missing dependencies warning"
-            },
-            "resource_sharing_root": {
-                "value": "",
-                "description": "Absolute path to the Resource Sharing 'collections' dir (empty = auto-detect)"
-            },
-            "default_publish_collection": {
-                "value": "",
-                "description": "Default target collection pre-selected in the Publish dialog"
-            },
-            "default_publish_metadata": {
-                "value": {"author": "", "license": "", "homepage": ""},
-                "description": "Default author / license / homepage pre-filled when publishing"
-            },
-            "allowed_collections": {
-                "value": [],
-                "description": "Opt-in allow-list of collection directory names (empty = scan all)"
-            },
-            "auto_refresh_on_project_load": {
-                "value": True,
-                "choices": [True, False],
-                "description": "Re-scan Resource Sharing on project load"
-            }
-        }
-    }
+    # Extension config namespace is populated at runtime by the
+    # ExtensionRegistry from each extension's config_schema(). Keeping an
+    # empty container here avoids drift with per-extension defaults.
+    "EXTENSIONS": {}
 }
 
 

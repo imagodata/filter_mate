@@ -76,7 +76,7 @@ class QFieldCloudService:
         description: str = "",
         styles_dir: Optional[Path] = None,
         layer_actions: Optional[Dict[str, str]] = None,
-        srid: int = 31370,
+        srid: Optional[int] = None,
         auto_package: bool = True,
         existing_project_id: Optional[str] = None,
         progress_callback: Optional[Callable[[int, str], None]] = None,
@@ -90,7 +90,8 @@ class QFieldCloudService:
             description: Project description
             styles_dir: Optional path to QML style files
             layer_actions: Layer -> QFieldSync action mode mapping
-            srid: EPSG code for the project CRS
+            srid: EPSG code for the project CRS. None = read from
+                FilterMate config (``default_srid``), falling back to 4326.
             auto_package: Trigger packaging after upload
             existing_project_id: Update existing project instead of creating new
             progress_callback: Called with (percent, message)
@@ -101,6 +102,16 @@ class QFieldCloudService:
         start_time = time.time()
         result = QFieldCloudPushResult()
         tmp_dir = None
+
+        # Resolve default SRID from team-level config when caller didn't pin one
+        if srid is None:
+            if self._credentials is not None and hasattr(self._credentials, "get_default_srid"):
+                try:
+                    srid = self._credentials.get_default_srid()
+                except Exception:
+                    srid = 4326
+            else:
+                srid = 4326
 
         def _progress(percent: int, msg: str):
             if progress_callback:

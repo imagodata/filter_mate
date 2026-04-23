@@ -287,7 +287,7 @@ def test_scanner_allow_list_filters_collections(tmp_path, monkeypatch):
     monkeypatch.setattr(
         ResourceSharingScanner,
         "_read_allowed_collections",
-        staticmethod(lambda: ["kept"]),
+        lambda self: ["kept"],
     )
 
     items = scanner.scan()
@@ -308,7 +308,7 @@ def test_scanner_empty_allow_list_scans_everything(tmp_path, monkeypatch):
     monkeypatch.setattr(
         ResourceSharingScanner,
         "_read_allowed_collections",
-        staticmethod(lambda: []),
+        lambda self: [],
     )
     items = scanner.scan()
     assert any(f.name == "Anyone" for f in items)
@@ -327,7 +327,7 @@ def test_scanner_uses_config_root_override(tmp_path, monkeypatch):
     monkeypatch.setattr(
         ResourceSharingScanner,
         "_read_configured_root",
-        staticmethod(lambda: str(real_root)),
+        lambda self: str(real_root),
     )
     assert scanner.get_collections_root() == str(real_root)
     items = scanner.scan()

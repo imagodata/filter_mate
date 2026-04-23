@@ -71,8 +71,21 @@ class ResourceSharingScanner:
 
     FAVORITE_FILE_SUFFIXES: Tuple[str, ...] = ('.fmfav.json', '.fmfav-pack.json')
 
-    def __init__(self, collections_root: Optional[str] = None):
+    def __init__(
+        self,
+        collections_root: Optional[str] = None,
+        extension: Optional[Any] = None,
+    ):
+        """
+        Args:
+            collections_root: Hard-coded root override (tests mostly).
+            extension: Owning ``FavoritesSharingExtension`` — used to read
+                config (resource_sharing_root, allowed_collections). When
+                omitted the scanner falls back to standalone ENV_VARS
+                lookups for backward compatibility.
+        """
         self._explicit_root = collections_root
+        self._extension = extension
         self._cache: Optional[List[SharedFavorite]] = None
 
     # ─── Path discovery ────────────────────────────────────────────────
@@ -190,16 +203,18 @@ class ResourceSharingScanner:
 
     # ─── Helpers ───────────────────────────────────────────────────────
 
-    @staticmethod
-    def _read_configured_root() -> Optional[str]:
-        """Read ``EXTENSIONS.favorites_sharing.resource_sharing_root``
-        from FilterMate config, if set.
+    def _read_configured_root(self) -> Optional[str]:
+        """Read ``EXTENSIONS.favorites_sharing.resource_sharing_root`` from
+        FilterMate config — via the owning extension when available, else
+        a direct ENV_VARS lookup (kept for standalone tests).
         """
+        if self._extension is not None:
+            try:
+                return self._extension.get_resource_sharing_root()
+            except Exception:
+                pass
         try:
             from filter_mate.config.config import ENV_VARS, _get_option_value
-        except Exception:
-            return None
-        try:
             cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
                 .get("EXTENSIONS", {}) \
                 .get("favorites_sharing", {})
@@ -208,17 +223,18 @@ class ResourceSharingScanner:
         except Exception:
             return None
 
-    @staticmethod
-    def _read_allowed_collections() -> List[str]:
+    def _read_allowed_collections(self) -> List[str]:
         """Read the opt-in allow-list of collection basenames from config.
 
         Empty list means "allow everything" — mirrors the config default.
         """
+        if self._extension is not None:
+            try:
+                return self._extension.get_allowed_collections()
+            except Exception:
+                pass
         try:
             from filter_mate.config.config import ENV_VARS, _get_option_value
-        except Exception:
-            return []
-        try:
             cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
                 .get("EXTENSIONS", {}) \
                 .get("favorites_sharing", {})
@@ -229,15 +245,14 @@ class ResourceSharingScanner:
             pass
         return []
 
-    @classmethod
-    def _iter_collections(cls, root: str) -> Iterable[Tuple[str, str]]:
+    def _iter_collections(self, root: str) -> Iterable[Tuple[str, str]]:
         try:
             entries = sorted(os.listdir(root))
         except OSError as e:
             logger.debug(f"Cannot list Resource Sharing root {root}: {e}")
             return []
 
-        allowed = set(cls._read_allowed_collections())
+        allowed = set(self._read_allowed_collections())
         for name in entries:
             path = os.path.join(root, name)
             if not os.path.isdir(path) or name.startswith('.'):

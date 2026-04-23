@@ -16,13 +16,31 @@ Lifecycle:
 Thread safety: Extensions run on the main thread unless they use QgsTask.
 """
 
+import json
 import logging
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger('FilterMate.Extensions')
+
+# Base config keys every extension gets for free (merged with extension schema).
+# Keeping them here means the config UI can show them consistently without each
+# extension re-declaring enabled/dismiss_missing_deps_warning.
+_COMMON_CONFIG_SCHEMA: Dict[str, Dict[str, Any]] = {
+    "enabled": {
+        "value": True,
+        "choices": [True, False],
+        "description": "Enable/disable this extension. When disabled, it is not initialized at plugin startup.",
+    },
+    "dismiss_missing_deps_warning": {
+        "value": False,
+        "choices": [True, False],
+        "description": "Do not show the missing-dependencies warning dialog for this extension.",
+    },
+}
 
 
 class ExtensionState(Enum):
@@ -187,6 +205,191 @@ class BaseExtension(ABC):
     def register_service(self, name: str, service: Any) -> None:
         """Register a service by name."""
         self._services[name] = service
+
+    # ------------------------------------------------------------------
+    # Configuration API
+    # ------------------------------------------------------------------
+    # All extensions share the same config namespace:
+    #   ENV_VARS.CONFIG_DATA["EXTENSIONS"][<ext_id>][<key>] = {"value": ..., ...}
+    # Extensions declare their own keys via config_schema(); the registry
+    # seeds missing keys on discovery so config.default.json never needs to
+    # be edited when an extension adds an option.
+
+    def config_schema(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Return the extension-specific config schema.
+
+        Override to declare the keys this extension reads/writes under
+        ``EXTENSIONS.<ext_id>`` in FilterMate's config.json. Every entry
+        must be a dict with at least a ``value`` key (the default) plus an
+        optional ``description``, ``choices``, ``min``, ``max`` etc. —
+        same wrapped format as the rest of FilterMate's config.
+
+        The ``enabled`` and ``dismiss_missing_deps_warning`` keys are
+        injected automatically (see ``full_config_schema``) — do not
+        re-declare them here unless you need to override the defaults.
+
+        Returns:
+            dict: ``{key: option_dict}`` — empty by default.
+        """
+        return {}
+
+    def full_config_schema(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Return the complete schema (common keys + extension-specific keys).
+
+        The registry uses this to auto-seed missing keys in config.json.
+        Subclasses should override ``config_schema()`` (not this method)
+        to add their own options.
+        """
+        merged: Dict[str, Dict[str, Any]] = {}
+        for key, opt in _COMMON_CONFIG_SCHEMA.items():
+            merged[key] = dict(opt)  # shallow copy so overrides don't mutate global
+        for key, opt in self.config_schema().items():
+            merged[key] = dict(opt)
+        return merged
+
+    def _get_extension_config_dict(self) -> Dict[str, Any]:
+        """
+        Return the raw config dict for this extension (``EXTENSIONS.<id>``).
+
+        Creates the nested structure on demand if absent — callers can
+        safely mutate the returned dict and persist via ``_persist_config()``.
+        """
+        try:
+            from filter_mate.config.config import ENV_VARS
+        except Exception:
+            return {}
+        config_data = ENV_VARS.get("CONFIG_DATA")
+        if not isinstance(config_data, dict):
+            return {}
+        extensions = config_data.setdefault("EXTENSIONS", {})
+        if not isinstance(extensions, dict):
+            return {}
+        ext_cfg = extensions.setdefault(self.metadata.id, {})
+        return ext_cfg if isinstance(ext_cfg, dict) else {}
+
+    def get_config(self, key: str, default: Any = None) -> Any:
+        """
+        Read a value from the extension's config namespace.
+
+        Handles both wrapped (``{"value": X}``) and raw formats, mirroring
+        ``config._get_option_value``. Missing keys return ``default``.
+
+        Args:
+            key: Config key under ``EXTENSIONS.<ext_id>``.
+            default: Fallback when the key is absent or unreadable.
+                    If omitted, falls back to the schema's default ``value``.
+        """
+        cfg = self._get_extension_config_dict()
+        if key in cfg:
+            try:
+                from filter_mate.config.config import _get_option_value
+            except Exception:
+                raw = cfg[key]
+                if isinstance(raw, dict) and "value" in raw:
+                    return raw["value"]
+                return raw
+            return _get_option_value(cfg.get(key), default=default)
+
+        # Fallback to schema-declared default when caller didn't force one.
+        if default is None:
+            schema = self.full_config_schema()
+            if key in schema:
+                return schema[key].get("value")
+        return default
+
+    def set_config(self, key: str, value: Any, *, persist: bool = True) -> bool:
+        """
+        Write a value into the extension's config namespace and persist.
+
+        Preserves the wrapped ``{"value": ..., "description": ...}`` shape
+        when the key already exists; otherwise writes a wrapped dict using
+        the schema's metadata (description/choices) when available.
+
+        Args:
+            key: Config key under ``EXTENSIONS.<ext_id>``.
+            value: New value to store.
+            persist: If True (default), write config.json to disk.
+
+        Returns:
+            True if the write (and optional persist) succeeded.
+        """
+        cfg = self._get_extension_config_dict()
+        if not isinstance(cfg, dict):
+            return False
+
+        existing = cfg.get(key)
+        if isinstance(existing, dict) and "value" in existing:
+            existing["value"] = value
+        else:
+            schema_entry = self.full_config_schema().get(key, {})
+            wrapped: Dict[str, Any] = {"value": value}
+            for meta_key in ("description", "choices", "min", "max", "applies_to"):
+                if meta_key in schema_entry:
+                    wrapped[meta_key] = schema_entry[meta_key]
+            cfg[key] = wrapped
+
+        if persist:
+            return self._persist_config()
+        return True
+
+    def _persist_config(self) -> bool:
+        """Write the current in-memory CONFIG_DATA back to config.json."""
+        try:
+            from filter_mate.config.config import ENV_VARS
+        except Exception:
+            return False
+        config_path = ENV_VARS.get("CONFIG_JSON_PATH")
+        config_data = ENV_VARS.get("CONFIG_DATA")
+        if not config_path or not isinstance(config_data, dict):
+            return False
+        try:
+            with open(config_path, "w", encoding="utf-8") as fh:
+                json.dump(config_data, fh, indent=2, ensure_ascii=False)
+            return True
+        except OSError as exc:
+            logger.warning(
+                "Failed to persist config for extension '%s': %s",
+                self.metadata.id, exc,
+            )
+            return False
+
+    # --- Convenience shortcuts for the common keys ---------------------
+
+    def is_enabled(self) -> bool:
+        """Return True when the extension is enabled in config."""
+        return bool(self.get_config("enabled", default=True))
+
+    def set_enabled(self, enabled: bool) -> bool:
+        """Persist enabled/disabled state for this extension."""
+        return self.set_config("enabled", bool(enabled))
+
+    def is_warning_dismissed(self) -> bool:
+        """Return True when the missing-deps warning was dismissed."""
+        return bool(self.get_config("dismiss_missing_deps_warning", default=False))
+
+    def dismiss_warning(self) -> bool:
+        """Persist the 'don't show again' flag for the missing-deps warning."""
+        return self.set_config("dismiss_missing_deps_warning", True)
+
+    def seed_default_config(self) -> bool:
+        """
+        Insert any missing schema keys into config.json (idempotent).
+
+        Called by the registry on discovery. Returns True if any key was
+        added (caller persists once for all extensions).
+        """
+        cfg = self._get_extension_config_dict()
+        if not isinstance(cfg, dict):
+            return False
+
+        dirty = False
+        for key, schema_entry in self.full_config_schema().items():
+            if key not in cfg:
+                cfg[key] = dict(schema_entry)
+                dirty = True
+        return dirty
 
     def on_project_loaded(self) -> None:
         """Called when a QGIS project is loaded. Override if needed."""

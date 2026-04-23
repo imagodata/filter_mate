@@ -62,7 +62,7 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         self._targets: List[CollectionTarget] = []
         # Defaults pulled from config — author/license/homepage prefill so
         # publishing repeatedly into the same org doesn't require re-typing.
-        self._config_defaults = self._read_config_defaults()
+        self._config_defaults = self._read_config_defaults(sharing_service)
 
         if HAS_QT:
             self._setup_ui()
@@ -71,12 +71,12 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             self._apply_default_metadata_prefill()
 
     @staticmethod
-    def _read_config_defaults() -> dict:
+    def _read_config_defaults(sharing_service: Optional[FavoritesSharingService]) -> dict:
         """Load pre-fill values from FilterMate config.
 
-        Returns a dict with keys ``default_publish_collection`` (str path)
-        and ``default_publish_metadata`` (dict with author/license/homepage).
-        Silent fallback to empty strings when config is unavailable.
+        Prefers the owning extension's typed accessors (single source of
+        truth); falls back to a direct ENV_VARS lookup when the dialog is
+        instantiated without an extension (legacy tests).
         """
         defaults = {
             'default_publish_collection': '',
@@ -84,11 +84,23 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
                 'author': '', 'license': '', 'homepage': '',
             },
         }
+
+        extension = getattr(sharing_service, "extension", None)
+        if extension is not None:
+            try:
+                defaults['default_publish_collection'] = (
+                    extension.get_default_publish_collection()
+                )
+                defaults['default_publish_metadata'] = (
+                    extension.get_default_publish_metadata()
+                )
+                return defaults
+            except Exception as exc:
+                logger.debug("Extension config accessors failed: %s", exc)
+
+        # Fallback — direct ENV_VARS lookup when no extension is available.
         try:
             from filter_mate.config.config import ENV_VARS, _get_option_value
-        except Exception:
-            return defaults
-        try:
             cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
                 .get("EXTENSIONS", {}) \
                 .get("favorites_sharing", {})

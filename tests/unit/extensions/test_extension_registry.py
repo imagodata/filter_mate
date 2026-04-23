@@ -417,3 +417,154 @@ class TestExtensionRegistry:
         # Should not raise
         registry.teardown_all()
         assert ok.state == ExtensionState.TORN_DOWN
+
+
+# ---------------------------------------------------------------------------
+# Harmonized config API (BaseExtension.config_schema / get_config / set_config)
+# ---------------------------------------------------------------------------
+
+
+class SchemaExtension(BaseExtension):
+    """Extension that declares a schema for config API tests."""
+
+    @property
+    def metadata(self) -> ExtensionMetadata:
+        return ExtensionMetadata(
+            id="schema_ext",
+            name="Schema Ext",
+            version="1.0.0",
+            description="Exposes a config schema",
+        )
+
+    def config_schema(self):
+        return {
+            "endpoint": {
+                "value": "https://default.example/api",
+                "description": "API endpoint",
+            },
+            "timeout": {"value": 30, "min": 1, "max": 300},
+            "enabled_flag": {"value": True, "choices": [True, False]},
+        }
+
+    def check_dependencies(self) -> bool:
+        return True
+
+    def initialize(self, iface) -> None:
+        pass
+
+    def teardown(self) -> None:
+        pass
+
+
+class TestConfigAPI:
+    """Tests for the harmonized BaseExtension config surface."""
+
+    @pytest.fixture
+    def in_memory_config(self, tmp_path, monkeypatch):
+        """Wire ENV_VARS to an in-memory CONFIG_DATA + tmp config.json."""
+        from filter_mate.config import config as fm_config
+
+        cfg_path = tmp_path / "config.json"
+        cfg_data = {"EXTENSIONS": {}}
+        original = dict(fm_config.ENV_VARS)
+        fm_config.ENV_VARS["CONFIG_DATA"] = cfg_data
+        fm_config.ENV_VARS["CONFIG_JSON_PATH"] = str(cfg_path)
+        yield cfg_data, cfg_path
+        fm_config.ENV_VARS.clear()
+        fm_config.ENV_VARS.update(original)
+
+    def test_full_schema_merges_common_keys(self):
+        ext = SchemaExtension()
+        schema = ext.full_config_schema()
+        # Common keys injected automatically
+        assert "enabled" in schema
+        assert "dismiss_missing_deps_warning" in schema
+        # Extension-specific keys preserved
+        assert schema["endpoint"]["value"] == "https://default.example/api"
+        assert schema["timeout"]["min"] == 1
+
+    def test_get_config_falls_back_to_schema_default(self, in_memory_config):
+        ext = SchemaExtension()
+        # Key absent from CONFIG_DATA → schema default returned
+        assert ext.get_config("endpoint") == "https://default.example/api"
+        assert ext.get_config("timeout") == 30
+        assert ext.is_enabled() is True
+        assert ext.is_warning_dismissed() is False
+
+    def test_set_config_persists_and_wraps(self, in_memory_config):
+        cfg_data, cfg_path = in_memory_config
+        ext = SchemaExtension()
+
+        assert ext.set_config("endpoint", "https://custom.example/api") is True
+
+        # In-memory update is wrapped ({"value": ..., "description": ...})
+        stored = cfg_data["EXTENSIONS"]["schema_ext"]["endpoint"]
+        assert isinstance(stored, dict)
+        assert stored["value"] == "https://custom.example/api"
+        assert stored["description"] == "API endpoint"
+
+        # Persisted to disk
+        import json
+        on_disk = json.loads(cfg_path.read_text())
+        assert on_disk["EXTENSIONS"]["schema_ext"]["endpoint"]["value"] == \
+            "https://custom.example/api"
+
+        # Round-trip through get_config
+        assert ext.get_config("endpoint") == "https://custom.example/api"
+
+    def test_set_enabled_and_dismiss_warning(self, in_memory_config):
+        ext = SchemaExtension()
+        assert ext.set_enabled(False) is True
+        assert ext.is_enabled() is False
+        assert ext.dismiss_warning() is True
+        assert ext.is_warning_dismissed() is True
+
+    def test_seed_default_config_inserts_missing_keys(self, in_memory_config):
+        cfg_data, _ = in_memory_config
+        ext = SchemaExtension()
+
+        dirty = ext.seed_default_config()
+        assert dirty is True
+
+        seeded = cfg_data["EXTENSIONS"]["schema_ext"]
+        for key in ("enabled", "dismiss_missing_deps_warning",
+                    "endpoint", "timeout", "enabled_flag"):
+            assert key in seeded
+            assert "value" in seeded[key]
+
+        # Idempotent — second call is a no-op
+        dirty_again = ext.seed_default_config()
+        assert dirty_again is False
+
+    def test_seed_preserves_user_overrides(self, in_memory_config):
+        cfg_data, _ = in_memory_config
+        # User already customized the endpoint
+        cfg_data["EXTENSIONS"]["schema_ext"] = {
+            "endpoint": {"value": "https://user.example/api"},
+        }
+
+        ext = SchemaExtension()
+        ext.seed_default_config()
+
+        # User value preserved, missing keys added
+        seeded = cfg_data["EXTENSIONS"]["schema_ext"]
+        assert seeded["endpoint"]["value"] == "https://user.example/api"
+        assert seeded["timeout"]["value"] == 30
+        assert seeded["enabled"]["value"] is True
+
+    def test_discover_extensions_auto_seeds(self, in_memory_config, registry):
+        """Registry.discover_extensions() seeds schema keys on startup."""
+        cfg_data, cfg_path = in_memory_config
+        ext = SchemaExtension()
+        registry.register(ext)
+
+        # Simulate what discover_extensions does after loading a module
+        if ext.seed_default_config():
+            registry._persist_config()
+
+        assert cfg_data["EXTENSIONS"]["schema_ext"]["endpoint"]["value"] == \
+            "https://default.example/api"
+        # Persisted
+        import json
+        on_disk = json.loads(cfg_path.read_text())
+        assert on_disk["EXTENSIONS"]["schema_ext"]["timeout"]["value"] == 30

@@ -14,6 +14,8 @@ from qgis.PyQt.QtCore import QCoreApplication
 
 from ..base import BaseExtension, ExtensionMetadata, ExtensionState
 
+DEFAULT_QFIELDCLOUD_URL = "https://app.qfield.cloud/api/v1/"
+
 logger = logging.getLogger('FilterMate.Extensions.QFieldCloud')
 
 # Lazy availability flag — set on first check_dependencies() call
@@ -78,6 +80,68 @@ class QFieldCloudExtension(BaseExtension):
             icon_name="qfieldcloud.png",
         )
 
+    def config_schema(self) -> Dict[str, Dict[str, Any]]:
+        """Declare team-level options under ``EXTENSIONS.qfieldcloud``.
+
+        These are non-sensitive settings that can live in FilterMate's
+        config.json (shared across a team via a shared profile dir).
+        Sensitive credentials (token, password) stay in OS keyring;
+        per-user identity (username) stays in QgsSettings.
+        """
+        return {
+            "server_url": {
+                "value": DEFAULT_QFIELDCLOUD_URL,
+                "description": (
+                    "QFieldCloud API base URL. Defaults to the public "
+                    "instance; override to point at a self-hosted "
+                    "QFieldCloud deployment."
+                ),
+            },
+            "default_project": {
+                "value": "",
+                "description": (
+                    "Default QFieldCloud project name pre-filled in the "
+                    "push dialog. Leave empty to require explicit entry."
+                ),
+            },
+            "auto_package": {
+                "value": True,
+                "choices": [True, False],
+                "description": (
+                    "Trigger a packaging job automatically after a "
+                    "successful push so the project is ready for QField "
+                    "clients without extra clicks."
+                ),
+            },
+            "default_srid": {
+                "value": 4326,
+                "min": 1024,
+                "max": 999999,
+                "description": (
+                    "Default EPSG code used when generating the .qgs "
+                    "project for QFieldCloud. 4326 (WGS84) is a portable "
+                    "default; teams should set their local CRS here "
+                    "(e.g. 31370 for Belgium, 2154 for France)."
+                ),
+            },
+            "default_description": {
+                "value": "",
+                "description": (
+                    "Default project description pre-filled in the push "
+                    "dialog. Useful to boilerplate team-wide context."
+                ),
+            },
+            "upload_timeout_seconds": {
+                "value": 300,
+                "min": 30,
+                "max": 3600,
+                "description": (
+                    "Maximum time (seconds) to wait for a single file "
+                    "upload to QFieldCloud before aborting."
+                ),
+            },
+        }
+
     def check_dependencies(self) -> bool:
         """Check if QFieldSync plugin is installed."""
         return _check_qfieldsync_available()
@@ -95,7 +159,8 @@ class QFieldCloudExtension(BaseExtension):
         from .credentials_manager import CredentialsManager
         from .signals import QFieldCloudSignals
 
-        self._credentials_manager = CredentialsManager()
+        self._credentials_manager = CredentialsManager(extension=self)
+        self._credentials_manager.migrate_legacy_qgssettings()
         self.register_service('credentials', self._credentials_manager)
 
         self._signals = QFieldCloudSignals()

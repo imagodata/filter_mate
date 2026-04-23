@@ -61,6 +61,7 @@ class ExtensionRegistry:
         extensions_dir = os.path.dirname(os.path.abspath(__file__))
         discovered = []
 
+        config_dirty = False
         for entry in sorted(os.listdir(extensions_dir)):
             entry_path = os.path.join(extensions_dir, entry)
             if not os.path.isdir(entry_path):
@@ -83,8 +84,22 @@ class ExtensionRegistry:
                         extension.metadata.name,
                         extension.metadata.version,
                     )
+                    # Auto-seed any schema keys missing from config.json
+                    # (non-destructive: existing user values are preserved).
+                    try:
+                        if extension.seed_default_config():
+                            config_dirty = True
+                    except Exception as seed_err:
+                        logger.debug(
+                            "Config seeding failed for '%s': %s",
+                            ext_id, seed_err,
+                        )
             except Exception as e:
                 logger.warning("Failed to load extension '%s': %s", entry, e)
+
+        # Persist once for all extensions that seeded new keys.
+        if config_dirty:
+            self._persist_config()
 
         return discovered
 
@@ -171,92 +186,30 @@ class ExtensionRegistry:
         self._initialized = True
         return results
 
-    def _get_extension_config(self, ext_id: str) -> dict:
-        """Get extension config from FilterMate config."""
-        try:
-            from filter_mate.config.config import ENV_VARS
-            config_data = ENV_VARS.get("CONFIG_DATA", {})
-            return config_data.get("EXTENSIONS", {}).get(ext_id, {})
-        except Exception:
-            return {}
-
-    def _is_extension_enabled_in_config(self, ext_id: str) -> bool:
-        """Check if an extension is enabled in FilterMate config."""
-        try:
-            from filter_mate.config.config import _get_option_value
-            ext_config = self._get_extension_config(ext_id)
-            enabled = _get_option_value(ext_config.get("enabled"), default=True)
-            return bool(enabled)
-        except Exception:
-            return True
-
-    def _set_extension_enabled_in_config(self, ext_id: str, enabled: bool) -> None:
-        """Set extension enabled/disabled in FilterMate config and save."""
+    def _persist_config(self) -> bool:
+        """Write ENV_VARS['CONFIG_DATA'] back to config.json (single I/O point)."""
         try:
             from filter_mate.config.config import ENV_VARS
             import json
-
-            config_data = ENV_VARS.get("CONFIG_DATA", {})
-            if "EXTENSIONS" not in config_data:
-                config_data["EXTENSIONS"] = {}
-            if ext_id not in config_data["EXTENSIONS"]:
-                config_data["EXTENSIONS"][ext_id] = {}
-
-            ext_cfg = config_data["EXTENSIONS"][ext_id]
-            if isinstance(ext_cfg.get("enabled"), dict) and "value" in ext_cfg["enabled"]:
-                ext_cfg["enabled"]["value"] = enabled
-            else:
-                ext_cfg["enabled"] = {"value": enabled}
-
-            # Persist to config.json
-            config_path = ENV_VARS.get("CONFIG_JSON_PATH")
-            if config_path:
-                with open(config_path, 'w', encoding='utf-8') as f:
-                    json.dump(config_data, f, indent=2, ensure_ascii=False)
-                logger.info("Extension '%s' %s in config",
-                           ext_id, "enabled" if enabled else "disabled")
-        except Exception as e:
-            logger.warning("Could not update config for extension '%s': %s", ext_id, e)
-
-    def _is_warning_dismissed(self, ext_id: str) -> bool:
-        """Check if the missing-dependency warning was dismissed."""
-        try:
-            from filter_mate.config.config import _get_option_value
-            ext_config = self._get_extension_config(ext_id)
-            return bool(_get_option_value(
-                ext_config.get("dismiss_missing_deps_warning"), default=False
-            ))
         except Exception:
             return False
-
-    def _set_warning_dismissed(self, ext_id: str) -> None:
-        """Mark the missing-dependency warning as dismissed in config."""
+        config_path = ENV_VARS.get("CONFIG_JSON_PATH")
+        config_data = ENV_VARS.get("CONFIG_DATA")
+        if not config_path or not isinstance(config_data, dict):
+            return False
         try:
-            from filter_mate.config.config import ENV_VARS
-            import json
-
-            config_data = ENV_VARS.get("CONFIG_DATA", {})
-            if "EXTENSIONS" not in config_data:
-                config_data["EXTENSIONS"] = {}
-            if ext_id not in config_data["EXTENSIONS"]:
-                config_data["EXTENSIONS"][ext_id] = {}
-
-            config_data["EXTENSIONS"][ext_id]["dismiss_missing_deps_warning"] = {
-                "value": True
-            }
-
-            config_path = ENV_VARS.get("CONFIG_JSON_PATH")
-            if config_path:
-                with open(config_path, 'w', encoding='utf-8') as f:
-                    json.dump(config_data, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            logger.warning("Could not dismiss warning for '%s': %s", ext_id, e)
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config_data, f, indent=2, ensure_ascii=False)
+            return True
+        except OSError as exc:
+            logger.warning("Could not persist config.json: %s", exc)
+            return False
 
     def _show_missing_deps_message(self, ext: BaseExtension, iface: Any) -> None:
         """Show a message when extension deps are missing, with dismiss option."""
         ext_id = ext.metadata.id
 
-        if self._is_warning_dismissed(ext_id):
+        if ext.is_warning_dismissed():
             return
 
         try:
@@ -284,7 +237,7 @@ class ExtensionRegistry:
             msg.exec()
 
             if checkbox.isChecked():
-                self._set_warning_dismissed(ext_id)
+                ext.dismiss_warning()
 
         except Exception as e:
             logger.debug("Could not show missing deps message: %s", e)
@@ -294,7 +247,7 @@ class ExtensionRegistry:
         ext_id = ext.metadata.id
         try:
             # Check config enable/disable
-            if not self._is_extension_enabled_in_config(ext_id):
+            if not ext.is_enabled():
                 logger.info("Extension '%s' disabled in config", ext_id)
                 return False
 
@@ -305,7 +258,7 @@ class ExtensionRegistry:
                     ext_id,
                 )
                 # Auto-disable in config and notify user
-                self._set_extension_enabled_in_config(ext_id, False)
+                ext.set_enabled(False)
                 self._show_missing_deps_message(ext, iface)
                 return False
 
