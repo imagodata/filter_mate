@@ -588,15 +588,6 @@ def simplify_buffer_result(
     logger.info(f"🔧 Simplifying buffer result: tolerance={adaptive_tolerance:.6f} ({'degrees' if crs.isGeographic() else 'meters'})")
 
     try:
-        # Count vertices before simplification
-        vertices_before = 0
-        for feature in layer.getFeatures():
-            geom = feature.geometry()
-            if geom and not geom.isEmpty():
-                # Count vertices in geometry
-                for part in geom.parts():
-                    vertices_before += len(list(part.vertices()))
-
         # Create new memory layer for simplified geometries
         fields = layer.fields()
         simplified_layer = QgsMemoryProviderUtils.createMemoryLayer(
@@ -610,14 +601,19 @@ def simplify_buffer_result(
             logger.warning("Failed to create simplified layer, returning original")
             return layer
 
-        # Process each feature
+        # Single-pass: simplify each feature and count vertices before/after in-flight.
+        # Previously this was two full getFeatures() iterations (one just to log vertices_before).
         simplified_features = []
+        vertices_before = 0
         vertices_after = 0
 
         for feature in layer.getFeatures():
             geom = feature.geometry()
             if geom is None or geom.isEmpty():
                 continue
+
+            for part in geom.parts():
+                vertices_before += len(list(part.vertices()))
 
             # Simplify geometry using Douglas-Peucker algorithm
             simplified_geom = geom.simplify(adaptive_tolerance)
