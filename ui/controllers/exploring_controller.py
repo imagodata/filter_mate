@@ -1089,29 +1089,34 @@ class ExploringController(BaseController, LayerSelectionMixin):
                         pk_name = layer_props.get("infos", {}).get("primary_key_name")
                         pk_is_numeric = layer_props.get("infos", {}).get("primary_key_is_numeric", True)
 
+                        # Collect PK values first, then issue ONE query with IN (...)
+                        # instead of up to 500 per-item getFeatures calls.
+                        pk_values = []
                         for item in checked_items:
-                            try:
-                                # item format: (display_value, pk_value, ...)
-                                if isinstance(item, (list, tuple)) and len(item) > 1:
-                                    pk_value = item[1]
-                                    # Build expression to fetch this feature
-                                    if pk_name:
-                                        if pk_is_numeric:
-                                            expr = f'"{pk_name}" = {pk_value}'
-                                        else:
-                                            expr = f'"{pk_name}" = \'{pk_value}\''
-                                        qgs_expr = QgsExpression(expr)
-                                        if qgs_expr.isValid():
-                                            for feat in self._dockwidget.current_layer.getFeatures(QgsFeatureRequest(qgs_expr)):
-                                                if feat.hasGeometry() and not feat.geometry().isEmpty():
-                                                    if extent.isEmpty():
-                                                        extent = feat.geometry().boundingBox()
-                                                    else:
-                                                        extent.combineExtentWith(feat.geometry().boundingBox())
-                                                    features_found += 1
-                                                    break  # Only one feature per pk_value
-                            except Exception as e:
-                                logger.debug(f"_compute_zoom_extent_for_mode: Error processing multiple item: {e}")
+                            if isinstance(item, (list, tuple)) and len(item) > 1:
+                                pk_values.append(item[1])
+
+                        if pk_name and pk_values:
+                            if pk_is_numeric:
+                                in_list = ", ".join(str(v) for v in pk_values)
+                            else:
+                                # Escape single quotes for safe inline SQL
+                                in_list = ", ".join(
+                                    "'" + str(v).replace("'", "''") + "'" for v in pk_values
+                                )
+                            expr = f'"{pk_name}" IN ({in_list})'
+                            qgs_expr = QgsExpression(expr)
+                            if qgs_expr.isValid():
+                                try:
+                                    for feat in self._dockwidget.current_layer.getFeatures(QgsFeatureRequest(qgs_expr)):
+                                        if feat.hasGeometry() and not feat.geometry().isEmpty():
+                                            if extent.isEmpty():
+                                                extent = feat.geometry().boundingBox()
+                                            else:
+                                                extent.combineExtentWith(feat.geometry().boundingBox())
+                                            features_found += 1
+                                except Exception as e:
+                                    logger.debug(f"_compute_zoom_extent_for_mode: Error iterating batch: {e}")
 
             elif self._dockwidget.current_exploring_groupbox == "custom_selection":
                 # Custom selection: get expression and fetch matching features
@@ -1945,8 +1950,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
             ...     on_complete=handle_result
             ... )
         """
-        from core.tasks.expression_evaluation_task import ExpressionEvaluationTask
-        from qgis.core import QgsApplication
+        from ...core.tasks import get_expression_manager
 
         if not self.current_layer:
             logger.warning("Async evaluation: No current layer")
@@ -1954,30 +1958,22 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 on_error("No current layer")
             return
 
-        # Create background task
-        task = ExpressionEvaluationTask(
-            layer=self.current_layer,
-            expression=expression,
-            description=f"Evaluating expression ({len(expression)} chars)"
-        )
-
-        # Connect callbacks
-        def _on_complete():
-            features = task.result_features or []
+        def _on_complete_wrapper(features, _expression, _layer_id):
             logger.info(f"Async evaluation complete: {len(features)} features")
             on_complete(features)
 
-        def _on_error():
-            error_msg = getattr(task, 'exception', 'Unknown error')
+        def _on_error_wrapper(error_msg, _layer_id):
             logger.error(f"Async evaluation failed: {error_msg}")
             if on_error:
-                on_error(str(error_msg))
+                on_error(error_msg)
 
-        task.taskCompleted.connect(_on_complete)
-        task.taskTerminated.connect(_on_error)
-
-        # Add to QGIS task manager
-        QgsApplication.taskManager().addTask(task)
+        get_expression_manager().evaluate(
+            layer=self.current_layer,
+            expression=expression,
+            on_complete=_on_complete_wrapper,
+            on_error=_on_error_wrapper,
+            description=f"Evaluating expression ({len(expression)} chars)",
+        )
         logger.info(f"Async evaluation started for layer {self.current_layer.name()}")
 
     def exploring_features_changed(self, input=[], identify_by_primary_key_name=False, custom_expression=None, preserve_filter_if_empty=False):
