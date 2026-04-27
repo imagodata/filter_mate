@@ -29,6 +29,7 @@ import tempfile
 from dataclasses import dataclass
 from typing import Callable, Optional
 from urllib.error import URLError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from .git_resolver import (
@@ -271,9 +272,17 @@ def _download(
     progress_callback: Optional[Callable[[int, Optional[int]], None]],
 ) -> int:
     """Stream a URL to disk and return the total bytes written."""
+    # Reject non-web schemes — `DownloadOverride.url` is user-supplied, so
+    # a misconfigured mirror could otherwise smuggle in `file://`, `ftp://`
+    # or custom URL handlers and read arbitrary local files.
+    scheme = urlparse(url).scheme.lower()
+    if scheme not in ("http", "https"):
+        raise URLError(
+            f"unsupported URL scheme {scheme!r} (only http/https allowed)"
+        )
     req = Request(url, headers={"User-Agent": "FilterMate-PortableGit/1.0"})
     bytes_so_far = 0
-    with urlopen(req, timeout=DOWNLOAD_TIMEOUT_SECONDS) as response:
+    with urlopen(req, timeout=DOWNLOAD_TIMEOUT_SECONDS) as response:  # nosec B310 - scheme validated above
         total: Optional[int] = None
         cl = response.headers.get("Content-Length")
         if cl and cl.isdigit():

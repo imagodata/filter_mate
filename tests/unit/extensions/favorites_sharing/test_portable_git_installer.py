@@ -145,6 +145,27 @@ class TestVerifyChecksum:
 
 
 # ---------------------------------------------------------------------------
+# Scheme guard: reject file:// / ftp:// / custom handlers before urlopen
+# ---------------------------------------------------------------------------
+
+
+class TestDownloadSchemeGuard:
+    @pytest.mark.parametrize("bad_url", [
+        "file:///etc/passwd",
+        "ftp://mirror.example.com/PortableGit.7z.exe",
+        "javascript:alert(1)",
+        "data:text/plain;base64,aGVsbG8=",
+        "/local/path/no/scheme",
+    ])
+    def test_non_http_scheme_rejected(self, tmp_path, bad_url):
+        from urllib.error import URLError
+        with pytest.raises(URLError, match="unsupported URL scheme"):
+            installer._download(
+                bad_url, str(tmp_path / "out.bin"), progress_callback=None,
+            )
+
+
+# ---------------------------------------------------------------------------
 # Mocked end-to-end: download → verify → extract → resolver picks up
 # ---------------------------------------------------------------------------
 
