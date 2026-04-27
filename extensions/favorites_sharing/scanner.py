@@ -257,6 +257,8 @@ class ResourceSharingScanner:
         return []
 
     def _iter_collections(self, root: str) -> Iterable[Tuple[str, str]]:
+        from .path_utils import safe_join_under
+
         try:
             entries = sorted(os.listdir(root))
         except OSError as e:
@@ -265,13 +267,19 @@ class ResourceSharingScanner:
 
         allowed = set(self._read_allowed_collections())
         for name in entries:
-            path = os.path.join(root, name)
-            if not os.path.isdir(path) or name.startswith('.'):
+            if name.startswith('.'):
+                continue
+            # Reject symlinks that escape the collections root after
+            # realpath resolution. ``os.path.isdir`` follows symlinks, so
+            # a malicious ``allowed_name`` symlink could otherwise leak
+            # an arbitrary FS subtree into the scan.
+            safe = safe_join_under(root, name)
+            if safe is None or not os.path.isdir(safe):
                 continue
             # Opt-in allow-list: when non-empty only accept whitelisted basenames.
             if allowed and name not in allowed:
                 continue
-            yield name, path
+            yield name, safe
 
     @staticmethod
     def _read_collection_metadata(collection_dir: str) -> Dict[str, Any]:
@@ -300,6 +308,12 @@ class ResourceSharingScanner:
         Accepts both the envelope format (dict with ``favorites`` list,
         schema v1/v2/v3) and a bare favorite payload (dict without the
         envelope), for quick-share snippets.
+
+        Trust boundary: bundles come from arbitrary publishers via the
+        Resource Sharing plugin. We run the structural validator
+        immediately after JSON parse — malformed envelopes are skipped
+        with a warning so a corrupted/hostile bundle cannot reach the
+        Fork path with broken invariants.
         """
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -307,6 +321,26 @@ class ResourceSharingScanner:
         except (ValueError, OSError) as e:
             logger.warning(f"Shared favorite bundle unreadable: {file_path}: {e}")
             return []
+
+        # Validate envelope-shaped bundles. Bare-snippet form (no
+        # ``favorites`` key) bypasses validation deliberately — it's
+        # already covered by the per-favorite shape check below.
+        if isinstance(data, dict) and 'favorites' in data:
+            try:
+                from .validator import validate
+                ok, errors = validate(data)
+            except Exception:
+                logger.exception(
+                    f"Validator unavailable for {file_path}; skipping bundle"
+                )
+                return []
+            if not ok:
+                logger.warning(
+                    "Shared bundle %s rejected by validator: %s",
+                    file_path,
+                    "; ".join(errors[:3]) + (f" (+{len(errors) - 3} more)" if len(errors) > 3 else ""),
+                )
+                return []
 
         items: List[SharedFavorite] = []
         schema_version = 1

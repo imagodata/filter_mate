@@ -171,6 +171,36 @@ class FavoritesSharingService:
             str(shared.schema_version),
         )
 
+        # Trust boundary: a shared favorite is authored by an arbitrary
+        # third party. Run the local subset-string sanitizer on the
+        # expression before it lands in the DB so a poisoned display
+        # expression / unsafe construct is rejected at fork time, not at
+        # apply time. ``sanitize_subset_string`` returns '' for a
+        # standalone display expression — refuse the fork in that case.
+        raw_expr = str(rebound.get('expression') or '')
+        if raw_expr:
+            try:
+                try:
+                    from filter_mate.core.filter import sanitize_subset_string
+                except ImportError:
+                    from core.filter import sanitize_subset_string  # type: ignore
+                cleaned_expr = sanitize_subset_string(raw_expr)
+            except Exception:
+                logger.exception("Sanitizer unavailable; refusing fork to be safe")
+                return None
+            if not cleaned_expr:
+                logger.warning(
+                    "Refusing fork: shared favorite '%s' carries a non-boolean "
+                    "expression that the sanitizer rejected.", shared.name,
+                )
+                return None
+            if cleaned_expr != raw_expr:
+                logger.info(
+                    "Sanitized expression on fork of '%s' (length %d → %d)",
+                    shared.name, len(raw_expr), len(cleaned_expr),
+                )
+                rebound['expression'] = cleaned_expr
+
         # Record provenance in _extra so it round-trips through re-export.
         extra = dict(rebound.get('_extra') or {})
         extra.setdefault('original_created_at', shared.payload.get('created_at'))
@@ -506,8 +536,8 @@ class FavoritesSharingService:
             return  # Unknown envelope shape — leave as-is
 
         try:
-            with open(bundle_path, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
+            from .path_utils import atomic_json_write
+            atomic_json_write(bundle_path, data)
         except OSError as exc:
             logger.warning("Could not rewrite bundle after owner strip: %s", exc)
 
@@ -524,8 +554,8 @@ class FavoritesSharingService:
                 data = json.load(f)
             if isinstance(data, dict):
                 data['collection'] = metadata
-                with open(bundle_path, 'w', encoding='utf-8') as f:
-                    json.dump(data, f, indent=2, ensure_ascii=False)
+                from .path_utils import atomic_json_write
+                atomic_json_write(bundle_path, data)
         except (OSError, ValueError) as e:
             logger.debug(f"Could not inject collection metadata into {bundle_path}: {e}")
 
@@ -557,8 +587,8 @@ class FavoritesSharingService:
             for k, v in (metadata or {}).items():
                 if v is not None and v != "":
                     merged[k] = v
-            with open(manifest_path, 'w', encoding='utf-8') as f:
-                json.dump(merged, f, indent=2, ensure_ascii=False)
+            from .path_utils import atomic_json_write
+            atomic_json_write(manifest_path, merged)
             return True
         except OSError as e:
             logger.warning(f"Could not write {manifest_path}: {e}")

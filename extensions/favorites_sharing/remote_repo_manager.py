@@ -145,12 +145,26 @@ class RemoteRepo:
 
     @property
     def collection_dir(self) -> str:
-        """Absolute path to the collection sub-directory inside the clone."""
+        """Absolute path to the collection sub-directory inside the clone.
+
+        ``target_collection`` originates from config and may be edited by
+        users — guard against ``..`` traversal that would land bundles
+        outside the working clone (and outside the git index, breaking
+        ``git add`` while still creating attacker-controlled directories).
+        """
         root = self.expanded_local_clone
         if not root:
             return ""
         if self.target_collection:
-            return os.path.join(root, "collections", self.target_collection)
+            from .path_utils import safe_join_under
+            safe = safe_join_under(root, "collections", self.target_collection)
+            if safe is None:
+                logger.warning(
+                    "target_collection %r escapes local_clone %r — refusing",
+                    self.target_collection, root,
+                )
+                return ""
+            return safe
         # When target_collection is omitted, assume the repo *is* the
         # collection root (rare, but supported for single-collection repos).
         return root
@@ -400,8 +414,7 @@ class RemoteRepoManager:
             timeout_seconds=timeout,
         )
         try:
-            args = ["ls-remote", "--heads", repo.git_url]
-            client._run(args, cwd=os.getcwd())
+            client.ls_remote(repo.git_url, cwd=os.getcwd())
         except GitError as exc:
             result.error_message = str(exc)
             return result

@@ -52,6 +52,19 @@ def _scrub_command(cmd: List[str]) -> List[str]:
     return [_AUTH_HEADER_RE.sub(rf"\1{_REDACTED}", arg) for arg in cmd]
 
 
+def _strip_control_chars(value: str) -> str:
+    """Remove CR/LF and other low-ASCII control chars from a single-line value.
+
+    Used on credentials, commit authors and other strings injected into
+    git's ``-c key=value`` flag or single-line argv slots: a stray
+    newline would otherwise terminate the config line and let attacker
+    content be parsed as additional git config.
+    """
+    if not value:
+        return value
+    return "".join(c for c in value if c == "\t" or (c >= " " and c != "\x7f"))
+
+
 def _scrub_text(text: str) -> str:
     """Strip Authorization headers and URL-embedded credentials from text.
 
@@ -221,9 +234,12 @@ class GitClient:
         # the master password at the moment of use, not at config load.
         header = self._resolve_auth_header()
         if header:
+            # Strip CR/LF: a header containing "\n[remote \"x\"]..." would
+            # otherwise inject extra git config through the ``-c`` flag.
+            safe_header = _strip_control_chars(header)
             cmd += [
                 "-c",
-                f"http.extraHeader=Authorization: {header}",
+                f"http.extraHeader=Authorization: {safe_header}",
             ]
         cmd += list(args)
 
@@ -288,6 +304,10 @@ class GitClient:
         Creates parent directories if needed. ``--depth 1`` would be
         tempting for speed but breaks subsequent ``pull --ff-only`` on
         diverged histories — keep a full clone.
+
+        Defense-in-depth: an explicit ``--`` separator precedes the URL
+        and destination so a URL like ``--upload-pack=evil`` cannot be
+        re-interpreted as an option even on older git releases.
         """
         parent = os.path.dirname(os.path.abspath(self.cwd))
         if parent and not os.path.isdir(parent):
@@ -300,7 +320,7 @@ class GitClient:
         args = ["clone"]
         if branch:
             args += ["--branch", branch]
-        args += [git_url, self.cwd]
+        args += ["--", git_url, self.cwd]
         # Run from parent so we can target cwd that doesn't exist yet.
         return self._run(args, cwd=parent or None)
 
@@ -333,16 +353,22 @@ class GitClient:
         When ``author`` is provided ("Name <email>"), it overrides the
         repo's configured identity for this single commit. Useful so
         bundles carry the publishing team's identity rather than the
-        machine's default git config.
+        machine's default git config. Newlines in ``author`` are
+        stripped — the field must stay single-line so a malicious
+        identity cannot inject extra commit trailers.
         """
         args = ["commit", "-m", message]
         if author:
-            args += ["--author", author]
+            args += ["--author", _strip_control_chars(author)]
         return self._run(args)
 
     def push(self, remote: str = "origin", branch: Optional[str] = None) -> GitResult:
-        """``git push <remote> [branch]``."""
-        args = ["push", remote]
+        """``git push <remote> [branch]``.
+
+        The ``--`` separator pins ``remote`` and ``branch`` as positional
+        even if they accidentally start with a dash.
+        """
+        args = ["push", "--", remote]
         if branch:
             args.append(branch)
         return self._run(args)
@@ -364,3 +390,18 @@ class GitClient:
         if not res.ok:
             return None
         return (res.stdout or "").strip() or None
+
+    def ls_remote(self, git_url: str, *, heads_only: bool = True,
+                  cwd: Optional[str] = None,
+                  timeout: Optional[int] = None) -> GitResult:
+        """``git ls-remote [--heads] -- <url>`` — probe a remote without cloning.
+
+        Used by ``test_connection`` to validate URL/auth from the editor
+        dialog. The ``--`` separator ensures a URL beginning with ``-``
+        is treated as positional, not as a flag.
+        """
+        args = ["ls-remote"]
+        if heads_only:
+            args.append("--heads")
+        args += ["--", git_url]
+        return self._run(args, cwd=cwd, timeout=timeout)
