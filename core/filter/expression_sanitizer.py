@@ -121,6 +121,14 @@ def _has_toplevel_boolean_operator(expr: str) -> bool:
 
 _FUNCTION_CALL_RE = re.compile(r'^[A-Z_][A-Z0-9_]*\s*\(')
 
+# Function/keyword calls whose return type IS boolean and which therefore form
+# a valid standalone WHERE body. The generic `_FUNCTION_CALL_RE` rule below
+# would otherwise wipe these — `EXISTS(...)` is exactly the shape FilterMate
+# pushes to target layers in chain filters, and `NOT(...)` is a plain unary
+# boolean operator. Without this short-circuit, target-layer subsets get
+# sanitized to '' and the cascade silently drops every downstream filter.
+_BOOLEAN_FUNCTION_RE = re.compile(r'^(EXISTS|NOT)\s*\(')
+
 
 def _is_standalone_display_expression(expr: str) -> bool:
     """True if `expr` is a display function call / field reference with no
@@ -156,6 +164,12 @@ def _is_standalone_display_expression(expr: str) -> bool:
         inner = stripped[1:-1]
         if '"' not in inner or inner.replace('"."', '').replace('"', '') == inner.replace('"."', '').replace('"', ''):
             return True
+
+    # Boolean-returning function calls (EXISTS, NOT) ARE valid WHERE bodies
+    # even though they look like a single function call with no top-level
+    # boolean operator. Must short-circuit before the generic call rule below.
+    if _BOOLEAN_FUNCTION_RE.match(upper):
+        return False
 
     # Known display function prefix (fast-path / explicit confidence).
     for prefix in _DISPLAY_FUNCTION_PREFIXES:

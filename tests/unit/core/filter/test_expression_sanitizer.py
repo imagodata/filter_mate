@@ -104,6 +104,39 @@ class TestBooleanFiltersPreserved:
         assert sanitize_subset_string(expr) == expr
 
 
+class TestBooleanReturningFunctionsPreserved:
+    """Regression 2026-04-27: the M2 hardening's generic-function-call rule
+    wiped any `IDENT(...)` without a top-level boolean operator, which broke
+    the chain-filter cascade. Target-layer subsets are pushed as
+    `EXISTS (SELECT 1 FROM <source> AS __source WHERE ST_Intersects(...))`
+    — a single function call whose body is wrapped in parens, so no
+    boolean operator surfaces at depth 0. They must survive sanitization.
+    """
+
+    def test_exists_subquery_preserved(self):
+        expr = (
+            'EXISTS (SELECT 1 FROM "tmp"."fm_chain_xxx" AS __source '
+            'WHERE ST_Intersects("target"."geom", __source.geom))'
+        )
+        assert sanitize_subset_string(expr) == expr
+
+    def test_exists_lowercase_preserved(self):
+        expr = 'exists(SELECT 1 FROM s)'
+        assert sanitize_subset_string(expr) == expr
+
+    def test_not_clause_preserved(self):
+        expr = 'NOT ("field" = 5)'
+        assert sanitize_subset_string(expr) == expr
+
+    def test_not_no_space_preserved(self):
+        expr = 'NOT("field" = 5)'
+        assert sanitize_subset_string(expr) == expr
+
+    def test_chained_exists_preserved(self):
+        expr = 'EXISTS (SELECT 1 FROM s) AND "foo" = 1'
+        assert sanitize_subset_string(expr) == expr
+
+
 class TestAndPrefixedCoalesceStillStripped:
     """Prior AND/OR-prefixed stripping must still work after the Phase -1 addition."""
 
