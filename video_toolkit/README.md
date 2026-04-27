@@ -607,7 +607,7 @@ Speed control: `speed: "+10%"` (faster) or `speed: "-15%"` (slower)
 ### ElevenLabs (paid, high quality)
 
 ```bash
-export ELEVENLABS_API_KEY="your-api-key"
+export ELEVENLABS_API_KEY="your-api-key"  # pragma: allowlist secret
 ```
 
 ```yaml

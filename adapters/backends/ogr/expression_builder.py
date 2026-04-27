@@ -271,7 +271,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         Returns:
             True if filter applied successfully
         """
-        global _last_operation_thread, _ogr_operations_lock
+        global _last_operation_thread
 
         # Thread safety check
         current_thread = threading.current_thread().ident

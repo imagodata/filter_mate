@@ -19,6 +19,8 @@ Created: January 2026 (EPIC-1 Phase E4)
 import logging
 import re
 import threading
+from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger('FilterMate.Adapters.Backends.OGR.FilterExecutor')
 
@@ -450,9 +452,6 @@ def execute_unfilter_action_ogr(
 # =============================================================================
 # EPIC-1 Phase E4-S7: OGR Source Geometry Preparation
 # =============================================================================
-
-from dataclasses import dataclass, field
-from typing import Optional, Any, Callable
 
 
 @dataclass

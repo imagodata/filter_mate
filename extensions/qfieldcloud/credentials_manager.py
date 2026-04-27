@@ -52,13 +52,13 @@ class CredentialsManager:
     """
 
     SETTINGS_PREFIX = "filtermate/qfieldcloud/"
-    KEYRING_SERVICE = "filtermate-qfieldcloud"
+    KEYRING_SERVICE = "filtermate-qfieldcloud"  # pragma: allowlist secret
 
     # Environment variable names (fallback for CI/CD)
     ENV_URL = "QFIELDCLOUD_URL"
-    ENV_TOKEN = "QFIELDCLOUD_TOKEN"
+    ENV_TOKEN = "QFIELDCLOUD_TOKEN"  # pragma: allowlist secret
     ENV_USER = "QFIELDCLOUD_USER"
-    ENV_PASSWORD = "QFIELDCLOUD_PASSWORD"
+    ENV_PASSWORD = "QFIELDCLOUD_PASSWORD"  # pragma: allowlist secret
 
     # Keys that moved from QgsSettings → FilterMate config during v5
     # Each entry is (qgssettings_key, config_key, parse_fn)
