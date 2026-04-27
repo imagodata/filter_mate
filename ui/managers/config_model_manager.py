@@ -306,7 +306,16 @@ class ConfigModelManager:
 
         # Validate critical path before accepting serialized data
         if isinstance(serialized, dict) and 'APP' in serialized:
-            dw.CONFIG_DATA = serialized
+            # FIX 2026-04-27: mutate in place rather than rebinding the
+            # attribute. ``dw.CONFIG_DATA`` is shared with the registry's
+            # seeded extension slices and ``app.CONFIG_DATA``; rebinding
+            # orphans those references and the next persist drops keys
+            # that only existed on the orphaned dict.
+            if isinstance(dw.CONFIG_DATA, dict):
+                dw.CONFIG_DATA.clear()
+                dw.CONFIG_DATA.update(serialized)
+            else:
+                dw.CONFIG_DATA = serialized
         else:
             # serialize produced wrong keys (e.g. _display_name as key)
             # — skip overwriting CONFIG_DATA, just patch from model
@@ -316,8 +325,15 @@ class ConfigModelManager:
                 f"keeping existing CONFIG_DATA"
             )
 
-        # Sync ENV_VARS so all code reading from it sees updated values
-        ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
+        # Sync ENV_VARS so all code reading from it sees updated values.
+        # Mutate in place when ENV_VARS already holds a dict so other live
+        # references stay aligned.
+        live_env = ENV_VARS.get("CONFIG_DATA")
+        if isinstance(live_env, dict) and live_env is not dw.CONFIG_DATA:
+            live_env.clear()
+            live_env.update(dw.CONFIG_DATA)
+        else:
+            ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
         config_path = ENV_VARS.get(
             'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json'
         )
@@ -380,18 +396,51 @@ class ConfigModelManager:
             # Disconnect any existing signal first
             self.disconnect_config_model_signal()
 
-            # Reload CONFIG_DATA from disk to pick up any new entries (e.g. new languages)
+            # Reload CONFIG_DATA from disk to pick up any new entries
+            # (new extensions seeded by the registry, language packs, …).
+            #
+            # FIX 2026-04-27: previously read from
+            # ``dw.plugin_dir/config/config.json`` — that's the **plugin
+            # template** baked into the .zip, not the runtime user config
+            # under the QGIS profile. The template ships with a fresh
+            # `EXTENSIONS: {qfieldcloud: {...}}` only, so every time the
+            # user opened the Configuration panel this would overwrite
+            # ``dw.CONFIG_DATA`` (and ``ENV_VARS["CONFIG_DATA"]``) with the
+            # template, dropping any extension the registry had seeded
+            # in the runtime config (favorites_sharing in particular).
+            # The subsequent ``save_configuration_model`` then wrote this
+            # stripped state back to the runtime config — making the
+            # extension permanently invisible until manually re-seeded.
+            #
+            # Now: prefer ``CONFIG_JSON_PATH`` from ``ENV_VARS`` (the
+            # active runtime path) and only fall back to the template
+            # when the env hasn't been initialised yet.
             import os
-            config_path = os.path.join(dw.plugin_dir, 'config', 'config.json')
+            try:
+                from ...config.config import ENV_VARS
+            except Exception:
+                ENV_VARS = {}
+            config_path = ENV_VARS.get("CONFIG_JSON_PATH") or os.path.join(
+                dw.plugin_dir, 'config', 'config.json'
+            )
             try:
                 with open(config_path, 'r', encoding='utf-8') as f:
                     fresh_config = json.load(f)
-                dw.CONFIG_DATA = fresh_config
-                try:
-                    from ...config.config import ENV_VARS
-                    ENV_VARS["CONFIG_DATA"] = fresh_config
-                except Exception:
-                    pass
+                # Mutate dw.CONFIG_DATA in place when possible so other
+                # holders of the live reference (registry seed slices,
+                # app.CONFIG_DATA) are not orphaned.
+                if isinstance(dw.CONFIG_DATA, dict):
+                    dw.CONFIG_DATA.clear()
+                    dw.CONFIG_DATA.update(fresh_config)
+                else:
+                    dw.CONFIG_DATA = fresh_config
+                # Keep ENV_VARS pointing at the same live dict.
+                live = ENV_VARS.get("CONFIG_DATA")
+                if isinstance(live, dict) and live is not dw.CONFIG_DATA:
+                    live.clear()
+                    live.update(fresh_config)
+                else:
+                    ENV_VARS["CONFIG_DATA"] = dw.CONFIG_DATA
                 logger.info(f"Config reloaded from {config_path}")
             except Exception as e:
                 logger.warning(f"Could not reload config from disk: {e}")
