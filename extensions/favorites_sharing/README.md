@@ -8,6 +8,11 @@ This extension is **fully optional**. FilterMate works without it. When
 the extension is absent, the JSON import/export still works as before —
 you just can't browse curated collections from within the dialog.
 
+> **Documentation**
+> - End-user guide (consume + publish, FR): [docs/favorites_sharing/USER_GUIDE.md](../../docs/favorites_sharing/USER_GUIDE.md)
+> - Repo admin guide (set up a sharing Git repo, FR): [docs/favorites_sharing/REPO_SETUP.md](../../docs/favorites_sharing/REPO_SETUP.md)
+> - This README: technical reference (config schema, JSON formats, internals).
+
 ## What it does
 
 **Consume** (import favorites published by others):
@@ -201,7 +206,7 @@ Each entry in `remote_repos` is a dict:
 | `git_url` | no | When empty → fallback A (write locally, user pushes). |
 | `branch` | no | Defaults to the remote's HEAD. |
 | `local_clone` | no | Empty → `[profile]/FilterMate/repos/<slug>`. Relative paths anchor on the same dir. |
-| `target_collection` | no | Sub-directory under `collections/`. Empty → repo root *is* the collection. |
+| `target_collection` | no | Sub-directory under `collections/`. Empty → repo root *is* the collection. **Validated** with `safe_join_under()` — values that would escape `local_clone` (`../foo`, absolute paths, symlink-out) are rejected with a warning. |
 | `is_default` | no | Picks this repo on dialog open. |
 | `authcfg_id` | no | **Preferred** — id of a QGIS Auth Manager entry. Resolved at exec time. |
 | `auth_header` | no | **Deprecated** — plaintext header (`Basic xxx` / `Bearer xxx`). Logs a warning on read. |
@@ -222,14 +227,40 @@ methods that map onto an HTTP `Authorization:` header:
 The plaintext credential never lands in `config.json`. The
 master-password prompt fires the first time a publish runs.
 
+## Security & path safety
+
+The extension exposes an internet-facing surface (git subprocess +
+untrusted JSON bundles + untrusted SQL expressions from third-party
+publishers). The defenses below are wired by default:
+
+| Threat | Mitigation | Implementation |
+|---|---|---|
+| Plain-text PAT in `config.json` | Prefer `authcfg_id` (encrypted at rest) | [git_client.py](git_client.py): `_resolve_authcfg_header()` |
+| Token leak in logs / GitError msgs | Scrub `Authorization:` headers + URL-embedded creds | [git_client.py](git_client.py): `_scrub_command/_scrub_text` |
+| Token visible in `argv` / process list | Inject via `git -c http.extraHeader=…` | [git_client.py](git_client.py): `_run()` |
+| Path traversal via `target_collection: "../foo"` | `safe_join_under()` realpath check | [path_utils.py](path_utils.py), [remote_repo_manager.py](remote_repo_manager.py): `RemoteRepo.collection_dir` |
+| Symlink bypass of `allowed_collections` | TODO — H1 in audit 2026-04-27 | (not yet wired in scanner) |
+| Malformed bundle ingested into DB | Validator runs at scan time | TODO C3 — wire `validate()` in `_load_file()` |
+| Argv flag-injection on `git_url` | TODO — emit `--` separator | C2 in audit 2026-04-27 |
+| Master password prompt at startup | Resolve `authcfg_id` lazily at exec time, not at config load | [git_client.py](git_client.py): `_resolve_auth_header()` |
+
+See [docs/favorites_sharing/REPO_SETUP.md §3](../../docs/favorites_sharing/REPO_SETUP.md#3--permissions)
+for the operator-side controls (branch protection, PAT scope, etc.).
+
 ## Unit tests
 
 ```bash
 pytest tests/unit/extensions/favorites_sharing/
 ```
 
-See `tests/unit/extensions/favorites_sharing/` for round-trip,
-signature-keying, scanner, and validator tests.
+Coverage (108 tests as of 2026-04-27):
+- `test_git_client.py` — subprocess wrapper, secret scrubbing, authcfg resolution
+- `test_remote_repo_manager.py` — config parsing, CRUD, default selection, publish E2E, test_connection
+- `test_scanner.py` — collection discovery, allow-list, cache
+- `test_validator.py` — schema v3 lightweight + jsonschema modes
+- `test_publish.py` — bundle write, manifest merge, overwrite safety
+- `test_roundtrip.py` — `FilterFavorite` ↔ JSON normalization
+- `test_author_filter.py` — `SharedFavorite.author`, `list_authors()`, search composition
 
 ## JSON Schema
 
