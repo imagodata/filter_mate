@@ -8,11 +8,11 @@ name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector data with lightning-fast performance on ANY data source.
-version=4.6.6
+version=4.7.0
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🎯 FilterMate 4.6.6 - Your Swiss Army Knife for Spatial Data!
+about=🎯 FilterMate 4.7.0 - Your Swiss Army Knife for Spatial Data!
 
     Stop struggling with complex filters. FilterMate makes spatial queries intuitive, fast, and powerful.
 
@@ -22,20 +22,23 @@ about=🎯 FilterMate 4.6.6 - Your Swiss Army Knife for Spatial Data!
     ✓ Lightning fast: 2-8× faster with 4 performance optimizers + smart caching
     ✓ Intuitive: Filter by clicking, drawing, or selecting - no SQL needed!
     ✓ Professional: Undo/Redo, Favorites, Dark Mode, 34 languages
+    ✓ Shareable: Git-backed favorites sharing + REST API for automation
 
     🔥 KILLER FEATURES:
     ━━━━━━━━━━━━━━━━━━
     📍 Geometric filtering with buffer, intersection, containment...
     🔍 Smart entity search across any layer type
     ⭐ Save & share your favorite filter configurations with spatial context
+    🤝 Publish favorites to git repos (private/team) with authcfg credentials
+    🌐 REST API to drive FilterMate from external tools (X-API-Key auth)
     📦 One-click export to GeoPackage with embedded QGIS project (preserves group structure, styles & CRS)
     🎨 Beautiful UI that adapts to your QGIS theme
     ⚡ Filter chaining with dynamic buffer expressions
 
+    💡 v4.7.0: Favorites sharing (git-backed publish, repo manager, authcfg, quick publish), REST API (/layers, /filters/apply, /filters/status, /undo, /redo, /favorites + X-API-Key auth), perf wins (streaming feature IDs, expression cache, single buffer fetch), audit hardening (path traversal, sanitizers, deprecation registry), favorites deep audit (CRIT/HIGH/MED + COALESCE display-expression leak)
     💡 v4.6.6: Security fixes (XML parsing, temp file hardening)
     💡 v4.6.5: Config tree restructure with live save, auto-migration, live language switching fixes
     💡 v4.6.3: i18n expanded to 34 languages, live language switching fix (full UI retranslation)
-    💡 v4.6.2: Feature picker fixes (debounce, refresh, browser buttons), always-enabled identify/zoom
 
     📖 Full docs: https://imagodata.github.io/filter_mate
 
@@ -47,7 +50,7 @@ repository=https://github.com/imagodata/filter_mate
 
 hasProcessingProvider=no
 
-changelog=v4.6.6 (2026-04-08): Security fixes — use defusedxml for XML parsing in GPKG/KML exporters, replace insecure tempfile.mktemp with mkstemp in F5-TTS narrator. v4.6.5 (2026-04-08): Config tree restructure with live save and auto-migration from flat to tree format. Fix live language switching: resolve NameError, stale reentrant guard, spurious currentIndexChanged on editor open, use item's own model for setModelData. Defer language retranslate to next event loop tick. Add 79 missing translations + QFieldCloud i18n + cleanup obsolete entries. v4.6.3 (2026-04-07): i18n expanded from 22 to 34 languages (+Korean, Japanese, Arabic, Thai, Ukrainian, Czech, Romanian, Greek, Hungarian, Bulgarian, Malay, Catalan). Fix live language switching: full UI retranslation (retranslateUi + dynamic tooltips + indicators). Handle QEvent.LanguageChange for QGIS locale changes. v4.6.2 (2026-03-17): Feature picker fixes: debounce with FID storage, refresh on display field change, next/prev browser buttons initialization, always-enabled identify/zoom buttons. v4.6.1 (2026-03-09): QGIS 4 / Qt6 compatibility. Edit mode popup before filter/unfilter operations. i18n 22 languages at 100%%. Config harmonization with single source of truth. v4.6.0 (2026-02-18): GPKG export now embeds a full QGIS project preserving layer group hierarchy, styles and CRS. Fix action buttons not disabled when switching to exporting tab. v4.5.3 (2026-02-18): Fix GPKG export crash caused by GUI calls from background thread. v4.5.2 (2026-02-12): Fix square key buttons sizing, exploring sidebar layout alignment. v4.5.1 (2026-02-11): Website launch, org migration, 600 tests, quality score 9.0/10.
+changelog=v4.7.0 (2026-04-27): Favorites sharing — git-backed publish to remote repos with authcfg credentials (QgsAuthManager), repo manager dialog, quick 1-click publish, picker disambiguation when (name, author) collide, optional Resource Sharing extension, JSON Schema v3, per-user scope + profile-dir local_clone. REST API (filtermate_api) — GET /layers, POST /filters/apply, /filters/status, /undo, /redo, /favorites with X-API-Key auth middleware. QFieldCloud — harden PushWorker teardown (disconnect before terminate), fix signal leaks + broken menu removal on unload, gate favorites-sharing activation on resource_sharing plugin. Performance — stream feature IDs instead of materializing full list, cache parsed QgsExpression in evaluation task, collapse double getFeatures() in buffer simplification, limit QgsProperty buffer-distance fetch to first feature. Audit hardening — path traversal + argv injection guards, M2 sanitizer + M7 git stderr scrubbing, single HistoryService consolidation, deprecation registry adoption, PostgreSQL QgsDataSourceUri table parsing. Favorites deep audit (2026-04-23) — CRIT/HIGH/MED/LOW regressions, v3 round-trip, capture geometric predicates from live widgets, propagate predicates to combobox + canonical PROJECT_LAYERS keys, sanitize at setSubsetString chokepoint, strip stale COALESCE display expressions from subset chain, exact filtered feature_count + refresh on apply. UI fixes — exploring sidebar visibility + HIDPI profile + QSS cascade cleanup, custom selection layout, harmonize SINGLE/MULTIPLE groupbox display with CUSTOM, restore groupbox mode on apply. Filter — use pointOnSurface instead of centroid for spatial filtering. Export — sidecar style naming, LIBKML groups, case-preserved OGR drivers. i18n — full 34-locale coverage for favorites-sharing + datasource manager. v4.6.6 (2026-04-08): Security fixes — use defusedxml for XML parsing in GPKG/KML exporters, replace insecure tempfile.mktemp with mkstemp in F5-TTS narrator. v4.6.5 (2026-04-08): Config tree restructure with live save and auto-migration from flat to tree format. Fix live language switching: resolve NameError, stale reentrant guard, spurious currentIndexChanged on editor open, use item's own model for setModelData. Defer language retranslate to next event loop tick. Add 79 missing translations + QFieldCloud i18n + cleanup obsolete entries. v4.6.3 (2026-04-07): i18n expanded from 22 to 34 languages (+Korean, Japanese, Arabic, Thai, Ukrainian, Czech, Romanian, Greek, Hungarian, Bulgarian, Malay, Catalan). Fix live language switching: full UI retranslation (retranslateUi + dynamic tooltips + indicators). Handle QEvent.LanguageChange for QGIS locale changes. v4.6.2 (2026-03-17): Feature picker fixes: debounce with FID storage, refresh on display field change, next/prev browser buttons initialization, always-enabled identify/zoom buttons. v4.6.1 (2026-03-09): QGIS 4 / Qt6 compatibility. Edit mode popup before filter/unfilter operations. i18n 22 languages at 100%%. Config harmonization with single source of truth. v4.6.0 (2026-02-18): GPKG export now embeds a full QGIS project preserving layer group hierarchy, styles and CRS. Fix action buttons not disabled when switching to exporting tab. v4.5.3 (2026-02-18): Fix GPKG export crash caused by GUI calls from background thread. v4.5.2 (2026-02-12): Fix square key buttons sizing, exploring sidebar layout alignment. v4.5.1 (2026-02-11): Website launch, org migration, 600 tests, quality score 9.0/10.
 
 # Tags are comma separated with spaces allowed
 tags=python,filter,vector,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export

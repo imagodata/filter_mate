@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.6.6** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.7.0** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -19,11 +19,21 @@
 | 🔍 **Smart Search** | Intuitive entity search across all layer types |
 | 📐 **Geometric Filtering** | Spatial predicates with buffer support |
 | ⭐ **Filter Favorites** | Save and reuse filter configurations |
+| 🤝 **Favorites Sharing** | Publish favorites to git repos with QGIS authcfg credentials |
+| 🌐 **REST API** | Drive FilterMate from external tools (X-API-Key auth) |
 | 📝 **Undo/Redo** | Complete filter history |
 | 🌍 **34 Languages** | Full internationalization |
 | 🎨 **Dark Mode** | Automatic theme detection |
 | 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
+
+### 🆕 What's new in 4.7.0
+
+- **Favorites Sharing**: git-backed publish to remote repos, repo manager dialog, 1-click *Quick publish*, optional Resource Sharing extension, JSON Schema v3, per-user scope.
+- **REST API**: `GET /layers`, `POST /filters/apply`, `/filters/status`, `/undo`, `/redo`, `/favorites` — protected by `X-API-Key` middleware.
+- **Performance**: streaming feature IDs, cached parsed expressions, single buffer-distance fetch.
+- **Hardening**: path-traversal + argv-injection guards, git stderr scrubbing, sanitizer at `setSubsetString` chokepoint, single `HistoryService`, `QgsDataSourceUri`-based PostgreSQL table parsing.
+- **UX/UI**: HIDPI profile + QSS cascade cleanup, harmonized groupbox display modes, favorites scope filter combo + list badges, full 34-locale coverage for new features.
 
 ---
 

@@ -2,6 +2,93 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.7.0] - 2026-04-27
+
+### Favorites Sharing, REST API, Audit Hardening
+
+A major minor: collaborative favorites over git, a public REST API for automation, broad audit hardening, and substantial performance wins.
+
+#### New — Favorites Sharing
+
+- **Git-backed publish** to configured remote repos (`favorites_sharing` extension)
+- **Repo manager dialog** with `authcfg_id` credentials via QGIS `QgsAuthManager`
+- **Quick publish** 1-click flow + collection picker + config defaults
+- **Picker disambiguation** when `(name, author)` collide (suffix with repo)
+- **Optional Resource Sharing** integration + **JSON Schema v3** payloads
+- **Per-user scope** (`personal` / `team` / `public`) with profile-dir `local_clone`, scope filter combo + list badges
+- **Background QThread** for git ops with hardened lifecycle (re-publish race + teardown)
+
+#### New — REST API (`filtermate_api`)
+
+- `GET /layers` — list project layers
+- `POST /filters/apply` — apply a filter on a layer
+- `GET /filters/status` — current filter state
+- `POST /undo` and `POST /redo`
+- `GET/POST /favorites` — list and apply saved favorites
+- `X-API-Key` authentication middleware
+
+#### Bug Fixes — QFieldCloud
+
+- Harden `PushWorker` teardown: disconnect signals before `terminate()`
+- Fix signal leaks + broken menu removal on plugin unload
+- Gate favorites-sharing activation on the `resource_sharing` plugin
+
+#### Bug Fixes — Favorites (deep audit 2026-04-23)
+
+- Capture geometric predicates from live widgets and propagate to combobox
+- Canonical `PROJECT_LAYERS` keys on restore
+- Sanitize at `setSubsetString` chokepoint to block stale display expressions
+- Strip standalone / `COALESCE('<NULL>')` display expressions from `subsetString` chain
+- Apply saved subsets directly (drop rebuild dance)
+- Restore groupbox mode on apply to survive project reopen
+- Exact filtered `feature_count` + refresh on apply
+- Translate raw QGIS expressions before `backend.execute` (TaskBridge)
+
+#### Bug Fixes — Audit hardening
+
+- Path traversal + argv injection guards on git ops
+- M2 sanitizer + M7 git stderr scrubbing
+- M3 — parent dialog children at construction
+- M4 single `HistoryService` + M5 deprecation registry adoption
+- M6 — `QgsDataSourceUri` to parse PostgreSQL table names
+
+#### Bug Fixes — Extensions
+
+- QFieldCloud teardown signal-leak fix
+- Extensions: correct QGIS plugin detection + accurate missing-deps dialog
+- Surface discovery failures to the QGIS log panel
+- Preserve `ENV_VARS['CONFIG_DATA']` reference across `_persist_config`
+- Cover mixed-failure, duplicate-id, and teardown edge cases
+
+#### Bug Fixes — UI / UX
+
+- Exploring sidebar visibility + HIDPI profile + QSS cascade cleanup
+- Exploring toolbar visibility + custom selection layout + combobox text clipping
+- Harmonize `SINGLE` / `MULTIPLE` groupbox display with `CUSTOM`
+
+#### Bug Fixes — Filter / Export / Backends
+
+- Use `pointOnSurface` instead of `centroid` for spatial filtering
+- Sidecar style naming, LIBKML groups, case-preserved OGR drivers
+- Restore PostgreSQL direct-exec broken query template
+- Include layer schema signature in cache keys
+
+#### Performance
+
+- Stream feature IDs instead of materializing full list
+- Cache parsed `QgsExpression` in `ExpressionEvaluationTask`
+- Route async expression eval through `ExpressionEvaluationManager`
+- Collapse double `getFeatures()` pass in buffer simplification
+- Limit `QgsProperty` buffer-distance fetch to first feature
+
+#### i18n / Docs
+
+- Full 34-locale coverage for `favorites-sharing` + datasource manager
+- User guide + repo admin guide + README security section for favorites sharing
+- General deep audit (2026-04-22) — score 8.0/10
+
+---
+
 ## [4.6.6] - 2026-04-08
 
 ### Security Fixes
