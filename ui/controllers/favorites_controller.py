@@ -1676,7 +1676,6 @@ class FavoritesController(BaseController):
         # the user's manual selection rather than regressing.
 
         buffer_value = spatial_config.get('buffer_value')
-        target_layer_keys = list((favorite.remote_layers or {}).keys())
 
         current_layer = getattr(dw, 'current_layer', None)
         layer_props = None

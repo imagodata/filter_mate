@@ -1,4 +1,4 @@
-"""Diagnostic script: extract and inspect project XML from a GPKG.
+r"""Diagnostic script: extract and inspect project XML from a GPKG.
 
 Usage in QGIS Python console:
     exec(open('C:/Users/SimonDucorneau/AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/filter_mate/debug_gpkg_project.py').read())

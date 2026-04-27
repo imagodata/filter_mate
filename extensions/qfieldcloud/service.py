@@ -149,7 +149,7 @@ class QFieldCloudService:
                 styles_dir=styles_dest,
                 layer_actions=layer_actions,
             )
-            qgs_path = builder.build()
+            builder.build()
 
             _progress(25, "Connecting to QFieldCloud...")
 

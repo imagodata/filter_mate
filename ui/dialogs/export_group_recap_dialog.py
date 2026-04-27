@@ -108,7 +108,6 @@ class ExportGroupRecapDialog(QDialog):
         layout.addWidget(header)
 
         # Summary
-        groups = self._hierarchy.get("groups", [])
         ungrouped = self._hierarchy.get("ungrouped", [])
         group_count = self._count_groups(self._hierarchy)
         has_groups = group_count > 0

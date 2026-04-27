@@ -83,7 +83,6 @@ def evaluate_buffer_distance(
     """
     if isinstance(buffer_param, QgsProperty):
         # Expression-based buffer: only the first feature is needed to seed context.
-        from qgis.core import QgsFeatureRequest
         first_feature = next(
             iter(layer.getFeatures(QgsFeatureRequest().setLimit(1))),
             None,
@@ -449,7 +448,6 @@ def apply_qgis_buffer(
         # Evaluate buffer distance to get actual value (only first feature is needed)
         eval_distance = buffer_distance
         if isinstance(buffer_distance, QgsProperty):
-            from qgis.core import QgsFeatureRequest
             first_feature = next(
                 iter(layer.getFeatures(QgsFeatureRequest().setLimit(1))),
                 None,
@@ -567,7 +565,6 @@ def simplify_buffer_result(
     # is needed to seed the expression context, so cap the request at 1.
     buffer_dist = buffer_distance
     if isinstance(buffer_distance, QgsProperty):
-        from qgis.core import QgsFeatureRequest
         first_feature = next(
             iter(layer.getFeatures(QgsFeatureRequest().setLimit(1))),
             None,

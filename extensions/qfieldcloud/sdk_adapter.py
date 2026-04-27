@@ -153,8 +153,8 @@ class QFieldCloudAdapter:
         """
         try:
             self._nam.set_token(token)
-            # Validate by fetching projects
-            projects = self._nam.get_projects_not_async()
+            # Validate by fetching projects (call is for its side effect on auth state)
+            self._nam.get_projects_not_async()
             if self._nam.is_authenticated():
                 logger.info("Authenticated with token via QFieldSync")
                 return True
