@@ -19,7 +19,6 @@ Date: January 2026
 
 import logging
 import time
-import re
 from typing import Optional, List, Dict, Any, Tuple
 
 from ....core.ports.backend_port import BackendPort, BackendInfo, BackendCapability
@@ -411,6 +410,10 @@ class PostgreSQLBackend(BackendPort):
         """
         Extract schema and table name from QGIS layer.
 
+        M6 (audit 2026-04-23): use ``QgsDataSourceUri`` instead of three
+        cascaded regexes — handles quoted identifiers, embedded dots,
+        and edge cases the regex chain silently mishandled.
+
         Args:
             layer: QgsVectorLayer
 
@@ -422,30 +425,16 @@ class PostgreSQLBackend(BackendPort):
 
         try:
             source = layer.source()
-
-            # Parse PostgreSQL connection string
-            # Format: "dbname='x' host='y' port='z' sslmode='prefer' ... table=\"schema\".\"table\" ..."
-
-            # Try table="schema"."table" format
-            import re
-            match = re.search(r'table="([^"]+)"\.?"([^"]+)"', source)
-            if match:
-                return match.group(1), match.group(2)
-
-            # Try table=schema.table format (no quotes)
-            match = re.search(r'table=([^\s"]+)\.([^\s"]+)', source)
-            if match:
-                return match.group(1), match.group(2)
-
-            # Try just table name
-            match = re.search(r'table=["\']?([^"\'\s]+)["\']?', source)
-            if match:
-                # Assume public schema if not specified
-                return 'public', match.group(1)
-
+            from qgis.core import QgsDataSourceUri
+            uri = QgsDataSourceUri(source)
+            table = uri.table()
+            schema = uri.schema()
+            # Defensive isinstance — see _get_table_name for the rationale.
+            if isinstance(table, str) and table:
+                schema_str = schema if isinstance(schema, str) and schema else 'public'
+                return schema_str, table
             logger.warning(f"[PostgreSQL] Could not parse table from source: {source[:200]}")
             return None, None
-
         except Exception as e:
             logger.error(f"[PostgreSQL] Error extracting table info: {e}")
             return None, None
@@ -764,28 +753,46 @@ class PostgreSQLBackend(BackendPort):
             raise
 
     def _get_table_name(self, layer_info: LayerInfo) -> str:
-        """Extract table name from layer source."""
-        # Parse from layer source_path
-        # Format: "dbname=x user=y table=schema.table" or "table=\"schema\".\"table\""
+        """Extract a quoted ``"schema"."table"`` reference for the layer.
+
+        M6 (audit 2026-04-23): prefer QGIS' own ``QgsDataSourceUri`` parser
+        over the previous regex on ``table=…``. The regex mishandled
+        quoted identifiers that contained spaces or dots, and silently
+        dropped the schema half. The parser is the same one QGIS uses
+        internally to build the URI, so it round-trips losslessly.
+        """
         source = layer_info.source_path
 
-        logger.debug(f"[PostgreSQL] [PostgreSQL v4.0] Extracting table from source: {source[:200]}...")
+        logger.debug(
+            f"[PostgreSQL] [PostgreSQL v4.0] Extracting table from source: {source[:200]}..."
+        )
 
-        # Try to extract table from source
-        match = re.search(r'table=["\']?([^"\'"\s]+)["\']?', source)
-        if match:
-            table = match.group(1)
-            logger.debug(f"[PostgreSQL] [PostgreSQL v4.0] Table extracted (method 1): {table}")
-            return table
+        # Primary: ask QGIS to parse the URI for us.
+        try:
+            from qgis.core import QgsDataSourceUri
+            uri = QgsDataSourceUri(source)
+            table = uri.table()
+            schema = uri.schema()
+            # Defensive isinstance — under the test suite's QGIS mock,
+            # MagicMock().table() returns another MagicMock (truthy) which
+            # would land bogus identifiers in the SQL. Real QGIS always
+            # returns str.
+            if isinstance(table, str) and table:
+                schema_str = schema if isinstance(schema, str) and schema else ""
+                qualified = (
+                    f'"{schema_str}"."{table}"' if schema_str else f'"{table}"'
+                )
+                logger.debug(
+                    f"[PostgreSQL] [PostgreSQL v4.0] Table from QgsDataSourceUri: {qualified}"
+                )
+                return qualified
+        except Exception as exc:
+            logger.debug(
+                f"[PostgreSQL] [PostgreSQL v4.0] QgsDataSourceUri parse failed, "
+                f"falling back to LayerInfo fields: {exc}"
+            )
 
-        # Try schema.table format
-        match = re.search(r'table="([^"]+)"\.?"([^"]+)"', source)
-        if match:
-            table = f'"{match.group(1)}"."{match.group(2)}"'
-            logger.debug(f"[PostgreSQL] [PostgreSQL v4.0] Table extracted (method 2): {table}")
-            return table
-
-        # Fallback to layer table_name
+        # Fallback: structured LayerInfo fields populated by the adapter.
         if layer_info.table_name:
             if layer_info.schema_name:
                 table = f'"{layer_info.schema_name}"."{layer_info.table_name}"'
@@ -794,7 +801,9 @@ class PostgreSQLBackend(BackendPort):
             logger.debug(f"[PostgreSQL] [PostgreSQL v4.0] Table from LayerInfo: {table}")
             return table
 
-        logger.warning("[PostgreSQL] [PostgreSQL v4.0] Could not extract table name - using 'unknown_table'")
+        logger.warning(
+            "[PostgreSQL] [PostgreSQL v4.0] Could not extract table name - using 'unknown_table'"
+        )
         return "unknown_table"
 
     def _get_geometry_column(self, layer_info: LayerInfo) -> str:
