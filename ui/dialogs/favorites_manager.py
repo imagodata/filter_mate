@@ -473,7 +473,11 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _create_left_panel(self) -> QWidget:
         """Create the left panel with favorites list."""
-        left_panel = QWidget()
+        # M3 (#41): pass self as parent so the widget stays anchored to the
+        # dialog's lifetime until the splitter takes ownership. Without it,
+        # a teardown race could GC the widget while Qt is still iterating
+        # children on shutdown.
+        left_panel = QWidget(self)
         left_layout = QVBoxLayout(left_panel)
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(0)
@@ -489,7 +493,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _create_right_panel(self) -> QWidget:
         """Create the right panel with details tabs."""
-        right_panel = QWidget()
+        right_panel = QWidget(self)
         right_layout = QVBoxLayout(right_panel)
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(0)
@@ -513,7 +517,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _create_general_tab(self) -> QWidget:
         """Create the General Info tab."""
-        general_tab = QWidget()
+        general_tab = QWidget(self)
         general_layout = QFormLayout(general_tab)
         general_layout.setContentsMargins(12, 12, 12, 12)
         general_layout.setSpacing(10)
@@ -563,7 +567,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # vs shared) and project (this vs all). Each dimension is a pair
         # of mutually exclusive radios; the combination gives the 4
         # scopes surfaced in the header filter combo.
-        scope_container = QWidget()
+        scope_container = QWidget(general_tab)
         scope_v = QVBoxLayout(scope_container)
         scope_v.setContentsMargins(0, 0, 0, 0)
         scope_v.setSpacing(4)
@@ -617,7 +621,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _create_expression_tab(self) -> QWidget:
         """Create the Expression tab."""
-        expr_tab = QWidget()
+        expr_tab = QWidget(self)
         expr_layout = QVBoxLayout(expr_tab)
         expr_layout.setContentsMargins(12, 12, 12, 12)
         expr_layout.setSpacing(8)
@@ -636,7 +640,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _create_remote_tab(self) -> QWidget:
         """Create the Remote Layers tab."""
-        remote_tab = QWidget()
+        remote_tab = QWidget(self)
         remote_layout = QVBoxLayout(remote_tab)
         remote_layout.setContentsMargins(12, 12, 12, 12)
         remote_layout.setSpacing(8)
