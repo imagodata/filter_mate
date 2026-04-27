@@ -22,6 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import __version__
 from .accessor import FilterMateAccessor, InMemoryAccessor
 from .config import APIConfig
+from .routers import favorites as favorites_router
 from .routers import filters as filters_router
 from .routers import layers as layers_router
 
@@ -121,8 +122,9 @@ def create_app(
         }
 
     # --- Domain routers ---
-    app.include_router(layers_router.router)    # GET /layers          — issue #30
-    app.include_router(filters_router.router)   # POST /filters/apply  — issue #29
+    app.include_router(layers_router.router)     # GET /layers                       — issue #30
+    app.include_router(filters_router.router)    # /filters/apply, /status, /undo, /redo — #29 #31 #33
+    app.include_router(favorites_router.router)  # GET /favorites, POST /favorites/{id}/apply — #32
 
     return app
 

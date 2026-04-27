@@ -13,7 +13,11 @@ pytest.importorskip("fastapi")
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from filtermate_api.accessor import InMemoryAccessor, LayerSummary  # noqa: E402
+from filtermate_api.accessor import (  # noqa: E402
+    Favorite,
+    InMemoryAccessor,
+    LayerSummary,
+)
 from filtermate_api.server import create_app  # noqa: E402
 
 
@@ -40,8 +44,33 @@ def sample_layers() -> list[LayerSummary]:
 
 
 @pytest.fixture
-def accessor(sample_layers) -> InMemoryAccessor:
-    return InMemoryAccessor(layers=list(sample_layers))
+def sample_favorites() -> list[Favorite]:
+    return [
+        Favorite(
+            favorite_id="fav-communes-large",
+            name="Large communes",
+            description="Communes >10k pop",
+            layer_name="communes",
+            expression='"population" > 10000',
+        ),
+        Favorite(
+            favorite_id="fav-roads-major",
+            name="Major roads",
+            layer_name="roads",
+            expression='"class" = \'major\'',
+        ),
+        # Intentionally has no layer_name — represents a malformed favorite
+        # so we can exercise the 404 path.
+        Favorite(favorite_id="fav-orphan", name="Orphan"),
+    ]
+
+
+@pytest.fixture
+def accessor(sample_layers, sample_favorites) -> InMemoryAccessor:
+    return InMemoryAccessor(
+        layers=list(sample_layers),
+        favorites=list(sample_favorites),
+    )
 
 
 @pytest.fixture

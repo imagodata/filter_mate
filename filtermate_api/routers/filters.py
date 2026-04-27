@@ -14,7 +14,7 @@ from typing import Dict
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
-from ..accessor import FilterMateAccessor
+from ..accessor import FilterMateAccessor, FilterStatus, HistoryStep
 
 router = APIRouter(prefix="/filters", tags=["filters"])
 
@@ -74,5 +74,54 @@ async def apply_filter(
         layer_name=payload.layer_name,
         expression=payload.expression,
         source=payload.source,
+        active_filters=accessor.get_active_filters(),
+    )
+
+
+@router.get("/status", response_model=FilterStatus)
+async def get_filter_status(request: Request) -> FilterStatus:
+    """Issue #31 — return a snapshot of the session's current filter state."""
+    return _accessor(request).get_filter_status()
+
+
+class HistoryStepResponse(BaseModel):
+    status: str = "ok"
+    step: HistoryStep
+    active_filters: Dict[str, str] = Field(default_factory=dict)
+
+
+@router.post("/undo", response_model=HistoryStepResponse)
+async def undo_filter(request: Request) -> HistoryStepResponse:
+    """Issue #33 — pop the last filter step from the undo stack.
+
+    Returns the step we just rolled back TO. 409 when there is nothing
+    to undo so clients can disable the button without polling /status
+    first.
+    """
+    accessor = _accessor(request)
+    step = accessor.undo_filter()
+    if step is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Nothing to undo",
+        )
+    return HistoryStepResponse(
+        step=step,
+        active_filters=accessor.get_active_filters(),
+    )
+
+
+@router.post("/redo", response_model=HistoryStepResponse)
+async def redo_filter(request: Request) -> HistoryStepResponse:
+    """Issue #33 — re-apply the most recently undone step."""
+    accessor = _accessor(request)
+    step = accessor.redo_filter()
+    if step is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Nothing to redo",
+        )
+    return HistoryStepResponse(
+        step=step,
         active_filters=accessor.get_active_filters(),
     )
