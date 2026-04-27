@@ -41,6 +41,38 @@ class TestStandaloneDisplayExpressions:
         assert sanitize_subset_string(expr) == expr
 
 
+class TestM2HardeningUnknownDisplayFunctions:
+    """M2 hardening (audit 2026-04-23, fix 2026-04-27): the previous
+    detection only triggered on a hardcoded denylist of QGIS display
+    functions. Any future / custom display function bypassed the check.
+
+    The new logic treats ANY function call without a top-level boolean
+    operator as a non-WHERE expression.
+    """
+
+    def test_unknown_display_function_is_cleared(self):
+        # Hypothetical display function not in _DISPLAY_FUNCTION_PREFIXES
+        expr = "geom_to_wkt(\"geometry\")"
+        assert sanitize_subset_string(expr) == ''
+
+    def test_camelcase_display_function_is_cleared(self):
+        expr = "MyCustomDisplay(\"field\", 'sep')"
+        assert sanitize_subset_string(expr) == ''
+
+    def test_unknown_function_with_top_level_comparison_preserved(self):
+        # Same unknown function but used in a WHERE-compatible comparison —
+        # must NOT be stripped.
+        expr = "geom_to_wkt(\"geometry\") = 'POINT(0 0)'"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_boolean_literal_true_preserved(self):
+        # `WHERE TRUE` is a valid SQL clause and must not be stripped.
+        assert sanitize_subset_string("TRUE") == "TRUE"
+
+    def test_boolean_literal_false_preserved(self):
+        assert sanitize_subset_string("FALSE") == "FALSE"
+
+
 class TestBooleanFiltersPreserved:
     """Valid boolean filters must pass through untouched."""
 

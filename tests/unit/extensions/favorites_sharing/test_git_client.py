@@ -19,6 +19,8 @@ import pytest
 from extensions.favorites_sharing.git_client import (
     GitClient,
     GitError,
+    _scrub_command,
+    _scrub_text,
 )
 
 
@@ -203,3 +205,67 @@ class TestGitClient:
             idx = argv.index("-c")
             assert "http.extraHeader" in argv[idx + 1]
             assert "SECRET-TOKEN-123" in argv[idx + 1]
+
+
+# ---------------------------------------------------------------------------
+# M7: secret scrubbing on the leak path (audit 2026-04-23)
+# ---------------------------------------------------------------------------
+
+
+class TestSecretScrubbing:
+    """The auth header / URL-embedded creds must never leave the process via
+    GitError messages, the .stderr field, or debug logs."""
+
+    def test_scrub_command_redacts_auth_header_arg(self):
+        cmd = [
+            "git", "-c",
+            "http.extraHeader=Authorization: Bearer SECRET-TOKEN-123",
+            "fetch",
+        ]
+        scrubbed = _scrub_command(cmd)
+        joined = " ".join(scrubbed)
+        assert "SECRET-TOKEN-123" not in joined
+        assert "[REDACTED]" in joined
+        # Original list untouched (function returns a copy).
+        assert "SECRET-TOKEN-123" in " ".join(cmd)
+
+    def test_scrub_command_no_auth_arg_is_passthrough(self):
+        cmd = ["git", "status"]
+        assert _scrub_command(cmd) == cmd
+
+    def test_scrub_text_redacts_url_embedded_creds(self):
+        text = "fatal: unable to access 'https://user:hunter2@host/repo.git/'"
+        scrubbed = _scrub_text(text)
+        assert "hunter2" not in scrubbed
+        assert "user" not in scrubbed
+        assert "[REDACTED]" in scrubbed
+
+    def test_scrub_text_redacts_authorization_header_in_log(self):
+        text = "request: http.extraHeader=Authorization: Bearer SECRET-XYZ"
+        scrubbed = _scrub_text(text)
+        assert "SECRET-XYZ" not in scrubbed
+        assert "[REDACTED]" in scrubbed
+
+    def test_scrub_text_empty_string_is_safe(self):
+        assert _scrub_text("") == ""
+        assert _scrub_text(None) is None  # type: ignore[arg-type]
+
+    def test_giterror_message_does_not_leak_token(self):
+        cmd = [
+            "git", "-c",
+            "http.extraHeader=Authorization: Bearer SECRET-TOKEN-123",
+            "push",
+        ]
+        err = GitError(
+            command=cmd,
+            returncode=128,
+            stdout="",
+            stderr="fatal: unable to access 'https://u:tok@h/r.git/'",
+            cwd="/tmp/clone",
+        )
+        msg = str(err)
+        assert "SECRET-TOKEN-123" not in msg
+        assert "tok" not in msg  # URL-embedded token also scrubbed
+        # Stored fields are scrubbed too.
+        assert "SECRET-TOKEN-123" not in " ".join(err.command)
+        assert "tok" not in err.stderr

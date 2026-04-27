@@ -119,9 +119,17 @@ def _has_toplevel_boolean_operator(expr: str) -> bool:
     return False
 
 
+_FUNCTION_CALL_RE = re.compile(r'^[A-Z_][A-Z0-9_]*\s*\(')
+
+
 def _is_standalone_display_expression(expr: str) -> bool:
     """True if `expr` is a display function call / field reference with no
     outer boolean operator — i.e. it cannot be used as a SQL WHERE clause.
+
+    M2 hardening (2026-04-27): primary detection is "no top-level boolean
+    operator". The known-prefix list (``_DISPLAY_FUNCTION_PREFIXES``) is now a
+    confidence booster, not the trigger — any future QGIS display function
+    name slips through the denylist otherwise.
     """
     if not expr or not expr.strip():
         return False
@@ -129,19 +137,36 @@ def _is_standalone_display_expression(expr: str) -> bool:
     stripped = expr.strip()
     upper = stripped.upper()
 
+    # Boolean literals and a bare boolean column ref are valid WHERE bodies.
+    if upper in ('TRUE', 'FALSE'):
+        return False
+
+    # A subset that already exposes a boolean operator at depth 0 is by
+    # definition usable as WHERE — leave it alone.
+    if _has_toplevel_boolean_operator(stripped):
+        return False
+
+    # From here on, we know there is NO top-level boolean operator. Decide
+    # whether the expression nonetheless looks like something the backend
+    # will reject (field ref / function call) versus a literal we'd rather
+    # leave to the backend.
+
     # Field-only reference: "field" or "table"."field" with nothing else.
     if stripped.startswith('"') and stripped.endswith('"'):
         inner = stripped[1:-1]
-        # Must not contain any top-level operator — if it does, it's a weird
-        # edge case and we leave it alone (let QGIS/Postgres reject it).
         if '"' not in inner or inner.replace('"."', '').replace('"', '') == inner.replace('"."', '').replace('"', ''):
-            if not _has_toplevel_boolean_operator(stripped):
-                return True
+            return True
 
-    # Display function prefix (COALESCE, CONCAT, …)
+    # Known display function prefix (fast-path / explicit confidence).
     for prefix in _DISPLAY_FUNCTION_PREFIXES:
         if upper.startswith(prefix):
-            return not _has_toplevel_boolean_operator(stripped)
+            return True
+
+    # Generic function call FOO(...): any IDENTIFIER( without a top-level
+    # boolean operator can't be a WHERE body. Catches future QGIS display
+    # functions that aren't in the prefix list.
+    if _FUNCTION_CALL_RE.match(upper):
+        return True
 
     return False
 

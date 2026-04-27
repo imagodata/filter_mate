@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import subprocess
 from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
@@ -32,20 +33,51 @@ logger = logging.getLogger('FilterMate.FavoritesSharing.Git')
 
 DEFAULT_TIMEOUT_SECONDS = 30
 
+# Patterns used to scrub secrets out of command lists, stderr text, and log
+# lines before they leave the process (M7 hardening, audit 2026-04-23).
+_AUTH_HEADER_RE = re.compile(
+    r"(http\.extraHeader=Authorization:\s*)[^\n]+", re.IGNORECASE
+)
+_URL_CREDS_RE = re.compile(r"(\w+://)([^/@\s]+)@")
+_REDACTED = "[REDACTED]"
+
+
+def _scrub_command(cmd: List[str]) -> List[str]:
+    """Return a copy of ``cmd`` with any embedded auth header redacted."""
+    return [_AUTH_HEADER_RE.sub(rf"\1{_REDACTED}", arg) for arg in cmd]
+
+
+def _scrub_text(text: str) -> str:
+    """Strip Authorization headers and URL-embedded credentials from text.
+
+    Designed for stderr coming back from ``git`` — server messages may echo
+    the request line (``Authorization: Basic ...``) or the full URL
+    (``https://user:token@host/repo``). Either would leak credentials into
+    log files, bug-report attachments, or the GitError message.
+    """
+    if not text:
+        return text
+    scrubbed = _AUTH_HEADER_RE.sub(rf"\1{_REDACTED}", text)
+    scrubbed = _URL_CREDS_RE.sub(rf"\1{_REDACTED}@", scrubbed)
+    return scrubbed
+
 
 class GitError(RuntimeError):
     """A git subprocess returned non-zero."""
 
     def __init__(self, command: List[str], returncode: int,
                  stdout: str, stderr: str, cwd: Optional[str] = None):
-        self.command = command
+        # M7 (2026-04-23): scrub auth headers from cmd & stderr so the
+        # exception (often surfaced in log files / bug reports) doesn't
+        # leak credentials.
+        self.command = _scrub_command(command)
         self.returncode = returncode
         self.stdout = stdout
-        self.stderr = stderr
+        self.stderr = _scrub_text(stderr)
         self.cwd = cwd
-        cmd_str = " ".join(command)
+        cmd_str = " ".join(self.command)
         super().__init__(
-            f"git command failed (exit {returncode}): {cmd_str}\n{stderr.strip()}"
+            f"git command failed (exit {returncode}): {cmd_str}\n{self.stderr.strip()}"
         )
 
 
@@ -109,7 +141,7 @@ class GitClient:
         env.setdefault("GIT_ASKPASS", "echo")
         env.update(self.extra_env)
 
-        logger.debug("git run: cwd=%s cmd=%s", run_cwd, cmd)
+        logger.debug("git run: cwd=%s cmd=%s", run_cwd, _scrub_command(cmd))
         try:
             proc = subprocess.run(
                 cmd,
