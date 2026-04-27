@@ -1129,10 +1129,19 @@ class TestSubsetManagementHandler:
 
     def test_get_spatialite_datasource_fallback(self, mock_layer):
         """When not native Spatialite, should use filterMate db path."""
-        with patch(
-            'core.tasks.subset_management_handler.get_spatialite_datasource_from_layer',
-            return_value=(None, None),
-            create=True,
+        # The handler does a late `from ...infrastructure.utils import
+        # get_spatialite_datasource_from_layer` inside the method body, so
+        # patching the module attribute on subset_management_handler doesn't
+        # take. Patch the real source — the namespaced infrastructure module
+        # — so the late import resolves to our stub regardless of pollution
+        # by sibling tests (#42).
+        import sys
+        infra_utils = sys.modules.setdefault(
+            'filter_mate.infrastructure.utils', MagicMock()
+        )
+        with patch.object(
+            infra_utils, 'get_spatialite_datasource_from_layer',
+            return_value=(None, None), create=True,
         ):
             from core.tasks.subset_management_handler import SubsetManagementHandler
             handler = SubsetManagementHandler.__new__(SubsetManagementHandler)

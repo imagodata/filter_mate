@@ -26,6 +26,37 @@ import types
 import os
 from unittest.mock import MagicMock
 
+import pytest
+
+
+# Snapshot of `sys.modules` keys this conftest mutates, so we can restore the
+# original state after the directory's tests finish. Without this, the
+# ``core``/``core.tasks`` aliases the conftest installs leak into sibling
+# directories' tests and break their imports — that was the root cause of
+# issue #42 (test-order pollution).
+_MUTATED_KEYS = (
+    'core',
+    'core.tasks',
+    'core.tasks.cleanup_handler',
+    'core.tasks.export_handler',
+    'core.tasks.geometry_handler',
+    'core.tasks.initialization_handler',
+    'core.tasks.source_geometry_preparer',
+    'core.tasks.subset_management_handler',
+    'core.tasks.expression_evaluation_task',
+)
+_PRE_SETUP_SNAPSHOT: dict = {}
+
+# Strong references to the canonical handler modules loaded by
+# ``_setup_handler_mocks``. Sibling test directories can re-trigger Python's
+# import machinery and replace ``filter_mate.core.tasks.X`` with a fresh
+# instance built against THEIR mock chain. That fresh instance binds the
+# wrong ``PROVIDER_POSTGRES`` etc. and breaks the handler tests when they
+# next run. Keeping a strong reference here lets ``_reassert_handler_aliases``
+# repin both the namespaced AND short-name slots to the original correctly-
+# mocked instance — see issue #42.
+_CANONICAL_HANDLER_MODULES: dict = {}
+
 
 def _create_package(name, parent=None):
     """Create a real module/package object and register in sys.modules."""
@@ -44,6 +75,12 @@ def _setup_handler_mocks():
     if getattr(_setup_handler_mocks, '_done', False):
         return
     _setup_handler_mocks._done = True
+
+    # Snapshot pre-existing entries for the keys we're about to mutate so a
+    # session-end fixture can restore them. Captures None for keys not yet
+    # in sys.modules (i.e. "delete on teardown").
+    for key in _MUTATED_KEYS:
+        _PRE_SETUP_SNAPSHOT[key] = sys.modules.get(key)
 
     # Logger and ENV mocks
     mock_logger = MagicMock()
@@ -214,6 +251,8 @@ def _setup_handler_mocks():
                 # Also set as attribute on the tasks package
                 setattr(sys.modules[f'{ROOT}.core.tasks'], handler_name, module)
                 setattr(sys.modules['core.tasks'], handler_name, module)
+                # Keep a strong reference for #42 alias-restoration.
+                _CANONICAL_HANDLER_MODULES[handler_name] = module
             except Exception as e:
                 sys.modules[fm_module_name] = MagicMock()
                 sys.modules[short_module_name] = MagicMock()
@@ -224,5 +263,79 @@ def _setup_handler_mocks():
                 )
 
 
-# Run at import time
+# Run at import time so that test files in this directory can use
+# ``from core.tasks.X import Y`` inside setup methods. The setup is guarded
+# by `_setup_handler_mocks._done` so repeat invocations are no-ops.
 _setup_handler_mocks()
+
+
+def _reassert_handler_aliases():
+    """Re-pin the ``core.tasks.<handler>`` aliases to the conftest's loaded
+    module instances.
+
+    #42 root-cause: between handler tests, sibling tests (e.g. those in
+    ``tests/unit/ui/controllers/`` or ``tests/unit/extensions/``) install
+    their own ``filter_mate`` package with a real ``__path__``. Subsequent
+    ``import core.tasks.subset_management_handler`` re-loads the module
+    file from disk via the standard machinery, replacing the alias. The
+    new module instance pulls ``PROVIDER_POSTGRES`` etc. from whatever
+    ``infrastructure.constants`` mock happens to be installed at that
+    moment — typically a bare MagicMock without our string values.
+
+    Re-pinning before each handler test guarantees the alias points to
+    the conftest's original (correctly-mocked) instance.
+    """
+    ROOT = 'filter_mate'
+    for short_name, canonical in _CANONICAL_HANDLER_MODULES.items():
+        # Force both the namespaced and short-name slots back to the canonical
+        # instance, even if a sibling test re-imported the file from disk and
+        # replaced the namespaced slot.
+        sys.modules[f'{ROOT}.core.tasks.{short_name}'] = canonical
+        sys.modules[f'core.tasks.{short_name}'] = canonical
+
+    # Re-pin the provider constants on each handler module. When the conftest
+    # runs AFTER a sibling test has already populated
+    # ``filter_mate.infrastructure.constants`` with a bare MagicMock, our
+    # ``setdefault``-based install is a no-op and the handler captures
+    # ``PROVIDER_POSTGRES`` as a MagicMock instance. Re-binding the attribute
+    # directly on the loaded module restores the test contract.
+    _PROVIDER_VALUES = {
+        'PROVIDER_POSTGRES': 'postgresql',
+        'PROVIDER_SPATIALITE': 'spatialite',
+        'PROVIDER_OGR': 'ogr',
+        'PROVIDER_MEMORY': 'memory',
+        'PROVIDER_VIRTUAL': 'virtual',
+    }
+    for canonical in _CANONICAL_HANDLER_MODULES.values():
+        for attr_name, attr_value in _PROVIDER_VALUES.items():
+            if hasattr(canonical, attr_name):
+                # Only overwrite if the existing binding is non-string (the
+                # MagicMock case). A real string already in place is correct.
+                current = getattr(canonical, attr_name)
+                if not isinstance(current, str):
+                    setattr(canonical, attr_name, attr_value)
+
+
+@pytest.fixture(autouse=True)
+def _refresh_handler_aliases():
+    """Run before each test in this directory to defend against alias
+    corruption by sibling test directories (#42)."""
+    _reassert_handler_aliases()
+    yield
+
+
+@pytest.fixture(scope='session', autouse=True)
+def _restore_core_aliases_after_tasks_tests():
+    """Restore the snapshot of ``sys.modules`` keys this conftest mutated.
+
+    Runs once at session end. Removes the leak documented in
+    ``_setup_handler_mocks()``.
+    """
+    yield
+    if not _PRE_SETUP_SNAPSHOT:
+        return
+    for key, original in _PRE_SETUP_SNAPSHOT.items():
+        if original is None:
+            sys.modules.pop(key, None)
+        else:
+            sys.modules[key] = original
