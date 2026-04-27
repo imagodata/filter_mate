@@ -10,7 +10,7 @@ only loaded when the favorites_sharing extension is active.
 from __future__ import annotations
 
 import logging
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
     from qgis.PyQt.QtCore import Qt
@@ -27,6 +27,28 @@ from ..scanner import SharedFavorite
 from ..service import FavoritesSharingService
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.UI')
+
+
+def compute_name_collisions(
+    items: List[SharedFavorite],
+) -> Dict[Tuple[str, str], int]:
+    """Count how many times each (name, author) pair appears in the set.
+
+    Used by the picker to surface the source collection on rows whose
+    label would otherwise be indistinguishable. Two favorites can
+    legitimately share an id (M5: ids round-trip through fork without
+    conflict) but visually identical rows confuse users — this is the
+    disambiguation hook.
+
+    Module-level (not a static method) so it stays testable in the
+    headless harness, which mocks ``qgis.PyQt.*`` and breaks attribute
+    access on the dialog class itself.
+    """
+    counts: Dict[Tuple[str, str], int] = {}
+    for fav in items:
+        key = (fav.name, fav.author or "")
+        counts[key] = counts.get(key, 0) + 1
+    return counts
 
 
 class SharedFavoritesPickerDialog(QDialog if HAS_QT else object):
@@ -202,6 +224,11 @@ class SharedFavoritesPickerDialog(QDialog if HAS_QT else object):
 
     def _populate_list(self, items: List[SharedFavorite]) -> None:
         self._list_widget.clear()
+        # Pre-compute (name, author) collisions so we annotate only the
+        # rows that genuinely need it — adding the collection name to
+        # every row would clutter the typical case where names are
+        # already unique.
+        collisions = compute_name_collisions(items)
         for fav in items:
             # Author badge ("· imagodata") makes it obvious at a glance who
             # ships each favorite — the same name can come from multiple
@@ -209,6 +236,11 @@ class SharedFavoritesPickerDialog(QDialog if HAS_QT else object):
             label = f"★ {fav.name}"
             if fav.author:
                 label += f"   · {fav.author}"
+            if collisions.get((fav.name, fav.author or ""), 0) > 1:
+                # Same (name, author) ships in 2+ collections — surface
+                # the source so the user can pick the right row without
+                # hovering for the tooltip. (M5, audit 2026-04-27.)
+                label += f"   · {fav.source.collection_name}"
             entry = QListWidgetItem(label)
             entry.setData(Qt.ItemDataRole.UserRole, fav)
             tooltip_parts = [
