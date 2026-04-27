@@ -28,8 +28,27 @@ if TYPE_CHECKING:
 
 from ..styles.favorites_styles import (
     FAVORITES_STYLES,
-    FAVORITES_MENU_STYLESHEET,
     build_indicator_stylesheet,
+)
+from .favorites_menu_builder import (
+    FavoritesMenuBuilder,
+    ACTION_ADD_FAVORITE,
+    ACTION_MANAGE,
+    ACTION_EXPORT,
+    ACTION_IMPORT,
+    ACTION_SHOW_ALL,
+    ACTION_SHOW_GLOBAL,
+    ACTION_SHARED_PICKER,
+    ACTION_PUBLISH_SHARING,
+    ACTION_QUICK_PUBLISH_SHARING,
+    ACTION_MANAGE_SHARING_REPOS,
+    ACTION_BACKUP_TO_PROJECT,
+    ACTION_RESTORE_FROM_PROJECT,
+    ACTION_CLEANUP_ORPHANS,
+    ACTION_SHOW_STATS,
+    ACTION_APPLY,
+    ACTION_APPLY_GLOBAL,
+    ACTION_COPY_TO_GLOBAL,
 )
 
 logger = logging.getLogger(__name__)
@@ -724,188 +743,55 @@ class FavoritesController(BaseController):
         return build_indicator_stylesheet(state)
 
     def _show_favorites_menu(self) -> None:
-        """Show context menu with favorites options."""
-        menu = QMenu(self.dockwidget)
-        menu.setStyleSheet(FAVORITES_MENU_STYLESHEET)
+        """Show context menu with favorites options.
 
-        # === QUICK FILTER SECTION (Favorites) ===
-        favorites = self.get_all_favorites()
-
-        if favorites:
-            # Header for quick filter
-            header = menu.addAction(f"⚡ Filtrage Rapide ({len(favorites)})")
-            header.setEnabled(False)
-            font = header.font()
-            font.setBold(True)
-            header.setFont(font)
-
-            # Show favorites directly in menu for quick access
-            # Sort by use_count (most used first), then by name
-            sorted_favs = sorted(favorites, key=lambda f: (-f.use_count, f.name.lower()))
-            display_favs = sorted_favs[:8]
-
-            for fav in display_favs:
-                layers_count = fav.get_layers_count() if hasattr(fav, 'get_layers_count') else 1
-                fav_text = f"★ {fav.get_display_name(30)}"
-                if layers_count > 1:
-                    fav_text += f" [{layers_count}]"
-
-                action = menu.addAction(fav_text)
-                action.setData(('apply', fav.id))
-                # Build tooltip with expression preview
-                tooltip = f"{fav.name}\n{fav.get_preview(100)}"
-                if fav.use_count > 0:
-                    tooltip += "\n" + self.tr("Used {0} times").format(fav.use_count)
-                action.setToolTip(tooltip)
-
-            if len(favorites) > 8:
-                more_action = menu.addAction(f"  ➤ Voir tous ({len(favorites)})...")
-                more_action.setData('__SHOW_ALL__')
-
-            menu.addSeparator()
-
-        # === ADD TO FAVORITES ===
-        current_expression = self.get_current_filter_expression()
-        add_action = menu.addAction("⭐ " + self.tr("Add current filter to favorites"))
-        add_action.setData('__ADD_FAVORITE__')
-        if not current_expression:
-            add_action.setEnabled(False)
-            add_action.setText("⭐ " + self.tr("Add filter (no active filter)"))
-
-        menu.addSeparator()
-
-        # === MANAGEMENT OPTIONS ===
-        manage_action = menu.addAction("⚙️ " + self.tr("Manage favorites..."))
-        manage_action.setData('__MANAGE__')
-
-        export_action = menu.addAction("📤 " + self.tr("Export..."))
-        export_action.setData('__EXPORT__')
-
-        import_action = menu.addAction("📥 " + self.tr("Import..."))
-        import_action.setData('__IMPORT__')
-
-        # Optional: shared-favorites picker + publish when the
-        # favorites_sharing extension is active. Entries are hidden when
-        # the extension is not installed.
-        if self._is_sharing_extension_active():
-            shared_action = menu.addAction("📡 " + self.tr("Import from Resource Sharing..."))
-            shared_action.setData('__SHARED_PICKER__')
-
-            publish_action = menu.addAction("📤 " + self.tr("Publish to Resource Sharing..."))
-            publish_action.setData('__PUBLISH_SHARING__')
-            # Disable publishing when there is nothing to publish.
-            if self.count == 0:
-                publish_action.setEnabled(False)
-                publish_action.setText(
-                    "📤 " + self.tr("Publish (no favorites saved)")
-                )
-
-            # Quick-publish: 1-click flow that bypasses the dialog and
-            # pushes ALL favorites to the configured default repo. Hidden
-            # when no default repo is configured (no point in failing
-            # silently from the menu).
-            if self.count > 0 and self._has_default_remote_repo():
-                quick_action = menu.addAction(
-                    "🚀 " + self.tr("Quick publish to default repo")
-                )
-                quick_action.setData('__QUICK_PUBLISH_SHARING__')
-
-            # Operator config: open the Repo Manager dialog from anywhere
-            # in the favorites menu so users don't have to dig into the
-            # JSON config tree to add a repo or rotate credentials.
-            manage_repos_action = menu.addAction(
-                "🌐 " + self.tr("Manage Resource Sharing repos...")
-            )
-            manage_repos_action.setData('__MANAGE_SHARING_REPOS__')
-
-        # === GLOBAL FAVORITES SUBMENU ===
-        menu.addSeparator()
-        global_menu = menu.addMenu("🌐 " + self.tr("Global favorites"))
-
-        # Add current favorites as global options
-        if favorites:
-            copy_global_menu = global_menu.addMenu(self.tr("Copy to global..."))
-            for fav in favorites[:5]:
-                action = copy_global_menu.addAction(f"  {fav.name}")
-                action.setData(('copy_to_global', fav.id))
-            if len(favorites) > 5:
-                copy_global_menu.addAction("  ...").setEnabled(False)
-
-        # Show global favorites
-        global_favorites = self._get_global_favorites()
-        if global_favorites:
-            global_menu.addSeparator()
-            global_menu.addAction(self.tr("── Available global favorites ──")).setEnabled(False)
-            for gfav in global_favorites[:5]:
-                action = global_menu.addAction(f"  📌 {gfav.name}")
-                action.setData(('apply_global', gfav.id))
-            if len(global_favorites) > 5:
-                more_action = global_menu.addAction(f"  ➤ Voir tous ({len(global_favorites)})...")
-                more_action.setData('__SHOW_GLOBAL__')
-        else:
-            global_menu.addAction(self.tr("(No global favorites)")).setEnabled(False)
-
-        # === MAINTENANCE ===
-        menu.addSeparator()
-        maintenance_menu = menu.addMenu("🔧 " + self.tr("Maintenance"))
-
-        backup_action = maintenance_menu.addAction("💾 " + self.tr("Save to project (.qgz)"))
-        backup_action.setData('__BACKUP_TO_PROJECT__')
-
-        restore_action = maintenance_menu.addAction("📂 " + self.tr("Restore from project"))
-        restore_action.setData('__RESTORE_FROM_PROJECT__')
-
-        maintenance_menu.addSeparator()
-
-        cleanup_action = maintenance_menu.addAction("🧹 " + self.tr("Clean up orphan projects"))
-        cleanup_action.setData('__CLEANUP_ORPHANS__')
-
-        stats_action = maintenance_menu.addAction("📊 " + self.tr("Database statistics"))
-        stats_action.setData('__SHOW_STATS__')
-
-        # Show menu
+        Construction is delegated to :class:`FavoritesMenuBuilder` so the
+        controller stays focused on lifecycle and dispatch. The builder
+        owns the QSS, the section layout, and the action sentinels;
+        ``_handle_menu_action`` resolves those sentinels back to
+        controller methods.
+        """
+        menu = FavoritesMenuBuilder.build(self, self.dockwidget)
         selected_action = menu.exec_(QCursor.pos())
-
         if selected_action:
-            action_data = selected_action.data()
-            self._handle_menu_action(action_data)
+            self._handle_menu_action(selected_action.data())
 
     def _handle_menu_action(self, action_data: Any) -> None:
-        """Handle favorites menu action."""
-        if action_data == '__ADD_FAVORITE__':
+        """Resolve a menu action sentinel back to a controller method."""
+        if action_data == ACTION_ADD_FAVORITE:
             self.add_current_to_favorites()
-        elif action_data == '__MANAGE__':
+        elif action_data == ACTION_MANAGE:
             self.show_manager_dialog()
-        elif action_data == '__EXPORT__':
+        elif action_data == ACTION_EXPORT:
             self.export_favorites()
-        elif action_data == '__IMPORT__':
+        elif action_data == ACTION_IMPORT:
             self.import_favorites()
-        elif action_data == '__SHOW_ALL__':
+        elif action_data == ACTION_SHOW_ALL:
             self.show_manager_dialog()
-        elif action_data == '__SHOW_GLOBAL__':
+        elif action_data == ACTION_SHOW_GLOBAL:
             self._show_global_favorites_dialog()
-        elif action_data == '__BACKUP_TO_PROJECT__':
+        elif action_data == ACTION_BACKUP_TO_PROJECT:
             self._backup_to_project()
-        elif action_data == '__RESTORE_FROM_PROJECT__':
+        elif action_data == ACTION_RESTORE_FROM_PROJECT:
             self._restore_from_project()
-        elif action_data == '__CLEANUP_ORPHANS__':
+        elif action_data == ACTION_CLEANUP_ORPHANS:
             self._cleanup_orphan_projects()
-        elif action_data == '__SHOW_STATS__':
+        elif action_data == ACTION_SHOW_STATS:
             self._show_database_stats()
-        elif action_data == '__SHARED_PICKER__':
+        elif action_data == ACTION_SHARED_PICKER:
             self._open_shared_picker()
-        elif action_data == '__PUBLISH_SHARING__':
+        elif action_data == ACTION_PUBLISH_SHARING:
             self._open_publish_dialog()
-        elif action_data == '__QUICK_PUBLISH_SHARING__':
+        elif action_data == ACTION_QUICK_PUBLISH_SHARING:
             self._quick_publish_to_default_repo()
-        elif action_data == '__MANAGE_SHARING_REPOS__':
+        elif action_data == ACTION_MANAGE_SHARING_REPOS:
             self._open_repo_manager_dialog()
         elif isinstance(action_data, tuple):
-            if action_data[0] == 'apply':
+            if action_data[0] == ACTION_APPLY:
                 self.apply_favorite(action_data[1])
-            elif action_data[0] == 'apply_global':
+            elif action_data[0] == ACTION_APPLY_GLOBAL:
                 self._apply_global_favorite(action_data[1])
-            elif action_data[0] == 'copy_to_global':
+            elif action_data[0] == ACTION_COPY_TO_GLOBAL:
                 self._copy_to_global(action_data[1])
 
     def _validate_favorite_name(self, name: str) -> bool:
