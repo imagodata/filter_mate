@@ -18,6 +18,7 @@ from datetime import datetime
 from dataclasses import dataclass, asdict, field
 
 from .schema_constants import GLOBAL_PROJECT_UUID
+from .remote_layers_normalizer import RemoteLayersNormalizer
 
 logger = logging.getLogger('FilterMate.FavoritesManager')
 
@@ -40,52 +41,15 @@ class FavoriteScope(Enum):
 
 
 def normalize_remote_layers_keys(remote_layers: Dict[str, Any]) -> Dict[str, Any]:
-    """Rewrite a remote_layers dict so each entry is keyed by its
-    portable ``layer_signature`` (``postgres::schema.table`` etc.) when one
-    is present in the payload. The original dict key is preserved as
-    ``display_name`` inside the payload for UI purposes.
+    """Rekey ``remote_layers`` by ``layer_signature`` and populate display_name.
 
-    CRIT-3 fix rationale: legacy favorites (v1/v2) keyed the dict by
-    ``layer.name()``, which collides when two layers share the same display
-    name in the source project (e.g. ``public.zones`` and ``staging.zones``
-    both named "zones"), and exposes the author's local naming when shared
-    across users. Signatures are stable, unique per table, and the same for
-    every user who has the PG/GPKG/Spatialite table in their project.
-
-    Payloads without a ``layer_signature`` are left keyed as-is (legacy
-    fallback); the caller is responsible for later resolution by name.
+    Thin wrapper kept for backward compatibility — the actual logic lives
+    in :class:`RemoteLayersNormalizer` so the four historical normalisation
+    paths (this one, ``_backfill_remote_layer_signatures``,
+    ``FavoritesService._strip_project_bindings``,
+    ``FavoritesService._rebind_imported_favorite``) cannot drift apart again.
     """
-    if not isinstance(remote_layers, dict) or not remote_layers:
-        return remote_layers or {}
-
-    normalized: Dict[str, Any] = {}
-    for key, payload in remote_layers.items():
-        if not isinstance(payload, dict):
-            # Unexpected shape — keep as-is to preserve data.
-            normalized[key] = payload
-            continue
-
-        new_payload = dict(payload)
-        # Preserve the original key as display_name so the UI keeps the
-        # author's label (favorite cards, tooltips, remote layers tree).
-        if 'display_name' not in new_payload:
-            new_payload['display_name'] = key
-
-        signature = new_payload.get('layer_signature')
-        canonical_key = signature if signature else key
-
-        # Collision handling: if two payloads resolve to the same signature,
-        # keep the first (deterministic across reloads) and log the loss.
-        if canonical_key in normalized:
-            logger.debug(
-                "normalize_remote_layers_keys: collision on '%s' — "
-                "skipping duplicate entry (original key '%s')",
-                canonical_key, key,
-            )
-            continue
-        normalized[canonical_key] = new_payload
-
-    return normalized
+    return RemoteLayersNormalizer.normalize(remote_layers)
 
 
 @dataclass
@@ -479,34 +443,12 @@ class FavoritesManager:
                 remote = json.loads(remote_json)
             except (ValueError, TypeError):
                 continue
-            if not isinstance(remote, dict) or not remote:
-                continue
 
-            rewrite_needed = False
-            new_remote: Dict[str, Any] = {}
-            for key, payload in remote.items():
-                if not isinstance(payload, dict):
-                    new_remote[key] = payload
-                    continue
-                cleaned = dict(payload)
-                if 'display_name' not in cleaned:
-                    cleaned['display_name'] = key
-                    rewrite_needed = True
-                if not cleaned.get('layer_signature'):
-                    legacy_id = cleaned.get('layer_id')
-                    sig = id_to_signature.get(legacy_id) if legacy_id else None
-                    if not sig:
-                        sig = name_to_signature.get(key)
-                    if sig:
-                        cleaned['layer_signature'] = sig
-                        rewrite_needed = True
-                canonical_key = cleaned.get('layer_signature') or key
-                if canonical_key in new_remote:
-                    rewrite_needed = True  # collision collapse
-                    continue
-                if canonical_key != key:
-                    rewrite_needed = True
-                new_remote[canonical_key] = cleaned
+            new_remote, rewrite_needed = RemoteLayersNormalizer.backfill(
+                remote,
+                id_to_signature=id_to_signature,
+                name_to_signature=name_to_signature,
+            )
 
             if rewrite_needed:
                 try:

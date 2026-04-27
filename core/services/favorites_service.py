@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
 # Export FilterFavorite from domain
 from ..domain.favorites_manager import FilterFavorite
+from ..domain.remote_layers_normalizer import RemoteLayersNormalizer
 
 logger = logging.getLogger(__name__)
 
@@ -893,29 +894,12 @@ class FavoritesService(QObject):
         # Drop the source layer_id UUID — the source layer is identified by
         # spatial_config.source_layer_signature (populated in _create_favorite).
         out['layer_id'] = None
-        # Rewrite remote_layers: drop the UUID, keep the portable signature,
-        # and normalize keys to signatures so the JSON is deterministic across
-        # users (CRIT-3: keying by layer.name() was collision-prone and leaked
-        # the author's local layer labels).
+        # CRIT-3 fix: keying remote_layers by layer.name() was collision-prone
+        # and leaked the author's local layer labels. Delegated to the shared
+        # normalizer so the strip/normalize/rebind/backfill paths cannot drift.
         remote_layers = out.get('remote_layers')
         if isinstance(remote_layers, dict):
-            portable_remote: Dict[str, Any] = {}
-            for key, payload in remote_layers.items():
-                if not isinstance(payload, dict):
-                    portable_remote[key] = payload
-                    continue
-                cleaned = {k: v for k, v in payload.items() if k != 'layer_id'}
-                cleaned['layer_id'] = None
-                # Ensure display_name is present so the receiving side can
-                # render the author's original label without the signature.
-                if 'display_name' not in cleaned:
-                    cleaned['display_name'] = key
-                signature = cleaned.get('layer_signature')
-                canonical_key = signature if signature else key
-                # Deduplicate when two legacy entries share a signature.
-                if canonical_key not in portable_remote:
-                    portable_remote[canonical_key] = cleaned
-            out['remote_layers'] = portable_remote
+            out['remote_layers'] = RemoteLayersNormalizer.strip(remote_layers)
         # Reset use_count and last_used_at on export.
         out['use_count'] = 0
         out['last_used_at'] = None
@@ -952,29 +936,10 @@ class FavoritesService(QObject):
         # --- Remote layers rebinding ---
         remote_layers = out.get('remote_layers')
         if isinstance(remote_layers, dict):
-            rebound_remote: Dict[str, Any] = {}
-            for key, payload in remote_layers.items():
-                if not isinstance(payload, dict):
-                    rebound_remote[key] = payload
-                    continue
-                new_payload = dict(payload)
-                # CRIT-3 fix: preserve the author's layer name for the UI.
-                if 'display_name' not in new_payload:
-                    new_payload['display_name'] = key
-                sig = new_payload.get('layer_signature')
-                if sig:
-                    resolved = cls._resolve_signature_to_layer_id(sig)
-                    if resolved:
-                        new_payload['layer_id'] = resolved
-                        logger.debug(
-                            f"Import rebind: remote '{sig}' -> {resolved}"
-                        )
-                # Canonical key: signature when available, else keep the
-                # original (legacy v1/v2) name as key.
-                canonical_key = sig if sig else key
-                if canonical_key not in rebound_remote:
-                    rebound_remote[canonical_key] = new_payload
-            out['remote_layers'] = rebound_remote
+            out['remote_layers'] = RemoteLayersNormalizer.rebind(
+                remote_layers,
+                signature_resolver=cls._resolve_signature_to_layer_id,
+            )
 
         logger.debug(f"Imported favorite '{out.get('name')}' from v{file_version}")
         return out
