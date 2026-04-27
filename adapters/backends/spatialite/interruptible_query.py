@@ -32,6 +32,8 @@ logger = logging.getLogger('FilterMate.Adapters.Backends.Spatialite.Interruptibl
 # Performance and timeout constants for complex geometric filters
 # These prevent QGIS freezing on large datasets
 # Defaults are overridden by APP.OPTIONS.SPATIALITE config if available
+
+
 def _get_spatialite_config():
     """Read SpatiaLite config from ENV_VARS, fallback to hardcoded defaults."""
     try:
@@ -44,6 +46,7 @@ def _get_spatialite_config():
         }
     except (ImportError, AttributeError, TypeError):
         return {'timeout': 120, 'batch_size': 5000, 'progress_interval': 1000}
+
 
 _sl_cfg = _get_spatialite_config()
 SPATIALITE_QUERY_TIMEOUT = _sl_cfg['timeout']

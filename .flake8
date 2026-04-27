@@ -36,7 +36,12 @@ ignore =
     # Ambiguous variable name (e.g., 'l' for layer - common in GIS)
     E741,
     # Unused global declarations (code pattern, not bugs)
-    F824
+    F824,
+    # Multiple spaces after ',' / ':' — intentional column alignment in
+    # state tables and badge dicts (dockwidget states, scope badges, …)
+    E241,
+    # Inline comment spacing — same column-alignment rationale as E241
+    E261
 per-file-ignores =
     # __init__.py files re-export symbols intentionally
     __init__.py: F401

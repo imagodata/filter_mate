@@ -22,6 +22,7 @@ try:
     HAS_QT = True
 except ImportError:  # pragma: no cover — headless / standalone tests
     HAS_QT = False
+
     # Provide a minimal stand-in so this module is importable without Qt.
     class QThread:  # type: ignore[no-redef]
         def __init__(self, parent=None) -> None:

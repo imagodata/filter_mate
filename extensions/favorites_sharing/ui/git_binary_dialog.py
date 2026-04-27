@@ -20,7 +20,7 @@ import os
 from typing import Optional
 
 try:
-    from qgis.PyQt.QtCore import QObject, Qt, QThread, pyqtSignal
+    from qgis.PyQt.QtCore import QThread, pyqtSignal
     from qgis.PyQt.QtWidgets import (
         QDialog, QDialogButtonBox, QFileDialog, QHBoxLayout, QLabel,
         QLineEdit, QMessageBox, QProgressBar, QPushButton, QVBoxLayout,

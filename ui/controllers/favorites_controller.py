@@ -1230,7 +1230,6 @@ class FavoritesController(BaseController):
             logger.debug(traceback.format_exc())
             return False
 
-
     def _apply_favorite_subsets_directly(self, favorite: 'FilterFavorite') -> bool:
         """Push the favorite's saved subset strings to source + target layers.
 

@@ -6862,8 +6862,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._reload_shortcut = QShortcut(QKeySequence("F5"), self)
         self._reload_shortcut.activated.connect(self._on_reload_layers_shortcut)
         self._reload_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self._undo_shortcut = QShortcut(QKeySequence.Undo, self); self._undo_shortcut.activated.connect(self._on_undo_shortcut); self._undo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self._redo_shortcut = QShortcut(QKeySequence.Redo, self); self._redo_shortcut.activated.connect(self._on_redo_shortcut); self._redo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self._undo_shortcut = QShortcut(QKeySequence.Undo, self)
+        self._undo_shortcut.activated.connect(self._on_undo_shortcut)
+        self._undo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self._redo_shortcut = QShortcut(QKeySequence.Redo, self)
+        self._redo_shortcut.activated.connect(self._on_redo_shortcut)
+        self._redo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         logger.debug("Keyboard shortcuts initialized: F5 = Reload layers, Ctrl+Z = Undo, Ctrl+Y = Redo")
 
     def _on_reload_layers_shortcut(self):

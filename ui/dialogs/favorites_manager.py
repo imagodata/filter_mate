@@ -78,6 +78,7 @@ def _favorite_scope_kind(fav, current_user, current_project_uuid, global_uuid):
         return "mine_global" if is_global else "mine_here"
     return "shared_global" if is_global else "shared_here"
 
+
 logger = logging.getLogger(__name__)
 
 

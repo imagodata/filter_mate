@@ -486,4 +486,3 @@ class ConfigModelManager:
                 dw.buttonBox.hide()
         except Exception as e:
             logger.error(f"Error creating configuration model: {e}")
-
