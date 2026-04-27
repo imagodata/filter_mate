@@ -86,6 +86,8 @@ rsync -a --quiet \
     --exclude='scripts/**' \
     --exclude='video_automation' \
     --exclude='video_automation/**' \
+    --exclude='video_toolkit' \
+    --exclude='video_toolkit/**' \
     --exclude='knowledge' \
     --exclude='knowledge/**' \
     --exclude='website' \
@@ -107,6 +109,8 @@ rsync -a --quiet \
     --exclude='coverage/**' \
     --exclude='pytest.ini' \
     --exclude='setup.cfg' \
+    --exclude='.flake8' \
+    --exclude='requirements-*.txt' \
     --exclude='config/backups' \
     --exclude='config/backups/**' \
     --exclude='logs/*.log' \
@@ -117,7 +121,10 @@ rsync -a --quiet \
     --exclude='*.sqlite-wal' \
     --exclude='*.sqlite-shm' \
     --exclude='diagnose_*.py' \
+    --exclude='debug_*.py' \
     --exclude='test_*.py' \
+    --exclude='CLAUDE.md' \
+    --exclude='BACKLOG*.md' \
     "$PLUGIN_DIR/" "$BUILD_DIR/$PLUGIN_NAME/"
 
 # --- Step 3: Strip trailing whitespace ---
