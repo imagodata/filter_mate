@@ -13,6 +13,8 @@ import logging
 from typing import Optional, Dict, List, Tuple, Any
 from datetime import datetime
 
+from ..domain.schema_constants import GLOBAL_PROJECT_UUID
+
 logger = logging.getLogger('FilterMate.FavoritesMigration')
 
 
@@ -25,9 +27,6 @@ class FavoritesMigrationService:
     - Database cleanup for unused projects
     - Statistics and reporting
     """
-
-    # UUID for global favorites (available in all projects)
-    GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
 
     def __init__(self, db_path: Optional[str] = None):
         """
@@ -232,7 +231,7 @@ class FavoritesMigrationService:
             # Check if global project exists
             cursor.execute(
                 "SELECT project_id FROM fm_projects WHERE project_id = ?",
-                (self.GLOBAL_PROJECT_UUID,)
+                (GLOBAL_PROJECT_UUID,)
             )
 
             if not cursor.fetchone():
@@ -242,7 +241,7 @@ class FavoritesMigrationService:
                         ?, datetime(), datetime(),
                         '__GLOBAL__', '__GLOBAL_FAVORITES__', '{}'
                     )
-                """, (self.GLOBAL_PROJECT_UUID,))
+                """, (GLOBAL_PROJECT_UUID,))
                 conn.commit()
                 logger.info("✓ Created global favorites project entry")
 
@@ -265,7 +264,7 @@ class FavoritesMigrationService:
 
             cursor.execute(
                 "SELECT COUNT(*) FROM fm_favorites WHERE project_uuid = ?",
-                (self.GLOBAL_PROJECT_UUID,)
+                (GLOBAL_PROJECT_UUID,)
             )
 
             count = cursor.fetchone()[0]
@@ -275,117 +274,6 @@ class FavoritesMigrationService:
         except Exception as e:
             logger.error(f"Error counting global favorites: {e}")
             return 0
-
-    def make_favorite_global(self, favorite_id: str) -> bool:
-        """
-        Make a favorite global (available in all projects).
-
-        Args:
-            favorite_id: ID of favorite to make global
-
-        Returns:
-            True if successful
-        """
-        if not self._db_path:
-            return False
-
-        self.ensure_global_project_exists()
-
-        try:
-            import sqlite3
-            conn = sqlite3.connect(self._db_path)
-            cursor = conn.cursor()
-
-            cursor.execute("""
-                UPDATE fm_favorites
-                SET project_uuid = ?, updated_at = ?
-                WHERE id = ?
-            """, (self.GLOBAL_PROJECT_UUID, datetime.now().isoformat(), favorite_id))
-
-            conn.commit()
-            success = cursor.rowcount > 0
-            conn.close()
-
-            if success:
-                logger.info(f"✓ Made favorite {favorite_id} global")
-
-            return success
-
-        except Exception as e:
-            logger.error(f"Error making favorite global: {e}")
-            return False
-
-    def copy_favorite_to_project(
-        self,
-        favorite_id: str,
-        target_project_uuid: str
-    ) -> Optional[str]:
-        """
-        Copy a favorite to another project.
-
-        Args:
-            favorite_id: ID of favorite to copy
-            target_project_uuid: Target project UUID
-
-        Returns:
-            New favorite ID if successful, None otherwise
-        """
-        if not self._db_path:
-            return None
-
-        try:
-            import sqlite3
-            import uuid
-
-            conn = sqlite3.connect(self._db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-
-            # Get original favorite
-            cursor.execute("SELECT * FROM fm_favorites WHERE id = ?", (favorite_id,))
-            row = cursor.fetchone()
-
-            if not row:
-                conn.close()
-                return None
-
-            # Create new favorite with new ID
-            new_id = str(uuid.uuid4())
-            now = datetime.now().isoformat()
-
-            cursor.execute("""
-                INSERT INTO fm_favorites (
-                    id, project_uuid, name, expression, layer_name, layer_id,
-                    layer_provider, description, tags, created_at, updated_at,
-                    use_count, last_used_at, remote_layers, spatial_config
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                new_id,
-                target_project_uuid,
-                row['name'],
-                row['expression'],
-                row['layer_name'],
-                row['layer_id'],
-                row['layer_provider'],
-                row['description'],
-                row['tags'],
-                now,
-                now,
-                0,  # Reset use count
-                None,
-                row['remote_layers'],
-                row['spatial_config']
-            ))
-
-            conn.commit()
-            conn.close()
-
-            logger.info(f"✓ Copied favorite to project {target_project_uuid[:8]}...")
-            return new_id
-
-        except Exception as e:
-            logger.error(f"Error copying favorite: {e}")
-            return None
 
     # ─────────────────────────────────────────────────────────────────
     # Cleanup
@@ -418,14 +306,14 @@ class FavoritesMigrationService:
                       AND (p.project_path = '' OR p.project_path IS NULL)
                       AND f.id IS NULL
                       AND p.project_id != ?
-                """, (self.GLOBAL_PROJECT_UUID,))
+                """, (GLOBAL_PROJECT_UUID,))
             else:
                 cursor.execute("""
                     SELECT project_id FROM fm_projects
                     WHERE (project_name = '' OR project_name IS NULL)
                       AND (project_path = '' OR project_path IS NULL)
                       AND project_id != ?
-                """, (self.GLOBAL_PROJECT_UUID,))
+                """, (GLOBAL_PROJECT_UUID,))
 
             orphan_ids = [row[0] for row in cursor.fetchall()]
 

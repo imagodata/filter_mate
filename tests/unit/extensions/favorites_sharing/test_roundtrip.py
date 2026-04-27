@@ -23,14 +23,36 @@ def _load_favorites_module():
     ``core/__init__.py`` -> QGIS imports which aren't available in the
     pure-Python test environment.
     """
+    import sys as _sys
+    import types
+
     plugin_root = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     )))
+
+    # favorites_manager.py uses relative imports (from .schema_constants).
+    # Register a stand-in parent package so those imports resolve when the
+    # module is loaded outside the real plugin namespace.
+    pkg_name = "_fm_favorites_for_tests_pkg"
+    if pkg_name not in _sys.modules:
+        pkg = types.ModuleType(pkg_name)
+        pkg.__path__ = [os.path.join(plugin_root, "core", "domain")]
+        _sys.modules[pkg_name] = pkg
+
+    sc_full = f"{pkg_name}.schema_constants"
+    if sc_full not in _sys.modules:
+        sc_path = os.path.join(plugin_root, "core", "domain", "schema_constants.py")
+        sc_spec = importlib.util.spec_from_file_location(sc_full, sc_path)
+        sc_module = importlib.util.module_from_spec(sc_spec)
+        _sys.modules[sc_full] = sc_module
+        sc_spec.loader.exec_module(sc_module)
+
+    fm_full = f"{pkg_name}.favorites_manager"
     path = os.path.join(plugin_root, "core", "domain", "favorites_manager.py")
-    spec = importlib.util.spec_from_file_location("_fm_favorites_for_tests", path)
+    spec = importlib.util.spec_from_file_location(fm_full, path)
     module = importlib.util.module_from_spec(spec)
-    import sys as _sys
-    _sys.modules["_fm_favorites_for_tests"] = module
+    _sys.modules[fm_full] = module
+    _sys.modules["_fm_favorites_for_tests"] = module  # legacy alias
     spec.loader.exec_module(module)
     return module
 

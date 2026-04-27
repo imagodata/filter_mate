@@ -26,6 +26,11 @@ from .git_resolver import GitResolution, resolve_for_extension
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
 
+# Repos already warned about a legacy plaintext auth_header. Re-parsing the
+# same config (e.g. on every save_repos round-trip) would otherwise spam the
+# log with one entry per read. Cleared by save when the legacy field is dropped.
+_LEGACY_AUTH_WARNED: set = set()
+
 
 def _profile_repos_root() -> str:
     """Return the standard parent directory for FilterMate-managed clones.
@@ -220,11 +225,12 @@ class RemoteRepo:
         extra = {k: v for k, v in entry.items() if k not in known}
 
         auth_header = str(entry.get("auth_header") or "").strip()
-        if auth_header:
+        if auth_header and name not in _LEGACY_AUTH_WARNED:
             logger.warning(
                 "Repo %r uses legacy plaintext auth_header — migrate to "
                 "authcfg_id (Manage Repos → Edit → Authentication).", name,
             )
+            _LEGACY_AUTH_WARNED.add(name)
 
         return cls(
             name=name,

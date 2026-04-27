@@ -834,57 +834,6 @@ class FavoritesService(QObject):
             )
 
     # ─────────────────────────────────────────────────────────────────
-    # Validation and Cleanup
-    # ─────────────────────────────────────────────────────────────────
-
-    def validate_favorite(
-        self,
-        favorite_id: str
-    ) -> tuple[bool, Optional[str]]:
-        """
-        Validate a favorite (check if layers/expressions still valid).
-
-        Args:
-            favorite_id: Favorite ID
-
-        Returns:
-            Tuple of (is_valid, error_message)
-        """
-        if not self._favorites_manager:
-            return False, "FavoritesManager not initialized"
-
-        return self._favorites_manager.validate_favorite(favorite_id)
-
-    def validate_all_favorites(self) -> Dict[str, tuple[bool, Optional[str]]]:
-        """
-        Validate all favorites.
-
-        Returns:
-            Dict mapping favorite_id to (is_valid, error_message)
-        """
-        if not self._favorites_manager:
-            return {}
-
-        return self._favorites_manager.validate_all_favorites()
-
-    def cleanup_orphaned_favorites(self) -> tuple[int, List[str]]:
-        """
-        Remove favorites for layers that no longer exist.
-
-        Returns:
-            Tuple of (removed_count, removed_ids)
-        """
-        if not self._favorites_manager:
-            return 0, []
-
-        result = self._favorites_manager.cleanup_orphaned_favorites()
-
-        if result[0] > 0:
-            self.favorites_changed.emit()
-
-        return result
-
-    # ─────────────────────────────────────────────────────────────────
     # Statistics
     # ─────────────────────────────────────────────────────────────────
 

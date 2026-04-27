@@ -17,10 +17,9 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass, asdict, field
 
-logger = logging.getLogger('FilterMate.FavoritesManager')
+from .schema_constants import GLOBAL_PROJECT_UUID
 
-# UUID for global favorites (available in all projects)
-GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
+logger = logging.getLogger('FilterMate.FavoritesManager')
 
 
 class FavoriteScope(Enum):
