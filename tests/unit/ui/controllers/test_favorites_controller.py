@@ -963,6 +963,47 @@ class TestDirectSubsetApply:
         ctrl._show_warning.assert_called_once()
 
 
+class TestExactFilteredFeatureCount:
+    """``_exact_filtered_feature_count`` must iterate the filtered cursor
+    instead of trusting ``layer.featureCount()`` (PG returns ``pg_class.
+    reltuples`` estimates that collapse to 1 for complex EXISTS subsets).
+    """
+
+    def test_returns_zero_for_none_layer(self):
+        assert FavoritesController._exact_filtered_feature_count(None) == 0
+
+    def test_returns_zero_for_invalid_layer(self):
+        layer = MagicMock()
+        layer.isValid.return_value = False
+        assert FavoritesController._exact_filtered_feature_count(layer) == 0
+
+    def test_counts_via_iteration(self, monkeypatch):
+        """Iterating the filtered cursor must drive the count, not the
+        featureCount() estimate."""
+        sys.modules["qgis.core"].QgsFeatureRequest = MagicMock(return_value=MagicMock())
+
+        layer = MagicMock()
+        layer.isValid.return_value = True
+        layer.getFeatures.return_value = iter([MagicMock() for _ in range(7)])
+        # Stale estimate the helper must NOT trust.
+        layer.featureCount.return_value = 1
+
+        assert FavoritesController._exact_filtered_feature_count(layer) == 7
+
+    def test_falls_back_to_featurecount_on_iteration_failure(self):
+        """If the iteration path raises (provider quirk, headless test
+        context, …), the helper must return ``layer.featureCount()``
+        instead of crashing the favorite save."""
+        sys.modules["qgis.core"].QgsFeatureRequest = MagicMock(return_value=MagicMock())
+
+        layer = MagicMock()
+        layer.isValid.return_value = True
+        layer.getFeatures.side_effect = RuntimeError("provider lost connection")
+        layer.featureCount.return_value = 42
+
+        assert FavoritesController._exact_filtered_feature_count(layer) == 42
+
+
 class TestCaptureRestoreRoundTrip:
     """End-to-end: capture → spatial_config → restore must keep the state."""
 

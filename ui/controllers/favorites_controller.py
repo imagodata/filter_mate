@@ -1011,7 +1011,13 @@ class FavoritesController(BaseController):
                         continue
                     remote_layers[canonical_key] = {
                         'expression': subset,
-                        'feature_count': map_layer.featureCount() if map_layer.isValid() else 0,
+                        # FIX 2026-04-27: layer.featureCount() returns an
+                        # *estimate* on PostgreSQL (pg_class.reltuples) that
+                        # tends to collapse to 1 for complex EXISTS subsets,
+                        # making the favorites manager show "1" everywhere.
+                        # Iterate the filtered cursor with no attrs/geom for
+                        # an exact count at minimal I/O cost.
+                        'feature_count': self._exact_filtered_feature_count(map_layer),
                         'layer_id': layer_id,
                         'layer_signature': signature,
                         'display_name': display_name,
@@ -1275,6 +1281,12 @@ class FavoritesController(BaseController):
             skipped.append(favorite.layer_name or '<unknown source>')
 
         # --- Target layer subsets ---------------------------------------
+        # Track count changes so the favorite's stored snapshot can be
+        # refreshed in one persist at the end (legacy favorites had wrong
+        # counts because layer.featureCount() returns estimates on PG).
+        refreshed_remote_layers: dict = {}
+        counts_changed = False
+
         for key, payload in (favorite.remote_layers or {}).items():
             target_layer = self._resolve_remote_layer_entry(
                 key, payload, project, name_to_layer, signature_to_layer
@@ -1288,23 +1300,59 @@ class FavoritesController(BaseController):
                     f"  ⚠️ Could not resolve target layer for entry '{key}' — skipped"
                 )
                 skipped.append(str(key))
+                if isinstance(payload, dict):
+                    refreshed_remote_layers[key] = dict(payload)
+                else:
+                    refreshed_remote_layers[key] = payload
                 continue
 
             try:
                 if safe_set_subset_string(target_layer, target_subset):
                     applied.append(target_layer.name())
+                    fresh_count = self._exact_filtered_feature_count(target_layer)
+                    if isinstance(payload, dict):
+                        new_payload = dict(payload)
+                    else:
+                        new_payload = {'expression': target_subset}
+                    if new_payload.get('feature_count') != fresh_count:
+                        counts_changed = True
+                    new_payload['feature_count'] = fresh_count
+                    refreshed_remote_layers[key] = new_payload
                     logger.info(
                         f"  ✓ Target layer '{target_layer.name()}' subset applied "
-                        f"({len(target_subset)} chars)"
+                        f"({len(target_subset)} chars, {fresh_count} feature(s))"
                     )
                 else:
                     skipped.append(target_layer.name())
+                    if isinstance(payload, dict):
+                        refreshed_remote_layers[key] = dict(payload)
+                    else:
+                        refreshed_remote_layers[key] = payload
                     logger.warning(
                         f"  ⚠️ safe_set_subset_string rejected target subset on '{target_layer.name()}'"
                     )
             except Exception as e:
                 logger.warning(f"Failed to apply subset on '{target_layer.name()}': {e}")
                 skipped.append(target_layer.name())
+                if isinstance(payload, dict):
+                    refreshed_remote_layers[key] = dict(payload)
+                else:
+                    refreshed_remote_layers[key] = payload
+
+        # Persist refreshed counts so the favorites manager UI reflects
+        # reality without forcing the user to re-save the favorite.
+        if counts_changed and refreshed_remote_layers:
+            favorite.remote_layers = refreshed_remote_layers
+            try:
+                if self._favorites_manager and hasattr(self._favorites_manager, 'update_favorite'):
+                    self._favorites_manager.update_favorite(
+                        favorite.id,
+                        remote_layers=refreshed_remote_layers,
+                        _touch_updated_at=False,
+                    )
+                    logger.info(f"  ↻ Refreshed feature_count snapshot for favorite '{favorite.name}'")
+            except Exception as exc:
+                logger.debug(f"Could not persist refreshed feature_counts: {exc}")
 
         if not applied:
             self._show_warning(self.tr(
@@ -1747,6 +1795,52 @@ class FavoritesController(BaseController):
                 f"geometric_predicates={predicate_list} "
                 f"(has_geometric_predicates={bool(has_predicates_flag)})"
             )
+
+    @staticmethod
+    def _exact_filtered_feature_count(layer) -> int:
+        """Count features matching the layer's current subsetString exactly.
+
+        ``QgsVectorLayer.featureCount()`` is fast but returns an estimate on
+        PostgreSQL (pulled from ``pg_class.reltuples``). For EXISTS subsets
+        with intersect predicates the estimate often collapses to 1 even
+        when the real cursor returns hundreds of rows, so the favorites
+        manager would display ``1`` everywhere. Iterate the filtered cursor
+        with no attributes / no geometry — this is an indexed COUNT-like
+        scan that respects ``subsetString`` and stays cheap.
+
+        Falls back to ``layer.featureCount()`` if anything goes wrong
+        (invalid layer, provider that doesn't honor NoGeometry, …).
+        """
+        if layer is None:
+            return 0
+        try:
+            if not layer.isValid():
+                return 0
+        except (RuntimeError, AttributeError):
+            return 0
+
+        try:
+            from qgis.core import QgsFeatureRequest
+            request = QgsFeatureRequest()
+            try:
+                request.setNoAttributes()
+            except (AttributeError, TypeError):
+                pass
+            try:
+                request.setFlags(QgsFeatureRequest.NoGeometry)
+            except (AttributeError, TypeError):
+                pass
+            count = 0
+            for _ in layer.getFeatures(request):
+                count += 1
+            return count
+        except Exception as e:
+            logger.debug(f"_exact_filtered_feature_count fallback for '{getattr(layer, 'name', lambda: '?')()}': {e}")
+            try:
+                fallback = layer.featureCount()
+                return fallback if fallback is not None and fallback >= 0 else 0
+            except Exception:
+                return 0
 
     @staticmethod
     def _layer_signature_for(layer: Any) -> str:
