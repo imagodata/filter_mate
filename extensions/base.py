@@ -458,18 +458,37 @@ class BaseExtension(ABC):
         """
         Insert any missing schema keys into config.json (idempotent).
 
+        Also refreshes schema-owned metadata (description, choices, min,
+        max, _hidden, _display_name) on existing keys so the Configuration
+        panel reflects the current schema rather than whatever text the
+        user's frozen copy still carries from an older release. The
+        user's ``value`` is always preserved.
+
         Called by the registry on discovery. Returns True if any key was
-        added (caller persists once for all extensions).
+        added or any metadata refreshed (caller persists once for all
+        extensions).
         """
         cfg = self._get_extension_config_dict()
         if not isinstance(cfg, dict):
             return False
+
+        try:
+            from filter_mate.config.config import _sync_metadata
+        except Exception:
+            _sync_metadata = None
 
         dirty = False
         for key, schema_entry in self.full_config_schema().items():
             if key not in cfg:
                 cfg[key] = dict(schema_entry)
                 dirty = True
+                continue
+            existing = cfg[key]
+            if _sync_metadata is None:
+                continue
+            if isinstance(existing, dict) and isinstance(schema_entry, dict):
+                if _sync_metadata(existing, schema_entry):
+                    dirty = True
         return dirty
 
     def on_project_loaded(self) -> None:

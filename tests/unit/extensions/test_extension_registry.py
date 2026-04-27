@@ -497,6 +497,35 @@ class TestConfigAPI:
 
         real_cc._get_option_value = _get_option_value
 
+        # Mirror the real ``_sync_metadata`` so seed_default_config() can
+        # refresh schema-owned metadata fields. Kept in lock-step with
+        # config/config.py — extend ``_METADATA_KEYS`` there if you change
+        # this set.
+        _METADATA_KEYS = frozenset({
+            "description", "choices", "min", "max", "applies_to",
+            "_hidden", "_display_name",
+        })
+
+        def _sync_metadata(user, ref):
+            if not (isinstance(user, dict) and isinstance(ref, dict)):
+                return False
+            dirty = False
+            for key, ref_val in ref.items():
+                if key == "value":
+                    continue
+                if key in _METADATA_KEYS:
+                    if user.get(key) != ref_val:
+                        user[key] = ref_val
+                        dirty = True
+                    continue
+                if isinstance(ref_val, dict) and isinstance(user.get(key), dict):
+                    if _sync_metadata(user[key], ref_val):
+                        dirty = True
+            return dirty
+
+        real_cc._sync_metadata = _sync_metadata
+        real_cc._METADATA_KEYS = _METADATA_KEYS
+
         real_c = types.ModuleType("filter_mate.config")
         real_c.__path__ = []
         real_c.config = real_cc
@@ -677,3 +706,50 @@ class TestConfigAPI:
             "ENV_VARS['CONFIG_DATA'] — same reference-desync bug."
         )
         assert caller_ref["EXTENSIONS"]["schema_ext"]["timeout"]["value"] == 60
+
+    def test_seed_refreshes_stale_metadata(self, in_memory_config):
+        """When the schema's description/choices/min/max are updated in a
+        new release, seed_default_config() must overlay the fresh metadata
+        on the user's existing config without touching ``value``.
+
+        Without this, the Configuration panel keeps showing tooltips,
+        dropdown choices, and bounds frozen from the version that first
+        seeded the key — so what users see no longer matches the schema.
+        """
+        cfg_data, _ = in_memory_config
+        # Pre-seed with stale metadata + a user-customized value on every key.
+        cfg_data["EXTENSIONS"]["schema_ext"] = {
+            "endpoint": {
+                "value": "https://user.example/api",
+                "description": "OLD description",
+            },
+            "timeout": {
+                "value": 99,
+                "min": 0,
+                "max": 100,
+                "description": "OLD timeout",
+            },
+            "enabled_flag": {
+                "value": True,
+                "choices": [True],
+                "description": "OLD flag",
+            },
+        }
+
+        ext = SchemaExtension()
+        dirty = ext.seed_default_config()
+        assert dirty is True
+
+        seeded = cfg_data["EXTENSIONS"]["schema_ext"]
+        # Values preserved
+        assert seeded["endpoint"]["value"] == "https://user.example/api"
+        assert seeded["timeout"]["value"] == 99
+        assert seeded["enabled_flag"]["value"] is True
+        # Metadata refreshed from schema
+        assert seeded["endpoint"]["description"] == "API endpoint"
+        assert seeded["timeout"]["min"] == 1
+        assert seeded["timeout"]["max"] == 300
+        assert seeded["enabled_flag"]["choices"] == [True, False]
+
+        # Idempotent — second call is a no-op now that schema and config agree
+        assert ext.seed_default_config() is False

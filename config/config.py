@@ -111,11 +111,65 @@ def _set_option_value(options_dict, key, new_value):
         options_dict[key] = new_value
 
 
+# Schema-owned metadata fields that must follow the reference (template /
+# extension schema), not the user's frozen copy. ``value`` is intentionally
+# excluded — that is the user's data and is preserved across migrations.
+_METADATA_KEYS = frozenset({
+    "description",
+    "choices",
+    "min",
+    "max",
+    "applies_to",
+    "_hidden",
+    "_display_name",
+})
+
+
+def _sync_metadata(user, ref):
+    """Overlay schema-owned metadata fields from ``ref`` into ``user``.
+
+    ``merge()`` only adds keys missing from ``user`` — it never refreshes
+    metadata on keys the user already has. So when a developer updates a
+    description / choices / _hidden flag in ``config.default.json`` (or in
+    an extension's ``config_schema()``), the user's copy keeps the stale
+    text and the Configuration panel displays out-of-date tooltips,
+    visibilities, and dropdown options.
+
+    This function recurses through ``ref``, copying every metadata field
+    listed in ``_METADATA_KEYS`` into ``user`` while leaving ``value`` (and
+    any user-only fields) untouched. Recursion stops at ``value`` because
+    its content is user data, not config structure.
+
+    Args:
+        user: The dict to refresh in place.
+        ref: The schema/template dict (read-only).
+
+    Returns:
+        bool: True if any metadata field was updated.
+    """
+    if not (isinstance(user, dict) and isinstance(ref, dict)):
+        return False
+    dirty = False
+    for key, ref_val in ref.items():
+        if key == "value":
+            continue
+        if key in _METADATA_KEYS:
+            if user.get(key) != ref_val:
+                user[key] = ref_val
+                dirty = True
+            continue
+        if isinstance(ref_val, dict) and isinstance(user.get(key), dict):
+            if _sync_metadata(user[key], ref_val):
+                dirty = True
+    return dirty
+
+
 def _migrate_config(config_data, default_data):
     """Migrate user config to latest structure.
 
-    Merges new keys from default, adds _hidden/_display_name metadata,
-    and removes deprecated sections. Safe to call on already-migrated configs.
+    Merges new keys from default, refreshes schema-owned metadata,
+    adds _hidden/_display_name metadata, and removes deprecated
+    sections. Safe to call on already-migrated configs.
 
     Args:
         config_data: User's current config dict (modified in place)
@@ -128,6 +182,12 @@ def _migrate_config(config_data, default_data):
 
     # 1) Merge new keys from default into user config (recursive, non-destructive)
     merge(config_data, default_data)
+
+    # 1b) Refresh schema-owned metadata (description, choices, _hidden, …) so
+    # the Configuration panel reflects the current template, not whatever
+    # text the user's frozen copy still carries from an older release.
+    if _sync_metadata(config_data, default_data):
+        dirty = True
 
     app = config_data.get("APP", {})
     dockwidget = app.get("DOCKWIDGET", {})
