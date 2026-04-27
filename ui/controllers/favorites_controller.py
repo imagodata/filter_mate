@@ -1323,8 +1323,8 @@ class FavoritesController(BaseController):
                 if self._favorites_manager and hasattr(self._favorites_manager, 'update_favorite'):
                     self._favorites_manager.update_favorite(
                         favorite.id,
+                        bump_updated_at=False,
                         remote_layers=refreshed_remote_layers,
-                        _touch_updated_at=False,
                     )
                     logger.info(f"  ↻ Refreshed feature_count snapshot for favorite '{favorite.name}'")
             except Exception as exc:
@@ -1901,8 +1901,8 @@ class FavoritesController(BaseController):
             if self._favorites_manager and hasattr(self._favorites_manager, 'update_favorite'):
                 persisted = bool(self._favorites_manager.update_favorite(
                     favorite.id,
+                    bump_updated_at=False,
                     spatial_config=spatial_config,
-                    _touch_updated_at=False,
                 ))
         except Exception as exc:
             logger.debug(f"Could not persist legacy-predicate backfill: {exc}")

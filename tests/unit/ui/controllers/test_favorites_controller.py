@@ -740,7 +740,7 @@ class TestBackfillLegacyPredicateDefault:
         manager.update_favorite.assert_called_once()
         kwargs = manager.update_favorite.call_args.kwargs
         assert kwargs['spatial_config']['geometric_predicates'] == ['Intersect']
-        assert kwargs['_touch_updated_at'] is False
+        assert kwargs['bump_updated_at'] is False
 
     def test_skip_when_predicates_already_present(self):
         manager = MagicMock()

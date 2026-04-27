@@ -773,19 +773,23 @@ class FavoritesManager:
             logger.error(f"Failed to remove favorite: {e}")
             return False
 
-    def update_favorite(self, favorite_id: str, **kwargs) -> bool:
+    def update_favorite(
+        self,
+        favorite_id: str,
+        *,
+        bump_updated_at: bool = True,
+        **kwargs,
+    ) -> bool:
         """Update a favorite.
 
-        FIX 2026-04-23 (HIGH-3): ``updated_at`` is bumped only when the
-        caller did not pass ``_touch_updated_at=False``. This lets
-        ``increment_use_count()`` mutate use_count / last_used_at without
-        polluting the "last content modification" timestamp. Usage stats
-        and content edits carry distinct semantics now.
+        FIX 2026-04-23 (HIGH-3): ``updated_at`` is bumped only when
+        ``bump_updated_at`` stays ``True``. Pass ``False`` to mutate
+        non-content fields (use_count, last_used_at) without polluting
+        the "last content modification" timestamp — usage stats and
+        content edits carry distinct semantics now.
         """
         if not self._initialized or favorite_id not in self._favorites:
             return False
-
-        touch_updated_at = kwargs.pop('_touch_updated_at', True)
 
         try:
             import sqlite3
@@ -797,7 +801,7 @@ class FavoritesManager:
                 if hasattr(favorite, key):
                     setattr(favorite, key, value)
 
-            if touch_updated_at:
+            if bump_updated_at:
                 favorite.updated_at = datetime.now().isoformat()
 
             conn = sqlite3.connect(self._db_path)
@@ -850,9 +854,9 @@ class FavoritesManager:
 
         return self.update_favorite(
             favorite_id,
+            bump_updated_at=False,
             use_count=self._favorites[favorite_id].use_count,
             last_used_at=self._favorites[favorite_id].last_used_at,
-            _touch_updated_at=False,
         )
 
     def search_favorites(self, query: str) -> List[FilterFavorite]:
