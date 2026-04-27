@@ -26,8 +26,8 @@ try:
     from qgis.PyQt.QtWidgets import (
         QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFileDialog,
         QFormLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget,
-        QListWidgetItem, QMessageBox, QPushButton, QSplitter, QTextEdit,
-        QVBoxLayout, QWidget,
+        QListWidgetItem, QMessageBox, QProgressDialog, QPushButton,
+        QSplitter, QTextEdit, QVBoxLayout, QWidget,
     )
     HAS_QT = True
 except ImportError:  # pragma: no cover
@@ -37,6 +37,23 @@ from ..remote_repo_manager import RemoteRepo, RemoteRepoManager
 from ..service import CollectionTarget, FavoritesSharingService
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.UI.Publish')
+
+
+class _SyncFailure:
+    """Lightweight stand-in for ``RepoSyncResult`` when the worker raises.
+
+    Carries the minimum fields ``_on_publish_finished`` reads so the
+    error path stays a single code branch.
+    """
+    success = False
+    bundle_written_at = ""
+    commit_sha = ""
+    pushed = False
+    skipped_push_reason = ""
+    clone_path = ""
+
+    def __init__(self, message: str) -> None:
+        self.error_message = message
 
 
 class PublishFavoritesDialog(QDialog if HAS_QT else object):
@@ -69,6 +86,10 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         # Optional: remote git-backed repos configured by IT
         self._remote_repo_manager: Optional[RemoteRepoManager] = \
             self._resolve_remote_repo_manager(sharing_service)
+
+        # H5: the QThread driving a remote-repo publish lives here so it
+        # survives the local scope of ``_run_publish_in_background``.
+        self._publish_worker = None
 
         if HAS_QT:
             self._setup_ui()
@@ -567,6 +588,13 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
     def _publish_to_remote_repo(self, repo: RemoteRepo, fav_ids: List[str]) -> None:
         """Run the clone/pull → write → commit → push pipeline.
 
+        H5 (audit 2026-04-27): the pipeline now runs in a ``GitOpsWorker``
+        on a background thread; a modal indeterminate progress dialog
+        keeps the user oriented without freezing QGIS for up to 2 min.
+        Cancelling the dialog hides it and disables the result handler —
+        the worker still runs to completion in the background (subprocess
+        cancellation is unsafe and would leave the clone in a half-state).
+
         On any git failure, surface the clone path so the user can open
         their own tooling. No auto-rebase, no force-push.
         """
@@ -580,54 +608,90 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         bundle_name = self._bundle_name_edit.text().strip() or "favorites"
         metadata = self._collect_metadata()
 
-        # Block the UI — git calls are sync. A worker thread would be
-        # nicer but the blocking window is already bounded by the 30s
-        # GitClient timeout and publish is a rare/intentional action.
-        try:
-            from qgis.PyQt.QtCore import Qt
-            from qgis.PyQt.QtWidgets import QApplication
-            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        except Exception:
-            QApplication = None  # type: ignore
-
-        try:
-            # Inline closure: lets RemoteRepoManager call back into the
-            # FilterMate bundle writer without knowing about favorites.
-            def _write_bundle(collection_dir: str) -> str:
-                result = self._sharing_service.publish_bundle(
-                    favorites_service=self._favorites_service,
-                    target=CollectionTarget(
-                        collection_dir=collection_dir,
-                        display_name=metadata.get('name') or repo.name,
-                        is_new=not os.path.isdir(collection_dir),
-                    ),
-                    bundle_filename=bundle_name,
-                    favorite_ids=fav_ids,
-                    collection_metadata=metadata,
-                    overwrite=self._overwrite_check.isChecked(),
+        # Inline closure: lets RemoteRepoManager call back into the
+        # FilterMate bundle writer without knowing about favorites.
+        def _write_bundle(collection_dir: str) -> str:
+            result = self._sharing_service.publish_bundle(
+                favorites_service=self._favorites_service,
+                target=CollectionTarget(
+                    collection_dir=collection_dir,
+                    display_name=metadata.get('name') or repo.name,
+                    is_new=not os.path.isdir(collection_dir),
+                ),
+                bundle_filename=bundle_name,
+                favorite_ids=fav_ids,
+                collection_metadata=metadata,
+                overwrite=self._overwrite_check.isChecked(),
+            )
+            if not result.success:
+                raise RuntimeError(
+                    result.error_message or "bundle write failed"
                 )
-                if not result.success:
-                    raise RuntimeError(
-                        result.error_message or "bundle write failed"
-                    )
-                return result.bundle_path
+            return result.bundle_path
 
-            # Build a plausible commit author from the metadata form
-            author_name = metadata.get('author') or ''
-            commit_author: Optional[str] = None
-            if author_name:
-                commit_author = f"{author_name} <filter_mate@imagodata.local>"
+        # Build a plausible commit author from the metadata form
+        author_name = metadata.get('author') or ''
+        commit_author: Optional[str] = None
+        if author_name:
+            commit_author = f"{author_name} <filter_mate@imagodata.local>"
 
-            sync = self._remote_repo_manager.publish_bundle(
+        # Wrap the whole pipeline in a callable for the worker
+        def _publish_op():
+            return self._remote_repo_manager.publish_bundle(
                 repo, _write_bundle, commit_author=commit_author,
             )
-        finally:
-            try:
-                if QApplication is not None:
-                    QApplication.restoreOverrideCursor()
-            except Exception:
-                pass
 
+        self._run_publish_in_background(repo, _publish_op)
+
+    def _run_publish_in_background(self, repo: RemoteRepo, publish_op) -> None:
+        """Run a publish closure on a worker thread with a progress dialog."""
+        from .git_worker import GitOpsWorker
+
+        progress = QProgressDialog(
+            self.tr("Publishing to {0}...").format(repo.name),
+            self.tr("Cancel"), 0, 0, self,
+        )
+        progress.setWindowTitle(self.tr("Publishing"))
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.setAutoClose(False)
+        progress.setAutoReset(False)
+
+        # Hold a strong reference on self so the QThread survives even if
+        # the user cancels the dialog (the worker keeps running because
+        # killing a subprocess mid-clone would corrupt the working tree).
+        self._publish_worker = GitOpsWorker(publish_op, parent=self)
+        worker = self._publish_worker
+
+        # When the user clicks Cancel: hide the dialog and detach result
+        # handlers. The worker keeps running — subprocess cancellation is
+        # not safe — but the user is no longer blocked.
+        cancelled = {"flag": False}
+
+        def _on_cancel():
+            cancelled["flag"] = True
+            progress.hide()
+
+        progress.canceled.connect(_on_cancel)
+
+        def _on_finished(sync):
+            if cancelled["flag"]:
+                return
+            progress.close()
+            self._on_publish_finished(repo, sync)
+
+        def _on_error(msg):
+            if cancelled["flag"]:
+                return
+            progress.close()
+            self._on_publish_finished(repo, _SyncFailure(msg))
+
+        worker.finished.connect(_on_finished)
+        worker.error.connect(_on_error)
+        worker.start()
+        progress.exec()
+
+    def _on_publish_finished(self, repo: RemoteRepo, sync) -> None:
         # Report outcome
         if not sync.success:
             detail = sync.error_message or self.tr("Unknown error.")

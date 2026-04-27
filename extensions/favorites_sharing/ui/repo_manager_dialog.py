@@ -74,6 +74,10 @@ class RepoEditDialog(QDialog if HAS_QT else object):
         self._original = repo
         self._existing_names = set(n for n in (existing_names or []) if n)
         self._manager = manager
+        # H5: holds the QThread driving Test connection so it survives the
+        # method call that spawned it. Set to None until the user clicks
+        # Test for the first time.
+        self._test_worker = None
         if HAS_QT:
             self._setup_ui()
             self._populate_from_repo(repo)
@@ -248,26 +252,48 @@ class RepoEditDialog(QDialog if HAS_QT else object):
                 + _tr("Set a name first.") + "</span>"
             )
             return
+        # H5 (audit 2026-04-27): ``test_connection`` runs ``git ls-remote``
+        # which can hang up to ``timeout_seconds`` (15s here) on an
+        # unreachable remote. Run it on a worker so the dialog stays
+        # responsive — the user can keep editing fields while the probe
+        # is in flight, and the result is rendered into the status label
+        # whenever it lands.
+        from .git_worker import GitOpsWorker
+
         self._test_status_label.setText(_tr("Testing…"))
         self._test_btn.setEnabled(False)
-        try:
-            from qgis.PyQt.QtWidgets import QApplication
-            QApplication.processEvents()
-            result = self._manager.test_connection(repo)
-        finally:
+
+        def _probe():
+            return self._manager.test_connection(repo)
+
+        # Keep a strong reference on self so the QThread is not
+        # garbage-collected before it runs.
+        self._test_worker = GitOpsWorker(_probe, parent=self)
+
+        def _on_finished(result):
             self._test_btn.setEnabled(True)
-        if result.success:
-            if result.skipped_push_reason == "no_remote":
-                msg = _tr("OK — local-only target (path is writable).")
+            if result.success:
+                if result.skipped_push_reason == "no_remote":
+                    msg = _tr("OK — local-only target (path is writable).")
+                else:
+                    msg = _tr("OK — remote reachable.")
+                self._test_status_label.setText(
+                    f"<span style='color:#3a3;'>✔ {msg}</span>"
+                )
             else:
-                msg = _tr("OK — remote reachable.")
+                self._test_status_label.setText(
+                    f"<span style='color:#c33;'>✗ {result.error_message}</span>"
+                )
+
+        def _on_error(msg):
+            self._test_btn.setEnabled(True)
             self._test_status_label.setText(
-                f"<span style='color:#3a3;'>✔ {msg}</span>"
+                f"<span style='color:#c33;'>✗ {msg}</span>"
             )
-        else:
-            self._test_status_label.setText(
-                f"<span style='color:#c33;'>✗ {result.error_message}</span>"
-            )
+
+        self._test_worker.finished.connect(_on_finished)
+        self._test_worker.error.connect(_on_error)
+        self._test_worker.start()
 
     def _on_accept(self) -> None:
         name = self._name_edit.text().strip()

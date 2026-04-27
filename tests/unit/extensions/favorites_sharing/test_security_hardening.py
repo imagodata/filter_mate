@@ -263,14 +263,30 @@ def test_safe_join_under_returns_inside_path(tmp_path):
 
 @pytest.fixture
 def _fake_filter_mate_modules(monkeypatch):
-    """Stub minimal ``filter_mate.core.*`` so service.fork can import without
-    a running QGIS. Returns the (FilterFavorite_cls, captured_kwargs)."""
+    """Stub the ``filter_mate.core.*`` namespace so service.fork can import
+    without a running QGIS. Forces a clean slate on every entry: any prior
+    test that loaded the real modules under that namespace would otherwise
+    leak through and break our assertions.
+
+    Returns ``(FilterFavorite_cls, captured_kwargs)``.
+    """
+    # Wipe any previously-cached filter_mate.* entries — pytest collects
+    # tests across packages and earlier ones may have imported the real
+    # implementation, leaving live references in sys.modules.
+    for cached in [k for k in list(sys.modules) if k == "filter_mate" or k.startswith("filter_mate.")]:
+        monkeypatch.delitem(sys.modules, cached, raising=False)
+
     fm_pkg = types.ModuleType("filter_mate")
     core_pkg = types.ModuleType("filter_mate.core")
     services_pkg = types.ModuleType("filter_mate.core.services")
     domain_pkg = types.ModuleType("filter_mate.core.domain")
+    filter_pkg = types.ModuleType("filter_mate.core.filter")
     fav_svc_mod = types.ModuleType("filter_mate.core.services.favorites_service")
     fav_mgr_mod = types.ModuleType("filter_mate.core.domain.favorites_manager")
+
+    # Re-export the REAL sanitizer so fork's sanitization step runs end-to-end.
+    from core.filter import sanitize_subset_string as _real_sanitize  # noqa: WPS433
+    filter_pkg.sanitize_subset_string = _real_sanitize  # type: ignore[attr-defined]
 
     class _FavoritesService:
         @staticmethod
@@ -301,6 +317,7 @@ def _fake_filter_mate_modules(monkeypatch):
     fm_pkg.core = core_pkg  # type: ignore[attr-defined]
     core_pkg.services = services_pkg  # type: ignore[attr-defined]
     core_pkg.domain = domain_pkg  # type: ignore[attr-defined]
+    core_pkg.filter = filter_pkg  # type: ignore[attr-defined]
     services_pkg.favorites_service = fav_svc_mod  # type: ignore[attr-defined]
     domain_pkg.favorites_manager = fav_mgr_mod  # type: ignore[attr-defined]
 
@@ -308,6 +325,7 @@ def _fake_filter_mate_modules(monkeypatch):
     monkeypatch.setitem(sys.modules, "filter_mate.core", core_pkg)
     monkeypatch.setitem(sys.modules, "filter_mate.core.services", services_pkg)
     monkeypatch.setitem(sys.modules, "filter_mate.core.domain", domain_pkg)
+    monkeypatch.setitem(sys.modules, "filter_mate.core.filter", filter_pkg)
     monkeypatch.setitem(
         sys.modules, "filter_mate.core.services.favorites_service", fav_svc_mod
     )
