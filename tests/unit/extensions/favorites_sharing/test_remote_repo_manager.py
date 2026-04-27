@@ -30,9 +30,16 @@ GIT_AVAILABLE = shutil.which("git") is not None
 class FakeExtension:
     def __init__(self, repos):
         self._repos = list(repos)
+        self.last_set_call = None
 
     def get_remote_repos(self):
         return list(self._repos)
+
+    def set_config(self, key, value, *, persist=True):
+        self.last_set_call = (key, value, persist)
+        if key == "remote_repos" and isinstance(value, list):
+            self._repos = list(value)
+        return True
 
 
 # ---------------------------------------------------------------------------
@@ -75,6 +82,36 @@ class TestRemoteRepoFromConfig:
         })
         assert repo is not None
         assert repo.extra == {"future_field": {"nested": 1}}
+
+    def test_parses_authcfg_id(self):
+        repo = RemoteRepo.from_config_entry({
+            "name": "Acme", "authcfg_id": "qg1xy7w",
+        })
+        assert repo is not None
+        assert repo.authcfg_id == "qg1xy7w"
+        assert repo.auth_header == ""
+
+    def test_legacy_auth_header_logs_deprecation(self, caplog):
+        import logging
+        with caplog.at_level(logging.WARNING,
+                             logger="FilterMate.FavoritesSharing.RemoteRepo"):
+            repo = RemoteRepo.from_config_entry({
+                "name": "Legacy", "auth_header": "Bearer tok",
+            })
+        assert repo is not None
+        assert repo.auth_header == "Bearer tok"
+        assert any("legacy plaintext auth_header" in rec.message
+                   for rec in caplog.records)
+
+    def test_authcfg_id_does_not_warn(self, caplog):
+        import logging
+        with caplog.at_level(logging.WARNING,
+                             logger="FilterMate.FavoritesSharing.RemoteRepo"):
+            RemoteRepo.from_config_entry({
+                "name": "Encrypted", "authcfg_id": "qg1xy7w",
+            })
+        assert not any("legacy plaintext auth_header" in rec.message
+                       for rec in caplog.records)
 
     def test_collection_dir_uses_collections_subdir(self, tmp_path):
         repo = RemoteRepo.from_config_entry({
@@ -298,3 +335,116 @@ class TestPublishBundleE2E:
         assert "disk full" in sync.error_message
         # clone_path is surfaced so the UI can offer "Open clone"
         assert sync.clone_path
+
+
+# ---------------------------------------------------------------------------
+# CRUD: save_repos round-trip + serialization invariants
+# ---------------------------------------------------------------------------
+
+
+class TestSaveRepos:
+    def test_save_repos_serializes_and_persists(self):
+        ext = FakeExtension([])
+        mgr = RemoteRepoManager(ext)
+
+        repos = [
+            RemoteRepo(name="A", git_url="https://x/a.git", authcfg_id="cfg1"),
+            RemoteRepo(name="B", local_clone="/tmp/b", target_collection="coll"),
+        ]
+        assert mgr.save_repos(repos) is True
+        assert ext.last_set_call[0] == "remote_repos"
+        saved = ext.last_set_call[1]
+        assert saved == [
+            {"name": "A", "git_url": "https://x/a.git", "authcfg_id": "cfg1"},
+            {"name": "B", "local_clone": "/tmp/b", "target_collection": "coll"},
+        ]
+
+    def test_save_repos_drops_legacy_auth_header_when_authcfg_set(self):
+        """Migration path: when both fields exist, drop the plaintext one."""
+        mgr = RemoteRepoManager(FakeExtension([]))
+        repo = RemoteRepo(
+            name="Migrated",
+            git_url="https://x/a.git",
+            auth_header="Bearer LEGACY",
+            authcfg_id="cfg-new",
+        )
+        ext = FakeExtension([])
+        mgr = RemoteRepoManager(ext)
+        mgr.save_repos([repo])
+        saved_entry = ext.last_set_call[1][0]
+        assert saved_entry.get("authcfg_id") == "cfg-new"
+        assert "auth_header" not in saved_entry
+
+    def test_save_repos_keeps_legacy_auth_header_alone(self):
+        """Without authcfg_id, the legacy header survives the round-trip."""
+        ext = FakeExtension([])
+        mgr = RemoteRepoManager(ext)
+        repo = RemoteRepo(
+            name="Old", git_url="https://x/a.git", auth_header="Bearer KEEP",
+        )
+        mgr.save_repos([repo])
+        saved_entry = ext.last_set_call[1][0]
+        assert saved_entry["auth_header"] == "Bearer KEEP"
+
+    def test_save_repos_enforces_single_default(self):
+        """Two is_default=True entries → only the first survives as default."""
+        ext = FakeExtension([])
+        mgr = RemoteRepoManager(ext)
+        repos = [
+            RemoteRepo(name="A", is_default=True),
+            RemoteRepo(name="B", is_default=True),
+        ]
+        mgr.save_repos(repos)
+        saved = ext.last_set_call[1]
+        assert saved[0].get("is_default") is True
+        # Second entry's is_default is dropped (falsy → omitted from dict)
+        assert "is_default" not in saved[1]
+
+    def test_save_repos_round_trip_via_list_repos(self):
+        """save → list must yield the same set of repos."""
+        ext = FakeExtension([])
+        mgr = RemoteRepoManager(ext)
+        original = [
+            RemoteRepo(name="X", authcfg_id="cfg1"),
+            RemoteRepo(name="Y", git_url="https://y.git", branch="main"),
+        ]
+        mgr.save_repos(original)
+        round_tripped = mgr.list_repos()
+        assert [r.name for r in round_tripped] == ["X", "Y"]
+        assert round_tripped[0].authcfg_id == "cfg1"
+        assert round_tripped[1].git_url == "https://y.git"
+
+    def test_save_repos_returns_false_without_extension(self):
+        """No extension → cannot persist, must report failure."""
+        mgr = RemoteRepoManager(extension=None)
+        assert mgr.save_repos([RemoteRepo(name="X")]) is False
+
+
+# ---------------------------------------------------------------------------
+# test_connection — used by the editor dialog's "Test connection" button
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(not GIT_AVAILABLE, reason="git binary not available")
+class TestTestConnection:
+    def test_local_only_repo_is_considered_ready(self, tmp_path):
+        """No git_url + writable path → success, skipped reason 'no_remote'."""
+        clone = tmp_path / "local_only"
+        mgr = RemoteRepoManager(FakeExtension([{
+            "name": "Local",
+            "local_clone": str(clone),
+        }]))
+        result = mgr.test_connection(mgr.get_default())
+        assert result.success is True
+        assert result.skipped_push_reason == "no_remote"
+
+    def test_unreachable_remote_returns_error(self, tmp_path):
+        """Bogus git URL must surface as a non-success with a stderr message."""
+        mgr = RemoteRepoManager(FakeExtension([{
+            "name": "Bogus",
+            "git_url": "https://127.0.0.1:1/no-such-repo.git",
+            "local_clone": str(tmp_path / "x"),
+        }]))
+        result = mgr.test_connection(mgr.get_default(), timeout=5)
+        assert result.success is False
+        assert result.error_message  # whatever git says, just non-empty

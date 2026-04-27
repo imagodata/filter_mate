@@ -16,8 +16,13 @@ Design rules:
   risking history rewrites.
 - stderr is captured and returned verbatim — operators paste it into bug
   reports.
-- ``auth_header`` (HTTP Basic / PAT) is injected via
-  ``http.extraHeader`` so credentials never land in process argv.
+- Credentials are injected via ``http.extraHeader`` so they never land
+  in process argv. Two sources are supported, the first one wins:
+  * ``authcfg_id`` — resolved at exec time through ``QgsAuthManager``,
+    which decrypts the stored Basic/PAT credential into an
+    ``Authorization:`` header. The plaintext never touches config.json.
+  * ``auth_header`` — legacy plaintext fallback for pre-migration
+    configs (deprecated).
 """
 
 from __future__ import annotations
@@ -62,6 +67,66 @@ def _scrub_text(text: str) -> str:
     return scrubbed
 
 
+def _resolve_authcfg_header(authcfg_id: str) -> Optional[str]:
+    """Decrypt a QGIS auth config entry into an HTTP Authorization value.
+
+    Supports the two QgsAuthMethodConfig variants that map cleanly onto
+    HTTP credentials: ``Basic`` (username + password → ``Basic <b64>``)
+    and ``APIHeader``/PAT-style configs that store a raw header value
+    under a ``token`` / ``Authorization`` config key.
+
+    Returns ``None`` when:
+      * the ``qgis.core`` module is not importable (standalone tests);
+      * the ``authcfg_id`` is not registered in QgsAuthManager;
+      * the entry exists but doesn't carry credentials we can map to an
+        ``Authorization:`` header (e.g. SSH key configs — out of scope
+        for HTTPS git over subprocess).
+
+    The first call may trigger the master-password prompt — that's the
+    user-facing tradeoff for storing credentials encrypted at rest.
+    """
+    if not authcfg_id:
+        return None
+    try:
+        from qgis.core import QgsApplication, QgsAuthMethodConfig  # type: ignore
+    except ImportError:
+        return None
+
+    auth_manager = QgsApplication.authManager()
+    if auth_manager is None or authcfg_id not in auth_manager.configIds():
+        return None
+
+    cfg = QgsAuthMethodConfig()
+    if not auth_manager.loadAuthenticationConfig(authcfg_id, cfg, True):
+        return None
+
+    method = (cfg.method() or "").lower()
+    config_map = {k: cfg.config(k) for k in cfg.configMap().keys()}
+
+    # Basic auth: build Basic <base64(user:pass)>
+    if method in ("basic", "httpbasic"):
+        import base64
+        user = config_map.get("username") or ""
+        pwd = config_map.get("password") or ""
+        if not user and not pwd:
+            return None
+        token = base64.b64encode(f"{user}:{pwd}".encode("utf-8")).decode("ascii")
+        return f"Basic {token}"
+
+    # APIHeader / PAT — providers store either the full "Bearer X" string
+    # or just the raw token. Accept both common keys.
+    for key in ("Authorization", "authorization", "token", "header"):
+        value = (config_map.get(key) or "").strip()
+        if value:
+            # Prepend "Bearer " when the value looks like a bare PAT
+            # (no scheme word at the start).
+            if " " not in value:
+                return f"Bearer {value}"
+            return value
+
+    return None
+
+
 class GitError(RuntimeError):
     """A git subprocess returned non-zero."""
 
@@ -100,10 +165,35 @@ class GitClient:
     """
     cwd: str
     auth_header: Optional[str] = None
+    # Preferred over auth_header when both are set. Resolved lazily via
+    # QgsAuthManager — keeps credentials encrypted at rest in QGIS' keystore.
+    authcfg_id: Optional[str] = None
     git_binary: str = "git"
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS
     # Extra env overrides (tests inject GIT_TERMINAL_PROMPT=0 etc.)
     extra_env: dict = field(default_factory=dict)
+
+    # ------------------------------------------------------------------
+    # Auth resolution
+    # ------------------------------------------------------------------
+
+    def _resolve_auth_header(self) -> Optional[str]:
+        """Return the Authorization header value to inject, or None.
+
+        Priority: ``authcfg_id`` (decrypted via QgsAuthManager) wins over
+        the legacy ``auth_header`` field. If the QGIS auth manager is not
+        importable (standalone tests, headless harness without QGIS) the
+        method silently falls back to ``auth_header``.
+        """
+        if self.authcfg_id:
+            header = _resolve_authcfg_header(self.authcfg_id)
+            if header:
+                return header
+            logger.warning(
+                "authcfg_id %r could not be resolved to a credential — "
+                "falling back to auth_header (if any).", self.authcfg_id,
+            )
+        return self.auth_header or None
 
     # ------------------------------------------------------------------
     # Low-level run
@@ -125,12 +215,15 @@ class GitClient:
         exception type.
         """
         cmd: List[str] = [self.git_binary]
-        # Inject auth header as an --config override so it is not logged
+        # Inject auth header as a --config override so it is not logged
         # as part of the URL. Only set for operations that touch the net.
-        if self.auth_header:
+        # Resolved here (not at __init__) so QgsAuthManager prompts for
+        # the master password at the moment of use, not at config load.
+        header = self._resolve_auth_header()
+        if header:
             cmd += [
                 "-c",
-                f"http.extraHeader=Authorization: {self.auth_header}",
+                f"http.extraHeader=Authorization: {header}",
             ]
         cmd += list(args)
 

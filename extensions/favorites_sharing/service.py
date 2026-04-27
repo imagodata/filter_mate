@@ -65,13 +65,25 @@ class FavoritesSharingService:
 
     # ─── Discovery ─────────────────────────────────────────────────────
 
-    def list_shared(self, search_query: Optional[str] = None) -> List[SharedFavorite]:
-        """Return shared favorites matching an optional search query.
+    def list_shared(
+        self,
+        search_query: Optional[str] = None,
+        author: Optional[str] = None,
+    ) -> List[SharedFavorite]:
+        """Return shared favorites matching the given filters.
 
         Search is case-insensitive and applied on name, description,
-        collection name, and tags.
+        collection name, and tags. ``author`` is an exact (case-insensitive)
+        match on the collection-level ``author`` — None / empty means
+        "any author".
         """
         items = self._scanner.scan()
+
+        if author:
+            needle_author = author.strip().lower()
+            if needle_author:
+                items = [f for f in items if f.author.lower() == needle_author]
+
         if not search_query:
             return items
 
@@ -86,12 +98,26 @@ class FavoritesSharingService:
                 return True
             if needle in fav.source.collection_name.lower():
                 return True
+            if fav.author and needle in fav.author.lower():
+                return True
             tags = fav.payload.get('tags') or []
             if isinstance(tags, list) and any(needle in str(t).lower() for t in tags):
                 return True
             return False
 
         return [f for f in items if _matches(f)]
+
+    def list_authors(self) -> List[str]:
+        """Return the distinct collection authors found across all shared
+        favorites, sorted alphabetically. Empty/anonymous authors are
+        omitted — the picker shows them under the "All authors" entry.
+        """
+        seen: Dict[str, None] = {}
+        for fav in self._scanner.scan():
+            a = fav.author
+            if a and a not in seen:
+                seen[a] = None
+        return sorted(seen.keys(), key=str.lower)
 
     def invalidate_cache(self) -> None:
         self._scanner.invalidate_cache()

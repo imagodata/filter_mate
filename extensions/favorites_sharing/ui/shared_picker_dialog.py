@@ -15,7 +15,7 @@ from typing import Any, List, Optional
 try:
     from qgis.PyQt.QtCore import Qt
     from qgis.PyQt.QtWidgets import (
-        QDialog, QVBoxLayout, QHBoxLayout, QLabel, QListWidget,
+        QComboBox, QDialog, QVBoxLayout, QHBoxLayout, QLabel, QListWidget,
         QListWidgetItem, QPushButton, QTextEdit, QLineEdit, QSplitter,
         QWidget, QInputDialog, QMessageBox,
     )
@@ -69,16 +69,25 @@ class SharedFavoritesPickerDialog(QDialog if HAS_QT else object):
         self._summary_label.setWordWrap(True)
         root.addWidget(self._summary_label)
 
-        # Search
+        # Search + author filter — author dropdown is rebuilt on every
+        # rescan since the discovered set changes when collections are
+        # added/removed.
         search_row = QHBoxLayout()
         search_row.addWidget(QLabel("🔍"))
         self._search_edit = QLineEdit()
         self._search_edit.setPlaceholderText(
-            self.tr("Search by name, description, collection, or tags...")
+            self.tr("Search by name, description, collection, author, or tags...")
         )
         self._search_edit.setClearButtonEnabled(True)
-        self._search_edit.textChanged.connect(self._on_search_changed)
-        search_row.addWidget(self._search_edit)
+        self._search_edit.textChanged.connect(lambda *_: self._on_filters_changed())
+        search_row.addWidget(self._search_edit, 1)
+
+        search_row.addWidget(QLabel(self.tr("Author:")))
+        self._author_combo = QComboBox()
+        self._author_combo.setMinimumWidth(160)
+        self._author_combo.currentIndexChanged.connect(lambda *_: self._on_filters_changed())
+        search_row.addWidget(self._author_combo)
+
         root.addLayout(search_row)
 
         # Splitter
@@ -128,10 +137,51 @@ class SharedFavoritesPickerDialog(QDialog if HAS_QT else object):
 
     # ─── Data wiring ──────────────────────────────────────────────────
 
+    _AUTHOR_ALL_SENTINEL = "__all__"
+
     def _refresh(self) -> None:
         self._items = self._sharing_service.list_shared()
-        self._populate_list(self._items)
+        self._refresh_author_combo()
+        self._populate_list(self._apply_filters())
         self._update_summary()
+
+    def _refresh_author_combo(self) -> None:
+        """Rebuild the author dropdown from the current scan result.
+
+        Preserves the currently-selected author when the same value is
+        still present after the rescan — so a refresh doesn't reset the
+        user's filter when they're triaging a long list.
+        """
+        previous = self._current_author_filter()
+        self._author_combo.blockSignals(True)
+        self._author_combo.clear()
+        self._author_combo.addItem(self.tr("All authors"), self._AUTHOR_ALL_SENTINEL)
+        for author in self._sharing_service.list_authors():
+            self._author_combo.addItem(author, author)
+        if previous and previous != self._AUTHOR_ALL_SENTINEL:
+            idx = self._author_combo.findData(previous)
+            if idx >= 0:
+                self._author_combo.setCurrentIndex(idx)
+        self._author_combo.blockSignals(False)
+
+    def _current_author_filter(self) -> str:
+        """Return the data sentinel currently selected in the combo."""
+        if not hasattr(self, "_author_combo"):
+            return self._AUTHOR_ALL_SENTINEL
+        data = self._author_combo.currentData()
+        return str(data) if data else self._AUTHOR_ALL_SENTINEL
+
+    def _apply_filters(self) -> List[SharedFavorite]:
+        """Apply current search + author filters in a single call."""
+        search = self._search_edit.text() if hasattr(self, "_search_edit") else ""
+        author = self._current_author_filter()
+        return self._sharing_service.list_shared(
+            search_query=search or None,
+            author=None if author == self._AUTHOR_ALL_SENTINEL else author,
+        )
+
+    def _on_filters_changed(self) -> None:
+        self._populate_list(self._apply_filters())
 
     def _update_summary(self) -> None:
         summary = self._sharing_service.collections_summary()
@@ -153,12 +203,20 @@ class SharedFavoritesPickerDialog(QDialog if HAS_QT else object):
     def _populate_list(self, items: List[SharedFavorite]) -> None:
         self._list_widget.clear()
         for fav in items:
-            entry = QListWidgetItem(f"★ {fav.name}")
+            # Author badge ("· imagodata") makes it obvious at a glance who
+            # ships each favorite — the same name can come from multiple
+            # collections in big orgs, so this disambiguates.
+            label = f"★ {fav.name}"
+            if fav.author:
+                label += f"   · {fav.author}"
+            entry = QListWidgetItem(label)
             entry.setData(Qt.ItemDataRole.UserRole, fav)
             tooltip_parts = [
                 fav.name,
                 self.tr("Collection: {0}").format(fav.source.collection_name),
             ]
+            if fav.author:
+                tooltip_parts.append(self.tr("Author: {0}").format(fav.author))
             if fav.description:
                 tooltip_parts.append(fav.description)
             entry.setToolTip("\n".join(tooltip_parts))
@@ -169,12 +227,8 @@ class SharedFavoritesPickerDialog(QDialog if HAS_QT else object):
         else:
             self._current = None
             self._fork_btn.setEnabled(False)
-            self._details_header.setText(self.tr("No shared favorites match your search."))
+            self._details_header.setText(self.tr("No shared favorites match your filters."))
             self._details_body.clear()
-
-    def _on_search_changed(self, text: str) -> None:
-        filtered = self._sharing_service.list_shared(search_query=text)
-        self._populate_list(filtered)
 
     def _on_selection_changed(self) -> None:
         item = self._list_widget.currentItem()

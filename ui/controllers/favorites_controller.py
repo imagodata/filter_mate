@@ -845,6 +845,24 @@ class FavoritesController(BaseController):
                     "📤 " + self.tr("Publish (no favorites saved)")
                 )
 
+            # Quick-publish: 1-click flow that bypasses the dialog and
+            # pushes ALL favorites to the configured default repo. Hidden
+            # when no default repo is configured (no point in failing
+            # silently from the menu).
+            if self.count > 0 and self._has_default_remote_repo():
+                quick_action = menu.addAction(
+                    "🚀 " + self.tr("Quick publish to default repo")
+                )
+                quick_action.setData('__QUICK_PUBLISH_SHARING__')
+
+            # Operator config: open the Repo Manager dialog from anywhere
+            # in the favorites menu so users don't have to dig into the
+            # JSON config tree to add a repo or rotate credentials.
+            manage_repos_action = menu.addAction(
+                "🌐 " + self.tr("Manage Resource Sharing repos...")
+            )
+            manage_repos_action.setData('__MANAGE_SHARING_REPOS__')
+
         # === GLOBAL FAVORITES SUBMENU ===
         menu.addSeparator()
         global_menu = menu.addMenu("🌐 " + self.tr("Global favorites"))
@@ -923,6 +941,10 @@ class FavoritesController(BaseController):
             self._open_shared_picker()
         elif action_data == '__PUBLISH_SHARING__':
             self._open_publish_dialog()
+        elif action_data == '__QUICK_PUBLISH_SHARING__':
+            self._quick_publish_to_default_repo()
+        elif action_data == '__MANAGE_SHARING_REPOS__':
+            self._open_repo_manager_dialog()
         elif isinstance(action_data, tuple):
             if action_data[0] == 'apply':
                 self.apply_favorite(action_data[1])
@@ -2161,6 +2183,158 @@ class FavoritesController(BaseController):
         except Exception as e:
             logger.exception("Publish dialog failed to open")
             self._show_warning(self.tr("Publish dialog failed: {0}").format(e))
+
+    def _has_default_remote_repo(self) -> bool:
+        """True when a default git-backed publish target is configured.
+
+        Used by the menu builder to gate the 'Quick publish' entry — no
+        point in showing it when there's nowhere to push.
+        """
+        ext = self._get_sharing_extension()
+        if ext is None:
+            return False
+        try:
+            mgr = ext.get_service('remote_repos')
+            return mgr is not None and mgr.get_default() is not None
+        except Exception:
+            return False
+
+    def _open_repo_manager_dialog(self) -> None:
+        """Open the Repo Manager (CRUD on the configured remote repos)."""
+        ext = self._get_sharing_extension()
+        if ext is None:
+            self._show_warning(self.tr(
+                "Resource Sharing extension is not active. "
+                "Enable 'favorites_sharing' in FilterMate settings."
+            ))
+            return
+        mgr = ext.get_service('remote_repos')
+        if mgr is None:
+            self._show_warning(self.tr("Remote repo manager is not available."))
+            return
+        try:
+            from ...extensions.favorites_sharing.ui import RepoManagerDialog
+            dialog = RepoManagerDialog(mgr, parent=self.dockwidget)
+            dialog.exec()
+        except Exception as e:
+            logger.exception("Repo manager dialog failed to open")
+            self._show_warning(self.tr("Repo manager failed: {0}").format(e))
+
+    def _quick_publish_to_default_repo(self) -> None:
+        """Publish ALL favorites to the configured default repo without
+        opening the full Publish dialog. Confirms once, then runs the
+        clone → write → commit → push pipeline.
+        """
+        ext = self._get_sharing_extension()
+        if ext is None or self._favorites_manager is None:
+            self._show_warning(self.tr(
+                "Resource Sharing extension is not active."
+            ))
+            return
+        service = ext.get_service('service')
+        mgr = ext.get_service('remote_repos')
+        if service is None or mgr is None:
+            self._show_warning(self.tr(
+                "Resource Sharing services are not available."
+            ))
+            return
+        repo = mgr.get_default()
+        if repo is None:
+            self._show_warning(self.tr(
+                "No default repo is configured. Open 'Manage Resource "
+                "Sharing repos…' to add one and mark it as default."
+            ))
+            return
+        if self.count == 0:
+            self._show_warning(self.tr(
+                "No favorites to publish."
+            ))
+            return
+
+        try:
+            from qgis.PyQt.QtWidgets import QApplication, QMessageBox
+            from qgis.PyQt.QtCore import Qt
+        except ImportError:
+            return
+
+        # Confirm with a single dialog so the user knows where it goes.
+        try:
+            favorites = self._favorites_manager.get_all_favorites()
+        except Exception:
+            favorites = []
+        confirm = QMessageBox.question(
+            self.dockwidget,
+            self.tr("Quick publish"),
+            self.tr(
+                "Publish {0} favorite(s) to <b>{1}</b>?<br><br>"
+                "<small>Target: <code>{2}</code></small>"
+            ).format(
+                len(favorites), repo.name,
+                repo.collection_dir or repo.expanded_local_clone or "(default)",
+            ),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Yes,
+        )
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+
+        from ...extensions.favorites_sharing.service import CollectionTarget
+        import os
+
+        bundle_name = "favorites"
+        metadata = ext.get_default_publish_metadata() if hasattr(
+            ext, 'get_default_publish_metadata'
+        ) else {}
+        # Always set a name so the manifest is valid
+        metadata = dict(metadata)
+        metadata.setdefault("name", repo.target_collection or repo.name)
+
+        fav_ids = [getattr(f, 'id', '') for f in favorites if getattr(f, 'id', '')]
+
+        def _write_bundle(collection_dir: str) -> str:
+            result = service.publish_bundle(
+                favorites_service=self._favorites_manager,
+                target=CollectionTarget(
+                    collection_dir=collection_dir,
+                    display_name=metadata.get('name') or repo.name,
+                    is_new=not os.path.isdir(collection_dir),
+                ),
+                bundle_filename=bundle_name,
+                favorite_ids=fav_ids,
+                collection_metadata=metadata,
+                overwrite=True,
+            )
+            if not result.success:
+                raise RuntimeError(result.error_message or "bundle write failed")
+            return result.bundle_path
+
+        author = (metadata.get('author') or '').strip()
+        commit_author = f"{author} <filter_mate@imagodata.local>" if author else None
+
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            sync = mgr.publish_bundle(repo, _write_bundle, commit_author=commit_author)
+        finally:
+            QApplication.restoreOverrideCursor()
+
+        if not sync.success:
+            self._show_warning(self.tr(
+                "Quick publish to {0} failed: {1}"
+            ).format(repo.name, sync.error_message or "?"))
+            return
+
+        if sync.pushed:
+            self._show_success(self.tr(
+                "Published {0} favorite(s) to {1} (commit {2})."
+            ).format(len(favorites), repo.name, sync.commit_sha or "?"))
+        elif sync.skipped_push_reason == "no_changes":
+            self._show_success(self.tr(
+                "Bundle unchanged — nothing to commit."
+            ))
+        elif sync.skipped_push_reason == "no_remote":
+            self._show_success(self.tr(
+                "Wrote bundle locally — push manually."
+            ))
 
     def _show_database_stats(self) -> None:
         """Show database statistics dialog."""

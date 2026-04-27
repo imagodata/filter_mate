@@ -269,3 +269,78 @@ class TestSecretScrubbing:
         # Stored fields are scrubbed too.
         assert "SECRET-TOKEN-123" not in " ".join(err.command)
         assert "tok" not in err.stderr
+
+
+# ---------------------------------------------------------------------------
+# authcfg_id resolution — preferred over plaintext auth_header
+# ---------------------------------------------------------------------------
+
+
+class TestAuthcfgResolution:
+    """``authcfg_id`` should win over ``auth_header`` when both are set,
+    and gracefully fall back when QgsAuthManager is not available."""
+
+    def test_resolve_returns_none_without_qgis(self, monkeypatch):
+        """Standalone tests have no qgis.core importable — must not crash."""
+        # Force the import in _resolve_authcfg_header to fail
+        import builtins
+        real_import = builtins.__import__
+
+        def raising(name, *a, **kw):
+            if name == "qgis.core":
+                raise ImportError("simulated standalone env")
+            return real_import(name, *a, **kw)
+
+        monkeypatch.setattr(builtins, "__import__", raising)
+
+        from extensions.favorites_sharing.git_client import _resolve_authcfg_header
+        assert _resolve_authcfg_header("anything") is None
+
+    def test_falls_back_to_plaintext_when_authcfg_unresolvable(
+        self, tmp_path, monkeypatch,
+    ):
+        """When authcfg_id can't be resolved (no QGIS), GitClient still
+        uses the legacy auth_header — preserves BC during migration."""
+        from extensions.favorites_sharing.git_client import GitClient
+
+        client = GitClient(
+            cwd=str(tmp_path),
+            authcfg_id="qg1xy7w",
+            auth_header="Bearer LEGACY-FALLBACK",
+        )
+        # No QGIS in the test harness, so authcfg returns None and we fall
+        # back to the plaintext.
+        assert client._resolve_auth_header() == "Bearer LEGACY-FALLBACK"
+
+    def test_no_credentials_at_all_returns_none(self, tmp_path):
+        """No authcfg_id, no auth_header → None (anonymous git)."""
+        from extensions.favorites_sharing.git_client import GitClient
+
+        client = GitClient(cwd=str(tmp_path))
+        assert client._resolve_auth_header() is None
+
+    def test_authcfg_resolution_is_called_lazily(
+        self, tmp_path, seeded_remote, monkeypatch,
+    ):
+        """Resolver fires at exec time, not at __init__ — so the QGIS
+        master-password prompt only happens when a publish actually runs."""
+        from extensions.favorites_sharing import git_client as gc_mod
+
+        calls = {"count": 0}
+
+        def spy_resolver(authcfg_id):
+            calls["count"] += 1
+            return None
+
+        monkeypatch.setattr(gc_mod, "_resolve_authcfg_header", spy_resolver)
+
+        # Constructing the client must not call the resolver
+        client = gc_mod.GitClient(cwd=str(tmp_path / "x"), authcfg_id="qg1xy7w")
+        assert calls["count"] == 0
+
+        # Running a command does
+        try:
+            client.clone(str(seeded_remote), branch="main")
+        except gc_mod.GitError:
+            pass
+        assert calls["count"] >= 1

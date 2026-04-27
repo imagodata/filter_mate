@@ -55,6 +55,17 @@ class SharedFavorite:
     def schema_version(self) -> int:
         return int(self.payload.get('_schema_version') or 1)
 
+    @property
+    def author(self) -> str:
+        """Author of the *collection* this favorite was published from.
+
+        v3 schema does not carry per-favorite author; the canonical
+        signal is the collection-level ``author`` (set by the publisher
+        in the bundle envelope or in ``collection.json``).
+        """
+        meta = self.source.collection_metadata or {}
+        return str(meta.get('author') or '').strip()
+
 
 class ResourceSharingScanner:
     """Enumerate favorites bundles installed under Resource Sharing.

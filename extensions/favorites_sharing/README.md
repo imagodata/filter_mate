@@ -17,6 +17,10 @@ you just can't browse curated collections from within the dialog.
   accessible from:
   - the favorites ★ menu (entry "Import from Resource Sharing...")
   - the Favorites Manager dialog (button in the header row)
+- **Filters by author** — the picker has an *Author* dropdown built from
+  the distinct collection authors. The author badge is also shown next
+  to each entry in the list so identical favorite names from different
+  publishers stay disambiguated.
 - **Forks** a shared favorite into the current project's SQLite DB —
   re-binds portable signatures (`postgres::schema.table`, …) to the
   user's local layer UUIDs.
@@ -27,16 +31,24 @@ you just can't browse curated collections from within the dialog.
 - Accessible from:
   - the favorites ★ menu → "📤 Publish to Resource Sharing..."
   - the Favorites Manager dialog → "📤 Publish..." button
-- Target selection: pick an **existing** collection under your Resource
-  Sharing root, create a **new collection** in the root (one click), or
-  **browse to a custom directory** for collections hosted outside the
-  default path.
+  - **Quick publish** ("🚀 Quick publish to default repo") — one-click
+    push of every favorite to the configured default remote repo,
+    skipping the dialog. Hidden when no default repo is configured.
+- Target selection: pick a **configured remote repo** (git-backed,
+  curated by IT — see the *Remote repos* section), an **existing**
+  collection under your Resource Sharing root, create a **new
+  collection** in the root (one click), or **browse to a custom
+  directory** for collections hosted outside the default path.
 - Multi-select favorites with checkboxes, pre-fill collection metadata
   (name, author, license, tags, homepage, description) from config.
 - Writes the bundle at `<target>/filter_mate/favorites/<name>.fmfav-pack.json`
   using the canonical v3 format, and **merges** the collection-level
   `collection.json` manifest (preserves pre-existing keys like
   `qgis_min`, `tags` set by the Resource Sharing plugin).
+- **Manage repos** ("🌐 Manage Resource Sharing repos…") opens a CRUD
+  dialog to add/edit/delete remote repos, set the default, link a QGIS
+  Auth Manager entry, and run "Test connection" — without editing the
+  raw JSON in the configuration tree.
 
 ## Publishing a collection
 
@@ -161,6 +173,54 @@ FilterMate `config.json`. Defaults ship in `config.default.json`.
 | `default_publish_metadata` | `author` / `license` / `homepage` pre-filled in the Publish dialog — saves re-typing for organisations publishing many bundles. |
 | `allowed_collections` | Opt-in allow-list of collection directory names (basenames only). When non-empty the scanner **only** ingests favorites from these collections — useful to restrict an org to curated repos. Empty list = scan everything. |
 | `auto_refresh_on_project_load` | Re-scan on every project load so signature resolution picks up the current project's layers. |
+| `remote_repos` | List of git-backed publish targets. See **Remote repos** below. |
+
+## Remote repos
+
+A remote repo lets a team publish favorite bundles by pushing to a
+shared git repository (GitHub, GitLab, Gitea, …). Anonymous read access
+is supported out of the box — only the publisher needs credentials.
+
+Each entry in `remote_repos` is a dict:
+
+```json
+{
+  "name": "Acme team",
+  "git_url": "https://github.com/acme/qgis-collections.git",
+  "branch": "main",
+  "local_clone": "",
+  "target_collection": "acme-favorites",
+  "is_default": true,
+  "authcfg_id": "qg1xy7w"
+}
+```
+
+| Field | Required | Notes |
+|---|---|---|
+| `name` | yes | Display label in the publish combo. |
+| `git_url` | no | When empty → fallback A (write locally, user pushes). |
+| `branch` | no | Defaults to the remote's HEAD. |
+| `local_clone` | no | Empty → `[profile]/FilterMate/repos/<slug>`. Relative paths anchor on the same dir. |
+| `target_collection` | no | Sub-directory under `collections/`. Empty → repo root *is* the collection. |
+| `is_default` | no | Picks this repo on dialog open. |
+| `authcfg_id` | no | **Preferred** — id of a QGIS Auth Manager entry. Resolved at exec time. |
+| `auth_header` | no | **Deprecated** — plaintext header (`Basic xxx` / `Bearer xxx`). Logs a warning on read. |
+
+### Authentication: use QGIS Auth Manager
+
+`authcfg_id` is the id of an entry in QGIS' encrypted credential store
+(*Settings → Options → Authentication*). FilterMate supports two config
+methods that map onto an HTTP `Authorization:` header:
+
+- **Basic** — username + password → `Basic <base64(user:pass)>`. Use
+  this for GitHub PATs (username = anything, password = PAT).
+- **API Header / token-style** — store the token under a `token` /
+  `Authorization` / `header` config key. A bare token is auto-prefixed
+  with `Bearer `; a value already starting with a scheme word is sent
+  verbatim.
+
+The plaintext credential never lands in `config.json`. The
+master-password prompt fires the first time a publish runs.
 
 ## Unit tests
 

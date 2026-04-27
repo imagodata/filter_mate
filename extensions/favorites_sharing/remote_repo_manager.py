@@ -77,7 +77,14 @@ class RepoStatus(Enum):
 
 @dataclass
 class RemoteRepo:
-    """One configured publish target (validated entry)."""
+    """One configured publish target (validated entry).
+
+    Authentication is preferably stored as ``authcfg_id`` — a reference
+    to a QGIS Auth Manager entry that ships an encrypted PAT/Basic
+    credential. The legacy ``auth_header`` field still works (for
+    config files that pre-date the migration) but logs a deprecation
+    warning on read; new entries should leave it empty.
+    """
 
     name: str
     git_url: str = ""
@@ -85,6 +92,9 @@ class RemoteRepo:
     local_clone: str = ""
     target_collection: str = ""
     is_default: bool = False
+    # Preferred — references an entry in QgsAuthManager. Encrypted at rest.
+    authcfg_id: str = ""
+    # Deprecated — plaintext header. Read-only fallback for legacy configs.
     auth_header: str = ""
     # Forward-compatible catch-all for unknown fields
     extra: Dict[str, Any] = field(default_factory=dict)
@@ -190,9 +200,16 @@ class RemoteRepo:
 
         known = {
             "name", "git_url", "branch", "local_clone",
-            "target_collection", "is_default", "auth_header",
+            "target_collection", "is_default", "authcfg_id", "auth_header",
         }
         extra = {k: v for k, v in entry.items() if k not in known}
+
+        auth_header = str(entry.get("auth_header") or "").strip()
+        if auth_header:
+            logger.warning(
+                "Repo %r uses legacy plaintext auth_header — migrate to "
+                "authcfg_id (Manage Repos → Edit → Authentication).", name,
+            )
 
         return cls(
             name=name,
@@ -201,7 +218,8 @@ class RemoteRepo:
             local_clone=str(entry.get("local_clone") or "").strip(),
             target_collection=str(entry.get("target_collection") or "").strip(),
             is_default=bool(entry.get("is_default") or False),
-            auth_header=str(entry.get("auth_header") or "").strip(),
+            authcfg_id=str(entry.get("authcfg_id") or "").strip(),
+            auth_header=auth_header,
             extra=extra,
         )
 
@@ -283,6 +301,114 @@ class RemoteRepoManager:
         return None
 
     # ------------------------------------------------------------------
+    # CRUD — persist back into EXTENSIONS.favorites_sharing.remote_repos
+    # ------------------------------------------------------------------
+
+    def save_repos(self, repos: List[RemoteRepo]) -> bool:
+        """Persist the given list of repos to FilterMate config.
+
+        Replaces the entire ``remote_repos`` list with the provided one
+        (intentional — the dialog edits the full set in one shot, and
+        we don't want orphan keys lingering on disk when a repo is
+        removed). Empty fields are dropped to keep config.json compact.
+
+        Returns True when the underlying ``set_config`` call succeeded.
+        """
+        if self._extension is None or not hasattr(self._extension, "set_config"):
+            logger.warning("Cannot persist repos: no extension wired")
+            return False
+
+        # Enforce: at most one default. If multiple are flagged, keep the
+        # first; this matches the get_default() pick-order so the UI is
+        # consistent across the round-trip.
+        seen_default = False
+        normalized: List[Dict[str, Any]] = []
+        for repo in repos:
+            entry = self._serialize_repo(repo)
+            if entry.get("is_default"):
+                if seen_default:
+                    # Demote duplicates by *removing* the key — keeps the
+                    # serialized JSON minimal (omit-when-false is our
+                    # convention) and matches what list_repos sees on
+                    # the way back in.
+                    entry.pop("is_default", None)
+                else:
+                    seen_default = True
+            normalized.append(entry)
+
+        return bool(self._extension.set_config("remote_repos", normalized))
+
+    @staticmethod
+    def _serialize_repo(repo: RemoteRepo) -> Dict[str, Any]:
+        """Turn a RemoteRepo back into a config-shaped dict.
+
+        Drops empty fields and the deprecated ``auth_header`` whenever
+        ``authcfg_id`` is set — the dialog migrates legacy entries this
+        way without forcing a separate UI step.
+        """
+        entry: Dict[str, Any] = {"name": repo.name}
+        for key in ("git_url", "branch", "local_clone",
+                    "target_collection", "authcfg_id"):
+            val = getattr(repo, key, "")
+            if val:
+                entry[key] = val
+        if repo.is_default:
+            entry["is_default"] = True
+        # Keep auth_header only when nothing has migrated yet
+        if repo.auth_header and not repo.authcfg_id:
+            entry["auth_header"] = repo.auth_header
+        # Round-trip unknown forward-compatibility fields
+        if repo.extra:
+            for k, v in repo.extra.items():
+                entry.setdefault(k, v)
+        return entry
+
+    # ------------------------------------------------------------------
+    # Connection diagnostic — used by 'Test connection' in the editor
+    # ------------------------------------------------------------------
+
+    def test_connection(self, repo: RemoteRepo, timeout: int = 15) -> RepoSyncResult:
+        """Probe a remote repo without mutating local state.
+
+        Runs ``git ls-remote <url>`` (no clone, no working tree) so the
+        user gets fast feedback on URL/auth correctness from the editor
+        dialog. For Fallback A repos (no git_url) we just check the
+        local_clone path is writable.
+        """
+        result = RepoSyncResult(
+            repo_name=repo.name,
+            clone_path=repo.expanded_local_clone,
+        )
+        if not repo.has_remote:
+            target = repo.expanded_local_clone
+            if not target:
+                result.error_message = "local_clone is empty"
+                return result
+            try:
+                os.makedirs(target, exist_ok=True)
+            except OSError as exc:
+                result.error_message = f"cannot write local_clone: {exc}"
+                return result
+            result.success = True
+            result.skipped_push_reason = "no_remote"
+            return result
+
+        client = GitClient(
+            cwd=repo.expanded_local_clone or os.getcwd(),
+            auth_header=repo.auth_header or None,
+            authcfg_id=repo.authcfg_id or None,
+            timeout_seconds=timeout,
+        )
+        try:
+            args = ["ls-remote", "--heads", repo.git_url]
+            client._run(args, cwd=os.getcwd())
+        except GitError as exc:
+            result.error_message = str(exc)
+            return result
+        result.success = True
+        return result
+
+    # ------------------------------------------------------------------
     # Publish orchestration
     # ------------------------------------------------------------------
 
@@ -317,6 +443,7 @@ class RemoteRepoManager:
         client = GitClient(
             cwd=repo.expanded_local_clone,
             auth_header=repo.auth_header or None,
+            authcfg_id=repo.authcfg_id or None,
         )
 
         try:
@@ -391,6 +518,7 @@ class RemoteRepoManager:
         client = GitClient(
             cwd=repo.expanded_local_clone,
             auth_header=repo.auth_header or None,
+            authcfg_id=repo.authcfg_id or None,
         )
 
         try:
