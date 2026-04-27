@@ -289,4 +289,3 @@ class ExportDialogManager:
         """
         # These buttons are always enabled - no state update needed here
         # The toggle state controls their associated widgets, not the buttons
-        pass

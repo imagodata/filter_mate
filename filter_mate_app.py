@@ -13,7 +13,7 @@ FilterMate Application Orchestrator
 """
 
 from qgis.PyQt.QtCore import Qt, QTimer, QCoreApplication
-from qgis.PyQt.QtWidgets import QMessageBox, QPushButton
+from qgis.PyQt.QtWidgets import QMessageBox
 import weakref
 try:
     import sip

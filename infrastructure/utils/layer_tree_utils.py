@@ -5,7 +5,7 @@ Used by the GPKG export feature to preserve layer group structure.
 """
 
 import logging
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 

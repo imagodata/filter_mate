@@ -9,7 +9,7 @@ and upload progress.
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from qgis.core import QgsProject, QgsVectorLayer
 from qgis.PyQt.QtCore import QCoreApplication, QThread, Qt, pyqtSignal
@@ -27,7 +27,6 @@ from qgis.PyQt.QtWidgets import (
     QRadioButton,
     QTableWidget,
     QTableWidgetItem,
-    QTextEdit,
     QVBoxLayout,
 )
 

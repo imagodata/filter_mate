@@ -11,7 +11,7 @@ Pure Python (xml.etree), no QGIS objects created.
 
 import logging
 import os
-from typing import Dict, List, Optional
+from typing import Dict
 try:
     from defusedxml.ElementTree import parse as _xml_parse
     from xml.etree import ElementTree as ET

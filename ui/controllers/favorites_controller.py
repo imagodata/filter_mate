@@ -648,7 +648,7 @@ class FavoritesController(BaseController):
                         .get("CUSTOM_SELECTION_EXPRESSION", {}).get("WIDGET")
                     if widget is not None and hasattr(widget, 'setExpression'):
                         widget.setExpression(custom_expr)
-                        logger.info(f"  ✓ Restored custom_selection_expression")
+                        logger.info("  ✓ Restored custom_selection_expression")
                 except (AttributeError, KeyError, RuntimeError) as e:
                     logger.debug(f"Could not restore custom_selection_expression: {e}")
 

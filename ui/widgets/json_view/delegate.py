@@ -1,6 +1,6 @@
 from qgis.PyQt import QtWidgets, QtCore, QtGui
 
-from .datatypes import DataType, TypeRole, DictType, ListType, NoneType, BoolType, IntType, FloatType
+from .datatypes import DataType, TypeRole
 
 
 # Type badge colors (used for the small colored dot next to keys)

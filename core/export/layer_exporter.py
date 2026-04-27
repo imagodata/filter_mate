@@ -31,7 +31,6 @@ try:
         QgsCoordinateReferenceSystem,
         QgsProject,
     )
-    from qgis.PyQt.QtCore import QCoreApplication
     from qgis import processing
     QGIS_AVAILABLE = True
 except ImportError:

@@ -679,7 +679,7 @@ class ConfigController(BaseController):
                                 new_locale = sib_data['value']
 
             if not new_locale:
-                logger.warning(f"_apply_language_change: could not extract locale from item")
+                logger.warning("_apply_language_change: could not extract locale from item")
                 return
 
             logger.info(f"LANGUAGE changed to: {new_locale}")

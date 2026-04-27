@@ -31,13 +31,6 @@ except ImportError:
 
 # Re-use the blueprint from the init script
 from discord_server_init import (
-    CATEGORIES,
-    ROLES,
-    READ_ONLY_CHANNELS,
-    BETA_ONLY_CHANNELS,
-    WELCOME_MESSAGE,
-    RULES_MESSAGE,
-    ROLES_MESSAGE,
     ServerInitializer,
 )
 

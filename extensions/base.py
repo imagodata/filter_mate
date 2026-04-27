@@ -18,7 +18,6 @@ Thread safety: Extensions run on the main thread unless they use QgsTask.
 
 import json
 import logging
-import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
@@ -475,11 +474,9 @@ class BaseExtension(ABC):
 
     def on_project_loaded(self) -> None:
         """Called when a QGIS project is loaded. Override if needed."""
-        pass
 
     def on_project_closed(self) -> None:
         """Called when a QGIS project is closed. Override if needed."""
-        pass
 
     def _set_state(self, state: ExtensionState) -> None:
         """Update extension state."""

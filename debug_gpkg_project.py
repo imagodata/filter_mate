@@ -74,7 +74,7 @@ def inspect_gpkg(gpkg_path):
                     # Find projectCrs
                     m = re.search(r'<projectCrs>.*?</projectCrs>', xml_str, re.DOTALL)
                     if m:
-                        print(f"\n  <projectCrs>:")
+                        print("\n  <projectCrs>:")
                         print(f"    {m.group()[:500]}")
                     else:
                         print("\n  <projectCrs>: NOT FOUND!")
@@ -82,7 +82,7 @@ def inspect_gpkg(gpkg_path):
                     # Find mapcanvas destinationsrs
                     m = re.search(r'<mapcanvas.*?</mapcanvas>', xml_str, re.DOTALL)
                     if m:
-                        print(f"\n  <mapcanvas>:")
+                        print("\n  <mapcanvas>:")
                         print(f"    {m.group()[:500]}")
                     else:
                         print("\n  <mapcanvas>: NOT FOUND!")
@@ -90,7 +90,7 @@ def inspect_gpkg(gpkg_path):
                     # Find first maplayer srs
                     m = re.search(r'<maplayer.*?<srs>(.*?)</srs>', xml_str, re.DOTALL)
                     if m:
-                        print(f"\n  First <maplayer><srs>:")
+                        print("\n  First <maplayer><srs>:")
                         print(f"    {m.group(1)[:500]}")
 
                     # Save full XML for inspection

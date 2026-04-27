@@ -36,7 +36,6 @@ try:
 except ImportError:
     def show_warning(title, message):
         """Fallback show_warning."""
-        pass
 
 logger = logging.getLogger(__name__)
 

@@ -22,7 +22,6 @@ from typing import Any, List, Optional
 
 try:
     from qgis.PyQt.QtCore import Qt
-    from qgis.PyQt.QtGui import QIcon
     from qgis.PyQt.QtWidgets import (
         QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFileDialog,
         QFormLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget,

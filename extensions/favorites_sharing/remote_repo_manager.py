@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from .git_client import GitClient, GitError, GitResult
+from .git_client import GitClient, GitError
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
 

@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 from qgis.PyQt.QtCore import QCoreApplication
 
-from ..base import BaseExtension, ExtensionMetadata, ExtensionState
+from ..base import BaseExtension, ExtensionMetadata
 
 DEFAULT_QFIELDCLOUD_URL = "https://app.qfield.cloud/api/v1/"
 

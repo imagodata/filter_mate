@@ -77,7 +77,6 @@ class FinishedHandler:
 
     def __init__(self):
         """Initialize FinishedHandler."""
-        pass
 
     def handle_finished(
         self,

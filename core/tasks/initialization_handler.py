@@ -60,7 +60,6 @@ class InitializationHandler:
 
     def __init__(self):
         """Initialize InitializationHandler."""
-        pass
 
     def initialize_source_layer(self, task_parameters, project):
         """Initialize source layer and basic layer count.

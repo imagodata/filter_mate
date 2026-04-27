@@ -2283,7 +2283,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def _on_reload_button_clicked(self):
         """Deprecated: reload button removed. No-op for compatibility."""
-        pass
 
     def manage_output_name(self):
         """v4.0 S18: Set export output name."""

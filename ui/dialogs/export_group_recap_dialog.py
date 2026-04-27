@@ -15,7 +15,7 @@ try:
         QDialog, QVBoxLayout, QHBoxLayout, QLabel, QCheckBox,
         QPushButton, QTreeWidget, QTreeWidgetItem, QWidget,
     )
-    from qgis.PyQt.QtCore import Qt, QCoreApplication
+    from qgis.PyQt.QtCore import QCoreApplication
     from qgis.PyQt.QtGui import QFont, QIcon
     QGIS_AVAILABLE = True
 except ImportError:
