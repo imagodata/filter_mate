@@ -192,6 +192,19 @@ class FavoritesSharingExtension(BaseExtension):
                     "Use the 'Manage Repos…' dialog to create entries."
                 ),
             },
+            "git_binary_path": {
+                "value": "",
+                "description": (
+                    "Absolute path to the git executable. Empty = "
+                    "auto-detect via the resolver chain: "
+                    "explicit config → bundled portable Git "
+                    "([profile]/FilterMate/tools/PortableGit) → "
+                    "system PATH. Useful on locked-down Windows "
+                    "where Git for Windows cannot be installed "
+                    "system-wide — the Manage Repos dialog can "
+                    "download a portable copy on demand."
+                ),
+            },
         }
 
     def missing_deps_hint(self) -> Dict[str, str]:
@@ -284,6 +297,14 @@ class FavoritesSharingExtension(BaseExtension):
                 continue
             repos.append(entry)
         return repos
+
+    def get_git_binary_path(self) -> str:
+        """Explicit user-configured git binary, or empty string for auto."""
+        return str(self.get_config("git_binary_path", default="") or "").strip()
+
+    def set_git_binary_path(self, path: str) -> bool:
+        """Persist a user-configured git binary path (or clear with empty)."""
+        return bool(self.set_config("git_binary_path", (path or "").strip()))
 
     def create_ui(self, toolbar: Any, menu_name: str) -> List[Any]:
         """No toolbar button — UI is injected into the Favorites Manager

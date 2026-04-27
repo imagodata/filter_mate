@@ -54,7 +54,43 @@ Quand non vide, FilterMate ignore toutes les collections dont le nom de dossier 
 
 ## B · Publier (devenir publisher)
 
-### B.1 · Pré-requis : token d'authentification
+> **Pré-requis général** : `git` doit être disponible dans QGIS. Le bandeau du dialog **Manage repos** affiche ✔ vert s'il est détecté, ✗ rouge sinon — voir [B.1](#b1--pré-requis--binaire-git-accessible) pour le configurer (Windows sans Git installé : téléchargement Portable Git en 1 clic).
+
+### B.1 · Pré-requis : binaire git accessible
+
+FilterMate exécute `git` en sous-processus pour cloner / pull / commit / push. Trois sources possibles, résolues dans cet ordre :
+
+1. **Chemin explicite** — `EXTENSIONS.favorites_sharing.git_binary_path` dans la config FilterMate
+2. **Portable Git bundlé** — `[QGIS profile]/FilterMate/tools/PortableGit/cmd/git.exe` (Windows) ou `bin/git` (POSIX)
+3. **PATH système** — `git` ou `git.exe` accessible depuis le PATH courant
+
+#### Configurer ou télécharger Portable Git
+
+Ouvrir **★ → Manage Resource Sharing repos…** → **⚙ Configure git…**
+
+Le dialog affiche :
+- **Status** : source actuelle (system / portable / configured / missing) + chemin résolu
+- **Path explicite** : champ texte + bouton **Browse** (`git.exe` sur Windows) + **Apply path** + **🔌 Test** (`git --version`)
+- **Portable Git** *(Windows uniquement)* :
+  - Bouton **⬇ Download Portable Git** (~50 Mo, ~30 s, **sans droits admin**) — récupère la version épinglée depuis github.com/git-for-windows/git/releases, vérifie la SHA-256, extrait silencieusement sous `[profile]/FilterMate/tools/PortableGit/`
+  - Une fois installé : boutons **Reinstall** (force re-download) et **🗑 Remove**
+
+Aucun reboot QGIS nécessaire — le resolver re-évalue à chaque publish.
+
+#### Cas d'usage par plateforme
+
+| Plateforme | Recommandation |
+|---|---|
+| **Linux** | `apt install git` / `dnf install git` côté OS — Portable Git non supporté |
+| **macOS** | `brew install git` ou Xcode CLT — Portable Git non supporté |
+| **Windows + droits admin** | Installer [Git for Windows](https://git-scm.com/download/win) une fois, le PATH système prend le relais |
+| **Windows verrouillé (postes IT)** | Bouton **Download Portable Git** — install dans le profil utilisateur, zéro intervention IT |
+
+#### Mirror interne (entreprise)
+
+Si GitHub est bloqué par le firewall, l'install peut être pointée vers un miroir interne en éditant `EXTENSIONS.favorites_sharing.portable_git_url` (override `DownloadOverride` dans le code — feature actuellement requérant une edit du `portable_git_installer.py`, à promouvoir en config si besoin terrain).
+
+### B.2 · Pré-requis : token d'authentification
 
 Pour pousser sur le dépôt il faut un **Personal Access Token** (GitHub) ou équivalent.
 
@@ -64,7 +100,7 @@ Pour pousser sur le dépôt il faut un **Personal Access Token** (GitHub) ou éq
 | GitLab | Preferences → Access Tokens | `write_repository` |
 | Gitea  | Settings → Applications → Generate token | `write:repository` |
 
-### B.2 · Stocker le token dans QGIS Auth Manager (chiffré)
+### B.3 · Stocker le token dans QGIS Auth Manager (chiffré)
 
 1. QGIS → **Settings → Options → Authentication** → **➕** (Add new authentication configuration)
 2. Remplir :
@@ -77,7 +113,7 @@ Pour pousser sur le dépôt il faut un **Personal Access Token** (GitHub) ou éq
 
 Le token n'apparaît jamais en clair dans la config FilterMate. Le master-password QGIS ne sera demandé qu'au premier `publish`.
 
-### B.3 · Configurer le dépôt dans FilterMate
+### B.4 · Configurer le dépôt dans FilterMate
 
 Menu favoris ★ → **🌐 Manage Resource Sharing repos…** → **➕ Add**
 
@@ -93,7 +129,7 @@ Menu favoris ★ → **🌐 Manage Resource Sharing repos…** → **➕ Add**
 
 Bouton **🔌 Test connection** → doit afficher `✔ OK — remote reachable.` Sinon, vérifier l'URL et le token.
 
-### B.4 · Publier — flux complet (avec choix par favori)
+### B.5 · Publier — flux complet (avec choix par favori)
 
 Menu ★ → **📤 Publish to Resource Sharing…**
 
@@ -109,7 +145,7 @@ FilterMate exécute : `clone si besoin → pull --ff-only → écrire le bundle 
 
 En cas d'erreur (conflit de merge, push refusé, token expiré) : message + bouton **Open clone…** pour résoudre dans tes outils Git habituels. **FilterMate ne fait jamais de force-push ni de rebase auto.**
 
-### B.5 · Quick Publish (1 clic)
+### B.6 · Quick Publish (1 clic)
 
 Menu ★ → **🚀 Quick publish to default repo**
 
@@ -121,7 +157,7 @@ Confirme une fois → publie **TOUS les favoris du projet** vers le dépôt par 
 
 Idéal pour les workflows "j'ai modifié 3 favoris, je sync".
 
-### B.6 · Métadonnées par défaut (gain de temps)
+### B.7 · Métadonnées par défaut (gain de temps)
 
 Pour ne pas re-saisir auteur/licence à chaque publish :
 
@@ -162,6 +198,7 @@ FilterMate **écrit** le bundle dans ce dossier sans tenter de push. Les autres 
 
 | Symptôme | Cause probable | Solution |
 |---|---|---|
+| `git binary not found: [WinError 2] Le fichier spécifié est introuvable` | `git` introuvable dans le PATH (Windows sans Git installé) | Manage repos → **⚙ Configure git…** → **⬇ Download Portable Git** (cf. [B.1](#b1--pré-requis--binaire-git-accessible)) |
 | `git command failed (exit 128) ... could not read Username for…` | Token manquant ou révoqué | Recréer l'authcfg, refaire **Test connection** |
 | `[REDACTED]` dans les logs | Volontaire — scrubbing des secrets | Aucune action, c'est normal |
 | Statut repo `⚪ not cloned` | Premier publish jamais lancé | Lancer un publish (clone auto) ou cliquer Test connection |

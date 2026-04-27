@@ -41,6 +41,7 @@ try:
 except ImportError:  # pragma: no cover - standalone
     HAS_AUTH_SELECT = False
 
+from ..git_resolver import GitSource, resolve_for_extension
 from ..remote_repo_manager import RemoteRepo, RemoteRepoManager
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.UI.RepoManager')
@@ -377,6 +378,21 @@ class RepoManagerDialog(QDialog if HAS_QT else object):
         header.setWordWrap(True)
         root.addWidget(header)
 
+        # Git binary status row — surfaces "git not found" before the user
+        # gets bitten by it deep inside Test connection / Publish.
+        git_row = QHBoxLayout()
+        self._git_status_label = QLabel("")
+        self._git_status_label.setWordWrap(True)
+        git_row.addWidget(self._git_status_label, 1)
+        self._git_config_btn = QPushButton("⚙ " + _tr("Configure git…"))
+        self._git_config_btn.setToolTip(_tr(
+            "Set an explicit git binary path or download Portable Git."
+        ))
+        self._git_config_btn.clicked.connect(self._on_configure_git)
+        git_row.addWidget(self._git_config_btn)
+        root.addLayout(git_row)
+        self._refresh_git_status()
+
         self._table = QTableWidget(0, 7)
         self._table.setHorizontalHeaderLabels([
             _tr("Name"), _tr("URL"), _tr("Branch"),
@@ -532,3 +548,49 @@ class RepoManagerDialog(QDialog if HAS_QT else object):
             )
             return
         self.accept()
+
+    # ─── Git binary status / config ────────────────────────────────────
+
+    def _refresh_git_status(self) -> None:
+        """Refresh the inline status banner above the repos table.
+
+        Shown labels mirror :class:`GitBinaryConfigDialog` to keep the UI
+        coherent. The status is recomputed whenever the user closes the
+        config dialog so a fresh portable install lights up immediately.
+        """
+        ext = getattr(self._manager, "_extension", None)
+        if ext is None:
+            self._git_status_label.setText("")
+            return
+        res = resolve_for_extension(ext)
+        if res.found:
+            label = {
+                GitSource.CONFIGURED: _tr("configured path"),
+                GitSource.PORTABLE: _tr("portable"),
+                GitSource.SYSTEM: _tr("system PATH"),
+            }.get(res.source, res.source.value)
+            self._git_status_label.setText(
+                f"<span style='color:#2a7a2a;'>✔ git ({label})</span> "
+                f"<small style='color:#666;'>· {res.binary_path}</small>"
+            )
+        else:
+            self._git_status_label.setText(
+                "<span style='color:#c33;'>✗ "
+                + _tr("git not found")
+                + "</span> "
+                + _tr(" — Test connection and Publish will fail until "
+                      "this is configured.")
+            )
+
+    def _on_configure_git(self) -> None:
+        """Open the git binary configuration dialog (lazy import)."""
+        ext = getattr(self._manager, "_extension", None)
+        if ext is None:
+            return
+        from .git_binary_dialog import GitBinaryConfigDialog
+        dlg = GitBinaryConfigDialog(extension=ext, parent=self)
+        dlg.exec()
+        # Whether the user closed via Save or Close, the resolution may
+        # have changed (path applied, portable downloaded). Re-render so
+        # the banner reflects the new state without a manager round-trip.
+        self._refresh_git_status()

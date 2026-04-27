@@ -22,6 +22,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from .git_client import GitClient, GitError
+from .git_resolver import GitResolution, resolve_for_extension
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
 
@@ -273,6 +274,37 @@ class RemoteRepoManager:
         self._extension = extension
 
     # ------------------------------------------------------------------
+    # Git binary resolution — feeds every GitClient we spawn so a user
+    # who set EXTENSIONS.favorites_sharing.git_binary_path or installed
+    # Portable Git via the UI is honored without restarting QGIS.
+    # ------------------------------------------------------------------
+
+    def resolve_git_binary(self) -> GitResolution:
+        """Re-resolve the git binary on every call.
+
+        We don't memoize because the user may install Portable Git or
+        flip ``git_binary_path`` mid-session via the dialog and expect
+        the next publish to honor it. Resolution is cheap (a few stat
+        calls + a PATH lookup).
+        """
+        if self._extension is None:
+            return resolve_for_extension(None)  # falls through to MISSING
+        return resolve_for_extension(self._extension)
+
+    def _git_binary_or_default(self) -> str:
+        """Best-effort binary string for ``GitClient.git_binary``.
+
+        Returns the resolved path when found, or the literal ``"git"``
+        when nothing matched — so existing call sites keep their old
+        behavior (subprocess fails with the same FileNotFoundError that
+        ``GitClient._run`` already wraps as ``GitError`` returncode -2).
+        That preserves the legacy error envelope for callers that still
+        match on ``"git binary not found"``.
+        """
+        res = self.resolve_git_binary()
+        return res.binary_path or "git"
+
+    # ------------------------------------------------------------------
     # Config lookup
     # ------------------------------------------------------------------
 
@@ -411,6 +443,7 @@ class RemoteRepoManager:
             cwd=repo.expanded_local_clone or os.getcwd(),
             auth_header=repo.auth_header or None,
             authcfg_id=repo.authcfg_id or None,
+            git_binary=self._git_binary_or_default(),
             timeout_seconds=timeout,
         )
         try:
@@ -457,6 +490,7 @@ class RemoteRepoManager:
             cwd=repo.expanded_local_clone,
             auth_header=repo.auth_header or None,
             authcfg_id=repo.authcfg_id or None,
+            git_binary=self._git_binary_or_default(),
         )
 
         try:
@@ -532,6 +566,7 @@ class RemoteRepoManager:
             cwd=repo.expanded_local_clone,
             auth_header=repo.auth_header or None,
             authcfg_id=repo.authcfg_id or None,
+            git_binary=self._git_binary_or_default(),
         )
 
         try:

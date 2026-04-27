@@ -28,17 +28,23 @@ GIT_AVAILABLE = shutil.which("git") is not None
 
 
 class FakeExtension:
-    def __init__(self, repos):
+    def __init__(self, repos, git_binary_path: str = ""):
         self._repos = list(repos)
+        self._git_binary_path = git_binary_path
         self.last_set_call = None
 
     def get_remote_repos(self):
         return list(self._repos)
 
+    def get_git_binary_path(self) -> str:
+        return self._git_binary_path
+
     def set_config(self, key, value, *, persist=True):
         self.last_set_call = (key, value, persist)
         if key == "remote_repos" and isinstance(value, list):
             self._repos = list(value)
+        elif key == "git_binary_path":
+            self._git_binary_path = value
         return True
 
 
@@ -448,3 +454,49 @@ class TestTestConnection:
         result = mgr.test_connection(mgr.get_default(), timeout=5)
         assert result.success is False
         assert result.error_message  # whatever git says, just non-empty
+
+
+# ---------------------------------------------------------------------------
+# Git binary plumbing — every GitClient must receive the resolved binary
+# ---------------------------------------------------------------------------
+
+
+class TestGitBinaryPlumbing:
+    def test_default_uses_literal_git_when_unresolved(self, monkeypatch):
+        """No configured path, no portable, no PATH → fallback "git" string.
+
+        Preserves the legacy GitError envelope (returncode -2 with
+        "git binary not found") so callers that match on it still work.
+        """
+        # Drop git off PATH for the duration of the test
+        monkeypatch.setenv("PATH", "")
+        mgr = RemoteRepoManager(FakeExtension([], git_binary_path=""))
+        assert mgr._git_binary_or_default() == "git"
+
+    def test_configured_path_propagated(self, tmp_path, monkeypatch):
+        """A user-set git_binary_path must surface from the resolver."""
+        # Make a fake executable file so the resolver accepts it
+        fake = tmp_path / "custom-git"
+        fake.write_text("#!/bin/sh\nexit 0\n")
+        if os.name != "nt":
+            os.chmod(fake, 0o755)
+
+        mgr = RemoteRepoManager(
+            FakeExtension([], git_binary_path=str(fake))
+        )
+        # The resolver should pick this up because configured wins over
+        # portable / PATH whenever the file exists and is runnable.
+        assert mgr._git_binary_or_default() == str(fake)
+
+    def test_resolution_includes_source(self, tmp_path):
+        """resolve_git_binary() exposes provenance for UI display."""
+        fake = tmp_path / "g"
+        fake.write_text("")
+        if os.name != "nt":
+            os.chmod(fake, 0o755)
+        mgr = RemoteRepoManager(
+            FakeExtension([], git_binary_path=str(fake))
+        )
+        res = mgr.resolve_git_binary()
+        assert res.found
+        assert res.binary_path == str(fake)
