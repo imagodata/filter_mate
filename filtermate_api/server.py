@@ -20,7 +20,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import __version__
+from .accessor import FilterMateAccessor, InMemoryAccessor
 from .config import APIConfig
+from .routers import filters as filters_router
+from .routers import layers as layers_router
 
 logger = logging.getLogger("filtermate_api")
 
@@ -64,17 +67,25 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("FilterMate API shutting down.")
 
 
-def create_app(config: APIConfig | None = None) -> FastAPI:
+def create_app(
+    config: APIConfig | None = None,
+    accessor: FilterMateAccessor | None = None,
+) -> FastAPI:
     """Factory that builds and returns a configured FastAPI application.
 
     Args:
         config: Optional APIConfig. If *None*, ``APIConfig.load()`` is used.
+        accessor: Optional bridge to the running FilterMate plugin. If
+            *None*, an empty :class:`InMemoryAccessor` is wired — fine for
+            standalone smoke tests, useless for real filtering.
 
     Returns:
         A ready-to-serve FastAPI instance.
     """
     if config is None:
         config = APIConfig.load()
+    if accessor is None:
+        accessor = InMemoryAccessor()
 
     app = FastAPI(
         title="FilterMate API",
@@ -83,8 +94,9 @@ def create_app(config: APIConfig | None = None) -> FastAPI:
         lifespan=lifespan,
     )
 
-    # Store config on app state so lifespan and routes can access it.
+    # Store config + accessor on app state so lifespan and routes can access them.
     app.state.config = config
+    app.state.accessor = accessor
 
     # --- CORS ---
     app.add_middleware(
@@ -107,6 +119,10 @@ def create_app(config: APIConfig | None = None) -> FastAPI:
             "service": "FilterMate API",
             "version": __version__,
         }
+
+    # --- Domain routers ---
+    app.include_router(layers_router.router)    # GET /layers          — issue #30
+    app.include_router(filters_router.router)   # POST /filters/apply  — issue #29
 
     return app
 
