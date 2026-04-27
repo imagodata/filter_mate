@@ -16,7 +16,15 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, List, Optional
+
+from .favorites_menu_builder import (
+    ACTION_MANAGE_SHARING_REPOS,
+    ACTION_PUBLISH_SHARING,
+    ACTION_QUICK_PUBLISH_SHARING,
+    ACTION_SHARED_PICKER,
+    MenuActionSpec,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +86,52 @@ class FavoritesExtensionBridge:
             return mgr is not None and mgr.get_default() is not None
         except Exception:
             return False
+
+    # ── Menu contribution (F5 minimal) ───────────────────────────────
+
+    def get_menu_actions(self) -> List[MenuActionSpec]:
+        """Return the list of sharing entries to render in the favorites menu.
+
+        Sourced declaratively so the menu builder no longer hardcodes
+        the four sharing entries — it just iterates whatever the bridge
+        returns. A future contribution mechanism (full F5: extension
+        registers its own provider) can replace the body of this method
+        with ``return self._registered_actions`` without touching either
+        side.
+        """
+        ctrl = self._controller
+        tr = ctrl.tr
+
+        actions: List[MenuActionSpec] = [
+            MenuActionSpec(
+                sentinel=ACTION_SHARED_PICKER,
+                label="📡 " + tr("Import from Resource Sharing..."),
+            ),
+        ]
+
+        publish_enabled = ctrl.count > 0
+        actions.append(MenuActionSpec(
+            sentinel=ACTION_PUBLISH_SHARING,
+            label="📤 " + tr("Publish to Resource Sharing..."),
+            enabled=publish_enabled,
+            disabled_label="📤 " + tr("Publish (no favorites saved)"),
+        ))
+
+        # 1-click flow — only surfaced when both pre-conditions are met.
+        # Hiding instead of disabling because there's no useful affordance
+        # to communicate "configure a default repo" from this menu entry.
+        if ctrl.count > 0 and self.has_default_repo():
+            actions.append(MenuActionSpec(
+                sentinel=ACTION_QUICK_PUBLISH_SHARING,
+                label="🚀 " + tr("Quick publish to default repo"),
+            ))
+
+        actions.append(MenuActionSpec(
+            sentinel=ACTION_MANAGE_SHARING_REPOS,
+            label="🌐 " + tr("Manage Resource Sharing repos..."),
+        ))
+
+        return actions
 
     # ── Dialog launchers ─────────────────────────────────────────────
 

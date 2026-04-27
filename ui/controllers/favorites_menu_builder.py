@@ -10,7 +10,8 @@ the same names back.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Callable, List
 
 try:
     from qgis.PyQt.QtWidgets import QMenu, QWidget
@@ -21,6 +22,31 @@ except ImportError:  # pragma: no cover
     QWidget = object  # type: ignore[misc,assignment]
 
 from ..styles.favorites_styles import FAVORITES_MENU_STYLESHEET
+
+
+@dataclass(frozen=True)
+class MenuActionSpec:
+    """Declarative description of one entry in a contributed menu section.
+
+    Used by :class:`FavoritesExtensionBridge` (and, eventually, any
+    future extension that registers favorites menu items via F5) to
+    declare what should appear without learning the QMenu API.
+    """
+
+    sentinel: str
+    """Action data string written via ``QAction.setData`` and dispatched
+    by ``FavoritesController._handle_menu_action``."""
+
+    label: str
+    """Final user-visible label, already translated and icon-prefixed."""
+
+    enabled: bool = True
+    """Disabled entries stay visible but greyed out (the user sees the
+    feature exists but the gating condition isn't met)."""
+
+    disabled_label: str = ""
+    """When ``enabled`` is False, override ``label`` with this text so
+    callers can swap "Publish..." for "Publish (no favorites saved)"."""
 
 if TYPE_CHECKING:
     from .favorites_controller import FavoritesController
@@ -142,32 +168,22 @@ class FavoritesMenuBuilder:
 
     @staticmethod
     def _add_sharing_section(menu: QMenu, controller: "FavoritesController") -> None:
-        """Resource Sharing actions — only when the extension is active.
+        """Resource Sharing actions — declarative, sourced from the bridge.
 
-        Hidden entirely when ``favorites_sharing`` is not registered. The
-        intent is the prelude to F5 (registry pattern): once the extension
-        owns its menu actions, this method becomes a single delegation.
+        F5 minimal: instead of hardcoding the three or four sharing
+        entries, we ask the bridge for a list of :class:`MenuActionSpec`
+        and render each one. A future extension that wants to contribute
+        more entries (or a different set entirely) only needs to extend
+        the bridge's ``get_menu_actions`` — neither the menu nor the
+        action dispatcher needs to know the new entries exist as long
+        as their sentinels are routed in ``_handle_menu_action``.
         """
-        shared_action = menu.addAction("📡 " + controller.tr("Import from Resource Sharing..."))
-        shared_action.setData(ACTION_SHARED_PICKER)
-
-        publish_action = menu.addAction("📤 " + controller.tr("Publish to Resource Sharing..."))
-        publish_action.setData(ACTION_PUBLISH_SHARING)
-        if controller.count == 0:
-            publish_action.setEnabled(False)
-            publish_action.setText("📤 " + controller.tr("Publish (no favorites saved)"))
-
-        # 1-click flow that bypasses the dialog and pushes ALL favorites
-        # to the configured default repo. Hidden when no default is set
-        # (no point in failing silently from the menu).
-        if controller.count > 0 and controller._has_default_remote_repo():
-            quick_action = menu.addAction("🚀 " + controller.tr("Quick publish to default repo"))
-            quick_action.setData(ACTION_QUICK_PUBLISH_SHARING)
-
-        manage_repos_action = menu.addAction(
-            "🌐 " + controller.tr("Manage Resource Sharing repos...")
-        )
-        manage_repos_action.setData(ACTION_MANAGE_SHARING_REPOS)
+        for spec in controller._extension_bridge.get_menu_actions():
+            label = spec.disabled_label if (not spec.enabled and spec.disabled_label) else spec.label
+            action = menu.addAction(label)
+            action.setData(spec.sentinel)
+            if not spec.enabled:
+                action.setEnabled(False)
 
     @staticmethod
     def _add_global_submenu(menu: QMenu, favorites: list, controller: "FavoritesController") -> None:
