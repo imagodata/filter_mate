@@ -322,11 +322,18 @@ class QFieldCloudPushDialog(QDialog):
         self._progress_label.setVisible(True)
         self._export_btn.setEnabled(False)
 
-        # Run push in background thread
+        # Run push in background thread.
+        # parent=None on the QThread (PushWorker default) keeps it alive
+        # via self._worker — parenting to a QDialog would let Qt destroy
+        # a still-running QThread on dialog close.
+        # finished/error → deleteLater() so the QThread cleans up after
+        # itself once run() returns, even if the dialog has been closed.
         self._worker = PushWorker(service, push_kwargs)
         self._worker.progress.connect(self._on_progress)
         self._worker.finished.connect(self._on_push_finished)
         self._worker.error.connect(self._on_push_error)
+        self._worker.finished.connect(self._worker.deleteLater)
+        self._worker.error.connect(self._worker.deleteLater)
         self._worker.start()
 
     def _export_gpkg(self, project_name: str) -> Optional[Path]:
@@ -447,17 +454,40 @@ class QFieldCloudPushDialog(QDialog):
 
         QMessageBox.critical(self, self.tr("Push Failed"), self.tr("Push failed:\n\n{0}").format(error))
 
+    def _stop_worker(self) -> None:
+        """Tear down the push worker safely.
+
+        Drops widget-touching slot connections **before** terminate() so a
+        late progress/finished/error cannot fire on a half-destroyed
+        dialog. terminate() is preserved here (vs. the GitOpsWorker
+        wait-only pattern): a QFC upload interrupt yields at worst a
+        half-uploaded file the server will reject, while git clone
+        interrupt would corrupt the local working tree. The 10s wait is
+        a conservative cap — terminate() itself returns near-immediately.
+        """
+        worker = self._worker
+        if worker is None:
+            return
+        try:
+            worker.progress.disconnect(self._on_progress)
+            worker.finished.disconnect(self._on_push_finished)
+            worker.error.disconnect(self._on_push_error)
+        except (TypeError, RuntimeError):
+            pass
+        if worker.isRunning():
+            worker.terminate()
+            worker.wait(10_000)
+        # The deleteLater connections wired on start() will fire if the
+        # worker emits finished/error before terminate; otherwise the
+        # QThread is reaped when self._worker is dropped + GC'd.
+        self._worker = None
+
     def _on_cancel(self):
         """Cancel push operation if running."""
-        if self._worker and self._worker.isRunning():
-            self._worker.terminate()
-            self._worker.wait(3000)
-            self._worker = None
+        self._stop_worker()
         self.reject()
 
     def closeEvent(self, event):
         """Ensure worker is stopped on close."""
-        if self._worker and self._worker.isRunning():
-            self._worker.terminate()
-            self._worker.wait(3000)
+        self._stop_worker()
         super().closeEvent(event)
