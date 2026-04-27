@@ -546,6 +546,15 @@ def reload_config():
 
     If environment variables are not initialized, calls init_env_vars() first.
 
+    FIX 2026-04-27: previously did ``ENV_VARS["CONFIG_DATA"] = new_config``
+    which orphans every reference held elsewhere (``app.CONFIG_DATA``,
+    ``dockwidget.CONFIG_DATA``, the extension registry's seed mutations).
+    The next persist write would then drop in-memory seeded keys
+    (e.g. ``EXTENSIONS.favorites_sharing``) because they only existed on
+    the orphaned dict. Same anti-pattern that the registry's
+    ``_persist_config`` had to fix on 2026-04-23. We now mutate in place:
+    clear + update the existing dict so live references see the new state.
+
     Returns:
         bool: True if reload successful, False otherwise
     """
@@ -570,7 +579,27 @@ def reload_config():
         with open(config_json_path, 'r', encoding='utf-8') as f:
             new_config = json.load(f)
 
-        ENV_VARS["CONFIG_DATA"] = new_config
+        live = ENV_VARS.get("CONFIG_DATA")
+        if isinstance(live, dict):
+            # Mutate in place: clear + repopulate so every holder of the
+            # live reference (app.CONFIG_DATA, dockwidget.CONFIG_DATA,
+            # registry-seeded EXTENSIONS sub-dicts) sees the new state
+            # without losing pre-existing in-memory mutations that the
+            # registry just seeded but hasn't persisted yet.
+            existing_extensions = live.get("EXTENSIONS")
+            live.clear()
+            live.update(new_config)
+            # Preserve any extension keys the registry just seeded which
+            # haven't reached disk yet — disk wins for keys both sides
+            # have, but in-memory-only keys survive the reload.
+            if isinstance(existing_extensions, dict):
+                merged = dict(live.get("EXTENSIONS", {}) or {})
+                for ext_id, slice_data in existing_extensions.items():
+                    if ext_id not in merged:
+                        merged[ext_id] = slice_data
+                live["EXTENSIONS"] = merged
+        else:
+            ENV_VARS["CONFIG_DATA"] = new_config
 
         QgsMessageLog.logMessage(
             f"Configuration reloaded from: {config_json_path}",
