@@ -621,11 +621,15 @@ class TestRestorePredicates:
         assert layer_props['filtering']['has_geometric_predicates'] is True
         assert set(layer_props['filtering']['geometric_predicates']) == {'Intersect', 'Contain'}
 
-    def test_restores_empty_predicates_unticks_button(self):
+    def test_restore_preserves_live_widgets_when_keys_absent(self):
+        """FIX 2026-04-27: when the favorite carries no predicate info at all,
+        restore must NOT push setCheckedItems([]) / setChecked(False) — that
+        used to wipe the user's manual selection on every legacy-favorite apply.
+        """
         ctrl = FavoritesController.__new__(FavoritesController)
         layer_props = {
             'filtering': {
-                # Pre-existing stale state from before favorite load.
+                # User had Intersect ticked manually before applying the favorite.
                 'has_geometric_predicates': True,
                 'geometric_predicates': ['Intersect'],
             }
@@ -640,11 +644,323 @@ class TestRestorePredicates:
 
         ctrl._restore_filtering_ui_from_favorite(fav)
 
+        combo.setCheckedItems.assert_not_called()
+        btn.setChecked.assert_not_called()
+        # PROJECT_LAYERS predicate state must also stay untouched.
+        assert layer_props['filtering']['has_geometric_predicates'] is True
+        assert layer_props['filtering']['geometric_predicates'] == ['Intersect']
+
+    def test_restore_explicit_empty_list_clears_widgets(self):
+        """When the favorite explicitly stores ``geometric_predicates: []``
+        (not just missing), the widgets ARE cleared — that's a deliberate
+        capture, not a legacy gap."""
+        ctrl = FavoritesController.__new__(FavoritesController)
+        layer_props = {
+            'filtering': {
+                'has_geometric_predicates': True,
+                'geometric_predicates': ['Intersect'],
+            }
+        }
+        dw, combo, btn = _make_dockwidget_for_predicate_restore(layer_props)
+        ctrl._dockwidget = dw
+
+        fav = MagicMock()
+        fav.name = "ExplicitEmpty"
+        fav.spatial_config = {
+            'has_geometric_predicates': False,
+            'geometric_predicates': [],
+        }
+        fav.remote_layers = {}
+
+        ctrl._restore_filtering_ui_from_favorite(fav)
+
         combo.setCheckedItems.assert_called_once_with([])
         btn.setChecked.assert_called_once_with(False)
-        # Stale state must be cleared, not preserved.
         assert layer_props['filtering']['has_geometric_predicates'] is False
         assert layer_props['filtering']['geometric_predicates'] == []
+
+
+class TestBackfillLegacyPredicateDefault:
+    """_backfill_legacy_predicate_default heals favorites saved before the
+    predicate-capture fix: spatial_config has neither geometric_predicates
+    nor has_geometric_predicates, but remote_layers is non-empty."""
+
+    def _make_ctrl(self, manager=None):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._dockwidget = MagicMock()
+        ctrl._favorites_manager = manager
+        return ctrl
+
+    def test_backfills_when_predicate_info_missing_and_remote_layers_present(self):
+        manager = MagicMock()
+        manager.update_favorite.return_value = True
+        ctrl = self._make_ctrl(manager=manager)
+
+        fav = MagicMock()
+        fav.id = "fav-1"
+        fav.name = "testy"
+        fav.spatial_config = {
+            'exploring_groupbox': 'single_selection',
+            'task_feature_ids': [66],
+        }
+        fav.remote_layers = {
+            'postgres::infra.cables': {'expression': '... ST_Intersects ...'}
+        }
+
+        assert ctrl._backfill_legacy_predicate_default(fav) is True
+        assert fav.spatial_config['geometric_predicates'] == ['Intersect']
+        assert fav.spatial_config['has_geometric_predicates'] is True
+        manager.update_favorite.assert_called_once()
+        kwargs = manager.update_favorite.call_args.kwargs
+        assert kwargs['spatial_config']['geometric_predicates'] == ['Intersect']
+        assert kwargs['_touch_updated_at'] is False
+
+    def test_skip_when_predicates_already_present(self):
+        manager = MagicMock()
+        ctrl = self._make_ctrl(manager=manager)
+
+        fav = MagicMock()
+        fav.id = "fav-2"
+        fav.spatial_config = {'geometric_predicates': ['Contain']}
+        fav.remote_layers = {'a': {}}
+
+        assert ctrl._backfill_legacy_predicate_default(fav) is False
+        manager.update_favorite.assert_not_called()
+        # Existing predicate must be untouched.
+        assert fav.spatial_config['geometric_predicates'] == ['Contain']
+
+    def test_skip_when_only_flag_present(self):
+        """Even just the ``has_geometric_predicates`` key is enough signal
+        that the favorite went through the post-fix capture pipeline."""
+        manager = MagicMock()
+        ctrl = self._make_ctrl(manager=manager)
+
+        fav = MagicMock()
+        fav.id = "fav-3"
+        fav.spatial_config = {'has_geometric_predicates': False}
+        fav.remote_layers = {'a': {}}
+
+        assert ctrl._backfill_legacy_predicate_default(fav) is False
+        manager.update_favorite.assert_not_called()
+
+    def test_skip_when_no_remote_layers(self):
+        """Source-only favorites don't need predicates — no remote filtering
+        means the predicate combobox is irrelevant."""
+        manager = MagicMock()
+        ctrl = self._make_ctrl(manager=manager)
+
+        fav = MagicMock()
+        fav.id = "fav-4"
+        fav.spatial_config = {}
+        fav.remote_layers = None
+
+        assert ctrl._backfill_legacy_predicate_default(fav) is False
+        manager.update_favorite.assert_not_called()
+        assert 'geometric_predicates' not in fav.spatial_config
+
+    def test_inmemory_patch_persists_when_manager_unavailable(self):
+        """No favorites_manager → still patch the in-memory model so the
+        current apply call works; a future load will retry the heal."""
+        ctrl = self._make_ctrl(manager=None)
+
+        fav = MagicMock()
+        fav.id = "fav-5"
+        fav.spatial_config = None
+        fav.remote_layers = {'a': {}}
+
+        assert ctrl._backfill_legacy_predicate_default(fav) is True
+        assert fav.spatial_config['geometric_predicates'] == ['Intersect']
+        assert fav.spatial_config['has_geometric_predicates'] is True
+
+
+class TestDirectSubsetApply:
+    """Favorites push saved subsets directly to the resolved layers.
+
+    Validates the 2026-04-27 rewrite: ``_apply_favorite_subsets_directly``
+    must (a) resolve the source layer via signature/UUID/name and apply
+    ``favorite.expression`` on it, (b) resolve each ``remote_layers``
+    entry and apply its ``expression``, (c) tolerate missing layers
+    without aborting, (d) push everything via ``safe_set_subset_string``.
+    """
+
+    @staticmethod
+    def _make_layer(name, signature, layer_id):
+        layer = MagicMock()
+        layer.name.return_value = name
+        layer.id.return_value = layer_id
+        return layer
+
+    @staticmethod
+    def _stub_qgis_project(layers_by_id):
+        """Install a QgsProject.instance() stub returning ``layers_by_id``."""
+        project = MagicMock()
+        project.mapLayers.return_value = layers_by_id
+        project.mapLayer.side_effect = lambda lid: layers_by_id.get(lid)
+        sys.modules["qgis.core"].QgsProject = MagicMock()
+        sys.modules["qgis.core"].QgsProject.instance.return_value = project
+        return project
+
+    def _patch_safe_set_subset_string(self, monkeypatch, sink):
+        """Patch the safe_set_subset_string used by the controller so we can
+        assert each (layer_name, subset) pair the apply pushed.
+
+        The controller resolves the import relative to ``filter_mate.*``
+        in the test shim (``from ...infrastructure.database.sql_utils``
+        fails at the shim depth, so the fallback ``filter_mate.infrastructure.
+        database.sql_utils`` path actually wins). We patch both paths so
+        the test stays robust whichever one resolves first.
+        """
+        import importlib
+
+        def _record(layer, subset):
+            sink.append((layer.name(), subset))
+            return True
+
+        for mod_name in ("infrastructure.database.sql_utils",
+                         "filter_mate.infrastructure.database.sql_utils"):
+            try:
+                mod = importlib.import_module(mod_name)
+            except ImportError:
+                continue
+            monkeypatch.setattr(mod, "safe_set_subset_string", _record)
+        return _record
+
+    def test_pushes_source_and_target_subsets(self, monkeypatch):
+        zone_pop = self._make_layer("Zones POP", "postgres::infra.zone_pop", "zonepop-id")
+        cables = self._make_layer("Cables", "postgres::infra.cables", "cables-id")
+        demand = self._make_layer("Points de demande", "postgres::infra.demand_points", "demand-id")
+
+        layers_by_id = {
+            zone_pop.id(): zone_pop,
+            cables.id(): cables,
+            demand.id(): demand,
+        }
+        self._stub_qgis_project(layers_by_id)
+
+        # _layer_signature_for is staticmethod — patch it onto every layer for the lookup pass
+        monkeypatch.setattr(
+            FavoritesController, "_layer_signature_for",
+            staticmethod(lambda layer: {
+                zone_pop: "postgres::infra.zone_pop",
+                cables: "postgres::infra.cables",
+                demand: "postgres::infra.demand_points",
+            }.get(layer, "unknown::?"))
+        )
+
+        applied = []
+        self._patch_safe_set_subset_string(monkeypatch, applied)
+
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._dockwidget = MagicMock()
+        ctrl._favorites_manager = None
+
+        fav = MagicMock()
+        fav.name = "testy"
+        fav.layer_id = None
+        fav.layer_name = "Zones POP"
+        fav.expression = "\"zone_pop\".\"id\" IN ('943b')"
+        fav.spatial_config = {'source_layer_signature': 'postgres::infra.zone_pop'}
+        fav.remote_layers = {
+            'postgres::infra.cables': {
+                'expression': 'EXISTS (SELECT 1 FROM zone_pop AS __source WHERE ST_Intersects(...))',
+                'layer_signature': 'postgres::infra.cables',
+                'display_name': 'Cables',
+            },
+            'postgres::infra.demand_points': {
+                'expression': 'EXISTS (SELECT 1 FROM zone_pop AS __source WHERE ST_Intersects(demand))',
+                'layer_signature': 'postgres::infra.demand_points',
+                'display_name': 'Points de demande',
+            },
+        }
+
+        assert ctrl._apply_favorite_subsets_directly(fav) is True
+
+        names_to_subsets = dict(applied)
+        # Source layer received the favorite expression
+        assert names_to_subsets["Zones POP"] == "\"zone_pop\".\"id\" IN ('943b')"
+        # Both remote layers received their EXISTS subsets
+        assert "EXISTS" in names_to_subsets["Cables"]
+        assert "EXISTS" in names_to_subsets["Points de demande"]
+
+    def test_unresolvable_target_does_not_abort(self, monkeypatch):
+        """A target layer that's no longer in the project is logged-skipped;
+        other applies still go through and the call still reports success."""
+        zone_pop = self._make_layer("Zones POP", "postgres::infra.zone_pop", "zonepop-id")
+        cables = self._make_layer("Cables", "postgres::infra.cables", "cables-id")
+        layers_by_id = {zone_pop.id(): zone_pop, cables.id(): cables}
+        self._stub_qgis_project(layers_by_id)
+
+        monkeypatch.setattr(
+            FavoritesController, "_layer_signature_for",
+            staticmethod(lambda layer: {
+                zone_pop: "postgres::infra.zone_pop",
+                cables: "postgres::infra.cables",
+            }.get(layer, "unknown::?"))
+        )
+
+        applied = []
+        self._patch_safe_set_subset_string(monkeypatch, applied)
+
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._dockwidget = MagicMock()
+        ctrl._favorites_manager = None
+
+        fav = MagicMock()
+        fav.name = "partial"
+        fav.layer_id = "zonepop-id"
+        fav.layer_name = "Zones POP"
+        fav.expression = "\"id\" = 1"
+        fav.spatial_config = {'source_layer_signature': 'postgres::infra.zone_pop'}
+        fav.remote_layers = {
+            'postgres::infra.cables': {
+                'expression': 'EXISTS (SELECT 1 FROM ... AS __source ...)',
+                'layer_signature': 'postgres::infra.cables',
+            },
+            'postgres::infra.removed_table': {
+                'expression': 'EXISTS (...)',
+                'layer_signature': 'postgres::infra.removed_table',
+                'display_name': 'Removed',
+            },
+        }
+
+        assert ctrl._apply_favorite_subsets_directly(fav) is True
+        names_to_subsets = dict(applied)
+        # Resolved layers got their subsets…
+        assert names_to_subsets["Zones POP"] == "\"id\" = 1"
+        assert "EXISTS" in names_to_subsets["Cables"]
+        # …unresolvable entry never reached the sink.
+        assert "Removed" not in names_to_subsets
+
+    def test_returns_false_when_nothing_resolves(self, monkeypatch):
+        """If neither source nor any target can be resolved, the apply
+        is a no-op and reports failure (so the caller can warn)."""
+        self._stub_qgis_project({})
+        monkeypatch.setattr(
+            FavoritesController, "_layer_signature_for",
+            staticmethod(lambda layer: "ghost::?")
+        )
+        applied = []
+        self._patch_safe_set_subset_string(monkeypatch, applied)
+
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._dockwidget = MagicMock()
+        ctrl._favorites_manager = None
+
+        # Stub _show_warning so the no-resolve path doesn't hit feedback module
+        ctrl._show_warning = MagicMock()
+        ctrl.tr = lambda s: s
+
+        fav = MagicMock()
+        fav.name = "ghost"
+        fav.layer_id = "missing-id"
+        fav.layer_name = "Missing"
+        fav.expression = ""
+        fav.spatial_config = {}
+        fav.remote_layers = {}
+
+        assert ctrl._apply_favorite_subsets_directly(fav) is False
+        assert applied == []
+        ctrl._show_warning.assert_called_once()
 
 
 class TestCaptureRestoreRoundTrip:

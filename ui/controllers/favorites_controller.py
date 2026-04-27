@@ -273,6 +273,14 @@ class FavoritesController(BaseController):
             logger.warning(f"Favorite not found: {favorite_id}")
             return False
 
+        # Legacy favorites (saved before the predicate-capture fix) carry
+        # remote_layers but no geometric_predicates in spatial_config. The
+        # restore would otherwise wipe the live predicate selection with
+        # an empty list, leaving the filter task with no predicate. Heal
+        # them in place with an "Intersect" default and surface a warning
+        # so the user knows the recovery happened.
+        self._backfill_legacy_predicate_default(favorite)
+
         # Apply the favorite expression
         success = self._apply_favorite_expression(favorite)
         if success:
@@ -1169,96 +1177,234 @@ class FavoritesController(BaseController):
         return config if config else None
 
     def _apply_favorite_expression(self, favorite: 'FilterFavorite') -> bool:
-        """Apply a favorite's expression to the filtering widgets and execute the filter.
+        """Apply a favorite by pushing its saved subset strings directly.
 
-        FIX 2026-04-21: Restore the full filtering UI state (layers_to_filter
-        checkboxes, predicate button, buffer, expression) BEFORE launching the
-        task. Previously only spatial_config was cached on the dockwidget while
-        the checkboxes stayed unchecked, so the filter task fired with empty
-        predicates / zero target layers and ended with "Task failed: Task failed".
+        REWRITE 2026-04-27: favorites are subset snapshots, not state
+        recordings. The previous implementation rebuilt the spatial filter
+        from ``spatial_config`` (predicates, task_feature_ids, exploring
+        groupbox …) by re-firing ``launchTaskEvent``. That dance failed
+        silently when the favorite's source layer differed from the
+        current layer, because the rebuild ran against the wrong source
+        feature set even though the task reported success.
 
-        FIX 2026-04-22: wrap the whole widget-mutation sequence in a single
-        SignalBlocker pass. setExpression / setChecked fire per-widget slots
-        (some connected to launchTaskEvent), producing a phantom filter task
-        on the intermediate state before the final explicit launchTaskEvent
-        below. The double emission yielded spurious "Task failed" banners.
+        We now treat ``favorite.expression`` as the source-layer subset
+        and ``favorite.remote_layers[*].expression`` as the target-layer
+        subsets, and push them through ``safe_set_subset_string()``
+        directly. The cleaner only strips malformed ``__source`` patterns
+        — well-formed ``EXISTS(... AS __source ...)`` payloads (the only
+        shape favorites store) pass through unchanged.
         """
         try:
-            dw = self.dockwidget
-            widgets_to_block = self._collect_filtering_widgets_for_favorite(dw)
-
-            from ...infrastructure.signal_utils import SignalBlocker
-
-            # FIX 2026-04-23: legacy favorites can carry a display expression
-            # (e.g. COALESCE("field", '<NULL>')) in .expression — pushing that
-            # into the filtering widget ends up as PostgreSQL
-            # "WHERE COALESCE(...)" → "argument of WHERE must be type boolean"
-            # on the next filter task. Blank the payload before it propagates
-            # so the task falls back to feature-id filtering from spatial_config.
-            fav_expression = favorite.expression or ''
-            if fav_expression:
-                try:
-                    from ...infrastructure.utils.validation_utils import should_skip_expression_for_filtering
-                    should_skip, reason = should_skip_expression_for_filtering(fav_expression)
-                    if should_skip:
-                        logger.warning(
-                            f"Favorite '{favorite.name}' carries a non-filter expression "
-                            f"({reason}): '{fav_expression[:80]}...' — ignoring the expression; "
-                            "filter will rely on spatial_config / feature ids."
-                        )
-                        fav_expression = ''
-                except ImportError:
-                    logger.debug("validation_utils unavailable — skipping favorite expression check")
-
-            with SignalBlocker(*widgets_to_block):
-                # Set expression in widget
-                expression_widget = getattr(dw, 'mQgsFieldExpressionWidget_filtering_active_expression', None)
-                if expression_widget is not None:
-                    if hasattr(expression_widget, 'setExpression'):
-                        expression_widget.setExpression(fav_expression)
-                    elif hasattr(expression_widget, 'setCurrentText'):
-                        expression_widget.setCurrentText(fav_expression)
-
-                # CRITICAL FIX 2026-01-18: Do NOT apply remote layer filters directly via setSubsetString!
-                # The filters contain __source alias which _clean_corrupted_subsets() will erase.
-                # Instead, we restore the spatial context (task_features, predicates, etc.) from
-                # favorite.spatial_config so the filter task can REBUILD the remote filters properly.
-                if favorite.remote_layers:
-                    logger.info(f"Favorite has {len(favorite.remote_layers)} remote layers")
-                    logger.info("  → Remote layers will be re-filtered by main filter task")
-                    logger.info("  → NOT applying filters directly to avoid __source cleanup")
-
-                # Restore spatial configuration (task_features, predicates, buffer, etc.)
-                if favorite.spatial_config:
-                    logger.info(f"Restoring spatial_config from favorite '{favorite.name}'...")
-                    self._restore_spatial_config(favorite)
-                else:
-                    logger.warning(f"Favorite '{favorite.name}' has no spatial_config - remote layers may not filter correctly")
-
-                # FIX 2026-04-21: materialize the favorite into the dockwidget UI
-                # so launchTaskEvent reads a complete filtering config.
-                self._restore_filtering_ui_from_favorite(favorite)
-
-                # SAFETY NET 2026-04-21: if the favorite would fire in
-                # single_selection mode without a resolvable source feature
-                # (e.g. legacy favorite with no captured task_feature_ids, or
-                # task_feature_ids that no longer resolve after reopen),
-                # downgrade to custom_selection so the task runs against the
-                # full source layer instead of aborting with
-                # "single_selection mode requires a selected feature".
-                self._ensure_applicable_groupbox_for_favorite(favorite)
-
-            # Trigger the filter action to apply the main expression (signals
-            # are re-enabled at this point so the task actually fires).
-            if hasattr(dw, 'launchTaskEvent'):
-                dw.launchTaskEvent(False, 'filter')
-                logger.info(f"Filter triggered for favorite: {favorite.name}")
-
-            return True
-
+            return self._apply_favorite_subsets_directly(favorite)
         except Exception as e:
             logger.error(f"Failed to apply favorite: {e}")
+            import traceback
+            logger.debug(traceback.format_exc())
             return False
+
+
+    def _apply_favorite_subsets_directly(self, favorite: 'FilterFavorite') -> bool:
+        """Push the favorite's saved subset strings to source + target layers.
+
+        Resolution order for each layer (source uses favorite.layer_id /
+        spatial_config.source_layer_signature / favorite.layer_name; targets
+        use the same chain plus the per-entry ``layer_signature`` and
+        ``layer_id`` fields). Layers that can't be resolved produce a
+        warning but don't abort the rest of the apply.
+
+        Args:
+            favorite: Favorite carrying ``expression`` (source subset) and
+                ``remote_layers`` (target → subset map).
+
+        Returns:
+            True when at least one layer received its subset.
+        """
+        from qgis.core import QgsProject
+
+        try:
+            from ...infrastructure.database.sql_utils import safe_set_subset_string
+        except ImportError:
+            from filter_mate.infrastructure.database.sql_utils import safe_set_subset_string
+
+        project = QgsProject.instance()
+        # Pre-build name + signature lookups so we resolve each entry in O(1).
+        name_to_layer: dict = {}
+        signature_to_layer: dict = {}
+        for lid, lobj in project.mapLayers().items():
+            try:
+                name_to_layer[lobj.name()] = lobj
+            except (RuntimeError, AttributeError):
+                pass
+            try:
+                signature_to_layer[self._layer_signature_for(lobj)] = lobj
+            except Exception:
+                pass
+
+        applied: List[str] = []
+        skipped: List[str] = []
+
+        spatial_config = favorite.spatial_config or {}
+
+        # --- Source layer subset ----------------------------------------
+        source_layer = self._resolve_favorite_source_layer(
+            favorite, spatial_config, project, name_to_layer, signature_to_layer
+        )
+        source_subset = favorite.expression or ''
+        if source_layer is not None:
+            try:
+                if safe_set_subset_string(source_layer, source_subset):
+                    applied.append(source_layer.name())
+                    logger.info(
+                        f"  ✓ Source layer '{source_layer.name()}' subset applied "
+                        f"({len(source_subset)} chars)"
+                    )
+                else:
+                    skipped.append(getattr(source_layer, 'name', lambda: '?')())
+                    logger.warning(
+                        f"  ⚠️ safe_set_subset_string rejected source subset on '{source_layer.name()}'"
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to apply source subset: {e}")
+                skipped.append(getattr(source_layer, 'name', lambda: '?')())
+        else:
+            logger.warning(
+                f"Favorite '{favorite.name}': source layer could not be resolved "
+                f"(layer_id={favorite.layer_id}, layer_name={favorite.layer_name}, "
+                f"signature={spatial_config.get('source_layer_signature')})"
+            )
+            skipped.append(favorite.layer_name or '<unknown source>')
+
+        # --- Target layer subsets ---------------------------------------
+        for key, payload in (favorite.remote_layers or {}).items():
+            target_layer = self._resolve_remote_layer_entry(
+                key, payload, project, name_to_layer, signature_to_layer
+            )
+            target_subset = ''
+            if isinstance(payload, dict):
+                target_subset = payload.get('expression', '') or ''
+
+            if target_layer is None:
+                logger.warning(
+                    f"  ⚠️ Could not resolve target layer for entry '{key}' — skipped"
+                )
+                skipped.append(str(key))
+                continue
+
+            try:
+                if safe_set_subset_string(target_layer, target_subset):
+                    applied.append(target_layer.name())
+                    logger.info(
+                        f"  ✓ Target layer '{target_layer.name()}' subset applied "
+                        f"({len(target_subset)} chars)"
+                    )
+                else:
+                    skipped.append(target_layer.name())
+                    logger.warning(
+                        f"  ⚠️ safe_set_subset_string rejected target subset on '{target_layer.name()}'"
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to apply subset on '{target_layer.name()}': {e}")
+                skipped.append(target_layer.name())
+
+        if not applied:
+            self._show_warning(self.tr(
+                "Favorite '{0}' could not be applied: no layer matched the saved source / targets."
+            ).format(favorite.name))
+            return False
+
+        if skipped:
+            logger.info(
+                f"Favorite '{favorite.name}': applied={applied}, skipped={skipped}"
+            )
+
+        # Refresh the canvas so users see the new filter immediately
+        # without waiting for the next idle event.
+        try:
+            from qgis.utils import iface
+            if iface and hasattr(iface, 'mapCanvas'):
+                canvas = iface.mapCanvas()
+                if canvas is not None and hasattr(canvas, 'refreshAllLayers'):
+                    canvas.refreshAllLayers()
+        except Exception:
+            pass
+
+        logger.info(
+            f"Favorite '{favorite.name}' applied directly: "
+            f"{len(applied)} layer(s) updated, {len(skipped)} skipped"
+        )
+        return True
+
+    def _resolve_favorite_source_layer(
+        self,
+        favorite: 'FilterFavorite',
+        spatial_config: dict,
+        project,
+        name_to_layer: dict,
+        signature_to_layer: dict,
+    ):
+        """Find the project layer the favorite was captured against."""
+        # Stronger first: project-portable signature
+        sig = spatial_config.get('source_layer_signature') if isinstance(spatial_config, dict) else None
+        if sig and sig in signature_to_layer:
+            return signature_to_layer[sig]
+
+        # UUID match (same project as save-time)
+        layer_id = getattr(favorite, 'layer_id', None)
+        if layer_id:
+            try:
+                layer = project.mapLayer(layer_id)
+                if layer is not None:
+                    return layer
+            except (RuntimeError, AttributeError):
+                pass
+
+        # Last resort: name match
+        layer_name = getattr(favorite, 'layer_name', None)
+        if layer_name and layer_name in name_to_layer:
+            return name_to_layer[layer_name]
+
+        return None
+
+    def _resolve_remote_layer_entry(
+        self,
+        key,
+        payload,
+        project,
+        name_to_layer: dict,
+        signature_to_layer: dict,
+    ):
+        """Find the QgsMapLayer matching a ``favorite.remote_layers[key]`` entry."""
+        # Signature stored in the payload (v2+).
+        if isinstance(payload, dict):
+            payload_sig = payload.get('layer_signature')
+            if payload_sig and payload_sig in signature_to_layer:
+                return signature_to_layer[payload_sig]
+
+        # FIX 2026-04-23 (CRIT-3): when the dict key is itself a signature.
+        if isinstance(key, str) and '::' in key and key in signature_to_layer:
+            return signature_to_layer[key]
+
+        # Legacy: payload carries layer_id (UUID)
+        if isinstance(payload, dict):
+            legacy_id = payload.get('layer_id')
+            if legacy_id:
+                try:
+                    layer = project.mapLayer(legacy_id)
+                    if layer is not None:
+                        return layer
+                except (RuntimeError, AttributeError):
+                    pass
+
+        # Last-chance: display name (or the dict key when it's a plain name).
+        candidate_name = None
+        if isinstance(payload, dict):
+            candidate_name = payload.get('display_name')
+        if not candidate_name and isinstance(key, str) and '::' not in key:
+            candidate_name = key
+        if candidate_name and candidate_name in name_to_layer:
+            return name_to_layer[candidate_name]
+
+        return None
 
     @staticmethod
     def _collect_filtering_widgets_for_favorite(dw: Any) -> List[Any]:
@@ -1432,20 +1578,32 @@ class FavoritesController(BaseController):
         predicate_list = spatial_config.get('geometric_predicates')
         if isinstance(predicate_list, (list, tuple)):
             predicate_list = list(predicate_list)
+            predicate_explicit = True
         else:
             legacy_predicates = spatial_config.get('predicates') or {}
-            if isinstance(legacy_predicates, dict):
+            if isinstance(legacy_predicates, dict) and legacy_predicates:
                 predicate_list = list(legacy_predicates.keys())
-            elif isinstance(legacy_predicates, (list, tuple)):
+                predicate_explicit = True
+            elif isinstance(legacy_predicates, (list, tuple)) and legacy_predicates:
                 predicate_list = list(legacy_predicates)
+                predicate_explicit = True
             else:
                 predicate_list = []
+                predicate_explicit = False
 
         has_predicates_flag = spatial_config.get('has_geometric_predicates')
         if has_predicates_flag is None:
             has_predicates_flag = bool(predicate_list)
         else:
             has_predicates_flag = bool(has_predicates_flag)
+            predicate_explicit = True
+
+        # FIX 2026-04-27: when the favorite carries no predicate info at
+        # all, leave the live combobox / toggle untouched instead of
+        # silently clearing them. ``apply_favorite`` already backfills
+        # legacy favorites with an "Intersect" default, so reaching this
+        # branch means a portability path bypassed the heal — preserve
+        # the user's manual selection rather than regressing.
 
         buffer_value = spatial_config.get('buffer_value')
         target_layer_keys = list((favorite.remote_layers or {}).keys())
@@ -1532,19 +1690,25 @@ class FavoritesController(BaseController):
         # level — typically out-of-sync with the favorite. We now drive both
         # widgets from the favorite's ``geometric_predicates`` list so
         # ``sync_ui_to_project_layers`` / task_builder see a consistent state.
-        try:
-            combo_widget = getattr(dw, 'comboBox_filtering_geometric_predicates', None)
-            if combo_widget is not None and hasattr(combo_widget, 'setCheckedItems'):
-                combo_widget.setCheckedItems(predicate_list)
-        except Exception as e:
-            logger.debug(f"Could not set checkedItems on geometric_predicates combobox: {e}")
+        if predicate_explicit:
+            try:
+                combo_widget = getattr(dw, 'comboBox_filtering_geometric_predicates', None)
+                if combo_widget is not None and hasattr(combo_widget, 'setCheckedItems'):
+                    combo_widget.setCheckedItems(predicate_list)
+            except Exception as e:
+                logger.debug(f"Could not set checkedItems on geometric_predicates combobox: {e}")
 
-        try:
-            has_pred_btn = getattr(dw, 'pushButton_checkable_filtering_geometric_predicates', None)
-            if has_pred_btn is not None:
-                has_pred_btn.setChecked(bool(has_predicates_flag))
-        except Exception as e:
-            logger.debug(f"Could not toggle HAS_GEOMETRIC_PREDICATES: {e}")
+            try:
+                has_pred_btn = getattr(dw, 'pushButton_checkable_filtering_geometric_predicates', None)
+                if has_pred_btn is not None:
+                    has_pred_btn.setChecked(bool(has_predicates_flag))
+            except Exception as e:
+                logger.debug(f"Could not toggle HAS_GEOMETRIC_PREDICATES: {e}")
+        else:
+            logger.info(
+                "  ↪ Favorite carries no predicate info — leaving live "
+                "geometric_predicates widgets untouched."
+            )
 
         # --- 5. Tick the HAS_BUFFER_VALUE button ---
         # FIX 2026-04-21: the spinbox value is set in _restore_spatial_config,
@@ -1571,8 +1735,9 @@ class FavoritesController(BaseController):
             filtering_props = layer_props.setdefault("filtering", {})
             filtering_props["has_layers_to_filter"] = bool(resolved_layer_ids)
             filtering_props["layers_to_filter"] = resolved_layer_ids
-            filtering_props["has_geometric_predicates"] = bool(has_predicates_flag)
-            filtering_props["geometric_predicates"] = list(predicate_list)
+            if predicate_explicit:
+                filtering_props["has_geometric_predicates"] = bool(has_predicates_flag)
+                filtering_props["geometric_predicates"] = list(predicate_list)
             if buffer_value is not None:
                 filtering_props["has_buffer_value"] = float(buffer_value) != 0.0
                 filtering_props["buffer_value"] = float(buffer_value)
@@ -1632,6 +1797,56 @@ class FavoritesController(BaseController):
             return f"{provider or 'unknown'}::{layer.name()}"
         except (RuntimeError, AttributeError):
             return f"{provider or 'unknown'}::?"
+
+    def _backfill_legacy_predicate_default(self, favorite: 'FilterFavorite') -> bool:
+        """Heal pre-fix favorites that lack geometric_predicates in spatial_config.
+
+        Favorites saved before commit 10d35be1 captured nothing for the
+        predicate combobox even when the user had ``Intersect`` ticked.
+        On apply, the post-fix restore would push ``setCheckedItems([])``
+        and clear the live selection. We default such favorites to
+        ``["Intersect"]`` (the most common case, and the predicate the
+        already-baked ``remote_layers`` SQL was generated against) and
+        persist the patched spatial_config so the heal is one-shot.
+
+        Args:
+            favorite: Favorite to patch in place.
+
+        Returns:
+            True when the favorite was patched and persisted.
+        """
+        if not favorite or not getattr(favorite, 'remote_layers', None):
+            return False
+
+        spatial_config = dict(favorite.spatial_config or {})
+        if 'geometric_predicates' in spatial_config or 'has_geometric_predicates' in spatial_config:
+            return False
+
+        spatial_config['geometric_predicates'] = ['Intersect']
+        spatial_config['has_geometric_predicates'] = True
+
+        favorite.spatial_config = spatial_config
+
+        persisted = False
+        try:
+            if self._favorites_manager and hasattr(self._favorites_manager, 'update_favorite'):
+                persisted = bool(self._favorites_manager.update_favorite(
+                    favorite.id,
+                    spatial_config=spatial_config,
+                    _touch_updated_at=False,
+                ))
+        except Exception as exc:
+            logger.debug(f"Could not persist legacy-predicate backfill: {exc}")
+
+        logger.info(
+            f"Favorite '{favorite.name}': backfilled missing geometric_predicates "
+            f"with default ['Intersect'] (persisted={persisted})"
+        )
+        self._show_warning(self.tr(
+            "Favorite '{0}' was missing predicate info — defaulting to 'Intersect'. "
+            "Re-save it after adjusting if you need a different predicate."
+        ).format(favorite.name))
+        return True
 
     def _show_success(self, message: str) -> None:
         """Show success message."""
