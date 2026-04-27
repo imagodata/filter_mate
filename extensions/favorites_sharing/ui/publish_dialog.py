@@ -43,9 +43,12 @@ class _SyncFailure:
     """Lightweight stand-in for ``RepoSyncResult`` when the worker raises.
 
     Carries the minimum fields ``_on_publish_finished`` reads so the
-    error path stays a single code branch.
+    error path stays a single code branch. Mirrors every public field on
+    ``RepoSyncResult`` (even those currently unused) so future readers
+    don't AttributeError when consuming a failure stub.
     """
     success = False
+    repo_name = ""
     bundle_written_at = ""
     commit_sha = ""
     pushed = False
@@ -657,11 +660,15 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         progress.setAutoClose(False)
         progress.setAutoReset(False)
 
-        # Hold a strong reference on self so the QThread survives even if
-        # the user cancels the dialog (the worker keeps running because
-        # killing a subprocess mid-clone would corrupt the working tree).
-        self._publish_worker = GitOpsWorker(publish_op, parent=self)
+        # Hold a strong reference on self so the QThread is not GC'd
+        # before it runs. We deliberately pass parent=None: with parent=self
+        # Qt's child-deletion would tear the QThread down when the dialog
+        # closes — destroying a still-running QThread is undefined behavior
+        # and would also corrupt the in-flight git working tree.
+        self._publish_worker = GitOpsWorker(publish_op, parent=None)
         worker = self._publish_worker
+        worker.finished.connect(worker.deleteLater)
+        worker.error.connect(worker.deleteLater)
 
         # When the user clicks Cancel: hide the dialog and detach result
         # handlers. The worker keeps running — subprocess cancellation is
@@ -746,6 +753,20 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             logger.debug("Could not open %s: %s", path, exc)
 
     def _on_publish(self) -> None:
+        # Refuse to start a second publish while one is still running in the
+        # background. Without this gate, the user could cancel the progress
+        # dialog (worker keeps running by design) and re-click Publish,
+        # spawning two concurrent git pipelines on the same clone.
+        if self._publish_worker is not None and self._publish_worker.isRunning():
+            QMessageBox.information(
+                self, self.tr("Publish in progress"),
+                self.tr(
+                    "A publish is still running in the background. "
+                    "Wait for it to finish before starting another one."
+                ),
+            )
+            return
+
         fav_ids = self._selected_favorite_ids()
         if not fav_ids:
             QMessageBox.warning(
@@ -799,6 +820,30 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             self, self.tr("Publish succeeded"), message,
         )
         self.accept()
+
+    # ─── Lifecycle ────────────────────────────────────────────────────
+
+    def closeEvent(self, event):  # type: ignore[override]
+        """Block close until the publish worker has finished.
+
+        Killing a git subprocess mid-clone/push corrupts the working tree,
+        so we wait for the worker rather than terminate(). The wait has a
+        cap (the worker's own subprocess timeouts already bound this) so
+        QGIS never hangs forever on a stuck network call.
+        """
+        worker = self._publish_worker
+        if worker is not None and worker.isRunning():
+            # Defensively drop slot connections so a queued finished/error
+            # cannot fire on a half-destroyed dialog after wait() returns.
+            try:
+                worker.finished.disconnect()
+                worker.error.disconnect()
+            except (TypeError, RuntimeError):
+                pass
+            # Cap the wait at slightly more than the longest GitClient
+            # timeout chain (clone+pull+commit+push ≈ 2 min @ 30s default).
+            worker.wait(150_000)
+        super().closeEvent(event)
 
     # ─── Translation helper ───────────────────────────────────────────
 

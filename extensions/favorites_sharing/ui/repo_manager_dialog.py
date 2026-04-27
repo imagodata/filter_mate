@@ -267,8 +267,12 @@ class RepoEditDialog(QDialog if HAS_QT else object):
             return self._manager.test_connection(repo)
 
         # Keep a strong reference on self so the QThread is not
-        # garbage-collected before it runs.
-        self._test_worker = GitOpsWorker(_probe, parent=self)
+        # garbage-collected before it runs. parent=None is deliberate:
+        # parenting to the dialog would let Qt destroy a still-running
+        # QThread on dialog close, which is undefined behavior.
+        self._test_worker = GitOpsWorker(_probe, parent=None)
+        self._test_worker.finished.connect(self._test_worker.deleteLater)
+        self._test_worker.error.connect(self._test_worker.deleteLater)
 
         def _on_finished(result):
             self._test_btn.setEnabled(True)
@@ -310,6 +314,24 @@ class RepoEditDialog(QDialog if HAS_QT else object):
             )
             return
         self.accept()
+
+    def closeEvent(self, event):  # type: ignore[override]
+        """Wait for an in-flight Test connection worker before tearing down.
+
+        ``ls-remote`` can hang up to ``timeout_seconds`` (15s) on an
+        unreachable remote — terminating the QThread would orphan the git
+        subprocess, so we wait. Slot connections are dropped first so a
+        late finished/error cannot fire on a half-destroyed dialog.
+        """
+        worker = self._test_worker
+        if worker is not None and worker.isRunning():
+            try:
+                worker.finished.disconnect()
+                worker.error.disconnect()
+            except (TypeError, RuntimeError):
+                pass
+            worker.wait(20_000)
+        super().closeEvent(event)
 
 
 class RepoManagerDialog(QDialog if HAS_QT else object):
