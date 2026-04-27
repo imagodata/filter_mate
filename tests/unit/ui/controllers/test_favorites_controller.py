@@ -94,8 +94,18 @@ def _ensure_favorites_mocks():
     sys.modules["filter_mate.ui.controllers.base_controller"] = base_mod
 
     # Also install it under the path favorites_controller will actually import
-    # from (relative `.base_controller`). We create a shim package that matches.
-    shim_pkg_name = "_fm_test_ctrl_pkg"
+    # from. The controller uses `from .base_controller import BaseController`
+    # AND `from ..styles.favorites_styles import ...`, so the shim needs a
+    # parent ``ui`` package and a ``styles`` sibling for the second import to
+    # resolve.
+    shim_root = "_fm_test_ui_shim"
+    if shim_root not in sys.modules:
+        shim_root_mod = types.ModuleType(shim_root)
+        shim_root_mod.__path__ = [str(_project_root / "ui")]
+        shim_root_mod.__package__ = shim_root
+        sys.modules[shim_root] = shim_root_mod
+
+    shim_pkg_name = f"{shim_root}.controllers"
     if shim_pkg_name not in sys.modules:
         shim_pkg = types.ModuleType(shim_pkg_name)
         shim_pkg.__path__ = [str(_project_root / "ui" / "controllers")]
@@ -103,15 +113,32 @@ def _ensure_favorites_mocks():
         sys.modules[shim_pkg_name] = shim_pkg
         sys.modules[f"{shim_pkg_name}.base_controller"] = base_mod
 
+    styles_pkg_name = f"{shim_root}.styles"
+    if styles_pkg_name not in sys.modules:
+        styles_pkg = types.ModuleType(styles_pkg_name)
+        styles_pkg.__path__ = [str(_project_root / "ui" / "styles")]
+        styles_pkg.__package__ = styles_pkg_name
+        sys.modules[styles_pkg_name] = styles_pkg
+
+        styles_full = f"{styles_pkg_name}.favorites_styles"
+        styles_spec = importlib.util.spec_from_file_location(
+            styles_full,
+            str(_project_root / "ui" / "styles" / "favorites_styles.py"),
+        )
+        styles_mod = importlib.util.module_from_spec(styles_spec)
+        sys.modules[styles_full] = styles_mod
+        styles_spec.loader.exec_module(styles_mod)
+
 
 _ensure_favorites_mocks()
 
 
 def _load_favorites_controller():
     """Load favorites_controller.py as a module inside the shim package so
-    its `from .base_controller import BaseController` resolves to the fake.
+    its `from .base_controller import BaseController` resolves to the fake
+    and `from ..styles.favorites_styles import ...` reaches the real file.
     """
-    mod_name = "_fm_test_ctrl_pkg.favorites_controller"
+    mod_name = "_fm_test_ui_shim.controllers.favorites_controller"
     if mod_name in sys.modules:
         return sys.modules[mod_name]
 

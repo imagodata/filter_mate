@@ -26,22 +26,13 @@ if TYPE_CHECKING:
     from ...core.services.favorites_service import FilterFavorite
     from ...core.domain.favorites_manager import FavoritesManager
 
+from ..styles.favorites_styles import (
+    FAVORITES_STYLES,
+    FAVORITES_MENU_STYLESHEET,
+    build_indicator_stylesheet,
+)
+
 logger = logging.getLogger(__name__)
-
-
-# Indicator styles
-FAVORITES_STYLES = {
-    'active': {
-        'background': '#f39c12',  # Gold/amber
-        'hover': '#d68910',
-        'color': 'white'
-    },
-    'empty': {
-        'background': '#ecf0f1',  # Light gray
-        'hover': '#d5dbdb',
-        'color': '#95a5a6'
-    }
-}
 
 
 class FavoritesController(BaseController):
@@ -730,48 +721,12 @@ class FavoritesController(BaseController):
 
     def _get_indicator_style(self, state: str) -> str:
         """Get stylesheet for indicator state."""
-        # FIX 2026-04-23: the template was never interpolated (stray double
-        # braces, no .format() / f-string, style_data lookup discarded).
-        # Qt's QSS parser silently rejected the literal `{style_data['...']}`
-        # tokens and the ★ indicator fell back to default Qt styling.
-        style_data = FAVORITES_STYLES.get(state, FAVORITES_STYLES['empty'])
-        return (
-            "QLabel#label_favorites_indicator {\n"
-            f"    color: {style_data['color']};\n"
-            "    font-size: 8pt;\n"
-            "    font-weight: 500;\n"
-            "    padding: 2px 8px;\n"
-            "    border-radius: 10px;\n"
-            "    border: none;\n"
-            f"    background-color: {style_data['background']};\n"
-            "}\n"
-            "QLabel#label_favorites_indicator:hover {\n"
-            f"    background-color: {style_data['hover']};\n"
-            "}\n"
-        )
+        return build_indicator_stylesheet(state)
 
     def _show_favorites_menu(self) -> None:
         """Show context menu with favorites options."""
         menu = QMenu(self.dockwidget)
-        menu.setStyleSheet("""
-            QMenu {
-                background-color: white;
-                border: 1px solid #cccccc;
-                padding: 5px;
-            }
-            QMenu::item {
-                padding: 6px 20px;
-            }
-            QMenu::item:selected {
-                background-color: #f39c12;
-                color: white;
-            }
-            QMenu::separator {
-                height: 1px;
-                background-color: #cccccc;
-                margin: 3px 10px;
-            }
-        """)
+        menu.setStyleSheet(FAVORITES_MENU_STYLESHEET)
 
         # === QUICK FILTER SECTION (Favorites) ===
         favorites = self.get_all_favorites()

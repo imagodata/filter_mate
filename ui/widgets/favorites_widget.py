@@ -21,6 +21,8 @@ except ImportError:
     QLabel = object
     pyqtSignal = lambda *args: None
 
+from ..styles.favorites_styles import FAVORITES_MENU_STYLESHEET
+
 logger = logging.getLogger(__name__)
 
 
@@ -103,25 +105,7 @@ class FavoritesWidget(QLabel if HAS_QGIS else object):
             return
 
         menu = QMenu(self)
-        menu.setStyleSheet("""
-            QMenu {
-                background-color: white;
-                border: 1px solid #cccccc;
-                padding: 5px;
-            }
-            QMenu::item {
-                padding: 5px 20px;
-            }
-            QMenu::item:selected {
-                background-color: #f39c12;
-                color: white;
-            }
-            QMenu::separator {
-                height: 1px;
-                background-color: #cccccc;
-                margin: 3px 10px;
-            }
-        """)
+        menu.setStyleSheet(FAVORITES_MENU_STYLESHEET)
 
         # === ADD TO FAVORITES ===
         add_action = menu.addAction(self._tr("⭐ Add Current Filter to Favorites"))
