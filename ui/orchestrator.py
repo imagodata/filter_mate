@@ -18,7 +18,22 @@ Components coordinated:
 
 from typing import TYPE_CHECKING, Dict, Any, List
 import logging
-import warnings
+
+# The deprecation decorator lives in the sibling `utils` package. Under the
+# QGIS plugin runtime the parent package is `filter_mate`, so the relative
+# `..utils.deprecation` resolves; under pytest's direct project-root layout
+# `ui` is loaded as a top-level package and the relative import fails. Fall
+# back to a no-op decorator so the test suite can still import this module.
+try:
+    from ..utils.deprecation import deprecated
+except ImportError:
+    try:
+        from utils.deprecation import deprecated  # type: ignore[no-redef]
+    except ImportError:
+        def deprecated(*_a, **_kw):  # type: ignore[no-redef]
+            def _decorator(func):
+                return func
+            return _decorator
 
 try:
     from qgis.PyQt.QtWidgets import QDockWidget, QWidget
@@ -547,38 +562,43 @@ class DockWidgetOrchestrator:
     # =========================================================================
     # Deprecated Façades (Backward Compatibility)
     # =========================================================================
+    # These façades maintain backward compatibility with code that directly
+    # calls methods on the dockwidget. They delegate to the appropriate
+    # controller and emit deprecation warnings via the central
+    # `utils.deprecation` registry — M5 (#41) adoption: each call now
+    # registers in the registry, so `print_deprecation_report()` shows which
+    # legacy entry points are still in use across a session.
 
-    def _deprecated_warning(self, old_method: str, new_method: str) -> None:
-        """Issue a deprecation warning."""
-        warnings.warn(
-            f"{old_method}() is deprecated. Use {new_method} instead. "
-            "Will be removed in v4.0.",
-            DeprecationWarning,
-            stacklevel=3
-        )
-
-    # These façades maintain backward compatibility with code that
-    # directly calls methods on the dockwidget. They delegate to
-    # the appropriate controller and emit deprecation warnings.
-
+    @deprecated(
+        version="4.0",
+        reason="Façade kept for the dockwidget migration; controller is the source of truth.",
+        replacement='_controllers["filtering"]',
+    )
     def manage_filter(self, *args, **kwargs):
-        """@deprecated Use filtering controller."""
-        self._deprecated_warning('manage_filter', '_controllers["filtering"]')
         return self._controllers.get('filtering')
 
+    @deprecated(
+        version="4.0",
+        reason="Façade kept for the dockwidget migration; controller is the source of truth.",
+        replacement='_controllers["exporting"]',
+    )
     def manage_export(self, *args, **kwargs):
-        """@deprecated Use exporting controller."""
-        self._deprecated_warning('manage_export', '_controllers["exporting"]')
         return self._controllers.get('exporting')
 
+    @deprecated(
+        version="4.0",
+        reason="Layout managers are now keyed by name on the orchestrator.",
+        replacement="get_layout_manager('splitter')",
+    )
     def get_splitter_manager(self):
-        """@deprecated Use get_layout_manager('splitter')."""
-        self._deprecated_warning('get_splitter_manager', "get_layout_manager('splitter')")
         return self._layout_managers.get('splitter')
 
+    @deprecated(
+        version="4.0",
+        reason="Style managers are now keyed by name on the orchestrator.",
+        replacement="get_style_manager('theme')",
+    )
     def get_theme_manager(self):
-        """@deprecated Use get_style_manager('theme')."""
-        self._deprecated_warning('get_theme_manager', "get_style_manager('theme')")
         return self._style_managers.get('theme')
 
 

@@ -402,10 +402,49 @@ class FilterMateApp:
             'reload_layers': _tr('Reloading layers'),
         }
 
-        # History & Favorites
         history_max_size = self._get_history_max_size_from_config()
-        self.history_manager = HistoryService(max_depth=history_max_size)
-        logger.info(f"FilterMate: HistoryService initialized for undo/redo functionality (max_depth={history_max_size})")
+
+        # PostgreSQL availability log (was below, moved up so the hexagonal
+        # init block can see it before we read it).
+        if POSTGRESQL_AVAILABLE:
+            logger.info("FilterMate: PostgreSQL support enabled (psycopg2 available)")
+        else:
+            logger.warning(
+                "FilterMate: PostgreSQL support DISABLED - psycopg2 not installed. "
+                "Plugin will work with local files (Shapefile, GeoPackage, Spatialite) only. "
+                "For PostgreSQL layers, install psycopg2."
+            )
+
+        # M4 (#41) — Initialize hexagonal services FIRST so the bridge's
+        # HistoryService is available before legacy code instantiates its
+        # own. Pre-fix, line 407 created a second HistoryService instance
+        # that was invisible to anything reading via get_history_service()
+        # (REST API, FilterMatePublicAPI), splitting undo/redo state.
+        if HEXAGONAL_AVAILABLE:
+            try:
+                _init_hexagonal_services({
+                    'history': {'max_depth': history_max_size},
+                    'backends': {'postgresql_available': POSTGRESQL_AVAILABLE}
+                })
+                logger.debug("FilterMate: Hexagonal architecture services initialized")
+            except Exception as e:
+                logger.warning(f"FilterMate: Hexagonal services initialization failed: {e}")
+
+        # History & Favorites — share the bridge's HistoryService when
+        # available so undo/redo state stays consistent across legacy +
+        # REST API + PublicAPI consumers.
+        self.history_manager = None
+        if HEXAGONAL_AVAILABLE:
+            try:
+                from .adapters.app_bridge import get_history_service, is_initialized as _hex_initialized
+                if _hex_initialized():
+                    self.history_manager = get_history_service()
+                    logger.debug("FilterMate: HistoryService reused from app_bridge (single source)")
+            except Exception as e:
+                logger.debug(f"FilterMate: app_bridge HistoryService unavailable: {e}")
+        if self.history_manager is None:
+            self.history_manager = HistoryService(max_depth=history_max_size)
+            logger.info(f"FilterMate: HistoryService initialized for undo/redo functionality (max_depth={history_max_size})")
         self._undo_redo_handler = UndoRedoHandler(self.history_manager, lambda: self.PROJECT_LAYERS, lambda: self.PROJECT, lambda: self.iface,
                                                    self._refresh_layers_and_canvas, lambda t, m: iface.messageBar().pushWarning(t, m)) if HEXAGONAL_AVAILABLE and UndoRedoHandler else None
         if self._undo_redo_handler:
@@ -429,27 +468,6 @@ class FilterMateApp:
         except Exception as e:
             logger.debug(f"FilterMate: Spatialite cache not available: {e}")
             self._spatialite_cache = None
-
-        # PostgreSQL & Hexagonal services
-        if POSTGRESQL_AVAILABLE:
-            logger.info("FilterMate: PostgreSQL support enabled (psycopg2 available)")
-        else:
-            logger.warning(
-                "FilterMate: PostgreSQL support DISABLED - psycopg2 not installed. "
-                "Plugin will work with local files (Shapefile, GeoPackage, Spatialite) only. "
-                "For PostgreSQL layers, install psycopg2."
-            )
-
-        # v3.0: Initialize hexagonal architecture services
-        if HEXAGONAL_AVAILABLE:
-            try:
-                _init_hexagonal_services({
-                    'history': {'max_depth': history_max_size},
-                    'backends': {'postgresql_available': POSTGRESQL_AVAILABLE}
-                })
-                logger.debug("FilterMate: Hexagonal architecture services initialized")
-            except Exception as e:
-                logger.warning(f"FilterMate: Hexagonal services initialization failed: {e}")
 
         # v4.0.1: Initialize BackendRegistry for hexagonal architecture compliance
         self._backend_registry = None
