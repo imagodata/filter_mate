@@ -1261,17 +1261,22 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             logger.debug(f"Could not open publish dialog: {e}")
 
     def refresh(self):
-        """Refresh the favorites list."""
+        """Refresh the favorites list, preserving the user's active filters.
+
+        F10 fix 2026-04-27: previous implementation called
+        ``_populate_list(self._all_favorites)`` directly, silently
+        dropping any active search/scope filter when an external change
+        triggered a refresh. We now re-fetch and delegate to
+        ``_refresh_filtered_list`` so the user's filtering state
+        survives ``favorites_changed`` and shared-picker imports.
+        """
         if not self._favorites_manager:
             self._all_favorites = []
             self._populate_list(self._all_favorites)
             self._header_label.setText(self.tr("<b>Saved Favorites (0)</b>"))
             return
         self._all_favorites = self._favorites_manager.get_all_favorites()
-        self._populate_list(self._all_favorites)
-        self._header_label.setText(
-            self.tr("<b>Saved Favorites ({0})</b>").format(self._favorites_manager.count)
-        )
+        self._refresh_filtered_list()
 
     @staticmethod
     def show_dialog(favorites_manager, parent=None) -> Optional[str]:
