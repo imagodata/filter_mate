@@ -441,15 +441,20 @@ class FavoritesSharingService:
                 success=False,
                 error_message="FavoritesService does not expose export_favorites().",
             )
+        owner_already_stripped = False
         try:
             result = export_fn(
                 bundle_path,
                 favorite_ids=list(favorite_ids),
                 collection_metadata=clean_metadata,
+                strip_owner=True,
             )
+            owner_already_stripped = True
         except TypeError:
-            # Older FavoritesService without the collection_metadata kwarg —
-            # fall back to a two-step path (export then patch the envelope).
+            # Older FavoritesService without ``collection_metadata``/
+            # ``strip_owner`` kwargs — fall back to a two-step path: a
+            # plain export, then patch the envelope and strip the owner
+            # via the static helper below.
             try:
                 result = export_fn(bundle_path, favorite_ids=list(favorite_ids))
                 self._inject_collection_metadata(bundle_path, clean_metadata)
@@ -470,12 +475,13 @@ class FavoritesSharingService:
                 ),
             )
 
-        # v5.1: strip ``owner`` from every favorite before shipping the
-        # bundle. owner is a local/team scope attribute — it identifies
-        # the author inside a single DB and must never leak when a
-        # bundle crosses organisation boundaries (fork, share via git,
-        # upload to QGIS Resource Sharing index).
-        self._strip_owner_from_bundle(bundle_path)
+        # Owner is a local/team scope attribute — it identifies the author
+        # inside a single DB and must never leak when a bundle crosses
+        # organisation boundaries (fork, share via git, upload to QGIS
+        # Resource Sharing index). The canonical export now does this in
+        # the same pass; the legacy fallback path needs the post-rewrite.
+        if not owner_already_stripped:
+            self._strip_owner_from_bundle(bundle_path)
 
         # Write / refresh collection.json manifest
         manifest_path = os.path.join(collection_dir, 'collection.json')

@@ -630,6 +630,7 @@ class FavoritesService(QObject):
         file_path: str,
         favorite_ids: Optional[List[str]] = None,
         collection_metadata: Optional[Dict[str, Any]] = None,
+        strip_owner: bool = False,
     ) -> FavoriteExportResult:
         """
         Export favorites to a JSON file.
@@ -646,6 +647,12 @@ class FavoritesService(QObject):
             collection_metadata: Optional metadata dict to describe the
                 bundle (name, author, license, description, tags). Used by
                 the resource_sharing extension to ship curated collections.
+            strip_owner: When True, drop ``owner`` from every favorite
+                before writing. ``owner`` identifies the local author
+                inside a single DB and must never leak when a bundle
+                crosses organisation boundaries (publish, fork, share via
+                git). Used by the resource_sharing extension; default
+                False keeps owner for in-tenant exports.
 
         Returns:
             FavoriteExportResult with status
@@ -673,6 +680,13 @@ class FavoritesService(QObject):
             # v2 signature substitution + v3 canonical keying — both handled
             # by _strip_project_bindings (updated for CRIT-3).
             serialized = [self._strip_project_bindings(f.to_dict()) for f in favorites]
+            # H4 fix 2026-04-27: stripping ``owner`` happens here in the
+            # canonical export pass (instead of a second-rewrite post-step
+            # in the sharing extension) so the on-disk file is final from
+            # the first ``json.dump``.
+            if strip_owner:
+                for fav in serialized:
+                    fav.pop('owner', None)
             # v3: stamp each favorite with its portability status so readers
             # can decide whether to accept legacy entries.
             for fav in serialized:
