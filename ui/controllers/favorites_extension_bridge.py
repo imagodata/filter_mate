@@ -18,13 +18,7 @@ import logging
 import os
 from typing import TYPE_CHECKING, Any, List, Optional
 
-from .favorites_menu_builder import (
-    ACTION_MANAGE_SHARING_REPOS,
-    ACTION_PUBLISH_SHARING,
-    ACTION_QUICK_PUBLISH_SHARING,
-    ACTION_SHARED_PICKER,
-    MenuActionSpec,
-)
+from .favorites_menu_builder import MenuActionSpec
 
 logger = logging.getLogger(__name__)
 
@@ -90,48 +84,43 @@ class FavoritesExtensionBridge:
     # ── Menu contribution (F5 minimal) ───────────────────────────────
 
     def get_menu_actions(self) -> List[MenuActionSpec]:
-        """Return the list of sharing entries to render in the favorites menu.
+        """Return the favorites-menu entries contributed by the extension.
 
-        Sourced declaratively so the menu builder no longer hardcodes
-        the four sharing entries — it just iterates whatever the bridge
-        returns. A future contribution mechanism (full F5: extension
-        registers its own provider) can replace the body of this method
-        with ``return self._registered_actions`` without touching either
-        side.
+        F5 stage 2: the bridge is now a pure relay. The extension owns
+        its menu shape via its own ``get_menu_actions`` method (duck-
+        typed, see :class:`MenuActionsProvider`); the bridge passes
+        itself as the :class:`MenuActionsContext` and returns whatever
+        the provider produces. If the extension is missing or doesn't
+        implement the contract, no entries are rendered.
         """
-        ctrl = self._controller
-        tr = ctrl.tr
+        ext = self.get_extension()
+        if ext is None:
+            return []
+        provider = getattr(ext, "get_menu_actions", None)
+        if not callable(provider):
+            return []
+        try:
+            return list(provider(self))
+        except Exception:
+            logger.exception("favorites_sharing.get_menu_actions failed; rendering empty section")
+            return []
 
-        actions: List[MenuActionSpec] = [
-            MenuActionSpec(
-                sentinel=ACTION_SHARED_PICKER,
-                label="📡 " + tr("Import from Resource Sharing..."),
-            ),
-        ]
+    # ── MenuActionsContext implementation ────────────────────────────
+    #
+    # Implemented implicitly via duck typing — the extension calls these
+    # back from inside ``get_menu_actions`` to gate entries. Keeping them
+    # on the bridge (rather than exposing the controller directly) lets
+    # the bridge remain the only seam between the controller's internals
+    # and any future menu provider.
 
-        publish_enabled = ctrl.count > 0
-        actions.append(MenuActionSpec(
-            sentinel=ACTION_PUBLISH_SHARING,
-            label="📤 " + tr("Publish to Resource Sharing..."),
-            enabled=publish_enabled,
-            disabled_label="📤 " + tr("Publish (no favorites saved)"),
-        ))
+    @property
+    def favorite_count(self) -> int:
+        """Current favorite count, used by providers to gate entries."""
+        return self._controller.count
 
-        # 1-click flow — only surfaced when both pre-conditions are met.
-        # Hiding instead of disabling because there's no useful affordance
-        # to communicate "configure a default repo" from this menu entry.
-        if ctrl.count > 0 and self.has_default_repo():
-            actions.append(MenuActionSpec(
-                sentinel=ACTION_QUICK_PUBLISH_SHARING,
-                label="🚀 " + tr("Quick publish to default repo"),
-            ))
-
-        actions.append(MenuActionSpec(
-            sentinel=ACTION_MANAGE_SHARING_REPOS,
-            label="🌐 " + tr("Manage Resource Sharing repos..."),
-        ))
-
-        return actions
+    def tr(self, message: str) -> str:
+        """Translate via the controller's Qt translation bag."""
+        return self._controller.tr(message)
 
     # ── Dialog launchers ─────────────────────────────────────────────
 

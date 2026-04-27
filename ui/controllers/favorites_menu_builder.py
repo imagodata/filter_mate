@@ -11,7 +11,7 @@ the same names back.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, List
+from typing import TYPE_CHECKING, Any, Callable, List, Protocol
 
 try:
     from qgis.PyQt.QtWidgets import QMenu, QWidget
@@ -28,9 +28,9 @@ from ..styles.favorites_styles import FAVORITES_MENU_STYLESHEET
 class MenuActionSpec:
     """Declarative description of one entry in a contributed menu section.
 
-    Used by :class:`FavoritesExtensionBridge` (and, eventually, any
-    future extension that registers favorites menu items via F5) to
-    declare what should appear without learning the QMenu API.
+    Used by :class:`FavoritesExtensionBridge` (and any extension that
+    contributes favorites menu entries via :class:`MenuActionsProvider`)
+    to declare what should appear without learning the QMenu API.
     """
 
     sentinel: str
@@ -47,6 +47,36 @@ class MenuActionSpec:
     disabled_label: str = ""
     """When ``enabled`` is False, override ``label`` with this text so
     callers can swap "Publish..." for "Publish (no favorites saved)"."""
+
+
+class MenuActionsContext(Protocol):
+    """Read-only handle a menu provider receives when contributing entries.
+
+    Decouples the provider (typically an extension) from the controller's
+    internals: the provider only sees the data it needs to gate entries
+    (favorite count, default-repo presence) and the localisation hook.
+    The bridge implements this protocol implicitly.
+    """
+
+    @property
+    def favorite_count(self) -> int: ...
+
+    def has_default_repo(self) -> bool: ...
+
+    def tr(self, message: str) -> str: ...
+
+
+class MenuActionsProvider(Protocol):
+    """Contract honoured by extensions contributing favorites menu entries.
+
+    F5 registry pattern: the bridge asks each registered provider for its
+    list of :class:`MenuActionSpec`, instead of hardcoding which sharing
+    entries exist. Implementing the method is enough — no registration
+    boilerplate, since the bridge discovers it via duck typing on the
+    extension instance.
+    """
+
+    def get_menu_actions(self, context: MenuActionsContext) -> List[MenuActionSpec]: ...
 
 if TYPE_CHECKING:
     from .favorites_controller import FavoritesController

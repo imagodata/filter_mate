@@ -279,6 +279,70 @@ class FavoritesSharingExtension(BaseExtension):
     def is_auto_refresh_enabled(self) -> bool:
         return bool(self.get_config("auto_refresh_on_project_load", default=True))
 
+    # ------------------------------------------------------------------
+    # F5 menu contribution — favorites context menu
+    # ------------------------------------------------------------------
+
+    def get_menu_actions(self, context: Any) -> List[Any]:
+        """Contribute the Resource Sharing entries to the favorites menu.
+
+        Implementation of the ``MenuActionsProvider`` protocol declared
+        in :mod:`ui.controllers.favorites_menu_builder`. The bridge
+        passes itself as ``context`` (read-only handle exposing
+        ``favorite_count``, ``has_default_repo`` and ``tr``); this
+        method returns ``MenuActionSpec`` instances describing what
+        should appear, in order. The bridge writes them to QActions and
+        the controller dispatches them by sentinel.
+
+        Done here (not in the bridge) so the Resource Sharing UX —
+        which entries exist, which icons, which gating conditions — is
+        owned by the same module that owns the extension.
+        """
+        # Imported inline so the extension module stays loadable even if
+        # the UI controllers package isn't on sys.path (e.g. headless
+        # tests instantiating the extension in isolation).
+        from ...ui.controllers.favorites_menu_builder import (
+            ACTION_MANAGE_SHARING_REPOS,
+            ACTION_PUBLISH_SHARING,
+            ACTION_QUICK_PUBLISH_SHARING,
+            ACTION_SHARED_PICKER,
+            MenuActionSpec,
+        )
+
+        tr = context.tr
+        actions: List[Any] = [
+            MenuActionSpec(
+                sentinel=ACTION_SHARED_PICKER,
+                label="\U0001F4E1 " + tr("Import from Resource Sharing..."),
+            ),
+        ]
+
+        publish_enabled = context.favorite_count > 0
+        actions.append(MenuActionSpec(
+            sentinel=ACTION_PUBLISH_SHARING,
+            label="\U0001F4E4 " + tr("Publish to Resource Sharing..."),
+            enabled=publish_enabled,
+            disabled_label="\U0001F4E4 " + tr("Publish (no favorites saved)"),
+        ))
+
+        # Quick-publish only surfaces when both pre-conditions are met.
+        # Hiding (rather than disabling) because there's no useful
+        # affordance to communicate "configure a default repo" from this
+        # menu entry — we'd just be teaching the user about a feature
+        # they can't use yet.
+        if publish_enabled and context.has_default_repo():
+            actions.append(MenuActionSpec(
+                sentinel=ACTION_QUICK_PUBLISH_SHARING,
+                label="\U0001F680 " + tr("Quick publish to default repo"),
+            ))
+
+        actions.append(MenuActionSpec(
+            sentinel=ACTION_MANAGE_SHARING_REPOS,
+            label="\U0001F310 " + tr("Manage Resource Sharing repos..."),
+        ))
+
+        return actions
+
     def get_remote_repos(self) -> List[Dict[str, Any]]:
         """Return the configured remote repos (never None, never malformed).
 
