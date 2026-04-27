@@ -18,6 +18,7 @@ from filtermate_api.accessor import (  # noqa: E402
     InMemoryAccessor,
     LayerSummary,
 )
+from filtermate_api.config import APIConfig  # noqa: E402
 from filtermate_api.server import create_app  # noqa: E402
 
 

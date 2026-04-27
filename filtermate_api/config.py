@@ -25,6 +25,11 @@ class APIConfig:
     log_level: str = "info"
     cors_origins: list[str] = field(default_factory=lambda: ["*"])
     project_root: Path = _PROJECT_ROOT
+    # Issue #28 — when set, every business request must carry an
+    # ``X-API-Key`` header equal to this value. Empty/None ⇒ auth
+    # disabled (dev mode + the health-check endpoint stays open in
+    # both modes so liveness probes work).
+    api_key: str | None = None
 
     @classmethod
     def from_env(cls) -> "APIConfig":
@@ -46,6 +51,7 @@ class APIConfig:
             debug=os.getenv("FILTERMATE_API_DEBUG", "false").lower() in ("1", "true", "yes"),
             log_level=os.getenv("FILTERMATE_API_LOG_LEVEL", "info"),
             cors_origins=cors_origins,
+            api_key=os.getenv("FILTERMATE_API_KEY") or None,
         )
 
     @classmethod
@@ -71,6 +77,7 @@ class APIConfig:
             debug=api_section.get("debug", False),
             log_level=api_section.get("log_level", "info"),
             cors_origins=api_section.get("cors_origins", ["*"]),
+            api_key=api_section.get("api_key") or None,
         )
 
     @classmethod
@@ -95,5 +102,8 @@ class APIConfig:
         if "FILTERMATE_API_CORS_ORIGINS" in os.environ:
             raw = os.environ["FILTERMATE_API_CORS_ORIGINS"]
             config.cors_origins = [o.strip() for o in raw.split(",") if o.strip()]
+        if "FILTERMATE_API_KEY" in os.environ:
+            # Empty env var explicitly disables auth — distinct from "unset".
+            config.api_key = os.environ["FILTERMATE_API_KEY"] or None
 
         return config

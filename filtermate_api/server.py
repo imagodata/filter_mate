@@ -21,6 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import __version__
 from .accessor import FilterMateAccessor, InMemoryAccessor
+from .auth import APIKeyMiddleware
 from .config import APIConfig
 from .routers import favorites as favorites_router
 from .routers import filters as filters_router
@@ -107,6 +108,13 @@ def create_app(
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # --- API key auth (#28) ---
+    # Always installed; no-op when api_key is None/empty so dev mode is
+    # still ergonomic. Putting it AFTER CORS means CORS pre-flight (OPTIONS)
+    # responses don't carry an auth check — browsers refuse to attach the
+    # X-API-Key on the pre-flight, so a 401 there would silently break clients.
+    app.add_middleware(APIKeyMiddleware, api_key=config.api_key)
 
     # ------------------------------------------------------------------
     # Routes
