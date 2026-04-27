@@ -1707,53 +1707,15 @@ class FavoritesController(BaseController):
 
     @staticmethod
     def _layer_signature_for(layer: Any) -> str:
-        """Build a project-portable signature for a QgsMapLayer.
+        """Build a project-portable signature for a ``QgsMapLayer``.
 
-        Format: "<provider>::<schema>.<table>" for PostgreSQL, "<provider>::<table>"
-        for GPKG/Spatialite, "<provider>::<basename>" for OGR files, and a fallback
-        "<provider>::<layer_name>" when nothing else is available. Used to resolve
-        favorites across different projects where UUIDs differ.
+        Delegates to :class:`LayerSignature` (domain) so the provider
+        parsing rules live in a single module — this method is kept as
+        a controller-side shortcut because the controller's static
+        callsites read more naturally as ``self._layer_signature_for(...)``.
         """
-        try:
-            provider = layer.providerType() if hasattr(layer, 'providerType') else ''
-        except (RuntimeError, AttributeError):
-            provider = ''
-
-        # PostgreSQL: use QgsDataSourceUri to get schema.table
-        try:
-            from qgis.core import QgsDataSourceUri
-            if provider == 'postgres':
-                uri = QgsDataSourceUri(layer.source())
-                schema = uri.schema() or 'public'
-                table = uri.table() or ''
-                if table:
-                    return f"postgres::{schema}.{table}"
-            if provider == 'spatialite':
-                uri = QgsDataSourceUri(layer.source())
-                table = uri.table() or ''
-                if table:
-                    return f"spatialite::{table}"
-            if provider == 'ogr':
-                src = layer.source() or ''
-                # GPKG layers: "path.gpkg|layername=xxx"
-                if '|layername=' in src:
-                    tail = src.split('|layername=', 1)[1]
-                    layername = tail.split('|', 1)[0]
-                    return f"ogr::{layername}"
-                # Shapefile etc. — use basename without extension
-                import os
-                base = os.path.basename(src.split('|', 1)[0])
-                if base:
-                    stem, _ = os.path.splitext(base)
-                    return f"ogr::{stem}"
-        except Exception:
-            pass
-
-        # Fallback: provider + layer name
-        try:
-            return f"{provider or 'unknown'}::{layer.name()}"
-        except (RuntimeError, AttributeError):
-            return f"{provider or 'unknown'}::?"
+        from ...core.domain.layer_signature import LayerSignature
+        return LayerSignature.compute(layer)
 
     def _backfill_legacy_predicate_default(self, favorite: 'FilterFavorite') -> bool:
         """Heal pre-fix favorites that lack geometric_predicates in spatial_config.

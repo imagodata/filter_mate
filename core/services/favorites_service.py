@@ -22,7 +22,9 @@ if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer
 
 # Export FilterFavorite from domain
+from ..domain.favorite_import_handler import FavoriteImportHandler
 from ..domain.favorites_manager import FilterFavorite
+from ..domain.layer_signature import LayerSignatureIndex
 from ..domain.remote_layers_normalizer import RemoteLayersNormalizer
 
 logger = logging.getLogger(__name__)
@@ -788,14 +790,18 @@ class FavoritesService(QObject):
 
         try:
             import json
-            # FilterFavorite is imported at top of file
 
-            # Read file
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
             favorites_data = data.get('favorites', [])
             file_version = str(data.get('version', '1.0'))
+
+            # Build the project signature index once for the whole
+            # import — re-walking QgsProject for every entry was the
+            # main perf cliff on bundles >50 favorites and the reason
+            # the rebind logic kept growing module-level caches.
+            index = LayerSignatureIndex()
 
             imported_count = 0
             skipped_count = 0
@@ -803,20 +809,16 @@ class FavoritesService(QObject):
             for fav_data in favorites_data:
                 name = fav_data.get('name', '')
 
-                # Check for duplicates
                 if skip_duplicates:
                     existing = self.get_favorite_by_name(name)
                     if existing:
                         skipped_count += 1
                         continue
 
-                # FIX 2026-04-21: rebind imported favorite to the current project's
-                # layer UUIDs using signatures when available (v2). v1 files keep
-                # their legacy layer_id UUIDs — they just won't resolve remote
-                # layers across projects, which matches pre-v2 behavior.
-                rebound = self._rebind_imported_favorite(fav_data, file_version)
+                rebound = FavoriteImportHandler.rebind_to_project(
+                    fav_data, index, file_version=file_version
+                )
 
-                # Create new favorite with new ID
                 favorite = FilterFavorite.from_dict(rebound)
                 favorite.id = None  # Will generate new ID
 
@@ -894,30 +896,13 @@ class FavoritesService(QObject):
 
     @staticmethod
     def _strip_project_bindings(fav_dict: Dict[str, Any]) -> Dict[str, Any]:
-        """Strip project-specific identifiers from a favorite dict for v2 export.
+        """Strip project-specific identifiers — see :class:`FavoriteImportHandler`.
 
-        Removes QGIS layer UUIDs and project UUIDs so the favorite can be
-        re-resolved against any project where a layer with the same
-        (provider, schema, table) signature exists. The layer_signature field
-        (populated at favorite creation time) carries the portable identity.
+        Wrapper kept for backward compatibility with callers (notably
+        ``extensions/favorites_sharing/service.py``) that referenced the
+        previous API. The transform itself lives in the domain handler.
         """
-        out = dict(fav_dict)  # shallow copy — we only rewrite nested dicts we own
-        # Drop the local DB id and project_uuid if present; a new id is generated at import.
-        out.pop('id', None)
-        out.pop('project_uuid', None)
-        # Drop the source layer_id UUID — the source layer is identified by
-        # spatial_config.source_layer_signature (populated in _create_favorite).
-        out['layer_id'] = None
-        # CRIT-3 fix: keying remote_layers by layer.name() was collision-prone
-        # and leaked the author's local layer labels. Delegated to the shared
-        # normalizer so the strip/normalize/rebind/backfill paths cannot drift.
-        remote_layers = out.get('remote_layers')
-        if isinstance(remote_layers, dict):
-            out['remote_layers'] = RemoteLayersNormalizer.strip(remote_layers)
-        # Reset use_count and last_used_at on export.
-        out['use_count'] = 0
-        out['last_used_at'] = None
-        return out
+        return FavoriteImportHandler.strip_project_bindings(fav_dict)
 
     @classmethod
     def _rebind_imported_favorite(
@@ -925,92 +910,28 @@ class FavoritesService(QObject):
         fav_data: Dict[str, Any],
         file_version: str = '1.0'
     ) -> Dict[str, Any]:
-        """Re-bind an imported favorite to the current QgsProject's layer UUIDs.
+        """Re-bind an imported favorite — see :class:`FavoriteImportHandler`.
 
-        For v2 exports (and v1 favorites that happen to carry layer_signature),
-        we look up each signature in the current project and repopulate the
-        local layer_id. When no match is found, layer_id stays None — the
-        favorite is still usable, but the target layers must be resolved at
-        apply-time (see FavoritesController._restore_filtering_ui_from_favorite).
+        Wrapper that builds a fresh :class:`LayerSignatureIndex` per call
+        and delegates. Callers importing many favorites in a row should
+        prefer ``FavoriteImportHandler.rebind_to_project`` directly with
+        a shared index (one ``QgsProject`` walk instead of N).
         """
-        out = dict(fav_data)
-
-        # --- Source layer rebinding ---
-        spatial_config = out.get('spatial_config') or {}
-        if isinstance(spatial_config, dict):
-            source_sig = spatial_config.get('source_layer_signature')
-            if source_sig:
-                resolved = cls._resolve_signature_to_layer_id(source_sig)
-                if resolved:
-                    out['layer_id'] = resolved
-                    logger.debug(
-                        f"Import rebind: source '{source_sig}' -> {resolved}"
-                    )
-
-        # --- Remote layers rebinding ---
-        remote_layers = out.get('remote_layers')
-        if isinstance(remote_layers, dict):
-            out['remote_layers'] = RemoteLayersNormalizer.rebind(
-                remote_layers,
-                signature_resolver=cls._resolve_signature_to_layer_id,
-            )
-
-        logger.debug(f"Imported favorite '{out.get('name')}' from v{file_version}")
-        return out
+        return FavoriteImportHandler.rebind_to_project(
+            fav_data,
+            LayerSignatureIndex(),
+            file_version=file_version,
+        )
 
     @staticmethod
     def _resolve_signature_to_layer_id(signature: str) -> Optional[str]:
-        """Resolve a portable layer signature against the current QgsProject.
+        """Resolve a signature against the current ``QgsProject``.
 
-        Returns the first layer id whose signature matches, or None.
-        Mirrors FavoritesController._layer_signature_for().
+        Backwards-compatible wrapper around :class:`LayerSignatureIndex`.
+        Builds a one-shot index per call; callers that resolve many
+        signatures in a row should construct a single index.
         """
-        if not signature:
-            return None
-        try:
-            from qgis.core import QgsProject, QgsDataSourceUri
-        except ImportError:
-            return None
-        import os
-        try:
-            parts = signature.split('::', 1)
-            if len(parts) != 2:
-                return None
-            provider, tail = parts
-            for lid, layer in QgsProject.instance().mapLayers().items():
-                try:
-                    if layer.providerType() != provider:
-                        continue
-                    if provider == 'postgres':
-                        uri = QgsDataSourceUri(layer.source())
-                        schema = uri.schema() or 'public'
-                        table = uri.table() or ''
-                        candidate = f"{schema}.{table}"
-                        if candidate == tail:
-                            return lid
-                    elif provider == 'spatialite':
-                        uri = QgsDataSourceUri(layer.source())
-                        if (uri.table() or '') == tail:
-                            return lid
-                    elif provider == 'ogr':
-                        src = layer.source() or ''
-                        if '|layername=' in src:
-                            layername = src.split('|layername=', 1)[1].split('|', 1)[0]
-                            if layername == tail:
-                                return lid
-                        else:
-                            base = os.path.basename(src.split('|', 1)[0])
-                            stem, _ = os.path.splitext(base)
-                            if stem == tail:
-                                return lid
-                    else:
-                        if layer.name() == tail:
-                            return lid
-                except (RuntimeError, AttributeError):
-                    continue
-        except Exception:
-            return None
-        return None
+        return LayerSignatureIndex().resolve(signature)
 
     def save(self) -> bool:
         """

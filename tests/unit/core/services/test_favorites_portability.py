@@ -4,10 +4,16 @@ Covers the _strip_project_bindings (export side) and
 _rebind_imported_favorite (import side) helpers added in 2026-04-21 to
 enable cross-project favorite sharing. The helpers operate on plain dicts,
 so these tests avoid requiring a running QGIS environment.
+
+F15 (2026-04-27): the resolution seam moved from
+``FavoritesService._resolve_signature_to_layer_id`` to
+``LayerSignatureIndex.resolve``. Tests monkey-patch the index method —
+that's the new single source of truth for project layer lookup.
 """
 
 import pytest
 
+from core.domain.layer_signature import LayerSignatureIndex
 from core.services.favorites_service import FavoritesService
 
 
@@ -83,9 +89,9 @@ class TestRebindImportedFavorite:
     def test_missing_signatures_leave_layer_id_none(self, monkeypatch):
         # Simulate "no layer matches" by forcing the resolver to return None.
         monkeypatch.setattr(
-            FavoritesService,
-            "_resolve_signature_to_layer_id",
-            staticmethod(lambda sig: None),
+            LayerSignatureIndex,
+            "resolve",
+            lambda self, sig: None,
         )
         fav = {
             "name": "F",
@@ -116,9 +122,9 @@ class TestRebindImportedFavorite:
         favorites would fire in the wrong selection mode.
         """
         monkeypatch.setattr(
-            FavoritesService,
-            "_resolve_signature_to_layer_id",
-            staticmethod(lambda sig: None),  # no project at test time
+            LayerSignatureIndex,
+            "resolve",
+            lambda self, sig: None,  # no project at test time
         )
         fav = {
             "name": "Fav with spatial config",
@@ -154,9 +160,9 @@ class TestRebindImportedFavorite:
             "ogr::parcelles": "local-uuid-B",
         }
         monkeypatch.setattr(
-            FavoritesService,
-            "_resolve_signature_to_layer_id",
-            staticmethod(lambda sig: mapping.get(sig)),
+            LayerSignatureIndex,
+            "resolve",
+            lambda self, sig: mapping.get(sig),
         )
         fav = {
             "name": "F",

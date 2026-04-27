@@ -17,8 +17,9 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass, asdict, field
 
-from .schema_constants import GLOBAL_PROJECT_UUID
+from .layer_signature import LayerSignatureIndex
 from .remote_layers_normalizer import RemoteLayersNormalizer
+from .schema_constants import GLOBAL_PROJECT_UUID
 
 logger = logging.getLogger('FilterMate.FavoritesManager')
 
@@ -380,16 +381,12 @@ class FavoritesManager:
         """Backfill missing ``layer_signature`` and ``display_name`` in
         persisted favorites' ``remote_layers`` JSON (HIGH-1).
 
-        Only rows whose JSON is missing at least one ``layer_signature`` are
-        rewritten. Resolution uses the current QgsProject's map layers when
-        available; unresolved entries keep the legacy name-only shape and
-        will be backfilled on the next load when the layer is present.
+        Only rows whose JSON is missing at least one ``layer_signature``
+        are rewritten. Resolution uses the current ``QgsProject`` (via
+        :class:`LayerSignatureIndex`) when available; unresolved entries
+        keep the legacy name-only shape and will be backfilled on the
+        next load when the layer is present.
         """
-        try:
-            from qgis.core import QgsProject, QgsDataSourceUri
-        except ImportError:
-            return  # Not running inside QGIS — nothing to backfill.
-
         try:
             cursor.execute("SELECT id, remote_layers FROM fm_favorites WHERE remote_layers IS NOT NULL")
             rows = cursor.fetchall()
@@ -397,42 +394,9 @@ class FavoritesManager:
             logger.debug(f"Signature backfill: could not scan rows: {e}")
             return
 
-        # Build id_to_signature map once
-        id_to_signature: Dict[str, str] = {}
-        name_to_signature: Dict[str, str] = {}
-        try:
-            import os
-            for lid, layer in QgsProject.instance().mapLayers().items():
-                try:
-                    provider = layer.providerType()
-                    signature = None
-                    if provider == 'postgres':
-                        uri = QgsDataSourceUri(layer.source())
-                        table = uri.table() or ''
-                        if table:
-                            signature = f"postgres::{(uri.schema() or 'public')}.{table}"
-                    elif provider == 'spatialite':
-                        uri = QgsDataSourceUri(layer.source())
-                        table = uri.table() or ''
-                        if table:
-                            signature = f"spatialite::{table}"
-                    elif provider == 'ogr':
-                        src = layer.source() or ''
-                        if '|layername=' in src:
-                            layername = src.split('|layername=', 1)[1].split('|', 1)[0]
-                            signature = f"ogr::{layername}"
-                        else:
-                            stem, _ = os.path.splitext(os.path.basename(src.split('|', 1)[0]))
-                            if stem:
-                                signature = f"ogr::{stem}"
-                    if signature is None:
-                        signature = f"{provider or 'unknown'}::{layer.name()}"
-                    id_to_signature[lid] = signature
-                    name_to_signature.setdefault(layer.name(), signature)
-                except (RuntimeError, AttributeError):
-                    continue
-        except Exception as e:
-            logger.debug(f"Signature backfill: could not enumerate layers: {e}")
+        index = LayerSignatureIndex()
+        # Outside QGIS the index is empty; nothing to backfill.
+        if not index.id_to_signature and not index.name_to_signature:
             return
 
         updated = 0
@@ -446,8 +410,8 @@ class FavoritesManager:
 
             new_remote, rewrite_needed = RemoteLayersNormalizer.backfill(
                 remote,
-                id_to_signature=id_to_signature,
-                name_to_signature=name_to_signature,
+                id_to_signature=index.id_to_signature,
+                name_to_signature=index.name_to_signature,
             )
 
             if rewrite_needed:
