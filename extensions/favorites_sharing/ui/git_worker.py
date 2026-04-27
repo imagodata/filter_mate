@@ -101,3 +101,26 @@ class GitOpsWorker(QThread):
             self.finished.emit(result)
         except Exception:
             logger.debug("Result signal emit failed (dialog torn down?)")
+
+
+def start_git_worker(
+    op_callable: Callable[[], Any],
+    on_finished: Callable[[Any], None],
+    on_error: Callable[[str], None],
+) -> "GitOpsWorker":
+    """Build, wire and start a one-shot :class:`GitOpsWorker`.
+
+    Centralises the H5 lifecycle ritual the audit (2026-04-27) locked
+    in: ``parent=None`` so dialog close cannot Qt-destroy a still-running
+    thread, ``deleteLater`` self-cleanup on terminal signals, then
+    ``start``. The caller is expected to keep a Python reference to the
+    returned worker (e.g. ``self._publish_worker = start_git_worker(...)``)
+    so the GC does not collect it before ``run`` finishes.
+    """
+    worker = GitOpsWorker(op_callable, parent=None)
+    worker.finished.connect(worker.deleteLater)
+    worker.error.connect(worker.deleteLater)
+    worker.finished.connect(on_finished)
+    worker.error.connect(on_error)
+    worker.start()
+    return worker

@@ -123,6 +123,11 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # FIX 2026-04-22: re-entrancy guard so our own update/delete don't bounce
         # back through the external-change refresh slot.
         self._suppress_external_refresh = False
+        # F13 fix 2026-04-27: track the external-change subscription so
+        # closeEvent can disconnect it. Without this the manager keeps a
+        # hard ref to the dialog through the signal slot — every open/close
+        # cycle leaked one dialog instance.
+        self._external_change_connected = False
 
         if HAS_QGIS:
             self._setup_ui()
@@ -133,6 +138,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             if self._favorites_manager is not None and hasattr(self._favorites_manager, 'favorites_changed'):
                 try:
                     self._favorites_manager.favorites_changed.connect(self._on_external_favorites_changed)
+                    self._external_change_connected = True
                 except (TypeError, RuntimeError):
                     pass
 
@@ -151,6 +157,24 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                         break
         except (RuntimeError, AttributeError) as e:
             logger.debug(f"Could not refresh dialog on external change: {e}")
+
+    def closeEvent(self, event):
+        """Disconnect from external signals before Qt destroys the dialog.
+
+        F13 fix 2026-04-27: the manager's ``favorites_changed`` signal
+        held a hard ref to ``_on_external_favorites_changed``, keeping
+        every closed dialog alive across Open → Close → Open cycles.
+        """
+        if self._external_change_connected and self._favorites_manager is not None:
+            try:
+                self._favorites_manager.favorites_changed.disconnect(
+                    self._on_external_favorites_changed
+                )
+            except (TypeError, RuntimeError):
+                pass
+            self._external_change_connected = False
+        if HAS_QGIS:
+            super().closeEvent(event)
 
     def _setup_ui(self):
         """Build the dialog UI."""

@@ -259,21 +259,13 @@ class RepoEditDialog(QDialog if HAS_QT else object):
         # responsive — the user can keep editing fields while the probe
         # is in flight, and the result is rendered into the status label
         # whenever it lands.
-        from .git_worker import GitOpsWorker
+        from .git_worker import start_git_worker
 
         self._test_status_label.setText(_tr("Testing…"))
         self._test_btn.setEnabled(False)
 
         def _probe():
             return self._manager.test_connection(repo)
-
-        # Keep a strong reference on self so the QThread is not
-        # garbage-collected before it runs. parent=None is deliberate:
-        # parenting to the dialog would let Qt destroy a still-running
-        # QThread on dialog close, which is undefined behavior.
-        self._test_worker = GitOpsWorker(_probe, parent=None)
-        self._test_worker.finished.connect(self._test_worker.deleteLater)
-        self._test_worker.error.connect(self._test_worker.deleteLater)
 
         def _on_finished(result):
             self._test_btn.setEnabled(True)
@@ -296,9 +288,9 @@ class RepoEditDialog(QDialog if HAS_QT else object):
                 f"<span style='color:#c33;'>✗ {msg}</span>"
             )
 
-        self._test_worker.finished.connect(_on_finished)
-        self._test_worker.error.connect(_on_error)
-        self._test_worker.start()
+        # Strong ref on self so the QThread is not GC'd before it runs;
+        # the helper handles parent=None + deleteLater self-cleanup.
+        self._test_worker = start_git_worker(_probe, _on_finished, _on_error)
 
     def _on_accept(self) -> None:
         name = self._name_edit.text().strip()

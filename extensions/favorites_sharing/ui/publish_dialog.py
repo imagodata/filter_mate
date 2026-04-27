@@ -647,7 +647,7 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
 
     def _run_publish_in_background(self, repo: RemoteRepo, publish_op) -> None:
         """Run a publish closure on a worker thread with a progress dialog."""
-        from .git_worker import GitOpsWorker
+        from .git_worker import start_git_worker
 
         progress = QProgressDialog(
             self.tr("Publishing to {0}...").format(repo.name),
@@ -658,16 +658,6 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         progress.setMinimumDuration(0)
         progress.setAutoClose(False)
         progress.setAutoReset(False)
-
-        # Hold a strong reference on self so the QThread is not GC'd
-        # before it runs. We deliberately pass parent=None: with parent=self
-        # Qt's child-deletion would tear the QThread down when the dialog
-        # closes — destroying a still-running QThread is undefined behavior
-        # and would also corrupt the in-flight git working tree.
-        self._publish_worker = GitOpsWorker(publish_op, parent=None)
-        worker = self._publish_worker
-        worker.finished.connect(worker.deleteLater)
-        worker.error.connect(worker.deleteLater)
 
         # When the user clicks Cancel: hide the dialog and detach result
         # handlers. The worker keeps running — subprocess cancellation is
@@ -692,9 +682,9 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             progress.close()
             self._on_publish_finished(repo, _SyncFailure(msg))
 
-        worker.finished.connect(_on_finished)
-        worker.error.connect(_on_error)
-        worker.start()
+        # Strong ref on self so the QThread is not GC'd before it runs;
+        # the helper handles parent=None + deleteLater self-cleanup.
+        self._publish_worker = start_git_worker(publish_op, _on_finished, _on_error)
         progress.exec()
 
     def _on_publish_finished(self, repo: RemoteRepo, sync) -> None:
