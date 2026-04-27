@@ -80,6 +80,9 @@ class LayerInfo:
         table_name: Database table name
         pk_attr: Primary key attribute name (e.g., "id", "fid")
         geometry_column: Geometry column name (e.g., "geom", "geometry")
+        fields_signature: Stable hash of the layer's field set, used as a cache
+            invalidation key when the schema changes (field added/removed/retyped).
+            Empty string opts out of schema-aware caching.
 
     Example:
         >>> layer = LayerInfo.create(
@@ -103,6 +106,7 @@ class LayerInfo:
     table_name: str = ""
     pk_attr: str = ""
     geometry_column: str = "geom"
+    fields_signature: str = ""
 
     def __eq__(self, other: object) -> bool:
         """
@@ -258,7 +262,10 @@ class LayerInfo:
             source_path=self.source_path,
             has_spatial_index=self.has_spatial_index,
             schema_name=self.schema_name,
-            table_name=self.table_name
+            table_name=self.table_name,
+            pk_attr=self.pk_attr,
+            geometry_column=self.geometry_column,
+            fields_signature=self.fields_signature,
         )
 
     def with_spatial_index(self, has_index: bool) -> 'LayerInfo':
@@ -274,7 +281,10 @@ class LayerInfo:
             source_path=self.source_path,
             has_spatial_index=has_index,
             schema_name=self.schema_name,
-            table_name=self.table_name
+            table_name=self.table_name,
+            pk_attr=self.pk_attr,
+            geometry_column=self.geometry_column,
+            fields_signature=self.fields_signature,
         )
 
     def __str__(self) -> str:

@@ -40,6 +40,24 @@ from ..filter.source_filter_builder import (
 )
 
 
+def _compute_layer_schema_signature(layer) -> Optional[str]:
+    """Stable short hash of a QGIS layer's field set for cache invalidation (#36).
+
+    Returns None when the field set can't be read (defensive — opt-out).
+    """
+    if layer is None or not hasattr(layer, "fields"):
+        return None
+    try:
+        fields = layer.fields()
+        parts = [f"{f.name()}:{f.typeName()}" for f in fields]
+    except Exception:
+        return None
+    if not parts:
+        return None
+    payload = "|".join(parts).encode("utf-8")
+    return hashlib.md5(payload, usedforsecurity=False).hexdigest()[:16]
+
+
 class BackendExpressionBuilder:
     """
     Builds filter expressions for different backends.
@@ -532,6 +550,10 @@ class BackendExpressionBuilder:
             source_filter_hash = hashlib.md5(source_filter.encode(), usedforsecurity=False).hexdigest()[:16]
             logger.debug(f"  Cache: source_filter_hash={source_filter_hash} (filter length: {len(source_filter)})")
 
+        # #36: include the target layer's schema signature so a field
+        # add/remove/retype invalidates stale cache entries.
+        target_schema_signature = _compute_layer_schema_signature(layer)
+
         cache_key = self.expr_cache.get_cache_key(
             layer_id=layer_id,
             predicates=self.current_predicates,
@@ -540,7 +562,8 @@ class BackendExpressionBuilder:
             provider_type=provider_type,
             source_filter_hash=source_filter_hash,
             use_centroids=self.param_use_centroids_distant_layers,
-            use_centroids_source=self.param_use_centroids_source_layer
+            use_centroids_source=self.param_use_centroids_source_layer,
+            target_schema_signature=target_schema_signature,
         )
 
         return cache_key

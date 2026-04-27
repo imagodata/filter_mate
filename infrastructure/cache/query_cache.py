@@ -134,7 +134,8 @@ class QueryExpressionCache:
         provider_type: str,
         source_filter_hash: Optional[str] = None,
         use_centroids: bool = False,
-        use_centroids_source: bool = False
+        use_centroids_source: bool = False,
+        target_schema_signature: Optional[str] = None,
     ) -> Tuple:
         """
         Generate a unique cache key for a query expression.
@@ -151,6 +152,8 @@ class QueryExpressionCache:
                           v2.5.14: Added to ensure cache invalidation when centroid option changes
             use_centroids_source: Whether centroid optimization is enabled for source layer
                           v2.5.15: Added for complete centroid cache invalidation
+            target_schema_signature: Optional stable hash of the target layer's field set —
+                          issue #36: invalidates the cache when the schema changes
 
         Returns:
             Tuple: Unique cache key
@@ -166,7 +169,8 @@ class QueryExpressionCache:
             provider_type,
             source_filter_hash,  # v2.5.19: Include source filter for cache invalidation on refilter
             use_centroids,  # v2.5.14: Include centroid flag for cache invalidation (distant layers)
-            use_centroids_source  # v2.5.15: Include centroid flag for source layer
+            use_centroids_source,  # v2.5.15: Include centroid flag for source layer
+            target_schema_signature,  # #36: invalidate on layer schema change
         )
 
     def compute_source_hash(self, source_geometry: Any) -> str:

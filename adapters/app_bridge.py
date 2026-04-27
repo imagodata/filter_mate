@@ -29,6 +29,7 @@ Author: FilterMate Team
 Date: January 2026
 """
 
+import hashlib
 import logging
 from typing import Optional, Dict, Any, TYPE_CHECKING
 
@@ -304,8 +305,25 @@ def layer_info_from_qgis_layer(layer: 'QgsVectorLayer') -> LayerInfo:
         schema_name=schema_name,
         table_name=table_name,
         pk_attr=pk_attr,
-        geometry_column=geometry_column
+        geometry_column=geometry_column,
+        fields_signature=_compute_fields_signature(layer),
     )
+
+
+def _compute_fields_signature(layer: 'QgsVectorLayer') -> str:
+    """Stable short hash of the layer's field set used for cache invalidation.
+
+    Returns "" if fields can't be read — opt-out of schema-aware caching.
+    """
+    try:
+        fields = layer.fields()
+        parts = [f"{f.name()}:{f.typeName()}" for f in fields]
+    except Exception:
+        return ""
+    if not parts:
+        return ""
+    payload = "|".join(parts).encode("utf-8")
+    return hashlib.md5(payload, usedforsecurity=False).hexdigest()[:16]
 
 
 def _check_spatial_index(layer: 'QgsVectorLayer') -> bool:

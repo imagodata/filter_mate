@@ -358,17 +358,7 @@ class FilterService:
 
         Handles cache lookup, backend selection, and execution.
         """
-        # Check cache first
-        if use_cache:
-            cache_key = self._build_cache_key(expression, target_layer_id)
-            cached = self._cache.get(cache_key)
-            if cached:
-                logger.debug(f"Cache hit for {target_layer_id}")
-                self._stats['cache_hits'] += 1
-                return cached.with_from_cache(True)
-            self._stats['cache_misses'] += 1
-
-        # Get target layer info
+        # Get target layer info (also feeds the schema-aware cache key)
         target_layer = self._layer_repository.get_layer_info(target_layer_id)
         if not target_layer:
             return FilterResult.error(
@@ -376,6 +366,16 @@ class FilterService:
                 expression_raw=expression.raw,
                 error_message=f"Target layer not found: {target_layer_id}"
             )
+
+        # Check cache first
+        if use_cache:
+            cache_key = self._build_cache_key(expression, source_layer, target_layer)
+            cached = self._cache.get(cache_key)
+            if cached:
+                logger.debug(f"Cache hit for {target_layer_id}")
+                self._stats['cache_hits'] += 1
+                return cached.with_from_cache(True)
+            self._stats['cache_misses'] += 1
 
         # Select backend
         backend = self._select_backend(source_layer)
@@ -407,7 +407,7 @@ class FilterService:
 
             # Cache successful results
             if result.is_success and use_cache:
-                cache_key = self._build_cache_key(expression, target_layer_id)
+                cache_key = self._build_cache_key(expression, source_layer, target_layer)
                 self._cache.set(cache_key, result)
 
             return result
@@ -448,11 +448,21 @@ class FilterService:
     def _build_cache_key(
         self,
         expression: FilterExpression,
-        target_layer_id: str
+        source_layer: LayerInfo,
+        target_layer: LayerInfo,
     ) -> str:
-        """Build cache key for expression + target combination."""
+        """Build cache key for expression + target combination.
+
+        Includes both layers' ``fields_signature`` so a schema change
+        (field added/removed/retyped) invalidates stale entries — see issue #36.
+        """
         buffer_str = str(expression.buffer_value) if expression.buffer_value else "0"
-        return f"{expression.raw}|{expression.source_layer_id}|{target_layer_id}|{buffer_str}"
+        src_sig = source_layer.fields_signature or "-"
+        tgt_sig = target_layer.fields_signature or "-"
+        return (
+            f"{expression.raw}|{source_layer.layer_id}|{target_layer.layer_id}"
+            f"|{buffer_str}|src={src_sig}|tgt={tgt_sig}"
+        )
 
     def _error_response(
         self,
