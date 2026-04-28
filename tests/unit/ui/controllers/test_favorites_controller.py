@@ -446,9 +446,9 @@ class TestFavoriteMatchesCurrentLayer:
 
         # Force _layer_signature_for to yield the same signature the favorite carries
         monkeypatch.setattr(
-            FavoritesController,
-            "_layer_signature_for",
-            staticmethod(lambda layer: "postgres::public.points"),
+            favorites_controller,
+            "layer_signature_for",
+            lambda layer: "postgres::public.points",
         )
 
         fav = MagicMock()
@@ -481,9 +481,9 @@ class TestFavoriteMatchesCurrentLayer:
         layer = _make_layer(layer_id="layer-Z", name="OtherLayer")
 
         monkeypatch.setattr(
-            FavoritesController,
-            "_layer_signature_for",
-            staticmethod(lambda layer: "ogr::other"),
+            favorites_controller,
+            "layer_signature_for",
+            lambda layer: "ogr::other",
         )
 
         fav = MagicMock()
@@ -915,14 +915,15 @@ class TestDirectSubsetApply:
         }
         self._stub_qgis_project(layers_by_id)
 
-        # _layer_signature_for is staticmethod — patch it onto every layer for the lookup pass
+        # F4.1: layer_signature_for is now a module-level function imported
+        # into favorites_controller; patch the binding in the controller module.
         monkeypatch.setattr(
-            FavoritesController, "_layer_signature_for",
-            staticmethod(lambda layer: {
+            favorites_controller, "layer_signature_for",
+            lambda layer: {
                 zone_pop: "postgres::infra.zone_pop",
                 cables: "postgres::infra.cables",
                 demand: "postgres::infra.demand_points",
-            }.get(layer, "unknown::?"))
+            }.get(layer, "unknown::?")
         )
 
         applied = []
@@ -969,11 +970,11 @@ class TestDirectSubsetApply:
         self._stub_qgis_project(layers_by_id)
 
         monkeypatch.setattr(
-            FavoritesController, "_layer_signature_for",
-            staticmethod(lambda layer: {
+            favorites_controller, "layer_signature_for",
+            lambda layer: {
                 zone_pop: "postgres::infra.zone_pop",
                 cables: "postgres::infra.cables",
-            }.get(layer, "unknown::?"))
+            }.get(layer, "unknown::?")
         )
 
         applied = []
@@ -1014,8 +1015,8 @@ class TestDirectSubsetApply:
         is a no-op and reports failure (so the caller can warn)."""
         self._stub_qgis_project({})
         monkeypatch.setattr(
-            FavoritesController, "_layer_signature_for",
-            staticmethod(lambda layer: "ghost::?")
+            favorites_controller, "layer_signature_for",
+            lambda layer: "ghost::?"
         )
         applied = []
         self._patch_safe_set_subset_string(monkeypatch, applied)
@@ -1048,12 +1049,12 @@ class TestExactFilteredFeatureCount:
     """
 
     def test_returns_zero_for_none_layer(self):
-        assert FavoritesController._exact_filtered_feature_count(None) == 0
+        assert favorites_controller.exact_filtered_feature_count(None) == 0
 
     def test_returns_zero_for_invalid_layer(self):
         layer = MagicMock()
         layer.isValid.return_value = False
-        assert FavoritesController._exact_filtered_feature_count(layer) == 0
+        assert favorites_controller.exact_filtered_feature_count(layer) == 0
 
     def test_counts_via_iteration(self, monkeypatch):
         """Iterating the filtered cursor must drive the count, not the
@@ -1066,7 +1067,7 @@ class TestExactFilteredFeatureCount:
         # Stale estimate the helper must NOT trust.
         layer.featureCount.return_value = 1
 
-        assert FavoritesController._exact_filtered_feature_count(layer) == 7
+        assert favorites_controller.exact_filtered_feature_count(layer) == 7
 
     def test_falls_back_to_featurecount_on_iteration_failure(self):
         """If the iteration path raises (provider quirk, headless test
@@ -1079,7 +1080,7 @@ class TestExactFilteredFeatureCount:
         layer.getFeatures.side_effect = RuntimeError("provider lost connection")
         layer.featureCount.return_value = 42
 
-        assert FavoritesController._exact_filtered_feature_count(layer) == 42
+        assert favorites_controller.exact_filtered_feature_count(layer) == 42
 
 
 class TestCaptureRestoreRoundTrip:

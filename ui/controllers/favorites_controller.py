@@ -21,6 +21,10 @@ from qgis.core import QgsProject
 
 from ...core.domain.exceptions import FavoritePersistenceError
 from .base_controller import BaseController
+from .favorites_spatial_helpers import (
+    exact_filtered_feature_count,
+    layer_signature_for,
+)
 
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
@@ -875,7 +879,7 @@ class FavoritesController(BaseController):
                 # Check if layer has an active filter
                 subset = map_layer.subsetString()
                 if subset and subset.strip():
-                    signature = self._layer_signature_for(map_layer)
+                    signature = layer_signature_for(map_layer)
                     display_name = map_layer.name()
                     # FIX 2026-04-23 (CRIT-3): key remote_layers by the
                     # portable signature (postgres::schema.table, ...) so the
@@ -897,7 +901,7 @@ class FavoritesController(BaseController):
                         # making the favorites manager show "1" everywhere.
                         # Iterate the filtered cursor with no attrs/geom for
                         # an exact count at minimal I/O cost.
-                        'feature_count': self._exact_filtered_feature_count(map_layer),
+                        'feature_count': exact_filtered_feature_count(map_layer),
                         'layer_id': layer_id,
                         'layer_signature': signature,
                         'display_name': display_name,
@@ -912,7 +916,7 @@ class FavoritesController(BaseController):
             if layer is not None:
                 if spatial_config is None:
                     spatial_config = {}
-                spatial_config['source_layer_signature'] = self._layer_signature_for(layer)
+                spatial_config['source_layer_signature'] = layer_signature_for(layer)
 
             # Use FavoritesService.add_favorite() with individual parameters
             favorite_id = self._favorites_manager.add_favorite(
@@ -1126,7 +1130,7 @@ class FavoritesController(BaseController):
             except (RuntimeError, AttributeError):
                 pass
             try:
-                signature_to_layer[self._layer_signature_for(lobj)] = lobj
+                signature_to_layer[layer_signature_for(lobj)] = lobj
             except Exception:
                 pass
 
@@ -1196,7 +1200,7 @@ class FavoritesController(BaseController):
                 if safe_set_subset_string(target_layer, target_subset):
                     applied.append(target_layer.name())
                     zoom_layers.append(target_layer)
-                    fresh_count = self._exact_filtered_feature_count(target_layer)
+                    fresh_count = exact_filtered_feature_count(target_layer)
                     if isinstance(payload, dict):
                         new_payload = dict(payload)
                     else:
@@ -1360,26 +1364,7 @@ class FavoritesController(BaseController):
 
         return None
 
-    @staticmethod
-    def _collect_filtering_widgets_for_favorite(dw: Any) -> List[Any]:
-        """Collect the widgets whose signals must be silenced while we
-        restore a favorite, so only the final launchTaskEvent fires a task.
-        """
-        candidates = [
-            getattr(dw, 'mQgsFieldExpressionWidget_filtering_active_expression', None),
-            getattr(dw, 'pushButton_checkable_filtering_layers_to_filter', None),
-            getattr(dw, 'pushButton_checkable_filtering_geometric_predicates', None),
-            getattr(dw, 'pushButton_checkable_filtering_buffer_value', None),
-            getattr(dw, 'mQgsDoubleSpinBox_filtering_buffer_value', None),
-            getattr(dw, 'checkableComboBoxLayer_filtering_layers_to_filter', None),
-        ]
-        try:
-            layers_widget = dw.widgets.get("FILTERING", {}).get("LAYERS_TO_FILTER", {}).get("WIDGET")
-            if layers_widget is not None:
-                candidates.append(layers_widget)
-        except (AttributeError, TypeError):
-            pass
-        return [w for w in candidates if w is not None]
+    
 
     def _favorite_matches_current_layer(
         self,
@@ -1415,7 +1400,7 @@ class FavoritesController(BaseController):
         source_sig = spatial_config.get('source_layer_signature') if isinstance(spatial_config, dict) else None
         if source_sig:
             try:
-                current_sig = self._layer_signature_for(current_layer)
+                current_sig = layer_signature_for(current_layer)
                 if current_sig == source_sig:
                     return True
             except Exception as e:
@@ -1579,7 +1564,7 @@ class FavoritesController(BaseController):
             for lid, lobj in project.mapLayers().items():
                 try:
                     name_to_id[lobj.name()] = lid
-                    signature_to_id[self._layer_signature_for(lobj)] = lid
+                    signature_to_id[layer_signature_for(lobj)] = lid
                 except (RuntimeError, AttributeError):
                     continue
             for key, payload in (favorite.remote_layers or {}).items():
@@ -1701,63 +1686,9 @@ class FavoritesController(BaseController):
                 f"(has_geometric_predicates={bool(has_predicates_flag)})"
             )
 
-    @staticmethod
-    def _exact_filtered_feature_count(layer) -> int:
-        """Count features matching the layer's current subsetString exactly.
+    
 
-        ``QgsVectorLayer.featureCount()`` is fast but returns an estimate on
-        PostgreSQL (pulled from ``pg_class.reltuples``). For EXISTS subsets
-        with intersect predicates the estimate often collapses to 1 even
-        when the real cursor returns hundreds of rows, so the favorites
-        manager would display ``1`` everywhere. Iterate the filtered cursor
-        with no attributes / no geometry — this is an indexed COUNT-like
-        scan that respects ``subsetString`` and stays cheap.
-
-        Falls back to ``layer.featureCount()`` if anything goes wrong
-        (invalid layer, provider that doesn't honor NoGeometry, …).
-        """
-        if layer is None:
-            return 0
-        try:
-            if not layer.isValid():
-                return 0
-        except (RuntimeError, AttributeError):
-            return 0
-
-        try:
-            from qgis.core import QgsFeatureRequest
-            request = QgsFeatureRequest()
-            try:
-                request.setNoAttributes()
-            except (AttributeError, TypeError):
-                pass
-            try:
-                request.setFlags(QgsFeatureRequest.NoGeometry)
-            except (AttributeError, TypeError):
-                pass
-            count = 0
-            for _ in layer.getFeatures(request):
-                count += 1
-            return count
-        except Exception as e:
-            logger.debug(f"_exact_filtered_feature_count fallback for '{getattr(layer, 'name', lambda: '?')()}': {e}")
-            try:
-                fallback = layer.featureCount()
-                return fallback if fallback is not None and fallback >= 0 else 0
-            except Exception:
-                return 0
-
-    @staticmethod
-    def _layer_signature_for(layer: Any) -> str:
-        """Build a project-portable signature for a ``QgsMapLayer``.
-
-        Delegates to :class:`LayerSignature` (domain) so the provider
-        parsing rules live in a single module — this method is kept as
-        a controller-side shortcut because the controller's static
-        callsites read more naturally as ``self._layer_signature_for(...)``.
-        """
-        from ...core.domain.layer_signature import LayerSignature
-        return LayerSignature.compute(layer)
+    
 
     def _backfill_legacy_predicate_default(self, favorite: 'FilterFavorite') -> bool:
         """Heal pre-fix favorites that lack geometric_predicates in spatial_config.
