@@ -679,9 +679,13 @@ class FavoritesService(QObject):
             else:
                 favorites = self.get_all_favorites()
 
-            # v2 signature substitution + v3 canonical keying — both handled
-            # by _strip_project_bindings (updated for CRIT-3).
-            serialized = [self._strip_project_bindings(f.to_dict()) for f in favorites]
+            # v2 signature substitution + v3 canonical keying — both
+            # handled by FavoriteImportHandler.strip_project_bindings
+            # (updated for CRIT-3).
+            serialized = [
+                FavoriteImportHandler.strip_project_bindings(f.to_dict())
+                for f in favorites
+            ]
             # H4 fix 2026-04-27: stripping ``owner`` happens here in the
             # canonical export pass (instead of a second-rewrite post-step
             # in the sharing extension) so the on-disk file is final from
@@ -894,44 +898,11 @@ class FavoritesService(QObject):
         from datetime import datetime
         return datetime.now().isoformat()
 
-    @staticmethod
-    def _strip_project_bindings(fav_dict: Dict[str, Any]) -> Dict[str, Any]:
-        """Strip project-specific identifiers — see :class:`FavoriteImportHandler`.
+    
 
-        Wrapper kept for backward compatibility with callers (notably
-        ``extensions/favorites_sharing/service.py``) that referenced the
-        previous API. The transform itself lives in the domain handler.
-        """
-        return FavoriteImportHandler.strip_project_bindings(fav_dict)
+    
 
-    @classmethod
-    def _rebind_imported_favorite(
-        cls,
-        fav_data: Dict[str, Any],
-        file_version: str = '1.0'
-    ) -> Dict[str, Any]:
-        """Re-bind an imported favorite — see :class:`FavoriteImportHandler`.
-
-        Wrapper that builds a fresh :class:`LayerSignatureIndex` per call
-        and delegates. Callers importing many favorites in a row should
-        prefer ``FavoriteImportHandler.rebind_to_project`` directly with
-        a shared index (one ``QgsProject`` walk instead of N).
-        """
-        return FavoriteImportHandler.rebind_to_project(
-            fav_data,
-            LayerSignatureIndex(),
-            file_version=file_version,
-        )
-
-    @staticmethod
-    def _resolve_signature_to_layer_id(signature: str) -> Optional[str]:
-        """Resolve a signature against the current ``QgsProject``.
-
-        Backwards-compatible wrapper around :class:`LayerSignatureIndex`.
-        Builds a one-shot index per call; callers that resolve many
-        signatures in a row should construct a single index.
-        """
-        return LayerSignatureIndex().resolve(signature)
+    
 
     def save(self) -> bool:
         """

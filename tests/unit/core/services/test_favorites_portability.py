@@ -1,9 +1,9 @@
 """Tests for the portable v2 favorites format.
 
-Covers the _strip_project_bindings (export side) and
-_rebind_imported_favorite (import side) helpers added in 2026-04-21 to
-enable cross-project favorite sharing. The helpers operate on plain dicts,
-so these tests avoid requiring a running QGIS environment.
+Covers ``FavoriteImportHandler.strip_project_bindings`` (export side)
+and ``FavoriteImportHandler.rebind_to_project`` (import side). The
+helpers operate on plain dicts, so these tests avoid requiring a
+running QGIS environment.
 
 F15 (2026-04-27): the resolution seam moved from
 ``FavoritesService._resolve_signature_to_layer_id`` to
@@ -13,8 +13,8 @@ that's the new single source of truth for project layer lookup.
 
 import pytest
 
+from core.domain.favorite_import_handler import FavoriteImportHandler
 from core.domain.layer_signature import LayerSignatureIndex
-from core.services.favorites_service import FavoritesService
 
 
 class TestStripProjectBindings:
@@ -26,7 +26,7 @@ class TestStripProjectBindings:
             "expression": "foo = 1",
             "layer_id": "source-uuid",
         }
-        stripped = FavoritesService._strip_project_bindings(fav)
+        stripped = FavoriteImportHandler.strip_project_bindings(fav)
         assert "id" not in stripped
         assert "project_uuid" not in stripped
         assert stripped["layer_id"] is None
@@ -54,7 +54,7 @@ class TestStripProjectBindings:
                 },
             },
         }
-        stripped = FavoritesService._strip_project_bindings(fav)
+        stripped = FavoriteImportHandler.strip_project_bindings(fav)
         for key, payload in stripped["remote_layers"].items():
             assert payload["layer_id"] is None, key
             assert "layer_signature" in payload, key
@@ -67,7 +67,7 @@ class TestStripProjectBindings:
             "use_count": 42,
             "last_used_at": "2026-04-01T10:00:00",
         }
-        stripped = FavoritesService._strip_project_bindings(fav)
+        stripped = FavoriteImportHandler.strip_project_bindings(fav)
         assert stripped["use_count"] == 0
         assert stripped["last_used_at"] is None
 
@@ -82,7 +82,7 @@ class TestRebindImportedFavorite:
                 "Foo": {"expression": "y = 2", "layer_id": None},
             },
         }
-        rebound = FavoritesService._rebind_imported_favorite(fav, file_version="1.0")
+        rebound = FavoriteImportHandler.rebind_to_project(fav, LayerSignatureIndex(), file_version="1.0")
         assert rebound["layer_id"] is None
         assert rebound["remote_layers"]["Foo"]["layer_id"] is None
 
@@ -106,7 +106,7 @@ class TestRebindImportedFavorite:
                 }
             },
         }
-        rebound = FavoritesService._rebind_imported_favorite(fav, file_version="2.0")
+        rebound = FavoriteImportHandler.rebind_to_project(fav, LayerSignatureIndex(), file_version="2.0")
         assert rebound["layer_id"] is None
         # CRIT-3 fix 2026-04-23: remote_layers is now canonicalized to
         # signature keys during rebind. The original layer name is
@@ -140,14 +140,16 @@ class TestRebindImportedFavorite:
             },
         }
 
-        stripped = FavoritesService._strip_project_bindings(fav)
+        stripped = FavoriteImportHandler.strip_project_bindings(fav)
         # spatial_config is kept as-is (no secret coupling to layer UUIDs)
         assert stripped["spatial_config"]["exploring_groupbox"] == "custom_selection"
         assert stripped["spatial_config"]["custom_selection_expression"] == "type = 'A'"
         assert stripped["spatial_config"]["source_layer_signature"] == "postgres::public.points"
         assert stripped["spatial_config"]["task_feature_ids"] == [1, 2, 3]
 
-        rebound = FavoritesService._rebind_imported_favorite(stripped, file_version="2.0")
+        rebound = FavoriteImportHandler.rebind_to_project(
+            stripped, LayerSignatureIndex(), file_version="2.0"
+        )
         assert rebound["spatial_config"]["exploring_groupbox"] == "custom_selection"
         assert rebound["spatial_config"]["custom_selection_expression"] == "type = 'A'"
         assert rebound["spatial_config"]["task_feature_ids"] == [1, 2, 3]
@@ -177,7 +179,7 @@ class TestRebindImportedFavorite:
                 }
             },
         }
-        rebound = FavoritesService._rebind_imported_favorite(fav, file_version="2.0")
+        rebound = FavoriteImportHandler.rebind_to_project(fav, LayerSignatureIndex(), file_version="2.0")
         assert rebound["layer_id"] == "local-uuid-A"
         # CRIT-3 fix 2026-04-23: signature-keyed canonical form.
         assert "ogr::parcelles" in rebound["remote_layers"]

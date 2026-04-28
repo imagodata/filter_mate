@@ -146,7 +146,8 @@ class FavoritesSharingService:
         - preserves the author's ``created_at`` as ``_extra.original_created_at``;
         - resets ``use_count`` to 0;
         - has its portable ``layer_signature`` entries re-resolved to
-          current-project layer UUIDs via ``_rebind_imported_favorite``.
+          current-project layer UUIDs via
+          :meth:`FavoriteImportHandler.rebind_to_project`.
 
         Args:
             shared: The SharedFavorite discovered by the scanner.
@@ -159,16 +160,21 @@ class FavoritesSharingService:
             New favorite id on success, ``None`` otherwise.
         """
         try:
-            from filter_mate.core.services.favorites_service import FavoritesService
+            from filter_mate.core.domain.favorite_import_handler import FavoriteImportHandler
             from filter_mate.core.domain.favorites_manager import FilterFavorite
+            from filter_mate.core.domain.layer_signature import LayerSignatureIndex
         except Exception:  # pragma: no cover — plugin package import guard
             logger.exception("Cannot import FilterMate core for Fork")
             return None
 
-        # Re-bind signatures to local layer UUIDs using the existing helper.
-        rebound = FavoritesService._rebind_imported_favorite(
+        # Re-bind signatures to local layer UUIDs. We use the canonical
+        # domain handler directly rather than going through a service
+        # wrapper — the handler is stateless and the index is a per-call
+        # snapshot of the current QgsProject.
+        rebound = FavoriteImportHandler.rebind_to_project(
             dict(shared.payload),
-            str(shared.schema_version),
+            LayerSignatureIndex(),
+            file_version=str(shared.schema_version),
         )
 
         # Trust boundary: a shared favorite is authored by an arbitrary

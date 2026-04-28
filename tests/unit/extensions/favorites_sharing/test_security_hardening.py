@@ -278,21 +278,30 @@ def _fake_filter_mate_modules(monkeypatch):
 
     fm_pkg = types.ModuleType("filter_mate")
     core_pkg = types.ModuleType("filter_mate.core")
-    services_pkg = types.ModuleType("filter_mate.core.services")
     domain_pkg = types.ModuleType("filter_mate.core.domain")
     filter_pkg = types.ModuleType("filter_mate.core.filter")
-    fav_svc_mod = types.ModuleType("filter_mate.core.services.favorites_service")
     fav_mgr_mod = types.ModuleType("filter_mate.core.domain.favorites_manager")
+    import_handler_mod = types.ModuleType(
+        "filter_mate.core.domain.favorite_import_handler"
+    )
+    layer_sig_mod = types.ModuleType("filter_mate.core.domain.layer_signature")
 
     # Re-export the REAL sanitizer so fork's sanitization step runs end-to-end.
     from core.filter import sanitize_subset_string as _real_sanitize  # noqa: WPS433
     filter_pkg.sanitize_subset_string = _real_sanitize  # type: ignore[attr-defined]
 
-    class _FavoritesService:
+    class _FavoriteImportHandler:
         @staticmethod
-        def _rebind_imported_favorite(payload, schema_version):
+        def rebind_to_project(payload, _index, file_version="1.0"):
             # Pass-through for the test — keeps the expression intact.
             return dict(payload)
+
+    class _LayerSignatureIndex:
+        def __init__(self) -> None:
+            pass
+
+        def resolve(self, _sig):
+            return None
 
     captured: Dict[str, Any] = {}
 
@@ -312,25 +321,30 @@ def _fake_filter_mate_modules(monkeypatch):
             captured["payload"] = payload
             return inst
 
-    fav_svc_mod.FavoritesService = _FavoritesService  # type: ignore[attr-defined]
+    import_handler_mod.FavoriteImportHandler = _FavoriteImportHandler  # type: ignore[attr-defined]
+    layer_sig_mod.LayerSignatureIndex = _LayerSignatureIndex  # type: ignore[attr-defined]
     fav_mgr_mod.FilterFavorite = _FilterFavorite  # type: ignore[attr-defined]
     fm_pkg.core = core_pkg  # type: ignore[attr-defined]
-    core_pkg.services = services_pkg  # type: ignore[attr-defined]
     core_pkg.domain = domain_pkg  # type: ignore[attr-defined]
     core_pkg.filter = filter_pkg  # type: ignore[attr-defined]
-    services_pkg.favorites_service = fav_svc_mod  # type: ignore[attr-defined]
     domain_pkg.favorites_manager = fav_mgr_mod  # type: ignore[attr-defined]
+    domain_pkg.favorite_import_handler = import_handler_mod  # type: ignore[attr-defined]
+    domain_pkg.layer_signature = layer_sig_mod  # type: ignore[attr-defined]
 
     monkeypatch.setitem(sys.modules, "filter_mate", fm_pkg)
     monkeypatch.setitem(sys.modules, "filter_mate.core", core_pkg)
-    monkeypatch.setitem(sys.modules, "filter_mate.core.services", services_pkg)
     monkeypatch.setitem(sys.modules, "filter_mate.core.domain", domain_pkg)
     monkeypatch.setitem(sys.modules, "filter_mate.core.filter", filter_pkg)
     monkeypatch.setitem(
-        sys.modules, "filter_mate.core.services.favorites_service", fav_svc_mod
+        sys.modules, "filter_mate.core.domain.favorites_manager", fav_mgr_mod
     )
     monkeypatch.setitem(
-        sys.modules, "filter_mate.core.domain.favorites_manager", fav_mgr_mod
+        sys.modules,
+        "filter_mate.core.domain.favorite_import_handler",
+        import_handler_mod,
+    )
+    monkeypatch.setitem(
+        sys.modules, "filter_mate.core.domain.layer_signature", layer_sig_mod
     )
     return _FilterFavorite, captured
 
