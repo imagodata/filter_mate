@@ -23,7 +23,11 @@ from ...core.domain.exceptions import FavoritePersistenceError
 from .base_controller import BaseController
 from .favorites_spatial_helpers import (
     exact_filtered_feature_count,
+    favorite_matches_current_layer,
     layer_signature_for,
+    resolve_favorite_source_layer,
+    resolve_remote_layer_entry,
+    should_downgrade_single_selection,
 )
 
 if TYPE_CHECKING:
@@ -691,7 +695,7 @@ class FavoritesController(BaseController):
                 # different layer (cross-layer apply), pushing those FIDs
                 # would corrupt the wrong layer's selection with IDs from
                 # an unrelated feature set.
-                if self._favorite_matches_current_layer(favorite, source_layer):
+                if favorite_matches_current_layer(favorite, source_layer):
                     # Push feature IDs into the QGIS layer selection so the
                     # feature picker / multi-select widgets surface them.
                     # Without this the single_selection picker may still
@@ -1141,7 +1145,7 @@ class FavoritesController(BaseController):
         spatial_config = favorite.spatial_config or {}
 
         # --- Source layer subset ----------------------------------------
-        source_layer = self._resolve_favorite_source_layer(
+        source_layer = resolve_favorite_source_layer(
             favorite, spatial_config, project, name_to_layer, signature_to_layer
         )
         source_subset = favorite.expression or ''
@@ -1178,7 +1182,7 @@ class FavoritesController(BaseController):
         counts_changed = False
 
         for key, payload in (favorite.remote_layers or {}).items():
-            target_layer = self._resolve_remote_layer_entry(
+            target_layer = resolve_remote_layer_entry(
                 key, payload, project, name_to_layer, signature_to_layer
             )
             target_subset = ''
@@ -1292,155 +1296,15 @@ class FavoritesController(BaseController):
         )
         return True
 
-    def _resolve_favorite_source_layer(
-        self,
-        favorite: 'FilterFavorite',
-        spatial_config: dict,
-        project,
-        name_to_layer: dict,
-        signature_to_layer: dict,
-    ):
-        """Find the project layer the favorite was captured against."""
-        # Stronger first: project-portable signature
-        sig = spatial_config.get('source_layer_signature') if isinstance(spatial_config, dict) else None
-        if sig and sig in signature_to_layer:
-            return signature_to_layer[sig]
-
-        # UUID match (same project as save-time)
-        layer_id = getattr(favorite, 'layer_id', None)
-        if layer_id:
-            try:
-                layer = project.mapLayer(layer_id)
-                if layer is not None:
-                    return layer
-            except (RuntimeError, AttributeError):
-                pass
-
-        # Last resort: name match
-        layer_name = getattr(favorite, 'layer_name', None)
-        if layer_name and layer_name in name_to_layer:
-            return name_to_layer[layer_name]
-
-        return None
-
-    def _resolve_remote_layer_entry(
-        self,
-        key,
-        payload,
-        project,
-        name_to_layer: dict,
-        signature_to_layer: dict,
-    ):
-        """Find the QgsMapLayer matching a ``favorite.remote_layers[key]`` entry."""
-        # Signature stored in the payload (v2+).
-        if isinstance(payload, dict):
-            payload_sig = payload.get('layer_signature')
-            if payload_sig and payload_sig in signature_to_layer:
-                return signature_to_layer[payload_sig]
-
-        # FIX 2026-04-23 (CRIT-3): when the dict key is itself a signature.
-        if isinstance(key, str) and '::' in key and key in signature_to_layer:
-            return signature_to_layer[key]
-
-        # Legacy: payload carries layer_id (UUID)
-        if isinstance(payload, dict):
-            legacy_id = payload.get('layer_id')
-            if legacy_id:
-                try:
-                    layer = project.mapLayer(legacy_id)
-                    if layer is not None:
-                        return layer
-                except (RuntimeError, AttributeError):
-                    pass
-
-        # Last-chance: display name (or the dict key when it's a plain name).
-        candidate_name = None
-        if isinstance(payload, dict):
-            candidate_name = payload.get('display_name')
-        if not candidate_name and isinstance(key, str) and '::' not in key:
-            candidate_name = key
-        if candidate_name and candidate_name in name_to_layer:
-            return name_to_layer[candidate_name]
-
-        return None
+    
 
     
 
-    def _favorite_matches_current_layer(
-        self,
-        favorite: 'FilterFavorite',
-        current_layer: Any,
-    ) -> bool:
-        """Decide whether task_feature_ids from the favorite can be safely
-        pushed onto `current_layer`.
+    
 
-        Matching order (strongest first):
-        1. spatial_config.source_layer_signature matches current layer's
-           signature — portable across projects (v2 favorites).
-        2. favorite.layer_id matches current_layer.id() — same QGIS project.
-        3. favorite.layer_name matches current_layer.name() — last-chance fuzzy.
+    
 
-        Returns False as soon as we can prove mismatch; returns True only
-        with a positive match on at least one of the three.
-        """
-        if current_layer is None:
-            return False
-
-        try:
-            current_layer_id = current_layer.id()
-        except (RuntimeError, AttributeError):
-            current_layer_id = None
-        try:
-            current_layer_name = current_layer.name()
-        except (RuntimeError, AttributeError):
-            current_layer_name = None
-
-        # Strongest check: project-portable signature
-        spatial_config = getattr(favorite, 'spatial_config', None) or {}
-        source_sig = spatial_config.get('source_layer_signature') if isinstance(spatial_config, dict) else None
-        if source_sig:
-            try:
-                current_sig = layer_signature_for(current_layer)
-                if current_sig == source_sig:
-                    return True
-            except Exception as e:
-                logger.debug(f"Could not compute signature for current layer: {e}")
-
-        # UUID match (same project)
-        fav_layer_id = getattr(favorite, 'layer_id', None)
-        if fav_layer_id and current_layer_id and fav_layer_id == current_layer_id:
-            return True
-
-        # Name match as last resort
-        fav_layer_name = getattr(favorite, 'layer_name', None)
-        if fav_layer_name and current_layer_name and fav_layer_name == current_layer_name:
-            return True
-
-        return False
-
-    @staticmethod
-    def _should_downgrade_single_selection(
-        current_groupbox: Optional[str],
-        has_restored_features: bool,
-        picker_feature_valid: bool,
-        selected_feature_count: int,
-    ) -> bool:
-        """Pure predicate: should we swap single_selection -> custom_selection?
-
-        single_selection aborts when no source feature is available.
-        custom_selection with an empty source expression runs with
-        skip_source_filter=True and filters against the full source layer,
-        which is what legacy favourites (no captured task_feature_ids) expect.
-        """
-        if current_groupbox != 'single_selection':
-            return False
-        if has_restored_features:
-            return False
-        if picker_feature_valid:
-            return False
-        if selected_feature_count > 0:
-            return False
-        return True
+    
 
     def _ensure_applicable_groupbox_for_favorite(self, favorite: 'FilterFavorite') -> None:
         """Downgrade the exploring groupbox when the favorite cannot supply a
@@ -1472,7 +1336,7 @@ class FavoritesController(BaseController):
             except (AttributeError, RuntimeError):
                 selected_count = 0
 
-        if not self._should_downgrade_single_selection(
+        if not should_downgrade_single_selection(
             current_groupbox=current_groupbox,
             has_restored_features=has_restored,
             picker_feature_valid=picker_valid,
