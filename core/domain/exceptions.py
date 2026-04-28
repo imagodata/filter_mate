@@ -94,6 +94,58 @@ class CRSMismatchError(LayerError):
 
 
 # ──────────────────────────────────────────────
+# Favorites errors (F16, 2026-04-28)
+# ──────────────────────────────────────────────
+
+class FavoritesError(FilterMateError):
+    """Base for failures in the favorites domain.
+
+    Lets callers handle every favorites-specific failure with a single
+    ``except FavoritesError`` while still letting subclasses distinguish
+    bootstrap, lookup and persistence problems for fine-grained UI
+    surfacing.
+    """
+
+
+class FavoritesNotInitialized(FavoritesError):
+    """Service or manager has no DB attached.
+
+    Raised when a write/read is invoked on an unbootstrapped state. In
+    practice this is either a programmer error (call site fired before
+    ``set_database``) or a startup race. Callers should treat as urgent —
+    the user's action is silently lost until the manager is wired.
+    """
+
+
+class FavoriteNotFound(FavoritesError):
+    """Asked to operate on a favorite id that doesn't exist.
+
+    Distinct from :class:`FavoritesNotInitialized` — the system is
+    healthy, the id is just unknown (stale UI reference, manual SQL
+    delete, etc.). UI may surface as a no-op or a soft warning.
+    """
+
+    def __init__(self, favorite_id: str):
+        super().__init__(f"Favorite {favorite_id!r} not found")
+        self.favorite_id = favorite_id
+
+
+class FavoritePersistenceError(FavoritesError):
+    """SQLite / file-system / project-file write failed.
+
+    Wraps the underlying exception via ``__cause__`` so callers retain
+    stack context but can act on the semantic class (always urgent —
+    disk full, DB locked, permission denied, …). The ``op`` attribute
+    names the high-level operation that was attempted, for log/UI use.
+    """
+
+    def __init__(self, op: str, cause: Exception):
+        super().__init__(f"Persistence failure during {op}: {cause}")
+        self.op = op
+        self.__cause__ = cause
+
+
+# ──────────────────────────────────────────────
 # Export errors
 # ──────────────────────────────────────────────
 
@@ -156,6 +208,11 @@ __all__ = [
     'LayerInvalidError',
     'LayerNotFoundError',
     'CRSMismatchError',
+    # Favorites
+    'FavoritesError',
+    'FavoritesNotInitialized',
+    'FavoriteNotFound',
+    'FavoritePersistenceError',
     # Export
     'ExportError',
     'ExportPathError',

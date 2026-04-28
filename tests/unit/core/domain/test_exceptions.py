@@ -32,6 +32,11 @@ from core.domain.exceptions import (
     LayerInvalidError,
     LayerNotFoundError,
     CRSMismatchError,
+    # Favorites errors
+    FavoritesError,
+    FavoritesNotInitialized,
+    FavoriteNotFound,
+    FavoritePersistenceError,
     # Export errors
     ExportError,
     ExportPathError,
@@ -185,6 +190,53 @@ class TestLayerErrors:
             raise LayerNotFoundError("layer_abc not in project")
         with pytest.raises(LayerError):
             raise CRSMismatchError("EPSG:4326 vs EPSG:3857")
+
+
+# =========================================================================
+# Favorites error hierarchy (F16, 2026-04-28)
+# =========================================================================
+
+class TestFavoritesErrors:
+    """Tests for favorites-domain exception hierarchy."""
+
+    def test_favorites_error_inherits_base(self):
+        assert issubclass(FavoritesError, FilterMateError)
+
+    def test_not_initialized_inherits_favorites(self):
+        assert issubclass(FavoritesNotInitialized, FavoritesError)
+
+    def test_not_found_inherits_favorites(self):
+        assert issubclass(FavoriteNotFound, FavoritesError)
+
+    def test_persistence_inherits_favorites(self):
+        assert issubclass(FavoritePersistenceError, FavoritesError)
+
+    def test_catch_favorites_error_catches_subtypes(self):
+        with pytest.raises(FavoritesError):
+            raise FavoritesNotInitialized("manager missing")
+        with pytest.raises(FavoritesError):
+            raise FavoriteNotFound("abc-123")
+        with pytest.raises(FavoritesError):
+            raise FavoritePersistenceError("save", IOError("disk full"))
+
+    def test_not_found_carries_id(self):
+        err = FavoriteNotFound("abc-123")
+        assert err.favorite_id == "abc-123"
+        assert "abc-123" in str(err)
+
+    def test_persistence_carries_op_and_cause(self):
+        cause = IOError("disk full")
+        err = FavoritePersistenceError("save_to_project_file", cause)
+        assert err.op == "save_to_project_file"
+        assert err.__cause__ is cause
+        assert "save_to_project_file" in str(err)
+        assert "disk full" in str(err)
+
+    def test_catch_filtermate_error_catches_favorites(self):
+        # Broad catch must work — favorites errors should not escape the
+        # plugin-wide exception umbrella.
+        with pytest.raises(FilterMateError):
+            raise FavoritesNotInitialized("any")
 
 
 # =========================================================================
