@@ -165,6 +165,21 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         except (RuntimeError, AttributeError) as e:
             logger.debug(f"Could not refresh dialog on external change: {e}")
 
+    def _show_error(self, message: str) -> None:
+        """Push a critical/error notification to the QGIS message bar.
+
+        F11 policy: transactional failures (delete, save) surface via
+        ``infrastructure.feedback.show_error`` rather than a modal
+        ``QMessageBox.warning`` — the dialog stays usable, the toast is
+        visible at the top of the canvas, and the full traceback can be
+        read in View → Panels → Log Messages.
+        """
+        try:
+            from ...infrastructure.feedback import show_error
+            show_error(message)
+        except ImportError:
+            logger.error(message)
+
     def closeEvent(self, event):
         """Disconnect from external signals before Qt destroys the dialog.
 
@@ -1089,6 +1104,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if not fav:
             return
 
+        # F11 policy: stays a modal QMessageBox.question because deletion
+        # is destructive and a toast confirm would risk silent data loss
+        # if missed.
         reply = QMessageBox.question(
             self,
             self.tr("Delete Favorite"),
@@ -1113,14 +1131,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # initialised, unknown id, IO error), the row is still in SQLite
         # — pretending otherwise creates a ghost entry on next reload.
         if not removed:
-            QMessageBox.warning(
-                self,
-                self.tr("Delete Favorite"),
-                self.tr(
-                    "Could not delete '{0}'. The favorite is still in the "
-                    "database — check the FilterMate log for details."
-                ).format(fav.name),
-            )
+            self._show_error(self.tr(
+                "Could not delete '{0}' — favorite is still in the "
+                "database. See View → Panels → Log Messages for details."
+            ).format(fav.name))
             return
 
         self._list_widget.takeItem(self._list_widget.currentRow())
@@ -1316,40 +1330,4 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         self._all_favorites = self._favorites_manager.get_all_favorites()
         self._refresh_filtered_list()
 
-    @staticmethod
-    def show_dialog(favorites_manager, parent=None) -> Optional[str]:
-        """
-        Show the dialog and return the applied favorite ID if any.
-
-        Args:
-            favorites_manager: FavoritesManager instance
-            parent: Parent widget
-
-        Returns:
-            Applied favorite ID or None
-        """
-        if not favorites_manager or favorites_manager.count == 0:
-            if HAS_QGIS:
-                from qgis.PyQt.QtCore import QCoreApplication
-                QMessageBox.information(
-                    parent,
-                    QCoreApplication.translate("FavoritesManagerDialog", "Favorites Manager"),
-                    QCoreApplication.translate(
-                        "FavoritesManagerDialog",
-                        "No favorites saved yet.\n\n"
-                        "Click the ★ indicator and select 'Add current filter to favorites' "
-                        "to save your first favorite."
-                    )
-                )
-            return None
-
-        dialog = FavoritesManagerDialog(favorites_manager, parent)
-        applied_id = [None]
-
-        def on_applied(fav_id):
-            applied_id[0] = fav_id
-
-        dialog.favoriteApplied.connect(on_applied)
-        dialog.exec()
-
-        return applied_id[0]
+    

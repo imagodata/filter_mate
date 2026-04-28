@@ -237,11 +237,7 @@ class FavoritesController(BaseController):
         """
         expression = self.get_current_filter_expression()
         if not expression:
-            QMessageBox.warning(
-                self.dockwidget,
-                self.tr("No Filter"),
-                self.tr("No active filter to save.")
-            )
+            self._show_warning(self.tr("No active filter to save."))
             return False
 
         if not name:
@@ -492,6 +488,9 @@ class FavoritesController(BaseController):
             return 0
 
         if merge is None:
+            # F11 policy: stays a modal QMessageBox.question. Replace-all
+            # is destructive (drops every existing favorite); the user
+            # must consciously decide before we touch the DB.
             result = QMessageBox.question(
                 self.dockwidget,
                 self.tr("Import Favorites"),
@@ -550,16 +549,10 @@ class FavoritesController(BaseController):
             # instead. When sharing IS active we still open the dialog so
             # the user can reach the "📡 Shared..." button.
             if self.count == 0 and not self._is_sharing_extension_active():
-                QMessageBox.information(
-                    self.dockwidget,
-                    self.tr("Favorites Manager"),
-                    self.tr(
-                        "No favorites saved yet.\n\n"
-                        "Apply a filter to a layer, then click the ★ indicator "
-                        "and choose 'Add current filter to favorites' to save "
-                        "your first favorite."
-                    ),
-                )
+                self._show_info(self.tr(
+                    "No favorites saved yet — apply a filter then click the "
+                    "★ indicator to save your first one."
+                ))
                 return
 
             from ..dialogs import FavoritesManagerDialog
@@ -806,17 +799,16 @@ class FavoritesController(BaseController):
     def _validate_favorite_name(self, name: str) -> bool:
         """Validate favorite name."""
         if not name or not name.strip():
-            QMessageBox.warning(
-                self.dockwidget,
-                self.tr("Invalid Name"),
-                self.tr("Favorite name cannot be empty.")
-            )
+            self._show_warning(self.tr("Favorite name cannot be empty."))
             return False
 
         # Check for duplicates
         if self._favorites_manager:
             existing = self._favorites_manager.get_favorite_by_name(name)
             if existing:
+                # F11 policy: stays a modal QMessageBox.question because
+                # the user must decide before the save proceeds. A toast
+                # would risk silent data loss if missed.
                 result = QMessageBox.question(
                     self.dockwidget,
                     self.tr("Duplicate Name"),
@@ -1796,21 +1788,42 @@ class FavoritesController(BaseController):
         ).format(favorite.name))
         return True
 
+    def _show_info(self, message: str) -> None:
+        """Push an info to the QGIS message bar (transient, non-blocking)."""
+        try:
+            from ...infrastructure.feedback import show_info
+            show_info(message)
+        except ImportError:
+            logger.info(message)
+
     def _show_success(self, message: str) -> None:
-        """Show success message."""
+        """Push a success notification to the QGIS message bar."""
         try:
             from ...infrastructure.feedback import show_success
-            show_success("FilterMate", message)
+            show_success(message)
         except ImportError:
             logger.info(f"Success: {message}")
 
     def _show_warning(self, message: str) -> None:
-        """Show warning message."""
+        """Push a warning to the QGIS message bar (transient, non-blocking)."""
         try:
             from ...infrastructure.feedback import show_warning
-            show_warning("FilterMate", message)
+            show_warning(message)
         except ImportError:
             logger.warning(message)
+
+    def _show_error(self, message: str) -> None:
+        """Push a critical/error notification to the QGIS message bar.
+
+        For transactional failures (save/persist/IO). Stays visible until
+        dismissed. The user can read the full traceback in
+        View → Panels → Log Messages.
+        """
+        try:
+            from ...infrastructure.feedback import show_error
+            show_error(message)
+        except ImportError:
+            logger.error(message)
 
     # ─────────────────────────────────────────────────────────────────
     # Global Favorites & Maintenance Methods

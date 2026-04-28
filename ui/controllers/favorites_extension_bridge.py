@@ -277,6 +277,9 @@ class FavoritesExtensionBridge:
             favorites = ctrl._favorites_manager.get_all_favorites()
         except Exception:
             favorites = []
+        # F11 policy: stays a modal QMessageBox.question. Quick-publish
+        # writes a signed bundle to a remote git repo + pushes it; user
+        # must consciously decide before we touch the remote.
         confirm = QMessageBox.question(
             ctrl.dockwidget,
             ctrl.tr("Quick publish"),
