@@ -724,6 +724,10 @@
           "min": 100,
           "max": 50000,
           "description": "Maximum number of features loaded in the feature picker list widget"
+        },
+        "auto_zoom_on_filter": {
+          "value": true,
+          "description": "Auto-zoom on the union extent of filtered layers (source + cascade targets) after a filter or favorite is applied. Per-layer is_tracking still forces zoom on its own layer."
         }
       }
     }
@@ -765,8 +769,6 @@
     "layers": []
   },
   "EXTENSIONS": {
-    "_hidden": true,
-    "_display_name": "Extensions",
-    "description": "Per-extension configuration. Keys are auto-seeded from each extension's config_schema() on first startup — do not edit by hand unless you know the extension's schema."
+    "_display_name": "Extensions"
   }
 }

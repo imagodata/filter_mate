@@ -148,8 +148,8 @@ class FilterResultHandler:
         # Update backend indicator with actual backend used
         self._update_backend_indicator(task_parameters, provider_type, display_backend, is_fallback)
 
-        # Zoom to filtered extent only if is_tracking (auto extent) is enabled
-        self._handle_auto_zoom(source_layer)
+        # Zoom to filtered extent (global flag or per-layer is_tracking)
+        self._handle_auto_zoom(source_layer, task_parameters)
 
         # Sync PROJECT_LAYERS between app and dockwidget
         self._sync_project_layers()
@@ -322,43 +322,49 @@ class FilterResultHandler:
                 else:
                     dockwidget._update_backend_indicator(provider_type, postgresql_conn, display_backend)
 
-    def _handle_auto_zoom(self, source_layer: QgsVectorLayer) -> None:
+    def _handle_auto_zoom(
+        self,
+        source_layer: QgsVectorLayer,
+        task_parameters: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """
-        Zoom to filtered extent if auto-zoom is enabled for this layer.
+        Zoom to the union extent of every layer touched by the filter.
+
+        Honours the global ``APP.OPTIONS.EXPLORATION.auto_zoom_on_filter``
+        flag and the per-layer ``is_tracking`` override (the latter wins
+        when the global flag is off).
 
         Args:
-            source_layer: Source layer to zoom to
+            source_layer: Primary layer that was filtered.
+            task_parameters: Original task parameters; used to discover
+                cascade target layers via ``task["layers"]``.
         """
+        from .auto_zoom import auto_zoom_to_filtered
+
+        layers = [source_layer]
+
+        if task_parameters:
+            project = QgsProject.instance()
+            for entry in task_parameters.get("task", {}).get("layers", []) or []:
+                if not isinstance(entry, dict):
+                    continue
+                layer_id = entry.get("layer_id")
+                if not layer_id or layer_id == source_layer.id():
+                    continue
+                target = project.mapLayer(layer_id)
+                if target is not None and target.isValid():
+                    layers.append(target)
+
         project_layers = self._get_project_layers() if self._get_project_layers else {}
-
-        # Check if is_tracking is enabled for this layer
-        is_tracking_enabled = False
-        if source_layer.id() in project_layers:
-            layer_props = project_layers[source_layer.id()]
-            is_tracking_enabled = layer_props.get("exploring", {}).get("is_tracking", False)
-
-        if not is_tracking_enabled:
-            # Just refresh the canvas without zooming
-            iface_obj = self._get_iface()
-            iface_obj.mapCanvas().refresh()
-            return
-
-        # IMPROVED: Use actual filtered extent instead of cached layer extent
-        source_layer.updateExtents()  # Force recalculation after filter
-
-        # Use dockwidget helper if available, otherwise calculate directly
         dockwidget = self._get_dockwidget() if self._get_dockwidget else None
-        if dockwidget and hasattr(dockwidget, 'get_filtered_layer_extent'):
-            extent = dockwidget.get_filtered_layer_extent(source_layer)
-        else:
-            extent = source_layer.extent()
-
         iface_obj = self._get_iface()
-        if extent and not extent.isEmpty():
-            iface_obj.mapCanvas().zoomToFeatureExtent(extent)
-            logger.debug("Auto-zoom to filtered extent enabled (is_tracking=True)")
-        else:
-            iface_obj.mapCanvas().refresh()
+
+        auto_zoom_to_filtered(
+            layers,
+            project_layers,
+            dockwidget=dockwidget,
+            iface_obj=iface_obj,
+        )
 
     def _sync_project_layers(self) -> None:
         """Sync PROJECT_LAYERS between FilterMateApp and dockwidget."""

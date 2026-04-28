@@ -1119,6 +1119,7 @@ class FavoritesController(BaseController):
 
         applied: List[str] = []
         skipped: List[str] = []
+        zoom_layers: list = []  # Source + targets actually filtered, for auto-zoom
 
         spatial_config = favorite.spatial_config or {}
 
@@ -1131,6 +1132,7 @@ class FavoritesController(BaseController):
             try:
                 if safe_set_subset_string(source_layer, source_subset):
                     applied.append(source_layer.name())
+                    zoom_layers.append(source_layer)
                     logger.info(
                         f"  ✓ Source layer '{source_layer.name()}' subset applied "
                         f"({len(source_subset)} chars)"
@@ -1180,6 +1182,7 @@ class FavoritesController(BaseController):
             try:
                 if safe_set_subset_string(target_layer, target_subset):
                     applied.append(target_layer.name())
+                    zoom_layers.append(target_layer)
                     fresh_count = self._exact_filtered_feature_count(target_layer)
                     if isinstance(payload, dict):
                         new_payload = dict(payload)
@@ -1246,6 +1249,25 @@ class FavoritesController(BaseController):
                     canvas.refreshAllLayers()
         except Exception:
             pass
+
+        # Auto-zoom on the union extent of every layer the favorite touched
+        # (mirrors the normal filter completion flow).
+        try:
+            from ...adapters.auto_zoom import auto_zoom_to_filtered
+
+            project_layers = {}
+            try:
+                project_layers = getattr(self.dockwidget, 'PROJECT_LAYERS', {}) or {}
+            except (RuntimeError, AttributeError):
+                project_layers = {}
+
+            auto_zoom_to_filtered(
+                zoom_layers,
+                project_layers,
+                dockwidget=self.dockwidget,
+            )
+        except Exception as exc:
+            logger.debug(f"Favorite auto-zoom skipped: {exc}")
 
         logger.info(
             f"Favorite '{favorite.name}' applied directly: "
