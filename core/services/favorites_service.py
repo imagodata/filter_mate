@@ -22,7 +22,11 @@ if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer
 
 # Export FilterFavorite from domain
-from ..domain.exceptions import FavoritesError, FavoritesNotInitialized
+from ..domain.exceptions import (
+    FavoritePersistenceError,
+    FavoritesError,
+    FavoritesNotInitialized,
+)
 from ..domain.favorite_import_handler import FavoriteImportHandler
 from ..domain.favorites_manager import FilterFavorite
 from ..domain.layer_signature import LayerSignatureIndex
@@ -345,7 +349,7 @@ class FavoritesService(QObject):
             raise
         except Exception as e:
             logger.error(f"Error removing favorite: {e}")
-            return False
+            raise FavoritePersistenceError("remove_favorite", e) from e
 
     def update_favorite(
         self,
@@ -385,7 +389,7 @@ class FavoritesService(QObject):
             raise
         except Exception as e:
             logger.error(f"Error updating favorite: {e}")
-            return False
+            raise FavoritePersistenceError("update_favorite", e) from e
 
     def get_favorite(self, favorite_id: str) -> Optional[Any]:
         """
@@ -942,7 +946,7 @@ class FavoritesService(QObject):
             raise
         except Exception as e:
             logger.error(f"Error saving favorites: {e}")
-            return False
+            raise FavoritePersistenceError("save", e) from e
 
     def reload(self) -> bool:
         """
@@ -967,7 +971,7 @@ class FavoritesService(QObject):
             raise
         except Exception as e:
             logger.error(f"Error reloading favorites: {e}")
-            return False
+            raise FavoritePersistenceError("reload", e) from e
 
     # ─────────────────────────────────────────────────────────────────
     # Project File (.qgz) Backup/Restore
@@ -1028,7 +1032,7 @@ class FavoritesService(QObject):
             raise
         except Exception as e:
             logger.error(f"Error saving favorites to project file: {e}")
-            return False
+            raise FavoritePersistenceError("save_to_project_file", e) from e
 
     def restore_from_project_file(self, project: Optional[Any] = None) -> int:
         """

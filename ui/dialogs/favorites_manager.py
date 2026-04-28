@@ -1058,6 +1058,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # the user sees the current state, but save does not act on it.
 
         if new_name:
+            # F16 phase 4 lazy import: keeps this module importable in
+            # tests that lack the 3-level package nesting needed by a
+            # top-level ``from ...core.domain.exceptions`` statement.
+            from ...core.domain.exceptions import FavoritePersistenceError
             # FIX 2026-04-22: suppress re-entrant external refresh triggered by
             # the manager's own favorites_changed emission.
             self._suppress_external_refresh = True
@@ -1071,6 +1075,11 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                     owner=desired_owner,
                 )
                 self._favorites_manager.save()
+            except FavoritePersistenceError as e:
+                self._show_error(self.tr(
+                    "Could not save '{0}': {1}"
+                ).format(new_name, e.__cause__ or e))
+                return
             finally:
                 self._suppress_external_refresh = False
 
@@ -1118,22 +1127,27 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
 
         deleted_id = self._current_fav_id
+        # F16 phase 4 lazy import — see _on_save for rationale.
+        from ...core.domain.exceptions import FavoritePersistenceError
         # FIX 2026-04-22: suppress re-entrant external refresh from manager's
         # own favorites_changed emission during delete + save.
         self._suppress_external_refresh = True
         try:
             removed = self._favorites_manager.remove_favorite(deleted_id)
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not delete '{0}': {1}"
+            ).format(fav.name, e.__cause__ or e))
+            return
         finally:
             self._suppress_external_refresh = False
 
-        # FIX 2026-04-23 (MED-5): surface silent failures instead of
-        # optimistically updating the UI. If the manager refused (DB not
-        # initialised, unknown id, IO error), the row is still in SQLite
-        # — pretending otherwise creates a ghost entry on next reload.
+        # FIX 2026-04-23 (MED-5): unknown-id stays a soft False (Cat B
+        # per F16 audit) — surface so the row stays visible. IO failures
+        # are now caught above as PersistenceError.
         if not removed:
             self._show_error(self.tr(
-                "Could not delete '{0}' — favorite is still in the "
-                "database. See View → Panels → Log Messages for details."
+                "'{0}' was not in the database — refresh and try again."
             ).format(fav.name))
             return
 

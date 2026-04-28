@@ -19,6 +19,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtGui import QCursor
 from qgis.core import QgsProject
 
+from ...core.domain.exceptions import FavoritePersistenceError
 from .base_controller import BaseController
 
 if TYPE_CHECKING:
@@ -322,9 +323,18 @@ class FavoritesController(BaseController):
             return False
 
         name = favorite.name
-        success = self._favorites_manager.remove_favorite(favorite_id)
+        try:
+            success = self._favorites_manager.remove_favorite(favorite_id)
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not remove '{0}': {1}"
+            ).format(name, e.__cause__ or e))
+            return False
         if success:
-            self._favorites_manager.save()
+            try:
+                self._favorites_manager.save()
+            except FavoritePersistenceError as e:
+                logger.warning(f"Save after remove failed: {e}")
             self.favorite_removed.emit(name)
             self.favorites_changed.emit()
             self.update_indicator()
@@ -819,7 +829,13 @@ class FavoritesController(BaseController):
                 if result != QMessageBox.StandardButton.Yes:
                     return False
                 # Remove existing
-                self._favorites_manager.remove_favorite(existing.id)
+                try:
+                    self._favorites_manager.remove_favorite(existing.id)
+                except FavoritePersistenceError as e:
+                    self._show_error(self.tr(
+                        "Could not replace '{0}': {1}"
+                    ).format(name, e.__cause__ or e))
+                    return False
 
         return True
 
@@ -918,6 +934,11 @@ class FavoritesController(BaseController):
                 logger.warning(f"Failed to create favorite '{name}' - add_favorite() returned None")
             return False
 
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not save '{0}': {1}"
+            ).format(name, e.__cause__ or e))
+            return False
         except Exception as e:
             logger.error(f"Failed to create favorite: {e}")
             return False
@@ -1846,7 +1867,13 @@ class FavoritesController(BaseController):
 
         # First, import the global favorite to the current project
         if hasattr(self._favorites_manager, 'import_global_to_project'):
-            new_id = self._favorites_manager.import_global_to_project(favorite_id)
+            try:
+                new_id = self._favorites_manager.import_global_to_project(favorite_id)
+            except FavoritePersistenceError as e:
+                self._show_error(self.tr(
+                    "Could not import global favorite: {0}"
+                ).format(e.__cause__ or e))
+                return False
             if new_id:
                 # Then apply the newly imported favorite
                 self.update_indicator()
@@ -1860,7 +1887,13 @@ class FavoritesController(BaseController):
             return False
 
         if hasattr(self._favorites_manager, 'copy_to_global'):
-            new_id = self._favorites_manager.copy_to_global(favorite_id)
+            try:
+                new_id = self._favorites_manager.copy_to_global(favorite_id)
+            except FavoritePersistenceError as e:
+                self._show_error(self.tr(
+                    "Could not copy to global: {0}"
+                ).format(e.__cause__ or e))
+                return False
             if new_id:
                 self._show_success(self.tr("Favorite copied to global favorites"))
                 return True
@@ -1886,7 +1919,13 @@ class FavoritesController(BaseController):
 
         if hasattr(self._favorites_manager, 'save_to_project_file'):
             from qgis.core import QgsProject
-            success = self._favorites_manager.save_to_project_file(QgsProject.instance())
+            try:
+                success = self._favorites_manager.save_to_project_file(QgsProject.instance())
+            except FavoritePersistenceError as e:
+                self._show_error(self.tr(
+                    "Could not save favorites to project file: {0}"
+                ).format(e.__cause__ or e))
+                return
             if success:
                 self._show_success(self.tr("Saved {0} favorite(s) to project file").format(self.count))
             else:

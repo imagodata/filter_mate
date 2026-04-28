@@ -17,7 +17,7 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass, asdict, field
 
-from .exceptions import FavoritesNotInitialized
+from .exceptions import FavoritePersistenceError, FavoritesNotInitialized
 from .layer_signature import LayerSignatureIndex
 from .remote_layers_normalizer import RemoteLayersNormalizer
 from .schema_constants import GLOBAL_PROJECT_UUID
@@ -701,7 +701,7 @@ class FavoritesManager:
 
         except Exception as e:
             logger.error(f"Failed to add favorite: {e}")
-            return False
+            raise FavoritePersistenceError("add_favorite", e) from e
 
     def remove_favorite(self, favorite_id: str) -> bool:
         """Remove a favorite.
@@ -740,7 +740,7 @@ class FavoritesManager:
 
         except Exception as e:
             logger.error(f"Failed to remove favorite: {e}")
-            return False
+            raise FavoritePersistenceError("remove_favorite", e) from e
 
     def update_favorite(
         self,
@@ -816,7 +816,7 @@ class FavoritesManager:
 
         except Exception as e:
             logger.error(f"Failed to update favorite: {e}")
-            return False
+            raise FavoritePersistenceError("update_favorite", e) from e
 
     def increment_use_count(self, favorite_id: str) -> bool:
         """Increment use count for a favorite.
@@ -1005,7 +1005,7 @@ class FavoritesManager:
 
         except Exception as e:
             logger.error(f"Error making favorite global: {e}")
-            return False
+            raise FavoritePersistenceError("make_favorite_global", e) from e
 
     def copy_to_global(self, favorite_id: str) -> Optional[str]:
         """

@@ -129,16 +129,67 @@ def _ensure_favorites_mocks():
         sys.modules[styles_full] = styles_mod
         styles_spec.loader.exec_module(styles_mod)
 
+    # F16 phase 4: favorites_controller does ``from ...core.domain.exceptions``.
+    # The shim is two-level deep (``_fm_test_ui_shim.controllers.X``), so
+    # three dots reaches above the shim root and fails. Add an inner ``ui``
+    # layer so the loader can register the controller as
+    # ``_fm_test_ui_shim.ui.controllers.favorites_controller`` and the
+    # three-dot import resolves to ``_fm_test_ui_shim.core.domain.exceptions``.
+    inner_ui = f"{shim_root}.ui"
+    if inner_ui not in sys.modules:
+        ui_mod = types.ModuleType(inner_ui)
+        ui_mod.__path__ = [str(_project_root / "ui")]
+        ui_mod.__package__ = inner_ui
+        sys.modules[inner_ui] = ui_mod
+        # Re-register controllers + styles + base_controller stub under
+        # the inner namespace so the new import path finds them.
+        sys.modules[f"{inner_ui}.controllers"] = sys.modules[shim_pkg_name]
+        sys.modules[f"{inner_ui}.controllers.base_controller"] = sys.modules[
+            f"{shim_pkg_name}.base_controller"
+        ]
+        sys.modules[f"{inner_ui}.styles"] = sys.modules[styles_pkg_name]
+        sys.modules[f"{inner_ui}.styles.favorites_styles"] = sys.modules[
+            f"{styles_pkg_name}.favorites_styles"
+        ]
+
+    core_pkg_name = f"{shim_root}.core"
+    if core_pkg_name not in sys.modules:
+        core_pkg = types.ModuleType(core_pkg_name)
+        core_pkg.__path__ = [str(_project_root / "core")]
+        core_pkg.__package__ = core_pkg_name
+        sys.modules[core_pkg_name] = core_pkg
+
+        domain_pkg = types.ModuleType(f"{core_pkg_name}.domain")
+        domain_pkg.__path__ = [str(_project_root / "core" / "domain")]
+        domain_pkg.__package__ = f"{core_pkg_name}.domain"
+        sys.modules[f"{core_pkg_name}.domain"] = domain_pkg
+
+        exc_full = f"{core_pkg_name}.domain.exceptions"
+        exc_spec = importlib.util.spec_from_file_location(
+            exc_full,
+            str(_project_root / "core" / "domain" / "exceptions.py"),
+        )
+        exc_mod = importlib.util.module_from_spec(exc_spec)
+        sys.modules[exc_full] = exc_mod
+        exc_spec.loader.exec_module(exc_mod)
+
 
 _ensure_favorites_mocks()
 
 
 def _load_favorites_controller():
-    """Load favorites_controller.py as a module inside the shim package so
-    its `from .base_controller import BaseController` resolves to the fake
-    and `from ..styles.favorites_styles import ...` reaches the real file.
+    """Load favorites_controller.py inside the shim package.
+
+    Three relative-import paths must resolve:
+      - ``from .base_controller`` -> shim base_controller stub.
+      - ``from ..styles.favorites_styles`` -> real styles file.
+      - ``from ...core.domain.exceptions`` -> real exceptions file.
+
+    The third one needs three levels of parents, so we load the
+    controller under ``_fm_test_ui_shim.ui.controllers.X`` rather than
+    ``_fm_test_ui_shim.controllers.X``.
     """
-    mod_name = "_fm_test_ui_shim.controllers.favorites_controller"
+    mod_name = "_fm_test_ui_shim.ui.controllers.favorites_controller"
     if mod_name in sys.modules:
         return sys.modules[mod_name]
 
