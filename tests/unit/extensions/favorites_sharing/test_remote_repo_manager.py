@@ -277,7 +277,7 @@ class TestPublishBundleE2E:
         _run(["git", "config", "user.email", "t@example.com"], cwd=repo.expanded_local_clone)
         _run(["git", "config", "user.name", "T"], cwd=repo.expanded_local_clone)
 
-        sync = mgr.publish_bundle(
+        sync = mgr.publish_to_remote(
             repo, self._write_bundle_fn(content='{"v": 1}\n'),
         )
         assert sync.success, sync.error_message
@@ -303,11 +303,11 @@ class TestPublishBundleE2E:
         _run(["git", "config", "user.name", "T"], cwd=repo.expanded_local_clone)
 
         # First publish lands a commit
-        first = mgr.publish_bundle(repo, self._write_bundle_fn('{"v": 1}\n'))
+        first = mgr.publish_to_remote(repo, self._write_bundle_fn('{"v": 1}\n'))
         assert first.pushed is True
 
         # Second publish with identical content → no-op
-        second = mgr.publish_bundle(repo, self._write_bundle_fn('{"v": 1}\n'))
+        second = mgr.publish_to_remote(repo, self._write_bundle_fn('{"v": 1}\n'))
         assert second.success is True
         assert second.pushed is False
         assert second.skipped_push_reason == "no_changes"
@@ -322,7 +322,7 @@ class TestPublishBundleE2E:
         }]))
         repo = mgr.get_default()
 
-        sync = mgr.publish_bundle(repo, self._write_bundle_fn())
+        sync = mgr.publish_to_remote(repo, self._write_bundle_fn())
         assert sync.success is True
         assert sync.pushed is False
         assert sync.skipped_push_reason == "no_remote"
@@ -336,7 +336,7 @@ class TestPublishBundleE2E:
         def _boom(_collection_dir):
             raise IOError("disk full")
 
-        sync = mgr.publish_bundle(repo, _boom)
+        sync = mgr.publish_to_remote(repo, _boom)
         assert sync.success is False
         assert "disk full" in sync.error_message
         # clone_path is surfaced so the UI can offer "Open clone"

@@ -26,6 +26,13 @@ from .git_resolver import GitResolution, resolve_for_extension
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
 
+# Deadline for dropping read-side support of the legacy plaintext
+# ``auth_header`` field on RemoteRepo. After this version we will raise
+# a config-load error instead of silently migrating, so users have a
+# hard prompt to move to ``authcfg_id``. Bump conservatively when
+# planning the next major release.
+LEGACY_AUTH_HEADER_DEADLINE = "5.0.0"
+
 # Repos already warned about a legacy plaintext auth_header. Re-parsing the
 # same config (e.g. on every save_repos round-trip) would otherwise spam the
 # log with one entry per read. Cleared by save when the legacy field is dropped.
@@ -89,7 +96,9 @@ class RemoteRepo:
     to a QGIS Auth Manager entry that ships an encrypted PAT/Basic
     credential. The legacy ``auth_header`` field still works (for
     config files that pre-date the migration) but logs a deprecation
-    warning on read; new entries should leave it empty.
+    warning on read; new entries should leave it empty. Read-side
+    support is scheduled for removal in
+    ``LEGACY_AUTH_HEADER_DEADLINE`` (FilterMate 5.0.0).
     """
 
     name: str
@@ -100,7 +109,8 @@ class RemoteRepo:
     is_default: bool = False
     # Preferred — references an entry in QgsAuthManager. Encrypted at rest.
     authcfg_id: str = ""
-    # Deprecated — plaintext header. Read-only fallback for legacy configs.
+    # DEPRECATED — plaintext header. Read-only fallback for legacy configs.
+    # Will be rejected in FilterMate 5.0.0 (see LEGACY_AUTH_HEADER_DEADLINE).
     auth_header: str = ""
     # Forward-compatible catch-all for unknown fields
     extra: Dict[str, Any] = field(default_factory=dict)
@@ -228,7 +238,9 @@ class RemoteRepo:
         if auth_header and name not in _LEGACY_AUTH_WARNED:
             logger.warning(
                 "Repo %r uses legacy plaintext auth_header — migrate to "
-                "authcfg_id (Manage Repos → Edit → Authentication).", name,
+                "authcfg_id (Manage Repos → Edit → Authentication). "
+                "Support will be removed in FilterMate %s.",
+                name, LEGACY_AUTH_HEADER_DEADLINE,
             )
             _LEGACY_AUTH_WARNED.add(name)
 
@@ -516,7 +528,7 @@ class RemoteRepoManager:
         result.success = True
         return result
 
-    def publish_bundle(
+    def publish_to_remote(
         self,
         repo: RemoteRepo,
         write_bundle,
@@ -524,6 +536,13 @@ class RemoteRepoManager:
     ) -> RepoSyncResult:
         """
         Run the full publish flow for a single repo.
+
+        Renamed from ``publish_bundle`` (P1, 2026-04-28) to disambiguate
+        from :meth:`FavoritesSharingService.publish_bundle` — which
+        writes a single bundle into a local Resource Sharing collection
+        directory. ``publish_to_remote`` is the *outer* layer: it clones
+        the repo, runs ``write_bundle`` to produce the file in-tree,
+        commits, and pushes.
 
         Args:
             repo: Target repo (validated via ``from_config_entry``).

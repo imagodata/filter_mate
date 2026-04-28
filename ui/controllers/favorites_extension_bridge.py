@@ -326,7 +326,7 @@ class FavoritesExtensionBridge:
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         try:
-            sync = mgr.publish_bundle(repo, _write_bundle, commit_author=commit_author)
+            sync = mgr.publish_to_remote(repo, _write_bundle, commit_author=commit_author)
         finally:
             QApplication.restoreOverrideCursor()
 

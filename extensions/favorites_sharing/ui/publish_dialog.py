@@ -639,7 +639,7 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
 
         # Wrap the whole pipeline in a callable for the worker
         def _publish_op():
-            return self._remote_repo_manager.publish_bundle(
+            return self._remote_repo_manager.publish_to_remote(
                 repo, _write_bundle, commit_author=commit_author,
             )
 
