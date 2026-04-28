@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer
 
 # Export FilterFavorite from domain
+from ..domain.exceptions import FavoritesError, FavoritesNotInitialized
 from ..domain.favorite_import_handler import FavoriteImportHandler
 from ..domain.favorites_manager import FilterFavorite
 from ..domain.layer_signature import LayerSignatureIndex
@@ -318,9 +319,15 @@ class FavoritesService(QObject):
 
         Returns:
             bool: True if removed successfully
+
+        Raises:
+            FavoritesNotInitialized: if the service has no manager attached
+                (programmer error / startup race — see F16 phase 2).
         """
         if not self._favorites_manager:
-            return False
+            raise FavoritesNotInitialized(
+                "FavoritesService.remove_favorite called before manager was attached"
+            )
 
         try:
             success = self._favorites_manager.remove_favorite(favorite_id)
@@ -332,6 +339,10 @@ class FavoritesService(QObject):
 
             return success
 
+        except FavoritesError:
+            # Domain errors (NotInitialized / NotFound / PersistenceError)
+            # propagate intact — caller decides how to surface.
+            raise
         except Exception as e:
             logger.error(f"Error removing favorite: {e}")
             return False
@@ -350,9 +361,14 @@ class FavoritesService(QObject):
 
         Returns:
             bool: True if updated successfully
+
+        Raises:
+            FavoritesNotInitialized: if the service has no manager attached.
         """
         if not self._favorites_manager:
-            return False
+            raise FavoritesNotInitialized(
+                "FavoritesService.update_favorite called before manager was attached"
+            )
 
         try:
             success = self._favorites_manager.update_favorite(favorite_id, **kwargs)
@@ -365,6 +381,8 @@ class FavoritesService(QObject):
 
             return success
 
+        except FavoritesError:
+            raise
         except Exception as e:
             logger.error(f"Error updating favorite: {e}")
             return False
@@ -558,9 +576,14 @@ class FavoritesService(QObject):
 
         Returns:
             bool: True if marked successfully
+
+        Raises:
+            FavoritesNotInitialized: if the service has no manager attached.
         """
         if not self._favorites_manager:
-            return False
+            raise FavoritesNotInitialized(
+                "FavoritesService.mark_favorite_used called before manager was attached"
+            )
 
         return self._favorites_manager.increment_use_count(favorite_id)
 
@@ -903,13 +926,20 @@ class FavoritesService(QObject):
 
         Returns:
             bool: True if saved successfully
+
+        Raises:
+            FavoritesNotInitialized: if the service has no manager attached.
         """
         if not self._favorites_manager:
-            return False
+            raise FavoritesNotInitialized(
+                "FavoritesService.save called before manager was attached"
+            )
 
         try:
             self._favorites_manager.save_to_project()
             return True
+        except FavoritesError:
+            raise
         except Exception as e:
             logger.error(f"Error saving favorites: {e}")
             return False
@@ -920,14 +950,21 @@ class FavoritesService(QObject):
 
         Returns:
             bool: True if reloaded successfully
+
+        Raises:
+            FavoritesNotInitialized: if the service has no manager attached.
         """
         if not self._favorites_manager:
-            return False
+            raise FavoritesNotInitialized(
+                "FavoritesService.reload called before manager was attached"
+            )
 
         try:
             self._favorites_manager.load_from_database()
             self.favorites_changed.emit()
             return True
+        except FavoritesError:
+            raise
         except Exception as e:
             logger.error(f"Error reloading favorites: {e}")
             return False
@@ -948,9 +985,14 @@ class FavoritesService(QObject):
 
         Returns:
             bool: True if saved successfully
+
+        Raises:
+            FavoritesNotInitialized: if the service has no manager attached.
         """
         if not self._favorites_manager:
-            return False
+            raise FavoritesNotInitialized(
+                "FavoritesService.save_to_project_file called before manager was attached"
+            )
 
         try:
             from qgis.core import QgsProject
@@ -982,6 +1024,8 @@ class FavoritesService(QObject):
             logger.info(f"✓ Saved {len(favorites)} favorites to project file")
             return True
 
+        except FavoritesError:
+            raise
         except Exception as e:
             logger.error(f"Error saving favorites to project file: {e}")
             return False
@@ -1138,9 +1182,14 @@ class FavoritesService(QObject):
 
         Returns:
             bool: True if successful
+
+        Raises:
+            FavoritesNotInitialized: if the service has no manager attached.
         """
         if not self._favorites_manager:
-            return False
+            raise FavoritesNotInitialized(
+                "FavoritesService.make_favorite_global called before manager was attached"
+            )
 
         if hasattr(self._favorites_manager, 'make_favorite_global'):
             success = self._favorites_manager.make_favorite_global(favorite_id)
