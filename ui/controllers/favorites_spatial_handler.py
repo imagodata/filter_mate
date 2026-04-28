@@ -323,3 +323,141 @@ class FavoritesSpatialHandler:
             logger.warning(f"Failed to capture spatial config: {e}")
 
         return config if config else None
+
+    # ── method 4 — restore_spatial_config -----------------------------
+
+    def restore_spatial_config(self, favorite: "FilterFavorite") -> bool:
+        """Restore spatial configuration from favorite to dockwidget.
+
+        Ensures task_features (selected FIDs) are available when
+        ``launchTaskEvent`` is called, so the filter task can rebuild
+        EXISTS expressions correctly.
+
+        Returns True if config was restored successfully.
+        """
+        from .favorites_spatial_helpers import favorite_matches_current_layer
+
+        if not favorite.spatial_config:
+            logger.warning(
+                f"Favorite '{favorite.name}' has no spatial_config to restore"
+            )
+            return False
+
+        dw = self._dockwidget
+
+        try:
+            config = favorite.spatial_config
+
+            # FIX 2026-04-21: restore the exploring groupbox mode FIRST
+            # so downstream widgets (picker, multi-select combo, custom
+            # selection expression) are in the right state when
+            # task_features / predicates are read back.
+            saved_groupbox = config.get("exploring_groupbox")
+            if saved_groupbox and hasattr(dw, "_restore_groupbox_ui_state"):
+                try:
+                    dw._restore_groupbox_ui_state(saved_groupbox)
+                    logger.info(f"  ✓ Restored exploring_groupbox = {saved_groupbox}")
+                except (AttributeError, RuntimeError) as e:
+                    logger.debug(f"Could not restore exploring_groupbox: {e}")
+
+            # Repopulate the EXPLORING custom_selection expression widget
+            # when the favorite was saved in that mode.
+            custom_expr = config.get("custom_selection_expression")
+            if custom_expr:
+                try:
+                    widget = dw.widgets.get("EXPLORING", {}) \
+                        .get("CUSTOM_SELECTION_EXPRESSION", {}).get("WIDGET")
+                    if widget is not None and hasattr(widget, "setExpression"):
+                        widget.setExpression(custom_expr)
+                        logger.info("  ✓ Restored custom_selection_expression")
+                except (AttributeError, KeyError, RuntimeError) as e:
+                    logger.debug(f"Could not restore custom_selection_expression: {e}")
+
+            # Restore selected feature IDs (task_features)
+            if "task_feature_ids" in config and dw.current_layer:
+                feature_ids = config["task_feature_ids"]
+                logger.info(
+                    f"Restoring {len(feature_ids)} task_feature IDs from favorite"
+                )
+
+                source_layer = dw.current_layer
+
+                # FIX 2026-04-21: only push IDs / fetch features when the
+                # current layer is the same one the favorite was captured
+                # against. Cross-layer apply must not corrupt another
+                # layer's selection with foreign FIDs.
+                if favorite_matches_current_layer(favorite, source_layer):
+                    # Push feature IDs into QGIS layer selection so the
+                    # feature picker / multi-select widgets surface them.
+                    try:
+                        source_layer.selectByIds(feature_ids)
+                        logger.info(
+                            f"  ✓ Pushed {len(feature_ids)} feature IDs to QGIS "
+                            f"selection on '{source_layer.name()}'"
+                        )
+                    except (AttributeError, RuntimeError) as e:
+                        logger.debug(f"Could not selectByIds on source layer: {e}")
+
+                    # Fetch actual QgsFeature objects from the source layer
+                    features = []
+                    for fid in feature_ids:
+                        feature = source_layer.getFeature(fid)
+                        if feature and feature.isValid():
+                            features.append(feature)
+                        else:
+                            logger.warning(
+                                f"  ⚠️ Could not fetch feature {fid} from "
+                                f"{source_layer.name()}"
+                            )
+
+                    if features:
+                        logger.info(
+                            f"  → Loaded {len(features)} features from "
+                            f"{len(feature_ids)} FIDs"
+                        )
+                        # Store in dockwidget for get_current_features() to pick up
+                        dw._restored_task_features = features
+                        logger.info(
+                            f"  ✓ Stored {len(features)} features in "
+                            f"dockwidget._restored_task_features"
+                        )
+                    else:
+                        logger.warning(
+                            f"  ⚠️ Could not load any features from "
+                            f"{len(feature_ids)} FIDs!"
+                        )
+                else:
+                    logger.info(
+                        f"  ↪ Skipping selectByIds: current layer "
+                        f"'{source_layer.name()}' does not match favorite's "
+                        f"source layer — FIDs would be meaningless."
+                    )
+
+            # Restore predicates if present
+            if "predicates" in config:
+                predicates = config["predicates"]
+                logger.info(f"Restoring predicates: {list(predicates.keys())}")
+                # Store in dockwidget for task to pick up
+                dw._restored_predicates = predicates
+
+            # Restore buffer settings if present
+            if "buffer_value" in config:
+                buffer_value = config["buffer_value"]
+                logger.info(f"Restoring buffer_value: {buffer_value}")
+                # v5.0: Set buffer widget value
+                if hasattr(dw, "mQgsDoubleSpinBox_filtering_buffer_value"):
+                    dw.mQgsDoubleSpinBox_filtering_buffer_value.setValue(
+                        float(buffer_value)
+                    )
+                    logger.info(f"  ✓ Buffer widget set to {buffer_value}")
+
+            logger.info(
+                f"✓ Spatial config restored from favorite '{favorite.name}'"
+            )
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to restore spatial_config: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return False
