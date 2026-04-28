@@ -25,7 +25,6 @@ if TYPE_CHECKING:
 from ..domain.favorite_import_handler import FavoriteImportHandler
 from ..domain.favorites_manager import FilterFavorite
 from ..domain.layer_signature import LayerSignatureIndex
-from ..domain.remote_layers_normalizer import RemoteLayersNormalizer
 
 logger = logging.getLogger(__name__)
 
@@ -897,12 +896,6 @@ class FavoritesService(QObject):
         """Get current timestamp in ISO format."""
         from datetime import datetime
         return datetime.now().isoformat()
-
-    
-
-    
-
-    
 
     def save(self) -> bool:
         """
