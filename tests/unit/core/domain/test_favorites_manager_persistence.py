@@ -7,7 +7,8 @@ Covers the audit fixes that are only meaningful end-to-end:
     - HIGH-3 : increment_use_count does not bump updated_at
     - HIGH-1 : _backfill_remote_layer_signatures rewrites legacy rows
     - LOW-4  : composite index idx_favorites_project_name is created
-    - MED-5  : remove_favorite returns False when DB not initialised
+    - MED-5  : remove_favorite raises FavoritesNotInitialized when DB
+               not initialised (F16 phase 2 — was a silent ``return False``)
 
 These tests use tempfile SQLite — they do NOT need QGIS runtime.
 """
@@ -220,16 +221,25 @@ def test_composite_index_is_created(manager):
         "LOW-4 composite index must be created"
 
 
-# ─── MED-5 : graceful failure when DB not initialised ──────────────────
+# ─── MED-5 / F16 phase 2 : surface DB-not-initialised vs. unknown-id ────
 
 
-def test_remove_favorite_returns_false_when_uninitialised(favorites_module):
+def test_remove_favorite_raises_when_uninitialised(favorites_module):
+    """F16 phase 2: bootstrap precondition raises rather than silently
+    returning False — the previous silent return masked an UI-vs-DB
+    divergence that's now surfaced via Qt's exception hook.
+    """
     mgr = favorites_module.FavoritesManager()  # no db_path → not initialised
     assert mgr._initialized is False
-    assert mgr.remove_favorite("anything") is False
+    with pytest.raises(favorites_module.FavoritesNotInitialized):
+        mgr.remove_favorite("anything")
 
 
 def test_remove_favorite_returns_false_for_unknown_id(manager):
+    """Unknown id stays a soft return-False — innocent lookup miss
+    (stale UI reference / external DB delete). F16 phase 2 split this
+    from the bootstrap-precondition case which now raises.
+    """
     assert manager.remove_favorite("this-id-does-not-exist") is False
 
 

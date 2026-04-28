@@ -17,6 +17,7 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 from dataclasses import dataclass, asdict, field
 
+from .exceptions import FavoritesNotInitialized
 from .layer_signature import LayerSignatureIndex
 from .remote_layers_normalizer import RemoteLayersNormalizer
 from .schema_constants import GLOBAL_PROJECT_UUID
@@ -632,8 +633,9 @@ class FavoritesManager:
             bool: True if added successfully
         """
         if not self._initialized:
-            logger.warning("Cannot add favorite: database not initialized")
-            return False
+            raise FavoritesNotInitialized(
+                "FavoritesManager.add_favorite called before set_database"
+            )
 
         try:
             import sqlite3
@@ -704,17 +706,20 @@ class FavoritesManager:
     def remove_favorite(self, favorite_id: str) -> bool:
         """Remove a favorite.
 
-        FIX 2026-04-23 (MED-5): returns False with a log warning when the
-        database was not initialised OR the row is unknown — the UI layer
-        must decide whether to surface that failure. The previous silent
-        False return made deleted-UI/remaining-in-DB divergence invisible.
+        F16 phase 2 (2026-04-28): split the two failure modes that
+        used to share a silent ``return False``:
+
+        - DB not initialised (precondition error) raises
+          :class:`FavoritesNotInitialized` so the UI surfaces it via
+          Qt's exception hook rather than letting deleted-UI /
+          remaining-in-DB state silently diverge.
+        - Unknown id stays a soft ``return False`` — innocent lookup
+          miss, may just be a stale UI reference.
         """
         if not self._initialized:
-            logger.warning(
-                f"remove_favorite({favorite_id}): DB not initialised — in-memory "
-                "entry kept, UI state and SQLite will diverge. Caller should show a warning."
+            raise FavoritesNotInitialized(
+                f"remove_favorite({favorite_id!r}) called before set_database"
             )
-            return False
         if favorite_id not in self._favorites:
             logger.debug(f"remove_favorite({favorite_id}): no such id in cache")
             return False
@@ -751,8 +756,16 @@ class FavoritesManager:
         non-content fields (use_count, last_used_at) without polluting
         the "last content modification" timestamp — usage stats and
         content edits carry distinct semantics now.
+
+        F16 phase 2 (2026-04-28): bootstrap precondition raises
+        :class:`FavoritesNotInitialized`; unknown id stays a soft
+        ``return False``.
         """
-        if not self._initialized or favorite_id not in self._favorites:
+        if not self._initialized:
+            raise FavoritesNotInitialized(
+                f"update_favorite({favorite_id!r}) called before set_database"
+            )
+        if favorite_id not in self._favorites:
             return False
 
         try:
@@ -944,8 +957,16 @@ class FavoritesManager:
 
         Returns:
             True if successful
+
+        Raises:
+            FavoritesNotInitialized: if the database was never bootstrapped
+                via :meth:`set_database`.
         """
-        if not self._initialized or favorite_id not in self._favorites:
+        if not self._initialized:
+            raise FavoritesNotInitialized(
+                f"make_favorite_global({favorite_id!r}) called before set_database"
+            )
+        if favorite_id not in self._favorites:
             return False
 
         try:
