@@ -40,6 +40,7 @@ from ..styles.favorites_styles import (
     build_indicator_stylesheet,
 )
 from .favorites_extension_bridge import FavoritesExtensionBridge
+from .favorites_spatial_handler import FavoritesSpatialHandler
 from .favorites_menu_builder import (
     FavoritesMenuBuilder,
     ACTION_ADD_FAVORITE,
@@ -104,6 +105,24 @@ class FavoritesController(BaseController):
         self._indicator_label: Optional[QLabel] = None
         self._initialized: bool = False
         self._extension_bridge = FavoritesExtensionBridge(self)
+        # _spatial is lazy via the property below — tests that bypass
+        # __init__ via __new__ get a fresh handler on first access.
+        self._spatial_instance: Optional[FavoritesSpatialHandler] = None
+
+    @property
+    def _spatial(self) -> FavoritesSpatialHandler:
+        """Lazy access to the spatial-config handler.
+
+        Eager construction in ``__init__`` would force every test that
+        builds the controller via ``FavoritesController.__new__`` to wire
+        the handler manually — the lazy form keeps the test rigging
+        small while production paths get the same single instance.
+        """
+        cached = getattr(self, "_spatial_instance", None)
+        if cached is None:
+            cached = FavoritesSpatialHandler(self)
+            self._spatial_instance = cached
+        return cached
 
     @property
     def favorites_manager(self) -> Optional['FavoritesManager']:
@@ -1307,55 +1326,8 @@ class FavoritesController(BaseController):
     
 
     def _ensure_applicable_groupbox_for_favorite(self, favorite: 'FilterFavorite') -> None:
-        """Downgrade the exploring groupbox when the favorite cannot supply a
-        source feature, so launchTaskEvent doesn't abort in single_selection.
-        """
-        dw = self.dockwidget
-        if not dw or not getattr(dw, 'widgets_initialized', False):
-            return
-
-        current_groupbox = getattr(dw, 'current_exploring_groupbox', None)
-        has_restored = bool(getattr(dw, '_restored_task_features', None))
-
-        picker_feature = None
-        try:
-            picker = dw.widgets.get("EXPLORING", {}) \
-                .get("SINGLE_SELECTION_FEATURES", {}).get("WIDGET")
-            if picker is not None and hasattr(picker, 'feature'):
-                picker_feature = picker.feature()
-        except (AttributeError, KeyError, RuntimeError):
-            picker_feature = None
-
-        picker_valid = bool(picker_feature and getattr(picker_feature, 'isValid', lambda: False)())
-
-        selected_count = 0
-        current_layer = getattr(dw, 'current_layer', None)
-        if current_layer is not None:
-            try:
-                selected_count = current_layer.selectedFeatureCount()
-            except (AttributeError, RuntimeError):
-                selected_count = 0
-
-        if not should_downgrade_single_selection(
-            current_groupbox=current_groupbox,
-            has_restored_features=has_restored,
-            picker_feature_valid=picker_valid,
-            selected_feature_count=selected_count,
-        ):
-            return
-
-        if not hasattr(dw, '_restore_groupbox_ui_state'):
-            logger.debug("Cannot downgrade groupbox: _restore_groupbox_ui_state missing")
-            return
-
-        logger.info(
-            f"Favorite '{favorite.name}': single_selection has no feature — "
-            "downgrading to custom_selection so the filter doesn't abort."
-        )
-        try:
-            dw._restore_groupbox_ui_state('custom_selection')
-        except (AttributeError, RuntimeError) as e:
-            logger.debug(f"Could not downgrade groupbox to custom_selection: {e}")
+        """Delegate — see :meth:`FavoritesSpatialHandler.ensure_applicable_groupbox_for_favorite`."""
+        self._spatial.ensure_applicable_groupbox_for_favorite(favorite)
 
     def _restore_filtering_ui_from_favorite(self, favorite: 'FilterFavorite') -> None:
         """Restore filtering UI state (checkboxes, predicate toggle, buffer, layers list)
@@ -1555,54 +1527,8 @@ class FavoritesController(BaseController):
     
 
     def _backfill_legacy_predicate_default(self, favorite: 'FilterFavorite') -> bool:
-        """Heal pre-fix favorites that lack geometric_predicates in spatial_config.
-
-        Favorites saved before commit 10d35be1 captured nothing for the
-        predicate combobox even when the user had ``Intersect`` ticked.
-        On apply, the post-fix restore would push ``setCheckedItems([])``
-        and clear the live selection. We default such favorites to
-        ``["Intersect"]`` (the most common case, and the predicate the
-        already-baked ``remote_layers`` SQL was generated against) and
-        persist the patched spatial_config so the heal is one-shot.
-
-        Args:
-            favorite: Favorite to patch in place.
-
-        Returns:
-            True when the favorite was patched and persisted.
-        """
-        if not favorite or not getattr(favorite, 'remote_layers', None):
-            return False
-
-        spatial_config = dict(favorite.spatial_config or {})
-        if 'geometric_predicates' in spatial_config or 'has_geometric_predicates' in spatial_config:
-            return False
-
-        spatial_config['geometric_predicates'] = ['Intersect']
-        spatial_config['has_geometric_predicates'] = True
-
-        favorite.spatial_config = spatial_config
-
-        persisted = False
-        try:
-            if self._favorites_manager and hasattr(self._favorites_manager, 'update_favorite'):
-                persisted = bool(self._favorites_manager.update_favorite(
-                    favorite.id,
-                    bump_updated_at=False,
-                    spatial_config=spatial_config,
-                ))
-        except Exception as exc:
-            logger.debug(f"Could not persist legacy-predicate backfill: {exc}")
-
-        logger.info(
-            f"Favorite '{favorite.name}': backfilled missing geometric_predicates "
-            f"with default ['Intersect'] (persisted={persisted})"
-        )
-        self._show_warning(self.tr(
-            "Favorite '{0}' was missing predicate info — defaulting to 'Intersect'. "
-            "Re-save it after adjusting if you need a different predicate."
-        ).format(favorite.name))
-        return True
+        """Delegate — see :meth:`FavoritesSpatialHandler.backfill_legacy_predicate_default`."""
+        return self._spatial.backfill_legacy_predicate_default(favorite)
 
     def _show_info(self, message: str) -> None:
         """Push an info to the QGIS message bar (transient, non-blocking)."""
