@@ -241,6 +241,25 @@ def _migrate_config(config_data, default_data):
             del colors[orphan_key]
             dirty = True
 
+    # 6) EXTENSIONS root: strip legacy placeholder metadata that older
+    # releases injected when the section was empty. The registry now
+    # seeds real extension namespaces (qfieldcloud, favorites_sharing,
+    # …) under EXTENSIONS, so the root must be visible in the
+    # Configuration panel — `_hidden: true` from older defaults would
+    # collapse the whole branch. The root-level `description` field
+    # rendered as a confusing string child once the parent unhid; keep
+    # the user-facing label only.
+    extensions = config_data.get("EXTENSIONS")
+    if isinstance(extensions, dict):
+        if extensions.pop("_hidden", None) is not None:
+            dirty = True
+        if "description" in extensions and not isinstance(extensions["description"], dict):
+            del extensions["description"]
+            dirty = True
+        if extensions.get("_display_name") != "Extensions":
+            extensions["_display_name"] = "Extensions"
+            dirty = True
+
     return dirty
 
 

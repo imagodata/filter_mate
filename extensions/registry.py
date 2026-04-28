@@ -326,9 +326,17 @@ class ExtensionRegistry:
         for ext_id, slice_data in disk_extensions.items():
             if isinstance(slice_data, (dict, str, bool, int, float, list)):
                 merged_ext[ext_id] = slice_data
-        # Overlay with live slices (fresh seed wins over stale disk).
+        # Overlay with live values:
+        #  - extension namespaces (dicts) — fresh seed wins over stale disk
+        #  - metadata keys starting with "_" (e.g. ``_display_name``) so the
+        #    Configuration panel keeps a label even when the disk file was
+        #    rewritten by an older release that didn't carry it.
         for ext_id, slice_data in live_extensions.items():
             if isinstance(slice_data, dict):
+                merged_ext[ext_id] = slice_data
+            elif isinstance(ext_id, str) and ext_id.startswith("_") and isinstance(
+                slice_data, (str, bool, int, float, list)
+            ):
                 merged_ext[ext_id] = slice_data
 
         # 3. Mutate live_data["EXTENSIONS"] in place — do NOT reassign
