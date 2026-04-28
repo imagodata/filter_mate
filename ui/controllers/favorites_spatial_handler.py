@@ -461,3 +461,226 @@ class FavoritesSpatialHandler:
             import traceback
             logger.error(traceback.format_exc())
             return False
+
+    # ── method 5 — restore_filtering_ui_from_favorite -----------------
+
+    def restore_filtering_ui_from_favorite(
+        self, favorite: "FilterFavorite"
+    ) -> None:
+        """Restore filtering UI state from a favorite.
+
+        Mirrors the non-UI restoration done in :meth:`restore_spatial_config`
+        but actually ticks the widgets (Intersect predicate button,
+        layers_to_filter combobox, has_layers_to_filter button,
+        has_buffer_value button) and persists into ``PROJECT_LAYERS`` so
+        ``sync_ui_to_project_layers`` sees a coherent state on
+        ``launchTaskEvent``.
+        """
+        from qgis.PyQt.QtCore import Qt
+        from .favorites_spatial_helpers import layer_signature_for
+
+        dw = self._dockwidget
+        if not dw or not getattr(dw, "widgets_initialized", False):
+            logger.debug("Skipping UI restore: dockwidget not ready")
+            return
+
+        spatial_config = favorite.spatial_config or {}
+
+        # FIX 2026-04-23: resolve geometric predicates from the canonical
+        # fields first. Fall back to the legacy ``predicates`` dict shape
+        # (written by pre-fix favorites and a handful of portability
+        # tests) so existing favorites keep restoring without a manual
+        # rebuild.
+        predicate_list = spatial_config.get("geometric_predicates")
+        if isinstance(predicate_list, (list, tuple)):
+            predicate_list = list(predicate_list)
+            predicate_explicit = True
+        else:
+            legacy_predicates = spatial_config.get("predicates") or {}
+            if isinstance(legacy_predicates, dict) and legacy_predicates:
+                predicate_list = list(legacy_predicates.keys())
+                predicate_explicit = True
+            elif isinstance(legacy_predicates, (list, tuple)) and legacy_predicates:
+                predicate_list = list(legacy_predicates)
+                predicate_explicit = True
+            else:
+                predicate_list = []
+                predicate_explicit = False
+
+        has_predicates_flag = spatial_config.get("has_geometric_predicates")
+        if has_predicates_flag is None:
+            has_predicates_flag = bool(predicate_list)
+        else:
+            has_predicates_flag = bool(has_predicates_flag)
+            predicate_explicit = True
+
+        # FIX 2026-04-27: when the favorite carries no predicate info at
+        # all, leave the live combobox / toggle untouched instead of
+        # silently clearing them. ``apply_favorite`` already backfills
+        # legacy favorites with an "Intersect" default, so reaching this
+        # branch means a portability path bypassed the heal — preserve
+        # the user's manual selection rather than regressing.
+
+        buffer_value = spatial_config.get("buffer_value")
+
+        current_layer = getattr(dw, "current_layer", None)
+        layer_props = None
+        if current_layer is not None and hasattr(dw, "PROJECT_LAYERS"):
+            try:
+                layer_props = dw.PROJECT_LAYERS.get(current_layer.id())
+            except (RuntimeError, AttributeError):
+                layer_props = None
+
+        # --- 1. Resolve target layer ids from remote_layers payload ---
+        resolved_layer_ids: list = []
+        try:
+            from qgis.core import QgsProject
+            project = QgsProject.instance()
+            name_to_id = {}
+            signature_to_id = {}
+            for lid, lobj in project.mapLayers().items():
+                try:
+                    name_to_id[lobj.name()] = lid
+                    signature_to_id[layer_signature_for(lobj)] = lid
+                except (RuntimeError, AttributeError):
+                    continue
+            for key, payload in (favorite.remote_layers or {}).items():
+                resolved = None
+                # Signature stored in payload (v2+) — portable across projects
+                if isinstance(payload, dict) and payload.get("layer_signature"):
+                    resolved = signature_to_id.get(payload["layer_signature"])
+                # FIX 2026-04-23 (CRIT-3): when dict key itself is a
+                # signature (v3 canonical form produced by
+                # ``_create_favorite``), resolve directly from the
+                # signature->id map.
+                if not resolved and isinstance(key, str) and "::" in key:
+                    resolved = signature_to_id.get(key)
+                # Legacy format: key is layer name, payload carries layer_id
+                if not resolved and isinstance(payload, dict):
+                    legacy_id = payload.get("layer_id")
+                    if legacy_id and legacy_id in project.mapLayers():
+                        resolved = legacy_id
+                # Last-chance resolution by display name. Skip when key
+                # is a signature (contains "::") — that lookup would
+                # always miss and might accidentally hit a user-named
+                # layer called "postgres::..." — unlikely but not worth
+                # risking.
+                if not resolved:
+                    candidate_name = None
+                    if isinstance(payload, dict):
+                        candidate_name = payload.get("display_name")
+                    if not candidate_name and isinstance(key, str) and "::" not in key:
+                        candidate_name = key
+                    if candidate_name:
+                        resolved = name_to_id.get(candidate_name)
+                if resolved and resolved != getattr(current_layer, "id", lambda: None)():
+                    resolved_layer_ids.append(resolved)
+        except Exception as e:
+            logger.debug(f"Could not resolve favorite target layers: {e}")
+
+        # --- 2. Tick the layers_to_filter combobox ---
+        try:
+            layers_widget = dw.widgets.get("FILTERING", {}) \
+                .get("LAYERS_TO_FILTER", {}).get("WIDGET")
+            if layers_widget is not None and resolved_layer_ids:
+                resolved_set = set(resolved_layer_ids)
+                for i in range(layers_widget.count()):
+                    data = layers_widget.itemData(i, Qt.ItemDataRole.UserRole)
+                    lid = data.get("layer_id") if isinstance(data, dict) else data
+                    state = (
+                        Qt.CheckState.Checked
+                        if lid in resolved_set
+                        else Qt.CheckState.Unchecked
+                    )
+                    layers_widget.model().item(i).setCheckState(state)
+                logger.info(
+                    f"  ✓ Favorite restore: ticked {len(resolved_set)} target layer(s)"
+                )
+        except Exception as e:
+            logger.debug(f"Could not tick layers_to_filter: {e}")
+
+        # --- 3. Tick the HAS_LAYERS_TO_FILTER button ---
+        try:
+            has_layers_btn = getattr(
+                dw, "pushButton_checkable_filtering_layers_to_filter", None
+            )
+            if has_layers_btn is not None:
+                has_layers_btn.setChecked(bool(resolved_layer_ids))
+        except Exception as e:
+            logger.debug(f"Could not toggle HAS_LAYERS_TO_FILTER: {e}")
+
+        # --- 4. Tick HAS_GEOMETRIC_PREDICATES + propagate predicates ---
+        #
+        # FIX 2026-04-23: previously only the push-button was toggled,
+        # so the combobox items came from whatever QGIS had persisted
+        # at the project level — typically out-of-sync with the
+        # favorite. We now drive both widgets from the favorite's
+        # ``geometric_predicates`` list so ``sync_ui_to_project_layers``
+        # / task_builder see a consistent state.
+        if predicate_explicit:
+            try:
+                combo_widget = getattr(
+                    dw, "comboBox_filtering_geometric_predicates", None
+                )
+                if combo_widget is not None and hasattr(combo_widget, "setCheckedItems"):
+                    combo_widget.setCheckedItems(predicate_list)
+            except Exception as e:
+                logger.debug(
+                    f"Could not set checkedItems on geometric_predicates combobox: {e}"
+                )
+
+            try:
+                has_pred_btn = getattr(
+                    dw, "pushButton_checkable_filtering_geometric_predicates", None
+                )
+                if has_pred_btn is not None:
+                    has_pred_btn.setChecked(bool(has_predicates_flag))
+            except Exception as e:
+                logger.debug(f"Could not toggle HAS_GEOMETRIC_PREDICATES: {e}")
+        else:
+            logger.info(
+                "  ↪ Favorite carries no predicate info — leaving live "
+                "geometric_predicates widgets untouched."
+            )
+
+        # --- 5. Tick the HAS_BUFFER_VALUE button ---
+        # FIX 2026-04-21: the spinbox value is set in restore_spatial_config,
+        # but sync_ui_to_project_layers reads has_buffer_value from the
+        # ``pushButton_checkable_filtering_buffer_value`` toggle state, not
+        # from the spinbox. Without this, a favorite with buffer_value=2.0
+        # restored as expected in the spinbox but has_buffer_value stayed
+        # False — meaning the buffer was silently ignored in the filter.
+        try:
+            has_buffer_btn = getattr(
+                dw, "pushButton_checkable_filtering_buffer_value", None
+            )
+            if has_buffer_btn is not None:
+                wants_buffer = buffer_value is not None and float(buffer_value) != 0.0
+                has_buffer_btn.setChecked(bool(wants_buffer))
+        except (AttributeError, TypeError, ValueError) as e:
+            logger.debug(f"Could not toggle HAS_BUFFER_VALUE: {e}")
+
+        # --- 6. Persist restored state into PROJECT_LAYERS ---
+        #
+        # FIX 2026-04-23: write to the canonical keys
+        # (``has_geometric_predicates`` + ``geometric_predicates`` list)
+        # that task_builder + filtering orchestrator actually read. The
+        # previous ``filtering_props["predicates"] = dict`` write was
+        # dead: nothing in the task pipeline ever reads it.
+        if layer_props is not None:
+            filtering_props = layer_props.setdefault("filtering", {})
+            filtering_props["has_layers_to_filter"] = bool(resolved_layer_ids)
+            filtering_props["layers_to_filter"] = resolved_layer_ids
+            if predicate_explicit:
+                filtering_props["has_geometric_predicates"] = bool(has_predicates_flag)
+                filtering_props["geometric_predicates"] = list(predicate_list)
+            if buffer_value is not None:
+                filtering_props["has_buffer_value"] = float(buffer_value) != 0.0
+                filtering_props["buffer_value"] = float(buffer_value)
+            logger.debug(
+                f"Favorite restore persisted into PROJECT_LAYERS"
+                f"[{current_layer.id()}]: "
+                f"layers={len(resolved_layer_ids)}, "
+                f"geometric_predicates={predicate_list} "
+                f"(has_geometric_predicates={bool(has_predicates_flag)})"
+            )
