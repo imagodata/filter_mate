@@ -198,3 +198,128 @@ class FavoritesSpatialHandler:
             dw._restore_groupbox_ui_state("custom_selection")
         except (AttributeError, RuntimeError) as e:
             logger.debug(f"Could not downgrade groupbox to custom_selection: {e}")
+
+    # ── method 3 — capture_spatial_config -----------------------------
+
+    def capture_spatial_config(self) -> Optional[dict]:
+        """Capture the current spatial configuration for favorite restoration.
+
+        Reads the dockwidget filtering widgets to build a serialisable
+        ``spatial_config`` dict. Returns ``None`` when nothing worth
+        capturing was present (callers must handle ``None`` — matches
+        the contract used by ``_create_favorite``).
+        """
+        config: dict = {}
+        dw = self._dockwidget
+
+        try:
+            # FIX 2026-04-21: capture the exploring groupbox mode so the
+            # favorite restores into the same selection context on apply.
+            # Without this, a favorite created in custom_selection fires
+            # after reopen with the default single_selection mode and
+            # aborts because no source feature is selected.
+            groupbox = getattr(dw, "current_exploring_groupbox", None)
+            if groupbox:
+                config["exploring_groupbox"] = groupbox
+                logger.info(f"Captured exploring_groupbox: {groupbox}")
+
+                # For custom_selection, also capture the expression
+                # driving source feature selection so the exploring
+                # widget can be repopulated on apply.
+                if groupbox == "custom_selection":
+                    try:
+                        widget = dw.widgets.get("EXPLORING", {}) \
+                            .get("CUSTOM_SELECTION_EXPRESSION", {}).get("WIDGET")
+                        if widget is not None and hasattr(widget, "expression"):
+                            custom_expr = widget.expression()
+                            if custom_expr and custom_expr.strip():
+                                config["custom_selection_expression"] = custom_expr
+                                logger.info(
+                                    f"Captured custom_selection_expression "
+                                    f"({len(custom_expr)} chars)"
+                                )
+                    except (AttributeError, KeyError, RuntimeError) as e:
+                        logger.debug(f"Could not capture custom_selection_expression: {e}")
+
+            # Capture task_features (selected feature IDs)
+            features, _ = dw.get_current_features()
+            if features:
+                feature_ids = [f.id() for f in features if f.isValid()]
+                if feature_ids:
+                    config["task_feature_ids"] = feature_ids
+                    logger.info(
+                        f"Captured {len(feature_ids)} task_feature IDs for favorite"
+                    )
+
+            # Capture geometric predicates from the actual filtering widgets.
+            #
+            # FIX 2026-04-23: read from the canonical widgets
+            # (``comboBox_filtering_geometric_predicates`` checkedItems +
+            # ``pushButton_checkable_filtering_geometric_predicates``
+            # isChecked), with a PROJECT_LAYERS fallback for headless /
+            # test contexts. The previous implementation read a dict from
+            # ``PROJECT_LAYERS[layer_id]['filtering']['predicates']`` —
+            # but that key is never populated anywhere in the codebase.
+            predicate_list: list = []
+            has_predicates: bool = False
+
+            combo_widget = getattr(
+                dw, "comboBox_filtering_geometric_predicates", None
+            )
+            if combo_widget is not None and hasattr(combo_widget, "checkedItems"):
+                try:
+                    predicate_list = list(combo_widget.checkedItems() or [])
+                except (RuntimeError, AttributeError) as e:
+                    logger.debug(f"Could not read checkedItems from combobox: {e}")
+
+            has_pred_btn = getattr(
+                dw, "pushButton_checkable_filtering_geometric_predicates", None
+            )
+            if has_pred_btn is not None and hasattr(has_pred_btn, "isChecked"):
+                try:
+                    has_predicates = bool(has_pred_btn.isChecked())
+                except (RuntimeError, AttributeError) as e:
+                    logger.debug(
+                        f"Could not read isChecked from geometric predicates button: {e}"
+                    )
+
+            # Fallback to PROJECT_LAYERS when the widgets are unavailable.
+            if (not predicate_list or not has_predicates) and \
+                    hasattr(dw, "PROJECT_LAYERS") and \
+                    dw.current_layer:
+                layer_id = dw.current_layer.id()
+                layer_data = dw.PROJECT_LAYERS.get(layer_id, {})
+                filtering_data = layer_data.get("filtering", {}) \
+                    if isinstance(layer_data, dict) else {}
+                if not predicate_list:
+                    stored_list = filtering_data.get("geometric_predicates", [])
+                    if isinstance(stored_list, (list, tuple)):
+                        predicate_list = list(stored_list)
+                if not has_predicates:
+                    has_predicates = bool(
+                        filtering_data.get("has_geometric_predicates", False)
+                    )
+
+            if predicate_list or has_predicates:
+                config["geometric_predicates"] = predicate_list
+                config["has_geometric_predicates"] = bool(
+                    has_predicates or predicate_list
+                )
+                logger.info(
+                    f"Captured geometric_predicates: {predicate_list} "
+                    f"(has_geometric_predicates={config['has_geometric_predicates']})"
+                )
+
+            # Capture buffer value if set (v5.0 read from widget)
+            if hasattr(dw, "mQgsDoubleSpinBox_filtering_buffer_value"):
+                buffer_value = dw.mQgsDoubleSpinBox_filtering_buffer_value.value()
+                if buffer_value != 0.0:
+                    config["buffer_value"] = buffer_value
+                    logger.info(f"Captured buffer_value: {buffer_value}")
+
+            logger.info(f"Spatial config captured: {list(config.keys())}")
+
+        except Exception as e:
+            logger.warning(f"Failed to capture spatial config: {e}")
+
+        return config if config else None
