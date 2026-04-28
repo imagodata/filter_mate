@@ -684,3 +684,217 @@ class FavoritesSpatialHandler:
                 f"geometric_predicates={predicate_list} "
                 f"(has_geometric_predicates={bool(has_predicates_flag)})"
             )
+
+    # ── method 6 — apply_favorite_subsets_directly --------------------
+
+    def apply_favorite_subsets_directly(self, favorite: "FilterFavorite") -> bool:
+        """Push the favorite's saved subset strings to source + target layers.
+
+        Resolution order for each layer (source uses ``favorite.layer_id``
+        / ``spatial_config.source_layer_signature`` / ``favorite.layer_name``;
+        targets use the same chain plus the per-entry ``layer_signature``
+        and ``layer_id`` fields). Layers that can't be resolved produce a
+        warning but don't abort the rest of the apply.
+
+        Returns True when at least one layer received its subset.
+        """
+        from qgis.core import QgsProject
+
+        from .favorites_spatial_helpers import (
+            exact_filtered_feature_count,
+            layer_signature_for,
+            resolve_favorite_source_layer,
+            resolve_remote_layer_entry,
+        )
+
+        try:
+            from ...infrastructure.database.sql_utils import safe_set_subset_string
+        except ImportError:
+            from filter_mate.infrastructure.database.sql_utils import (
+                safe_set_subset_string,
+            )
+
+        ctrl = self._controller
+
+        project = QgsProject.instance()
+        # Pre-build name + signature lookups so we resolve each entry in O(1).
+        name_to_layer: dict = {}
+        signature_to_layer: dict = {}
+        for lid, lobj in project.mapLayers().items():
+            try:
+                name_to_layer[lobj.name()] = lobj
+            except (RuntimeError, AttributeError):
+                pass
+            try:
+                signature_to_layer[layer_signature_for(lobj)] = lobj
+            except Exception:
+                pass
+
+        applied: list = []
+        skipped: list = []
+        zoom_layers: list = []  # Source + targets actually filtered, for auto-zoom
+
+        spatial_config = favorite.spatial_config or {}
+
+        # --- Source layer subset ----------------------------------------
+        source_layer = resolve_favorite_source_layer(
+            favorite, spatial_config, project, name_to_layer, signature_to_layer
+        )
+        source_subset = favorite.expression or ""
+        if source_layer is not None:
+            try:
+                if safe_set_subset_string(source_layer, source_subset):
+                    applied.append(source_layer.name())
+                    zoom_layers.append(source_layer)
+                    logger.info(
+                        f"  ✓ Source layer '{source_layer.name()}' subset applied "
+                        f"({len(source_subset)} chars)"
+                    )
+                else:
+                    skipped.append(getattr(source_layer, "name", lambda: "?")())
+                    logger.warning(
+                        f"  ⚠️ safe_set_subset_string rejected source subset on "
+                        f"'{source_layer.name()}'"
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to apply source subset: {e}")
+                skipped.append(getattr(source_layer, "name", lambda: "?")())
+        else:
+            logger.warning(
+                f"Favorite '{favorite.name}': source layer could not be resolved "
+                f"(layer_id={favorite.layer_id}, layer_name={favorite.layer_name}, "
+                f"signature={spatial_config.get('source_layer_signature')})"
+            )
+            skipped.append(favorite.layer_name or "<unknown source>")
+
+        # --- Target layer subsets ---------------------------------------
+        # Track count changes so the favorite's stored snapshot can be
+        # refreshed in one persist at the end (legacy favorites had wrong
+        # counts because layer.featureCount() returns estimates on PG).
+        refreshed_remote_layers: dict = {}
+        counts_changed = False
+
+        for key, payload in (favorite.remote_layers or {}).items():
+            target_layer = resolve_remote_layer_entry(
+                key, payload, project, name_to_layer, signature_to_layer
+            )
+            target_subset = ""
+            if isinstance(payload, dict):
+                target_subset = payload.get("expression", "") or ""
+
+            if target_layer is None:
+                logger.warning(
+                    f"  ⚠️ Could not resolve target layer for entry '{key}' — skipped"
+                )
+                skipped.append(str(key))
+                if isinstance(payload, dict):
+                    refreshed_remote_layers[key] = dict(payload)
+                else:
+                    refreshed_remote_layers[key] = payload
+                continue
+
+            try:
+                if safe_set_subset_string(target_layer, target_subset):
+                    applied.append(target_layer.name())
+                    zoom_layers.append(target_layer)
+                    fresh_count = exact_filtered_feature_count(target_layer)
+                    if isinstance(payload, dict):
+                        new_payload = dict(payload)
+                    else:
+                        new_payload = {"expression": target_subset}
+                    if new_payload.get("feature_count") != fresh_count:
+                        counts_changed = True
+                    new_payload["feature_count"] = fresh_count
+                    refreshed_remote_layers[key] = new_payload
+                    logger.info(
+                        f"  ✓ Target layer '{target_layer.name()}' subset applied "
+                        f"({len(target_subset)} chars, {fresh_count} feature(s))"
+                    )
+                else:
+                    skipped.append(target_layer.name())
+                    if isinstance(payload, dict):
+                        refreshed_remote_layers[key] = dict(payload)
+                    else:
+                        refreshed_remote_layers[key] = payload
+                    logger.warning(
+                        f"  ⚠️ safe_set_subset_string rejected target subset on "
+                        f"'{target_layer.name()}'"
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to apply subset on '{target_layer.name()}': {e}"
+                )
+                skipped.append(target_layer.name())
+                if isinstance(payload, dict):
+                    refreshed_remote_layers[key] = dict(payload)
+                else:
+                    refreshed_remote_layers[key] = payload
+
+        # Persist refreshed counts so the favorites manager UI reflects
+        # reality without forcing the user to re-save the favorite.
+        if counts_changed and refreshed_remote_layers:
+            favorite.remote_layers = refreshed_remote_layers
+            try:
+                manager = self._favorites_manager
+                if manager and hasattr(manager, "update_favorite"):
+                    manager.update_favorite(
+                        favorite.id,
+                        bump_updated_at=False,
+                        remote_layers=refreshed_remote_layers,
+                    )
+                    logger.info(
+                        f"  ↻ Refreshed feature_count snapshot for favorite "
+                        f"'{favorite.name}'"
+                    )
+            except Exception as exc:
+                logger.debug(f"Could not persist refreshed feature_counts: {exc}")
+
+        if not applied:
+            ctrl._show_warning(
+                ctrl.tr(
+                    "Favorite '{0}' could not be applied: no layer matched the "
+                    "saved source / targets."
+                ).format(favorite.name)
+            )
+            return False
+
+        if skipped:
+            logger.info(
+                f"Favorite '{favorite.name}': applied={applied}, skipped={skipped}"
+            )
+
+        # Refresh the canvas so users see the new filter immediately
+        # without waiting for the next idle event.
+        try:
+            from qgis.utils import iface
+            if iface and hasattr(iface, "mapCanvas"):
+                canvas = iface.mapCanvas()
+                if canvas is not None and hasattr(canvas, "refreshAllLayers"):
+                    canvas.refreshAllLayers()
+        except Exception:
+            pass
+
+        # Auto-zoom on the union extent of every layer the favorite
+        # touched (mirrors the normal filter completion flow).
+        try:
+            from ...adapters.auto_zoom import auto_zoom_to_filtered
+
+            project_layers: dict = {}
+            try:
+                project_layers = getattr(self._dockwidget, "PROJECT_LAYERS", {}) or {}
+            except (RuntimeError, AttributeError):
+                project_layers = {}
+
+            auto_zoom_to_filtered(
+                zoom_layers,
+                project_layers,
+                dockwidget=self._dockwidget,
+            )
+        except Exception as exc:
+            logger.debug(f"Favorite auto-zoom skipped: {exc}")
+
+        logger.info(
+            f"Favorite '{favorite.name}' applied directly: "
+            f"{len(applied)} layer(s) updated, {len(skipped)} skipped"
+        )
+        return True

@@ -930,7 +930,7 @@ class TestDirectSubsetApply:
         # F4.1: layer_signature_for is now a module-level function imported
         # into favorites_controller; patch the binding in the controller module.
         monkeypatch.setattr(
-            favorites_controller, "layer_signature_for",
+            favorites_spatial_helpers, "layer_signature_for",
             lambda layer: {
                 zone_pop: "postgres::infra.zone_pop",
                 cables: "postgres::infra.cables",
@@ -982,7 +982,7 @@ class TestDirectSubsetApply:
         self._stub_qgis_project(layers_by_id)
 
         monkeypatch.setattr(
-            favorites_controller, "layer_signature_for",
+            favorites_spatial_helpers, "layer_signature_for",
             lambda layer: {
                 zone_pop: "postgres::infra.zone_pop",
                 cables: "postgres::infra.cables",
@@ -1027,7 +1027,7 @@ class TestDirectSubsetApply:
         is a no-op and reports failure (so the caller can warn)."""
         self._stub_qgis_project({})
         monkeypatch.setattr(
-            favorites_controller, "layer_signature_for",
+            favorites_spatial_helpers, "layer_signature_for",
             lambda layer: "ghost::?"
         )
         applied = []
