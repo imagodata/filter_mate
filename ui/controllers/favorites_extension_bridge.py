@@ -124,8 +124,14 @@ class FavoritesExtensionBridge:
 
     # ── Dialog launchers ─────────────────────────────────────────────
 
-    def open_shared_picker(self) -> None:
-        """Open the Resource Sharing picker dialog when the extension is active."""
+    def open_shared_picker(self, *, parent: Optional[Any] = None) -> None:
+        """Open the Resource Sharing picker dialog when the extension is active.
+
+        ``parent`` defaults to the controller's dockwidget. Callers that
+        already have a dialog open (``FavoritesManagerDialog``) pass
+        ``parent=self`` so the picker is modal to the manager rather than
+        to the dockwidget.
+        """
         ctrl = self._controller
         ext = self.get_extension()
         if ext is None or ctrl._favorites_manager is None:
@@ -145,7 +151,7 @@ class FavoritesExtensionBridge:
             dialog = SharedFavoritesPickerDialog(
                 service,
                 ctrl._favorites_manager,
-                parent=ctrl.dockwidget,
+                parent=parent if parent is not None else ctrl.dockwidget,
             )
             dialog.exec()
             ctrl.update_indicator()
@@ -154,8 +160,19 @@ class FavoritesExtensionBridge:
             logger.exception("Shared picker failed to open")
             ctrl._show_warning(ctrl.tr("Shared picker failed: {0}").format(e))
 
-    def open_publish_dialog(self) -> None:
-        """Open the PublishFavoritesDialog when the extension is active."""
+    def open_publish_dialog(
+        self,
+        *,
+        parent: Optional[Any] = None,
+        preselected_ids: Optional[List[str]] = None,
+    ) -> None:
+        """Open the PublishFavoritesDialog when the extension is active.
+
+        ``parent`` defaults to the controller's dockwidget. ``preselected_ids``
+        lets callers (e.g. the manager dialog) bias the dialog towards the
+        currently selected favorite — the dialog's checklist still allows
+        the user to toggle other favorites on/off.
+        """
         ctrl = self._controller
         ext = self.get_extension()
         if ext is None or ctrl._favorites_manager is None:
@@ -179,10 +196,15 @@ class FavoritesExtensionBridge:
 
         try:
             from ...extensions.favorites_sharing.ui import PublishFavoritesDialog
+            kwargs: dict = {
+                "parent": parent if parent is not None else ctrl.dockwidget,
+            }
+            if preselected_ids:
+                kwargs["preselected_ids"] = list(preselected_ids)
             dialog = PublishFavoritesDialog(
                 service,
                 ctrl._favorites_manager,
-                parent=ctrl.dockwidget,
+                **kwargs,
             )
             dialog.exec()
         except Exception as e:

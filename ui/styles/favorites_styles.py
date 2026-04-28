@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """Shared QSS / palette / icon registry for the favorites UI.
 
-Centralises the snippets that used to be duplicated between
-``ui/controllers/favorites_controller.py`` and
-``ui/widgets/favorites_widget.py``. Keep visual changes here so the
-indicator badge and the context menu stay in sync across the dock and
-the controller-driven entry points.
+Centralises the QSS snippets and icon names that
+``ui/controllers/favorites_controller.py`` writes onto the indicator
+label and the context menu. Keep visual changes here so all favorites
+entry points stay in sync.
 """
 
 from __future__ import annotations

@@ -106,18 +106,25 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         favoriteUpdated = pyqtSignal(str)
         favoritesChanged = pyqtSignal()
 
-    def __init__(self, favorites_manager, parent=None):
+    def __init__(self, favorites_manager, parent=None, extension_bridge=None):
         """
         Initialize FavoritesManagerDialog.
 
         Args:
             favorites_manager: FavoritesManager instance
             parent: Parent widget
+            extension_bridge: Optional FavoritesExtensionBridge — when
+                provided, the dialog routes its sharing flows (shared
+                picker / publish) through it instead of importing the
+                extension UI directly. Restores the F5 invariant that
+                ``favorites_extension_bridge`` is the single coupling
+                point with ``favorites_sharing``.
         """
         if HAS_QGIS:
             super().__init__(parent)
 
         self._favorites_manager = favorites_manager
+        self._extension_bridge = extension_bridge
         self._current_fav_id = None
         self._all_favorites = []
         # FIX 2026-04-22: re-entrancy guard so our own update/delete don't bounce
@@ -1198,7 +1205,19 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
     # ─── favorites_sharing integration (optional) ─────────────────────
 
     def _is_sharing_active(self) -> bool:
-        """True when the favorites_sharing extension is loaded + initialized."""
+        """True when the favorites_sharing extension is loaded + initialized.
+
+        Delegates to the injected ``FavoritesExtensionBridge`` when
+        available (F5 invariant). The fallback path is kept so legacy
+        callers that build the dialog without a bridge still work, and
+        so headless tests that patch the registry directly continue to
+        observe the same behaviour.
+        """
+        if self._extension_bridge is not None:
+            try:
+                return bool(self._extension_bridge.is_active())
+            except Exception:
+                return False
         try:
             from ...extensions.registry import get_extension_registry
             from ...extensions.base import ExtensionState
@@ -1212,14 +1231,23 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
     def _on_shared_clicked(self) -> None:
         """Open the shared-favorites picker, then refresh the list on close.
 
-        The picker materialises chosen shared favorites into the user's DB
-        via FavoritesSharingService.fork(), which emits favorites_changed
-        and triggers _on_external_favorites_changed — so the list updates
-        automatically. We still call refresh() defensively for the case
-        where the external signal was somehow suppressed.
+        Routes through ``FavoritesExtensionBridge.open_shared_picker``
+        (F5 invariant). The picker materialises chosen shared favorites
+        into the user's DB via ``FavoritesSharingService.fork()``, which
+        emits ``favorites_changed`` and triggers
+        ``_on_external_favorites_changed`` — so the list updates
+        automatically. We still call ``refresh()`` defensively for the
+        case where the external signal was somehow suppressed.
         """
         if not self._is_sharing_active() or self._favorites_manager is None:
             return
+        if self._extension_bridge is not None:
+            try:
+                self._extension_bridge.open_shared_picker(parent=self)
+                self.refresh()
+                return
+            except Exception as e:
+                logger.debug(f"Bridge shared picker failed, falling back: {e}")
         try:
             from ...extensions.registry import get_extension_registry
             from ...extensions.favorites_sharing.ui import SharedFavoritesPickerDialog
@@ -1238,12 +1266,23 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
     def _on_publish_clicked(self) -> None:
         """Open the PublishFavoritesDialog pre-selecting the current row.
 
-        When there is a selected favorite we pass its id as the default
-        check — the user can still toggle others on/off in the publish
-        dialog's favorites list.
+        Routes through ``FavoritesExtensionBridge.open_publish_dialog``
+        (F5 invariant). When there is a selected favorite we pass its
+        id as the default check — the user can still toggle others
+        on/off in the publish dialog's favorites list.
         """
         if not self._is_sharing_active() or self._favorites_manager is None:
             return
+        preselected = [self._current_fav_id] if self._current_fav_id else []
+        if self._extension_bridge is not None:
+            try:
+                self._extension_bridge.open_publish_dialog(
+                    parent=self,
+                    preselected_ids=preselected or None,
+                )
+                return
+            except Exception as e:
+                logger.debug(f"Bridge publish dialog failed, falling back: {e}")
         try:
             from ...extensions.registry import get_extension_registry
             from ...extensions.favorites_sharing.ui import PublishFavoritesDialog
@@ -1251,7 +1290,6 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             service = ext.get_service('service') if ext else None
             if service is None:
                 return
-            preselected = [self._current_fav_id] if self._current_fav_id else []
             dialog = PublishFavoritesDialog(
                 service, self._favorites_manager,
                 parent=self, preselected_ids=preselected,

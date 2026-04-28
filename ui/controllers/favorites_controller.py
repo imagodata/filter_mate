@@ -563,8 +563,15 @@ class FavoritesController(BaseController):
                 return
 
             from ..dialogs import FavoritesManagerDialog
-            # Note: FavoritesManagerDialog(favorites_manager, parent) - order matters!
-            dialog = FavoritesManagerDialog(self._favorites_manager, self.dockwidget)
+            # F5 invariant: pass the extension bridge so the dialog's
+            # sharing flows route through the same single coupling point
+            # as the controller's menu, rather than reaching directly
+            # into ``extensions.favorites_sharing.ui``.
+            dialog = FavoritesManagerDialog(
+                self._favorites_manager,
+                self.dockwidget,
+                extension_bridge=self._extension_bridge,
+            )
 
             # Connect the favoriteApplied signal to apply the favorite
             dialog.favoriteApplied.connect(self.apply_favorite)
