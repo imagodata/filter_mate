@@ -54,8 +54,8 @@ class MenuActionsContext(Protocol):
 
     Decouples the provider (typically an extension) from the controller's
     internals: the provider only sees the data it needs to gate entries
-    (favorite count, default-repo presence) and the localisation hook.
-    The bridge implements this protocol implicitly.
+    (favorite count, default-repo presence, sharing-active flag) and the
+    localisation hook. The bridge implements this protocol implicitly.
     """
 
     @property
@@ -63,7 +63,37 @@ class MenuActionsContext(Protocol):
 
     def has_default_repo(self) -> bool: ...
 
+    def is_sharing_active(self) -> bool: ...
+
     def tr(self, message: str) -> str: ...
+
+
+class BuilderContext(Protocol):
+    """Slice of FavoritesController that FavoritesMenuBuilder actually reads.
+
+    Pinning the contract here means the builder is decoupled from the
+    full controller surface — adding a new attribute access in
+    ``build()`` requires widening the Protocol, surfacing the design
+    decision instead of letting the builder grow tendrils into the
+    controller silently (UI-8, audit 2026-04-29).
+
+    Implemented implicitly by FavoritesController via duck typing; tests
+    can substitute a typed ``SimpleNamespace`` matching this surface
+    instead of a broad MagicMock.
+    """
+
+    def tr(self, message: str) -> str: ...
+
+    def get_all_favorites(self) -> list: ...
+
+    def get_current_filter_expression(self) -> str: ...
+
+    def is_sharing_extension_active(self) -> bool: ...
+
+    def get_global_favorites(self) -> list: ...
+
+    @property
+    def extension_bridge(self) -> Any: ...
 
 
 class MenuActionsProvider(Protocol):
@@ -120,8 +150,14 @@ class FavoritesMenuBuilder:
     """
 
     @staticmethod
-    def build(controller: "FavoritesController", parent: Any) -> QMenu:
-        """Return a fully populated QMenu, ready to ``exec_()``."""
+    def build(controller: BuilderContext, parent: Any) -> QMenu:
+        """Return a fully populated QMenu, ready to ``exec_()``.
+
+        ``controller`` is typed against :class:`BuilderContext` Protocol
+        — UI-8 (audit 2026-04-29). The full ``FavoritesController`` class
+        satisfies it implicitly via duck typing; tests can substitute a
+        lighter typed double instead of a broad MagicMock.
+        """
         menu = QMenu(parent)
         menu.setStyleSheet(FAVORITES_MENU_STYLESHEET)
 
@@ -129,7 +165,7 @@ class FavoritesMenuBuilder:
         FavoritesMenuBuilder._add_quick_filter_section(menu, favorites, controller)
         FavoritesMenuBuilder._add_create_section(menu, controller)
         FavoritesMenuBuilder._add_management_section(menu, controller)
-        if controller._is_sharing_extension_active():
+        if controller.is_sharing_extension_active():
             FavoritesMenuBuilder._add_sharing_section(menu, controller)
         FavoritesMenuBuilder._add_global_submenu(menu, favorites, controller)
         FavoritesMenuBuilder._add_maintenance_submenu(menu, controller)
@@ -208,7 +244,7 @@ class FavoritesMenuBuilder:
         action dispatcher needs to know the new entries exist as long
         as their sentinels are routed in ``_handle_menu_action``.
         """
-        for spec in controller._extension_bridge.get_menu_actions():
+        for spec in controller.extension_bridge.get_menu_actions():
             label = spec.disabled_label if (not spec.enabled and spec.disabled_label) else spec.label
             action = menu.addAction(label)
             action.setData(spec.sentinel)
@@ -229,7 +265,7 @@ class FavoritesMenuBuilder:
             if len(favorites) > 5:
                 copy_global_menu.addAction("  ...").setEnabled(False)
 
-        global_favorites = controller._get_global_favorites()
+        global_favorites = controller.get_global_favorites()
         if global_favorites:
             global_menu.addSeparator()
             global_menu.addAction(controller.tr("── Available global favorites ──")).setEnabled(False)

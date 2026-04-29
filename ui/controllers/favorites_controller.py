@@ -1130,6 +1130,20 @@ class FavoritesController(BaseController):
     # ``self._extension_bridge_*`` indirectly without learning the bridge
     # API. Once F5 lands (registry pattern), even these wrappers can go.
 
+    # ── Public surface for FavoritesMenuBuilder (UI-8) ──────────────
+    # The builder is typed against ``BuilderContext`` (Protocol) — these
+    # aliases expose the underscored internals through that contract.
+
+    @property
+    def extension_bridge(self) -> "FavoritesExtensionBridge":
+        return self._extension_bridge
+
+    def is_sharing_extension_active(self) -> bool:
+        return self._is_sharing_extension_active()
+
+    def get_global_favorites(self) -> List['FilterFavorite']:
+        return self._get_global_favorites()
+
     def _is_sharing_extension_active(self) -> bool:
         return self._extension_bridge.is_active()
 
