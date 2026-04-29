@@ -6,6 +6,7 @@ Kept intentionally separate from the QGIS plugin config (config/config.py)
 which depends on QgsApplication and QgsProject.
 """
 
+import hashlib
 import json
 import logging
 import os
@@ -29,6 +30,14 @@ class APIConfigError(RuntimeError):
     """Raised when :meth:`APIConfig.validate` rejects an insecure config."""
 
 
+def _hash_api_key(plaintext: str) -> str:
+    """Return the lowercase hex sha256 digest of an API key.
+
+    Centralised so config-load and middleware agree on the digest shape.
+    """
+    return hashlib.sha256(plaintext.encode("utf-8")).hexdigest()
+
+
 @dataclass
 class APIConfig:
     """Configuration for the FilterMate HTTP API."""
@@ -44,6 +53,25 @@ class APIConfig:
     # disabled (dev mode + the health-check endpoint stays open in
     # both modes so liveness probes work).
     api_key: str | None = None
+    # P1-S4 (audit 2026-04-29): pre-hashed key digest. Source of truth
+    # for the middleware comparison. Populated either directly from the
+    # JSON field ``api_key_sha256`` (preferred — no plaintext on disk)
+    # or derived from ``api_key`` at load time. When neither is set,
+    # auth is disabled.
+    api_key_hash: str | None = None
+
+    def __post_init__(self) -> None:
+        # Derive the hash from plaintext when only ``api_key`` was
+        # provided (env path, legacy JSON path, or direct construction
+        # in tests). When both are provided, trust ``api_key_hash`` as
+        # the explicit signal.
+        if self.api_key_hash is None and self.api_key:
+            self.api_key_hash = _hash_api_key(self.api_key)
+
+    @property
+    def has_auth(self) -> bool:
+        """True when a configured API key (plaintext or hash) is in effect."""
+        return bool(self.api_key_hash)
 
     @classmethod
     def from_env(cls) -> "APIConfig":
@@ -75,12 +103,15 @@ class APIConfig:
         Looks for an ``"API"`` key in the JSON. If absent, returns defaults.
         Falls back to ``config/config.json`` in the project root.
 
-        S4 (audit 2026-04-29): when the JSON file ships an ``api_key`` in
-        plaintext, we emit a one-time warning so operators see that the
-        secret is sitting in a file that often syncs to Dropbox/OneDrive
-        and is rarely encrypted at rest. Recommend rotating to the
-        ``FILTERMATE_API_KEY`` env var (or :class:`QgsAuthManager` once
-        wired). The warning is informational — config still loads.
+        Auth fields (mutually exclusive — ``api_key_sha256`` wins):
+
+        - ``api_key_sha256`` (P1-S4 hash-at-rest, preferred): hex sha256
+          digest of the plaintext key. Synced profile dirs (OneDrive,
+          Dropbox) leak the digest, not the secret. The plaintext never
+          lands on disk.
+        - ``api_key`` (legacy plaintext): kept for BC. Emits a one-time
+          warning steering operators to ``api_key_sha256`` or the
+          ``FILTERMATE_API_KEY`` env var.
         """
         if path is None:
             path = _PROJECT_ROOT / "config" / "config.json"
@@ -92,16 +123,22 @@ class APIConfig:
             data = json.load(fh)
 
         api_section = data.get("API", {})
+        api_key_hash = (api_section.get("api_key_sha256") or "").strip().lower() or None
         api_key = api_section.get("api_key") or None
 
-        if api_key:
+        # When the digest is provided explicitly, ignore the plaintext
+        # field entirely so a stray legacy ``api_key`` next to a fresh
+        # hash doesn't bring the warning back.
+        if api_key_hash:
+            api_key = None
+        elif api_key:
             logger = logging.getLogger("filtermate_api")
             logger.warning(
                 "filtermate_api.config: api_key loaded from %s in plaintext. "
                 "QGIS profile dirs are commonly synced (Dropbox/OneDrive) and "
-                "rarely encrypted at rest. Prefer setting FILTERMATE_API_KEY "
-                "as an environment variable, or remove the key from JSON and "
-                "rely on env-only configuration.",
+                "rarely encrypted at rest. Prefer either the FILTERMATE_API_KEY "
+                "env var, or replace ``api_key`` with ``api_key_sha256`` "
+                "(hex sha256 digest of the plaintext) in the JSON config.",
                 path,
             )
 
@@ -112,6 +149,7 @@ class APIConfig:
             log_level=api_section.get("log_level", "info"),
             cors_origins=api_section.get("cors_origins", ["*"]),
             api_key=api_key,
+            api_key_hash=api_key_hash,
         )
 
     @classmethod
@@ -138,7 +176,11 @@ class APIConfig:
             config.cors_origins = [o.strip() for o in raw.split(",") if o.strip()]
         if "FILTERMATE_API_KEY" in os.environ:
             # Empty env var explicitly disables auth — distinct from "unset".
-            config.api_key = os.environ["FILTERMATE_API_KEY"] or None
+            plaintext = os.environ["FILTERMATE_API_KEY"] or None
+            config.api_key = plaintext
+            # Refresh the digest so a JSON-supplied hash doesn't override
+            # the env value (env wins per loader ordering).
+            config.api_key_hash = _hash_api_key(plaintext) if plaintext else None
 
         return config
 
@@ -175,9 +217,7 @@ class APIConfig:
         if allow_insecure:
             return
 
-        has_auth = bool(self.api_key)
-
-        if not self.is_loopback_only and not has_auth:
+        if not self.is_loopback_only and not self.has_auth:
             raise APIConfigError(
                 f"Refusing to start: host={self.host!r} is non-loopback but "
                 f"api_key is unset. Set FILTERMATE_API_KEY, bind to 127.0.0.1, "

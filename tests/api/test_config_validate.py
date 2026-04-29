@@ -194,3 +194,121 @@ class TestWildcardCorsForcesNoCredentials:
             },
         )
         assert response.headers.get("access-control-allow-credentials") == "true"
+
+
+class TestApiKeyHashAtRest:
+    """P1-S4 (audit 2026-04-29): never compare against plaintext at runtime.
+
+    The middleware sees only the digest. JSON deployments can avoid
+    landing plaintext on disk entirely by setting ``api_key_sha256``
+    instead of ``api_key``.
+    """
+
+    _SECRET = "shared-secret-123"
+    _SECRET_HASH = (
+        "da68a9aa0f4fa7079603140103d3ec5d24f2cfcb18113d5e841263d6e1567206"
+    )
+
+    def test_post_init_derives_hash_from_plaintext(self):
+        cfg = APIConfig(api_key=self._SECRET)
+        assert cfg.api_key_hash == self._SECRET_HASH
+        assert cfg.has_auth is True
+
+    def test_post_init_keeps_explicit_hash(self):
+        cfg = APIConfig(api_key_hash=self._SECRET_HASH)
+        # No plaintext was provided — just the digest survives.
+        assert cfg.api_key is None
+        assert cfg.api_key_hash == self._SECRET_HASH
+        assert cfg.has_auth is True
+
+    def test_no_auth_when_neither_set(self):
+        cfg = APIConfig()
+        assert cfg.api_key is None
+        assert cfg.api_key_hash is None
+        assert cfg.has_auth is False
+
+    def test_from_json_api_key_sha256_avoids_plaintext_warning(
+        self, tmp_path, caplog
+    ):
+        path = tmp_path / "config.json"
+        path.write_text(
+            f'{{"API": {{"api_key_sha256": "{self._SECRET_HASH}"}}}}',
+            encoding="utf-8",
+        )
+        with caplog.at_level("WARNING", logger="filtermate_api"):
+            cfg = APIConfig.from_json(path)
+        assert cfg.api_key is None
+        assert cfg.api_key_hash == self._SECRET_HASH
+        assert not any(
+            "plaintext" in record.message for record in caplog.records
+        ), "Hash-at-rest path must not emit the plaintext warning"
+
+    def test_from_json_hash_wins_over_legacy_plaintext(self, tmp_path, caplog):
+        path = tmp_path / "config.json"
+        path.write_text(
+            f'{{"API": {{"api_key": "ignored-legacy", "api_key_sha256": "{self._SECRET_HASH}"}}}}',
+            encoding="utf-8",
+        )
+        with caplog.at_level("WARNING", logger="filtermate_api"):
+            cfg = APIConfig.from_json(path)
+        # When both fields ship, the digest is authoritative and the
+        # warning stays silent — the operator already migrated.
+        assert cfg.api_key is None
+        assert cfg.api_key_hash == self._SECRET_HASH
+        assert not any(
+            "plaintext" in record.message for record in caplog.records
+        )
+
+    def test_from_json_api_key_sha256_normalised_to_lowercase(self, tmp_path):
+        path = tmp_path / "config.json"
+        path.write_text(
+            f'{{"API": {{"api_key_sha256": "  {self._SECRET_HASH.upper()}  "}}}}',
+            encoding="utf-8",
+        )
+        cfg = APIConfig.from_json(path)
+        assert cfg.api_key_hash == self._SECRET_HASH
+
+
+class TestApiKeyMiddlewareHashCompare:
+    """End-to-end: middleware accepts requests whose header digest matches."""
+
+    _SECRET = "shared-secret-123"
+    _SECRET_HASH = (
+        "da68a9aa0f4fa7079603140103d3ec5d24f2cfcb18113d5e841263d6e1567206"
+    )
+
+    def _client(self) -> TestClient:
+        cfg = APIConfig(api_key_hash=self._SECRET_HASH)
+        return TestClient(create_app(config=cfg, accessor=InMemoryAccessor()))
+
+    def test_correct_plaintext_authorises(self):
+        response = self._client().get(
+            "/layers", headers={"X-API-Key": self._SECRET}
+        )
+        assert response.status_code == 200
+
+    def test_wrong_plaintext_rejected(self):
+        response = self._client().get(
+            "/layers", headers={"X-API-Key": "wrong"}
+        )
+        assert response.status_code == 401
+
+    def test_raw_hash_in_header_is_rejected(self):
+        # A leaked digest must NOT authenticate as if it were the key.
+        # The middleware hashes the provided header and compares against
+        # the stored digest, so passing the digest yields a digest of a
+        # digest (≠ stored). Anyone with read access to config.json
+        # cannot escalate to API access.
+        response = self._client().get(
+            "/layers", headers={"X-API-Key": self._SECRET_HASH}
+        )
+        assert response.status_code == 401
+
+    def test_missing_header_rejected(self):
+        response = self._client().get("/layers")
+        assert response.status_code == 401
+
+    def test_health_check_open_even_with_auth_enabled(self):
+        # Liveness probes never carry a key — root path stays public.
+        response = self._client().get("/")
+        assert response.status_code == 200

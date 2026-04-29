@@ -138,9 +138,9 @@ def create_app(
     # still ergonomic. Putting it AFTER CORS means CORS pre-flight (OPTIONS)
     # responses don't carry an auth check — browsers refuse to attach the
     # X-API-Key on the pre-flight, so a 401 there would silently break clients.
-    app.add_middleware(APIKeyMiddleware, api_key=config.api_key)
+    app.add_middleware(APIKeyMiddleware, api_key_hash=config.api_key_hash)
 
-    if not config.api_key:
+    if not config.has_auth:
         logger.warning(
             "FilterMate API starting without api_key — auth disabled "
             "(allowed because host=%r is loopback-only).",
