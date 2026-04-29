@@ -163,7 +163,7 @@ class FavoritesService(QObject):
             db_path: Path to SQLite database
             project_uuid: Project UUID for favorites isolation
         """
-        if self._favorites_manager and hasattr(self._favorites_manager, 'set_database'):
+        if self._favorites_manager:
             self._favorites_manager.set_database(db_path, project_uuid)
 
             # FIX 2026-04-22: if the SQLite DB is empty but the .qgz project file
@@ -202,11 +202,9 @@ class FavoritesService(QObject):
     @property
     def count(self) -> int:
         """Get the number of favorites."""
-        if self._favorites_manager and hasattr(self._favorites_manager, '__len__'):
-            return len(self._favorites_manager)
-        elif self._favorites_manager and hasattr(self._favorites_manager, 'count'):
-            return self._favorites_manager.count
-        return 0
+        if not self._favorites_manager:
+            return 0
+        return self._favorites_manager.count
 
     
 
@@ -960,11 +958,7 @@ class FavoritesService(QObject):
         """
         if not self._favorites_manager:
             return []
-
-        if hasattr(self._favorites_manager, 'get_global_favorites'):
-            return self._favorites_manager.get_global_favorites()
-
-        return []
+        return self._favorites_manager.get_global_favorites()
 
     
 
@@ -986,13 +980,10 @@ class FavoritesService(QObject):
                 "FavoritesService.make_favorite_global called before manager was attached"
             )
 
-        if hasattr(self._favorites_manager, 'make_favorite_global'):
-            success = self._favorites_manager.make_favorite_global(favorite_id)
-            if success:
-                self.favorites_changed.emit()
-            return success
-
-        return False
+        success = self._favorites_manager.make_favorite_global(favorite_id)
+        if success:
+            self.favorites_changed.emit()
+        return success
 
     def copy_to_global(self, favorite_id: str) -> Optional[str]:
         """
@@ -1006,14 +997,10 @@ class FavoritesService(QObject):
         """
         if not self._favorites_manager:
             return None
-
-        if hasattr(self._favorites_manager, 'copy_to_global'):
-            new_id = self._favorites_manager.copy_to_global(favorite_id)
-            if new_id:
-                self.favorites_changed.emit()
-            return new_id
-
-        return None
+        new_id = self._favorites_manager.copy_to_global(favorite_id)
+        if new_id:
+            self.favorites_changed.emit()
+        return new_id
 
     def import_global_to_project(self, global_favorite_id: str) -> Optional[str]:
         """
@@ -1027,11 +1014,7 @@ class FavoritesService(QObject):
         """
         if not self._favorites_manager:
             return None
-
-        if hasattr(self._favorites_manager, 'import_global_to_project'):
-            new_id = self._favorites_manager.import_global_to_project(global_favorite_id)
-            if new_id:
-                self.favorites_changed.emit()
-            return new_id
-
-        return None
+        new_id = self._favorites_manager.import_global_to_project(global_favorite_id)
+        if new_id:
+            self.favorites_changed.emit()
+        return new_id

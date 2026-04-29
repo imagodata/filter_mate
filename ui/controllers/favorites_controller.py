@@ -19,7 +19,11 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtGui import QCursor
 from qgis.core import QgsProject
 
-from ...core.domain.exceptions import FavoritePersistenceError
+from ...core.domain.exceptions import (
+    FavoritePersistenceError,
+    FavoritesError,
+    FavoritesNotInitialized,
+)
 from .base_controller import BaseController
 from .favorites_spatial_helpers import (
     exact_filtered_feature_count,
@@ -147,7 +151,7 @@ class FavoritesController(BaseController):
 
         # CRITICAL FIX 2026-01-18: Connect to favorites_changed signal from FavoritesService
         # This ensures the UI is updated when favorites are loaded from database
-        if self._favorites_manager and hasattr(self._favorites_manager, 'favorites_changed'):
+        if self._favorites_manager:
             self._favorites_manager.favorites_changed.connect(self._on_favorites_loaded)
             logger.debug("✓ Connected to FavoritesService.favorites_changed signal")
 
@@ -179,7 +183,7 @@ class FavoritesController(BaseController):
             return False
 
         # Disconnect old signal if any
-        if self._favorites_manager and hasattr(self._favorites_manager, 'favorites_changed'):
+        if self._favorites_manager:
             try:
                 self._favorites_manager.favorites_changed.disconnect(self._on_favorites_loaded)
             except (TypeError, RuntimeError):
@@ -190,8 +194,7 @@ class FavoritesController(BaseController):
         self._favorites_manager = new_manager
 
         # Connect new signal
-        if hasattr(self._favorites_manager, 'favorites_changed'):
-            self._favorites_manager.favorites_changed.connect(self._on_favorites_loaded)
+        self._favorites_manager.favorites_changed.connect(self._on_favorites_loaded)
 
         # Update UI
         self.update_indicator()
@@ -300,11 +303,25 @@ class FavoritesController(BaseController):
 
         Returns:
             True if favorite was applied successfully
+
+        A4 (audit 2026-04-29): :class:`FavoritesNotInitialized` is now
+        caught and surfaced as a warning. The early ``if not
+        self._favorites_manager`` guard above only covers the "service
+        slot is None" case — once the slot is set, the service can still
+        be in a non-initialised internal state (project not loaded yet,
+        re-init in progress) and raise from any of its mutators.
         """
         if not self._favorites_manager:
             return False
 
-        favorite = self._favorites_manager.get_favorite(favorite_id)
+        try:
+            favorite = self._favorites_manager.get_favorite(favorite_id)
+        except FavoritesNotInitialized as e:
+            self._show_warning(self.tr(
+                "Favorites are not ready yet: {0}"
+            ).format(e))
+            return False
+
         if not favorite:
             logger.warning(f"Favorite not found: {favorite_id}")
             return False
@@ -320,8 +337,13 @@ class FavoritesController(BaseController):
         # Apply the favorite expression
         success = self._apply_favorite_expression(favorite)
         if success:
-            # Update use count
-            self._favorites_manager.mark_favorite_used(favorite_id)
+            try:
+                # Update use count
+                self._favorites_manager.mark_favorite_used(favorite_id)
+            except FavoritesError as e:
+                # Use-count bump is non-critical; log and keep the apply
+                # success — the user already sees the filter applied.
+                logger.warning(f"Failed to mark favorite used: {e}")
             self.favorite_applied.emit(favorite.name)
             # FIX 2026-04-22: surface the use_count bump so consumers (manager
             # dialog, menu preview) can redraw. mark_favorite_used() only
@@ -341,17 +363,33 @@ class FavoritesController(BaseController):
 
         Returns:
             True if favorite was removed successfully
+
+        A4 (audit 2026-04-29): same defensive catch as ``apply_favorite``
+        for :class:`FavoritesNotInitialized`. Persistence failures keep
+        the existing :class:`FavoritePersistenceError` handling.
         """
         if not self._favorites_manager:
             return False
 
-        favorite = self._favorites_manager.get_favorite(favorite_id)
+        try:
+            favorite = self._favorites_manager.get_favorite(favorite_id)
+        except FavoritesNotInitialized as e:
+            self._show_warning(self.tr(
+                "Favorites are not ready yet: {0}"
+            ).format(e))
+            return False
+
         if not favorite:
             return False
 
         name = favorite.name
         try:
             success = self._favorites_manager.remove_favorite(favorite_id)
+        except FavoritesNotInitialized as e:
+            self._show_warning(self.tr(
+                "Favorites are not ready yet: {0}"
+            ).format(e))
+            return False
         except FavoritePersistenceError as e:
             self._show_error(self.tr(
                 "Could not remove '{0}': {1}"
@@ -362,6 +400,8 @@ class FavoritesController(BaseController):
                 self._favorites_manager.save()
             except FavoritePersistenceError as e:
                 logger.warning(f"Save after remove failed: {e}")
+            except FavoritesNotInitialized as e:
+                logger.warning(f"Save after remove skipped (not initialized): {e}")
             self.favorite_removed.emit(name)
             self.favorites_changed.emit()
             self.update_indicator()
@@ -960,11 +1000,7 @@ class FavoritesController(BaseController):
         """Get global favorites from the manager."""
         if not self._favorites_manager:
             return []
-
-        if hasattr(self._favorites_manager, 'get_global_favorites'):
-            return self._favorites_manager.get_global_favorites()
-
-        return []
+        return self._favorites_manager.get_global_favorites()
 
     def _apply_global_favorite(self, favorite_id: str) -> bool:
         """Apply a global favorite."""
@@ -972,37 +1008,34 @@ class FavoritesController(BaseController):
             return False
 
         # First, import the global favorite to the current project
-        if hasattr(self._favorites_manager, 'import_global_to_project'):
-            try:
-                new_id = self._favorites_manager.import_global_to_project(favorite_id)
-            except FavoritePersistenceError as e:
-                self._show_error(self.tr(
-                    "Could not import global favorite: {0}"
-                ).format(e.__cause__ or e))
-                return False
-            if new_id:
-                # Then apply the newly imported favorite
-                self.update_indicator()
-                return self.apply_favorite(new_id)
-
-        return False
+        try:
+            new_id = self._favorites_manager.import_global_to_project(favorite_id)
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not import global favorite: {0}"
+            ).format(e.__cause__ or e))
+            return False
+        if not new_id:
+            return False
+        # Then apply the newly imported favorite
+        self.update_indicator()
+        return self.apply_favorite(new_id)
 
     def _copy_to_global(self, favorite_id: str) -> bool:
         """Copy a favorite to global favorites."""
         if not self._favorites_manager:
             return False
 
-        if hasattr(self._favorites_manager, 'copy_to_global'):
-            try:
-                new_id = self._favorites_manager.copy_to_global(favorite_id)
-            except FavoritePersistenceError as e:
-                self._show_error(self.tr(
-                    "Could not copy to global: {0}"
-                ).format(e.__cause__ or e))
-                return False
-            if new_id:
-                self._show_success(self.tr("Favorite copied to global favorites"))
-                return True
+        try:
+            new_id = self._favorites_manager.copy_to_global(favorite_id)
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not copy to global: {0}"
+            ).format(e.__cause__ or e))
+            return False
+        if new_id:
+            self._show_success(self.tr("Favorite copied to global favorites"))
+            return True
 
         self._show_warning(self.tr("Failed to copy to global favorites"))
         return False
@@ -1014,33 +1047,31 @@ class FavoritesController(BaseController):
         if not self._favorites_manager:
             return
 
-        if hasattr(self._favorites_manager, 'save_to_project_file'):
-            from qgis.core import QgsProject
-            try:
-                success = self._favorites_manager.save_to_project_file(QgsProject.instance())
-            except FavoritePersistenceError as e:
-                self._show_error(self.tr(
-                    "Could not save favorites to project file: {0}"
-                ).format(e.__cause__ or e))
-                return
-            if success:
-                self._show_success(self.tr("Saved {0} favorite(s) to project file").format(self.count))
-            else:
-                self._show_warning(self.tr("Save failed"))
+        from qgis.core import QgsProject
+        try:
+            success = self._favorites_manager.save_to_project_file(QgsProject.instance())
+        except FavoritePersistenceError as e:
+            self._show_error(self.tr(
+                "Could not save favorites to project file: {0}"
+            ).format(e.__cause__ or e))
+            return
+        if success:
+            self._show_success(self.tr("Saved {0} favorite(s) to project file").format(self.count))
+        else:
+            self._show_warning(self.tr("Save failed"))
 
     def _restore_from_project(self) -> None:
         """Restore favorites from the QGIS project file."""
         if not self._favorites_manager:
             return
 
-        if hasattr(self._favorites_manager, 'restore_from_project_file'):
-            from qgis.core import QgsProject
-            count = self._favorites_manager.restore_from_project_file(QgsProject.instance())
-            if count > 0:
-                self.update_indicator()
-                self._show_success(self.tr("Restored {0} favorite(s) from project file").format(count))
-            else:
-                self._show_warning(self.tr("No favorites to restore found in project"))
+        from qgis.core import QgsProject
+        count = self._favorites_manager.restore_from_project_file(QgsProject.instance())
+        if count > 0:
+            self.update_indicator()
+            self._show_success(self.tr("Restored {0} favorite(s) from project file").format(count))
+        else:
+            self._show_warning(self.tr("No favorites to restore found in project"))
 
     def _cleanup_orphan_projects(self) -> None:
         """Clean up orphan projects from the database."""

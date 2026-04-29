@@ -142,7 +142,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             # FIX 2026-04-22: keep the dialog in sync when favorites change
             # externally (import, apply updating use_count, another controller
             # editing the same manager). Without this the list stayed stale.
-            if self._favorites_manager is not None and hasattr(self._favorites_manager, 'favorites_changed'):
+            if self._favorites_manager is not None:
                 try:
                     self._favorites_manager.favorites_changed.connect(self._on_external_favorites_changed)
                     self._external_change_connected = True

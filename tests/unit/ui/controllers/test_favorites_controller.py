@@ -1125,3 +1125,124 @@ class TestCaptureRestoreRoundTrip:
         btn.setChecked.assert_called_once_with(True)
         assert layer_props['filtering']['has_geometric_predicates'] is True
         assert layer_props['filtering']['geometric_predicates'] == ['Intersect']
+
+
+# ---------------------------------------------------------------------------
+# A4 (audit 2026-04-29): FavoritesNotInitialized must be caught and surfaced
+# as a warning. The early ``if not self._favorites_manager`` guard only
+# covers the "slot is None" case; the service can raise even when set.
+# ---------------------------------------------------------------------------
+
+
+class TestApplyFavoriteCatchesNotInitialized:
+    def _make_controller(self, manager_mock):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._favorites_manager = manager_mock
+        ctrl._show_warning = MagicMock()
+        ctrl._show_error = MagicMock()
+        ctrl.tr = lambda s: s
+        ctrl.favorite_applied = MagicMock()
+        ctrl.favorites_changed = MagicMock()
+        return ctrl
+
+    def test_get_favorite_raising_not_initialized_returns_false(self):
+        # Trigger the same exception class the controller imports.
+        from _fm_test_ui_shim.core.domain.exceptions import FavoritesNotInitialized
+
+        manager = MagicMock()
+        manager.get_favorite.side_effect = FavoritesNotInitialized("manager not ready")
+
+        ctrl = self._make_controller(manager)
+        result = ctrl.apply_favorite("fav-1")
+
+        assert result is False
+        ctrl._show_warning.assert_called_once()
+        warning_msg = ctrl._show_warning.call_args.args[0]
+        assert "not ready" in warning_msg.lower()
+        # mark_favorite_used must NOT be called when the apply path bailed
+        manager.mark_favorite_used.assert_not_called()
+
+    def test_mark_favorite_used_failure_does_not_break_apply(self):
+        # apply_favorite_expression succeeds, then mark_favorite_used raises
+        # FavoritesNotInitialized (race: service re-init between calls).
+        # The bookkeeping failure is non-critical and must not roll back
+        # the user-visible apply success.
+        from _fm_test_ui_shim.core.domain.exceptions import FavoritesNotInitialized
+
+        manager = MagicMock()
+        favorite = MagicMock()
+        favorite.name = "fav-1"
+        favorite.spatial_config = {}
+        favorite.remote_layers = {}
+        manager.get_favorite.return_value = favorite
+        manager.mark_favorite_used.side_effect = FavoritesNotInitialized("re-init")
+
+        ctrl = self._make_controller(manager)
+        ctrl._backfill_legacy_predicate_default = MagicMock()
+        ctrl._apply_favorite_expression = MagicMock(return_value=True)
+
+        result = ctrl.apply_favorite("fav-1")
+
+        # Apply itself succeeded — bookkeeping failure logged, not raised.
+        assert result is True
+        ctrl.favorite_applied.emit.assert_called_once()
+
+
+class TestRemoveFavoriteCatchesNotInitialized:
+    def _make_controller(self, manager_mock):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._favorites_manager = manager_mock
+        ctrl._show_warning = MagicMock()
+        ctrl._show_error = MagicMock()
+        ctrl.tr = lambda s: s
+        ctrl.favorite_removed = MagicMock()
+        ctrl.favorites_changed = MagicMock()
+        ctrl.update_indicator = MagicMock()
+        return ctrl
+
+    def test_get_favorite_raising_not_initialized_returns_false(self):
+        from _fm_test_ui_shim.core.domain.exceptions import FavoritesNotInitialized
+
+        manager = MagicMock()
+        manager.get_favorite.side_effect = FavoritesNotInitialized("not ready")
+
+        ctrl = self._make_controller(manager)
+        result = ctrl.remove_favorite("fav-1")
+
+        assert result is False
+        ctrl._show_warning.assert_called_once()
+        manager.remove_favorite.assert_not_called()
+
+    def test_remove_favorite_raising_not_initialized_returns_false(self):
+        # get_favorite succeeds but the actual remove raises.
+        from _fm_test_ui_shim.core.domain.exceptions import FavoritesNotInitialized
+
+        manager = MagicMock()
+        favorite = MagicMock()
+        favorite.name = "fav-1"
+        manager.get_favorite.return_value = favorite
+        manager.remove_favorite.side_effect = FavoritesNotInitialized("re-init")
+
+        ctrl = self._make_controller(manager)
+        result = ctrl.remove_favorite("fav-1")
+
+        assert result is False
+        ctrl._show_warning.assert_called_once()
+        ctrl.favorite_removed.emit.assert_not_called()
+
+    def test_save_after_remove_failing_not_initialized_logs_only(self):
+        from _fm_test_ui_shim.core.domain.exceptions import FavoritesNotInitialized
+
+        manager = MagicMock()
+        favorite = MagicMock()
+        favorite.name = "fav-1"
+        manager.get_favorite.return_value = favorite
+        manager.remove_favorite.return_value = True
+        manager.save.side_effect = FavoritesNotInitialized("save unavail")
+
+        ctrl = self._make_controller(manager)
+        result = ctrl.remove_favorite("fav-1")
+
+        # The remove itself succeeded; save() failure is downgraded to log.
+        assert result is True
+        ctrl.favorite_removed.emit.assert_called_once_with("fav-1")

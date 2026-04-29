@@ -2422,18 +2422,7 @@ class FilterMateApp:
                     controller = self.dockwidget.favorites_controller
                     if controller is not None:
                         # Use the new sync method for clean signal handling
-                        if hasattr(controller, 'sync_with_dockwidget_manager'):
-                            controller.sync_with_dockwidget_manager()
-                        else:
-                            # Fallback for older controller versions
-                            controller._favorites_manager = self.favorites_manager
-                            if hasattr(self.favorites_manager, 'favorites_changed'):
-                                try:
-                                    self.favorites_manager.favorites_changed.disconnect(controller._on_favorites_loaded)
-                                except (TypeError, RuntimeError):
-                                    pass
-                                self.favorites_manager.favorites_changed.connect(controller._on_favorites_loaded)
-                            controller.update_indicator()
+                        controller.sync_with_dockwidget_manager()
                         logger.info(f"✓ FavoritesController synced and UI updated ({favorites_count} favorites)")
                     else:
                         logger.debug("FavoritesController not yet available - will be notified via signal")
@@ -2514,15 +2503,14 @@ class FilterMateApp:
                 outfile.write(json.dumps(config_data_clean, indent=4))
 
             # Save favorites to project
-            if hasattr(self, 'favorites_manager') and self.favorites_manager is not None:
+            if self.favorites_manager is not None:
                 self.favorites_manager.save()
-                count = getattr(self.favorites_manager, 'count', 0)
+                count = self.favorites_manager.count
                 logger.debug(f"Saved {count} favorites to project")
 
                 # Also backup favorites to .qgz project file
-                if hasattr(self.favorites_manager, 'save_to_project_file'):
-                    self.favorites_manager.save_to_project_file(self.PROJECT)
-                    logger.debug(f"Backed up {count} favorites to project file (.qgz)")
+                self.favorites_manager.save_to_project_file(self.PROJECT)
+                logger.debug(f"Backed up {count} favorites to project file (.qgz)")
 
     def layer_management_engine_task_completed(self, result_project_layers, task_name):
         """Handle layer management task completion. Delegates to LayerTaskCompletionHandler."""
