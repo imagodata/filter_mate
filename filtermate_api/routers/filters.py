@@ -62,11 +62,14 @@ async def apply_filter(
         source=payload.source,
     )
     if not success:
-        # 404 — the layer name didn't resolve. We surface this distinctly
-        # from a 400 (bad expression) so clients can branch on it.
+        # 404 — the layer name didn't resolve. Distinct from a 400 (bad
+        # expression) so clients can branch on it. P1-API-HARDEN (audit
+        # 2026-04-29): don't echo the user-supplied name into the error
+        # body — caller already has it from the request payload, and a
+        # static message removes the reflected-input surface.
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Layer not found: {payload.layer_name!r}",
+            detail="Layer not found",
         )
 
     return ApplyFilterResponse(

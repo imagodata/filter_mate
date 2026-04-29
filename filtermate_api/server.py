@@ -16,8 +16,10 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import AsyncGenerator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from . import __version__
 from .accessor import FilterMateAccessor, InMemoryAccessor
@@ -28,6 +30,56 @@ from .routers import filters as filters_router
 from .routers import layers as layers_router
 
 logger = logging.getLogger("filtermate_api")
+
+# P1-API-HARDEN (audit 2026-04-29): cap request body at 1 MiB so a
+# malicious caller can't DoS the QGIS process by streaming gigabytes
+# into ``POST /filters/apply`` (which accepts arbitrary expression
+# strings). 1 MiB is two orders of magnitude above any legitimate
+# filter expression — operators can override per-deployment via the
+# ``FILTERMATE_API_MAX_BODY_BYTES`` env var.
+_DEFAULT_MAX_BODY_BYTES = 1 * 1024 * 1024
+
+
+class BodySizeLimitMiddleware(BaseHTTPMiddleware):
+    """Reject requests with ``Content-Length`` above the configured cap.
+
+    Compares against the declared ``Content-Length`` header — a hostile
+    caller can omit the header and stream chunked, but FastAPI's body
+    parsing then enforces the same ceiling implicitly via Pydantic's
+    ``max_length`` validators on the field shapes (``ApplyFilterRequest``
+    has ``min_length=1`` but no ``max_length`` today; if that becomes a
+    real attack surface we'll add it). Header-based rejection is the
+    cheap first wall — it stops well-behaved clients from accidentally
+    DoS-ing the QGIS process.
+    """
+
+    def __init__(self, app, max_body_bytes: int = _DEFAULT_MAX_BODY_BYTES) -> None:
+        super().__init__(app)
+        self._max_body_bytes = max_body_bytes
+
+    # Newer Starlette renamed this constant to ``HTTP_413_CONTENT_TOO_LARGE``;
+    # fall back to the legacy spelling so the middleware works against
+    # both versions without emitting a DeprecationWarning.
+    _STATUS_413 = getattr(
+        status, "HTTP_413_CONTENT_TOO_LARGE", 413
+    )
+
+    async def dispatch(self, request: Request, call_next):
+        content_length_raw = request.headers.get("content-length")
+        if content_length_raw:
+            try:
+                content_length = int(content_length_raw)
+            except ValueError:
+                content_length = 0
+            if content_length > self._max_body_bytes:
+                return JSONResponse(
+                    status_code=self._STATUS_413,
+                    content={
+                        "detail": "Request body too large",
+                        "max_bytes": self._max_body_bytes,
+                    },
+                )
+        return await call_next(request)
 
 
 def _configure_logging(level: str) -> None:
@@ -139,6 +191,20 @@ def create_app(
     # responses don't carry an auth check — browsers refuse to attach the
     # X-API-Key on the pre-flight, so a 401 there would silently break clients.
     app.add_middleware(APIKeyMiddleware, api_key_hash=config.api_key_hash)
+
+    # --- Body-size cap (P1-API-HARDEN) ---
+    # Installed AFTER auth so unauthenticated callers are 401'd before
+    # we even read the Content-Length — keeps the cheap first wall in
+    # the right order. Override via FILTERMATE_API_MAX_BODY_BYTES.
+    import os as _os
+    try:
+        _max_body = int(
+            _os.environ.get("FILTERMATE_API_MAX_BODY_BYTES")
+            or _DEFAULT_MAX_BODY_BYTES
+        )
+    except ValueError:
+        _max_body = _DEFAULT_MAX_BODY_BYTES
+    app.add_middleware(BodySizeLimitMiddleware, max_body_bytes=_max_body)
 
     if not config.has_auth:
         logger.warning(

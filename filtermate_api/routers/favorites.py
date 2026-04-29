@@ -12,9 +12,16 @@ from typing import Dict, List
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
-from ..accessor import Favorite, FilterMateAccessor, HistoryStep
+from ..accessor import Favorite, FavoritesUnavailable, FilterMateAccessor, HistoryStep
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
+
+# P1-API-HARDEN (audit 2026-04-29): the plugin can come up before its
+# favorites store is fully wired (project not loaded, persistence layer
+# offline). Tell clients to retry rather than letting them silently
+# treat "not ready" as "no favorites configured". 30s is the empirical
+# warm-up budget for a typical QGIS startup.
+_FAVORITES_RETRY_AFTER_SECONDS = 30
 
 
 def _accessor(request: Request) -> FilterMateAccessor:
@@ -22,10 +29,21 @@ def _accessor(request: Request) -> FilterMateAccessor:
     return accessor
 
 
+def _favorites_unavailable_response() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        detail="Favorites store not ready",
+        headers={"Retry-After": str(_FAVORITES_RETRY_AFTER_SECONDS)},
+    )
+
+
 @router.get("", response_model=List[Favorite])
 async def list_favorites(request: Request) -> List[Favorite]:
     """Return every favorite the FilterMate session knows about."""
-    return _accessor(request).list_favorites()
+    try:
+        return _accessor(request).list_favorites()
+    except FavoritesUnavailable:
+        raise _favorites_unavailable_response()
 
 
 class ApplyFavoriteResponse(BaseModel):
@@ -38,11 +56,17 @@ class ApplyFavoriteResponse(BaseModel):
 async def apply_favorite(favorite_id: str, request: Request) -> ApplyFavoriteResponse:
     """Apply the favorite identified by ``favorite_id``."""
     accessor = _accessor(request)
-    step = accessor.apply_favorite(favorite_id)
+    try:
+        step = accessor.apply_favorite(favorite_id)
+    except FavoritesUnavailable:
+        raise _favorites_unavailable_response()
     if step is None:
+        # P1-API-HARDEN: don't echo the user-supplied id back into the
+        # error body — clients already have it from the URL, and a
+        # static message removes a tiny reflected-input surface.
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Favorite not found or has no target layer: {favorite_id!r}",
+            detail="Favorite not found or has no target layer",
         )
     return ApplyFavoriteResponse(
         step=step,

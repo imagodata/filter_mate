@@ -38,7 +38,11 @@ class TestApplyFilter:
             json={"layer_name": "ghost_layer", "expression": "1=1"},
         )
         assert response.status_code == 404
-        assert "ghost_layer" in response.json()["detail"]
+        # P1-API-HARDEN (audit 2026-04-29): the detail message no longer
+        # echoes the user-supplied layer name back to remove the
+        # reflected-input surface. The status code conveys "not found"
+        # and the caller already has the name from the request payload.
+        assert response.json()["detail"] == "Layer not found"
 
     def test_missing_layer_name_is_422(self, client):
         # Pydantic validation kicks in before the route body runs.

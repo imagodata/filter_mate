@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Optional
 
 from .accessor import (
     Favorite,
+    FavoritesUnavailable,
     FilterStatus,
     HistoryStep,
     LayerSummary,
@@ -176,20 +177,37 @@ class QGISFilterMateAccessor:
     def list_favorites(self) -> List[Favorite]:
         favorites_service = getattr(self._plugin, "favorites_manager", None)
         if favorites_service is None:
-            return []
+            # P1-API-HARDEN: surface "not ready" distinctly from "no
+            # favorites" so the router can answer 503 instead of [].
+            raise FavoritesUnavailable(
+                "FavoritesService not mounted on plugin instance"
+            )
         try:
             entries = favorites_service.get_all_favorites() or []
-        except Exception:
+        except FavoritesUnavailable:
+            raise
+        except Exception as exc:
+            # ``FavoritesNotInitialized`` (and any other init-time failure
+            # surfaced as a domain exception) propagates as a 503 too —
+            # the favorites store is simply not available yet.
+            if type(exc).__name__ == "FavoritesNotInitialized":
+                raise FavoritesUnavailable(str(exc)) from exc
             return []
         return [self._favorite_from(entry) for entry in entries]
 
     def apply_favorite(self, favorite_id: str) -> Optional[HistoryStep]:
         favorites_service = getattr(self._plugin, "favorites_manager", None)
         if favorites_service is None:
-            return None
+            raise FavoritesUnavailable(
+                "FavoritesService not mounted on plugin instance"
+            )
         try:
             entry = favorites_service.get_favorite(favorite_id)
-        except Exception:
+        except FavoritesUnavailable:
+            raise
+        except Exception as exc:
+            if type(exc).__name__ == "FavoritesNotInitialized":
+                raise FavoritesUnavailable(str(exc)) from exc
             return None
         if entry is None:
             return None

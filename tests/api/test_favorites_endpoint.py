@@ -44,7 +44,9 @@ class TestApplyFavorite:
     def test_apply_unknown_favorite_returns_404(self, client):
         response = client.post("/favorites/no-such-id/apply")
         assert response.status_code == 404
-        assert "no-such-id" in response.json()["detail"]
+        # P1-API-HARDEN (audit 2026-04-29): static message — no echo of
+        # the user-supplied id into the body.
+        assert response.json()["detail"] == "Favorite not found or has no target layer"
 
     def test_apply_orphan_favorite_returns_404(self, client):
         # The orphan favorite has no layer_name — can't be applied.

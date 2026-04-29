@@ -24,6 +24,18 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Protocol, runtime_checkable
 
 
+class FavoritesUnavailable(RuntimeError):
+    """Raised when the favorites store is not (yet) ready to serve.
+
+    P1-API-HARDEN (audit 2026-04-29): the QGIS-side FavoritesService
+    can be missing entirely (plugin still booting, project not loaded
+    yet, persistence layer offline) or raise ``FavoritesNotInitialized``
+    on access. Routers translate this to ``503 Service Unavailable``
+    with a ``Retry-After`` hint so callers don't get a silent ``[]``
+    that misleads them into "no favorites configured".
+    """
+
+
 @dataclass(frozen=True)
 class LayerSummary:
     """Lightweight projection of a QGIS layer for API consumers.

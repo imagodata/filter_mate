@@ -317,12 +317,18 @@ class TestFavorites:
         assert favorites[0].favorite_id == "fav-1"
         assert favorites[0].layer_name == "communes"
 
-    def test_list_favorites_returns_empty_when_service_missing(
+    def test_list_favorites_raises_unavailable_when_service_missing(
         self, public_api, plugin
     ):
+        # P1-API-HARDEN (audit 2026-04-29): a missing FavoritesService is
+        # "store not ready" — distinct from "no favorites configured".
+        # The router translates this to 503 + Retry-After.
+        from filtermate_api.accessor import FavoritesUnavailable
+
         del plugin.favorites_manager
         accessor = QGISFilterMateAccessor(public_api=public_api, plugin=plugin)
-        assert accessor.list_favorites() == []
+        with pytest.raises(FavoritesUnavailable):
+            accessor.list_favorites()
 
     def test_apply_favorite_delegates_through_public_api(self, accessor,
                                                         plugin, public_api):
