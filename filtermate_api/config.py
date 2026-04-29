@@ -14,6 +14,19 @@ from pathlib import Path
 # Resolve the project root (parent of filtermate_api/)
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
+# Loopback addresses considered safe for unauthenticated bind. Anything
+# else (LAN, 0.0.0.0, public IP) is treated as a remote-exposed surface
+# and requires either an API key or an explicit insecure-override.
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
+
+# Env var that bypasses :meth:`APIConfig.validate`. Use only for dev/CI
+# scenarios where the operator accepts the implications.
+_INSECURE_OVERRIDE_ENV = "FILTERMATE_API_ALLOW_INSECURE"
+
+
+class APIConfigError(RuntimeError):
+    """Raised when :meth:`APIConfig.validate` rejects an insecure config."""
+
 
 @dataclass
 class APIConfig:
@@ -107,3 +120,52 @@ class APIConfig:
             config.api_key = os.environ["FILTERMATE_API_KEY"] or None
 
         return config
+
+    @property
+    def is_loopback_only(self) -> bool:
+        """True when the bind address is restricted to the local machine."""
+        return self.host in _LOOPBACK_HOSTS
+
+    @property
+    def has_wildcard_cors(self) -> bool:
+        """True when CORS allows any origin."""
+        return "*" in self.cors_origins
+
+    def validate(self, allow_insecure: bool | None = None) -> None:
+        """Reject insecure deployments before the app boots.
+
+        Two combinations are remotely exploitable and refused:
+
+        1. **Non-loopback bind without auth** — anything on the LAN can
+           drive the QGIS session. CWE-306.
+        2. **Non-loopback bind with wildcard CORS** — even with auth, a
+           browser-driven CSRF can replay credentials when the user
+           visits a hostile page. CWE-942.
+
+        ``allow_insecure=True`` (or env ``FILTERMATE_API_ALLOW_INSECURE=1``)
+        bypasses both rules — for tests/CI only.
+        """
+        if allow_insecure is None:
+            allow_insecure = os.getenv(_INSECURE_OVERRIDE_ENV, "").lower() in (
+                "1",
+                "true",
+                "yes",
+            )
+        if allow_insecure:
+            return
+
+        has_auth = bool(self.api_key)
+
+        if not self.is_loopback_only and not has_auth:
+            raise APIConfigError(
+                f"Refusing to start: host={self.host!r} is non-loopback but "
+                f"api_key is unset. Set FILTERMATE_API_KEY, bind to 127.0.0.1, "
+                f"or set {_INSECURE_OVERRIDE_ENV}=1 to override (dev only)."
+            )
+
+        if not self.is_loopback_only and self.has_wildcard_cors:
+            raise APIConfigError(
+                f"Refusing to start: cors_origins={self.cors_origins!r} contains "
+                f"a wildcard on non-loopback host {self.host!r}. Specify explicit "
+                f"origins or set {_INSECURE_OVERRIDE_ENV}=1 to override (dev only)."
+            )

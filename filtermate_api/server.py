@@ -72,6 +72,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 def create_app(
     config: APIConfig | None = None,
     accessor: FilterMateAccessor | None = None,
+    *,
+    allow_insecure: bool | None = None,
 ) -> FastAPI:
     """Factory that builds and returns a configured FastAPI application.
 
@@ -80,14 +82,25 @@ def create_app(
         accessor: Optional bridge to the running FilterMate plugin. If
             *None*, an empty :class:`InMemoryAccessor` is wired — fine for
             standalone smoke tests, useless for real filtering.
+        allow_insecure: Forwarded to :meth:`APIConfig.validate`. ``None``
+            (default) reads the ``FILTERMATE_API_ALLOW_INSECURE`` env var.
+            Set ``True`` from tests/CI that legitimately need the relaxed
+            defaults (e.g. ``api_key=None`` on loopback already passes).
 
     Returns:
         A ready-to-serve FastAPI instance.
+
+    Raises:
+        APIConfigError: when the resolved config is remotely exploitable
+            (non-loopback + no auth, or non-loopback + wildcard CORS) and
+            no override is requested.
     """
     if config is None:
         config = APIConfig.load()
     if accessor is None:
         accessor = InMemoryAccessor()
+
+    config.validate(allow_insecure=allow_insecure)
 
     app = FastAPI(
         title="FilterMate API",
@@ -101,10 +114,21 @@ def create_app(
     app.state.accessor = accessor
 
     # --- CORS ---
+    # Wildcard origin + credentials is forbidden by spec; browsers reject
+    # it silently. Force-disable credentials when origin is "*" so the
+    # middleware emits a coherent, browser-honoured policy instead of
+    # one that silently degrades.
+    cors_allow_credentials = not config.has_wildcard_cors
+    if config.has_wildcard_cors:
+        logger.warning(
+            "CORS allow_origins=['*'] — disabling allow_credentials. "
+            "Specify explicit origins to allow credentialed requests."
+        )
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origins,
-        allow_credentials=True,
+        allow_credentials=cors_allow_credentials,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -115,6 +139,13 @@ def create_app(
     # responses don't carry an auth check — browsers refuse to attach the
     # X-API-Key on the pre-flight, so a 401 there would silently break clients.
     app.add_middleware(APIKeyMiddleware, api_key=config.api_key)
+
+    if not config.api_key:
+        logger.warning(
+            "FilterMate API starting without api_key — auth disabled "
+            "(allowed because host=%r is loopback-only).",
+            config.host,
+        )
 
     # ------------------------------------------------------------------
     # Routes
