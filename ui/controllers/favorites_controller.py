@@ -690,7 +690,10 @@ class FavoritesController(BaseController):
         elif action_data == ACTION_SHOW_ALL:
             self.show_manager_dialog()
         elif action_data == ACTION_SHOW_GLOBAL:
-            self._show_global_favorites_dialog()
+            # The unified manager dialog's scope filter (F10) already
+            # covers the "Global · All projects" view; route there
+            # rather than maintain a placeholder dialog.
+            self.show_manager_dialog()
         elif action_data == ACTION_BACKUP_TO_PROJECT:
             self._backup_to_project()
         elif action_data == ACTION_RESTORE_FROM_PROJECT:
@@ -1004,16 +1007,7 @@ class FavoritesController(BaseController):
         self._show_warning(self.tr("Failed to copy to global favorites"))
         return False
 
-    def _show_global_favorites_dialog(self) -> None:
-        """Show dialog for managing global favorites."""
-        # For now, show a message - full dialog can be added later
-        global_count = len(self._get_global_favorites())
-        QMessageBox.information(
-            self.dockwidget,
-            self.tr("Global Favorites"),
-            self.tr("{0} global favorite(s) available.\n\n"
-                     "Global favorites are shared across all projects.").format(global_count)
-        )
+    
 
     def _backup_to_project(self) -> None:
         """Backup favorites to the QGIS project file."""
