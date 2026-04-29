@@ -351,7 +351,7 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             self._target_combo.addItem(label, t)
 
         # 3) Virtual options
-        if self._sharing_service._scanner.get_collections_root() is not None:
+        if self._sharing_service.has_configured_collections_root():
             self._target_combo.addItem(
                 "✨ " + self.tr("New collection in Resource Sharing root..."),
                 self._TARGET_NEW_IN_ROOT,

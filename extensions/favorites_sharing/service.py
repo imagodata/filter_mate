@@ -278,6 +278,14 @@ class FavoritesSharingService:
 
     BUNDLE_FILENAME_RE = r'^[a-zA-Z0-9_\-]+\.fmfav(-pack)?\.json$'
 
+    def has_configured_collections_root(self) -> bool:
+        """Whether a Resource Sharing collections root is configured.
+
+        Lets UI flows surface the "New collection in root..." offer
+        without having to reach into ``self._scanner`` directly (EXT-4).
+        """
+        return self._scanner.get_collections_root() is not None
+
     def list_publish_targets(self) -> List[CollectionTarget]:
         """Enumerate directories under the Resource Sharing collections
         root that the user can publish into.
