@@ -332,7 +332,7 @@ class FavoritesController(BaseController):
         # an empty list, leaving the filter task with no predicate. Heal
         # them in place with an "Intersect" default and surface a warning
         # so the user knows the recovery happened.
-        self._backfill_legacy_predicate_default(favorite)
+        self._spatial.backfill_legacy_predicate_default(favorite)
 
         # Apply the favorite expression
         success = self._apply_favorite_expression(favorite)
@@ -705,9 +705,7 @@ class FavoritesController(BaseController):
             "FilterMateApp to publish one via sync_with_dockwidget_manager()."
         )
 
-    def _restore_spatial_config(self, favorite: 'FilterFavorite') -> bool:
-        """Delegate — see :meth:`FavoritesSpatialHandler.restore_spatial_config`."""
-        return self._spatial.restore_spatial_config(favorite)
+    
 
     def _get_indicator_style(self, state: str) -> str:
         """Get stylesheet for indicator state."""
@@ -867,7 +865,7 @@ class FavoritesController(BaseController):
                     }
 
             # ENHANCEMENT 2026-01-18: Capture spatial configuration
-            spatial_config = self._capture_spatial_config()
+            spatial_config = self._spatial.capture_spatial_config()
 
             # FIX 2026-04-21: embed source layer signature in spatial_config so
             # the export/import path can resolve the source layer across projects.
@@ -905,9 +903,7 @@ class FavoritesController(BaseController):
             logger.error(f"Failed to create favorite: {e}")
             return False
 
-    def _capture_spatial_config(self) -> Optional[dict]:
-        """Delegate — see :meth:`FavoritesSpatialHandler.capture_spatial_config`."""
-        return self._spatial.capture_spatial_config()
+    
 
     def _apply_favorite_expression(self, favorite: 'FilterFavorite') -> bool:
         """Apply a favorite by pushing its saved subset strings directly.
@@ -928,16 +924,22 @@ class FavoritesController(BaseController):
         shape favorites store) pass through unchanged.
         """
         try:
-            return self._apply_favorite_subsets_directly(favorite)
+            return self._spatial.apply_favorite_subsets_directly(favorite)
         except Exception as e:
             logger.error(f"Failed to apply favorite: {e}")
             import traceback
             logger.debug(traceback.format_exc())
             return False
 
-    def _apply_favorite_subsets_directly(self, favorite: 'FilterFavorite') -> bool:
-        """Delegate — see :meth:`FavoritesSpatialHandler.apply_favorite_subsets_directly`."""
-        return self._spatial.apply_favorite_subsets_directly(favorite)
+    
+
+    
+
+    
+
+    
+
+    
 
     
 
@@ -949,21 +951,7 @@ class FavoritesController(BaseController):
 
     
 
-    def _ensure_applicable_groupbox_for_favorite(self, favorite: 'FilterFavorite') -> None:
-        """Delegate — see :meth:`FavoritesSpatialHandler.ensure_applicable_groupbox_for_favorite`."""
-        self._spatial.ensure_applicable_groupbox_for_favorite(favorite)
-
-    def _restore_filtering_ui_from_favorite(self, favorite: 'FilterFavorite') -> None:
-        """Delegate — see :meth:`FavoritesSpatialHandler.restore_filtering_ui_from_favorite`."""
-        self._spatial.restore_filtering_ui_from_favorite(favorite)
-
     
-
-    
-
-    def _backfill_legacy_predicate_default(self, favorite: 'FilterFavorite') -> bool:
-        """Delegate — see :meth:`FavoritesSpatialHandler.backfill_legacy_predicate_default`."""
-        return self._spatial.backfill_legacy_predicate_default(favorite)
 
     def _show_info(self, message: str) -> None:
         """Push an info to the QGIS message bar (transient, non-blocking)."""

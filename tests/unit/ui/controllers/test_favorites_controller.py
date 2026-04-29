@@ -305,7 +305,7 @@ class TestEnsureApplicableGroupboxForFavorite:
             widgets_initialized=False,
             current_exploring_groupbox='single_selection',
         )
-        ctrl._ensure_applicable_groupbox_for_favorite(_make_favorite())
+        ctrl._spatial.ensure_applicable_groupbox_for_favorite(_make_favorite())
         dw._restore_groupbox_ui_state.assert_not_called()
 
     def test_downgrades_when_single_selection_has_no_feature(self):
@@ -327,7 +327,7 @@ class TestEnsureApplicableGroupboxForFavorite:
             widgets=widgets,
             current_layer=layer,
         )
-        ctrl._ensure_applicable_groupbox_for_favorite(_make_favorite())
+        ctrl._spatial.ensure_applicable_groupbox_for_favorite(_make_favorite())
         dw._restore_groupbox_ui_state.assert_called_once_with('custom_selection')
 
     def test_no_downgrade_when_picker_has_valid_feature(self):
@@ -350,7 +350,7 @@ class TestEnsureApplicableGroupboxForFavorite:
             widgets=widgets,
             current_layer=layer,
         )
-        ctrl._ensure_applicable_groupbox_for_favorite(_make_favorite())
+        ctrl._spatial.ensure_applicable_groupbox_for_favorite(_make_favorite())
         dw._restore_groupbox_ui_state.assert_not_called()
 
     def test_no_downgrade_when_restored_task_features_present(self):
@@ -371,7 +371,7 @@ class TestEnsureApplicableGroupboxForFavorite:
             widgets=widgets,
             current_layer=layer,
         )
-        ctrl._ensure_applicable_groupbox_for_favorite(_make_favorite())
+        ctrl._spatial.ensure_applicable_groupbox_for_favorite(_make_favorite())
         dw._restore_groupbox_ui_state.assert_not_called()
 
     def test_no_downgrade_when_layer_has_selection(self):
@@ -392,7 +392,7 @@ class TestEnsureApplicableGroupboxForFavorite:
             widgets=widgets,
             current_layer=layer,
         )
-        ctrl._ensure_applicable_groupbox_for_favorite(_make_favorite())
+        ctrl._spatial.ensure_applicable_groupbox_for_favorite(_make_favorite())
         dw._restore_groupbox_ui_state.assert_not_called()
 
     def test_no_downgrade_in_non_single_selection_mode(self):
@@ -403,7 +403,7 @@ class TestEnsureApplicableGroupboxForFavorite:
             widgets={},
             current_layer=None,
         )
-        ctrl._ensure_applicable_groupbox_for_favorite(_make_favorite())
+        ctrl._spatial.ensure_applicable_groupbox_for_favorite(_make_favorite())
         dw._restore_groupbox_ui_state.assert_not_called()
 
     def test_tolerates_runtime_error_on_selected_feature_count(self):
@@ -426,7 +426,7 @@ class TestEnsureApplicableGroupboxForFavorite:
         )
         # Should still decide to downgrade (no selection detected because the
         # call raised, which we interpret as 0 selected features).
-        ctrl._ensure_applicable_groupbox_for_favorite(_make_favorite())
+        ctrl._spatial.ensure_applicable_groupbox_for_favorite(_make_favorite())
         dw._restore_groupbox_ui_state.assert_called_once_with('custom_selection')
 
 
@@ -567,7 +567,7 @@ class TestCapturePredicates:
         )
         ctrl._dockwidget = dw
 
-        config = ctrl._capture_spatial_config()
+        config = ctrl._spatial.capture_spatial_config()
 
         assert config is not None
         assert config['geometric_predicates'] == ['Intersect']
@@ -583,7 +583,7 @@ class TestCapturePredicates:
         ctrl._dockwidget = dw
 
         # Nothing to capture → None so _create_favorite's guard still fires.
-        assert ctrl._capture_spatial_config() is None
+        assert ctrl._spatial.capture_spatial_config() is None
 
     def test_captures_multiple_predicates(self):
         ctrl = FavoritesController.__new__(FavoritesController)
@@ -593,7 +593,7 @@ class TestCapturePredicates:
         )
         ctrl._dockwidget = dw
 
-        config = ctrl._capture_spatial_config()
+        config = ctrl._spatial.capture_spatial_config()
         assert config['geometric_predicates'] == ['Intersect', 'Contain', 'Are within']
         assert config['has_geometric_predicates'] is True
 
@@ -625,7 +625,7 @@ class TestCapturePredicates:
         dw.mQgsDoubleSpinBox_filtering_buffer_value = spinbox
         ctrl._dockwidget = dw
 
-        config = ctrl._capture_spatial_config()
+        config = ctrl._spatial.capture_spatial_config()
         assert config is not None
         assert config['geometric_predicates'] == ['Intersect']
         assert config['has_geometric_predicates'] is True
@@ -683,7 +683,7 @@ class TestRestorePredicates:
         }
         fav.remote_layers = {}
 
-        ctrl._restore_filtering_ui_from_favorite(fav)
+        ctrl._spatial.restore_filtering_ui_from_favorite(fav)
 
         combo.setCheckedItems.assert_called_once_with(['Intersect'])
         btn.setChecked.assert_called_once_with(True)
@@ -702,7 +702,7 @@ class TestRestorePredicates:
         fav.spatial_config = {'predicates': {'Intersect': True, 'Contain': True}}
         fav.remote_layers = {}
 
-        ctrl._restore_filtering_ui_from_favorite(fav)
+        ctrl._spatial.restore_filtering_ui_from_favorite(fav)
 
         # Dict keys become the predicate list; order not guaranteed but contents are.
         args, _ = combo.setCheckedItems.call_args
@@ -732,7 +732,7 @@ class TestRestorePredicates:
         fav.spatial_config = {}  # capture skipped predicates
         fav.remote_layers = {}
 
-        ctrl._restore_filtering_ui_from_favorite(fav)
+        ctrl._spatial.restore_filtering_ui_from_favorite(fav)
 
         combo.setCheckedItems.assert_not_called()
         btn.setChecked.assert_not_called()
@@ -762,7 +762,7 @@ class TestRestorePredicates:
         }
         fav.remote_layers = {}
 
-        ctrl._restore_filtering_ui_from_favorite(fav)
+        ctrl._spatial.restore_filtering_ui_from_favorite(fav)
 
         combo.setCheckedItems.assert_called_once_with([])
         btn.setChecked.assert_called_once_with(False)
@@ -797,7 +797,7 @@ class TestBackfillLegacyPredicateDefault:
             'postgres::infra.cables': {'expression': '... ST_Intersects ...'}
         }
 
-        assert ctrl._backfill_legacy_predicate_default(fav) is True
+        assert ctrl._spatial.backfill_legacy_predicate_default(fav) is True
         assert fav.spatial_config['geometric_predicates'] == ['Intersect']
         assert fav.spatial_config['has_geometric_predicates'] is True
         manager.update_favorite.assert_called_once()
@@ -814,7 +814,7 @@ class TestBackfillLegacyPredicateDefault:
         fav.spatial_config = {'geometric_predicates': ['Contain']}
         fav.remote_layers = {'a': {}}
 
-        assert ctrl._backfill_legacy_predicate_default(fav) is False
+        assert ctrl._spatial.backfill_legacy_predicate_default(fav) is False
         manager.update_favorite.assert_not_called()
         # Existing predicate must be untouched.
         assert fav.spatial_config['geometric_predicates'] == ['Contain']
@@ -830,7 +830,7 @@ class TestBackfillLegacyPredicateDefault:
         fav.spatial_config = {'has_geometric_predicates': False}
         fav.remote_layers = {'a': {}}
 
-        assert ctrl._backfill_legacy_predicate_default(fav) is False
+        assert ctrl._spatial.backfill_legacy_predicate_default(fav) is False
         manager.update_favorite.assert_not_called()
 
     def test_skip_when_no_remote_layers(self):
@@ -844,7 +844,7 @@ class TestBackfillLegacyPredicateDefault:
         fav.spatial_config = {}
         fav.remote_layers = None
 
-        assert ctrl._backfill_legacy_predicate_default(fav) is False
+        assert ctrl._spatial.backfill_legacy_predicate_default(fav) is False
         manager.update_favorite.assert_not_called()
         assert 'geometric_predicates' not in fav.spatial_config
 
@@ -858,7 +858,7 @@ class TestBackfillLegacyPredicateDefault:
         fav.spatial_config = None
         fav.remote_layers = {'a': {}}
 
-        assert ctrl._backfill_legacy_predicate_default(fav) is True
+        assert ctrl._spatial.backfill_legacy_predicate_default(fav) is True
         assert fav.spatial_config['geometric_predicates'] == ['Intersect']
         assert fav.spatial_config['has_geometric_predicates'] is True
 
@@ -964,7 +964,7 @@ class TestDirectSubsetApply:
             },
         }
 
-        assert ctrl._apply_favorite_subsets_directly(fav) is True
+        assert ctrl._spatial.apply_favorite_subsets_directly(fav) is True
 
         names_to_subsets = dict(applied)
         # Source layer received the favorite expression
@@ -1014,7 +1014,7 @@ class TestDirectSubsetApply:
             },
         }
 
-        assert ctrl._apply_favorite_subsets_directly(fav) is True
+        assert ctrl._spatial.apply_favorite_subsets_directly(fav) is True
         names_to_subsets = dict(applied)
         # Resolved layers got their subsets…
         assert names_to_subsets["Zones POP"] == "\"id\" = 1"
@@ -1049,7 +1049,7 @@ class TestDirectSubsetApply:
         fav.spatial_config = {}
         fav.remote_layers = {}
 
-        assert ctrl._apply_favorite_subsets_directly(fav) is False
+        assert ctrl._spatial.apply_favorite_subsets_directly(fav) is False
         assert applied == []
         ctrl._show_warning.assert_called_once()
 
@@ -1105,7 +1105,7 @@ class TestCaptureRestoreRoundTrip:
             combobox_items=['Intersect'], button_checked=True
         )
         ctrl_cap._dockwidget = dw_cap
-        captured = ctrl_cap._capture_spatial_config()
+        captured = ctrl_cap._spatial.capture_spatial_config()
         assert captured is not None
 
         # Restore from the captured config
@@ -1119,7 +1119,7 @@ class TestCaptureRestoreRoundTrip:
         fav.spatial_config = captured
         fav.remote_layers = {}
 
-        ctrl_res._restore_filtering_ui_from_favorite(fav)
+        ctrl_res._spatial.restore_filtering_ui_from_favorite(fav)
 
         combo.setCheckedItems.assert_called_once_with(['Intersect'])
         btn.setChecked.assert_called_once_with(True)
@@ -1178,7 +1178,8 @@ class TestApplyFavoriteCatchesNotInitialized:
         manager.mark_favorite_used.side_effect = FavoritesNotInitialized("re-init")
 
         ctrl = self._make_controller(manager)
-        ctrl._backfill_legacy_predicate_default = MagicMock()
+        ctrl._spatial_instance = MagicMock()
+        ctrl._spatial_instance.backfill_legacy_predicate_default = MagicMock()
         ctrl._apply_favorite_expression = MagicMock(return_value=True)
 
         result = ctrl.apply_favorite("fav-1")
