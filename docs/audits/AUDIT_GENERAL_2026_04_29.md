@@ -18,7 +18,7 @@
 - `f"SELECT * FROM {table_name} WHERE {expression.sql}"` — sanitizer = best-effort, pas un parser.
 - Reachable via REST `/filters/apply` → public_api → strategy.
 - CWE-89.
-- Fix : paramétrer via `psycopg2.sql.SQL/Identifier` + `cursor.execute(query, params)`.
+- **Statut : FIXÉ 2026-04-29** — nouveau module `sql_safety.py` avec `validate_where_clause()` (refuse `;`, commentaires, DDL/DML, fonctions PG escalation) + `validate_identifier()` (shape `[A-Za-z_][A-Za-z0-9_]{0,62}`). Branchés en pré-execute dans `_execute_direct` et `_execute_with_mv`. 69 tests (59 unit + 10 intégration). Strings/identifiers quotés sont scrubés avant pattern matching → noms légitimes (`deleted_at`, `'DROP request'`) préservés.
 
 ### S3 · Sanitizer `_BOOLEAN_FUNCTION_RE` permissif
 - `core/filter/expression_sanitizer.py:130` — `^(EXISTS|NOT)\s*\(` court-circuite tout le reste.
