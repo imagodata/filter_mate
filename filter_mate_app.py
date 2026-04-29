@@ -450,7 +450,7 @@ class FilterMateApp:
         if self._undo_redo_handler:
             logger.debug("FilterMate: UndoRedoHandler initialized (v4.0 migration)")
         self.favorites_manager = FavoritesService()
-        logger.info(f"FilterMate: FavoritesService initialized ({self.favorites_manager.get_favorites_count()} favorites)")
+        logger.info(f"FilterMate: FavoritesService initialized ({self.favorites_manager.count} favorites)")
 
         # v4.0.7: FavoritesMigrationService for orphan favorites handling
         self._favorites_migration_service = FavoritesMigrationService()

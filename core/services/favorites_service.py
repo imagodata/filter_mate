@@ -438,17 +438,7 @@ class FavoritesService(QObject):
 
         return self._favorites_manager.search_favorites(query)
 
-    def get_favorites_count(self) -> int:
-        """
-        Get total number of favorites.
-
-        Returns:
-            int: Number of favorites
-        """
-        if not self._favorites_manager:
-            return 0
-
-        return len(self.get_all_favorites())
+    
 
     # ─────────────────────────────────────────────────────────────────
     # Apply Operations

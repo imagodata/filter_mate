@@ -526,9 +526,7 @@ class FavoritesManager:
         """Get favorite by ID."""
         return self._favorites.get(favorite_id)
 
-    def get_by_id(self, favorite_id: str) -> Optional[FilterFavorite]:
-        """Alias for get_favorite."""
-        return self.get_favorite(favorite_id)
+    
 
     def get_favorite_by_name(self, name: str) -> Optional[FilterFavorite]:
         """Get favorite by name."""
