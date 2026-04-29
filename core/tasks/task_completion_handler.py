@@ -173,11 +173,20 @@ def apply_pending_subset_requests(
     )
     logger.info(f"finished(): Applying {len(pending_requests)} pending subset requests on main thread")
 
-    # Log all pending requests details
+    # Log all pending requests details — promoted to QGIS log panel 2026-04-29
+    # so the user can see exactly what subset is being applied per cascade
+    # target. Without this it was impossible to distinguish "no subset queued"
+    # from "empty subset queued" from "valid subset queued but rejected by
+    # provider"; the previous DEBUG-level message only landed in the Python
+    # console which most users don't have open.
     for idx, (lyr, expr) in enumerate(pending_requests):
         lyr_name = lyr.name() if lyr and is_valid_layer(lyr) else "INVALID"
-        expr_preview = (expr[:80] + '...') if expr and len(expr) > 80 else (expr or 'EMPTY')
+        expr_preview = (expr[:120] + '...') if expr and len(expr) > 120 else (expr or 'EMPTY')
         logger.debug(f"  [{idx + 1}] {lyr_name}: {expr_preview}")
+        QgsMessageLog.logMessage(
+            f"  [{idx + 1}/{len(pending_requests)}] {lyr_name}: {expr_preview}",
+            "FilterMate", Qgis.MessageLevel.Info
+        )
 
     # Performance thresholds
     MAX_FEATURES_FOR_UPDATE_EXTENTS = 50000
