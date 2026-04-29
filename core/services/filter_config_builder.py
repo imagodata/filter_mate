@@ -739,5 +739,3 @@ __all__ = [
     "LayerValidationResult",
     "LayerFilterBuilder",
 ]
-</content>
-</invoke>
