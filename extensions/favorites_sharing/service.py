@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
-"""
-FavoritesSharing service layer.
+"""FavoritesSharing service layer — facade over three focused services.
 
-Pure-Python orchestration between the :class:`ResourceSharingScanner`
-(filesystem-level) and the :class:`FavoritesService` (plugin-level).
+EXT-2 (audit 2026-04-29): the original 607-LOC god-class is now a
+thin facade. The actual work lives in:
 
-Responsibilities:
-- Cache of shared favorites (re-scan on demand).
-- Fork a shared favorite into the current project's DB, rebinding
-  portable signatures to local layer UUIDs when possible.
-- Provide filtered views for the "Shared" dialog section (by collection,
-  by search query).
+- :class:`SharedFavoritesQuery` — read path / filter / cache.
+- :class:`FavoritesForkService` — trust boundary / materialise into
+  the local DB (with sanitiser, signature rebind, owner reset).
+- :class:`BundlePublisher` — writer path / produce a v3 bundle inside
+  a Resource Sharing collection.
+
+This module keeps the public surface (``list_shared``, ``fork``,
+``publish_bundle`` and friends) so callers — extension entry point,
+publish + shared-picker dialogs, tests — need not relearn the layout.
+The two dataclasses (:class:`CollectionTarget`, :class:`PublishResult`)
+also stay here so they remain importable from ``extensions
+.favorites_sharing.service`` as before.
 """
 
 from __future__ import annotations
 
-import json
 import logging
-import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -104,8 +107,6 @@ class FavoritesSharingService:
         return self._fork.fork(shared, favorites_service, override_name=override_name)
 
     # ─── Publish ───────────────────────────────────────────────────────
-
-    BUNDLE_FILENAME_RE = r'^[a-zA-Z0-9_\-]+\.fmfav(-pack)?\.json$'
 
     def has_configured_collections_root(self) -> bool:
         return self._publisher.has_configured_collections_root()
