@@ -932,21 +932,7 @@ class FavoritesManager:
             logger.error(f"Failed to load global favorites: {e}")
             return []
 
-    def get_all_with_global(self) -> List[FilterFavorite]:
-        """
-        Get all favorites including global ones.
-
-        Returns:
-            List of FilterFavorite (project-specific + global)
-        """
-        project_favorites = self.get_all_favorites()
-        global_favorites = self.get_global_favorites()
-
-        # Combine and sort by name
-        all_favorites = project_favorites + global_favorites
-        all_favorites.sort(key=lambda f: f.name.lower())
-
-        return all_favorites
+    
 
     def make_favorite_global(self, favorite_id: str) -> bool:
         """

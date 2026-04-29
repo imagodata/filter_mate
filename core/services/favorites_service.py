@@ -10,7 +10,7 @@ Pattern: Strangler Fig - Gradual extraction
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Callable, TYPE_CHECKING
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 from dataclasses import dataclass
 
 try:
@@ -75,23 +75,13 @@ class FavoritesService(QObject):
     - Usage tracking and statistics
 
     Emits:
-    - favorite_added: When a new favorite is created
-    - favorite_removed: When a favorite is deleted
-    - favorite_updated: When a favorite is modified
-    - favorite_applied: When a favorite is applied to layers
-    - favorites_changed: When the favorites list changes
-    - favorites_imported: When favorites are imported
-    - favorites_exported: When favorites are exported
+    - favorites_changed: When the favorites list changes (the only
+      signal anyone subscribes to — the per-event signals were never
+      observed and were dropped 2026-04-29 per CORE-3 audit).
     """
 
     # Signals
-    favorite_added = pyqtSignal(str, str)  # favorite_id, name
-    favorite_removed = pyqtSignal(str)  # favorite_id
-    favorite_updated = pyqtSignal(str, str)  # favorite_id, name
-    favorite_applied = pyqtSignal(str, int)  # favorite_id, layers_affected
     favorites_changed = pyqtSignal()  # general notification
-    favorites_imported = pyqtSignal(int, int)  # imported_count, skipped_count
-    favorites_exported = pyqtSignal(int, str)  # count, file_path
 
     def __init__(
         self,
@@ -120,10 +110,6 @@ class FavoritesService(QObject):
             self._favorites_manager = favorites_manager
 
         self._is_initialized = False
-
-        # Callbacks for applying favorites (set by controller)
-        self._apply_expression_callback: Optional[Callable] = None
-        self._get_current_state_callback: Optional[Callable] = None
 
     # ─────────────────────────────────────────────────────────────────
     # Initialization
@@ -235,20 +221,7 @@ class FavoritesService(QObject):
             return self._favorites_manager.count
         return 0
 
-    def set_callbacks(
-        self,
-        apply_expression: Optional[Callable] = None,
-        get_current_state: Optional[Callable] = None
-    ) -> None:
-        """
-        Set callbacks for integration with dockwidget.
-
-        Args:
-            apply_expression: Callback to apply expression to layer
-            get_current_state: Callback to get current filter state
-        """
-        self._apply_expression_callback = apply_expression
-        self._get_current_state_callback = get_current_state
+    
 
     # ─────────────────────────────────────────────────────────────────
     # CRUD Operations
@@ -301,7 +274,6 @@ class FavoritesService(QObject):
             success = self._favorites_manager.add_favorite(favorite)
 
             if success:
-                self.favorite_added.emit(favorite.id, name)
                 self.favorites_changed.emit()
                 logger.info(f"✓ Favorite added via FavoritesService: {name} (ID: {favorite.id})")
                 return favorite.id
@@ -337,7 +309,6 @@ class FavoritesService(QObject):
             success = self._favorites_manager.remove_favorite(favorite_id)
 
             if success:
-                self.favorite_removed.emit(favorite_id)
                 self.favorites_changed.emit()
                 logger.info(f"Removed favorite: {favorite_id}")
 
@@ -378,8 +349,6 @@ class FavoritesService(QObject):
             success = self._favorites_manager.update_favorite(favorite_id, **kwargs)
 
             if success:
-                name = kwargs.get('name', favorite_id)
-                self.favorite_updated.emit(favorite_id, name)
                 self.favorites_changed.emit()
                 logger.info(f"Updated favorite: {favorite_id}")
 
@@ -498,78 +467,7 @@ class FavoritesService(QObject):
     # Apply Operations
     # ─────────────────────────────────────────────────────────────────
 
-    def apply_favorite(
-        self,
-        favorite_id: str,
-        layer: Optional["QgsVectorLayer"] = None
-    ) -> FavoriteApplyResult:
-        """
-        Apply a favorite's filter to the current layer.
-
-        Args:
-            favorite_id: ID of favorite to apply
-            layer: Optional layer to apply to
-
-        Returns:
-            FavoriteApplyResult with status
-        """
-        if not self._favorites_manager:
-            return FavoriteApplyResult(
-                success=False,
-                favorite_id=favorite_id,
-                favorite_name="",
-                error_message="FavoritesManager not initialized"
-            )
-
-        favorite = self._favorites_manager.get_favorite(favorite_id)
-
-        if not favorite:
-            return FavoriteApplyResult(
-                success=False,
-                favorite_id=favorite_id,
-                favorite_name="",
-                error_message=f"Favorite not found: {favorite_id}"
-            )
-
-        try:
-            layers_affected = 0
-
-            # Apply main expression
-            if self._apply_expression_callback:
-                success = self._apply_expression_callback(
-                    favorite.expression,
-                    layer
-                )
-                if success:
-                    layers_affected += 1
-
-            # Apply remote layers if any
-            if favorite.remote_layers:
-                for layer_name, config in favorite.remote_layers.items():
-                    # Remote layer application is handled by controller
-                    layers_affected += 1
-
-            # Mark as used
-            self._favorites_manager.increment_use_count(favorite_id)
-
-            # Emit signal
-            self.favorite_applied.emit(favorite_id, layers_affected)
-
-            return FavoriteApplyResult(
-                success=True,
-                favorite_id=favorite_id,
-                favorite_name=favorite.name,
-                layers_affected=layers_affected
-            )
-
-        except Exception as e:
-            logger.error(f"Error applying favorite: {e}")
-            return FavoriteApplyResult(
-                success=False,
-                favorite_id=favorite_id,
-                favorite_name=favorite.name,
-                error_message=str(e)
-            )
+    
 
     def mark_favorite_used(self, favorite_id: str) -> bool:
         """
@@ -595,52 +493,7 @@ class FavoritesService(QObject):
     # Create from Current State
     # ─────────────────────────────────────────────────────────────────
 
-    def create_from_current_state(
-        self,
-        name: str,
-        layer: Optional["QgsVectorLayer"] = None,
-        include_remote_layers: bool = True
-    ) -> Optional[str]:
-        """
-        Create a favorite from the current filter state.
-
-        Args:
-            name: Name for the new favorite
-            layer: Current layer (or None to use callback)
-            include_remote_layers: Whether to include remote layer filters
-
-        Returns:
-            str: Favorite ID if created, None on error
-        """
-        if not self._favorites_manager:
-            return None
-
-        # Get current state via callback
-        if self._get_current_state_callback:
-            state = self._get_current_state_callback()
-
-            if state:
-                return self.add_favorite(
-                    name=name,
-                    expression=state.get('expression', ''),
-                    layer_name=state.get('layer_name'),
-                    layer_provider=state.get('layer_provider'),
-                    spatial_config=state.get('spatial_config'),
-                    remote_layers=state.get('remote_layers') if include_remote_layers else None,
-                    description="Created from current state"
-                )
-
-        # Fallback: use layer directly
-        if layer is not None:
-            expression = layer.subsetString() if layer.subsetString() else ""
-            return self.add_favorite(
-                name=name,
-                expression=expression,
-                layer_name=layer.name(),
-                layer_provider=layer.providerType()
-            )
-
-        return None
+    
 
     # ─────────────────────────────────────────────────────────────────
     # Import/Export
@@ -756,7 +609,6 @@ class FavoritesService(QObject):
                 json.dump(envelope, f, indent=2, ensure_ascii=False)
 
             count = len(favorites)
-            self.favorites_exported.emit(count, file_path)
 
             logger.info(
                 f"Exported {count} favorites to {file_path} "
@@ -860,7 +712,6 @@ class FavoritesService(QObject):
                 else:
                     skipped_count += 1
 
-            self.favorites_imported.emit(imported_count, skipped_count)
             self.favorites_changed.emit()
 
             logger.info(f"Imported {imported_count} favorites, skipped {skipped_count}")
@@ -1161,21 +1012,7 @@ class FavoritesService(QObject):
 
         return []
 
-    def get_all_with_global(self) -> List[Any]:
-        """
-        Get all favorites including global ones.
-
-        Returns:
-            List of FilterFavorite (project-specific + global)
-        """
-        if not self._favorites_manager:
-            return []
-
-        if hasattr(self._favorites_manager, 'get_all_with_global'):
-            return self._favorites_manager.get_all_with_global()
-
-        # Fallback: just return project favorites
-        return self.get_all_favorites()
+    
 
     def make_favorite_global(self, favorite_id: str) -> bool:
         """
