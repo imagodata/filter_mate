@@ -11,11 +11,11 @@
 
 ## TL;DR — what this audit changes
 
-| Severity | Count | Examples |
+| Severity | Count | Status |
 |---|---|---|
-| 🔴 NEW P0 | **2** | C-bug: `spatialite_persistent_cache.py` SQL identifier interpolation broken (silent feature loss, 100+ days). API thread-safety: `QgsVectorLayer.setSubsetString()` called from FastAPI worker thread. |
-| 🟠 NEW/CONFIRMED P1 | **8** | S4 plaintext api_key, optimizer cache invalidation, hexagonal violations cluster (20+ sites), filtermate_api hardening (rate-limit/size-limit/A4-at-API), EXT-6 fail-fast guard test, sanitizer whitespace gap, 3 mega-controllers (>3000 LOC), filter_config_builder.py edge cases (no test file post-merge). |
-| 🟡 P2 / housekeeping | **5** | Dead caches deletion (~628 LOC), `video_automation/` + `video_toolkit/` purge, CORE-5 fm_meta decision, stale `.serena/memories/`, untestable god-dialogs (favorites_manager 1307, publish 774). |
+| 🔴 NEW P0 | **2** | ✅ **Both fixed** — P0-A `298af9e5` spatialite f-string + 9 roundtrip tests, P0-B `42f3cd75` Qt main-thread marshalling helper + 9 wiring tests. |
+| 🟠 NEW/CONFIRMED P1 | **8** | **2 fixed**: P1-S4 `03527e2d` api_key hash-at-rest (11 tests), P1-EXT6 `eda70978` deadline tripwire. **6 open**: P1-OPT-INV (optimizer cache invalidation), P1-API-HARDEN (rate-limit/size-limit/A4-at-API/reflected-error), P1-HEX (20+ violations cluster), P1-SAN-WS (whitespace gap), P1-MEGA-CTRL (3 god-classes >3000 LOC), P1-FCB-TESTS (10 edge cases). |
+| 🟡 P2 / housekeeping | **5** | All open — dead caches (~628 LOC), `video_automation/` + `video_toolkit/` purge, CORE-5 fm_meta decision, stale `.serena/memories/`, untestable god-dialogs. |
 
 **Verdict on prior P0/P1 fixes**: all SAFE — no plausible bypass for S1/S2/S3 found.
 S2 deny-list survives ~10 mental fuzz attempts. S3 sanitizer holds for security but has
