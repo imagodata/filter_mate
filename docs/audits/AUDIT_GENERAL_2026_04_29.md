@@ -48,7 +48,7 @@
 | A2 | `core/domain/layer_signature.py` — `QgsDataSourceUri` + `QgsProject.instance()` dans domain | `core/domain/layer_signature.py:55,107` | **FIXÉ** — `LayerSignatureIndex.__init__` retire le fallback `QgsProject.instance()` ; les 3 callers passent le projet explicitement (services/extension via `QgsProject.instance()`, domain `_backfill_remote_layer_signatures` documente la dette restante avec lazy import). 6 tests régression, suite 1317/1317. `QgsDataSourceUri` (lazy dans `compute()`) reste — futur port parser à envisager. |
 | A3 | 5 paires de services dupliqués post-revert toujours actives | `core/services/` | M×5 |
 | A4 | `FavoritesNotInitialized` jamais catchée dans `favorites_controller.py` (F11 policy non appliquée) | `ui/controllers/favorites_controller.py` | **FIXÉ `dde30f5d`** (embarqué dans CORE-1a par concurrence d'agents) — `apply_favorite` et `remove_favorite` catchent `FavoritesNotInitialized` → `_show_warning`. `mark_favorite_used` / `save` failures dégradés en log (non-critique). 5 tests régression. |
-| T2 | `auto_zoom.py` (144 LOC, commit 9bd78d2b) — 0 test | `adapters/auto_zoom.py` | S |
+| T2 | `auto_zoom.py` (144 LOC, commit 9bd78d2b) — 0 test | `adapters/auto_zoom.py` | **FIXÉ** — 33 tests `_read_global_auto_zoom_flag` + `_is_tracking` + `_layer_extent` + flow end-to-end (iface absent, canvas absent, global-off+tracking, union multi-layers, empty union refresh, etc.). + 8 tests H1 token déjà ajoutés. Suite 1350/1350. |
 | T3 | `history_service.py` (680 LOC, undo/redo critique) — 0 test | `core/services/history_service.py` | L |
 | T4 | Config rebind (486ac81a, 77a6de1e) — pas de test sur la mutation-in-place de `CONFIG_DATA` | `tests/unit/.../test_config_migration.py` | S |
 
