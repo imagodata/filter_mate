@@ -866,13 +866,9 @@ class FavoritesManager:
         # Favorites are saved to database immediately in add/update/remove
         logger.debug("save_to_project called (favorites already persisted)")
 
-    def load_from_project(self) -> None:
-        """Load favorites from project."""
-        self._load_favorites()
+    
 
-    def load_from_database(self) -> None:
-        """Reload favorites from database."""
-        self._load_favorites()
+    
 
     # ─────────────────────────────────────────────────────────────────
     # Global Favorites Support

@@ -197,20 +197,7 @@ class FavoritesService(QObject):
                 "check earlier logs for FavoritesManager import errors."
             )
 
-    def load_from_project(self) -> None:
-        """
-        Load favorites from project.
-        Delegates to underlying FavoritesManager.
-        """
-        if self._favorites_manager and hasattr(self._favorites_manager, 'load_from_project'):
-            self._favorites_manager.load_from_project()
-            # CRITICAL: Emit favorites_changed to update UI after loading
-            self.favorites_changed.emit()
-            logger.info(f"✓ Favorites reloaded from database and UI notified (count: {self.count})")
-        else:
-            # Note: Internal project loading without manager is not implemented.
-            # FavoritesManager is required for full functionality.
-            logger.debug("FavoritesService: Loading from project (stub - no manager)")
+    
 
     @property
     def count(self) -> int:
@@ -799,30 +786,7 @@ class FavoritesService(QObject):
             logger.error(f"Error saving favorites: {e}")
             raise FavoritePersistenceError("save", e) from e
 
-    def reload(self) -> bool:
-        """
-        Reload favorites from storage.
-
-        Returns:
-            bool: True if reloaded successfully
-
-        Raises:
-            FavoritesNotInitialized: if the service has no manager attached.
-        """
-        if not self._favorites_manager:
-            raise FavoritesNotInitialized(
-                "FavoritesService.reload called before manager was attached"
-            )
-
-        try:
-            self._favorites_manager.load_from_database()
-            self.favorites_changed.emit()
-            return True
-        except FavoritesError:
-            raise
-        except Exception as e:
-            logger.error(f"Error reloading favorites: {e}")
-            raise FavoritePersistenceError("reload", e) from e
+    
 
     # ─────────────────────────────────────────────────────────────────
     # Project File (.qgz) Backup/Restore
