@@ -643,10 +643,20 @@ class FavoritesController(BaseController):
                 extension_bridge=self._extension_bridge,
             )
 
-            # Connect the favoriteApplied signal to apply the favorite
+            # Connect the favoriteApplied signal to apply the favorite.
+            # UI-6 (2026-04-29): the dialog is parented to ``dockwidget``
+            # so the connection would otherwise outlive each Open/Close/
+            # Open cycle and re-fire ``apply_favorite`` for every prior
+            # session. Disconnect in ``finally`` so the lifetime is
+            # bounded by this call.
             dialog.favoriteApplied.connect(self.apply_favorite)
-
-            dialog.exec()
+            try:
+                dialog.exec()
+            finally:
+                try:
+                    dialog.favoriteApplied.disconnect(self.apply_favorite)
+                except (TypeError, RuntimeError):
+                    pass
             # Refresh after dialog closes
             self.favorites_changed.emit()
             self.update_indicator()
