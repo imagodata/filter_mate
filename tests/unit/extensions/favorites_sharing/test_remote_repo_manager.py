@@ -14,6 +14,7 @@ import types
 import pytest
 
 from extensions.favorites_sharing.remote_repo_manager import (
+    LEGACY_AUTH_HEADER_DEADLINE,
     RemoteRepo,
     RemoteRepoManager,
     RepoStatus,
@@ -118,6 +119,57 @@ class TestRemoteRepoFromConfig:
             })
         assert not any("legacy plaintext auth_header" in rec.message
                        for rec in caplog.records)
+
+    def test_legacy_auth_header_purge_tripwire(self):
+        """Tripwire for the EXT-6 audit promise.
+
+        ``LEGACY_AUTH_HEADER_DEADLINE`` is currently enforced only via a
+        ``logger.warning`` — there is no runtime guard that rejects entries
+        carrying a plaintext ``auth_header`` once FilterMate is at or past
+        the declared deadline. This test fails the moment the plugin
+        version reaches ``LEGACY_AUTH_HEADER_DEADLINE`` (currently
+        ``"5.0.0"``) so the dev cannot ship a major bump without:
+
+        1. dropping the ``auth_header`` field from ``RemoteRepo``,
+        2. removing the warning path in ``from_config_entry``,
+        3. raising on / refusing entries that still carry it,
+        4. deleting this tripwire.
+
+        See `project_audit_general_deep_2026_04_29.md` (P1-EXT6).
+        """
+        import os
+        import re
+
+        plugin_root = os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )))
+        metadata_path = os.path.join(plugin_root, "metadata.txt")
+        assert os.path.exists(metadata_path), \
+            f"metadata.txt not found at {metadata_path}"
+
+        with open(metadata_path, encoding="utf-8") as fh:
+            match = re.search(r"^version=(\S+)\s*$", fh.read(), re.MULTILINE)
+        assert match, "metadata.txt is missing a version= line"
+        current = match.group(1)
+
+        def _version_tuple(v: str) -> tuple:
+            # Strip any trailing pre-release tag (e.g. "5.0.0-rc1").
+            head = v.split("-", 1)[0]
+            return tuple(int(p) for p in head.split(".") if p.isdigit())
+
+        current_t = _version_tuple(current)
+        deadline_t = _version_tuple(LEGACY_AUTH_HEADER_DEADLINE)
+
+        if current_t >= deadline_t:
+            pytest.fail(
+                f"FilterMate is at v{current} (>= deadline "
+                f"{LEGACY_AUTH_HEADER_DEADLINE}). Time to drop legacy "
+                "plaintext auth_header support per the EXT-6 audit "
+                "promise: remove the field on RemoteRepo, drop the "
+                "warning branch in from_config_entry, raise on entries "
+                "that still carry it (or skip them), and delete this "
+                "tripwire test."
+            )
 
     def test_collection_dir_uses_collections_subdir(self, tmp_path):
         repo = RemoteRepo.from_config_entry({
