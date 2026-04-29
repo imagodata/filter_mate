@@ -8,18 +8,14 @@ They moved here so ``FavoritesController`` shrinks back toward an
 orchestrator role and the spatial-config surface gains a single
 testable seam.
 
-Design choice (vs. the formal ``DockwidgetSurface`` Protocol the
-original memo proposed): we mirror the ``FavoritesExtensionBridge``
-pattern — the handler holds a reference to the owning controller and
-reads back ``self._controller.dockwidget``, ``_favorites_manager``,
-``_show_warning``, ``tr``. The dockwidget surface is too wide and Qt-
-coupled to Protocol-test in headless mode anyway; existing tests use
-``MagicMock()`` and that pattern keeps working.
-
-Stage-1 extraction policy: the controller still exposes the old
-underscore methods as one-line delegations, so internal callers and
-tests don't break. A later cleanup will drop the delegations once the
-test rig has migrated to ``ctrl._spatial.method(...)`` calls.
+XCUT-3 close-out (2026-04-29): the typed contract that step-3 skipped
+now lives in :mod:`favorites_dockwidget_surface` —
+:class:`DockwidgetSurface` documents the dockwidget attributes the
+handler reads/writes, :class:`FavoritesControllerSurface` documents
+the slice of the controller it talks back to. Runtime stays the same
+(``self._controller.dockwidget``); the Protocols give static checkers
+something to enforce and let tests build typed fakes instead of broad
+``MagicMock`` doubles.
 
 See ``project_f4_step3_spatial_handler_design_2026_04_28.md``.
 """
@@ -29,10 +25,14 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Optional
 
+from .favorites_dockwidget_surface import (
+    DockwidgetSurface,
+    FavoritesControllerSurface,
+)
+
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from .favorites_controller import FavoritesController
     from ...core.services.favorites_service import FilterFavorite
 
 
@@ -56,19 +56,20 @@ class FavoritesSpatialHandler:
       - ``backfill_legacy_predicate_default(favorite)`` — heal
         pre-fix favorites that lack ``geometric_predicates``.
 
-    Reads back into the controller for ``dockwidget``,
-    ``_favorites_manager``, ``_show_warning`` and ``tr``. Direction
-    stays controller -> handler -> dockwidget; the handler never
-    imports controller types except for type-checking.
+    The controller surface is typed with
+    :class:`FavoritesControllerSurface` and the dockwidget surface
+    with :class:`DockwidgetSurface` (both ``Protocol``\\ s) — adding
+    a new attribute access here means widening the Protocols, which
+    makes the contract a deliberate decision rather than an accident.
     """
 
-    def __init__(self, controller: "FavoritesController") -> None:
+    def __init__(self, controller: FavoritesControllerSurface) -> None:
         self._controller = controller
 
     # ── shorthands -----------------------------------------------------
 
     @property
-    def _dockwidget(self):
+    def _dockwidget(self) -> DockwidgetSurface:
         return self._controller.dockwidget
 
     @property
