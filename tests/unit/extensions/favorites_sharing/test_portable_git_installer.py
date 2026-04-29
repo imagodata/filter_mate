@@ -137,11 +137,20 @@ class TestVerifyChecksum:
         with pytest.raises(installer.ChecksumMismatchError):
             installer._verify_sha256(str(path), "0" * 64)
 
-    def test_empty_expected_logs_and_passes(self, tmp_path):
+    def test_empty_expected_raises(self, tmp_path):
+        # S6 (audit 2026-04-29): an empty digest used to log a warning and
+        # let the .exe run unverified. The installer now refuses outright;
+        # tests that need the skip path monkey-patch _verify_sha256.
         path = tmp_path / "blob"
         path.write_bytes(b"x")
-        # Should not raise — opt-out path used by tests / dev mirrors
-        installer._verify_sha256(str(path), "")
+        with pytest.raises(installer.ChecksumMismatchError, match="no SHA-256"):
+            installer._verify_sha256(str(path), "")
+
+    def test_whitespace_only_expected_raises(self, tmp_path):
+        path = tmp_path / "blob"
+        path.write_bytes(b"x")
+        with pytest.raises(installer.ChecksumMismatchError, match="no SHA-256"):
+            installer._verify_sha256(str(path), "   \t  ")
 
 
 # ---------------------------------------------------------------------------

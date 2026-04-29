@@ -305,17 +305,22 @@ def _download(
 
 
 def _verify_sha256(path: str, expected_hex: str) -> None:
-    """Raise :class:`ChecksumMismatchError` when digest != ``expected_hex``."""
+    """Raise :class:`ChecksumMismatchError` when digest != ``expected_hex``.
+
+    S6 hardening (audit 2026-04-29): an empty ``expected_hex`` previously
+    logged a warning and continued — fine for read-only blobs, dangerous
+    for the PortableGit ``.exe`` we are about to execute. The installer
+    must refuse to run an unverified self-extractor; tests that legitimately
+    need the skip path monkey-patch the function instead.
+    """
     expected = (expected_hex or "").strip().lower()
     if not expected:
-        # Empty expected hash means the caller opted out of verification —
-        # log a loud warning but don't block. Refusing to download would
-        # be more strict; not raising lets users override for tests.
-        logger.warning(
-            "Skipping SHA-256 verification for %s — installer was "
-            "configured without an expected digest.", path,
+        raise ChecksumMismatchError(
+            f"refusing to install {path}: no SHA-256 digest configured "
+            "for this download. Set DownloadOverride.sha256 (or the upstream "
+            "DEFAULT_SHA256 constant) to an explicit hex digest before "
+            "retrying."
         )
-        return
     h = hashlib.sha256()
     with open(path, "rb") as fh:
         for chunk in iter(lambda: fh.read(1024 * 1024), b""):
