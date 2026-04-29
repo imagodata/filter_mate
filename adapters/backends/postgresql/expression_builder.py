@@ -627,6 +627,20 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             self.log_info(f"   Expression length: {len(final_expression)} chars")
             self.log_debug(f"   Expression preview: {final_expression[:300]}...")
 
+            # 2026-04-29 fix: prefer the task's subset queue when available so
+            # `setSubsetString` runs on the Qt main thread. Same root cause as
+            # the spatialite cascade silent no-op — calling setSubsetString
+            # straight from `QgsTask.run()` (worker) is not thread-safe per
+            # `FilterEngineTask.queue_subset_request` docstring. PG appeared
+            # to "work" historically only because EXISTS subsets are short
+            # enough that the worker-thread call sometimes succeeds; routing
+            # through the queue eliminates the race for both backends.
+            queue_callback = self.task_params.get('_subset_queue_callback') if self.task_params else None
+            if queue_callback is not None:
+                queue_callback(layer, final_expression)
+                self.log_info(f"✓ Filter queued for main-thread application: {layer.name()}")
+                return True
+
             success = safe_set_subset_string(layer, final_expression)
 
             if success:

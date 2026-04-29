@@ -470,3 +470,52 @@ class TestBuildExpression:
         )
         assert "EXISTS" in result
         assert "__source" in result
+
+
+class TestApplyFilterQueueRouting:
+    """2026-04-29: same Qt-thread-safety fix as the spatialite backend.
+
+    The PostgreSQL apply_filter previously called `safe_set_subset_string`
+    synchronously on the worker thread. In practice this often "worked"
+    (PostgreSQL EXISTS subsets are short and the QGIS PG provider is more
+    forgiving) but the race is the same as spatialite — and the contract
+    in `FilterEngineTask.queue_subset_request` says any subset apply MUST
+    be deferred to `finished()` on the Qt main thread. Routing through
+    the queue when the orchestrator wires one removes the race.
+    """
+
+    def test_uses_queue_callback_when_present(self, mock_pg_layer):
+        callback = MagicMock()
+        builder = PostgreSQLExpressionBuilder(task_params={
+            "buffer_endcap_style": "round",
+            "buffer_segments": 5,
+            "_subset_queue_callback": callback,
+        })
+
+        expr = (
+            'EXISTS (SELECT 1 FROM "tmp"."fm_chain_xxx" AS __source '
+            'WHERE ST_Intersects("buildings"."geom", __source.geom))'
+        )
+        result = builder.apply_filter(mock_pg_layer, expr)
+
+        assert result is True
+        callback.assert_called_once_with(mock_pg_layer, expr)
+
+    def test_falls_back_to_direct_when_callback_missing(self, builder, mock_pg_layer):
+        # Default builder fixture has no queue callback in task_params,
+        # so apply_filter must keep using safe_set_subset_string and
+        # return its result (mocked to True).
+        expr = "EXISTS (SELECT 1 FROM s WHERE ST_Intersects(geom, source.geom))"
+        result = builder.apply_filter(mock_pg_layer, expr)
+        assert result is True
+
+    def test_callback_not_invoked_for_empty_expression(self, mock_pg_layer):
+        callback = MagicMock()
+        builder = PostgreSQLExpressionBuilder(task_params={
+            "_subset_queue_callback": callback,
+        })
+
+        result = builder.apply_filter(mock_pg_layer, "")
+
+        assert result is False
+        callback.assert_not_called()

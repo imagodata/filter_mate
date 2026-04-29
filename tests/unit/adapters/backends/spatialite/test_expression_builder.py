@@ -392,3 +392,93 @@ class TestApplyFilter:
             combine_operator="AND",
         )
         assert result is True
+
+
+class TestApplyFilterQueueRouting:
+    """2026-04-29 regression: spatialite cascade silently no-oped because
+    `apply_filter` called `setSubsetString` straight from the QgsTask worker
+    thread, which Qt rejects for layer subset changes (cf docstring of
+    ``FilterEngineTask.queue_subset_request``).
+
+    When the orchestrator wires a ``_subset_queue_callback`` into
+    ``task_params``, ``apply_filter`` must use it instead of the synchronous
+    path so the actual setSubsetString runs in `finished()` on the main
+    thread. When no callback is wired (tests, public API direct use), the
+    synchronous fallback stays.
+    """
+
+    def test_uses_queue_callback_when_present(self, mock_spatialite_layer):
+        callback = MagicMock()
+        builder = SpatialiteExpressionBuilder(task_params={
+            "buffer_endcap_style": "round",
+            "source_srid": 2154,
+            "_subset_queue_callback": callback,
+        })
+
+        expr = "Intersects(\"geom\", GeomFromText('POINT(0 0)', 2154))"
+        result = builder.apply_filter(mock_spatialite_layer, expr)
+
+        assert result is True
+        callback.assert_called_once_with(mock_spatialite_layer, expr)
+
+    def test_queue_callback_receives_combined_expression(self, mock_spatialite_layer):
+        # When old_subset is present, the queued payload must be the COMBINED
+        # final expression (so the main-thread apply preserves the user's
+        # attribute filter), not the raw geometric clause.
+        callback = MagicMock()
+        builder = SpatialiteExpressionBuilder(task_params={
+            "_subset_queue_callback": callback,
+        })
+
+        expr = "Intersects(\"geom\", GeomFromText('POINT(0 0)', 2154))"
+        result = builder.apply_filter(
+            mock_spatialite_layer,
+            expr,
+            old_subset='"type" = \'highway\'',
+            combine_operator="AND",
+        )
+
+        assert result is True
+        # Combined shape: ({old}) AND ({new})
+        called_layer, called_expr = callback.call_args.args
+        assert called_layer is mock_spatialite_layer
+        assert "Intersects" in called_expr
+        assert '"type"' in called_expr
+        assert " AND " in called_expr
+
+    def test_falls_back_to_direct_when_callback_missing(self, builder, mock_spatialite_layer):
+        # Existing behaviour: builder fixture has no _subset_queue_callback
+        # in task_params, so apply_filter must keep using safe_set_subset_string
+        # synchronously and return its result.
+        result = builder.apply_filter(
+            mock_spatialite_layer,
+            "Intersects(\"geom\", GeomFromText('POINT(0 0)', 2154))",
+        )
+        assert result is True  # safe_set_subset_string mock returns True
+
+    def test_callback_not_invoked_for_empty_expression(self, mock_spatialite_layer):
+        # The empty-expression early return must come first — never queue
+        # an empty payload as that would be indistinguishable from a clear
+        # operation in `task_completion_handler` and risk silent unfilters.
+        callback = MagicMock()
+        builder = SpatialiteExpressionBuilder(task_params={
+            "_subset_queue_callback": callback,
+        })
+
+        result = builder.apply_filter(mock_spatialite_layer, "")
+
+        assert result is False
+        callback.assert_not_called()
+
+    def test_callback_not_invoked_for_ogr_fallback_sentinel(self, mock_spatialite_layer):
+        # The OGR-fallback sentinel must short-circuit before queueing —
+        # the orchestrator inspects the False return to switch backends.
+        callback = MagicMock()
+        builder = SpatialiteExpressionBuilder(task_params={
+            "_subset_queue_callback": callback,
+        })
+
+        result = builder.apply_filter(mock_spatialite_layer, USE_OGR_FALLBACK)
+
+        assert result is False
+        callback.assert_not_called()

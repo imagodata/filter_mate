@@ -293,7 +293,23 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             else:
                 final_expression = expression
 
-            # Apply filter
+            # 2026-04-29 fix: prefer the task's subset queue when available so
+            # `setSubsetString` runs on the Qt main thread. The cascade is
+            # invoked from `QgsTask.run()` (worker thread) and the docstring
+            # of ``FilterEngineTask.queue_subset_request`` is explicit:
+            # "Subset strings cannot be applied directly from background
+            # threads due to Qt thread safety constraints." Calling
+            # `safe_set_subset_string` straight from the worker silently
+            # no-ops on spatialite (the cascade reported "8/8 filtered
+            # successfully" while every distant layer kept its full feature
+            # count). When no queue is wired (tests, public-API direct use),
+            # fall back to the synchronous path.
+            queue_callback = self.task_params.get('_subset_queue_callback') if self.task_params else None
+            if queue_callback is not None:
+                queue_callback(layer, final_expression)
+                self.log_info("✓ Filter queued for main-thread application")
+                return True
+
             success = safe_set_subset_string(layer, final_expression)
 
             if success:
