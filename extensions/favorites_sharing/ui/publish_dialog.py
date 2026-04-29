@@ -34,6 +34,7 @@ except ImportError:  # pragma: no cover
 
 from ..remote_repo_manager import RemoteRepo, RemoteRepoManager
 from ..service import CollectionTarget, FavoritesSharingService
+from .publish_model import read_config_defaults, resolve_remote_repo_manager
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.UI.Publish')
 
@@ -84,10 +85,10 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
         self._targets: List[CollectionTarget] = []
         # Defaults pulled from config — author/license/homepage prefill so
         # publishing repeatedly into the same org doesn't require re-typing.
-        self._config_defaults = self._read_config_defaults(sharing_service)
+        self._config_defaults = read_config_defaults(sharing_service)
         # Optional: remote git-backed repos configured by IT
         self._remote_repo_manager: Optional[RemoteRepoManager] = \
-            self._resolve_remote_repo_manager(sharing_service)
+            resolve_remote_repo_manager(sharing_service)
 
         # H5: the QThread driving a remote-repo publish lives here so it
         # survives the local scope of ``_run_publish_in_background``.
@@ -99,71 +100,9 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             self._populate_favorites()
             self._apply_default_metadata_prefill()
 
-    @staticmethod
-    def _resolve_remote_repo_manager(
-        sharing_service: Optional[FavoritesSharingService],
-    ) -> Optional[RemoteRepoManager]:
-        """Return the RemoteRepoManager registered on the owning extension.
+    
 
-        Falls back to None when no extension is wired (legacy tests) or
-        when the service isn't registered — the dialog then renders its
-        pre-v5 behavior (scanned collections only, no git).
-        """
-        extension = getattr(sharing_service, "extension", None)
-        if extension is None:
-            return None
-        mgr = extension.get_service("remote_repos") if hasattr(extension, "get_service") else None
-        if isinstance(mgr, RemoteRepoManager):
-            return mgr
-        return None
-
-    @staticmethod
-    def _read_config_defaults(sharing_service: Optional[FavoritesSharingService]) -> dict:
-        """Load pre-fill values from FilterMate config.
-
-        Prefers the owning extension's typed accessors (single source of
-        truth); falls back to a direct ENV_VARS lookup when the dialog is
-        instantiated without an extension (legacy tests).
-        """
-        defaults = {
-            'default_publish_collection': '',
-            'default_publish_metadata': {
-                'author': '', 'license': '', 'homepage': '',
-            },
-        }
-
-        extension = getattr(sharing_service, "extension", None)
-        if extension is not None:
-            try:
-                defaults['default_publish_collection'] = (
-                    extension.get_default_publish_collection()
-                )
-                defaults['default_publish_metadata'] = (
-                    extension.get_default_publish_metadata()
-                )
-                return defaults
-            except Exception as exc:
-                logger.debug("Extension config accessors failed: %s", exc)
-
-        # Fallback — direct ENV_VARS lookup when no extension is available.
-        try:
-            from filter_mate.config.config import ENV_VARS, _get_option_value
-            cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
-                .get("EXTENSIONS", {}) \
-                .get("favorites_sharing", {})
-            defaults['default_publish_collection'] = str(
-                _get_option_value(cfg.get("default_publish_collection"), default="") or ""
-            )
-            meta = _get_option_value(
-                cfg.get("default_publish_metadata"),
-                default={'author': '', 'license': '', 'homepage': ''},
-            ) or {}
-            if isinstance(meta, dict):
-                for k in ('author', 'license', 'homepage'):
-                    defaults['default_publish_metadata'][k] = str(meta.get(k) or '')
-        except Exception:
-            pass
-        return defaults
+    
 
     def _apply_default_metadata_prefill(self) -> None:
         """Prefill author / license / homepage fields from config when the
