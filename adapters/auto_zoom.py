@@ -13,8 +13,18 @@ Resolution rules:
 - Otherwise, zoom only to layers whose ``PROJECT_LAYERS[layer_id].exploring.is_tracking``
   is true (per-layer override).
 - If neither applies, just refresh the canvas.
+
+H1 hardening (audit 2026-04-29): a monotonically-increasing
+:func:`bump_subset_change_token` is exposed for callers that need to
+detect "a newer subset was applied between my own subset apply and my
+auto_zoom call". The filter task captures the token at scheduling time
+(main thread) and passes it as ``expected_token`` when finished()
+finally fires; if a favorite's synchronous apply has bumped the token
+in the meantime, the stale filter zoom is skipped instead of overwriting
+the canvas the user is now looking at.
 """
 
+import threading
 from typing import Iterable, Optional, Mapping, Any
 
 from qgis.core import QgsRectangle, QgsVectorLayer
@@ -23,6 +33,30 @@ from qgis.utils import iface as default_iface
 from ..infrastructure.logging import get_app_logger
 
 logger = get_app_logger()
+
+
+_token_lock = threading.Lock()
+_subset_change_token = 0
+
+
+def bump_subset_change_token() -> int:
+    """Bump the subset-change token and return its new value.
+
+    Call right BEFORE applying a subset (filter task __init__, favorite
+    apply). Snapshot the return value and pass it to
+    :func:`auto_zoom_to_filtered` as ``expected_token`` so a later async
+    zoom whose subset has been superseded can be skipped.
+    """
+    global _subset_change_token
+    with _token_lock:
+        _subset_change_token += 1
+        return _subset_change_token
+
+
+def current_subset_change_token() -> int:
+    """Return the current token without bumping (test/diagnostic helper)."""
+    with _token_lock:
+        return _subset_change_token
 
 
 def _read_global_auto_zoom_flag() -> bool:
@@ -78,6 +112,7 @@ def auto_zoom_to_filtered(
     *,
     dockwidget: Any = None,
     iface_obj: Any = None,
+    expected_token: Optional[int] = None,
 ) -> bool:
     """Zoom the map canvas to the union extent of filtered layers.
 
@@ -91,11 +126,28 @@ def auto_zoom_to_filtered(
             ``get_filtered_layer_extent`` for a more accurate (feature-bbox)
             extent when feasible.
         iface_obj: Optional iface override (tests).
+        expected_token: Token captured pre-apply via
+            :func:`bump_subset_change_token`. When provided, the zoom is
+            skipped if the global token has since advanced — meaning a
+            newer subset (typically a favorite apply) already drove the
+            canvas to a different extent and this stale zoom would clobber
+            it.
 
     Returns:
         True when a zoom was performed, False when only a refresh was issued
-        (or nothing at all).
+        or the call was skipped (token superseded, no canvas, no extents).
     """
+    if expected_token is not None:
+        with _token_lock:
+            current = _subset_change_token
+        if current > expected_token:
+            logger.debug(
+                "Auto-zoom skipped: subset_change_token advanced "
+                f"({expected_token} -> {current}) — a newer subset "
+                "owns the canvas now."
+            )
+            return False
+
     iface_obj = iface_obj or default_iface
     if iface_obj is None:
         return False

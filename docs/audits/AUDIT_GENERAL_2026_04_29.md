@@ -44,7 +44,7 @@
 | S5 | `host=0.0.0.0` accepté via env sans warning | `filtermate_api/config.py:49` | **FIXÉ par S1** |
 | S6 | PortableGit `_verify_sha256` silencieux si `expected_hex=""` → exécute `.exe` non vérifié | `extensions/favorites_sharing/portable_git_installer.py:307-348` | **FIXÉ `f2110df2`** — raise `ChecksumMismatchError` au lieu de log warning. |
 | C1 | PushWorker `terminate()` + drop ref si `wait(10s)` timeout → orphan QThread | `extensions/qfieldcloud/ui/push_dialog.py:476-482` | M |
-| H1 | Auto-zoom stale-state race favorite vs filter (commit 9bd78d2b) | `ui/controllers/favorites_spatial_handler.py:888` + `adapters/filter_result_handler.py:362` | S |
+| H1 | Auto-zoom stale-state race favorite vs filter (commit 9bd78d2b) | `ui/controllers/favorites_spatial_handler.py:888` + `adapters/filter_result_handler.py:362` | **FIXÉ** — `bump_subset_change_token()` global thread-safe ; `FilterEngineTask.__init__` snapshote le token, `FilterResultHandler._handle_auto_zoom` le passe en `expected_token` ; favori synchrone bump et passe son propre token. `auto_zoom_to_filtered` skip si token courant > expected. 8 tests. |
 | A2 | `core/domain/layer_signature.py` — `QgsDataSourceUri` + `QgsProject.instance()` dans domain | `core/domain/layer_signature.py:55,107` | M |
 | A3 | 5 paires de services dupliqués post-revert toujours actives | `core/services/` | M×5 |
 | A4 | `FavoritesNotInitialized` jamais catchée dans `favorites_controller.py` (F11 policy non appliquée) | `ui/controllers/favorites_controller.py` | **FIXÉ `dde30f5d`** (embarqué dans CORE-1a par concurrence d'agents) — `apply_favorite` et `remove_favorite` catchent `FavoritesNotInitialized` → `_show_warning`. `mark_favorite_used` / `save` failures dégradés en log (non-critique). 5 tests régression. |

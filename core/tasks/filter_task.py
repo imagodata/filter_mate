@@ -265,6 +265,18 @@ class FilterEngineTask(QgsTask):
         self.task_action = task_action
         self.task_parameters = task_parameters
 
+        # H1 (audit 2026-04-29): stamp the subset-change token NOW (main
+        # thread, before run() is queued). FilterResultHandler reads this
+        # back in finished() and skips the auto-zoom if the token has
+        # since advanced — i.e. a favorite was applied while we were
+        # running and already drove the canvas to a different extent.
+        try:
+            from ...adapters.auto_zoom import bump_subset_change_token
+            self.task_parameters["_subset_change_token"] = bump_subset_change_token()
+        except Exception:
+            # Bumping is opportunistic — never fail task creation over it.
+            pass
+
         # Backend registry for hexagonal architecture compliance
         # If provided, use registry for backend selection instead of direct imports
         self._backend_registry = backend_registry

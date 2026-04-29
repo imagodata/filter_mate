@@ -877,8 +877,14 @@ class FavoritesSpatialHandler:
 
         # Auto-zoom on the union extent of every layer the favorite
         # touched (mirrors the normal filter completion flow).
+        # H1 (audit 2026-04-29): bump the subset-change token before zoom
+        # so any in-flight filter task whose finished() hasn't fired yet
+        # sees a newer token and skips its now-stale zoom.
         try:
-            from ...adapters.auto_zoom import auto_zoom_to_filtered
+            from ...adapters.auto_zoom import (
+                auto_zoom_to_filtered,
+                bump_subset_change_token,
+            )
 
             project_layers: dict = {}
             try:
@@ -886,10 +892,12 @@ class FavoritesSpatialHandler:
             except (RuntimeError, AttributeError):
                 project_layers = {}
 
+            my_token = bump_subset_change_token()
             auto_zoom_to_filtered(
                 zoom_layers,
                 project_layers,
                 dockwidget=self._dockwidget,
+                expected_token=my_token,
             )
         except Exception as exc:
             logger.debug(f"Favorite auto-zoom skipped: {exc}")

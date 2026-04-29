@@ -341,6 +341,14 @@ class FilterResultHandler:
         """
         from .auto_zoom import auto_zoom_to_filtered
 
+        # H1 (audit 2026-04-29): the filter task captured a subset-change
+        # token at scheduling time. If a favorite has been applied between
+        # then and this finished() callback, the token has advanced and
+        # this zoom would clobber the canvas the user is now looking at.
+        expected_token = None
+        if task_parameters:
+            expected_token = task_parameters.get("_subset_change_token")
+
         layers = [source_layer]
 
         if task_parameters:
@@ -364,6 +372,7 @@ class FilterResultHandler:
             project_layers,
             dockwidget=dockwidget,
             iface_obj=iface_obj,
+            expected_token=expected_token,
         )
 
     def _sync_project_layers(self) -> None:
