@@ -213,44 +213,7 @@ class FavoritesMigrationService:
     # Global Favorites
     # ─────────────────────────────────────────────────────────────────
 
-    def ensure_global_project_exists(self) -> bool:
-        """
-        Ensure the global project entry exists in database.
-
-        Returns:
-            True if global project exists or was created
-        """
-        if not self._db_path:
-            return False
-
-        try:
-            import sqlite3
-            conn = sqlite3.connect(self._db_path)
-            cursor = conn.cursor()
-
-            # Check if global project exists
-            cursor.execute(
-                "SELECT project_id FROM fm_projects WHERE project_id = ?",
-                (GLOBAL_PROJECT_UUID,)
-            )
-
-            if not cursor.fetchone():
-                # Create global project entry
-                cursor.execute("""
-                    INSERT INTO fm_projects VALUES(
-                        ?, datetime(), datetime(),
-                        '__GLOBAL__', '__GLOBAL_FAVORITES__', '{}'
-                    )
-                """, (GLOBAL_PROJECT_UUID,))
-                conn.commit()
-                logger.info("✓ Created global favorites project entry")
-
-            conn.close()
-            return True
-
-        except Exception as e:
-            logger.error(f"Error ensuring global project exists: {e}")
-            return False
+    
 
     def get_global_favorites_count(self) -> int:
         """Get count of global favorites."""
