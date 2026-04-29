@@ -34,7 +34,7 @@
 ### T1 · 0 test sur `FavoritesSpatialHandler` (900 LOC livrées en F4 stages 1-5)
 - `ui/controllers/favorites_spatial_handler.py`
 - Les 5 stages F4 ont déplacé du code, pas couvert. `restore_spatial_config` (cross-layer FID guard) silencieusement bug si `favorite_matches_current_layer` retourne False.
-- Fix : tests unit sur `restore_spatial_config` + init + wiring.
+- **Statut : FIXÉ 2026-04-29** — `tests/unit/ui/controllers/test_favorites_spatial_handler.py` charge le handler via importlib (zéro import QGIS top-level grâce au Protocol + helpers purs) avec fakes typés. 14 tests sur `restore_spatial_config` : cross-layer FID guard (same id / cross id / name fallback / signature match), no-current-layer, predicates/buffer/groupbox restore, invalid features (full + partial), exception safety. Le harnais offre une base pour les 4 méthodes restantes du handler (`capture_spatial_config`, `restore_filtering_ui_from_favorite`, `apply_favorite_subsets_directly`, `ensure_applicable_groupbox_for_favorite`).
 
 ## P1 — Sprint courant
 
