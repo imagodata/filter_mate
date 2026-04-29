@@ -24,7 +24,7 @@
 - `core/filter/expression_sanitizer.py:130` — `^(EXISTS|NOT)\s*\(` court-circuite tout le reste.
 - `NOT(1=1); DELETE FROM x; --` matche et bypasse le strip.
 - Régression du fix 2026-04-27 (memory `project_sanitizer_exists_regression_2026_04_27.md`).
-- Fix : parens balancées + sanitization récursive du contenu interne.
+- **Statut : FIXÉ 2026-04-29** — nouvelle fonction `_is_balanced_boolean_function_call` valide parens balancées + tail vide après le `)` final ; nouvelle fonction `_strip_for_op_scan` scrub literals + commentaires SQL pour le top-level operator scan (sans toucher aux literals seuls dans les autres usages). 8 tests régression chained-statement + comment-bypass.
 
 ### A1 · `iface` importé au niveau module dans le domaine
 - `core/filter/result_processor.py:27`

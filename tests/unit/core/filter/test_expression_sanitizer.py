@@ -137,6 +137,65 @@ class TestBooleanReturningFunctionsPreserved:
         assert sanitize_subset_string(expr) == expr
 
 
+class TestBooleanFunctionChainBypassBlocked:
+    """S3 hardening (audit 2026-04-29): the regex `^(EXISTS|NOT)\\s*\\(` only
+    checked the prefix. A payload like `NOT(1=1); DROP TABLE x; --` matched
+    and was preserved as a "boolean function call". The balanced-parens
+    check now requires the matching `)` to end the expression — chained
+    statements / DDL / comments past the close fall through to the
+    generic display-expression drop.
+    """
+
+    def test_chained_drop_after_not_is_dropped(self):
+        # Should NOT be preserved. Sanitizer drops it as display expression.
+        expr = "NOT(1=1); DROP TABLE x; --"
+        result = sanitize_subset_string(expr)
+        assert "DROP" not in result.upper()
+        assert ";" not in result
+
+    def test_chained_delete_after_exists_is_dropped(self):
+        expr = "EXISTS(SELECT 1) ; DELETE FROM users"
+        result = sanitize_subset_string(expr)
+        assert "DELETE" not in result.upper()
+        assert ";" not in result
+
+    def test_chained_comment_after_not_is_dropped(self):
+        expr = "NOT(1=1) -- AND \"secret\" = 'x'"
+        result = sanitize_subset_string(expr)
+        assert "--" not in result
+
+    def test_unbalanced_parens_dropped(self):
+        # Closing paren never reached: not a clean call → not preserved.
+        expr = "NOT(SELECT 1 FROM evil"
+        result = sanitize_subset_string(expr)
+        assert result.strip() == ""
+
+    def test_double_function_call_dropped(self):
+        # Two side-by-side calls: `NOT(...)EXISTS(...)`. The first ')' closes
+        # the NOT, but trailing tokens disqualify it as a single call.
+        expr = "NOT(1=1)EXISTS(SELECT 1)"
+        result = sanitize_subset_string(expr)
+        assert result.strip() == ""
+
+    def test_not_with_embedded_quote_with_chained_payload_dropped(self):
+        # The ';' inside the literal must NOT trick the balanced-parens
+        # check, but the trailing DROP after the close must still be caught.
+        expr = "NOT(\"x\" = 'a;b'); DROP TABLE x"
+        result = sanitize_subset_string(expr)
+        assert "DROP" not in result.upper()
+
+    def test_clean_not_with_semicolon_inside_literal_preserved(self):
+        # No chained statement — the ';' is only inside the string literal.
+        # The balanced check ignores literals; the call is balanced; tail
+        # is empty → preserved.
+        expr = "NOT(\"label\" = 'a;b')"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_clean_exists_with_nested_parens_preserved(self):
+        expr = "EXISTS(SELECT 1 FROM s WHERE (a=1 OR b=2))"
+        assert sanitize_subset_string(expr) == expr
+
+
 class TestAndPrefixedCoalesceStillStripped:
     """Prior AND/OR-prefixed stripping must still work after the Phase -1 addition."""
 

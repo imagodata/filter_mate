@@ -91,11 +91,62 @@ def _strip_toplevel_string_literals(expr: str) -> str:
     return ''.join(out)
 
 
+def _strip_for_op_scan(expr: str) -> str:
+    """Scrub literals AND SQL comments for top-level operator analysis.
+
+    Used only by :func:`_has_toplevel_boolean_operator`. Comment-stripping
+    closes a smuggling vector where ``NOT(1=1) -- AND foo = 1`` would
+    otherwise expose a ``AND`` token that a quote-only scrub leaves visible.
+
+    NOT used by :func:`_is_balanced_boolean_function_call` — there we
+    *want* trailing comments / chained statements to remain visible after
+    the closing paren so the call is correctly disqualified as
+    "not a single function call".
+    """
+    out = []
+    i = 0
+    n = len(expr)
+    while i < n:
+        c = expr[i]
+        if c == "'":
+            i += 1
+            while i < n:
+                if expr[i] == "'":
+                    if i + 1 < n and expr[i + 1] == "'":
+                        i += 2
+                        continue
+                    i += 1
+                    break
+                i += 1
+            out.append("''")
+            continue
+        if c == '-' and i + 1 < n and expr[i + 1] == '-':
+            i += 2
+            while i < n and expr[i] not in ('\n', '\r'):
+                i += 1
+            out.append(' ')
+            continue
+        if c == '/' and i + 1 < n and expr[i + 1] == '*':
+            i += 2
+            while i < n - 1:
+                if expr[i] == '*' and expr[i + 1] == '/':
+                    i += 2
+                    break
+                i += 1
+            else:
+                i = n
+            out.append(' ')
+            continue
+        out.append(c)
+        i += 1
+    return ''.join(out)
+
+
 def _has_toplevel_boolean_operator(expr: str) -> bool:
     """True if expr contains a boolean operator at parenthesis-depth 0,
     ignoring characters inside single-quoted string literals.
     """
-    stripped = _strip_toplevel_string_literals(expr)
+    stripped = _strip_for_op_scan(expr)
     upper = stripped.upper()
 
     depth = 0
@@ -128,6 +179,45 @@ _FUNCTION_CALL_RE = re.compile(r'^[A-Z_][A-Z0-9_]*\s*\(')
 # boolean operator. Without this short-circuit, target-layer subsets get
 # sanitized to '' and the cascade silently drops every downstream filter.
 _BOOLEAN_FUNCTION_RE = re.compile(r'^(EXISTS|NOT)\s*\(')
+
+
+def _is_balanced_boolean_function_call(expr: str) -> bool:
+    """True if ``expr`` is *exactly* a single ``EXISTS(...)`` or ``NOT(...)``
+    call with balanced parentheses and nothing trailing.
+
+    S3 hardening (2026-04-29): :data:`_BOOLEAN_FUNCTION_RE` only checks that
+    the expression *starts* with ``EXISTS(`` or ``NOT(``. A payload like
+    ``NOT(1=1); DROP TABLE x; --`` matches the regex and was therefore
+    short-circuited as a "preserved boolean function", letting the chained
+    statement survive the sanitizer. This helper validates that the matching
+    closing paren ends the string (whitespace excluded), so chained
+    statements / DDL keywords / comments after the close are caught by the
+    downstream display-expression rules instead.
+
+    String literals are scrubbed first so embedded ``)`` or ``;`` inside
+    ``'...'`` don't break the depth counter.
+    """
+    if not _BOOLEAN_FUNCTION_RE.match(expr.upper()):
+        return False
+
+    scrubbed = _strip_toplevel_string_literals(expr)
+    open_idx = scrubbed.find('(')
+    if open_idx == -1:
+        return False
+
+    depth = 0
+    for i in range(open_idx, len(scrubbed)):
+        ch = scrubbed[i]
+        if ch == '(':
+            depth += 1
+        elif ch == ')':
+            depth -= 1
+            if depth == 0:
+                # Matching close found. Anything past it (after whitespace)
+                # disqualifies the expression as a single boolean call.
+                return scrubbed[i + 1:].strip() == ''
+    # Unbalanced parens — not a clean call.
+    return False
 
 
 def _is_standalone_display_expression(expr: str) -> bool:
@@ -167,8 +257,11 @@ def _is_standalone_display_expression(expr: str) -> bool:
 
     # Boolean-returning function calls (EXISTS, NOT) ARE valid WHERE bodies
     # even though they look like a single function call with no top-level
-    # boolean operator. Must short-circuit before the generic call rule below.
-    if _BOOLEAN_FUNCTION_RE.match(upper):
+    # boolean operator. Must short-circuit before the generic call rule
+    # below — but only when the call is balanced and self-contained, so
+    # chained payloads like ``NOT(1=1); DROP TABLE x; --`` (S3) fall
+    # through to the generic display-expression drop instead.
+    if _is_balanced_boolean_function_call(stripped):
         return False
 
     # Known display function prefix (fast-path / explicit confidence).
