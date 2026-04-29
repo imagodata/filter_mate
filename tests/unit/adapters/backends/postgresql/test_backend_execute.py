@@ -71,6 +71,23 @@ def _install_module_stubs():
 _install_module_stubs()
 
 
+# Load sql_safety.py for real — it has zero deps and the backend imports it
+# at runtime via `from .sql_safety import ...` to validate WHERE clauses (S2).
+_sql_safety_path = os.path.normpath(os.path.join(
+    os.path.dirname(__file__),
+    "..", "..", "..", "..", "..",
+    "adapters", "backends", "postgresql", "sql_safety.py",
+))
+_sql_safety_spec = importlib.util.spec_from_file_location(
+    f"{ROOT}.adapters.backends.postgresql.sql_safety",
+    _sql_safety_path,
+)
+_sql_safety_mod = importlib.util.module_from_spec(_sql_safety_spec)
+_sql_safety_mod.__package__ = f"{ROOT}.adapters.backends.postgresql"
+sys.modules[_sql_safety_mod.__name__] = _sql_safety_mod
+_sql_safety_spec.loader.exec_module(_sql_safety_mod)
+
+
 _backend_path = os.path.normpath(os.path.join(
     os.path.dirname(__file__),
     "..", "..", "..", "..", "..",
@@ -161,3 +178,70 @@ class TestExecuteDirectQueryTemplate:
         connection.cursor.return_value.execute.side_effect = RuntimeError("syntax error")
         with pytest.raises(RuntimeError, match="syntax error"):
             backend._execute_direct(expression, layer_info, connection)
+
+
+class TestSqlInjectionGuards:
+    """S2 (audit 2026-04-29): defense-in-depth on _execute_direct / _execute_with_mv.
+
+    Even if the upstream sanitizer leaks a malicious payload, sql_safety must
+    refuse before cursor.execute() so chained statements / DDL / escalation
+    functions cannot reach the database.
+    """
+
+    SqlInjectionAttempt = _sql_safety_mod.SqlInjectionAttempt
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            "1=1; DROP TABLE users",
+            "NOT(1=1); DELETE FROM y",
+            '"x" = 1 -- AND "secret" = \'x\'',
+            '"x" = 1 OR pg_sleep(10) IS NULL',
+            '"x" = pg_read_file(\'/etc/passwd\')',
+            "1=1 UNION ALL SELECT lo_import('/etc/shadow')",
+        ],
+    )
+    def test_execute_direct_rejects_payload(
+        self, backend, expression, layer_info, connection, payload
+    ):
+        expression.sql = payload
+        with pytest.raises(self.SqlInjectionAttempt):
+            backend._execute_direct(expression, layer_info, connection)
+        # The cursor must NOT have been touched.
+        connection.cursor.return_value.execute.assert_not_called()
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            "1=1; DROP TABLE users",
+            "NOT(pg_sleep(10) IS NULL)",
+        ],
+    )
+    def test_execute_with_mv_rejects_payload(
+        self, backend, expression, layer_info, connection, payload
+    ):
+        # _execute_with_mv calls into _mv_manager; assigning a bare MagicMock
+        # is enough — the validator should fire before any MV interaction.
+        backend._mv_manager = MagicMock()
+        expression.sql = payload
+        with pytest.raises(self.SqlInjectionAttempt):
+            backend._execute_with_mv(expression, layer_info, connection)
+        backend._mv_manager.create_mv.assert_not_called()
+
+    def test_execute_direct_rejects_malformed_pk_column(
+        self, backend, expression, layer_info, connection
+    ):
+        # Tampered LayerInfo with a hostile pk_attr — the identifier shape
+        # check must catch it before f-string concatenation.
+        layer_info.pk_attr = 'id"; DROP TABLE x; --'
+        with pytest.raises(self.SqlInjectionAttempt, match="primary key column"):
+            backend._execute_direct(expression, layer_info, connection)
+        connection.cursor.return_value.execute.assert_not_called()
+
+    def test_legitimate_expression_still_executes(
+        self, backend, expression, layer_info, connection
+    ):
+        # Regression: the validator must not break the happy path.
+        expression.sql = '"deleted_at" IS NULL AND "x" > 5'
+        backend._execute_direct(expression, layer_info, connection)
+        connection.cursor.return_value.execute.assert_called_once()

@@ -703,7 +703,18 @@ class PostgreSQLBackend(BackendPort):
         layer_info: LayerInfo,
         connection
     ) -> List[int]:
-        """Execute filter using materialized view."""
+        """Execute filter using materialized view.
+
+        S2 (audit 2026-04-29): WHERE clause is sanitized upstream but validated
+        again here through :func:`sql_safety.validate_where_clause` so chained
+        statements / DDL keywords / escalation functions cannot reach
+        ``cursor.execute``. ``pk_column`` is shape-checked before being
+        embedded in identifier quotes.
+        """
+        from .sql_safety import validate_identifier, validate_where_clause
+
+        validate_where_clause(expression.sql)
+
         # Build query for MV
         table_name = self._get_table_name(layer_info)
         query = f"SELECT * FROM {table_name} WHERE {expression.sql}"  # nosec B608
@@ -718,7 +729,9 @@ class PostgreSQLBackend(BackendPort):
         )
 
         # Query MV for feature IDs
-        pk_column = self._get_pk_column(layer_info)
+        pk_column = validate_identifier(
+            self._get_pk_column(layer_info), kind="primary key column"
+        )
         results = self._mv_manager.query_mv(
             mv_name=mv_name,
             columns=pk_column,
@@ -733,9 +746,22 @@ class PostgreSQLBackend(BackendPort):
         layer_info: LayerInfo,
         connection
     ) -> List[int]:
-        """Execute filter directly without MV."""
+        """Execute filter directly without MV.
+
+        S2 (audit 2026-04-29): WHERE clause is sanitized upstream but validated
+        again here through :func:`sql_safety.validate_where_clause` so chained
+        statements / DDL keywords / escalation functions cannot reach
+        ``cursor.execute``. ``pk_column`` is shape-checked before being
+        embedded in identifier quotes.
+        """
+        from .sql_safety import validate_identifier, validate_where_clause
+
+        validate_where_clause(expression.sql)
+
         table_name = self._get_table_name(layer_info)
-        pk_column = self._get_pk_column(layer_info)
+        pk_column = validate_identifier(
+            self._get_pk_column(layer_info), kind="primary key column"
+        )
 
         query = f'SELECT "{pk_column}" FROM {table_name} WHERE {expression.sql}'  # nosec B608
 
