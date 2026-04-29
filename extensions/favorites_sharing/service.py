@@ -22,7 +22,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from .scanner import ResourceSharingScanner, SharedFavorite
-from .services import SharedFavoritesQuery
+from .services import FavoritesForkService, SharedFavoritesQuery
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.Service')
 
@@ -58,11 +58,11 @@ class FavoritesSharingService:
 
     def __init__(self, scanner: ResourceSharingScanner):
         self._scanner = scanner
-        # EXT-2 stage 1 (audit 2026-04-29): the read path lives in a
-        # dedicated service. The facade keeps the public API by
-        # delegating, so external callers (dialogs, extension entry
-        # point, tests) need not know about the split.
+        # EXT-2 (audit 2026-04-29): the god-class is now a facade over
+        # focused services. Same public surface — delegations preserve
+        # BC for the dialogs / extension entry point / tests.
         self._query = SharedFavoritesQuery(scanner)
+        self._fork = FavoritesForkService()
 
     @property
     def extension(self):
@@ -97,147 +97,10 @@ class FavoritesSharingService:
     ) -> Optional[str]:
         """Materialize a shared favorite into the user's local DB.
 
-        The forked favorite:
-        - gets a new UUID (the original is never touched);
-        - preserves the author's ``created_at`` as ``_extra.original_created_at``;
-        - resets ``use_count`` to 0;
-        - has its portable ``layer_signature`` entries re-resolved to
-          current-project layer UUIDs via
-          :meth:`FavoriteImportHandler.rebind_to_project`.
-
-        Args:
-            shared: The SharedFavorite discovered by the scanner.
-            favorites_service: The running :class:`FavoritesService`
-                (obtained from ``dockwidget._favorites_manager``).
-            override_name: When provided, used instead of the bundled name
-                (the Fork dialog lets users rename on the fly).
-
-        Returns:
-            New favorite id on success, ``None`` otherwise.
+        Delegates to :class:`FavoritesForkService` (EXT-2 stage 2). See
+        that class's docstring for the trust-boundary contract.
         """
-        try:
-            from filter_mate.core.domain.favorite_import_handler import FavoriteImportHandler
-            from filter_mate.core.domain.favorites_manager import FilterFavorite
-            from filter_mate.core.domain.layer_signature import LayerSignatureIndex
-        except Exception:  # pragma: no cover — plugin package import guard
-            logger.exception("Cannot import FilterMate core for Fork")
-            return None
-
-        # Re-bind signatures to local layer UUIDs. We use the canonical
-        # domain handler directly rather than going through a service
-        # wrapper — the handler is stateless and the index is a per-call
-        # snapshot of the current QgsProject.
-        # A2 (audit 2026-04-29): pass the project explicitly to the index;
-        # the domain no longer reaches into QGIS on its own.
-        try:
-            from qgis.core import QgsProject
-            project_for_index = QgsProject.instance()
-        except (ImportError, AttributeError):
-            # AttributeError covers headless tests where qgis.core is a
-            # MagicMock and QgsProject has no real ``instance()`` method.
-            project_for_index = None
-        rebound = FavoriteImportHandler.rebind_to_project(
-            dict(shared.payload),
-            LayerSignatureIndex(project_for_index),
-            file_version=str(shared.schema_version),
-        )
-
-        # Trust boundary: a shared favorite is authored by an arbitrary
-        # third party. Run the local subset-string sanitizer on the
-        # expression before it lands in the DB so a poisoned display
-        # expression / unsafe construct is rejected at fork time, not at
-        # apply time. ``sanitize_subset_string`` returns '' for a
-        # standalone display expression — refuse the fork in that case.
-        raw_expr = str(rebound.get('expression') or '')
-        if raw_expr:
-            try:
-                try:
-                    from filter_mate.core.filter import sanitize_subset_string
-                except ImportError:
-                    from core.filter import sanitize_subset_string  # type: ignore
-                cleaned_expr = sanitize_subset_string(raw_expr)
-            except Exception:
-                logger.exception("Sanitizer unavailable; refusing fork to be safe")
-                return None
-            if not cleaned_expr:
-                logger.warning(
-                    "Refusing fork: shared favorite '%s' carries a non-boolean "
-                    "expression that the sanitizer rejected.", shared.name,
-                )
-                return None
-            if cleaned_expr != raw_expr:
-                logger.info(
-                    "Sanitized expression on fork of '%s' (length %d → %d)",
-                    shared.name, len(raw_expr), len(cleaned_expr),
-                )
-                rebound['expression'] = cleaned_expr
-
-        # Record provenance in _extra so it round-trips through re-export.
-        extra = dict(rebound.get('_extra') or {})
-        extra.setdefault('original_created_at', shared.payload.get('created_at'))
-        extra.setdefault('forked_from', {
-            'collection': shared.source.collection_name,
-            'file': shared.source.file_path,
-        })
-        rebound['_extra'] = extra
-
-        # Apply rename if requested
-        if override_name:
-            rebound['name'] = override_name
-
-        # Strip identity fields that would collide with existing rows
-        rebound.pop('id', None)
-        rebound.pop('project_uuid', None)
-        # v5.1: also strip ``owner`` — a shared bundle should never pin
-        # the forker to the author's identity. ``add_favorite`` will
-        # re-stamp with the current user via the cascade.
-        rebound.pop('owner', None)
-        # Reset usage stats on fork — it's a brand-new copy
-        rebound['use_count'] = 0
-        rebound['last_used_at'] = None
-
-        favorite = FilterFavorite.from_dict(rebound)
-        favorite.id = None  # Will generate new ID in add_favorite
-
-        manager = getattr(favorites_service, 'favorites_manager', favorites_service)
-        add_fn = getattr(manager, 'add_favorite', None)
-        if not callable(add_fn):
-            logger.error("Fork failed: manager has no add_favorite()")
-            return None
-
-        # Use preserve_timestamps=True so the fork keeps the author's
-        # original created_at. If the caller wants a fresh timestamp, they
-        # can override via favorite.created_at before fork.
-        try:
-            success = add_fn(favorite, preserve_timestamps=True)
-        except TypeError:
-            # Raw FavoritesManager without the preserve_timestamps kwarg
-            success = add_fn(favorite)
-
-        if not success:
-            return None
-
-        # Let the service emit favorites_changed so the UI refreshes.
-        emit_fn = getattr(favorites_service, 'favorites_changed', None)
-        if emit_fn is not None and hasattr(emit_fn, 'emit'):
-            try:
-                emit_fn.emit()
-            except Exception:
-                pass
-
-        # Also persist the .qgz backup so the fork survives installer wipes.
-        backup_fn = getattr(favorites_service, 'save_to_project_file', None)
-        if callable(backup_fn):
-            try:
-                backup_fn()
-            except Exception as e:
-                logger.debug(f"Post-fork .qgz backup skipped: {e}")
-
-        logger.info(
-            f"Forked shared favorite '{favorite.name}' from collection "
-            f"'{shared.source.collection_name}' → id={favorite.id}"
-        )
-        return favorite.id
+        return self._fork.fork(shared, favorites_service, override_name=override_name)
 
     # ─── Publish ───────────────────────────────────────────────────────
 

@@ -17,8 +17,10 @@ surface as a thin facade so callers (extension entry point, dialogs,
 tests) need not relearn the new layout.
 """
 
+from .fork import FavoritesForkService
 from .shared_query import SharedFavoritesQuery
 
 __all__ = [
+    "FavoritesForkService",
     "SharedFavoritesQuery",
 ]
