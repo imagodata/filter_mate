@@ -629,7 +629,12 @@ class FavoritesManager:
             return list(favs)
         return [f for f in favs if pred(f)]
 
-    def add_favorite(self, favorite: FilterFavorite, preserve_timestamps: bool = False) -> bool:
+    def add_favorite(
+        self,
+        favorite: FilterFavorite,
+        preserve_timestamps: bool = False,
+        target_project_uuid: Optional[str] = None,
+    ) -> bool:
         """
         Add a new favorite.
 
@@ -639,6 +644,11 @@ class FavoritesManager:
                 ``created_at`` / ``updated_at`` instead of overwriting them
                 with ``now()``. Used by import / restore paths so
                 provenance survives round-trips (CRIT-1).
+            target_project_uuid: When provided, insert under that project
+                instead of the active ``self._project_uuid``. Used by
+                ``copy_to_global`` / ``import_global_to_project`` so the
+                F7 timestamp + auto-stamp owner policy stays honored
+                regardless of the destination project (CORE-2).
 
         Returns:
             bool: True if added successfully
@@ -673,6 +683,8 @@ class FavoritesManager:
                 if resolved:
                     favorite.owner = resolved
 
+            destination_project = target_project_uuid or self._project_uuid
+
             conn = sqlite3.connect(self._db_path)
             cursor = conn.cursor()
 
@@ -684,7 +696,7 @@ class FavoritesManager:
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 favorite.id,
-                self._project_uuid,
+                destination_project,
                 favorite.name,
                 favorite.expression,
                 favorite.layer_name,
@@ -704,8 +716,12 @@ class FavoritesManager:
             conn.commit()
             conn.close()
 
-            self._favorites[favorite.id] = favorite
-            logger.info(f"✓ Favorite '{favorite.name}' saved to database (ID: {favorite.id}, Project: {self._project_uuid})")
+            # Only cache when the row landed in the *active* project — a
+            # row in a different project (e.g. global copy) is not part
+            # of the live favorites list and would skew the count.
+            if destination_project == self._project_uuid:
+                self._favorites[favorite.id] = favorite
+            logger.info(f"✓ Favorite '{favorite.name}' saved to database (ID: {favorite.id}, Project: {destination_project})")
             logger.debug(f"  → Database: {self._db_path}")
             logger.debug(f"  → Expression: {favorite.expression[:80]}..." if len(favorite.expression) > 80 else f"  → Expression: {favorite.expression}")
             return True
@@ -954,6 +970,12 @@ class FavoritesManager:
         Raises:
             FavoritesNotInitialized: if the database was never bootstrapped
                 via :meth:`set_database`.
+
+        CORE-2 (audit 2026-04-29): the global-project bootstrap moved to
+        the shared ``_ensure_global_project_exists`` helper. The
+        ``UPDATE fm_favorites`` is kept inline (a project_uuid swap is
+        not what ``update_favorite`` is for) but bumps ``updated_at``
+        explicitly to honor F7.
         """
         if not self._initialized:
             raise FavoritesNotInitialized(
@@ -962,35 +984,25 @@ class FavoritesManager:
         if favorite_id not in self._favorites:
             return False
 
+        self._ensure_global_project_exists()
+
         try:
             import sqlite3
             conn = sqlite3.connect(self._db_path)
             cursor = conn.cursor()
-
-            # Ensure global project exists
             cursor.execute(
-                "SELECT project_id FROM fm_projects WHERE project_id = ?",
-                (GLOBAL_PROJECT_UUID,)
-            )
-            if not cursor.fetchone():
-                cursor.execute("""
-                    INSERT INTO fm_projects VALUES(
-                        ?, datetime(), datetime(),
-                        '__GLOBAL__', '__GLOBAL_FAVORITES__', '{}'
-                    )
-                """, (GLOBAL_PROJECT_UUID,))
-
-            # Update favorite to global project
-            cursor.execute("""
+                """
                 UPDATE fm_favorites
                 SET project_uuid = ?, updated_at = ?
                 WHERE id = ?
-            """, (GLOBAL_PROJECT_UUID, datetime.now().isoformat(), favorite_id))
-
+                """,
+                (GLOBAL_PROJECT_UUID, datetime.now().isoformat(), favorite_id),
+            )
             conn.commit()
             conn.close()
 
-            # Remove from local cache
+            # Remove from local cache — the favorite no longer belongs
+            # to the active project.
             del self._favorites[favorite_id]
 
             logger.info(f"✓ Made favorite {favorite_id} global")
@@ -999,6 +1011,40 @@ class FavoritesManager:
         except Exception as e:
             logger.error(f"Error making favorite global: {e}")
             raise FavoritePersistenceError("make_favorite_global", e) from e
+
+    def _ensure_global_project_exists(self) -> None:
+        """Ensure the GLOBAL project row exists in ``fm_projects``.
+
+        Idempotent insert — required by ``copy_to_global`` /
+        ``make_favorite_global`` before tagging a favorite with
+        ``GLOBAL_PROJECT_UUID``. Folded back into the manager 2026-04-29
+        (CORE-2): the previous inline DDL was duplicated 3× and the
+        former MigrationService helper had no callers (CORE-11).
+        """
+        if not self._db_path:
+            return
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self._db_path)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT project_id FROM fm_projects WHERE project_id = ?",
+                (GLOBAL_PROJECT_UUID,),
+            )
+            if cursor.fetchone() is None:
+                cursor.execute(
+                    """
+                    INSERT INTO fm_projects VALUES(
+                        ?, datetime(), datetime(),
+                        '__GLOBAL__', '__GLOBAL_FAVORITES__', '{}'
+                    )
+                    """,
+                    (GLOBAL_PROJECT_UUID,),
+                )
+                conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.warning(f"Could not ensure global project row: {e}")
 
     def copy_to_global(self, favorite_id: str) -> Optional[str]:
         """
@@ -1009,67 +1055,42 @@ class FavoritesManager:
 
         Returns:
             New favorite ID if successful, None otherwise
+
+        CORE-2 (audit 2026-04-29): routed through ``add_favorite`` so
+        the F7 timestamp + auto-stamp owner policy are honored — the
+        previous inline INSERT bypassed both.
         """
         if favorite_id not in self._favorites:
             return None
 
-        favorite = self._favorites[favorite_id]
+        source = self._favorites[favorite_id]
+        self._ensure_global_project_exists()
+
+        copy = FilterFavorite(
+            id=str(uuid.uuid4()),
+            name=f"{source.name} (Global)",
+            expression=source.expression,
+            layer_name=source.layer_name,
+            layer_id=source.layer_id,
+            layer_provider=source.layer_provider,
+            description=source.description,
+            tags=list(source.tags) if source.tags else [],
+            remote_layers=dict(source.remote_layers) if source.remote_layers else {},
+            spatial_config=dict(source.spatial_config) if source.spatial_config else {},
+            use_count=0,
+            last_used_at=None,
+        )
 
         try:
-            import sqlite3
-            conn = sqlite3.connect(self._db_path)
-            cursor = conn.cursor()
-
-            # Ensure global project exists
-            cursor.execute(
-                "SELECT project_id FROM fm_projects WHERE project_id = ?",
-                (GLOBAL_PROJECT_UUID,)
-            )
-            if not cursor.fetchone():
-                cursor.execute("""
-                    INSERT INTO fm_projects VALUES(
-                        ?, datetime(), datetime(),
-                        '__GLOBAL__', '__GLOBAL_FAVORITES__', '{}'
-                    )
-                """, (GLOBAL_PROJECT_UUID,))
-
-            # Create new global favorite
-            new_id = str(uuid.uuid4())
-            now = datetime.now().isoformat()
-
-            cursor.execute("""
-                INSERT INTO fm_favorites (
-                    id, project_uuid, name, expression, layer_name, layer_id,
-                    layer_provider, description, tags, created_at, updated_at,
-                    use_count, last_used_at, remote_layers, spatial_config
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                new_id,
-                GLOBAL_PROJECT_UUID,
-                f"{favorite.name} (Global)",
-                favorite.expression,
-                favorite.layer_name,
-                favorite.layer_id,
-                favorite.layer_provider,
-                favorite.description,
-                json.dumps(favorite.tags) if favorite.tags else None,
-                now,
-                now,
-                0,
-                None,
-                json.dumps(favorite.remote_layers) if favorite.remote_layers else None,
-                json.dumps(favorite.spatial_config) if favorite.spatial_config else None,
-            ))
-
-            conn.commit()
-            conn.close()
-
-            logger.info(f"✓ Copied favorite to global: {new_id}")
-            return new_id
-
-        except Exception as e:
+            ok = self.add_favorite(copy, target_project_uuid=GLOBAL_PROJECT_UUID)
+        except FavoritePersistenceError as e:
             logger.error(f"Error copying favorite to global: {e}")
             return None
+        if not ok:
+            return None
+
+        logger.info(f"✓ Copied favorite to global: {copy.id}")
+        return copy.id
 
     def import_global_to_project(self, global_favorite_id: str) -> Optional[str]:
         """
@@ -1080,6 +1101,10 @@ class FavoritesManager:
 
         Returns:
             New favorite ID if successful, None otherwise
+
+        CORE-2 (audit 2026-04-29): routed through ``add_favorite`` so
+        the F7 timestamp + auto-stamp owner policy are honored — the
+        previous inline INSERT bypassed both.
         """
         if not self._initialized or not self._project_uuid:
             return None
@@ -1089,55 +1114,41 @@ class FavoritesManager:
             conn = sqlite3.connect(self._db_path)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-
-            # Get global favorite
             cursor.execute(
                 "SELECT * FROM fm_favorites WHERE id = ? AND project_uuid = ?",
-                (global_favorite_id, GLOBAL_PROJECT_UUID)
+                (global_favorite_id, GLOBAL_PROJECT_UUID),
             )
             row = cursor.fetchone()
-
-            if not row:
-                conn.close()
-                return None
-
-            # Create new project-specific favorite
-            new_id = str(uuid.uuid4())
-            now = datetime.now().isoformat()
-
-            cursor.execute("""
-                INSERT INTO fm_favorites (
-                    id, project_uuid, name, expression, layer_name, layer_id,
-                    layer_provider, description, tags, created_at, updated_at,
-                    use_count, last_used_at, remote_layers, spatial_config
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                new_id,
-                self._project_uuid,
-                row['name'].replace(' (Global)', ''),
-                row['expression'],
-                row['layer_name'],
-                row['layer_id'],
-                row['layer_provider'],
-                row['description'],
-                row['tags'],
-                now,
-                now,
-                0,
-                None,
-                row['remote_layers'],
-                row['spatial_config'],
-            ))
-
-            conn.commit()
             conn.close()
-
-            # Reload favorites
-            self._load_favorites()
-
-            logger.info(f"✓ Imported global favorite to project: {new_id}")
-            return new_id
-
         except Exception as e:
+            logger.error(f"Error reading global favorite: {e}")
+            return None
+
+        if not row:
+            return None
+
+        copy = FilterFavorite(
+            id=str(uuid.uuid4()),
+            name=row['name'].replace(' (Global)', ''),
+            expression=row['expression'],
+            layer_name=row['layer_name'],
+            layer_id=row['layer_id'],
+            layer_provider=row['layer_provider'],
+            description=row['description'],
+            tags=json.loads(row['tags']) if row['tags'] else [],
+            remote_layers=json.loads(row['remote_layers']) if row['remote_layers'] else {},
+            spatial_config=json.loads(row['spatial_config']) if row['spatial_config'] else {},
+            use_count=0,
+            last_used_at=None,
+        )
+
+        try:
+            ok = self.add_favorite(copy)
+        except FavoritePersistenceError as e:
             logger.error(f"Error importing global favorite: {e}")
             return None
+        if not ok:
+            return None
+
+        logger.info(f"✓ Imported global favorite to project: {copy.id}")
+        return copy.id
