@@ -77,6 +77,13 @@ class QFieldCloudPushDialog(QDialog):
         - Progress bar during upload
     """
 
+    # C1 hardening (audit 2026-04-29): orphan workers that survived the
+    # 10s terminate/wait cap are parked here so their Python ref outlives
+    # the dialog and the C++ QThread is not destroyed while still
+    # running. Class-level on purpose — a closing dialog cannot host the
+    # registry, the next dialog instance must inherit pending orphans.
+    _orphan_workers: list = []
+
     @staticmethod
     def tr(message):
         return QCoreApplication.translate('QFieldCloudPushDialog', message)
@@ -463,6 +470,16 @@ class QFieldCloudPushDialog(QDialog):
         half-uploaded file the server will reject, while git clone
         interrupt would corrupt the local working tree. The 10s wait is
         a conservative cap — terminate() itself returns near-immediately.
+
+        C1 hardening (audit 2026-04-29): when ``wait(10s)`` returns False
+        (terminate didn't actually halt the C++ thread within the cap —
+        rare but possible on a stuck syscall), dropping the Python ref
+        would let the QThread instance be GC'd while still running, which
+        crashes QGIS with "QThread destroyed while running" on plugin
+        reload / app exit. Park the orphan in a class-level registry
+        instead so the Python ref keeps the C++ object alive; reap it
+        when the thread eventually emits ``destroyed`` / ``finished`` /
+        ``error``.
         """
         worker = self._worker
         if worker is None:
@@ -473,13 +490,65 @@ class QFieldCloudPushDialog(QDialog):
             worker.error.disconnect(self._on_push_error)
         except (TypeError, RuntimeError):
             pass
+
+        stopped = True
         if worker.isRunning():
             worker.terminate()
-            worker.wait(10_000)
-        # The deleteLater connections wired on start() will fire if the
-        # worker emits finished/error before terminate; otherwise the
-        # QThread is reaped when self._worker is dropped + GC'd.
+            stopped = bool(worker.wait(10_000))
+
+        if not stopped:
+            logger.warning(
+                "PushWorker did not halt within 10s of terminate(); "
+                "parking the orphan worker so its QThread is not "
+                "destroyed while still running."
+            )
+            self._park_orphan_worker(worker)
+        # else: the deleteLater connections wired on start() fire when
+        # the worker emits finished/error; the QThread is reaped when
+        # the Python ref is dropped here and the C++ object follows.
         self._worker = None
+
+    @classmethod
+    def _park_orphan_worker(cls, worker: "PushWorker") -> None:
+        """Keep ``worker`` alive in a class-level list until it really stops.
+
+        Re-wires the ``finished`` / ``error`` / ``destroyed`` signals onto
+        :meth:`_reap_orphan_worker` so the registry self-cleans the moment
+        the thread reports it is done — without needing the originating
+        dialog (which may have been closed).
+        """
+        registry = cls._orphan_workers
+        if worker in registry:
+            return
+        registry.append(worker)
+        try:
+            worker.finished.connect(lambda *_: cls._reap_orphan_worker(worker))
+        except (TypeError, RuntimeError):
+            pass
+        try:
+            worker.error.connect(lambda *_: cls._reap_orphan_worker(worker))
+        except (TypeError, RuntimeError):
+            pass
+        try:
+            worker.destroyed.connect(lambda *_: cls._reap_orphan_worker(worker))
+        except (TypeError, RuntimeError):
+            pass
+
+    @classmethod
+    def _reap_orphan_worker(cls, worker: "PushWorker") -> None:
+        """Drop ``worker`` from the orphan registry and request deleteLater.
+
+        Idempotent — every signal we hook on may fire (or not), in any
+        order, so guard against double-removal and double-delete.
+        """
+        try:
+            cls._orphan_workers.remove(worker)
+        except ValueError:
+            return  # already reaped, nothing to do
+        try:
+            worker.deleteLater()
+        except (RuntimeError, AttributeError):
+            pass
 
     def _on_cancel(self):
         """Cancel push operation if running."""
