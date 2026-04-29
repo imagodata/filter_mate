@@ -44,6 +44,7 @@ _MUTATED_KEYS = (
     'core.tasks.source_geometry_preparer',
     'core.tasks.subset_management_handler',
     'core.tasks.expression_evaluation_task',
+    'core.tasks.v3_bridge_handler',
 )
 _PRE_SETUP_SNAPSHOT: dict = {}
 
@@ -97,6 +98,10 @@ def _setup_handler_mocks():
 
     # Backend services mock
     mock_bs_instance = MagicMock()
+    # v3_bridge_handler unpacks: get_task_bridge, BridgeStatus = _bs.get_task_bridge()
+    mock_bs_instance.get_task_bridge = MagicMock(
+        return_value=(MagicMock(), MagicMock())
+    )
     mock_get_bs = MagicMock(return_value=mock_bs_instance)
 
     # HistoryRepository as a real class (not instance)
@@ -221,6 +226,7 @@ def _setup_handler_mocks():
         'source_geometry_preparer',
         'subset_management_handler',
         'expression_evaluation_task',
+        'v3_bridge_handler',
     ]
 
     for handler_name in handler_files:

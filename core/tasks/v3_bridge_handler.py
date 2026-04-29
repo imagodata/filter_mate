@@ -156,6 +156,16 @@ class V3BridgeHandler:
             logger.debug("TaskBridge: OGR spatial filtering - using legacy code (V3 not ready)")
             return None
 
+        # CRITICAL 2026-04-29: Disable V3 for Spatialite spatial filtering
+        # Same root cause as PostgreSQL/OGR: V3 emits the literal placeholder
+        # "SPATIAL_FILTER(intersects)" (line ~189) which the SpatialiteBackend
+        # passes to QgsExpression, producing "Function SPATIAL_FILTER is not known"
+        # and a silent no-op on the cascade. Until SpatialiteBackend implements
+        # real spatial expression generation, route through legacy code.
+        if 'spatialite' in layers_dict and len(layers_dict.get('spatialite', [])) > 0:
+            logger.debug("TaskBridge: Spatialite spatial filtering - using legacy code (V3 not ready)")
+            return None
+
         # Skip multi-step for complex scenarios
         # Check for buffers which require special handling (both positive and negative)
         # Handle negative buffers (erosion) as well as positive buffers
