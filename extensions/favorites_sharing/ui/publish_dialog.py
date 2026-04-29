@@ -815,23 +815,14 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
     def closeEvent(self, event):  # type: ignore[override]
         """Block close until the publish worker has finished.
 
-        Killing a git subprocess mid-clone/push corrupts the working tree,
-        so we wait for the worker rather than terminate(). The wait has a
-        cap (the worker's own subprocess timeouts already bound this) so
-        QGIS never hangs forever on a stuck network call.
+        Killing a git subprocess mid-clone/push corrupts the working
+        tree, so we wait via :func:`gracefully_close_worker` rather
+        than terminate(). The 150s cap is slightly more than the
+        longest GitClient timeout chain (clone+pull+commit+push ≈ 2 min
+        @ 30s default), so QGIS never hangs forever on a stuck call.
         """
-        worker = self._publish_worker
-        if worker is not None and worker.isRunning():
-            # Defensively drop slot connections so a queued finished/error
-            # cannot fire on a half-destroyed dialog after wait() returns.
-            try:
-                worker.finished.disconnect()
-                worker.error.disconnect()
-            except (TypeError, RuntimeError):
-                pass
-            # Cap the wait at slightly more than the longest GitClient
-            # timeout chain (clone+pull+commit+push ≈ 2 min @ 30s default).
-            worker.wait(150_000)
+        from .git_worker import gracefully_close_worker
+        gracefully_close_worker(self._publish_worker, timeout_ms=150_000)
         super().closeEvent(event)
 
     # ─── Translation helper ───────────────────────────────────────────

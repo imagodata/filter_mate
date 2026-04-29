@@ -15,7 +15,7 @@ closure capturing exactly the operation they want offloaded.
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Iterable, Optional
 
 try:
     from qgis.PyQt.QtCore import QThread, pyqtSignal
@@ -124,3 +124,43 @@ def start_git_worker(
     worker.error.connect(on_error)
     worker.start()
     return worker
+
+
+def gracefully_close_worker(
+    worker: Optional[Any],
+    *,
+    timeout_ms: int,
+    signal_names: Iterable[str] = ("finished", "error"),
+    cancel: bool = False,
+) -> None:
+    """Detach + wait for an in-flight QThread worker before dialog teardown.
+
+    EXT-7 (audit 2026-04-29): the publish/repo-manager/git-binary
+    dialogs all rolled their own variant of "if worker is running:
+    disconnect signals, then wait()". Centralised here so the H5
+    invariant (terminate() corrupts in-flight git subprocesses) stays
+    enforced in one place.
+
+    - ``timeout_ms`` caps the wait so QGIS never hangs on a stuck call;
+      tune to slightly more than the longest underlying op timeout.
+    - ``signal_names`` lists which Qt signals to disconnect first, so a
+      queued finished/error cannot fire on a half-destroyed dialog
+      after wait() returns. Defaults match :func:`start_git_worker`'s
+      surface.
+    - ``cancel=True`` calls ``worker.request_cancel()`` first, for
+      workers (e.g. PortableGitDownloadWorker) that cooperate with
+      cancellation rather than running to completion.
+    """
+    if worker is None or not worker.isRunning():
+        return
+    if cancel:
+        try:
+            worker.request_cancel()
+        except AttributeError:
+            logger.debug("Worker has no request_cancel(); skipping cancel hook.")
+    for sig_name in signal_names:
+        try:
+            getattr(worker, sig_name).disconnect()
+        except (TypeError, RuntimeError, AttributeError):
+            pass
+    worker.wait(timeout_ms)

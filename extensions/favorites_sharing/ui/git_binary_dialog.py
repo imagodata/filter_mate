@@ -480,14 +480,11 @@ class GitBinaryConfigDialog(QDialog if HAS_QT else object):
     # ─── Lifecycle ─────────────────────────────────────────────────────
 
     def closeEvent(self, event):  # type: ignore[override]
-        worker = self._worker
-        if worker is not None and worker.isRunning():
-            worker.request_cancel()
-            try:
-                worker.progress.disconnect()
-                worker.finished_ok.disconnect()
-                worker.failed.disconnect()
-            except (TypeError, RuntimeError):
-                pass
-            worker.wait(20_000)
+        from .git_worker import gracefully_close_worker
+        gracefully_close_worker(
+            self._worker,
+            timeout_ms=20_000,
+            signal_names=("progress", "finished_ok", "failed"),
+            cancel=True,
+        )
         super().closeEvent(event)

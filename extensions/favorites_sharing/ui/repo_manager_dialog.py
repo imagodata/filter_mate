@@ -313,17 +313,10 @@ class RepoEditDialog(QDialog if HAS_QT else object):
 
         ``ls-remote`` can hang up to ``timeout_seconds`` (15s) on an
         unreachable remote — terminating the QThread would orphan the git
-        subprocess, so we wait. Slot connections are dropped first so a
-        late finished/error cannot fire on a half-destroyed dialog.
+        subprocess, so we wait via :func:`gracefully_close_worker`.
         """
-        worker = self._test_worker
-        if worker is not None and worker.isRunning():
-            try:
-                worker.finished.disconnect()
-                worker.error.disconnect()
-            except (TypeError, RuntimeError):
-                pass
-            worker.wait(20_000)
+        from .git_worker import gracefully_close_worker
+        gracefully_close_worker(self._test_worker, timeout_ms=20_000)
         super().closeEvent(event)
 
 
