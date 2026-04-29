@@ -7,6 +7,7 @@ which depends on QgsApplication and QgsProject.
 """
 
 import json
+import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -73,6 +74,13 @@ class APIConfig:
 
         Looks for an ``"API"`` key in the JSON. If absent, returns defaults.
         Falls back to ``config/config.json`` in the project root.
+
+        S4 (audit 2026-04-29): when the JSON file ships an ``api_key`` in
+        plaintext, we emit a one-time warning so operators see that the
+        secret is sitting in a file that often syncs to Dropbox/OneDrive
+        and is rarely encrypted at rest. Recommend rotating to the
+        ``FILTERMATE_API_KEY`` env var (or :class:`QgsAuthManager` once
+        wired). The warning is informational — config still loads.
         """
         if path is None:
             path = _PROJECT_ROOT / "config" / "config.json"
@@ -84,13 +92,26 @@ class APIConfig:
             data = json.load(fh)
 
         api_section = data.get("API", {})
+        api_key = api_section.get("api_key") or None
+
+        if api_key:
+            logger = logging.getLogger("filtermate_api")
+            logger.warning(
+                "filtermate_api.config: api_key loaded from %s in plaintext. "
+                "QGIS profile dirs are commonly synced (Dropbox/OneDrive) and "
+                "rarely encrypted at rest. Prefer setting FILTERMATE_API_KEY "
+                "as an environment variable, or remove the key from JSON and "
+                "rely on env-only configuration.",
+                path,
+            )
+
         return cls(
             host=api_section.get("host", "127.0.0.1"),
             port=api_section.get("port", 8000),
             debug=api_section.get("debug", False),
             log_level=api_section.get("log_level", "info"),
             cors_origins=api_section.get("cors_origins", ["*"]),
-            api_key=api_section.get("api_key") or None,
+            api_key=api_key,
         )
 
     @classmethod

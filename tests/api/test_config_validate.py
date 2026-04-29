@@ -116,6 +116,54 @@ class TestCreateAppPropagatesValidation:
         assert TestClient(app).get("/").status_code == 200
 
 
+class TestApiKeyJsonPlaintextWarning:
+    """S4 (audit 2026-04-29): warn when api_key is loaded from JSON in plaintext.
+
+    QGIS profile dirs are commonly synced (Dropbox/OneDrive); a key in
+    config.json is a quiet credential leak. The warning steers operators
+    toward the FILTERMATE_API_KEY env var without breaking existing
+    deployments.
+    """
+
+    def test_api_key_in_json_emits_warning(self, tmp_path, caplog):
+        path = tmp_path / "config.json"
+        path.write_text('{"API": {"api_key": "secret-from-json"}}', encoding="utf-8")
+
+        with caplog.at_level("WARNING", logger="filtermate_api"):
+            cfg = APIConfig.from_json(path)
+
+        assert cfg.api_key == "secret-from-json"
+        assert any(
+            "plaintext" in record.message and "FILTERMATE_API_KEY" in record.message
+            for record in caplog.records
+        ), "Expected a plaintext-key warning naming the env var alternative"
+
+    def test_no_api_key_in_json_no_warning(self, tmp_path, caplog):
+        path = tmp_path / "config.json"
+        path.write_text('{"API": {"host": "127.0.0.1"}}', encoding="utf-8")
+
+        with caplog.at_level("WARNING", logger="filtermate_api"):
+            cfg = APIConfig.from_json(path)
+
+        assert cfg.api_key is None
+        assert not any(
+            "plaintext" in record.message for record in caplog.records
+        )
+
+    def test_empty_string_api_key_no_warning(self, tmp_path, caplog):
+        # Empty string is normalized to None — no secret, no warning.
+        path = tmp_path / "config.json"
+        path.write_text('{"API": {"api_key": ""}}', encoding="utf-8")
+
+        with caplog.at_level("WARNING", logger="filtermate_api"):
+            cfg = APIConfig.from_json(path)
+
+        assert cfg.api_key is None
+        assert not any(
+            "plaintext" in record.message for record in caplog.records
+        )
+
+
 class TestWildcardCorsForcesNoCredentials:
     def test_wildcard_origin_disables_credentials_in_response(self):
         # When origins=["*"], the CORS middleware must not advertise
