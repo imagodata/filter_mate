@@ -164,6 +164,13 @@ def _has_toplevel_boolean_operator(expr: str) -> bool:
             toplevel_chars.append(ch if depth == 0 else ' ')
     toplevel = ''.join(toplevel_chars)
 
+    # P1-SAN-WS (audit 2026-04-29): collapse all whitespace runs to a
+    # single ASCII space so markers like ' AND ' / ' IN ' match against
+    # tab- or `\v`/`\f`-separated input. Without this, a legitimate
+    # filter ``field\tAND\tvalue`` survived as a "display expression"
+    # and got dropped.
+    toplevel = re.sub(r'\s+', ' ', toplevel)
+
     for marker in _TOPLEVEL_BOOLEAN_MARKERS:
         if marker in toplevel:
             return True

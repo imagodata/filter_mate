@@ -288,3 +288,69 @@ class TestEmptyInputs:
 
     def test_none(self):
         assert sanitize_subset_string(None) is None
+
+
+class TestNonStandardWhitespace:
+    """P1-SAN-WS (audit 2026-04-29): the top-level boolean marker scan
+    used to compare against literal-space markers (``' AND '``,
+    ``' IN '``…). Tab- or `\\v`/`\\f`-separated input survived as a
+    "display expression" and got dropped — false negative on legitimate
+    filters built by code that emits SQL with non-standard whitespace.
+
+    The fix collapses all whitespace runs in the top-level projection
+    to a single ASCII space before the marker scan. The function's
+    Phase 3 already normalises output whitespace, so we assert on the
+    *normalised* form: not empty + the operator is preserved.
+    """
+
+    def test_tab_separated_and_is_recognised_as_filter(self):
+        # ``"field"\tAND\tvalue`` shape — the AND must still be detected
+        # so the expression is preserved as a filter, not dropped to ''.
+        expr = '"a" = 1\tAND\t"b" = 2'
+        result = sanitize_subset_string(expr)
+        assert result, "tab-separated AND must not be dropped as display expr"
+        assert 'AND' in result.upper()
+        # Phase 3 normalises whitespace, so spaces (not tabs) survive.
+        assert result == '"a" = 1 AND "b" = 2'
+
+    def test_newline_separated_or_is_recognised(self):
+        expr = '"a" = 1\nOR\n"b" = 2'
+        result = sanitize_subset_string(expr)
+        assert result, "newline-separated OR must not be dropped"
+        assert 'OR' in result.upper()
+
+    def test_mixed_whitespace_in_clause_is_recognised(self):
+        # `IN(` marker must match even with tab separators around it.
+        expr = '"x"\tIN\t(1, 2, 3)'
+        result = sanitize_subset_string(expr)
+        assert result, "tab-separated IN must not be dropped"
+        assert 'IN' in result.upper()
+
+    def test_form_feed_between_operands_recognised(self):
+        # `\f` is valid SQL whitespace per ANSI grammar — the `=` marker
+        # is single-char so detection works regardless, but the output
+        # whitespace is normalised by Phase 3.
+        expr = '"a"\f=\f"b"'
+        result = sanitize_subset_string(expr)
+        assert result, "form-feed-separated comparison must not be dropped"
+        assert '=' in result
+
+    def test_tab_only_between_keyword_and_operand_for_is_null(self):
+        # ' IS NULL' marker requires the space prefix; tab must be
+        # normalised to space in the marker scan for the substring
+        # match to succeed.
+        expr = '"a"\tIS NULL'
+        result = sanitize_subset_string(expr)
+        assert result, "tab-prefixed IS NULL must not be dropped"
+        assert 'IS NULL' in result.upper()
+
+    def test_pre_fix_regression_tab_and_was_dropped(self):
+        # Without the P1-SAN-WS fix, this exact shape returned '' because
+        # the marker scan compared ``' AND '`` (literal spaces) against a
+        # tab-separated projection. Pin the post-fix behaviour.
+        expr = '"category" = \'A\'\tAND\t"value" > 10'
+        result = sanitize_subset_string(expr)
+        assert result != '', (
+            "P1-SAN-WS regression: tab-separated AND was dropped as a "
+            "display expression"
+        )
