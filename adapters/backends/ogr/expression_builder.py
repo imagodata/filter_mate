@@ -360,7 +360,14 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
             if not selected_ids:
                 self.log_warning("No features selected - applying empty filter")
-                safe_set_subset_string(layer, "1 = 0")
+                # 2026-04-29 fix: route through subset queue when wired to
+                # ensure setSubsetString runs on the Qt main thread (cf
+                # `FilterEngineTask.queue_subset_request` docstring).
+                queue_callback = self.task_params.get('_subset_queue_callback') if self.task_params else None
+                if queue_callback is not None:
+                    queue_callback(layer, "1 = 0")
+                else:
+                    safe_set_subset_string(layer, "1 = 0")
                 return True
 
             # FIX v4.5.3: For OGR layers with a real PK attribute field, use actual
@@ -414,6 +421,16 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
             # Apply filter
             self.log_info(f"  - Applying filter: {final_filter[:200]}..." if len(final_filter) > 200 else f"  - Applying filter: {final_filter}")
+            # 2026-04-29 fix: route through subset queue when wired so
+            # `setSubsetString` runs on the Qt main thread. Same root cause
+            # as the spatialite/postgresql cascade no-op (cf
+            # `FilterEngineTask.queue_subset_request` docstring).
+            queue_callback = self.task_params.get('_subset_queue_callback') if self.task_params else None
+            if queue_callback is not None:
+                queue_callback(layer, final_filter)
+                self.log_info(f"✓ OGR filter queued for main-thread application: {len(selected_ids)} features")
+                return True
+
             success = safe_set_subset_string(layer, final_filter)
 
             if success:

@@ -45,6 +45,7 @@ _MUTATED_KEYS = (
     'core.tasks.subset_management_handler',
     'core.tasks.expression_evaluation_task',
     'core.tasks.v3_bridge_handler',
+    'core.tasks.task_completion_handler',
 )
 _PRE_SETUP_SNAPSHOT: dict = {}
 
@@ -165,6 +166,14 @@ def _setup_handler_mocks():
             get_backend_services=mock_get_bs,
             BackendServices=MagicMock(),
         ),
+        f'{ROOT}.core.ports.qgis_port': MagicMock(
+            get_qgis_factory=MagicMock(return_value=MagicMock()),
+        ),
+        f'{ROOT}.infrastructure.signal_utils': MagicMock(
+            SignalBlocker=MagicMock(
+                return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock()),
+            ),
+        ),
         f'{ROOT}.core.export': MagicMock(),
         f'{ROOT}.core.export.style_exporter': MagicMock(),
         f'{ROOT}.core.services': MagicMock(),
@@ -227,6 +236,7 @@ def _setup_handler_mocks():
         'subset_management_handler',
         'expression_evaluation_task',
         'v3_bridge_handler',
+        'task_completion_handler',
     ]
 
     for handler_name in handler_files:

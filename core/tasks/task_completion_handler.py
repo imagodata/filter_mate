@@ -86,6 +86,46 @@ def should_skip_subset_application(
     return truly_canceled and has_pending_requests and not pending_requests
 
 
+def _layer_database_path(layer: Any) -> Optional[str]:
+    """Return the on-disk SQLite/GeoPackage file backing this layer (or None).
+
+    Mirrors :meth:`ParallelFilterExecutor._get_layer_database_path` so the
+    same single-writer locking heuristics can be applied here. Recognised
+    extensions: .gpkg, .sqlite, .db, .spatialite. Returned path is
+    lowercased for case-insensitive equality on Windows/WSL.
+    """
+    try:
+        if not hasattr(layer, 'source'):
+            return None
+        source = layer.source()
+        if not source:
+            return None
+
+        file_path: Optional[str] = None
+        if '|' in source:
+            file_path = source.split('|')[0]
+        elif "dbname='" in source:
+            import re
+            match = re.search(r"dbname='([^']+)'", source)
+            if match:
+                file_path = match.group(1)
+        elif 'dbname="' in source:
+            import re
+            match = re.search(r'dbname="([^"]+)"', source)
+            if match:
+                file_path = match.group(1)
+        else:
+            file_path = source
+
+        if file_path:
+            lower = file_path.lower()
+            if lower.endswith(('.gpkg', '.sqlite', '.db', '.spatialite')):
+                return lower
+        return None
+    except (RuntimeError, AttributeError):
+        return None
+
+
 def apply_pending_subset_requests(
     pending_requests: List[Tuple[Any, str]],  # List[Tuple[QgsVectorLayer, str]]
     safe_set_subset_fn: Callable[[Any, str], bool]  # Callable[[QgsVectorLayer, str], bool]
@@ -143,9 +183,25 @@ def apply_pending_subset_requests(
     MAX_FEATURES_FOR_UPDATE_EXTENTS = 50000
     MAX_EXPRESSION_FOR_DIRECT_APPLY = 100000  # 100KB
 
+    # 2026-04-29: count layers per shared SQLite file so we can throttle
+    # consecutive setSubsetString+reload+featureCount calls. Without the
+    # throttle, an 8-layers-from-the-same-server.sqlite cascade triggers
+    # ``OGR error: sqlite3_step(): unable to open database file`` during
+    # the redraw that follows each apply, and featureCount() returns the
+    # stale pre-filter count — the cascade looks like a no-op even though
+    # the subset string is correctly set.
+    db_layer_counts: dict = {}
+    for layer, _ in pending_requests:
+        if layer is None:
+            continue
+        db_path = _layer_database_path(layer)
+        if db_path:
+            db_layer_counts[db_path] = db_layer_counts.get(db_path, 0) + 1
+
     # Collect large expressions for deferred application
     large_expressions = []
     applied_count = 0
+    last_db_path: Optional[str] = None
 
     for layer, expression in pending_requests:
         try:
@@ -157,6 +213,22 @@ def apply_pending_subset_requests(
                     "FilterMate", Qgis.MessageLevel.Warning
                 )
                 continue
+
+            # 2026-04-29: throttle consecutive applies on the same SQLite
+            # file. Adaptive delay matches the existing parallel-executor
+            # heuristic — more layers per DB → longer pause to let the
+            # previous setSubsetString+reload release its file lock.
+            current_db_path = _layer_database_path(layer)
+            if current_db_path and current_db_path == last_db_path:
+                shared_count = db_layer_counts.get(current_db_path, 1)
+                if shared_count > 10:
+                    delay = 0.5
+                elif shared_count > 5:
+                    delay = 0.3
+                else:
+                    delay = 0.2
+                import time as _time
+                _time.sleep(delay)
 
             current_subset = layer.subsetString() or ''
             expression_str = expression or ''
@@ -285,6 +357,13 @@ def apply_pending_subset_requests(
                 f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
                 "FilterMate", Qgis.MessageLevel.Critical
             )
+
+        # Track last-touched DB path so the next iteration knows whether
+        # to throttle on the same shared SQLite file.
+        if layer is not None:
+            db_path_after = _layer_database_path(layer)
+            if db_path_after:
+                last_db_path = db_path_after
 
     # Handle large expressions with deferred application
     if large_expressions:
