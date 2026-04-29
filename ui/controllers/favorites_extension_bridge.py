@@ -37,7 +37,7 @@ class FavoritesExtensionBridge:
 
     Reads back into the controller for UI helpers (``tr``,
     ``_show_warning``, ``_show_success``, ``dockwidget``, ``count``,
-    ``_favorites_manager``, ``favorites_changed`` signal,
+    ``_favorites_service``, ``favorites_changed`` signal,
     ``update_indicator``). The dependency direction stays
     controller → bridge → extension; the bridge never imports controller
     types except for type-checking.
@@ -134,7 +134,7 @@ class FavoritesExtensionBridge:
         """
         ctrl = self._controller
         ext = self.get_extension()
-        if ext is None or ctrl._favorites_manager is None:
+        if ext is None or ctrl._favorites_service is None:
             ctrl._show_warning(ctrl.tr(
                 "Resource Sharing extension is not active. "
                 "Enable 'favorites_sharing' in FilterMate settings."
@@ -150,7 +150,7 @@ class FavoritesExtensionBridge:
             from ...extensions.favorites_sharing.ui import SharedFavoritesPickerDialog
             dialog = SharedFavoritesPickerDialog(
                 service,
-                ctrl._favorites_manager,
+                ctrl._favorites_service,
                 parent=parent if parent is not None else ctrl.dockwidget,
             )
             dialog.exec()
@@ -175,7 +175,7 @@ class FavoritesExtensionBridge:
         """
         ctrl = self._controller
         ext = self.get_extension()
-        if ext is None or ctrl._favorites_manager is None:
+        if ext is None or ctrl._favorites_service is None:
             ctrl._show_warning(ctrl.tr(
                 "Resource Sharing extension is not active. "
                 "Enable 'favorites_sharing' in FilterMate settings."
@@ -203,7 +203,7 @@ class FavoritesExtensionBridge:
                 kwargs["preselected_ids"] = list(preselected_ids)
             dialog = PublishFavoritesDialog(
                 service,
-                ctrl._favorites_manager,
+                ctrl._favorites_service,
                 **kwargs,
             )
             dialog.exec()
@@ -242,7 +242,7 @@ class FavoritesExtensionBridge:
         """
         ctrl = self._controller
         ext = self.get_extension()
-        if ext is None or ctrl._favorites_manager is None:
+        if ext is None or ctrl._favorites_service is None:
             ctrl._show_warning(ctrl.tr(
                 "Resource Sharing extension is not active."
             ))
@@ -274,7 +274,7 @@ class FavoritesExtensionBridge:
             return
 
         try:
-            favorites = ctrl._favorites_manager.get_all_favorites()
+            favorites = ctrl._favorites_service.get_all_favorites()
         except Exception:
             favorites = []
         # F11 policy: stays a modal QMessageBox.question. Quick-publish
@@ -309,7 +309,7 @@ class FavoritesExtensionBridge:
 
         def _write_bundle(collection_dir: str) -> str:
             result = service.publish_bundle(
-                favorites_service=ctrl._favorites_manager,
+                favorites_service=ctrl._favorites_service,
                 target=CollectionTarget(
                     collection_dir=collection_dir,
                     display_name=metadata.get('name') or repo.name,

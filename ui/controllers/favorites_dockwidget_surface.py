@@ -66,7 +66,7 @@ class FavoritesControllerSurface(Protocol):
     """
 
     dockwidget: DockwidgetSurface
-    _favorites_manager: Any  # FavoritesService — Any to avoid import cycle
+    _favorites_service: Any  # FavoritesService — Any to avoid import cycle
 
     def _show_warning(self, message: str) -> None:
         ...

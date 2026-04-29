@@ -778,7 +778,7 @@ class TestBackfillLegacyPredicateDefault:
     def _make_ctrl(self, manager=None):
         ctrl = FavoritesController.__new__(FavoritesController)
         ctrl._dockwidget = MagicMock()
-        ctrl._favorites_manager = manager
+        ctrl._favorites_service = manager
         return ctrl
 
     def test_backfills_when_predicate_info_missing_and_remote_layers_present(self):
@@ -943,7 +943,7 @@ class TestDirectSubsetApply:
 
         ctrl = FavoritesController.__new__(FavoritesController)
         ctrl._dockwidget = MagicMock()
-        ctrl._favorites_manager = None
+        ctrl._favorites_service = None
 
         fav = MagicMock()
         fav.name = "testy"
@@ -994,7 +994,7 @@ class TestDirectSubsetApply:
 
         ctrl = FavoritesController.__new__(FavoritesController)
         ctrl._dockwidget = MagicMock()
-        ctrl._favorites_manager = None
+        ctrl._favorites_service = None
 
         fav = MagicMock()
         fav.name = "partial"
@@ -1035,7 +1035,7 @@ class TestDirectSubsetApply:
 
         ctrl = FavoritesController.__new__(FavoritesController)
         ctrl._dockwidget = MagicMock()
-        ctrl._favorites_manager = None
+        ctrl._favorites_service = None
 
         # Stub _show_warning so the no-resolve path doesn't hit feedback module
         ctrl._show_warning = MagicMock()
@@ -1129,7 +1129,7 @@ class TestCaptureRestoreRoundTrip:
 
 # ---------------------------------------------------------------------------
 # A4 (audit 2026-04-29): FavoritesNotInitialized must be caught and surfaced
-# as a warning. The early ``if not self._favorites_manager`` guard only
+# as a warning. The early ``if not self._favorites_service`` guard only
 # covers the "slot is None" case; the service can raise even when set.
 # ---------------------------------------------------------------------------
 
@@ -1137,7 +1137,7 @@ class TestCaptureRestoreRoundTrip:
 class TestApplyFavoriteCatchesNotInitialized:
     def _make_controller(self, manager_mock):
         ctrl = FavoritesController.__new__(FavoritesController)
-        ctrl._favorites_manager = manager_mock
+        ctrl._favorites_service = manager_mock
         ctrl._show_warning = MagicMock()
         ctrl._show_error = MagicMock()
         ctrl.tr = lambda s: s
@@ -1192,7 +1192,7 @@ class TestApplyFavoriteCatchesNotInitialized:
 class TestRemoveFavoriteCatchesNotInitialized:
     def _make_controller(self, manager_mock):
         ctrl = FavoritesController.__new__(FavoritesController)
-        ctrl._favorites_manager = manager_mock
+        ctrl._favorites_service = manager_mock
         ctrl._show_warning = MagicMock()
         ctrl._show_error = MagicMock()
         ctrl.tr = lambda s: s

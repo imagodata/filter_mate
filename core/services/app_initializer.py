@@ -71,7 +71,7 @@ class AppInitializer:
         get_dockwidget_callback=None,
         set_dockwidget_callback=None,
         get_task_orchestrator_callback=None,
-        get_favorites_manager_callback=None,
+        get_favorites_service_callback=None,
         # Callbacks for signal state
         get_signals_connected_callback=None,
         set_signals_connected_callback=None,
@@ -105,7 +105,7 @@ class AppInitializer:
             get_dockwidget_callback: Callback to get dockwidget instance
             set_dockwidget_callback: Callback to set dockwidget instance
             get_task_orchestrator_callback: Callback to get TaskOrchestrator
-            get_favorites_manager_callback: Callback to get FavoritesManager
+            get_favorites_service_callback: Callback to get FavoritesManager
             get_signals_connected_callback: Callback to get _signals_connected flag
             set_signals_connected_callback: Callback to set _signals_connected flag
             get_dockwidget_signals_connected_callback: Callback to get _dockwidget_signals_connected flag
@@ -133,7 +133,7 @@ class AppInitializer:
         self._get_dockwidget = get_dockwidget_callback
         self._set_dockwidget = set_dockwidget_callback
         self._get_task_orchestrator = get_task_orchestrator_callback
-        self._get_favorites_manager = get_favorites_manager_callback
+        self._get_favorites_service = get_favorites_service_callback
         self._get_signals_connected = get_signals_connected_callback
         self._set_signals_connected = set_signals_connected_callback
         self._get_dockwidget_signals_connected = get_dockwidget_signals_connected_callback
@@ -400,9 +400,9 @@ class AppInitializer:
             # dockwidget._app_ref = self (cannot do here since this is a service, not the app)
 
             # Pass favorites manager to dockwidget and update FavoritesController
-            favorites_manager = self._get_favorites_manager() if self._get_favorites_manager else None
+            favorites_manager = self._get_favorites_service() if self._get_favorites_service else None
             if favorites_manager:
-                dockwidget._favorites_manager = favorites_manager
+                dockwidget._favorites_service = favorites_manager
 
                 # CRITICAL FIX 2026-01-19: Update FavoritesController with the correctly initialized manager
                 # The controller was setup in dockwidget_widgets_configuration() BEFORE we could

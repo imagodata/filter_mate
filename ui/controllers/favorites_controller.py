@@ -105,7 +105,7 @@ class FavoritesController(BaseController):
             dockwidget: Main dockwidget reference
         """
         super().__init__(dockwidget)
-        self._favorites_manager: Optional['FavoritesManager'] = None
+        self._favorites_service: Optional['FavoritesManager'] = None
         self._indicator_label: Optional[QLabel] = None
         self._initialized: bool = False
         self._extension_bridge = FavoritesExtensionBridge(self)
@@ -131,13 +131,13 @@ class FavoritesController(BaseController):
     @property
     def favorites_manager(self) -> Optional['FavoritesManager']:
         """Get the favorites manager instance."""
-        return self._favorites_manager
+        return self._favorites_service
 
     @property
     def count(self) -> int:
         """Get the number of favorites."""
-        if self._favorites_manager:
-            return self._favorites_manager.count
+        if self._favorites_service:
+            return self._favorites_service.count
         return 0
 
     def setup(self) -> None:
@@ -147,12 +147,12 @@ class FavoritesController(BaseController):
         Initializes the favorites manager and connects to indicator.
         """
         self._find_indicator_label()
-        self._init_favorites_manager()
+        self._init_favorites_service()
 
         # CRITICAL FIX 2026-01-18: Connect to favorites_changed signal from FavoritesService
         # This ensures the UI is updated when favorites are loaded from database
-        if self._favorites_manager:
-            self._favorites_manager.favorites_changed.connect(self._on_favorites_loaded)
+        if self._favorites_service:
+            self._favorites_service.favorites_changed.connect(self._on_favorites_loaded)
             logger.debug("✓ Connected to FavoritesService.favorites_changed signal")
 
         self._initialized = True
@@ -160,41 +160,41 @@ class FavoritesController(BaseController):
 
     def teardown(self) -> None:
         """Clean up resources."""
-        self._favorites_manager = None
+        self._favorites_service = None
         super().teardown()
 
     def sync_with_dockwidget_manager(self) -> bool:
         """
         Re-synchronize with the favorites manager from dockwidget.
 
-        FIX 2026-01-19: Called when the dockwidget's _favorites_manager is updated
+        FIX 2026-01-19: Called when the dockwidget's _favorites_service is updated
         (e.g., after init_filterMate_db() configures it).
 
         Returns:
             bool: True if sync was successful
         """
-        if not hasattr(self.dockwidget, '_favorites_manager'):
-            logger.debug("sync_with_dockwidget_manager: dockwidget has no _favorites_manager")
+        if not hasattr(self.dockwidget, '_favorites_service'):
+            logger.debug("sync_with_dockwidget_manager: dockwidget has no _favorites_service")
             return False
 
-        new_manager = self.dockwidget._favorites_manager
+        new_manager = self.dockwidget._favorites_service
         if new_manager is None:
-            logger.debug("sync_with_dockwidget_manager: dockwidget._favorites_manager is None")
+            logger.debug("sync_with_dockwidget_manager: dockwidget._favorites_service is None")
             return False
 
         # Disconnect old signal if any
-        if self._favorites_manager:
+        if self._favorites_service:
             try:
-                self._favorites_manager.favorites_changed.disconnect(self._on_favorites_loaded)
+                self._favorites_service.favorites_changed.disconnect(self._on_favorites_loaded)
             except (TypeError, RuntimeError):
                 pass  # Signal wasn't connected
 
         # Update reference
         old_count = self.count
-        self._favorites_manager = new_manager
+        self._favorites_service = new_manager
 
         # Connect new signal
-        self._favorites_manager.favorites_changed.connect(self._on_favorites_loaded)
+        self._favorites_service.favorites_changed.connect(self._on_favorites_loaded)
 
         # Update UI
         self.update_indicator()
@@ -306,16 +306,16 @@ class FavoritesController(BaseController):
 
         A4 (audit 2026-04-29): :class:`FavoritesNotInitialized` is now
         caught and surfaced as a warning. The early ``if not
-        self._favorites_manager`` guard above only covers the "service
+        self._favorites_service`` guard above only covers the "service
         slot is None" case — once the slot is set, the service can still
         be in a non-initialised internal state (project not loaded yet,
         re-init in progress) and raise from any of its mutators.
         """
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return False
 
         try:
-            favorite = self._favorites_manager.get_favorite(favorite_id)
+            favorite = self._favorites_service.get_favorite(favorite_id)
         except FavoritesNotInitialized as e:
             self._show_warning(self.tr(
                 "Favorites are not ready yet: {0}"
@@ -339,7 +339,7 @@ class FavoritesController(BaseController):
         if success:
             try:
                 # Update use count
-                self._favorites_manager.mark_favorite_used(favorite_id)
+                self._favorites_service.mark_favorite_used(favorite_id)
             except FavoritesError as e:
                 # Use-count bump is non-critical; log and keep the apply
                 # success — the user already sees the filter applied.
@@ -368,11 +368,11 @@ class FavoritesController(BaseController):
         for :class:`FavoritesNotInitialized`. Persistence failures keep
         the existing :class:`FavoritePersistenceError` handling.
         """
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return False
 
         try:
-            favorite = self._favorites_manager.get_favorite(favorite_id)
+            favorite = self._favorites_service.get_favorite(favorite_id)
         except FavoritesNotInitialized as e:
             self._show_warning(self.tr(
                 "Favorites are not ready yet: {0}"
@@ -384,7 +384,7 @@ class FavoritesController(BaseController):
 
         name = favorite.name
         try:
-            success = self._favorites_manager.remove_favorite(favorite_id)
+            success = self._favorites_service.remove_favorite(favorite_id)
         except FavoritesNotInitialized as e:
             self._show_warning(self.tr(
                 "Favorites are not ready yet: {0}"
@@ -397,7 +397,7 @@ class FavoritesController(BaseController):
             return False
         if success:
             try:
-                self._favorites_manager.save()
+                self._favorites_service.save()
             except FavoritePersistenceError as e:
                 logger.warning(f"Save after remove failed: {e}")
             except FavoritesNotInitialized as e:
@@ -480,9 +480,9 @@ class FavoritesController(BaseController):
         Returns:
             List of all favorites
         """
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return []
-        return self._favorites_manager.get_all_favorites()
+        return self._favorites_service.get_all_favorites()
 
     def get_recent_favorites(self, limit: int = 10) -> List['FilterFavorite']:
         """
@@ -494,9 +494,9 @@ class FavoritesController(BaseController):
         Returns:
             List of recent favorites
         """
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return []
-        return self._favorites_manager.get_recent_favorites(limit=limit)
+        return self._favorites_service.get_recent_favorites(limit=limit)
 
     def export_favorites(self, filepath: Optional[str] = None) -> bool:
         """
@@ -516,19 +516,19 @@ class FavoritesController(BaseController):
                 "JSON Files (*.json)"
             )
 
-        if not filepath or not self._favorites_manager:
+        if not filepath or not self._favorites_service:
             return False
 
         # FIX 2026-04-21: route through FavoritesService.export_favorites
         # which produces the portable v2 format (signature-based).
-        export_fn = getattr(self._favorites_manager, 'export_favorites', None)
+        export_fn = getattr(self._favorites_service, 'export_favorites', None)
         if callable(export_fn):
             result = export_fn(filepath)
             success = getattr(result, 'success', False)
             count = getattr(result, 'favorites_count', self.count)
         else:
             # Fallback for managers that still expose export_to_file
-            legacy_fn = getattr(self._favorites_manager, 'export_to_file', None)
+            legacy_fn = getattr(self._favorites_service, 'export_to_file', None)
             success = bool(legacy_fn(filepath)) if callable(legacy_fn) else False
             count = self.count
 
@@ -561,7 +561,7 @@ class FavoritesController(BaseController):
                 "JSON Files (*.json)"
             )
 
-        if not filepath or not self._favorites_manager:
+        if not filepath or not self._favorites_service:
             return 0
 
         if merge is None:
@@ -582,7 +582,7 @@ class FavoritesController(BaseController):
 
         # FIX 2026-04-21: route through FavoritesService.import_favorites which
         # re-resolves portable signatures against the current project.
-        import_fn = getattr(self._favorites_manager, 'import_favorites', None)
+        import_fn = getattr(self._favorites_service, 'import_favorites', None)
         if callable(import_fn):
             # skip_duplicates is the inverse of merge:
             #   merge=True  -> skip_duplicates=True  (add the rest alongside existing)
@@ -593,7 +593,7 @@ class FavoritesController(BaseController):
             result = import_fn(filepath, skip_duplicates=True)
             count = getattr(result, 'imported_count', 0)
         else:
-            legacy_fn = getattr(self._favorites_manager, 'import_from_file', None)
+            legacy_fn = getattr(self._favorites_service, 'import_from_file', None)
             count = legacy_fn(filepath, merge=merge) if callable(legacy_fn) else 0
 
         if count > 0:
@@ -601,7 +601,7 @@ class FavoritesController(BaseController):
             # which delegates to the underlying manager. Calling save_to_project()
             # directly raised AttributeError and swallowed the import success
             # signal + indicator update.
-            save_fn = getattr(self._favorites_manager, 'save', None)
+            save_fn = getattr(self._favorites_service, 'save', None)
             if callable(save_fn):
                 save_fn()
             self.favorites_changed.emit()
@@ -616,7 +616,7 @@ class FavoritesController(BaseController):
         """Show the favorites manager dialog."""
         try:
             # Check if favorites manager is available
-            if not self._favorites_manager:
+            if not self._favorites_service:
                 self._show_warning(self.tr("Favorites manager not initialized. Please restart FilterMate."))
                 return
 
@@ -638,7 +638,7 @@ class FavoritesController(BaseController):
             # as the controller's menu, rather than reaching directly
             # into ``extensions.favorites_sharing.ui``.
             dialog = FavoritesManagerDialog(
-                self._favorites_manager,
+                self._favorites_service,
                 self.dockwidget,
                 extension_bridge=self._extension_bridge,
             )
@@ -674,13 +674,13 @@ class FavoritesController(BaseController):
         if hasattr(self.dockwidget, 'favorites_indicator_label'):
             self._indicator_label = self.dockwidget.favorites_indicator_label
 
-    def _init_favorites_manager(self) -> None:
+    def _init_favorites_service(self) -> None:
         """
         Initialize the favorites manager.
 
         FIX 2026-04-23 (CRIT-4): the controller no longer creates its own
         FavoritesService. FilterMateApp owns the singleton and assigns it
-        to ``dockwidget._favorites_manager`` once ``init_filterMate_db()``
+        to ``dockwidget._favorites_service`` once ``init_filterMate_db()``
         has resolved the project uuid. Creating a rogue service here meant
         signals emitted before the sync were silently lost, and if the
         sync was ever skipped (unit tests, dockwidget re-open on a project
@@ -693,13 +693,13 @@ class FavoritesController(BaseController):
 
         # PRIORITY 1: Use the service that FilterMateApp attached to the
         # dockwidget. This is the canonical path in production.
-        if hasattr(self.dockwidget, '_favorites_manager') and self.dockwidget._favorites_manager:
-            self._favorites_manager = self.dockwidget._favorites_manager
+        if hasattr(self.dockwidget, '_favorites_service') and self.dockwidget._favorites_service:
+            self._favorites_service = self.dockwidget._favorites_service
             return
 
         # No service available yet — stay dormant. sync_with_dockwidget_manager()
         # will wire us up once FilterMateApp finishes init_filterMate_db.
-        self._favorites_manager = None
+        self._favorites_service = None
         logger.debug(
             "FavoritesController: no favorites service yet — waiting for "
             "FilterMateApp to publish one via sync_with_dockwidget_manager()."
@@ -773,8 +773,8 @@ class FavoritesController(BaseController):
             return False
 
         # Check for duplicates
-        if self._favorites_manager:
-            existing = self._favorites_manager.get_favorite_by_name(name)
+        if self._favorites_service:
+            existing = self._favorites_service.get_favorite_by_name(name)
             if existing:
                 # F11 policy: stays a modal QMessageBox.question because
                 # the user must decide before the save proceeds. A toast
@@ -790,7 +790,7 @@ class FavoritesController(BaseController):
                     return False
                 # Remove existing
                 try:
-                    self._favorites_manager.remove_favorite(existing.id)
+                    self._favorites_service.remove_favorite(existing.id)
                 except FavoritePersistenceError as e:
                     self._show_error(self.tr(
                         "Could not replace '{0}': {1}"
@@ -806,7 +806,7 @@ class FavoritesController(BaseController):
         ENHANCEMENT 2026-01-18: Capture spatial_config (task_features, predicates, etc.)
         so favorites can be properly restored with full geometric context.
         """
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return False
 
         try:
@@ -875,7 +875,7 @@ class FavoritesController(BaseController):
                 spatial_config['source_layer_signature'] = layer_signature_for(layer)
 
             # Use FavoritesService.add_favorite() with individual parameters
-            favorite_id = self._favorites_manager.add_favorite(
+            favorite_id = self._favorites_service.add_favorite(
                 name=name,
                 expression=expression,
                 layer_name=layer_name,
@@ -888,7 +888,7 @@ class FavoritesController(BaseController):
                 # Note: Favorite already saved to database in add_favorite()
                 # save() is a no-op but we call it for consistency
                 logger.debug(f"Favorite '{name}' created successfully (ID: {favorite_id})")
-                self._favorites_manager.save()  # No-op, already persisted
+                self._favorites_service.save()  # No-op, already persisted
                 return True
             else:
                 logger.warning(f"Failed to create favorite '{name}' - add_favorite() returned None")
@@ -996,18 +996,18 @@ class FavoritesController(BaseController):
 
     def _get_global_favorites(self) -> List['FilterFavorite']:
         """Get global favorites from the manager."""
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return []
-        return self._favorites_manager.get_global_favorites()
+        return self._favorites_service.get_global_favorites()
 
     def _apply_global_favorite(self, favorite_id: str) -> bool:
         """Apply a global favorite."""
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return False
 
         # First, import the global favorite to the current project
         try:
-            new_id = self._favorites_manager.import_global_to_project(favorite_id)
+            new_id = self._favorites_service.import_global_to_project(favorite_id)
         except FavoritePersistenceError as e:
             self._show_error(self.tr(
                 "Could not import global favorite: {0}"
@@ -1021,11 +1021,11 @@ class FavoritesController(BaseController):
 
     def _copy_to_global(self, favorite_id: str) -> bool:
         """Copy a favorite to global favorites."""
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return False
 
         try:
-            new_id = self._favorites_manager.copy_to_global(favorite_id)
+            new_id = self._favorites_service.copy_to_global(favorite_id)
         except FavoritePersistenceError as e:
             self._show_error(self.tr(
                 "Could not copy to global: {0}"
@@ -1042,12 +1042,12 @@ class FavoritesController(BaseController):
 
     def _backup_to_project(self) -> None:
         """Backup favorites to the QGIS project file."""
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return
 
         from qgis.core import QgsProject
         try:
-            success = self._favorites_manager.save_to_project_file(QgsProject.instance())
+            success = self._favorites_service.save_to_project_file(QgsProject.instance())
         except FavoritePersistenceError as e:
             self._show_error(self.tr(
                 "Could not save favorites to project file: {0}"
@@ -1060,11 +1060,11 @@ class FavoritesController(BaseController):
 
     def _restore_from_project(self) -> None:
         """Restore favorites from the QGIS project file."""
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return
 
         from qgis.core import QgsProject
-        count = self._favorites_manager.restore_from_project_file(QgsProject.instance())
+        count = self._favorites_service.restore_from_project_file(QgsProject.instance())
         if count > 0:
             self.update_indicator()
             self._show_success(self.tr("Restored {0} favorite(s) from project file").format(count))

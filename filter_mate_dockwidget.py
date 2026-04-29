@@ -1349,7 +1349,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self._favorites_ctrl:
             self._favorites_ctrl.apply_favorite(favorite_id)
 
-    def _show_favorites_manager_dialog(self):
+    def _show_favorites_service_dialog(self):
         """v4.0 S16: → FavoritesController."""
         if not (self._controller_integration and self._controller_integration.delegate_favorites_show_manager_dialog()):
             show_warning("FilterMate", self.tr("Favorites manager not available"))
@@ -1368,7 +1368,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def _update_favorite_indicator(self):
         """v4.0 S16: Update favorites badge."""
         if not hasattr(self, 'favorites_indicator_label') or not self.favorites_indicator_label: return
-        cnt = getattr(getattr(self, '_favorites_manager', None), 'count', 0)
+        cnt = getattr(getattr(self, '_favorites_service', None), 'count', 0)
         if cnt > 0:
             self.favorites_indicator_label.setText(f"★ {cnt}")
             self.favorites_indicator_label.setToolTip(self.tr("★ {0} Favorites saved\nClick to apply or manage").format(cnt))

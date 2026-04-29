@@ -2414,7 +2414,7 @@ class FilterMateApp:
                 # CRITICAL FIX 2026-01-19: Sync favorites_manager to dockwidget and notify FavoritesController
                 # This ensures the controller uses the correctly initialized manager with loaded favorites
                 if self.dockwidget is not None:
-                    self.dockwidget._favorites_manager = self.favorites_manager
+                    self.dockwidget._favorites_service = self.favorites_manager
                     logger.debug("✓ FavoritesManager synchronized to dockwidget")
 
                     # Notify FavoritesController to update UI with loaded favorites

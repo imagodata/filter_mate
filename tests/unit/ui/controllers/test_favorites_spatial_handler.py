@@ -162,7 +162,7 @@ class _FakeDockwidget:
 class _FakeController:
     def __init__(self, dockwidget: _FakeDockwidget) -> None:
         self.dockwidget = dockwidget
-        self._favorites_manager = MagicMock()
+        self._favorites_service = MagicMock()
 
     def _show_warning(self, msg: str) -> None:
         pass

@@ -123,7 +123,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         if HAS_QGIS:
             super().__init__(parent)
 
-        self._favorites_manager = favorites_manager
+        self._favorites_service = favorites_manager
         self._extension_bridge = extension_bridge
         self._current_fav_id = None
         self._all_favorites = []
@@ -142,9 +142,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             # FIX 2026-04-22: keep the dialog in sync when favorites change
             # externally (import, apply updating use_count, another controller
             # editing the same manager). Without this the list stayed stale.
-            if self._favorites_manager is not None:
+            if self._favorites_service is not None:
                 try:
-                    self._favorites_manager.favorites_changed.connect(self._on_external_favorites_changed)
+                    self._favorites_service.favorites_changed.connect(self._on_external_favorites_changed)
                     self._external_change_connected = True
                 except (TypeError, RuntimeError):
                     pass
@@ -187,9 +187,9 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         held a hard ref to ``_on_external_favorites_changed``, keeping
         every closed dialog alive across Open → Close → Open cycles.
         """
-        if self._external_change_connected and self._favorites_manager is not None:
+        if self._external_change_connected and self._favorites_service is not None:
             try:
-                self._favorites_manager.favorites_changed.disconnect(
+                self._favorites_service.favorites_changed.disconnect(
                     self._on_external_favorites_changed
                 )
             except (TypeError, RuntimeError):
@@ -217,7 +217,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         header_row.setContentsMargins(0, 0, 0, 0)
         header_row.setSpacing(8)
 
-        fav_count = self._favorites_manager.count if self._favorites_manager else 0
+        fav_count = self._favorites_service.count if self._favorites_service else 0
         self._header_label = QLabel(
             self.tr("<b>Saved Favorites ({0})</b>").format(fav_count)
         )
@@ -314,8 +314,8 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         layout.addLayout(button_layout)
 
         # Initial population (handle None favorites_manager)
-        if self._favorites_manager:
-            self._all_favorites = self._favorites_manager.get_all_favorites()
+        if self._favorites_service:
+            self._all_favorites = self._favorites_service.get_all_favorites()
         else:
             self._all_favorites = []
         self._populate_list(self._all_favorites)
@@ -755,7 +755,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # Pre-resolve identity / project once — avoids a per-item cascade
         # lookup that would otherwise fire for every favorite.
         current_user = self._resolve_current_user()
-        project_uuid = getattr(self._favorites_manager, "_project_uuid", None)
+        project_uuid = getattr(self._favorites_service, "_project_uuid", None)
         try:
             from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
         except Exception:
@@ -818,7 +818,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         in-memory), then apply the text search on the narrowed subset so
         ``search_favorites()`` doesn't re-walk every row.
         """
-        if not self._favorites_manager:
+        if not self._favorites_service:
             return
 
         scope_key = self._current_scope_key()
@@ -839,7 +839,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
         self._populate_list(visible)
 
-        total = self._favorites_manager.count
+        total = self._favorites_service.count
         if len(visible) == total:
             self._header_label.setText(
                 self.tr("<b>Saved Favorites ({0})</b>").format(total)
@@ -869,7 +869,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return list(favorites)
 
         current_user = self._resolve_current_user()
-        project_uuid = getattr(self._favorites_manager, "_project_uuid", None)
+        project_uuid = getattr(self._favorites_service, "_project_uuid", None)
         try:
             from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
         except Exception:
@@ -887,7 +887,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _resolve_current_user(self):
         """Pull the current user identity from the manager (cached)."""
-        mgr = self._favorites_manager
+        mgr = self._favorites_service
         if mgr is None:
             return None
         getter = getattr(mgr, "get_current_user", None)
@@ -901,11 +901,11 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
     def _on_selection_changed(self):
         """Handle selection change in list."""
         item = self._list_widget.currentItem()
-        if not item or not self._favorites_manager:
+        if not item or not self._favorites_service:
             return
 
         fav_id = item.data(Qt.ItemDataRole.UserRole)
-        fav = self._favorites_manager.get_favorite(fav_id)
+        fav = self._favorites_service.get_favorite(fav_id)
 
         if not fav:
             return
@@ -948,7 +948,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                 from ...core.domain.favorites_manager import GLOBAL_PROJECT_UUID
             except Exception:
                 GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
-            project_uuid = getattr(self._favorites_manager, "_project_uuid", None)
+            project_uuid = getattr(self._favorites_service, "_project_uuid", None)
             if project_uuid == GLOBAL_PROJECT_UUID:
                 self._scope_proj_all_radio.setChecked(True)
             else:
@@ -1032,7 +1032,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _on_save(self):
         """Save changes to selected favorite."""
-        if not self._current_fav_id or not self._favorites_manager:
+        if not self._current_fav_id or not self._favorites_service:
             return
 
         new_name = self._name_edit.text().strip()
@@ -1066,7 +1066,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             # the manager's own favorites_changed emission.
             self._suppress_external_refresh = True
             try:
-                self._favorites_manager.update_favorite(
+                self._favorites_service.update_favorite(
                     self._current_fav_id,
                     name=new_name,
                     expression=new_expr,
@@ -1074,7 +1074,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
                     tags=new_tags,
                     owner=desired_owner,
                 )
-                self._favorites_manager.save()
+                self._favorites_service.save()
             except FavoritePersistenceError as e:
                 self._show_error(self.tr(
                     "Could not save '{0}': {1}"
@@ -1087,7 +1087,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             # populate_list() call reflects the edited name/tags. Without this,
             # _all_favorites still held the pre-edit FilterFavorite and
             # clearing the search box silently restored the old display.
-            self._all_favorites = self._favorites_manager.get_all_favorites()
+            self._all_favorites = self._favorites_service.get_all_favorites()
             # v5.1: re-render the list via the unified refresh so the
             # scope badge reflects the freshly-persisted owner. The
             # manual per-item text edit we used to do was out of sync
@@ -1106,10 +1106,10 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
 
     def _on_delete(self):
         """Delete selected favorite."""
-        if not self._current_fav_id or not self._favorites_manager:
+        if not self._current_fav_id or not self._favorites_service:
             return
 
-        fav = self._favorites_manager.get_favorite(self._current_fav_id)
+        fav = self._favorites_service.get_favorite(self._current_fav_id)
         if not fav:
             return
 
@@ -1133,7 +1133,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         # own favorites_changed emission during delete + save.
         self._suppress_external_refresh = True
         try:
-            removed = self._favorites_manager.remove_favorite(deleted_id)
+            removed = self._favorites_service.remove_favorite(deleted_id)
         except FavoritePersistenceError as e:
             self._show_error(self.tr(
                 "Could not delete '{0}': {1}"
@@ -1160,13 +1160,13 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             if getattr(f, 'id', None) != deleted_id
         ]
 
-        fav_count = self._favorites_manager.count if self._favorites_manager else 0
+        fav_count = self._favorites_service.count if self._favorites_service else 0
         self._header_label.setText(
             self.tr("<b>Saved Favorites ({0})</b>").format(fav_count)
         )
 
         # Save changes
-        self._favorites_manager.save()
+        self._favorites_service.save()
 
         # FIX 2026-04-23: after takeItem, Qt may auto-advance selection to the
         # next row and fire currentItemChanged. Resetting _current_fav_id=None
@@ -1259,7 +1259,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         automatically. ``refresh()`` runs defensively in case the
         external signal was suppressed.
         """
-        if not self._is_sharing_active() or self._favorites_manager is None:
+        if not self._is_sharing_active() or self._favorites_service is None:
             return
         try:
             self._extension_bridge.open_shared_picker(parent=self)
@@ -1275,7 +1275,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         selected favorite we pass its id as the default check; the user
         can still toggle others on/off in the publish dialog's list.
         """
-        if not self._is_sharing_active() or self._favorites_manager is None:
+        if not self._is_sharing_active() or self._favorites_service is None:
             return
         preselected = [self._current_fav_id] if self._current_fav_id else []
         try:
@@ -1296,12 +1296,12 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         ``_refresh_filtered_list`` so the user's filtering state
         survives ``favorites_changed`` and shared-picker imports.
         """
-        if not self._favorites_manager:
+        if not self._favorites_service:
             self._all_favorites = []
             self._populate_list(self._all_favorites)
             self._header_label.setText(self.tr("<b>Saved Favorites (0)</b>"))
             return
-        self._all_favorites = self._favorites_manager.get_all_favorites()
+        self._all_favorites = self._favorites_service.get_all_favorites()
         self._refresh_filtered_list()
 
     

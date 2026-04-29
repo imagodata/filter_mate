@@ -73,8 +73,8 @@ class FavoritesSpatialHandler:
         return self._controller.dockwidget
 
     @property
-    def _favorites_manager(self):
-        return self._controller._favorites_manager
+    def _favorites_service(self):
+        return self._controller._favorites_service
 
     # ── method 1 — backfill_legacy_predicate_default -------------------
 
@@ -111,7 +111,7 @@ class FavoritesSpatialHandler:
         favorite.spatial_config = spatial_config
 
         persisted = False
-        manager = self._favorites_manager
+        manager = self._favorites_service
         try:
             if manager and hasattr(manager, "update_favorite"):
                 persisted = bool(
@@ -836,7 +836,7 @@ class FavoritesSpatialHandler:
         if counts_changed and refreshed_remote_layers:
             favorite.remote_layers = refreshed_remote_layers
             try:
-                manager = self._favorites_manager
+                manager = self._favorites_service
                 if manager and hasattr(manager, "update_favorite"):
                     manager.update_favorite(
                         favorite.id,
