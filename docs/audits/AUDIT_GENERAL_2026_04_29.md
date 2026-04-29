@@ -29,7 +29,7 @@
 ### A1 · `iface` importé au niveau module dans le domaine
 - `core/filter/result_processor.py:27`
 - Viole strictement la règle hexagonale ; module non testable headless.
-- Fix : injecter via port `IMapRefresher`.
+- **Statut : FIXÉ 2026-04-29** — adapter `QgisMessageBarFeedback` (implémente `IFeedback` du port existant) wiré dans `FilterMate.__init__` via `set_feedback_adapter`. `result_processor.py` retire `from qgis.utils import iface`, route `_display_warnings` via `get_feedback_adapter().push_message(..., MessageLevel.WARNING)`. Fallback log-only si adapter pas wiré (headless). 6 tests pinnent le contrat.
 
 ### T1 · 0 test sur `FavoritesSpatialHandler` (900 LOC livrées en F4 stages 1-5)
 - `ui/controllers/favorites_spatial_handler.py`

@@ -24,11 +24,11 @@ from qgis.core import (
     QgsMessageLog,
     Qgis
 )
-from qgis.utils import iface
 
 from ...infrastructure.database.sql_utils import safe_set_subset_string
 from ...infrastructure.signal_utils import SignalBlocker
 from ..ports import get_backend_services
+from ..ports.qgis_port import MessageLevel, get_feedback_adapter
 
 _backend_services = get_backend_services()
 is_valid_layer = _backend_services.is_valid_layer
@@ -205,18 +205,34 @@ class ResultProcessor:
     # =====================================================================
 
     def _display_warnings(self) -> None:
-        """Display warnings collected during worker thread execution."""
-        # Display warnings from worker thread
-        if self.warning_messages:
-            for warning_msg in self.warning_messages:
-                iface.messageBar().pushWarning("FilterMate", warning_msg)
-            self.warning_messages = []
+        """Display warnings collected during worker thread execution.
 
-        # Display backend warnings
-        if self.backend_warnings:
-            for warning_msg in self.backend_warnings:
-                iface.messageBar().pushWarning("FilterMate", warning_msg)
+        Routes through the :class:`IFeedback` port (A1 hardening) so the
+        domain stays independent of ``iface``. The QGIS-side adapter is
+        wired in :meth:`FilterMate.__init__`; if wiring failed (headless
+        tests, partial init) :func:`get_feedback_adapter` raises and we
+        fall back to logging the message — same outcome as before, just
+        without the iface import in the domain.
+        """
+        if not self.warning_messages and not self.backend_warnings:
+            return
+
+        try:
+            feedback = get_feedback_adapter()
+        except RuntimeError:
+            for msg in self.warning_messages + self.backend_warnings:
+                logger.warning("FilterMate (no feedback adapter): %s", msg)
+            self.warning_messages = []
             self.backend_warnings = []
+            return
+
+        for warning_msg in self.warning_messages:
+            feedback.push_message("FilterMate", warning_msg, MessageLevel.WARNING)
+        self.warning_messages = []
+
+        for warning_msg in self.backend_warnings:
+            feedback.push_message("FilterMate", warning_msg, MessageLevel.WARNING)
+        self.backend_warnings = []
 
     def _apply_single_subset(
         self,

@@ -125,6 +125,19 @@ class FilterMate:
             logger.error(f"FilterMate: CRITICAL - Could not initialize QGIS factory: {factory_error}")
             # This is critical - without factory, hexagonal services won't work
 
+        # A1 (audit 2026-04-29): Wire the IFeedback adapter so domain code
+        # (core/filter/result_processor.py) can push messages without
+        # importing iface directly. Failures here downgrade to logger-only
+        # output — never block the plugin from loading.
+        try:
+            from .core.ports.qgis_port import set_feedback_adapter
+            from .adapters.qgis.qgis_feedback_adapter import QgisMessageBarFeedback
+
+            set_feedback_adapter(QgisMessageBarFeedback())
+            logger.debug("FilterMate: Feedback adapter initialized in __init__")
+        except Exception as feedback_error:
+            logger.error(f"FilterMate: Could not initialize feedback adapter: {feedback_error}")
+
         self.pluginIsActive = False
         self.app = None
         self._auto_activation_signals_connected = False
