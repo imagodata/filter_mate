@@ -241,16 +241,17 @@ class DockWidgetOrchestrator:
         from ..core.services import (
             BackendService,
             FilterService,
-            FavoritesService,
             LayerService,
             PostgresSessionManager,
         )
 
-        # These are the primary services used by controllers
+        # FavoritesService is owned by FilterMateApp and synced to the
+        # dockwidget at init_filterMate_db() time. The controller binds
+        # via sync_with_dockwidget_manager() — orchestrator does not
+        # instantiate a second one (would create a parallel SQLite/cache).
         self._services = {
             'backend': BackendService(self._dockwidget),
             'filter': FilterService(self._dockwidget),
-            'favorites': FavoritesService(self._dockwidget),
             'layer': LayerService(self._dockwidget),
             'postgres_session': PostgresSessionManager(self._dockwidget),
         }
@@ -281,10 +282,7 @@ class DockWidgetOrchestrator:
                 self._dockwidget,
                 self._services.get('backend'),
             ),
-            'favorites': FavoritesController(
-                self._dockwidget,
-                self._services.get('favorites'),
-            ),
+            'favorites': FavoritesController(self._dockwidget),
             'layer_sync': LayerSyncController(
                 self._dockwidget,
                 self._services.get('layer'),
