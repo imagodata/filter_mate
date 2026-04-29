@@ -30,6 +30,7 @@ from .accessor import (
     HistoryStep,
     LayerSummary,
 )
+from .main_thread import run_on_main_thread
 
 
 def _safe(callable_, default):
@@ -122,7 +123,14 @@ class QGISFilterMateAccessor:
     # ------------------------------------------------------------------
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
-        ok = self._public_api.apply_filter(
+        # P0-B (audit 2026-04-29): ``PublicAPI.apply_filter`` ultimately
+        # calls ``QgsVectorLayer.setSubsetString`` which is not
+        # thread-safe outside the Qt main thread. ``uvicorn`` runs us
+        # on a worker, so we marshal the call through the main-thread
+        # dispatcher; under the headless test harness this is a no-op
+        # inline call.
+        ok = run_on_main_thread(
+            self._public_api.apply_filter,
             layer_name=layer_name,
             filter_expr=expression,
             source_plugin=source,
@@ -231,21 +239,15 @@ class QGISFilterMateAccessor:
             project = None
 
         previous_filters = getattr(entry, "previous_filters", ()) or ()
-        target_layer_name = ""
-        target_expression = ""
-        target_is_clear = True
 
-        for layer_id, prev_subset in previous_filters:
-            layer = project.mapLayer(layer_id) if project is not None else None
-            if layer is None:
-                continue
-            try:
-                layer.setSubsetString(prev_subset or "")
-            except Exception:
-                continue
-            target_layer_name = _safe(layer.name, layer_id)
-            target_expression = prev_subset or ""
-            target_is_clear = not target_expression
+        # P0-B (audit 2026-04-29): ``setSubsetString`` is not thread-safe
+        # outside the Qt main thread. Batch all subset writes into a
+        # single main-thread roundtrip rather than N round-trips.
+        target_layer_name, target_expression, target_is_clear = run_on_main_thread(
+            self._reapply_previous_filters_inline,
+            project,
+            previous_filters,
+        )
 
         # If we couldn't reach any layer (no project / layer ids missing),
         # fall back to the entry's own metadata so the API still answers.
@@ -263,6 +265,35 @@ class QGISFilterMateAccessor:
             expression=target_expression,
             is_clear=target_is_clear,
         )
+
+    @staticmethod
+    def _reapply_previous_filters_inline(project, previous_filters):
+        """Apply ``previous_filters`` to project layers — main-thread only.
+
+        Returns ``(layer_name, expression, is_clear)`` for the *last*
+        layer successfully written, mirroring the original loop's
+        behaviour. Skips missing layers and individual write failures
+        silently because the API contract is "best-effort restoration"
+        (the history step is always reported even when the project no
+        longer carries every layer it referenced).
+        """
+        target_layer_name = ""
+        target_expression = ""
+        target_is_clear = True
+
+        for layer_id, prev_subset in previous_filters:
+            layer = project.mapLayer(layer_id) if project is not None else None
+            if layer is None:
+                continue
+            try:
+                layer.setSubsetString(prev_subset or "")
+            except Exception:
+                continue
+            target_layer_name = _safe(layer.name, layer_id)
+            target_expression = prev_subset or ""
+            target_is_clear = not target_expression
+
+        return target_layer_name, target_expression, target_is_clear
 
     @staticmethod
     def _favorite_from(entry: Any) -> Favorite:
