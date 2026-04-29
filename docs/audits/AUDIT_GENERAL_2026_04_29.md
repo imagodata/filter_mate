@@ -49,7 +49,7 @@
 | A3 | 5 paires de services dupliqués post-revert toujours actives | `core/services/` | M×5 |
 | A4 | `FavoritesNotInitialized` jamais catchée dans `favorites_controller.py` (F11 policy non appliquée) | `ui/controllers/favorites_controller.py` | **FIXÉ `dde30f5d`** (embarqué dans CORE-1a par concurrence d'agents) — `apply_favorite` et `remove_favorite` catchent `FavoritesNotInitialized` → `_show_warning`. `mark_favorite_used` / `save` failures dégradés en log (non-critique). 5 tests régression. |
 | T2 | `auto_zoom.py` (144 LOC, commit 9bd78d2b) — 0 test | `adapters/auto_zoom.py` | **FIXÉ** — 33 tests `_read_global_auto_zoom_flag` + `_is_tracking` + `_layer_extent` + flow end-to-end (iface absent, canvas absent, global-off+tracking, union multi-layers, empty union refresh, etc.). + 8 tests H1 token déjà ajoutés. Suite 1350/1350. |
-| T3 | `history_service.py` (680 LOC, undo/redo critique) — 0 test | `core/services/history_service.py` | L |
+| T3 | `history_service.py` (680 LOC, undo/redo critique) — 0 test | `core/services/history_service.py` | **FIXÉ** — 62 tests : HistoryEntry/HistoryState dataclasses, push/undo/redo/peek/can_*/counts, LIFO ordering, max_depth + truncation, clear + clear_redo, on_change callback (succès + failure swallowing), get_history_for_layer, push_global_state (provided + fallback paths), serialize/deserialize round trip, LayerHistory wrapper. **Bonus finding** : `set_max_depth` truncate immédiatement (docstring incorrecte — à corriger). |
 | T4 | Config rebind (486ac81a, 77a6de1e) — pas de test sur la mutation-in-place de `CONFIG_DATA` | `tests/unit/.../test_config_migration.py` | S |
 
 ## P2 — Dette à backloguer
