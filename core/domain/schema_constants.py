@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 """Domain-level schema constants shared across the favorites stack.
 
-Single source of truth for SQLite schema identifiers and reserved UUIDs.
-Both ``core/domain/favorites_manager.py`` and
-``core/services/favorites_migration_service.py`` import from here so the
-two never drift apart.
+Single source of truth for reserved UUIDs (and previously SQLite table
+names — those constants were dropped 2026-04-29 per CORE-8 since the
+22 SQL sites all use the literal table name and threading the constant
+through would mostly add ceremony).
 """
 
 GLOBAL_PROJECT_UUID = "00000000-0000-0000-0000-000000000000"
 """Reserved project_uuid for favorites that are visible in every project."""
-
-TABLE_FAVORITES = "fm_favorites"
-TABLE_PROJECTS = "fm_projects"
