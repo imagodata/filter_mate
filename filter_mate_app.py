@@ -466,7 +466,11 @@ class FilterMateApp:
             cache_stats = self._spatialite_cache.get_cache_stats()
             logger.info(f"FilterMate: Spatialite cache initialized ({cache_stats['total_entries']} entries, {cache_stats['db_size_mb']} MB)")
         except Exception as e:
-            logger.debug(f"FilterMate: Spatialite cache not available: {e}")
+            logger.warning(
+                "FilterMate: Spatialite persistent cache disabled (init failed): %s. "
+                "Multi-step filter caching unavailable; operations will run uncached.",
+                e,
+            )
             self._spatialite_cache = None
 
         # v4.0.1: Initialize BackendRegistry for hexagonal architecture compliance

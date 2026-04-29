@@ -234,7 +234,7 @@ class SpatialitePersistentCache:
             cursor = conn.cursor()
 
             # Create main cache table
-            cursor.execute('''
+            cursor.execute(f'''
                 CREATE TABLE IF NOT EXISTS {CACHE_TABLE_NAME} (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     layer_id TEXT NOT NULL,
@@ -252,18 +252,18 @@ class SpatialitePersistentCache:
                     metadata TEXT,
                     UNIQUE(layer_id, cache_key)
                 )
-            ''')
+            ''')  # nosec B608 - identifier is module-level constant
 
             # Create indexes for fast lookups
-            cursor.execute('''
+            cursor.execute(f'''
                 CREATE INDEX IF NOT EXISTS idx_cache_layer_key
                 ON {CACHE_TABLE_NAME} (layer_id, cache_key)
-            ''')
+            ''')  # nosec B608 - identifier is module-level constant
 
-            cursor.execute('''
+            cursor.execute(f'''
                 CREATE INDEX IF NOT EXISTS idx_cache_expires
                 ON {CACHE_TABLE_NAME} (expires_at)
-            ''')
+            ''')  # nosec B608 - identifier is module-level constant
 
             # Create multi-step tracking table
             cursor.execute('''
@@ -375,8 +375,8 @@ class SpatialitePersistentCache:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
 
-                # Upsert cache entry
-                cursor.execute('''
+                # Upsert cache entry — nosec B608: identifier is module-level constant
+                cursor.execute(f'''
                     INSERT OR REPLACE INTO {CACHE_TABLE_NAME} (
                         layer_id, layer_source, layer_name, cache_key,
                         fids, fid_count, created_at, expires_at,
@@ -442,10 +442,10 @@ class SpatialitePersistentCache:
             cursor = conn.cursor()
 
             now = datetime.now(timezone.utc).isoformat()
-            cursor.execute('''
+            cursor.execute(f'''
                 SELECT fids, fid_count FROM {CACHE_TABLE_NAME}
                 WHERE layer_id = ? AND cache_key = ? AND expires_at > ?
-            ''', (layer_id, cache_key, now))
+            ''', (layer_id, cache_key, now))  # nosec B608 - identifier is module-level constant
 
             row = cursor.fetchone()
             if row:
@@ -495,13 +495,13 @@ class SpatialitePersistentCache:
             cursor = conn.cursor()
 
             now = datetime.now(timezone.utc).isoformat()
-            cursor.execute('''
+            cursor.execute(f'''
                 SELECT fids, fid_count, step_number, source_geom_hash, buffer_value, predicates
                 FROM {CACHE_TABLE_NAME}
                 WHERE layer_id = ? AND expires_at > ?
                 ORDER BY created_at DESC
                 LIMIT 1
-            ''', (layer_id, now))
+            ''', (layer_id, now))  # nosec B608 - identifier is module-level constant
 
             row = cursor.fetchone()
             if row:
@@ -582,12 +582,12 @@ class SpatialitePersistentCache:
             # Get previous step number
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
+                cursor.execute(f'''
                     SELECT step_number FROM {CACHE_TABLE_NAME}
                     WHERE layer_id = ?
                     ORDER BY created_at DESC
                     LIMIT 1
-                ''', (layer.id(),))
+                ''', (layer.id(),))  # nosec B608 - identifier is module-level constant
                 row = cursor.fetchone()
                 prev_step = row['step_number'] if row else 0
 
@@ -653,9 +653,9 @@ class SpatialitePersistentCache:
                 cursor = conn.cursor()
 
                 now = datetime.now(timezone.utc).isoformat()
-                cursor.execute('''
+                cursor.execute(f'''
                     DELETE FROM {CACHE_TABLE_NAME} WHERE expires_at < ?
-                ''', (now,))
+                ''', (now,))  # nosec B608 - identifier is module-level constant
 
                 deleted = cursor.rowcount
                 conn.commit()
@@ -678,9 +678,9 @@ class SpatialitePersistentCache:
         with self._lock:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute('''
+                cursor.execute(f'''
                     DELETE FROM {CACHE_TABLE_NAME} WHERE layer_id = ?
-                ''', (layer_id,))
+                ''', (layer_id,))  # nosec B608 - identifier is module-level constant
                 deleted = cursor.rowcount
                 conn.commit()
                 return deleted
@@ -718,17 +718,17 @@ class SpatialitePersistentCache:
             cursor.execute(f'SELECT COUNT(*) as count FROM {CACHE_TABLE_NAME}')  # nosec B608
             total_entries = cursor.fetchone()['count']
 
-            cursor.execute('''
+            cursor.execute(f'''
                 SELECT SUM(fid_count) as total_fids FROM {CACHE_TABLE_NAME}
-            ''')
+            ''')  # nosec B608 - identifier is module-level constant
             row = cursor.fetchone()
             total_fids = row['total_fids'] or 0 if row else 0
 
             now = datetime.now(timezone.utc).isoformat()
-            cursor.execute('''
+            cursor.execute(f'''
                 SELECT COUNT(*) as count FROM {CACHE_TABLE_NAME}
                 WHERE expires_at < ?
-            ''', (now,))
+            ''', (now,))  # nosec B608 - identifier is module-level constant
             expired_entries = cursor.fetchone()['count']
 
             # Get database file size
