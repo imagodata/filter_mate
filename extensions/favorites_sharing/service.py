@@ -22,6 +22,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from .scanner import ResourceSharingScanner, SharedFavorite
+from .services import SharedFavoritesQuery
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.Service')
 
@@ -57,79 +58,34 @@ class FavoritesSharingService:
 
     def __init__(self, scanner: ResourceSharingScanner):
         self._scanner = scanner
+        # EXT-2 stage 1 (audit 2026-04-29): the read path lives in a
+        # dedicated service. The facade keeps the public API by
+        # delegating, so external callers (dialogs, extension entry
+        # point, tests) need not know about the split.
+        self._query = SharedFavoritesQuery(scanner)
 
     @property
     def extension(self):
         """Owning FavoritesSharingExtension (or None when used standalone)."""
         return getattr(self._scanner, "_extension", None)
 
-    # ─── Discovery ─────────────────────────────────────────────────────
+    # ─── Discovery (delegated to SharedFavoritesQuery) ────────────────
 
     def list_shared(
         self,
         search_query: Optional[str] = None,
         author: Optional[str] = None,
     ) -> List[SharedFavorite]:
-        """Return shared favorites matching the given filters.
-
-        Search is case-insensitive and applied on name, description,
-        collection name, and tags. ``author`` is an exact (case-insensitive)
-        match on the collection-level ``author`` — None / empty means
-        "any author".
-        """
-        items = self._scanner.scan()
-
-        if author:
-            needle_author = author.strip().lower()
-            if needle_author:
-                items = [f for f in items if f.author.lower() == needle_author]
-
-        if not search_query:
-            return items
-
-        needle = search_query.lower().strip()
-        if not needle:
-            return items
-
-        def _matches(fav: SharedFavorite) -> bool:
-            if needle in fav.name.lower():
-                return True
-            if needle in fav.description.lower():
-                return True
-            if needle in fav.source.collection_name.lower():
-                return True
-            if fav.author and needle in fav.author.lower():
-                return True
-            tags = fav.payload.get('tags') or []
-            if isinstance(tags, list) and any(needle in str(t).lower() for t in tags):
-                return True
-            return False
-
-        return [f for f in items if _matches(f)]
+        return self._query.list_shared(search_query=search_query, author=author)
 
     def list_authors(self) -> List[str]:
-        """Return the distinct collection authors found across all shared
-        favorites, sorted alphabetically. Empty/anonymous authors are
-        omitted — the picker shows them under the "All authors" entry.
-        """
-        seen: Dict[str, None] = {}
-        for fav in self._scanner.scan():
-            a = fav.author
-            if a and a not in seen:
-                seen[a] = None
-        return sorted(seen.keys(), key=str.lower)
+        return self._query.list_authors()
 
     def invalidate_cache(self) -> None:
-        self._scanner.invalidate_cache()
+        self._query.invalidate_cache()
 
     def collections_summary(self) -> Dict[str, int]:
-        """Return {collection_name: shared_favorites_count}."""
-        summary: Dict[str, int] = {}
-        for fav in self._scanner.scan():
-            summary[fav.source.collection_name] = (
-                summary.get(fav.source.collection_name, 0) + 1
-            )
-        return summary
+        return self._query.collections_summary()
 
     # ─── Fork ──────────────────────────────────────────────────────────
 
