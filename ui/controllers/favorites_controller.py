@@ -1073,35 +1073,38 @@ class FavoritesController(BaseController):
         else:
             self._show_warning(self.tr("No favorites to restore found in project"))
 
+    def _build_migration_service(self):
+        """Bootstrap a FavoritesMigrationService against the FilterMate db.
+
+        Shared by the two menu actions (cleanup orphans, show stats);
+        returns None and warns the user when the plugin config directory
+        is uninitialized (MED-1: would otherwise build a bogus filesystem-
+        root path on Linux or a drive-less path on Windows).
+        """
+        from ...core.services.favorites_migration_service import FavoritesMigrationService
+        from ...config.config import ENV_VARS
+        import os
+        plugin_dir = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "") or ""
+        if not plugin_dir:
+            self._show_warning(self.tr(
+                "FilterMate config directory is not initialized yet — "
+                "open a QGIS project with FilterMate first."
+            ))
+            return None
+        db_path = os.path.normpath(os.path.join(plugin_dir, 'filterMate_db.sqlite'))
+        return FavoritesMigrationService(db_path)
+
     def _cleanup_orphan_projects(self) -> None:
         """Clean up orphan projects from the database."""
+        migration_service = self._build_migration_service()
+        if migration_service is None:
+            return
         try:
-            from ...core.services.favorites_migration_service import FavoritesMigrationService
-            from ...config.config import ENV_VARS
-            import os
-
-            # MED-1 fix: guard against an uninitialized ENV_VARS — without this
-            # we'd build '/filterMate_db.sqlite' on Linux (filesystem root) or
-            # a Windows-drive-free path, then silently hit a bogus location.
-            plugin_dir = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "") or ""
-            if not plugin_dir:
-                self._show_warning(self.tr(
-                    "FilterMate config directory is not initialized yet — "
-                    "open a QGIS project with FilterMate first."
-                ))
-                return
-            db_path = os.path.normpath(
-                os.path.join(plugin_dir, 'filterMate_db.sqlite')
-            )
-
-            migration_service = FavoritesMigrationService(db_path)
-            deleted_count, deleted_ids = migration_service.cleanup_orphan_projects()
-
+            deleted_count, _deleted_ids = migration_service.cleanup_orphan_projects()
             if deleted_count > 0:
                 self._show_success(self.tr("Cleaned up {0} orphan project(s)").format(deleted_count))
             else:
                 self._show_success(self.tr("No orphan projects to clean up"))
-
         except Exception as e:
             logger.error(f"Error cleaning up orphan projects: {e}")
             self._show_warning(self.tr("Error: {0}").format(e))
@@ -1137,28 +1140,11 @@ class FavoritesController(BaseController):
 
     def _show_database_stats(self) -> None:
         """Show database statistics dialog."""
+        migration_service = self._build_migration_service()
+        if migration_service is None:
+            return
         try:
-            from ...core.services.favorites_migration_service import FavoritesMigrationService
-            from ...config.config import ENV_VARS
-            import os
-
-            # MED-1 fix: guard against an uninitialized ENV_VARS — without this
-            # we'd build '/filterMate_db.sqlite' on Linux (filesystem root) or
-            # a Windows-drive-free path, then silently hit a bogus location.
-            plugin_dir = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "") or ""
-            if not plugin_dir:
-                self._show_warning(self.tr(
-                    "FilterMate config directory is not initialized yet — "
-                    "open a QGIS project with FilterMate first."
-                ))
-                return
-            db_path = os.path.normpath(
-                os.path.join(plugin_dir, 'filterMate_db.sqlite')
-            )
-
-            migration_service = FavoritesMigrationService(db_path)
             stats = migration_service.get_database_statistics()
-
             if 'error' in stats:
                 self._show_warning(self.tr("Error: {0}").format(stats['error']))
                 return
@@ -1189,7 +1175,6 @@ class FavoritesController(BaseController):
                 self.tr("FilterMate Statistics"),
                 msg
             )
-
         except Exception as e:
             logger.error(f"Error showing database stats: {e}")
             self._show_warning(self.tr("Error: {0}").format(e))
