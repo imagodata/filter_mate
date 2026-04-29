@@ -175,10 +175,18 @@ _FUNCTION_CALL_RE = re.compile(r'^[A-Z_][A-Z0-9_]*\s*\(')
 # Function/keyword calls whose return type IS boolean and which therefore form
 # a valid standalone WHERE body. The generic `_FUNCTION_CALL_RE` rule below
 # would otherwise wipe these — `EXISTS(...)` is exactly the shape FilterMate
-# pushes to target layers in chain filters, and `NOT(...)` is a plain unary
-# boolean operator. Without this short-circuit, target-layer subsets get
-# sanitized to '' and the cascade silently drops every downstream filter.
-_BOOLEAN_FUNCTION_RE = re.compile(r'^(EXISTS|NOT)\s*\(')
+# pushes to target layers in chain filters, `NOT(...)` is a plain unary
+# boolean operator, and the ST_* predicates are exactly what the spatialite /
+# postgresql cascades emit on target layers (e.g. ``ST_Intersects(geom, ...)``).
+# Without this short-circuit, target-layer subsets get sanitized to '' and the
+# cascade silently drops every downstream filter — same regression class as
+# the 2026-04-27 EXISTS/NOT wipe; ST_* added 2026-04-29 after spatialite
+# cascade reproduced it on a fully-spatialite project.
+_BOOLEAN_FUNCTION_RE = re.compile(
+    r'^(EXISTS|NOT|ST_INTERSECTS|ST_CONTAINS|ST_WITHIN|ST_TOUCHES|ST_OVERLAPS'
+    r'|ST_CROSSES|ST_DISJOINT|ST_EQUALS|ST_DWITHIN|ST_COVERS|ST_COVEREDBY'
+    r'|ST_3DINTERSECTS|ST_3DDISJOINT|ST_3DDWITHIN)\s*\('
+)
 
 
 def _is_balanced_boolean_function_call(expr: str) -> bool:

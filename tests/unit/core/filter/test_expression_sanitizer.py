@@ -137,6 +137,79 @@ class TestBooleanReturningFunctionsPreserved:
         assert sanitize_subset_string(expr) == expr
 
 
+class TestSpatialPredicatesPreserved:
+    """Regression 2026-04-29: spatialite (and PostGIS) cascades push a
+    standalone `ST_Intersects(...)` (or any ST_* predicate) onto target
+    layers. These are boolean-returning function calls without a top-level
+    boolean operator, which made the M2 generic-function-call rule wipe
+    them — the cascade then silently no-oped (target layer subset = ''
+    → completion handler logs "filter already applied" against the
+    pre-existing empty subset, distant features stay fully visible).
+
+    Same regression class as the EXISTS/NOT 2026-04-27 fix, just a
+    different family of boolean-returning functions.
+    """
+
+    def test_st_intersects_preserved(self):
+        expr = (
+            "ST_Intersects(geom, MakeValid("
+            "GeomFromText('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))', 31370)))"
+        )
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_contains_preserved(self):
+        expr = "ST_Contains(\"geometry\", GeomFromText('POINT(1 1)', 31370))"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_within_preserved(self):
+        expr = "ST_Within(geom, GeomFromText('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))', 4326))"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_dwithin_preserved(self):
+        # ST_DWithin takes a third arg (distance); balanced-parens check
+        # must walk past the inner GeomFromText close and still see the
+        # outer ST_DWithin close as the terminator.
+        expr = "ST_DWithin(geom, GeomFromText('POINT(0 0)', 4326), 100)"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_touches_preserved(self):
+        expr = "ST_Touches(geom, GeomFromText('LINESTRING(0 0, 1 1)', 4326))"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_overlaps_preserved(self):
+        expr = "ST_Overlaps(geom, GeomFromText('POLYGON((0 0, 2 0, 2 2, 0 2, 0 0))', 4326))"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_covers_preserved(self):
+        expr = "ST_Covers(geom, GeomFromText('POINT(0 0)', 4326))"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_intersects_lowercase_preserved(self):
+        # Spatialite SQL is case-insensitive; the QGIS subsetString may
+        # arrive in any case. The allowlist check uppercases first.
+        expr = "st_intersects(geom, GeomFromText('POINT(0 0)', 4326))"
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_intersects_with_top_level_and_preserved(self):
+        # When ST_Intersects is combined with an attribute filter via AND,
+        # the existing top-level-operator path already preserves the
+        # expression. Pin this to make sure neither code path drops it.
+        expr = (
+            "ST_Intersects(geom, GeomFromText('POINT(0 0)', 4326)) "
+            "AND \"id\" = 1"
+        )
+        assert sanitize_subset_string(expr) == expr
+
+    def test_st_intersects_chained_drop_blocked(self):
+        # S3 invariant: trailing chained DDL must still be caught even
+        # though ST_Intersects is now in the allowlist. The balanced-call
+        # check disqualifies any non-empty tail past the closing paren.
+        expr = "ST_Intersects(geom, x); DROP TABLE foo; --"
+        result = sanitize_subset_string(expr)
+        assert "DROP" not in result.upper()
+        assert ";" not in result
+
+
 class TestBooleanFunctionChainBypassBlocked:
     """S3 hardening (audit 2026-04-29): the regex `^(EXISTS|NOT)\\s*\\(` only
     checked the prefix. A payload like `NOT(1=1); DROP TABLE x; --` matched
