@@ -164,7 +164,7 @@ def _setup_handler_mocks():
         f'{ROOT}.core.export.style_exporter': MagicMock(),
         f'{ROOT}.core.services': MagicMock(),
         f'{ROOT}.core.services.buffer_service': MagicMock(),
-        f'{ROOT}.core.services.filter_parameter_builder': MagicMock(),
+        f'{ROOT}.core.services.filter_config_builder': MagicMock(),
         f'{ROOT}.core.services.source_subset_buffer_builder': MagicMock(),
         f'{ROOT}.core.services.geometry_preparer': MagicMock(),
         f'{ROOT}.core.geometry': MagicMock(),

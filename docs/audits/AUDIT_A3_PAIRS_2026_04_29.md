@@ -131,7 +131,7 @@ Ce rapport documente l'analyse de chaque paire pour préparer la décision produ
 ## Plan d'action consolidé
 
 **Sprint 1 (LOW risk, ~3-4h)** :
-- Paire 4 : créer `FilterConfigBuilder`, migrer 2 callers, supprimer les 2 anciens.
+- Paire 4 : créer `FilterConfigBuilder`, migrer 2 callers, supprimer les 2 anciens. **LIVRÉ 2026-04-29** — `core/services/filter_config_builder.py` consolide les 2 anciens modules. 2 classes co-localisées (`FilterParameterBuilder`, `LayerFilterBuilder`) avec dataclasses partagées. 2 callers migrés (`initialization_handler.py`, `filter_mate_app.py`) + conftest. Suite 1424/1424 ✅.
 
 **Sprint 2 (MED risk, ~2-3h)** :
 - Paire 3 : intégrer `source_subset_buffer_builder` comme classmethod de `BufferService`, supprimer le fichier.

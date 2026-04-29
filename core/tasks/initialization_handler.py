@@ -200,7 +200,8 @@ class InitializationHandler:
                                                  postgresql_available, sanitize_subset_fn):
         """Extract and initialize all parameters needed for source layer filtering.
 
-        EPIC-1 Phase 14.4: Delegates to core.services.filter_parameter_builder.
+        EPIC-1 Phase 14.4: Delegates to core.services.filter_config_builder
+        (formerly filter_parameter_builder; merged 2026-04-29 via A3 paire 4).
 
         Args:
             task_parameters: Dict with task configuration.
@@ -215,7 +216,7 @@ class InitializationHandler:
                 - has_combine_operator, source_layer_combine_operator
                 - other_layers_combine_operator, old_subset, field_names
         """
-        from ..services.filter_parameter_builder import build_filter_parameters
+        from ..services.filter_config_builder import build_filter_parameters
         from ...infrastructure.utils import detect_layer_provider_type
 
         # Delegate to FilterParameterBuilder service

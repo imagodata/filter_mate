@@ -109,8 +109,8 @@ try:
     logger.debug("✓ app_initializer")
     from .core.services.datasource_manager import DatasourceManager
     logger.debug("✓ datasource_manager")
-    from .core.services.layer_filter_builder import LayerFilterBuilder
-    logger.debug("✓ layer_filter_builder")
+    from .core.services.filter_config_builder import LayerFilterBuilder
+    logger.debug("✓ layer_filter_builder (via filter_config_builder)")
     from .adapters.layer_refresh_manager import LayerRefreshManager
     logger.debug("✓ layer_refresh_manager")
     from .adapters.layer_task_completion_handler import LayerTaskCompletionHandler
