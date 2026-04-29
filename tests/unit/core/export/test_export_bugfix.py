@@ -44,7 +44,8 @@ class TestGetExtensionForFormat:
         ("XLSX", ".xlsx"),
         ("MapInfo File", ".tab"),
         ("FlatGeobuf", ".fgb"),
-        ("SpatiaLite", ".spatialite"),
+        # SpatiaLite uses .sqlite — QGIS does not recognise .spatialite
+        ("SpatiaLite", ".sqlite"),
         ("DXF", ".dxf"),
     ])
     def test_known_formats(self, datatype, expected):
@@ -245,3 +246,767 @@ class TestValidatorLibKmlAccepted:
         result = self._validate("ESRI Shapefile")
         assert result.valid is True
         assert result.preserve_groups is False
+
+
+# ---------------------------------------------------------------------------
+# LayerExporter — writeAsVectorFormatV3 contract
+# ---------------------------------------------------------------------------
+
+class TestExportSingleLayerV3API:
+    """The deprecated 5-arg ``writeAsVectorFormat`` is removed in QGIS 4.x.
+    ``LayerExporter.export_single_layer`` must use ``writeAsVectorFormatV3``
+    and pass CRS reprojection via ``options.ct``."""
+
+    @pytest.fixture
+    def patched_module(self, monkeypatch):
+        """Force ``QGIS_AVAILABLE = True`` and inject a fake
+        ``QgsVectorFileWriter`` into the layer_exporter module."""
+        from core.export import layer_exporter as le
+
+        fake_writer = MagicMock()
+        fake_writer.NoError = 0
+        fake_writer.writeAsVectorFormatV3 = MagicMock(
+            return_value=(0, "", "", "")
+        )
+        # SaveVectorOptions returns a fresh MagicMock each instantiation so the
+        # test can assert which attributes were set.
+        fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
+
+        # Make sure the deprecated entry-point is gone — calling it must blow
+        # up so any regression is caught loudly.
+        del fake_writer.writeAsVectorFormat
+
+        monkeypatch.setattr(le, "QGIS_AVAILABLE", True)
+        monkeypatch.setattr(le, "QgsVectorFileWriter", fake_writer)
+        monkeypatch.setattr(le, "QgsCoordinateTransform",
+                            MagicMock(return_value="CT_SENTINEL"))
+        monkeypatch.setattr(le, "QgsCoordinateTransformContext",
+                            MagicMock(return_value="CTX_SENTINEL"))
+        # Skip QgsProject.transformContext() lookup
+        monkeypatch.setattr(le, "QgsProject",
+                            MagicMock(instance=MagicMock(return_value=None)))
+        return le, fake_writer
+
+    def _make_layer(self, source_authid="EPSG:4326"):
+        layer = MagicMock()
+        layer.name.return_value = "roads"
+        src_crs = MagicMock()
+        src_crs.isValid.return_value = True
+        src_crs.authid.return_value = source_authid
+        # `==` between source and target uses python equality; differentiate
+        # objects by their authid to mimic QgsCoordinateReferenceSystem behaviour.
+        src_crs.__eq__ = lambda self, o: getattr(o, '_authid', None) == source_authid
+        src_crs._authid = source_authid
+        layer.sourceCrs.return_value = src_crs
+        return layer
+
+    def test_uses_v3_api_not_deprecated(self, patched_module, tmp_path):
+        """Regression: the deprecated 5-arg writeAsVectorFormat is removed in
+        QGIS 4.x. The exporter must reach for V3 instead."""
+        le, fake_writer = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layer = self._make_layer()
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        out = str(tmp_path / "roads.shp")
+        result = exporter.export_single_layer(
+            "roads", out, projection=None,
+            datatype="ESRI Shapefile",
+            style_format=None, save_styles=False,
+        )
+
+        assert result.success is True
+        fake_writer.writeAsVectorFormatV3.assert_called_once()
+        # Hard assertion: deprecated call surface is unreachable
+        assert not hasattr(fake_writer, "writeAsVectorFormat")
+
+    def test_no_reprojection_skips_coordinate_transform(self, patched_module, tmp_path):
+        """When target CRS is None, no QgsCoordinateTransform should be built —
+        otherwise we'd silently no-op transform every feature."""
+        le, fake_writer = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layer = self._make_layer()
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        exporter.export_single_layer(
+            "roads", str(tmp_path / "roads.shp"),
+            projection=None, datatype="ESRI Shapefile",
+            style_format=None, save_styles=False,
+        )
+
+        call_args = fake_writer.writeAsVectorFormatV3.call_args
+        options = call_args.args[3]
+        # `options.ct` must NOT have been touched (no reprojection requested)
+        ct_mock = options.ct
+        assert isinstance(ct_mock, MagicMock)
+        # If options.ct was set, it would equal "CT_SENTINEL"
+        assert ct_mock != "CT_SENTINEL"
+
+    def test_target_crs_attaches_coordinate_transform(self, patched_module, tmp_path):
+        """When user picks a target CRS different from source, the V3 options
+        must carry a QgsCoordinateTransform so geometries get reprojected."""
+        le, fake_writer = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layer = self._make_layer(source_authid="EPSG:4326")
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        target = MagicMock()
+        target.isValid.return_value = True
+        target._authid = "EPSG:2154"
+        target.__eq__ = lambda self, o: getattr(o, '_authid', None) == "EPSG:2154"
+
+        exporter.export_single_layer(
+            "roads", str(tmp_path / "roads.shp"),
+            projection=target, datatype="ESRI Shapefile",
+            style_format=None, save_styles=False,
+        )
+
+        call_args = fake_writer.writeAsVectorFormatV3.call_args
+        options = call_args.args[3]
+        # options.ct should have been assigned the QgsCoordinateTransform sentinel
+        assert options.ct == "CT_SENTINEL"
+        assert options.driverName == "ESRI Shapefile"
+
+    def test_v3_error_message_propagates(self, patched_module, tmp_path):
+        """Non-NoError return from V3 must bubble up as ``error_message``."""
+        le, fake_writer = patched_module
+        fake_writer.writeAsVectorFormatV3.return_value = (
+            5, "DBF: field 'verylongfieldname' truncated to 10 chars", "", ""
+        )
+        exporter = le.LayerExporter(project=MagicMock())
+        layer = self._make_layer()
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        result = exporter.export_single_layer(
+            "roads", str(tmp_path / "roads.shp"),
+            projection=None, datatype="ESRI Shapefile",
+            style_format=None, save_styles=False,
+        )
+
+        assert result.success is False
+        assert "truncated" in result.error_message
+
+
+# ---------------------------------------------------------------------------
+# Streaming exporter — target_crs propagation
+# ---------------------------------------------------------------------------
+
+class TestStreamingTargetCrsPropagation:
+    """``_export_with_streaming`` must hand the user-supplied projection to
+    StreamingExporter via the ``target_crs`` kwarg, otherwise reprojection is
+    silently dropped on large dataset exports."""
+
+    def test_export_handler_passes_projection_to_streaming(self, tmp_path):
+        from core.tasks.export_handler import ExportHandler
+
+        handler = ExportHandler()
+        handler.calculate_total_features = MagicMock(return_value=999_999)
+        handler.get_layer_by_name = MagicMock(return_value=MagicMock())
+
+        captured = {}
+
+        class FakeStreamingExporter:
+            def __init__(self, *_a, **_kw):
+                pass
+
+            def export_layer_streaming(self, **kwargs):
+                captured.update(kwargs)
+                return {"success": True}
+
+        params = {
+            "task": {
+                "EXPORTING": {
+                    "HAS_LAYERS_TO_EXPORT": True,
+                    "HAS_DATATYPE_TO_EXPORT": True,
+                    "DATATYPE_TO_EXPORT": "ESRI Shapefile",
+                    "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
+                    "OUTPUT_FOLDER_TO_EXPORT": str(tmp_path),
+                    "HAS_STYLES_TO_EXPORT": False,
+                },
+                "layers": [{"layer_name": "roads"}],
+            },
+            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                "enabled": {"value": True},
+                "feature_threshold": {"value": 10000},
+                "chunk_size": {"value": 5000},
+            }}}},
+        }
+
+        target_crs = MagicMock(name="target_crs")
+        validated = {
+            'layers': [{"layer_name": "roads"}],
+            'projection': target_crs, 'styles': None,
+            'datatype': "ESRI Shapefile",
+            'output_folder': str(tmp_path),
+            'zip_path': None, 'batch_output_folder': False,
+            'batch_zip': False, 'preserve_groups': False,
+        }
+
+        with patch('core.tasks.export_handler.StreamingExporter', FakeStreamingExporter), \
+             patch('core.tasks.export_handler.StreamingConfig', MagicMock()), \
+             patch.object(handler, 'validate_export_parameters', return_value=validated):
+            handler.execute_exporting(
+                task_parameters=params, project=MagicMock(),
+                set_progress=MagicMock(), set_description=MagicMock(),
+                is_canceled=MagicMock(return_value=False),
+            )
+
+        assert captured.get("target_crs") is target_crs, (
+            "Streaming export must propagate user-selected projection "
+            "(was the kwarg dropped between handler and StreamingExporter?)"
+        )
+
+
+# ---------------------------------------------------------------------------
+# B10 — ZIP archive must not leak parent-directory contents
+# ---------------------------------------------------------------------------
+
+class TestZipFileOutputSidecarsOnly:
+    """``create_zip_archive_for_file`` must include only the data file and its
+    sidecars (same basename), never unrelated user files in the parent dir."""
+
+    def test_archive_contains_only_matching_basenames(self, tmp_path):
+        from core.export.batch_exporter import BatchExporter
+        import zipfile
+
+        # Layout: roads.shp + sidecars + UNRELATED files in same dir
+        (tmp_path / "roads.shp").write_bytes(b"shp")
+        (tmp_path / "roads.dbf").write_bytes(b"dbf")
+        (tmp_path / "roads.shx").write_bytes(b"shx")
+        (tmp_path / "roads.qml").write_text("<qml/>")
+        # Files that MUST NOT end up in the archive
+        (tmp_path / "private_taxes.xlsx").write_bytes(b"secret")
+        (tmp_path / "other_layer.shp").write_bytes(b"other")
+        (tmp_path / "README.md").write_text("# nope")
+
+        zip_path = str(tmp_path / "out.zip")
+        ok = BatchExporter.create_zip_archive_for_file(
+            zip_path, str(tmp_path / "roads.shp")
+        )
+        assert ok is True
+
+        with zipfile.ZipFile(zip_path) as zf:
+            members = set(zf.namelist())
+
+        assert members == {"roads.shp", "roads.dbf", "roads.shx", "roads.qml"}
+        # Hard tripwire on data leak
+        assert "private_taxes.xlsx" not in members
+        assert "README.md" not in members
+        assert "other_layer.shp" not in members
+
+    def test_returns_false_when_no_sidecars(self, tmp_path):
+        from core.export.batch_exporter import BatchExporter
+        # File doesn't exist on disk → no siblings match
+        ok = BatchExporter.create_zip_archive_for_file(
+            str(tmp_path / "out.zip"), str(tmp_path / "missing.shp")
+        )
+        assert ok is False
+
+
+# ---------------------------------------------------------------------------
+# B8 — CSV must set GEOMETRY=AS_WKT layer option
+# ---------------------------------------------------------------------------
+
+class TestCsvLayerOptions:
+    """Without ``GEOMETRY=AS_WKT`` in layerOptions, OGR's CSV driver drops the
+    geometry column silently."""
+
+    @pytest.fixture
+    def patched_module(self, monkeypatch):
+        from core.export import layer_exporter as le
+        fake_writer = MagicMock()
+        fake_writer.NoError = 0
+        fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
+        fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
+        del fake_writer.writeAsVectorFormat
+        monkeypatch.setattr(le, "QGIS_AVAILABLE", True)
+        monkeypatch.setattr(le, "QgsVectorFileWriter", fake_writer)
+        monkeypatch.setattr(le, "QgsCoordinateTransform", MagicMock())
+        monkeypatch.setattr(le, "QgsCoordinateTransformContext", MagicMock())
+        monkeypatch.setattr(le, "QgsProject",
+                            MagicMock(instance=MagicMock(return_value=None)))
+        return le, fake_writer
+
+    def _make_layer(self):
+        layer = MagicMock()
+        layer.name.return_value = "x"
+        crs = MagicMock()
+        crs.isValid.return_value = True
+        crs.__eq__ = lambda self, o: True
+        layer.sourceCrs.return_value = crs
+        return layer
+
+    def test_csv_sets_geometry_layer_option(self, patched_module, tmp_path):
+        le, fake_writer = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        exporter.get_layer_by_name = MagicMock(return_value=self._make_layer())
+
+        exporter.export_single_layer(
+            "x", str(tmp_path / "x.csv"),
+            projection=None, datatype="CSV",
+            style_format=None, save_styles=False,
+        )
+
+        options = fake_writer.writeAsVectorFormatV3.call_args.args[3]
+        assert options.layerOptions is not None
+        assert any("GEOMETRY=AS_WKT" in opt for opt in options.layerOptions)
+        assert any("CREATE_CSVT" in opt for opt in options.layerOptions)
+
+    def test_non_csv_does_not_set_csv_options(self, patched_module, tmp_path):
+        le, fake_writer = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        exporter.get_layer_by_name = MagicMock(return_value=self._make_layer())
+
+        exporter.export_single_layer(
+            "x", str(tmp_path / "x.shp"),
+            projection=None, datatype="ESRI Shapefile",
+            style_format=None, save_styles=False,
+        )
+
+        options = fake_writer.writeAsVectorFormatV3.call_args.args[3]
+        # SaveVectorOptions returns a MagicMock, so options.layerOptions is
+        # only set when explicit assignment happens. For SHP it's untouched.
+        if hasattr(options, '_mock_children') and 'layerOptions' in options._mock_children:
+            ops = options.layerOptions
+            assert not any("GEOMETRY=AS_WKT" in str(o) for o in (ops if isinstance(ops, list) else []))
+
+
+# ---------------------------------------------------------------------------
+# B7 — GPKG with target_crs must bypass qgis:package
+# ---------------------------------------------------------------------------
+
+class TestGpkgReprojection:
+    """``processing.run('qgis:package')`` ignores any CRS parameter — when the
+    user picks a target CRS that differs from a layer's source, we must fall
+    back to per-layer writeAsVectorFormatV3 with options.ct."""
+
+    @pytest.fixture
+    def patched_module(self, monkeypatch):
+        from core.export import layer_exporter as le
+        fake_writer = MagicMock()
+        fake_writer.NoError = 0
+        fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
+        fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
+        # ActionOnExistingFile enum stub
+        fake_writer.ActionOnExistingFile = MagicMock(
+            CreateOrOverwriteFile=1, CreateOrOverwriteLayer=2,
+        )
+        del fake_writer.writeAsVectorFormat
+
+        fake_processing = MagicMock()
+        fake_processing.run = MagicMock(return_value={'OUTPUT': '/x.gpkg'})
+
+        monkeypatch.setattr(le, "QGIS_AVAILABLE", True)
+        monkeypatch.setattr(le, "QgsVectorFileWriter", fake_writer)
+        monkeypatch.setattr(le, "QgsCoordinateTransform",
+                            MagicMock(return_value="CT_SENTINEL"))
+        monkeypatch.setattr(le, "QgsCoordinateTransformContext", MagicMock())
+        monkeypatch.setattr(le, "QgsProject",
+                            MagicMock(instance=MagicMock(return_value=None)))
+        monkeypatch.setattr(le, "processing", fake_processing)
+        return le, fake_writer, fake_processing
+
+    def _make_layer(self, name, source_authid):
+        layer = MagicMock()
+        layer.name.return_value = name
+        crs = MagicMock()
+        crs.isValid.return_value = True
+        crs._authid = source_authid
+        crs.__eq__ = lambda self, o: getattr(o, '_authid', None) == source_authid
+        layer.sourceCrs.return_value = crs
+        return layer
+
+    def test_no_reprojection_uses_qgis_package(self, patched_module, tmp_path):
+        """When target_crs is None, we keep using processing for multi-layer GPKG."""
+        le, fake_writer, fake_processing = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layer = self._make_layer("roads", "EPSG:4326")
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        result = exporter.export_to_gpkg(
+            ["roads"], str(tmp_path / "out.gpkg"), save_styles=False,
+            target_crs=None,
+        )
+        assert result.success is True
+        fake_processing.run.assert_called_once()
+        fake_writer.writeAsVectorFormatV3.assert_not_called()
+
+    def test_reprojection_bypasses_qgis_package(self, patched_module, tmp_path):
+        """When target_crs differs from source, qgis:package must NOT be called
+        (it would silently keep the source CRS)."""
+        le, fake_writer, fake_processing = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layer = self._make_layer("roads", "EPSG:4326")
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        target = MagicMock()
+        target.isValid.return_value = True
+        target._authid = "EPSG:2154"
+        target.__eq__ = lambda self, o: getattr(o, '_authid', None) == "EPSG:2154"
+
+        result = exporter.export_to_gpkg(
+            ["roads"], str(tmp_path / "out.gpkg"), save_styles=False,
+            target_crs=target,
+        )
+        assert result.success is True
+        fake_processing.run.assert_not_called()
+        fake_writer.writeAsVectorFormatV3.assert_called_once()
+        # And the writer must carry the coordinate transform
+        options = fake_writer.writeAsVectorFormatV3.call_args.args[3]
+        assert options.ct == "CT_SENTINEL"
+
+    def test_reprojection_appends_subsequent_layers(self, patched_module, tmp_path):
+        """Multi-layer GPKG reprojection must append, not overwrite, after the
+        first layer creates the file."""
+        le, fake_writer, _ = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layers = [
+            self._make_layer("roads", "EPSG:4326"),
+            self._make_layer("rivers", "EPSG:4326"),
+        ]
+        exporter.get_layer_by_name = MagicMock(side_effect=lambda n: {
+            "roads": layers[0], "rivers": layers[1]
+        }[n])
+
+        target = MagicMock()
+        target.isValid.return_value = True
+        target._authid = "EPSG:2154"
+        target.__eq__ = lambda self, o: getattr(o, '_authid', None) == "EPSG:2154"
+
+        exporter.export_to_gpkg(
+            ["roads", "rivers"], str(tmp_path / "out.gpkg"),
+            save_styles=False, target_crs=target,
+        )
+        assert fake_writer.writeAsVectorFormatV3.call_count == 2
+        # 1st call: CreateOrOverwriteFile (=1). 2nd call: CreateOrOverwriteLayer (=2).
+        first_options = fake_writer.writeAsVectorFormatV3.call_args_list[0].args[3]
+        second_options = fake_writer.writeAsVectorFormatV3.call_args_list[1].args[3]
+        assert first_options.actionOnExistingFile == 1
+        assert second_options.actionOnExistingFile == 2
+
+
+# ---------------------------------------------------------------------------
+# C1 — Batch filename collision must be disambiguated, never silently overwritten
+# ---------------------------------------------------------------------------
+
+class TestBatchFilenameDisambiguation:
+    """Two layers with names that sanitize to the same basename must produce
+    distinct files (``foo.shp``, ``foo_2.shp``), never overwrite each other."""
+
+    def test_disambiguate_basename_helper(self):
+        from core.export.batch_exporter import _disambiguate_basename
+        used = set()
+        assert _disambiguate_basename("roads", used) == "roads"
+        assert _disambiguate_basename("roads", used) == "roads_2"
+        assert _disambiguate_basename("roads", used) == "roads_3"
+        assert _disambiguate_basename("rivers", used) == "rivers"
+        assert used == {"roads", "roads_2", "roads_3", "rivers"}
+
+    def test_export_to_folder_disambiguates_collisions(self, tmp_path):
+        from core.export.batch_exporter import BatchExporter
+        from core.export import layer_exporter as le
+
+        captured_paths = []
+
+        def fake_export_single(self_, layer_name, output_path, *a, **kw):
+            captured_paths.append(output_path)
+            from core.export.layer_exporter import ExportResult
+            return ExportResult(success=True, exported_count=1, output_path=output_path)
+
+        with patch.object(le.LayerExporter, 'export_single_layer', fake_export_single), \
+             patch.object(le.LayerExporter, 'get_layer_by_name',
+                          return_value=MagicMock()):
+            exporter = BatchExporter(project=MagicMock())
+            # Two identically named layers (e.g. cross-schema)
+            exporter.export_to_folder(
+                [{"layer_name": "roads"}, {"layer_name": "roads"}],
+                str(tmp_path), datatype="ESRI Shapefile",
+            )
+
+        assert len(captured_paths) == 2
+        assert captured_paths[0].endswith("roads.shp")
+        assert captured_paths[1].endswith("roads_2.shp")
+        # Tripwire: never the same path
+        assert captured_paths[0] != captured_paths[1]
+
+
+# ---------------------------------------------------------------------------
+# C2 — Validator must reject unknown OGR drivers up-front
+# ---------------------------------------------------------------------------
+
+class TestValidatorRejectsUnknownDriver:
+    def _validate(self, datatype):
+        from core.export.export_validator import validate_export_parameters
+        return validate_export_parameters({
+            "task": {
+                "EXPORTING": {
+                    "HAS_LAYERS_TO_EXPORT": True,
+                    "HAS_DATATYPE_TO_EXPORT": True,
+                    "DATATYPE_TO_EXPORT": datatype,
+                    "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
+                    "OUTPUT_FOLDER_TO_EXPORT": "/tmp/out",
+                },
+                "layers": [{"layer_name": "x"}],
+            }
+        })
+
+    def test_unknown_driver_rejected(self):
+        result = self._validate("Bogus Format 9000")
+        assert result.valid is False
+        assert "Unsupported export datatype" in (result.error_message or "")
+
+    def test_known_drivers_pass(self):
+        for d in ("GPKG", "ESRI Shapefile", "GeoJSON", "CSV", "XLSX",
+                  "MapInfo File", "FlatGeobuf"):
+            result = self._validate(d)
+            assert result.valid is True, f"{d} should validate, got: {result.error_message}"
+
+
+# ---------------------------------------------------------------------------
+# B3 — Shapefile pre-flight: surface DBF + geom-type constraints
+# ---------------------------------------------------------------------------
+
+class TestShapefilePreflightConstraints:
+    """``validate_shapefile_constraints`` must surface (as warnings, not errors)
+    the silent OGR coercions that confuse users post-export:
+    - DBF 10-char field-name limit
+    - DBF allowed character set (ASCII alnum + underscore, letter-leading)
+    - Mixed/unknown geometry types not natively supported by SHP
+    """
+
+    def _make_layer(self, field_names, wkb_type_str='Polygon'):
+        layer = MagicMock()
+        layer.name.return_value = "x"
+        fields = []
+        for n in field_names:
+            f = MagicMock()
+            f.name.return_value = n
+            fields.append(f)
+        layer.fields.return_value = fields
+
+        # Stub QgsWkbTypes.displayString() lookup
+        layer.wkbType.return_value = MagicMock()
+        return layer, wkb_type_str
+
+    def test_long_field_name_warns(self, monkeypatch):
+        from core.export import layer_exporter as le
+        layer, wkb_str = self._make_layer(["short", "this_is_too_long_for_dbf"])
+
+        # Stub QgsWkbTypes import inside the function
+        import sys
+        fake_wkb = MagicMock(displayString=MagicMock(return_value=wkb_str))
+        monkeypatch.setitem(sys.modules, 'qgis', MagicMock())
+        monkeypatch.setitem(sys.modules, 'qgis.core',
+                            MagicMock(QgsWkbTypes=fake_wkb))
+
+        warnings = le.validate_shapefile_constraints(layer)
+        joined = " ".join(warnings)
+        assert "this_is_too_long_for_dbf" in joined
+        assert "10 chars" in joined
+
+    def test_invalid_dbf_chars_warn(self, monkeypatch):
+        from core.export import layer_exporter as le
+        # spaces and accents are not DBF-safe, leading digit not allowed
+        layer, wkb_str = self._make_layer(["nom rue", "1abc", "café"])
+
+        import sys
+        fake_wkb = MagicMock(displayString=MagicMock(return_value=wkb_str))
+        monkeypatch.setitem(sys.modules, 'qgis', MagicMock())
+        monkeypatch.setitem(sys.modules, 'qgis.core',
+                            MagicMock(QgsWkbTypes=fake_wkb))
+
+        warnings = le.validate_shapefile_constraints(layer)
+        joined = " ".join(warnings)
+        assert "nom rue" in joined or "café" in joined or "1abc" in joined
+
+    def test_unknown_geometry_warns(self, monkeypatch):
+        from core.export import layer_exporter as le
+        layer, _ = self._make_layer(["ok"], wkb_type_str='Unknown')
+
+        import sys
+        fake_wkb = MagicMock(displayString=MagicMock(return_value='Unknown'))
+        monkeypatch.setitem(sys.modules, 'qgis', MagicMock())
+        monkeypatch.setitem(sys.modules, 'qgis.core',
+                            MagicMock(QgsWkbTypes=fake_wkb))
+
+        warnings = le.validate_shapefile_constraints(layer)
+        assert any("Unknown" in w for w in warnings)
+
+    def test_clean_layer_emits_no_warnings(self, monkeypatch):
+        from core.export import layer_exporter as le
+        layer, _ = self._make_layer(["id", "name", "speed"], wkb_type_str='LineString')
+
+        import sys
+        fake_wkb = MagicMock(displayString=MagicMock(return_value='LineString'))
+        monkeypatch.setitem(sys.modules, 'qgis', MagicMock())
+        monkeypatch.setitem(sys.modules, 'qgis.core',
+                            MagicMock(QgsWkbTypes=fake_wkb))
+
+        warnings = le.validate_shapefile_constraints(layer)
+        assert warnings == []
+
+    def test_warnings_attached_to_export_result(self, monkeypatch, tmp_path):
+        """End-to-end: a SHP export with violating field names returns
+        ``ExportResult.warnings`` non-empty — so the UI can surface them."""
+        from core.export import layer_exporter as le
+
+        fake_writer = MagicMock()
+        fake_writer.NoError = 0
+        fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
+        fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
+        del fake_writer.writeAsVectorFormat
+
+        monkeypatch.setattr(le, "QGIS_AVAILABLE", True)
+        monkeypatch.setattr(le, "QgsVectorFileWriter", fake_writer)
+        monkeypatch.setattr(le, "QgsCoordinateTransform", MagicMock())
+        monkeypatch.setattr(le, "QgsCoordinateTransformContext", MagicMock())
+        monkeypatch.setattr(le, "QgsProject",
+                            MagicMock(instance=MagicMock(return_value=None)))
+
+        # Stub QgsWkbTypes for validate_shapefile_constraints
+        import sys
+        monkeypatch.setitem(sys.modules, 'qgis', MagicMock())
+        monkeypatch.setitem(sys.modules, 'qgis.core',
+                            MagicMock(QgsWkbTypes=MagicMock(
+                                displayString=MagicMock(return_value='Polygon'))))
+
+        layer = MagicMock()
+        layer.name.return_value = "parcelles"
+        f1 = MagicMock(); f1.name.return_value = "id"
+        f2 = MagicMock(); f2.name.return_value = "very_long_attribute_name"
+        layer.fields.return_value = [f1, f2]
+        crs = MagicMock(); crs.isValid.return_value = True
+        crs.__eq__ = lambda self, o: True
+        layer.sourceCrs.return_value = crs
+
+        exporter = le.LayerExporter(project=MagicMock())
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        result = exporter.export_single_layer(
+            "parcelles", str(tmp_path / "parcelles.shp"),
+            projection=None, datatype="ESRI Shapefile",
+            style_format=None, save_styles=False,
+        )
+
+        assert result.success is True
+        assert result.warnings, "SHP export should surface DBF warnings"
+        assert any("very_long_attribute_name" in w for w in result.warnings)
+
+    def test_non_shp_export_skips_pre_flight(self, monkeypatch, tmp_path):
+        """GPKG/GeoJSON/etc. don't have DBF limits — pre-flight must NOT run
+        and result.warnings stays empty."""
+        from core.export import layer_exporter as le
+
+        fake_writer = MagicMock()
+        fake_writer.NoError = 0
+        fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
+        fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
+        del fake_writer.writeAsVectorFormat
+
+        monkeypatch.setattr(le, "QGIS_AVAILABLE", True)
+        monkeypatch.setattr(le, "QgsVectorFileWriter", fake_writer)
+        monkeypatch.setattr(le, "QgsCoordinateTransform", MagicMock())
+        monkeypatch.setattr(le, "QgsCoordinateTransformContext", MagicMock())
+        monkeypatch.setattr(le, "QgsProject",
+                            MagicMock(instance=MagicMock(return_value=None)))
+
+        layer = MagicMock()
+        layer.name.return_value = "parcelles"
+        f = MagicMock(); f.name.return_value = "very_long_field_name_that_would_break_dbf"
+        layer.fields.return_value = [f]
+        crs = MagicMock(); crs.isValid.return_value = True
+        crs.__eq__ = lambda self, o: True
+        layer.sourceCrs.return_value = crs
+
+        exporter = le.LayerExporter(project=MagicMock())
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        result = exporter.export_single_layer(
+            "parcelles", str(tmp_path / "parcelles.gpkg"),
+            projection=None, datatype="GPKG",
+            style_format=None, save_styles=False,
+        )
+
+        assert result.success is True
+        assert result.warnings == []
+
+
+# ---------------------------------------------------------------------------
+# C4 — GPKG path detection robust to non-.gpkg suffixes & existing dirs
+# ---------------------------------------------------------------------------
+
+class TestGpkgPathDetection:
+    """The handler must distinguish file-output vs directory-output for GPKG
+    based on actual filesystem state, not just suffix matching."""
+
+    @pytest.fixture
+    def setup_handler(self):
+        with patch('core.tasks.export_handler.StreamingExporter'), \
+             patch('core.tasks.export_handler.StreamingConfig'):
+            from core.tasks.export_handler import ExportHandler
+            return ExportHandler()
+
+    def _run(self, handler, output_folder, tmp_path):
+        from core.export.layer_exporter import LayerExporter
+        captured = {}
+
+        def fake_export_to_gpkg(self_, layers, output_path, save_styles,
+                                target_crs=None):
+            captured['output_path'] = output_path
+            return MagicMock(success=True, exported_count=1, output_path=output_path,
+                             error_message=None)
+
+        validated = {
+            'layers': [{"layer_name": "x"}],
+            'projection': None, 'styles': None,
+            'datatype': "GPKG",
+            'output_folder': output_folder,
+            'zip_path': None, 'batch_output_folder': False,
+            'batch_zip': False, 'preserve_groups': False,
+        }
+
+        project = MagicMock()
+        project.title.return_value = "myproj"
+        project.baseName.return_value = "myproj"
+
+        with patch.object(LayerExporter, 'export_to_gpkg', fake_export_to_gpkg), \
+             patch.object(handler, 'validate_export_parameters', return_value=validated):
+            handler.execute_exporting(
+                task_parameters={"task": {"EXPORTING": {
+                    "HAS_LAYERS_TO_EXPORT": True,
+                    "HAS_DATATYPE_TO_EXPORT": True,
+                    "DATATYPE_TO_EXPORT": "GPKG",
+                    "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
+                    "OUTPUT_FOLDER_TO_EXPORT": output_folder,
+                    "HAS_STYLES_TO_EXPORT": False,
+                }, "layers": [{"layer_name": "x"}]}, "config": {}},
+                project=project,
+                set_progress=MagicMock(), set_description=MagicMock(),
+                is_canceled=MagicMock(return_value=False),
+            )
+        return captured
+
+    def test_existing_directory_treated_as_dir(self, setup_handler, tmp_path):
+        """Existing dir → write project_title.gpkg inside it."""
+        out_dir = tmp_path / "outputs"
+        out_dir.mkdir()
+        captured = self._run(setup_handler, str(out_dir), tmp_path)
+        assert captured['output_path'].endswith(".gpkg")
+        assert str(out_dir) in captured['output_path']
+        # Filename comes from the project title, not the dir name
+        assert os.path.dirname(captured['output_path']) == str(out_dir)
+
+    def test_dot_gpkg_suffix_treated_as_file(self, setup_handler, tmp_path):
+        """Path ending in .gpkg (file doesn't exist yet) → use as-is."""
+        target = tmp_path / "myexport.gpkg"
+        captured = self._run(setup_handler, str(target), tmp_path)
+        assert captured['output_path'] == str(target)
+
+    def test_unusual_suffix_existing_file_treated_as_file(self, setup_handler, tmp_path):
+        """Path like ``foo.gpkg.tmp`` that already exists as a file → treat as
+        file, not as a directory to create. Previously the suffix check
+        ``.endswith('.gpkg')`` returned False and the handler tried makedirs."""
+        target = tmp_path / "weird.gpkg.tmp"
+        target.touch()
+        captured = self._run(setup_handler, str(target), tmp_path)
+        assert captured['output_path'] == str(target)

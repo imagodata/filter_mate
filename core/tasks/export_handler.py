@@ -339,17 +339,23 @@ class ExportHandler:
         if is_canceled():
             return False, 'Export cancelled by user', None
 
-        # Resolve the reported output location — for file-output mode, report
-        # the exported file itself, and zip the parent directory.
+        # Resolve the reported output location.
         reported_output = single_output if output_is_file else output_folder
-        zip_source_dir = (
-            os.path.dirname(single_output) if output_is_file else output_folder
-        )
 
-        # Create zip archive if requested
+        # Create zip archive if requested.
+        # File-output mode zips ONLY the exported file + its sidecars (same
+        # basename) — zipping the parent dir would leak unrelated user files
+        # into the archive.
         zip_created = False
         if zip_path:
-            zip_created = BatchExporter.create_zip_archive(zip_path, zip_source_dir)
+            if output_is_file:
+                zip_created = BatchExporter.create_zip_archive_for_file(
+                    zip_path, single_output
+                )
+            else:
+                zip_created = BatchExporter.create_zip_archive(
+                    zip_path, output_folder
+                )
             if not zip_created:
                 return False, 'Failed to create ZIP archive', None
 
@@ -413,7 +419,18 @@ class ExportHandler:
         Returns:
             tuple: (success: bool, message: str, error_details: Optional[str])
         """
-        if output_folder.lower().endswith('.gpkg'):
+        # Distinguish file-output from directory-output. Prefer the existing
+        # filesystem state when available (handles paths like ``foo.gpkg.tmp``
+        # — non-.gpkg suffix that the user clearly meant as a file path),
+        # then fall back to suffix detection for paths that don't exist yet.
+        if os.path.isdir(output_folder):
+            output_is_file = False
+        elif os.path.isfile(output_folder):
+            output_is_file = True
+        else:
+            output_is_file = output_folder.lower().endswith('.gpkg')
+
+        if output_is_file:
             gpkg_output_path = output_folder
             gpkg_dir = os.path.dirname(gpkg_output_path)
             if gpkg_dir and not os.path.exists(gpkg_dir):
@@ -438,7 +455,9 @@ class ExportHandler:
             gpkg_output_path = os.path.join(output_folder, f"{default_name}.gpkg")
 
         logger.info(f"GPKG export - delegating to LayerExporter: {gpkg_output_path}")
-        result = layer_exporter.export_to_gpkg(layers, gpkg_output_path, save_styles)
+        result = layer_exporter.export_to_gpkg(
+            layers, gpkg_output_path, save_styles, target_crs=export_crs
+        )
 
         if not result.success:
             return False, result.error_message or 'GPKG export failed', None
@@ -536,7 +555,11 @@ class ExportHandler:
             exported_count = 0
             failed_layers = []
             from ..export.layer_exporter import get_extension_for_format
+            from ..export.batch_exporter import (
+                _disambiguate_basename, sanitize_filename,
+            )
             ext = get_extension_for_format(datatype)
+            used_basenames = set()
 
             for layer_info in layers:
                 layer_name = layer_info['layer_name'] if isinstance(layer_info, dict) else layer_info
@@ -547,8 +570,11 @@ class ExportHandler:
                     failed_layers.append(f"{layer_name} (not found)")
                     continue
 
-                # Determine output path
-                output_path = os.path.join(output_folder, f"{layer_name}{ext}")
+                # Determine output path (disambiguate collisions)
+                safe = _disambiguate_basename(
+                    sanitize_filename(layer_name), used_basenames
+                )
+                output_path = os.path.join(output_folder, f"{safe}{ext}")
 
                 logger.info(f"Streaming export: {layer_name} -> {output_path}")
 
@@ -557,7 +583,8 @@ class ExportHandler:
                     output_path=output_path,
                     format=export_format,
                     progress_callback=progress_callback,
-                    cancel_check=is_canceled
+                    cancel_check=is_canceled,
+                    target_crs=projection,
                 )
 
                 if not result.get('success', False):

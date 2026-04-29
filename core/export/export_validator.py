@@ -142,6 +142,21 @@ def validate_export_parameters(
             error_message="Export datatype is empty"
         )
 
+    # Reject unknown OGR drivers up-front. Without this check, the writer
+    # call later will fail with an opaque GDAL error or silently produce a
+    # garbage extension via get_extension_for_format's fallback.
+    from .layer_exporter import LayerExporter
+    known_keys = set(LayerExporter.DRIVER_MAP.keys())
+    known_values = {v.upper() for v in LayerExporter.DRIVER_MAP.values()}
+    if datatype.upper() not in known_keys and datatype.upper() not in known_values:
+        return ExportValidationResult(
+            valid=False,
+            error_message=(
+                f"Unsupported export datatype '{datatype}'. "
+                f"Pick one of: {sorted(set(LayerExporter.DRIVER_MAP.values()))}"
+            ),
+        )
+
     logger.debug(f"Datatype validation passed: {datatype}")
 
     # Extract optional parameters

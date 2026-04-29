@@ -19,6 +19,7 @@ Original source: modules/tasks/filter_task.py lines 9551-10400 (~850 lines)
 """
 
 import os
+import re
 import logging
 from enum import Enum
 from dataclasses import dataclass
@@ -29,6 +30,8 @@ try:
         QgsVectorLayer,
         QgsVectorFileWriter,
         QgsCoordinateReferenceSystem,
+        QgsCoordinateTransform,
+        QgsCoordinateTransformContext,
         QgsProject,
     )
     from qgis import processing
@@ -38,6 +41,8 @@ except ImportError:
     QgsVectorLayer = Any
     QgsVectorFileWriter = Any
     QgsCoordinateReferenceSystem = Any
+    QgsCoordinateTransform = Any
+    QgsCoordinateTransformContext = Any
     QgsProject = Any
 
 logger = logging.getLogger('FilterMate.Export')
@@ -62,7 +67,9 @@ OGR_EXTENSION_MAP = {
     'MAPINFO FILE': '.tab',
     'DXF': '.dxf',
     'SQLITE': '.sqlite',
-    'SPATIALITE': '.spatialite',
+    # SpatiaLite uses .sqlite by QGIS/OGR convention; .spatialite is not
+    # recognised by QGIS data-source loaders.
+    'SPATIALITE': '.sqlite',
     'FLATGEOBUF': '.fgb',
     'ESRI FILEGDB': '.gdb',
     'OPENFILEGDB': '.gdb',
@@ -82,6 +89,76 @@ def get_extension_for_format(datatype: str) -> str:
     # Fallback: use lowercased datatype as extension (only safe for single-word names)
     clean = datatype.strip().lower().replace(' ', '_')
     return f'.{clean}'
+
+
+# Shapefile DBF allows only ASCII alphanumerics + underscore in field names,
+# max 10 chars, must start with a letter. OGR truncates/mangles silently.
+_DBF_VALID_FIELD = re.compile(r'^[A-Za-z][A-Za-z0-9_]{0,9}$')
+
+# Geometry type buckets used to detect mixed-type layers that SHP can't store
+# in a single file (Point/MultiPoint share a bucket; same for Line and Polygon
+# variants — OGR coerces Single↔Multi automatically).
+_GEOM_BUCKETS = {
+    'Point': 'point', 'MultiPoint': 'point',
+    'LineString': 'line', 'MultiLineString': 'line',
+    'CircularString': 'line', 'CompoundCurve': 'line', 'MultiCurve': 'line',
+    'Polygon': 'polygon', 'MultiPolygon': 'polygon',
+    'CurvePolygon': 'polygon', 'MultiSurface': 'polygon',
+}
+
+
+def validate_shapefile_constraints(layer) -> List[str]:
+    """Return human-readable warnings for SHP-specific constraints that OGR
+    would otherwise apply silently:
+
+    - DBF field-name limit (10 chars, ASCII alnum + underscore)
+    - Single geometry-type per file (mixed types get coerced)
+
+    Returns an empty list when the layer is SHP-clean. Warnings are surfaced
+    via ``ExportResult.warnings`` — never fatal, since OGR can still produce
+    a (degraded) shapefile.
+    """
+    warnings: List[str] = []
+
+    try:
+        fields = list(layer.fields())
+    except Exception:
+        fields = []
+
+    long_fields = [f.name() for f in fields if len(f.name()) > 10]
+    if long_fields:
+        warnings.append(
+            f"DBF will silently truncate field names >10 chars: {long_fields}. "
+            f"Rename fields before export to keep them stable."
+        )
+
+    invalid_fields = [
+        f.name() for f in fields
+        if not _DBF_VALID_FIELD.match(f.name())
+    ]
+    # Subtract long_fields so the user doesn't get duplicate noise.
+    invalid_only = [n for n in invalid_fields if n not in long_fields]
+    if invalid_only:
+        warnings.append(
+            f"DBF requires ASCII letter-leading alphanumerics + underscore in "
+            f"field names. OGR will mangle: {invalid_only}"
+        )
+
+    # Geometry homogeneity: SHP can hold one geometry type per file.
+    try:
+        wkb_type = layer.wkbType()
+        from qgis.core import QgsWkbTypes
+        type_name = QgsWkbTypes.displayString(wkb_type)
+    except Exception:
+        type_name = ''
+
+    if type_name in ('Unknown', 'GeometryCollection', 'NoGeometry'):
+        warnings.append(
+            f"Layer geometry type '{type_name}' is not natively supported by "
+            f"Shapefile — OGR may produce a degraded or empty file."
+        )
+
+    return warnings
 
 
 class ExportFormat(Enum):
@@ -292,21 +369,61 @@ class LayerExporter:
 
         logger.debug(f"Exporting layer '{layer.name()}' to {output_path} (driver: {driver_name})")
 
+        # Pre-flight: surface SHP-specific constraints (DBF field limits,
+        # geometry type homogeneity) that OGR would otherwise apply silently.
+        shp_warnings: List[str] = []
+        if driver_name == 'ESRI Shapefile':
+            shp_warnings = validate_shapefile_constraints(layer)
+            for w in shp_warnings:
+                logger.warning(f"SHP pre-flight ({layer.name()}): {w}")
+
         try:
-            result = QgsVectorFileWriter.writeAsVectorFormat(
-                layer,
-                os.path.normcase(output_path),
-                "UTF-8",
-                current_projection,
-                driver_name
+            # writeAsVectorFormatV3 (QGIS 3.20+) — replaces deprecated writeAsVectorFormat
+            # which is removed in QGIS 4.x. CRS reprojection is expressed via options.ct.
+            transform_context = (
+                QgsProject.instance().transformContext()
+                if QgsProject.instance() is not None
+                else QgsCoordinateTransformContext()
             )
 
-            if result[0] != QgsVectorFileWriter.NoError:
-                error_msg = result[1] if len(result) > 1 else "Unknown error"
-                logger.error(f"Export failed for layer '{layer.name()}': {error_msg}")
+            options = QgsVectorFileWriter.SaveVectorOptions()
+            options.driverName = driver_name
+            options.fileEncoding = "UTF-8"
+
+            # CSV needs explicit geometry layer-creation options, otherwise
+            # OGR drops the geometry column silently. CREATE_CSVT writes a
+            # `.csvt` sidecar with column types so re-import preserves them.
+            if driver_name == 'CSV':
+                options.layerOptions = [
+                    'GEOMETRY=AS_WKT',
+                    'CREATE_CSVT=YES',
+                    'SEPARATOR=COMMA',
+                ]
+
+            source_crs = layer.sourceCrs()
+            if (
+                current_projection
+                and current_projection.isValid()
+                and source_crs.isValid()
+                and current_projection != source_crs
+            ):
+                options.ct = QgsCoordinateTransform(
+                    source_crs, current_projection, transform_context
+                )
+
+            error, error_msg, _, _ = QgsVectorFileWriter.writeAsVectorFormatV3(
+                layer,
+                output_path,
+                transform_context,
+                options,
+            )
+
+            if error != QgsVectorFileWriter.NoError:
+                msg = error_msg or "Unknown error"
+                logger.error(f"Export failed for layer '{layer.name()}': {msg}")
                 return ExportResult(
                     success=False,
-                    error_message=error_msg
+                    error_message=msg
                 )
 
             # Save style if requested
@@ -317,7 +434,8 @@ class LayerExporter:
             return ExportResult(
                 success=True,
                 exported_count=1,
-                output_path=output_path
+                output_path=output_path,
+                warnings=shp_warnings,
             )
 
         except Exception as e:
@@ -332,7 +450,8 @@ class LayerExporter:
         self,
         layer_names: List[str],
         output_path: str,
-        save_styles: bool
+        save_styles: bool,
+        target_crs: Optional[QgsCoordinateReferenceSystem] = None,
     ) -> ExportResult:
         """
         Export layers to GeoPackage format using QGIS processing.
@@ -341,6 +460,10 @@ class LayerExporter:
             layer_names: List of layer names to export
             output_path: Output GPKG file path
             save_styles: Whether to include layer styles
+            target_crs: Optional reprojection CRS. ``qgis:package`` does not
+                accept a CRS parameter, so when ``target_crs`` is set and
+                differs from any layer's native CRS we fall back to manual
+                per-layer ``writeAsVectorFormatV3`` with ``options.ct``.
 
         Returns:
             ExportResult with export status
@@ -359,6 +482,23 @@ class LayerExporter:
             return ExportResult(
                 success=False,
                 error_message="No valid layers found for GPKG export"
+            )
+
+        # If user picked a target CRS that differs from any layer's source
+        # CRS, ``qgis:package`` would silently keep the source CRS. Fall back
+        # to a manual writer loop so reprojection actually happens.
+        needs_reprojection = (
+            target_crs is not None
+            and target_crs.isValid()
+            and any(
+                layer.sourceCrs().isValid() and layer.sourceCrs() != target_crs
+                for layer in layer_objects
+            )
+        )
+
+        if needs_reprojection:
+            return self._export_to_gpkg_reproject(
+                layer_objects, output_path, target_crs
             )
 
         alg_parameters = {
@@ -396,6 +536,82 @@ class LayerExporter:
                 error_message=str(e)
             )
 
+    def _export_to_gpkg_reproject(
+        self,
+        layer_objects: List[QgsVectorLayer],
+        output_path: str,
+        target_crs: QgsCoordinateReferenceSystem,
+    ) -> ExportResult:
+        """Multi-layer GPKG export with per-layer reprojection.
+
+        ``processing.run("qgis:package")`` does not accept a CRS parameter,
+        so when reprojection is requested we have to drive the export
+        ourselves via writeAsVectorFormatV3, layering each table into the
+        same .gpkg via ``actionOnExistingFile``.
+        """
+        logger.info(
+            f"GPKG reprojection export: {len(layer_objects)} layer(s) "
+            f"→ {target_crs.authid()} → {output_path}"
+        )
+
+        transform_context = (
+            QgsProject.instance().transformContext()
+            if QgsProject.instance() is not None
+            else QgsCoordinateTransformContext()
+        )
+
+        # Remove any existing output so the first writer call doesn't append
+        # to stale data from a previous run.
+        if os.path.isfile(output_path):
+            try:
+                os.remove(output_path)
+            except OSError as e:
+                return ExportResult(
+                    success=False,
+                    error_message=f"Cannot overwrite existing GPKG: {e}",
+                )
+
+        for idx, layer in enumerate(layer_objects):
+            options = QgsVectorFileWriter.SaveVectorOptions()
+            options.driverName = 'GPKG'
+            options.fileEncoding = 'UTF-8'
+            options.layerName = layer.name()
+            # First layer creates the file; subsequent layers append a new
+            # table to the same GPKG.
+            if idx == 0:
+                options.actionOnExistingFile = (
+                    QgsVectorFileWriter.ActionOnExistingFile.CreateOrOverwriteFile
+                )
+            else:
+                options.actionOnExistingFile = (
+                    QgsVectorFileWriter.ActionOnExistingFile.CreateOrOverwriteLayer
+                )
+
+            source_crs = layer.sourceCrs()
+            if source_crs.isValid() and source_crs != target_crs:
+                options.ct = QgsCoordinateTransform(
+                    source_crs, target_crs, transform_context
+                )
+
+            error, error_msg, _, _ = QgsVectorFileWriter.writeAsVectorFormatV3(
+                layer, output_path, transform_context, options
+            )
+            if error != QgsVectorFileWriter.NoError:
+                msg = error_msg or "Unknown error"
+                logger.error(
+                    f"GPKG reprojection export failed for '{layer.name()}': {msg}"
+                )
+                return ExportResult(
+                    success=False,
+                    error_message=msg,
+                )
+
+        return ExportResult(
+            success=True,
+            exported_count=len(layer_objects),
+            output_path=output_path,
+        )
+
     def export_multiple_to_directory(self, config: ExportConfig) -> ExportResult:
         """
         Export multiple layers to a directory (one file per layer).
@@ -406,17 +622,22 @@ class LayerExporter:
         Returns:
             ExportResult with export statistics
         """
+        from .batch_exporter import _disambiguate_basename, sanitize_filename
         result = ExportResult(success=True, output_path=config.output_path)
+        used_basenames = set()
 
         for layer_name_item in config.layers:
             # Handle both dict and string formats
             layer_name = layer_name_item['layer_name'] if isinstance(layer_name_item, dict) else layer_name_item
 
-            # Build output path for this layer
+            # Build output path for this layer (disambiguate collisions)
+            safe = _disambiguate_basename(
+                sanitize_filename(layer_name), used_basenames
+            )
             ext = get_extension_for_format(config.datatype)
             layer_output = os.path.join(
                 config.output_path,
-                f"{layer_name}{ext}"
+                f"{safe}{ext}"
             )
 
             # Export layer

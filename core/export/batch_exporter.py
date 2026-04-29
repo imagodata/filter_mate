@@ -58,6 +58,23 @@ def sanitize_filename(filename: str) -> str:
     return safe
 
 
+def _disambiguate_basename(base: str, used: set) -> str:
+    """Append ``_2``, ``_3``, … to ``base`` until it is unique against ``used``.
+
+    Mutates ``used`` to reserve the chosen name. Used to prevent silent
+    overwrites when two layers sanitize to the same basename in batch export.
+    """
+    if base not in used:
+        used.add(base)
+        return base
+    n = 2
+    while f"{base}_{n}" in used:
+        n += 1
+    candidate = f"{base}_{n}"
+    used.add(candidate)
+    return candidate
+
+
 @dataclass
 class BatchExportResult:
     """Result of batch export operation."""
@@ -204,6 +221,10 @@ class BatchExporter:
         exported_paths = []
         failed_layers = []
         skipped_layers = []
+        # Track sanitized basenames to disambiguate collisions (e.g. two
+        # layers that share a name across schemas, or that collide after
+        # special-character stripping).
+        used_basenames = set()
 
         for idx, layer_item in enumerate(layer_names, 1):
             # Handle both dict (layer info) and string (layer name) formats
@@ -222,8 +243,10 @@ class BatchExporter:
                 skipped_layers.append(layer_name)
                 continue
 
-            # Sanitize filename
-            safe_filename = sanitize_filename(layer_name)
+            # Sanitize filename + disambiguate against earlier exports
+            safe_filename = _disambiguate_basename(
+                sanitize_filename(layer_name), used_basenames
+            )
             file_extension = get_extension_for_format(datatype)
             output_path = os.path.join(output_folder, f"{safe_filename}{file_extension}")
 
@@ -320,6 +343,7 @@ class BatchExporter:
         exported_zips = []
         failed_layers = []
         skipped_layers = []
+        used_basenames = set()
 
         for idx, layer_item in enumerate(layer_names, 1):
             # Handle both dict (layer info) and string (layer name) formats
@@ -338,8 +362,10 @@ class BatchExporter:
                 skipped_layers.append(layer_name)
                 continue
 
-            # Sanitize filename
-            safe_filename = sanitize_filename(layer_name)
+            # Sanitize filename + disambiguate against earlier ZIPs
+            safe_filename = _disambiguate_basename(
+                sanitize_filename(layer_name), used_basenames
+            )
             file_extension = get_extension_for_format(datatype)
 
             # Create temporary directory for this layer's export
@@ -435,6 +461,59 @@ class BatchExporter:
                         logger.debug(f"Added to ZIP: {arcname}")
 
             logger.info(f"Successfully created ZIP archive: {zip_path}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to create ZIP archive '{zip_path}': {e}")
+            return False
+
+    @staticmethod
+    def create_zip_archive_for_file(zip_path: str, output_file: str) -> bool:
+        """Create a ZIP archive for a single exported data file and its
+        sidecars (same basename, different extensions: .shp/.dbf/.shx/.prj/.cpg
+        /.qml/.sld/.lyrx, etc.).
+
+        Used in single-layer file-output mode to avoid leaking unrelated files
+        from the parent directory into the archive (which is what the legacy
+        ``create_zip_archive(parent_dir)`` path did).
+
+        Args:
+            zip_path: Output ZIP file path.
+            output_file: Path to the exported data file (e.g. ``roads.shp``).
+
+        Returns:
+            True if successful, False otherwise.
+        """
+        try:
+            parent_dir = os.path.dirname(output_file)
+            base_name = os.path.splitext(os.path.basename(output_file))[0]
+
+            siblings = []
+            if os.path.isdir(parent_dir):
+                for entry in os.listdir(parent_dir):
+                    entry_path = os.path.join(parent_dir, entry)
+                    if not os.path.isfile(entry_path):
+                        continue
+                    entry_base = os.path.splitext(entry)[0]
+                    if entry_base == base_name:
+                        siblings.append(entry_path)
+
+            if not siblings:
+                logger.warning(
+                    f"No sidecar files matched base '{base_name}' for ZIP"
+                )
+                return False
+
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                for file_path in siblings:
+                    arcname = os.path.basename(file_path)
+                    zipf.write(file_path, arcname)
+                    logger.debug(f"Added to ZIP: {arcname}")
+
+            logger.info(
+                f"Successfully created ZIP archive: {zip_path} "
+                f"({len(siblings)} sidecar(s))"
+            )
             return True
 
         except Exception as e:

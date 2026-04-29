@@ -192,7 +192,8 @@ class StreamingExporter:
         format: str = 'gpkg',
         field_mapping: Optional[Dict[str, str]] = None,
         progress_callback: Optional[Callable[[ExportProgress], None]] = None,
-        cancel_check: Optional[Callable[[], bool]] = None
+        cancel_check: Optional[Callable[[], bool]] = None,
+        target_crs=None,
     ) -> Dict[str, Any]:
         """
         Export layer features using streaming/batching.
@@ -204,6 +205,8 @@ class StreamingExporter:
             field_mapping: Optional field name mapping
             progress_callback: Callback for progress updates
             cancel_check: Callback to check for cancellation
+            target_crs: Optional QgsCoordinateReferenceSystem for output
+                reprojection. When None or invalid, source layer CRS is used.
 
         Returns:
             Dict with export results:
@@ -227,8 +230,9 @@ class StreamingExporter:
             # Import QGIS writer
             from qgis.core import (
                 QgsVectorFileWriter,
+                QgsCoordinateTransform,
                 QgsCoordinateTransformContext,
-                QgsFields
+                QgsFields,
             )
 
             # Determine driver name. Accepts either a short alias (e.g. 'shp',
@@ -262,6 +266,9 @@ class StreamingExporter:
 
             # Create writer with first batch to initialize file
             writer = None
+            # Coordinate transform for per-feature reprojection. Built lazily
+            # alongside the writer once we know source vs target CRS.
+            feature_transform = None
 
             for batch in batch_iterator:
                 current_batch += 1
@@ -292,12 +299,20 @@ class StreamingExporter:
                     options.driverName = driver_name
                     options.fileEncoding = 'UTF-8'
 
+                    # Honour caller-supplied target CRS, else fall back to source.
+                    # writer_crs is what gets stamped in the output (e.g. .prj).
+                    source_crs = source_layer.crs()
+                    if target_crs is not None and target_crs.isValid():
+                        writer_crs = target_crs
+                    else:
+                        writer_crs = source_crs
+
                     # Create writer
                     writer = QgsVectorFileWriter.create(
                         output_path,
                         fields,
                         source_layer.wkbType(),
-                        source_layer.crs(),
+                        writer_crs,
                         transform_context,
                         options
                     )
@@ -313,8 +328,31 @@ class StreamingExporter:
                             'error': error_msg
                         }
 
+                    # Build per-feature transform once writer CRS is known.
+                    # QgsVectorFileWriter.create() stamps writer_crs in metadata
+                    # but does NOT transform geometries on addFeature(); we have
+                    # to do it ourselves to avoid CRS/geometry mismatch.
+                    if (
+                        source_crs.isValid()
+                        and writer_crs.isValid()
+                        and source_crs != writer_crs
+                    ):
+                        feature_transform = QgsCoordinateTransform(
+                            source_crs, writer_crs, transform_context
+                        )
+
                 # Write batch features
                 for feature in batch:
+                    if feature_transform is not None and feature.hasGeometry():
+                        geom = feature.geometry()
+                        if geom.transform(feature_transform) == 0:
+                            feature.setGeometry(geom)
+                        else:
+                            logger.warning(
+                                f"CRS transform failed for feature {feature.id()}, "
+                                f"skipping"
+                            )
+                            continue
                     if writer.addFeature(feature):
                         features_exported += 1
                     else:

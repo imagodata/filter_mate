@@ -112,9 +112,10 @@ class ExportDialogManager:
                 ))
 
             if path:
-                dw.widgets["EXPORTING"]["OUTPUT_FOLDER_TO_EXPORT"]["WIDGET"].setText(
-                    os.path.normcase(path)
-                )
+                # Don't normcase: the writer (V3) handles paths verbatim and
+                # case-sensitive filesystems (Linux, WSL mounts) treat
+                # `Foo.shp` and `foo.shp` as distinct files.
+                dw.widgets["EXPORTING"]["OUTPUT_FOLDER_TO_EXPORT"]["WIDGET"].setText(path)
             else:
                 state = False
                 dw.widgets["EXPORTING"]["OUTPUT_FOLDER_TO_EXPORT"]["WIDGET"].clear()
@@ -162,9 +163,7 @@ class ExportDialogManager:
                 '*.zip'
             )[0])
             if path:
-                dw.widgets["EXPORTING"]["ZIP_TO_EXPORT"]["WIDGET"].setText(
-                    os.path.normcase(path)
-                )
+                dw.widgets["EXPORTING"]["ZIP_TO_EXPORT"]["WIDGET"].setText(path)
             else:
                 state = False
                 dw.widgets["EXPORTING"]["ZIP_TO_EXPORT"]["WIDGET"].clear()

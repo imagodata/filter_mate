@@ -275,25 +275,10 @@ DOCKWIDGET_WIDGET_SIGNALS: List[SignalDefinition] = [
         2
     ),
 
-    # Export buttons
-    SignalDefinition(
-        'export_gpkg_clicked',
-        'pushButton_export_gpkg',
-        'clicked',
-        '_on_export_gpkg',
-        SignalCategory.WIDGET,
-        'exporting',
-        2
-    ),
-    SignalDefinition(
-        'export_shp_clicked',
-        'pushButton_export_shp',
-        'clicked',
-        '_on_export_shp',
-        SignalCategory.WIDGET,
-        'exporting',
-        2
-    ),
+    # NOTE: per-format export buttons (pushButton_export_gpkg / _shp) were
+    # superseded by a single pushButton_action_export wired through
+    # ConfigurationManager.SIGNALS → launchTaskEvent('export'). The dedicated
+    # widgets and their _on_export_* handlers no longer exist.
 ]
 
 
