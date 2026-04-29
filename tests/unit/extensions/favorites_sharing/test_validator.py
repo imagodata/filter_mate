@@ -151,3 +151,69 @@ def test_validate_reports_all_bad_favorites():
     assert not ok
     assert any("favorites[1]" in e for e in errors)
     assert any("favorites[2]" in e for e in errors)
+
+
+# ---------------------------------------------------------------------------
+# EXT-9 (audit 2026-04-29): cover the version-tolerance contract.
+# Validator must accept v1/v2 (legacy) and tolerate v4+ (future); only
+# `schema_version=0` and negative ints are real errors.
+# ---------------------------------------------------------------------------
+
+
+def test_validate_accepts_legacy_v1_bundle():
+    """v1 bundles predate the `collection` envelope and may omit `schema`."""
+    data = {
+        "schema_version": 1,
+        "favorites": [{"name": "legacy", "expression": "TRUE"}],
+    }
+    ok, errors = validate(data)
+    assert ok, f"v1 bundle should validate: {errors}"
+
+
+def test_validate_accepts_legacy_v2_bundle():
+    """v2 bundles introduced `schema` identifier; still without `collection`."""
+    data = {
+        "schema": "filter_mate.favorites",
+        "schema_version": 2,
+        "favorites": [{"name": "legacy", "expression": "TRUE"}],
+    }
+    ok, errors = validate(data)
+    assert ok, f"v2 bundle should validate: {errors}"
+
+
+def test_validate_tolerates_v4_bundle_with_unknown_keys():
+    """v4 (future) bundles must validate — unknown keys are kept via _extra
+    by the loader, the validator just warns and falls back to the v3 reader.
+    """
+    data = {
+        "schema": "filter_mate.favorites",
+        "schema_version": 4,
+        "favorites": [{"name": "fwd", "expression": "TRUE"}],
+        "future_envelope_key": {"hint": "ignore me on v3 reader"},
+    }
+    ok, errors = validate(data)
+    assert ok, f"v4 bundle should validate (warn-don't-reject): {errors}"
+
+
+def test_validate_rejects_zero_schema_version():
+    """schema_version=0 is rejected (must be a positive int)."""
+    data = {
+        "schema": "filter_mate.favorites",
+        "schema_version": 0,
+        "favorites": [],
+    }
+    ok, errors = validate(data)
+    assert not ok
+    assert any("schema_version" in e for e in errors)
+
+
+def test_validate_rejects_negative_schema_version():
+    """Negative schema_version is rejected."""
+    data = {
+        "schema": "filter_mate.favorites",
+        "schema_version": -1,
+        "favorites": [],
+    }
+    ok, errors = validate(data)
+    assert not ok
+    assert any("schema_version" in e for e in errors)
