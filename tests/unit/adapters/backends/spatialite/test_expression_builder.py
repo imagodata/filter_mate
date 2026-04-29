@@ -269,7 +269,17 @@ class TestBuildExpression:
 # ===========================================================================
 
 class TestGeoPackageDetection:
-    def test_geopackage_uses_geomfromgpb(self, builder, mock_gpkg_layer):
+    """2026-04-29: previously this class verified the spatialite builder
+    wrapped the geometry column in ``GeomFromGPB("geom")`` for GeoPackage
+    layers. The wrap was a silent no-op trap — QGIS's OGR provider already
+    decodes GPKG blobs to real geometries by the time SQLite sees the
+    WHERE clause, so re-decoding via ``GeomFromGPB`` returned NULL and the
+    cascade silently dropped every distant feature. The expression now
+    references the column directly and uses ``ST_*``-prefixed predicates
+    so SQLite without an explicit SpatiaLite extension still parses it.
+    """
+
+    def test_geopackage_does_not_wrap_in_geomfromgpb(self, builder, mock_gpkg_layer):
         expr = builder.build_expression(
             layer_props={
                 "layer_name": "test",
@@ -279,7 +289,25 @@ class TestGeoPackageDetection:
             predicates={"intersects": True},
             source_geom="POINT(0 0)",
         )
-        assert "GeomFromGPB" in expr
+        assert "GeomFromGPB" not in expr
+        # Bare column reference is the correct shape for both pure
+        # SpatiaLite and GPKG-via-OGR — GDAL has already decoded the blob
+        # by the time SQLite evaluates the predicate.
+        assert '"geom"' in expr or 'ST_PointOnSurface("geom")' in expr
+
+    def test_geopackage_uses_st_prefixed_predicate(self, builder, mock_gpkg_layer):
+        expr = builder.build_expression(
+            layer_props={
+                "layer_name": "test",
+                "layer_geometry_field": "geom",
+                "layer": mock_gpkg_layer,
+            },
+            predicates={"intersects": True},
+            source_geom="POINT(0 0)",
+        )
+        # ST_ prefix is required for GPKG via OGR when SpatiaLite extension
+        # isn't loaded (which is the default GDAL configuration).
+        assert "ST_Intersects" in expr
 
 
 # ===========================================================================
@@ -337,10 +365,13 @@ class TestPredicateFunctions:
             assert pred in builder.PREDICATE_FUNCTIONS
 
     def test_spatialite_function_names(self, builder):
-        # Spatialite uses non-ST_ prefix
-        assert builder.PREDICATE_FUNCTIONS["intersects"] == "Intersects"
-        assert builder.PREDICATE_FUNCTIONS["contains"] == "Contains"
-        assert builder.PREDICATE_FUNCTIONS["within"] == "Within"
+        # 2026-04-29: ST_-prefixed names are required for GPKG-via-OGR
+        # compatibility (cf class docstring on PREDICATE_FUNCTIONS). The
+        # OGC alias ``ST_*`` works on modern SpatiaLite (>= 4.0) and is
+        # the only form GeoPackage's native SQL accepts.
+        assert builder.PREDICATE_FUNCTIONS["intersects"] == "ST_Intersects"
+        assert builder.PREDICATE_FUNCTIONS["contains"] == "ST_Contains"
+        assert builder.PREDICATE_FUNCTIONS["within"] == "ST_Within"
 
 
 # ===========================================================================

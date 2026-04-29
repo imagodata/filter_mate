@@ -77,18 +77,27 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         )
     """
 
-    # Spatialite predicate mapping
+    # Spatial predicate mapping. ``ST_*``-prefixed names work uniformly:
+    # - SpatiaLite (>= 4.0, OGC alias): ST_Intersects(...) is equivalent to Intersects(...)
+    # - GeoPackage native SQL: ST_Intersects is the standard OGC name
+    # - QGIS OGR provider on .gpkg: GDAL passes the WHERE through to SQLite,
+    #   which understands both the bare and ST_-prefixed forms when SpatiaLite
+    #   is loaded but ONLY ST_-prefixed when it isn't.
+    # 2026-04-29 fix: switched from bare names to ST_-prefixed because the
+    # cascade silently no-oped on GPKG-via-OGR — the bare ``Intersects(...)``
+    # was either rejected or silently dropped depending on whether SpatiaLite
+    # was loaded in the GDAL stack.
     PREDICATE_FUNCTIONS = {
-        'intersects': 'Intersects',
-        'contains': 'Contains',
-        'within': 'Within',
-        'touches': 'Touches',
-        'overlaps': 'Overlaps',
-        'crosses': 'Crosses',
-        'disjoint': 'Disjoint',
-        'equals': 'Equals',
-        'covers': 'Covers',
-        'coveredby': 'CoveredBy',
+        'intersects': 'ST_Intersects',
+        'contains': 'ST_Contains',
+        'within': 'ST_Within',
+        'touches': 'ST_Touches',
+        'overlaps': 'ST_Overlaps',
+        'crosses': 'ST_Crosses',
+        'disjoint': 'ST_Disjoint',
+        'equals': 'ST_Equals',
+        'covers': 'ST_Covers',
+        'coveredby': 'ST_CoveredBy',
     }
 
     def __init__(self, task_params: Dict[str, Any]):
@@ -203,11 +212,15 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         # Build geometry expression
         geom_expr = f'"{geom_field}"'
 
-        # Detect GeoPackage and apply GPB conversion
-        is_geopackage = self._is_geopackage(layer)
-        if is_geopackage:
-            geom_expr = f'GeomFromGPB({geom_expr})'
-            self.log_info("GeoPackage detected: using GeomFromGPB()")
+        # 2026-04-29 fix: previously wrapped ``GeomFromGPB("geom")`` for
+        # GeoPackage layers, but QGIS's OGR provider already passes the
+        # column through GDAL which auto-decodes the GPB blob to a real
+        # geometry by the time SQLite sees the WHERE clause. Re-decoding
+        # an already-decoded geometry made the cascade silently no-op
+        # (``GeomFromGPB`` returned NULL → ``ST_Intersects(NULL, ...)`` →
+        # rejected/ignored, layer left unfiltered). The bare column
+        # reference is the correct shape for both pure SpatiaLite and
+        # GPKG-via-OGR. Centroid optimization is still applied below.
 
         # Apply centroid optimization
         if use_centroids:
@@ -362,15 +375,18 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         # Escape single quotes in WKT
         escaped_wkt = source_wkt.replace("'", "''")
 
-        # Build base geometry
-        source_geom_sql = f"GeomFromText('{escaped_wkt}', {source_srid})"
+        # 2026-04-29 fix: ST_-prefixed function names everywhere — see comment
+        # on PREDICATE_FUNCTIONS for the rationale (works on SpatiaLite and
+        # GPKG-via-OGR, bare names worked only when SpatiaLite extension was
+        # explicitly loaded in the GDAL stack).
+        source_geom_sql = f"ST_GeomFromText('{escaped_wkt}', {source_srid})"
 
         # Apply MakeValid
-        source_geom_sql = f"MakeValid({source_geom_sql})"
+        source_geom_sql = f"ST_MakeValid({source_geom_sql})"
 
         # Apply CRS transformation if needed
         if source_srid != target_srid:
-            source_geom_sql = f"Transform({source_geom_sql}, {target_srid})"
+            source_geom_sql = f"ST_Transform({source_geom_sql}, {target_srid})"
             self.log_info(f"Applying CRS transform: {source_srid} → {target_srid}")
 
         # FIX v4.2.11: Support dynamic buffer expressions
@@ -381,16 +397,16 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             buffer_expr_sql = qgis_expression_to_spatialite(buffer_expression)
 
             self.log_info(f"🔧 Applying dynamic buffer expression: {buffer_expr_sql[:100]}...")
-            source_geom_sql = f"Buffer({source_geom_sql}, {buffer_expr_sql})"
+            source_geom_sql = f"ST_Buffer({source_geom_sql}, {buffer_expr_sql})"
 
         # Apply static buffer
         elif buffer_value is not None and buffer_value != 0:
-            source_geom_sql = f"Buffer({source_geom_sql}, {buffer_value})"
+            source_geom_sql = f"ST_Buffer({source_geom_sql}, {buffer_value})"
             self.log_info(f"Applying buffer: {buffer_value}")
 
             # Wrap negative buffers in MakeValid
             if buffer_value < 0:
-                source_geom_sql = f"MakeValid({source_geom_sql})"
+                source_geom_sql = f"ST_MakeValid({source_geom_sql})"
 
         return source_geom_sql
 
