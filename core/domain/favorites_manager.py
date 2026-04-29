@@ -395,7 +395,20 @@ class FavoritesManager:
             logger.debug(f"Signature backfill: could not scan rows: {e}")
             return
 
-        index = LayerSignatureIndex()
+        # A2 (audit 2026-04-29): build the index against an explicitly
+        # resolved project. The lazy import is the remaining QGIS coupling
+        # in this domain class; a follow-up should expose a
+        # ``IProjectResolver`` port and move the lookup to the service
+        # layer that owns the manager. For now we keep the resolution
+        # local but explicit so the dependency is visible.
+        try:
+            from qgis.core import QgsProject
+            qgs_project = QgsProject.instance()
+        except (ImportError, AttributeError):
+            # AttributeError covers headless tests where qgis.core is a
+            # MagicMock and QgsProject has no real instance() method.
+            qgs_project = None
+        index = LayerSignatureIndex(qgs_project)
         # Outside QGIS the index is empty; nothing to backfill.
         if not index.id_to_signature and not index.name_to_signature:
             return

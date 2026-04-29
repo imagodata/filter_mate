@@ -97,23 +97,31 @@ class LayerSignatureIndex:
     """
 
     def __init__(self, qgs_project: Any = None) -> None:
+        """Build the project-wide signature index.
+
+        Args:
+            qgs_project: A QGIS project handle exposing ``mapLayers()``.
+                Pass ``QgsProject.instance()`` from any service / adapter
+                layer that has access to QGIS. Pass ``None`` (default) to
+                construct an empty index — useful in headless tests and in
+                domain callers that legitimately have no project to walk.
+
+        A2 hardening (audit 2026-04-29): the previous version fell back to
+        ``QgsProject.instance()`` here when ``qgs_project`` was None,
+        smuggling a hard dependency on QGIS into the pure-domain module.
+        Resolution failed silently outside QGIS but the import lived in
+        the domain. Now the caller decides: explicit ``None`` ⇒ empty
+        index, no implicit project lookup.
+        """
         self._id_to_signature: Dict[str, str] = {}
         self._signature_to_id: Dict[str, str] = {}
         self._name_to_signature: Dict[str, str] = {}
 
-        project = qgs_project
-        if project is None:
-            try:
-                from qgis.core import QgsProject
-                project = QgsProject.instance()
-            except ImportError:
-                return
-
-        if project is None:
+        if qgs_project is None:
             return
 
         try:
-            layers = project.mapLayers()
+            layers = qgs_project.mapLayers()
         except (RuntimeError, AttributeError):
             return
 

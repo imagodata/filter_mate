@@ -297,7 +297,9 @@ def _fake_filter_mate_modules(monkeypatch):
             return dict(payload)
 
     class _LayerSignatureIndex:
-        def __init__(self) -> None:
+        def __init__(self, qgs_project=None) -> None:
+            # A2 (audit 2026-04-29): the real index now takes an explicit
+            # project parameter — accept and ignore it in this fake.
             pass
 
         def resolve(self, _sig):

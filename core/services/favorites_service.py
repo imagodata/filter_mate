@@ -658,7 +658,15 @@ class FavoritesService(QObject):
             # import — re-walking QgsProject for every entry was the
             # main perf cliff on bundles >50 favorites and the reason
             # the rebind logic kept growing module-level caches.
-            index = LayerSignatureIndex()
+            # A2 (audit 2026-04-29): pass the project explicitly so the
+            # domain doesn't reach into QGIS by itself.
+            try:
+                from qgis.core import QgsProject
+                index = LayerSignatureIndex(QgsProject.instance())
+            except (ImportError, AttributeError):
+                # AttributeError covers headless tests where qgis.core is
+                # a MagicMock and QgsProject has no real instance() method.
+                index = LayerSignatureIndex()
 
             imported_count = 0
             skipped_count = 0

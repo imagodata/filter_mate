@@ -171,9 +171,18 @@ class FavoritesSharingService:
         # domain handler directly rather than going through a service
         # wrapper — the handler is stateless and the index is a per-call
         # snapshot of the current QgsProject.
+        # A2 (audit 2026-04-29): pass the project explicitly to the index;
+        # the domain no longer reaches into QGIS on its own.
+        try:
+            from qgis.core import QgsProject
+            project_for_index = QgsProject.instance()
+        except (ImportError, AttributeError):
+            # AttributeError covers headless tests where qgis.core is a
+            # MagicMock and QgsProject has no real ``instance()`` method.
+            project_for_index = None
         rebound = FavoriteImportHandler.rebind_to_project(
             dict(shared.payload),
-            LayerSignatureIndex(),
+            LayerSignatureIndex(project_for_index),
             file_version=str(shared.schema_version),
         )
 
