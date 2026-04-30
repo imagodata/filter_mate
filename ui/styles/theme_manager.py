@@ -767,6 +767,15 @@ class ThemeManager(StylerBase):
         for key, value in colors.items():
             stylesheet = stylesheet.replace(f'{{{key}}}', value)
 
+        # Profile-driven dimension substitution ({combobox_height}, {input_height}, ...).
+        # Without this, QSS rules using these placeholders silently fail to parse,
+        # leaving QComboBox/QLineEdit at native sizes and breaking HIDPI rendering.
+        try:
+            from .style_loader import StyleLoader
+            stylesheet = StyleLoader._apply_dynamic_dimensions(stylesheet)
+        except Exception as e:
+            logger.debug(f"Could not apply dynamic dimensions: {e}")
+
         # Cache result
         self._styles_cache[theme] = stylesheet
 

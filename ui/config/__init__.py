@@ -562,7 +562,8 @@ class UIConfig:
                 'padding': 5,
             },
         },
-        # HIDPI profile for high DPI displays (4K, Retina)
+        # HIDPI profile for high DPI displays (4K, Retina, Win 150%/200% scaling)
+        # Triggered when devicePixelRatio >= 1.5 OR logicalDotsPerInch > 120
         DisplayProfile.HIDPI.value: {
             'dockwidget': {
                 'min_width': 480,
@@ -611,20 +612,24 @@ class UIConfig:
                 'padding': 0,
                 'border_radius': 12,
             },
+            # combobox/input aligned at 36px so QSS-driven heights match the
+            # ~48px key_button HIDPI scale (avoids 20px combos next to oversized
+            # buttons). Both must stay equal — the QSS substitutes them in the
+            # same selector group used for QComboBox/QLineEdit/QSpinBox.
             'combobox': {
-                'height': 20,
-                'min_height': 20,
-                'max_height': 20,
-                'padding': {'top': 2, 'right': 8, 'bottom': 2, 'left': 8},
-                'item_height': 20,
-                'icon_size': 16,
+                'height': 36,
+                'min_height': 36,
+                'max_height': 36,
+                'padding': {'top': 6, 'right': 12, 'bottom': 6, 'left': 12},
+                'item_height': 36,
+                'icon_size': 22,
             },
             'input': {
-                'height': 56,
-                'min_height': 52,
-                'max_height': 60,
-                'padding': {'top': 12, 'right': 20, 'bottom': 12, 'left': 20},
-                'border_radius': 12,
+                'height': 36,
+                'min_height': 36,
+                'max_height': 36,
+                'padding': {'top': 6, 'right': 12, 'bottom': 6, 'left': 12},
+                'border_radius': 8,
             },
             'button': {
                 'height': 72,

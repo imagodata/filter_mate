@@ -154,6 +154,11 @@ class StyleLoader:
             for color_key, color_value in colors.items():
                 stylesheet = stylesheet.replace(f'{{{color_key}}}', color_value)
 
+            # Apply profile-driven dimension placeholders so QSS parses cleanly
+            # even when callers bypass load_stylesheet_from_config().
+            if UI_CONFIG_AVAILABLE:
+                stylesheet = cls._apply_dynamic_dimensions(stylesheet)
+
             # Cache the result
             cls._styles_cache[theme] = stylesheet
 
@@ -386,9 +391,6 @@ class StyleLoader:
             return stylesheet
 
         try:
-            # Get current profile config
-            UIConfig.get_all_dimensions()
-
             # Define dimension replacements
             # Format: {placeholder: (component, key)}
             dimension_map = {
