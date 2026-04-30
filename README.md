@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.7.0** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.7.1** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -27,7 +27,17 @@
 | 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 
-### 🆕 What's new in 4.7.0
+### 🆕 What's new in 4.7.1
+
+- **Export hardened**: 12 fixes across SHP/CSV/GPKG/SpatiaLite/ZIP — including a critical ZIP path-traversal leak, V3 API migration, streaming CRS plumbing, batch collision detection.
+- **SpatiaLite cascade restored**: drop `GeomFromGPB` wrap (use `ST_*` prefix), preserve `ST_*` / `EXISTS(...)` / `NOT(...)` predicates in the sanitizer (3 silent no-op regressions fixed), restore the cache f-string interpolation that had been broken for 100+ days.
+- **REST API hardening**: refuse insecure default `api_key`, hash-at-rest, 503 when favorites unavailable, no input echo on errors, 1 MiB body cap, Qt main-thread marshalling for accessor mutations.
+- **Security**: PortableGit installer requires SHA-256 digest + http(s)-only URLs, defense-in-depth PostgreSQL SQL guards, sanitizer collapses whitespace runs before marker scan.
+- **Favorites deep audit follow-through**: `FavoritesSpatialHandler` extraction, `FavoritesError` exception family, `FavoritesExtensionBridge` + `FavoritesMenuBuilder` + `FavoriteImportHandler` + `LayerSignature`, signal leak fixes, ~24 commits closing 37 findings.
+- **Auto-zoom**: zoom on filtered-layers union after filter/favorite apply, with a subset-change token to block stale post-task zoom.
+- **Tests**: 1493 ✅ (+200 since v4.7.0).
+
+### What's new in 4.7.0
 
 - **Favorites Sharing**: git-backed publish to remote repos, repo manager dialog, 1-click *Quick publish*, optional Resource Sharing extension, JSON Schema v3, per-user scope.
 - **REST API**: `GET /layers`, `POST /filters/apply`, `/filters/status`, `/undo`, `/redo`, `/favorites` — protected by `X-API-Key` middleware.

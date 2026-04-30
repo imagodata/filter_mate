@@ -70,8 +70,9 @@ def _scrub_text(text: str) -> str:
 
     Designed for stderr coming back from ``git`` — server messages may echo
     the request line (``Authorization: Basic ...``) or the full URL
-    (``https://user:token@host/repo``). Either would leak credentials into
-    log files, bug-report attachments, or the GitError message.
+    (``https://user:token@host/repo``).  # pragma: allowlist secret
+    Either would leak credentials into log files, bug-report attachments,
+    or the GitError message.
     """
     if not text:
         return text

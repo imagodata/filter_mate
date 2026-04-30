@@ -2,6 +2,108 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.7.1] - 2026-04-29
+
+### Hardening + Audit Follow-Through
+
+A maintenance release: ~96 commits since v4.7.0 closing audit findings (P0/P1), restoring silently-broken paths (SpatiaLite cascade, persistent cache, sanitizer predicates), hardening the REST API surface, and finishing the favorites deep-audit refactor. Test suite grew from ~1289 to 1493 ✅.
+
+#### Bug Fixes — Export pipeline (12 fixes)
+
+- **B10 (CRITICAL)**: ZIP path-traversal leak when packaging exports
+- **B1**: migrate to V3 export API
+- **B2**: streaming CRS plumbing through the export pipeline
+- **B3**: SHP pre-flight checks (driver capabilities, field length)
+- **B4**: normalize case on UI paths (Windows-friendly)
+- **B5**: drop dead refs in batch export
+- **B7**: GPKG bypasses `qgis:package` when path detection succeeds
+- **B8**: CSV WKT injection guard
+- **B9**: SpatiaLite extension fix
+- **C1**: collision detection in batch export
+- **C2**: validator drivers list
+- **C4**: GPKG path detection
+
+#### Bug Fixes — SpatiaLite cascade
+
+- Drop `GeomFromGPB` wrap; use `ST_*` prefix (cascade was a silent no-op)
+- Preserve `ST_*` spatial predicates in sanitizer (3rd cascade no-op variant fixed — 14 OGC predicates allowlisted)
+- SQLite lock + OGR queue routing fixes
+- Route `apply_filter` through subset queue for Qt thread safety
+- Restore `SpatialitePersistentCache` f-string interpolation (cache silently broken 100+ days)
+- Disable V3 multi-step for SpatiaLite — `SPATIAL_FILTER` placeholder regression
+
+#### Bug Fixes — Sanitizer
+
+- Preserve `EXISTS(...)` / `NOT(...)` — chain filter regression on target layers
+- Block `NOT(...)` / `EXISTS(...)` chain bypass (S3 hardening)
+- Collapse whitespace runs before top-level marker scan (P1-SAN-WS)
+
+#### Bug Fixes — REST API hardening
+
+- **S1**: refuse insecure default `api_key`
+- **S4**: warn when `api_key` is loaded from JSON in plaintext + hash-at-rest
+- **P0-B**: marshall `qgis_accessor` mutations to Qt main thread
+- **P1-API-HARDEN**: 503 when favorites service unavailable, no input echo on errors, 1 MiB body cap
+
+#### Bug Fixes — Security
+
+- **S2**: defense-in-depth PostgreSQL SQL guards
+- **S6**: refuse PortableGit install without a SHA-256 digest
+- **B310**: reject non-http(s) URLs in PortableGit downloader
+- **EXT6**: tripwire test for `LEGACY_AUTH_HEADER_DEADLINE`
+
+#### Refactors — Favorites deep audit (37 findings, 24 commits)
+
+- **FavoritesSpatialHandler**: extracted from dockwidget (5 stages, ~927 LOC)
+- **FavoritesError exception family**: `FavoritesNotInitialized` + `FavoritePersistenceError` (F16 phases 1/2/2b/4)
+- **FavoritesExtensionBridge**, **FavoritesMenuBuilder**, **FavoriteImportHandler**, **LayerSignature** extracted
+- **XCUTs**: drop dead second `FavoritesService`, drop bridge fallback paths in dialog, pin `DockwidgetSurface` Protocol
+- **CORE**: drop dead-defensive `hasattr` guards (1a), rename `_favorites_manager` → `_favorites_service` (1b), route global INSERTs through `add_favorite` (2), drop orphan Service methods + dead signals (3), drop orphan load/reload + count/get_by_id aliases (4/6), drop unused `TABLE_FAVORITES` / `TABLE_PROJECTS` constants (8), drop orphan `ensure_global_project_exists` (11)
+- **UI**: drop spatial-handler delegations from controller (5), plug `favoriteApplied` signal leak (6), pin `BuilderContext` Protocol for menu builder (8), factor `migration_service` bootstrap (9), drop `_show_global_favorites_dialog` placeholder (13)
+- **EXT**: extract `SharedFavoritesQuery`, `FavoritesForkService`, `BundlePublisher`, publish_model helpers (1/2 stages 1-4); factor worker close lifecycle (7); validator version-tolerance contract test (9)
+
+#### Refactors — Domain / Services
+
+- **A1**: wire `IFeedback` adapter to remove `iface` from core
+- **A2**: drop `QgsProject.instance()` fallback in `LayerSignatureIndex`
+- **A3**: merge `filter_parameter_builder` + `layer_filter_builder` (paire 4)
+- **F11**: feedback policy alignment (4 rules, 5 callsites converted)
+- Shared QSS + icon registry to `ui/styles/`
+- `bump_updated_at` rename, normalize `remote_layers` paths
+
+#### New — Auto-zoom
+
+- Zoom on filtered layers union after filter or favorite apply
+- Subset-change token blocks stale post-task zoom
+- T2 helper functions + end-to-end coverage
+
+#### Bug Fixes — QFieldCloud / Extensions
+
+- **C1**: park orphan `PushWorker` on terminate timeout
+- Plug favorites manager dialog leak + factor git worker setup
+- `refresh()` preserves active search and scope filters
+
+#### Bug Fixes — Config
+
+- Refresh schema-owned metadata on existing keys (`_migrate_config` + `seed_default_config`)
+- `reload_config` mutates `CONFIG_DATA` in place to preserve in-memory seeds
+- `config_model_manager` reads runtime config, not plugin template
+- Preserve `EXTENSIONS` panel label across config migrations
+
+#### Tests
+
+- **T1**: cover `FavoritesSpatialHandler.restore_spatial_config`
+- **T2**: cover auto-zoom helper functions and e2e flows
+- **T3**: cover `HistoryService` + `LayerHistory` wrapper
+- **P1-FCB-TESTS**: 10 edge cases for `filter_config_builder`
+- Total: **1493 ✅** (+200 since v4.7.0)
+
+#### Lint / Build
+
+- Clear flake8 issues on shipped code (47 → 0)
+- ZIP build excludes `CLAUDE.md`, `BACKLOG*`, `debug_*.py`, `.flake8`, `requirements-*.txt`, `video_toolkit/`
+- Drop stale `BACKLOG_RASTER_POINTCLOUD_V1.md`
+
 ## [4.7.0] - 2026-04-27
 
 ### Favorites Sharing, REST API, Audit Hardening

@@ -24,7 +24,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-API_KEY_HEADER = "x-api-key"
+API_KEY_HEADER = "x-api-key"  # pragma: allowlist secret
 
 # Routes that bypass auth even when an api_key is configured. Liveness
 # probes / OpenAPI tooling can't hand a key on every probe.

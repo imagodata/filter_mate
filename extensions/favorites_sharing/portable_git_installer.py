@@ -61,7 +61,7 @@ DEFAULT_URL = (
 # CDN can't slip in a tampered archive — we fail fast if the digest
 # diverges.
 DEFAULT_SHA256 = (
-    "f4be1f923e9cc1ee0cb09e99f0e90cf254b530bb622d12064361563307e2f505"
+    "f4be1f923e9cc1ee0cb09e99f0e90cf254b530bb622d12064361563307e2f505"  # pragma: allowlist secret
 )
 
 DOWNLOAD_TIMEOUT_SECONDS = 180
