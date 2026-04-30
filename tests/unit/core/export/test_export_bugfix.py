@@ -1010,3 +1010,227 @@ class TestGpkgPathDetection:
         target.touch()
         captured = self._run(setup_handler, str(target), tmp_path)
         assert captured['output_path'] == str(target)
+
+
+# ---------------------------------------------------------------------------
+# B3-leak — ExportHandler must collect warnings from per-layer/batch results
+# so FilterEngineTask can drain them into self.warning_messages and the user
+# sees them via iface.messageBar(). Without this, SHP DBF pre-flight warnings
+# and BatchExportResult.failed_layers only reach the log file.
+# ---------------------------------------------------------------------------
+
+class TestExportHandlerWarningCollection:
+    """Regression: warnings/failed_layers from result objects must land in
+    ``ExportHandler._last_warnings`` for the caller to surface to the user."""
+
+    @pytest.fixture(autouse=True)
+    def setup_handler(self):
+        with patch('core.tasks.export_handler.StreamingExporter'), \
+             patch('core.tasks.export_handler.StreamingConfig'):
+            from core.tasks.export_handler import ExportHandler
+            self.handler = ExportHandler()
+            yield
+
+    def _validated_export_config(self, batch_folder=False, batch_zip=False):
+        return {
+            'layers': [{'layer_name': 'roads'}],
+            'projection': None, 'styles': None,
+            'datatype': 'ESRI Shapefile',
+            'output_folder': '/tmp/out',
+            'zip_path': None,
+            'batch_output_folder': batch_folder,
+            'batch_zip': batch_zip,
+            'preserve_groups': False,
+        }
+
+    def test_init_creates_empty_warning_list(self):
+        from core.tasks.export_handler import ExportHandler
+        handler = ExportHandler()
+        assert handler._last_warnings == []
+
+    def test_collect_warnings_from_export_result(self):
+        """ExportResult.warnings (e.g. SHP DBF pre-flight) must be collected."""
+        from core.export.layer_exporter import ExportResult
+        result = ExportResult(
+            success=True,
+            warnings=[
+                "DBF will silently truncate field names >10 chars: ['verylongfieldname']",
+                "Geometry type 'GeometryCollection' is not natively supported by Shapefile",
+            ],
+        )
+        self.handler._collect_warnings(result)
+        assert len(self.handler._last_warnings) == 2
+        assert any("truncate" in w for w in self.handler._last_warnings)
+        assert any("GeometryCollection" in w for w in self.handler._last_warnings)
+
+    def test_collect_warnings_from_batch_failed_layers(self):
+        """BatchExportResult.failed_layers must be collected with a Failed: prefix."""
+        from core.export.batch_exporter import BatchExportResult
+        result = BatchExportResult(
+            success=False,
+            exported_count=2,
+            failed_count=1,
+            failed_layers=["roads: permission denied", "rivers: disk full"],
+        )
+        self.handler._collect_warnings(result)
+        assert len(self.handler._last_warnings) == 2
+        assert all(w.startswith("Failed: ") for w in self.handler._last_warnings)
+        assert any("permission denied" in w for w in self.handler._last_warnings)
+
+    def test_collect_warnings_from_batch_skipped_layers(self):
+        """BatchExportResult.skipped_layers (layer not found) collected too."""
+        from core.export.batch_exporter import BatchExportResult
+        result = BatchExportResult(
+            success=False,
+            skipped_count=2,
+            skipped_layers=["missing_layer_a", "missing_layer_b"],
+        )
+        self.handler._collect_warnings(result)
+        assert len(self.handler._last_warnings) == 2
+        assert all(w.startswith("Skipped: ") for w in self.handler._last_warnings)
+
+    def test_collect_warnings_handles_objects_without_warning_fields(self):
+        """Result types without .warnings/.failed_layers/.skipped_layers must
+        not raise. Defensive against future result-shape changes."""
+        bare = MagicMock(spec=[])  # no attributes
+        self.handler._collect_warnings(bare)
+        assert self.handler._last_warnings == []
+
+    def test_execute_exporting_resets_warnings_per_run(self):
+        """Successive exports must not accumulate warnings across runs."""
+        # Pre-pollute the warnings list
+        self.handler._last_warnings = ["stale", "junk"]
+        # Run with a validation failure (returns early but should still reset)
+        params = {"task": {"EXPORTING": {}, "layers": []}}
+        self.handler.execute_exporting(
+            task_parameters=params, project=MagicMock(),
+            set_progress=MagicMock(), set_description=MagicMock(),
+            is_canceled=MagicMock(return_value=False),
+        )
+        # Reset must have happened before the early return
+        assert "stale" not in self.handler._last_warnings
+        assert "junk" not in self.handler._last_warnings
+
+    def test_single_layer_warnings_propagate_through_handler(self, tmp_path):
+        """End-to-end: SHP pre-flight warnings on a layer with a long field
+        name flow from LayerExporter → ExportHandler._last_warnings."""
+        from core.export import layer_exporter as le
+        from core.export.layer_exporter import ExportResult
+
+        captured_warnings = [
+            "DBF will silently truncate field names >10 chars: ['superlongfield']"
+        ]
+        fake_result = ExportResult(
+            success=True, exported_count=1, warnings=captured_warnings,
+        )
+
+        validated = {
+            'layers': [{'layer_name': 'x'}], 'projection': None, 'styles': None,
+            'datatype': 'ESRI Shapefile',
+            'output_folder': str(tmp_path / 'x.shp'),
+            'zip_path': None, 'batch_output_folder': False,
+            'batch_zip': False, 'preserve_groups': False,
+        }
+        params = {
+            "task": {
+                "EXPORTING": {
+                    "HAS_LAYERS_TO_EXPORT": True,
+                    "HAS_DATATYPE_TO_EXPORT": True,
+                    "DATATYPE_TO_EXPORT": "ESRI Shapefile",
+                    "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
+                    "OUTPUT_FOLDER_TO_EXPORT": str(tmp_path / 'x.shp'),
+                    "HAS_STYLES_TO_EXPORT": False,
+                },
+                "layers": [{"layer_name": "x"}],
+            },
+            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                "enabled": {"value": False},
+            }}}},
+        }
+        with patch.object(le.LayerExporter, 'export_single_layer',
+                          return_value=fake_result), \
+             patch.object(self.handler, 'validate_export_parameters',
+                          return_value=validated):
+            success, _, _ = self.handler.execute_exporting(
+                task_parameters=params, project=MagicMock(),
+                set_progress=MagicMock(), set_description=MagicMock(),
+                is_canceled=MagicMock(return_value=False),
+            )
+
+        assert success is True
+        # The crucial assertion: the warning made it through. Without the
+        # _collect_warnings() wiring, _last_warnings stays empty.
+        assert any("truncate" in w for w in self.handler._last_warnings), \
+            f"SHP pre-flight warning was dropped at handler boundary. " \
+            f"_last_warnings={self.handler._last_warnings}"
+
+    def test_batch_failure_summary_propagates_through_handler(self, tmp_path):
+        """End-to-end: per-layer batch failures flow from BatchExporter →
+        ExportHandler._last_warnings (not just the log)."""
+        from core.export import batch_exporter as be
+        from core.export.batch_exporter import BatchExportResult
+
+        fake_result = BatchExportResult(
+            success=False,
+            exported_count=2,
+            failed_count=1,
+            output_paths=["/tmp/a.shp", "/tmp/b.shp"],
+            failed_layers=["bad_layer: write permission denied"],
+        )
+
+        validated = {
+            'layers': [{'layer_name': 'a'}, {'layer_name': 'b'}, {'layer_name': 'bad_layer'}],
+            'projection': None, 'styles': None,
+            'datatype': 'ESRI Shapefile',
+            'output_folder': str(tmp_path),
+            'zip_path': None, 'batch_output_folder': True,
+            'batch_zip': False, 'preserve_groups': False,
+        }
+        params = {
+            "task": {
+                "EXPORTING": {
+                    "HAS_LAYERS_TO_EXPORT": True,
+                    "HAS_DATATYPE_TO_EXPORT": True,
+                    "DATATYPE_TO_EXPORT": "ESRI Shapefile",
+                    "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
+                    "OUTPUT_FOLDER_TO_EXPORT": str(tmp_path),
+                    "HAS_STYLES_TO_EXPORT": False,
+                    "BATCH_OUTPUT_FOLDER": True,
+                },
+                "layers": [{"layer_name": "a"}, {"layer_name": "b"},
+                           {"layer_name": "bad_layer"}],
+            }
+        }
+        with patch.object(be.BatchExporter, 'export_to_folder',
+                          return_value=fake_result), \
+             patch.object(self.handler, 'validate_export_parameters',
+                          return_value=validated):
+            self.handler.execute_exporting(
+                task_parameters=params, project=MagicMock(),
+                set_progress=MagicMock(), set_description=MagicMock(),
+                is_canceled=MagicMock(return_value=False),
+            )
+
+        # Without the _collect_warnings() wiring, this stays empty and the
+        # user only sees "Batch export completed with errors" without the
+        # per-layer detail.
+        assert any("permission denied" in w for w in self.handler._last_warnings), \
+            f"Batch per-layer failure dropped at handler boundary. " \
+            f"_last_warnings={self.handler._last_warnings}"
+        assert all(w.startswith("Failed:") for w in self.handler._last_warnings)
+
+
+# ---------------------------------------------------------------------------
+# B-bug — Export must run when current_layer is None
+# ---------------------------------------------------------------------------
+# This test cannot be unit-tested without pulling the full FilterMateApp
+# class graph (~50 dependencies). The fix is small and inspection-reviewed
+# in commit message; manual smoke test:
+#   1. Open QGIS with FilterMate plugin loaded
+#   2. Switch to EXPORT tab WITHOUT picking a layer in EXPLORING tab
+#   3. Pick layers + format + output, click Export
+#   4. Expected: export runs (was: silent log-only error pre-fix)
+#
+# A future integration test could exercise this via the QGIS test harness
+# (tests/integration/) but that's deferred — out of scope for this PR.
+# ---------------------------------------------------------------------------

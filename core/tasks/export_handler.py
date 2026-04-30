@@ -52,6 +52,31 @@ class ExportHandler:
         ... )
     """
 
+    def __init__(self):
+        # Warnings collected during the most recent execute_exporting() call.
+        # Caller (FilterEngineTask) drains this into self.warning_messages so
+        # FinishedHandler surfaces them via iface.messageBar() — without this,
+        # SHP DBF pre-flight warnings (B3) and per-layer batch failures only
+        # reached the log file.
+        self._last_warnings: List[str] = []
+
+    def _collect_warnings(self, result: Any) -> None:
+        """Extract user-relevant warnings from an export result object.
+
+        Handles both ``ExportResult`` (with .warnings: List[str]) and
+        ``BatchExportResult`` (with .failed_layers: List[str] and
+        .skipped_layers: List[str]).
+        """
+        warnings = getattr(result, 'warnings', None)
+        if warnings:
+            self._last_warnings.extend(str(w) for w in warnings)
+        failed = getattr(result, 'failed_layers', None)
+        if failed:
+            self._last_warnings.extend(f"Failed: {f}" for f in failed)
+        skipped = getattr(result, 'skipped_layers', None)
+        if skipped:
+            self._last_warnings.extend(f"Skipped: {s}" for s in skipped)
+
     def validate_export_parameters(
         self,
         task_parameters: Dict[str, Any],
@@ -172,6 +197,10 @@ class ExportHandler:
         Returns:
             tuple: (success: bool, message: str, error_details: Optional[str])
         """
+        # Reset per-run warning collector. Caller drains _last_warnings into
+        # self.warning_messages so FinishedHandler displays them.
+        self._last_warnings = []
+
         # Validate parameters
         export_config = self.validate_export_parameters(task_parameters)
         if not export_config:
@@ -212,6 +241,7 @@ class ExportHandler:
                 progress_callback=progress_callback,
                 description_callback=description_callback
             )
+            self._collect_warnings(result)
             if result.success:
                 message = f'Batch export: {result.exported_count} layer(s) exported to <a href="file:///{output_folder}">{output_folder}</a>'
             else:
@@ -229,6 +259,7 @@ class ExportHandler:
                 progress_callback=progress_callback,
                 description_callback=description_callback
             )
+            self._collect_warnings(result)
             if result.success:
                 message = f'Batch ZIP export: {result.exported_count} ZIP file(s) created in <a href="file:///{output_folder}">{output_folder}</a>'
             else:
@@ -310,6 +341,7 @@ class ExportHandler:
             result = layer_exporter.export_single_layer(
                 layer_name, single_output, projection, datatype, style_format, save_styles
             )
+            self._collect_warnings(result)
             export_success = result.success
             if not result.success:
                 message = result.error_message or 'Export failed'
@@ -327,6 +359,7 @@ class ExportHandler:
                     save_styles=save_styles
                 )
             )
+            self._collect_warnings(result)
             export_success = result.success
             if not result.success:
                 message = result.error_message or 'Export failed'

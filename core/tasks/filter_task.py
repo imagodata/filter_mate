@@ -2086,6 +2086,18 @@ class FilterEngineTask(QgsTask):
         self.message = message
         if error_details:
             self.error_details = error_details
+
+        # Drain warnings collected by the handler (SHP DBF pre-flight, batch
+        # per-layer failures, etc.) into the task's warning_messages so
+        # FinishedHandler surfaces them via iface.messageBar(). Without this
+        # drain, ExportResult.warnings and BatchExportResult.failed_layers
+        # only ever reach the log file. (B3-leak fix.)
+        export_warnings = getattr(self._export_handler, '_last_warnings', None)
+        if export_warnings:
+            for w in export_warnings:
+                if w not in self.warning_messages:
+                    self.warning_messages.append(w)
+
         return success
 
     def _calculate_total_features(self, layers) -> int:
