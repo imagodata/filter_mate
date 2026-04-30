@@ -742,3 +742,144 @@ def _insert_project_into_gpkg(
         )
     finally:
         conn.close()
+
+
+# ---------------------------------------------------------------------------
+# layer_styles writer — closes audit findings H1 (GPKG+CRS) and H2 (streaming
+# GPKG) where save_styles was silently dropped because the writer paths
+# bypassed processing.run("qgis:package", SAVE_STYLES=True).
+# ---------------------------------------------------------------------------
+
+# Standard QGIS layer_styles schema. Matches the table that
+# processing.run("qgis:package", SAVE_STYLES=True) creates and that
+# QgsVectorLayer.loadNamedStyle reads on import.
+_LAYER_STYLES_DDL = """
+CREATE TABLE IF NOT EXISTS layer_styles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    f_table_catalog TEXT(256),
+    f_table_schema TEXT(256),
+    f_table_name TEXT(256),
+    f_geometry_column TEXT(256),
+    styleName TEXT(30),
+    styleQML TEXT,
+    styleSLD TEXT,
+    useAsDefault BOOLEAN,
+    description TEXT,
+    owner TEXT(30),
+    ui TEXT(30),
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+"""
+
+
+def write_layer_styles_to_gpkg(gpkg_path, layers_with_table_names) -> bool:
+    """Embed QGIS QML styles into the GeoPackage's ``layer_styles`` table.
+
+    Mirrors ``processing.run("qgis:package", SAVE_STYLES=True)`` for export
+    paths that bypass that algorithm — specifically the GPKG reprojection
+    branch (audit H1) and the streaming GPKG path (audit H2).
+
+    Without this, layers in those branches end up without embedded styles
+    even when the user ticked "Save styles" in the export dialog.
+
+    Args:
+        gpkg_path: Path to the exported GPKG file.
+        layers_with_table_names: Iterable of ``(layer, table_name)`` tuples
+            where ``layer`` is a QgsVectorLayer (or duck-type with the same
+            ``exportNamedStyle`` interface) and ``table_name`` is the name
+            of the table the layer was written under in the GPKG. The
+            geometry column for each table is read from
+            ``gpkg_geometry_columns``; tables without a geometry column
+            entry get ``f_geometry_column = ''``.
+
+    Returns:
+        True on success, False on failure (logged at error level).
+    """
+    if not QGIS_AVAILABLE:
+        logger.warning("QGIS not available - cannot write layer styles to GPKG")
+        return False
+
+    if not os.path.isfile(gpkg_path):
+        logger.warning(f"GPKG file not found: {gpkg_path}")
+        return False
+
+    layer_list = list(layers_with_table_names)
+    if not layer_list:
+        return True  # nothing to embed; not an error
+
+    try:
+        from qgis.PyQt.QtXml import QDomDocument
+    except ImportError:
+        logger.error("QtXml unavailable — cannot serialize styles to QML")
+        return False
+
+    try:
+        conn = sqlite3.connect(gpkg_path)
+        try:
+            cur = conn.cursor()
+            cur.execute(_LAYER_STYLES_DDL)
+
+            # Read geometry column names from gpkg_geometry_columns for each
+            # table. Falls back to '' when missing (non-spatial tables).
+            geom_columns = {}
+            try:
+                cur.execute(
+                    "SELECT table_name, column_name FROM gpkg_geometry_columns"
+                )
+                for row in cur.fetchall():
+                    geom_columns[row[0]] = row[1] or ""
+            except sqlite3.OperationalError:
+                # gpkg_geometry_columns missing — leave geom_columns empty.
+                # Result: f_geometry_column = '' for all tables. Acceptable.
+                pass
+
+            embedded = 0
+            for layer, table_name in layer_list:
+                if not table_name:
+                    logger.warning(
+                        f"Skipping layer '{getattr(layer, 'name', lambda: '?')()}' "
+                        f"— no table_name supplied"
+                    )
+                    continue
+
+                # Serialize the layer's named style to QML XML.
+                try:
+                    doc = QDomDocument()
+                    layer.exportNamedStyle(doc)
+                    style_qml = doc.toString()
+                except Exception as e:
+                    logger.warning(
+                        f"exportNamedStyle failed for '{table_name}': {e}"
+                    )
+                    continue
+
+                if not style_qml:
+                    logger.debug(f"Empty style for '{table_name}', skipping")
+                    continue
+
+                f_geometry_column = geom_columns.get(table_name, "")
+                style_name = layer.name() if hasattr(layer, 'name') else table_name
+
+                # Match the column order produced by qgis:package so QGIS reads
+                # the row identically on Project > Open from > GeoPackage.
+                cur.execute(
+                    "INSERT INTO layer_styles "
+                    "(f_table_catalog, f_table_schema, f_table_name, "
+                    " f_geometry_column, styleName, styleQML, styleSLD, "
+                    " useAsDefault, description, owner, ui) "
+                    "VALUES ('', '', ?, ?, ?, ?, '', 1, '', '', '')",
+                    (table_name, f_geometry_column, style_name, style_qml),
+                )
+                embedded += 1
+
+            conn.commit()
+            logger.info(
+                f"Embedded {embedded}/{len(layer_list)} layer styles into "
+                f"{gpkg_path} (layer_styles table)"
+            )
+            return embedded > 0
+        finally:
+            conn.close()
+    except Exception as e:
+        logger.error(f"Failed to write layer_styles to GPKG: {e}", exc_info=True)
+        return False

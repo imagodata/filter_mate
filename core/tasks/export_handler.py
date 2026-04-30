@@ -628,8 +628,31 @@ class ExportHandler:
 
                 exported_count += 1
 
-                if save_styles and style_format:
-                    self.save_layer_style(layer, output_path, style_format, datatype)
+                # Style preservation depends on the target format (H2 fix):
+                # - GPKG: embed in layer_styles table (matches qgis:package
+                #   behavior for non-streaming GPKG; previously a .qml sidecar
+                #   was written next to the .gpkg, which loses self-containment
+                #   and is inconsistent with the standard GPKG path).
+                # - Other formats: write a sidecar file (QML/SLD/LYRX) — the
+                #   format itself can't carry embedded styles.
+                if save_styles:
+                    if datatype.upper() == 'GPKG':
+                        try:
+                            from ..export.gpkg_layer_tree_writer import (
+                                write_layer_styles_to_gpkg,
+                            )
+                            # Single-layer streaming: each output_path is a
+                            # standalone .gpkg, so the layer's table_name in
+                            # that file is the (sanitized) layer name.
+                            write_layer_styles_to_gpkg(
+                                output_path, [(layer, safe)]
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                f"Style embedding failed for {output_path}: {e}"
+                            )
+                    elif style_format:
+                        self.save_layer_style(layer, output_path, style_format, datatype)
 
                 if is_canceled():
                     logger.info("Export cancelled by user")

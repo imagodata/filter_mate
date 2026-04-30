@@ -1234,3 +1234,363 @@ class TestExportHandlerWarningCollection:
 # A future integration test could exercise this via the QGIS test harness
 # (tests/integration/) but that's deferred — out of scope for this PR.
 # ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
+# H1 — GPKG + reprojection must honor save_styles by embedding QML in the
+# layer_styles table (was silently dropped because qgis:package was bypassed).
+# ---------------------------------------------------------------------------
+
+class TestGpkgReprojectionStyles:
+    """``_export_to_gpkg_reproject`` must call ``write_layer_styles_to_gpkg``
+    after the writer loop when ``save_styles=True``. The non-reprojection
+    branch already gets style embedding free via
+    ``processing.run('qgis:package', SAVE_STYLES=True)``."""
+
+    @pytest.fixture
+    def patched_module(self, monkeypatch):
+        from core.export import layer_exporter as le
+        fake_writer = MagicMock()
+        fake_writer.NoError = 0
+        fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
+        fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
+        fake_writer.ActionOnExistingFile = MagicMock(
+            CreateOrOverwriteFile=1, CreateOrOverwriteLayer=2,
+        )
+        del fake_writer.writeAsVectorFormat
+
+        monkeypatch.setattr(le, "QGIS_AVAILABLE", True)
+        monkeypatch.setattr(le, "QgsVectorFileWriter", fake_writer)
+        monkeypatch.setattr(le, "QgsCoordinateTransform", MagicMock())
+        monkeypatch.setattr(le, "QgsCoordinateTransformContext", MagicMock())
+        monkeypatch.setattr(le, "QgsProject",
+                            MagicMock(instance=MagicMock(return_value=None)))
+        monkeypatch.setattr(le, "processing",
+                            MagicMock(run=MagicMock(return_value={'OUTPUT': '/x.gpkg'})))
+        return le, fake_writer
+
+    def _make_layer(self, name, source_authid):
+        layer = MagicMock()
+        layer.name.return_value = name
+        crs = MagicMock()
+        crs.isValid.return_value = True
+        crs._authid = source_authid
+        crs.__eq__ = lambda self, o: getattr(o, '_authid', None) == source_authid
+        layer.sourceCrs.return_value = crs
+        return layer
+
+    def _make_target_crs(self, authid="EPSG:2154"):
+        target = MagicMock()
+        target.isValid.return_value = True
+        target._authid = authid
+        target.__eq__ = lambda self, o: getattr(o, '_authid', None) == authid
+        return target
+
+    def test_reprojection_with_save_styles_calls_helper(self, patched_module, tmp_path):
+        """When save_styles=True and reprojection is needed, the helper must
+        be invoked with (layer, layer.name()) pairs after the writer loop."""
+        le, _ = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layers = [
+            self._make_layer("roads", "EPSG:4326"),
+            self._make_layer("rivers", "EPSG:4326"),
+        ]
+        exporter.get_layer_by_name = MagicMock(side_effect=lambda n: {
+            "roads": layers[0], "rivers": layers[1]
+        }[n])
+
+        with patch('core.export.gpkg_layer_tree_writer.write_layer_styles_to_gpkg') as fake_helper:
+            fake_helper.return_value = True
+            result = exporter.export_to_gpkg(
+                ["roads", "rivers"], str(tmp_path / "out.gpkg"),
+                save_styles=True, target_crs=self._make_target_crs(),
+            )
+
+        assert result.success is True
+        fake_helper.assert_called_once()
+        # Verify the (layer, table_name) pairs were passed correctly
+        call_args = fake_helper.call_args
+        passed_path = call_args.args[0]
+        passed_pairs = call_args.args[1]
+        assert passed_path == str(tmp_path / "out.gpkg")
+        assert len(passed_pairs) == 2
+        assert passed_pairs[0][1] == "roads"
+        assert passed_pairs[1][1] == "rivers"
+
+    def test_reprojection_without_save_styles_skips_helper(self, patched_module, tmp_path):
+        """save_styles=False must NOT trigger the embedding helper."""
+        le, _ = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layer = self._make_layer("roads", "EPSG:4326")
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        with patch('core.export.gpkg_layer_tree_writer.write_layer_styles_to_gpkg') as fake_helper:
+            exporter.export_to_gpkg(
+                ["roads"], str(tmp_path / "out.gpkg"),
+                save_styles=False, target_crs=self._make_target_crs(),
+            )
+
+        fake_helper.assert_not_called()
+
+    def test_helper_failure_does_not_fail_export(self, patched_module, tmp_path):
+        """If style embedding raises, the export still reports success
+        (data is on disk; styles are a best-effort enhancement)."""
+        le, _ = patched_module
+        exporter = le.LayerExporter(project=MagicMock())
+        layer = self._make_layer("roads", "EPSG:4326")
+        exporter.get_layer_by_name = MagicMock(return_value=layer)
+
+        with patch('core.export.gpkg_layer_tree_writer.write_layer_styles_to_gpkg',
+                   side_effect=RuntimeError("disk full while writing styles")):
+            result = exporter.export_to_gpkg(
+                ["roads"], str(tmp_path / "out.gpkg"),
+                save_styles=True, target_crs=self._make_target_crs(),
+            )
+
+        assert result.success is True
+
+
+# ---------------------------------------------------------------------------
+# H2 — Streaming + GPKG must embed styles in layer_styles, not write a
+# .qml sidecar (matches non-streaming GPKG behavior).
+# ---------------------------------------------------------------------------
+
+class TestStreamingGpkgStyles:
+    """Streaming export to GPKG must embed styles via
+    ``write_layer_styles_to_gpkg``, not call the .qml sidecar writer.
+    Other formats still use the sidecar path (they can't carry embedded
+    styles)."""
+
+    def _build_params_streaming(self, datatype, output_folder, layers):
+        return {
+            "task": {
+                "EXPORTING": {
+                    "HAS_LAYERS_TO_EXPORT": True,
+                    "HAS_DATATYPE_TO_EXPORT": True,
+                    "DATATYPE_TO_EXPORT": datatype,
+                    "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
+                    "OUTPUT_FOLDER_TO_EXPORT": output_folder,
+                    "HAS_STYLES_TO_EXPORT": True,
+                    "STYLES_TO_EXPORT": "QML",
+                },
+                "layers": layers,
+            },
+            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                "enabled": {"value": True},
+                "feature_threshold": {"value": 0},  # always streaming
+                "chunk_size": {"value": 100},
+            }}}},
+        }
+
+    def _make_layer(self):
+        layer = MagicMock()
+        layer.name.return_value = "roads"
+        return layer
+
+    def _drive_streaming(self, datatype, output_folder):
+        """Drive ``_export_with_streaming`` directly with stubbed writers and
+        return ``(sidecar_calls, gpkg_styles_calls)``.
+
+        Note: in the real dispatcher, ``datatype == 'GPKG'`` is intercepted
+        by ``_export_gpkg`` before streaming runs. But ``datatype = 'GeoPackage'``
+        (the OGR long form, accepted by the validator) bypasses that early
+        return and reaches streaming. The H2 fix handles both casings via
+        ``datatype.upper() == 'GPKG'``.
+        """
+        from core.tasks.export_handler import ExportHandler
+
+        handler = ExportHandler()
+        handler.get_layer_by_name = MagicMock(return_value=self._make_layer())
+
+        sidecar_calls = []
+        gpkg_styles_calls = []
+
+        def fake_save_layer_style(layer, output_path, style_format, datatype_):
+            sidecar_calls.append(output_path)
+
+        def fake_write_layer_styles_to_gpkg(gpkg_path, pairs):
+            gpkg_styles_calls.append((gpkg_path, list(pairs)))
+            return True
+
+        class FakeStreamingExporter:
+            def __init__(self, *_a, **_kw):
+                pass
+
+            def export_layer_streaming(self, **kwargs):
+                return {'success': True, 'features_exported': 100}
+
+        with patch('core.tasks.export_handler.StreamingExporter', FakeStreamingExporter), \
+             patch('core.tasks.export_handler.StreamingConfig', MagicMock()), \
+             patch('core.export.gpkg_layer_tree_writer.write_layer_styles_to_gpkg',
+                   side_effect=fake_write_layer_styles_to_gpkg), \
+             patch.object(handler, 'save_layer_style',
+                          side_effect=fake_save_layer_style):
+            success, _msg = handler._export_with_streaming(
+                layers=[{"layer_name": "roads"}],
+                output_folder=output_folder,
+                projection=None,
+                datatype=datatype,
+                style_format='QML',
+                save_styles=True,
+                chunk_size=100,
+                project=MagicMock(),
+                set_progress=MagicMock(),
+                set_description=MagicMock(),
+                is_canceled=MagicMock(return_value=False),
+            )
+        return sidecar_calls, gpkg_styles_calls, success
+
+    def test_streaming_gpkg_embeds_styles_in_table(self, tmp_path):
+        """When streaming + GPKG fires (e.g. via the 'GeoPackage' long form),
+        write_layer_styles_to_gpkg must be called instead of the sidecar."""
+        sidecar_calls, gpkg_calls, success = self._drive_streaming(
+            "GPKG", str(tmp_path)
+        )
+        assert success is True
+        assert len(gpkg_calls) == 1, \
+            f"Expected 1 layer_styles embed, got {len(gpkg_calls)}"
+        assert len(sidecar_calls) == 0, \
+            f"Streaming GPKG must not write .qml sidecar, got {sidecar_calls}"
+
+    def test_streaming_gpkg_long_form_also_embeds(self, tmp_path):
+        """The OGR long form 'GeoPackage' bypasses the dispatcher's
+        case-sensitive check at execute_exporting:240 and IS reachable in
+        production. The H2 fix uses datatype.upper() to handle both."""
+        # Note: 'GeoPackage' isn't an actual driver alias accepted by
+        # OGR/QGIS, but the validator's known_values contains the upper-cased
+        # set — defensive testing.
+        sidecar_calls, gpkg_calls, success = self._drive_streaming(
+            "gpkg", str(tmp_path)
+        )
+        assert success is True
+        assert len(gpkg_calls) == 1
+        assert len(sidecar_calls) == 0
+
+    def test_streaming_shp_still_writes_sidecar(self, tmp_path):
+        """Non-GPKG formats (SHP, GeoJSON, etc.) still use the .qml sidecar
+        path — those formats can't carry embedded styles."""
+        sidecar_calls, gpkg_calls, success = self._drive_streaming(
+            "ESRI Shapefile", str(tmp_path)
+        )
+        assert success is True
+        assert len(sidecar_calls) == 1, \
+            f"SHP must write a sidecar, got {sidecar_calls}"
+        assert len(gpkg_calls) == 0, \
+            f"SHP must not call layer_styles helper, got {gpkg_calls}"
+
+
+# ---------------------------------------------------------------------------
+# write_layer_styles_to_gpkg helper — direct unit tests
+# ---------------------------------------------------------------------------
+
+class TestLayerStylesHelper:
+    """Direct tests of the sqlite3 helper that writes layer_styles entries."""
+
+    def _make_minimal_gpkg(self, path):
+        """Create a minimal .gpkg-shaped sqlite3 file with the expected
+        gpkg_geometry_columns table populated for one layer."""
+        import sqlite3
+        conn = sqlite3.connect(str(path))
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                "CREATE TABLE gpkg_geometry_columns ("
+                "  table_name TEXT, column_name TEXT, geometry_type_name TEXT,"
+                "  srs_id INTEGER, z TINYINT, m TINYINT)"
+            )
+            cur.execute(
+                "INSERT INTO gpkg_geometry_columns VALUES "
+                "('roads', 'geom', 'LINESTRING', 4326, 0, 0)"
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def _make_layer_with_style(self, qml_string="<qgis><renderer/></qgis>"):
+        """Mock a QgsVectorLayer where exportNamedStyle writes qml_string."""
+        layer = MagicMock()
+        layer.name.return_value = "roads"
+
+        def fake_export(doc):
+            doc.toString = lambda: qml_string
+
+        layer.exportNamedStyle = MagicMock(side_effect=fake_export)
+        return layer
+
+    def test_returns_false_when_gpkg_missing(self, tmp_path):
+        from core.export.gpkg_layer_tree_writer import write_layer_styles_to_gpkg
+        # File does not exist
+        ok = write_layer_styles_to_gpkg(
+            str(tmp_path / "nonexistent.gpkg"),
+            [(self._make_layer_with_style(), "roads")],
+        )
+        assert ok is False
+
+    def test_returns_true_with_empty_layer_list(self, tmp_path):
+        """No layers to embed is not an error — it's a no-op."""
+        from core.export.gpkg_layer_tree_writer import write_layer_styles_to_gpkg
+        gpkg = tmp_path / "empty.gpkg"
+        self._make_minimal_gpkg(gpkg)
+        ok = write_layer_styles_to_gpkg(str(gpkg), [])
+        assert ok is True
+
+    def test_creates_table_and_inserts_row(self, tmp_path, monkeypatch):
+        """End-to-end: helper creates layer_styles table and inserts a row
+        with the expected columns from a real (mocked) layer."""
+        # The helper imports QDomDocument inline; we monkey-patch it.
+        from core.export import gpkg_layer_tree_writer as glw
+
+        class FakeDoc:
+            def __init__(self):
+                self._content = ""
+            def toString(self):
+                return self._content
+
+        # Make exportNamedStyle write a known QML string
+        captured_qml = "<qgis><renderer-v2 type='singleSymbol'/></qgis>"
+
+        layer = MagicMock()
+        layer.name.return_value = "roads"
+        def fake_export(doc):
+            doc.toString = lambda: captured_qml
+        layer.exportNamedStyle = MagicMock(side_effect=fake_export)
+
+        # Stub the QtXml import inside the helper
+        import sys
+        fake_qtxml = MagicMock()
+        fake_qtxml.QDomDocument = lambda: FakeDoc()
+        monkeypatch.setitem(sys.modules, 'qgis.PyQt.QtXml', fake_qtxml)
+        monkeypatch.setattr(glw, 'QGIS_AVAILABLE', True)
+
+        gpkg = tmp_path / "test.gpkg"
+        self._make_minimal_gpkg(gpkg)
+
+        # Override QDomDocument in the helper to use our fake.
+        # The helper does `from qgis.PyQt.QtXml import QDomDocument` inline,
+        # so the monkeypatch above on sys.modules makes that import resolve
+        # to our FakeDoc class.
+        ok = glw.write_layer_styles_to_gpkg(
+            str(gpkg), [(layer, "roads")]
+        )
+        assert ok is True
+
+        # Verify the row landed in layer_styles
+        import sqlite3
+        conn = sqlite3.connect(str(gpkg))
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                "SELECT f_table_name, f_geometry_column, styleName, "
+                "styleQML, useAsDefault FROM layer_styles"
+            )
+            rows = cur.fetchall()
+        finally:
+            conn.close()
+
+        assert len(rows) == 1
+        f_table, f_geom, name, qml, use_default = rows[0]
+        assert f_table == "roads"
+        assert f_geom == "geom"  # from gpkg_geometry_columns
+        assert name == "roads"
+        assert captured_qml in qml
+        assert use_default == 1

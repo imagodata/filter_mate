@@ -78,7 +78,7 @@ def _setup():
     # Load real modules
     export_dir = os.path.join(project_root, 'core', 'export')
     for name in ('layer_exporter', 'batch_exporter', 'style_exporter',
-                 'export_validator'):
+                 'export_validator', 'gpkg_layer_tree_writer'):
         _load_file_as(
             f'{ROOT}.core.export.{name}',
             os.path.join(export_dir, f'{name}.py'),

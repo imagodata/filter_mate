@@ -498,7 +498,7 @@ class LayerExporter:
 
         if needs_reprojection:
             return self._export_to_gpkg_reproject(
-                layer_objects, output_path, target_crs
+                layer_objects, output_path, target_crs, save_styles=save_styles
             )
 
         alg_parameters = {
@@ -541,6 +541,7 @@ class LayerExporter:
         layer_objects: List[QgsVectorLayer],
         output_path: str,
         target_crs: QgsCoordinateReferenceSystem,
+        save_styles: bool = False,
     ) -> ExportResult:
         """Multi-layer GPKG export with per-layer reprojection.
 
@@ -548,6 +549,12 @@ class LayerExporter:
         so when reprojection is requested we have to drive the export
         ourselves via writeAsVectorFormatV3, layering each table into the
         same .gpkg via ``actionOnExistingFile``.
+
+        When ``save_styles=True``, after the writer loop completes we embed
+        QML styles into the GPKG's ``layer_styles`` table via the helper
+        in ``gpkg_layer_tree_writer`` — mirroring what
+        ``processing.run('qgis:package', SAVE_STYLES=True)`` would have done
+        on the non-reprojection branch. (Audit H1 fix.)
         """
         logger.info(
             f"GPKG reprojection export: {len(layer_objects)} layer(s) "
@@ -604,6 +611,24 @@ class LayerExporter:
                 return ExportResult(
                     success=False,
                     error_message=msg,
+                )
+
+        # Embed styles in the layer_styles table (H1 fix). qgis:package would
+        # have done this on the non-reprojection branch via SAVE_STYLES=True;
+        # we have to drive it explicitly here.
+        if save_styles:
+            try:
+                from .gpkg_layer_tree_writer import write_layer_styles_to_gpkg
+                pairs = [(layer, layer.name()) for layer in layer_objects]
+                ok = write_layer_styles_to_gpkg(output_path, pairs)
+                if not ok:
+                    logger.warning(
+                        f"Layer styles embedding returned False for {output_path} — "
+                        f"data exported successfully but styles may be missing"
+                    )
+            except Exception as e:  # never fail the export over a style write
+                logger.warning(
+                    f"Style embedding failed for {output_path}: {e}", exc_info=True
                 )
 
         return ExportResult(

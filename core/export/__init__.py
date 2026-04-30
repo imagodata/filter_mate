@@ -43,6 +43,7 @@ from .batch_exporter import (  # noqa: F401
 
 from .gpkg_layer_tree_writer import (  # noqa: F401
     write_layer_tree_to_gpkg,
+    write_layer_styles_to_gpkg,
 )
 
 from .kml_folder_writer import (  # noqa: F401
@@ -71,6 +72,7 @@ __all__ = [
     'sanitize_filename',
     # GPKG layer tree writer
     'write_layer_tree_to_gpkg',
+    'write_layer_styles_to_gpkg',
     # KML folder writer
     'merge_kml_with_folders',
     'cleanup_individual_kmls',
