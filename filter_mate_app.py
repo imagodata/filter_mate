@@ -1137,16 +1137,33 @@ class FilterMateApp:
     # ========================================
 
     def _execute_filter_task(self, task_name: str, task_parameters: dict):
-        """Execute filter/unfilter/reset task (callback for TaskOrchestrator)."""
+        """Execute filter/unfilter/reset/export task (callback for TaskOrchestrator)."""
         from .core.tasks import FilterEngineTask
 
         logger.info(f"⚙️ _execute_filter_task CALLED: task_name={task_name}")
 
-        if self.dockwidget is None or self.dockwidget.current_layer is None:
-            logger.error(f"❌ Cannot execute filter task: dockwidget={self.dockwidget is not None}, current_layer={self.dockwidget.current_layer is not None if self.dockwidget else False}")
+        if self.dockwidget is None:
+            logger.error(f"❌ Cannot execute {task_name}: dockwidget is None")
             return
 
+        # Export is independent of the exploring tab — current_layer is not
+        # required (see core/export design docs and adapters/task_builder.py
+        # build_export_params docstring). Only filter/unfilter/reset need it.
+        is_export = task_name == 'export'
         current_layer = self.dockwidget.current_layer
+        if not is_export and current_layer is None:
+            logger.error(f"❌ Cannot execute {task_name}: no current_layer in exploring tab")
+            try:
+                iface.messageBar().pushWarning(
+                    "FilterMate",
+                    QCoreApplication.translate(
+                        "FilterMateApp",
+                        "Pick a layer in the EXPLORING tab before running '{0}'."
+                    ).format(task_name),
+                )
+            except Exception as e:  # iface unavailable in some test/headless contexts
+                logger.debug(f"messageBar unavailable: {e}")
+            return
 
         # Get layers from task parameters first (needed for project context)
         layers = []
@@ -1173,20 +1190,23 @@ class FilterMateApp:
         )
         logger.info(f"✓ FilterEngineTask created: {self.appTasks[task_name].description()}")
 
-        # Save current layer before filtering
-        self._save_current_layer_before_filter()
+        # Filter/unfilter/reset bookkeeping uses current_layer; skip for export
+        # which has its own independent flow.
+        if not is_export:
+            self._save_current_layer_before_filter()
+            self._set_filter_protection_flags(current_layer)
+            self._show_filter_start_message(task_name, task_parameters, layers_props, layers, current_layer)
 
-        # Set filtering protection flags
-        self._set_filter_protection_flags(current_layer)
-
-        # Show backend info message
-        self._show_filter_start_message(task_name, task_parameters, layers_props, layers, current_layer)
-
-        # Connect completion handler
-        self.appTasks[task_name].taskCompleted.connect(
-            lambda tn=task_name, cl=current_layer, tp=task_parameters:
-                self.filter_engine_task_completed(tn, cl, tp)
-        )
+        # Connect completion handler. FilterResultHandler.handle_task_completion
+        # calls source_layer.featureCount() and is filter-specific (cache clear,
+        # filter history, auto-zoom) — none of which apply to export. Export
+        # completion is fully handled in FilterEngineTask.finished() →
+        # FinishedHandler with the 'ExportLayers' message branch.
+        if not is_export:
+            self.appTasks[task_name].taskCompleted.connect(
+                lambda tn=task_name, cl=current_layer, tp=task_parameters:
+                    self.filter_engine_task_completed(tn, cl, tp)
+            )
 
         # Cancel conflicting tasks and add to task manager
         self._cancel_conflicting_tasks()
