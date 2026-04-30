@@ -221,6 +221,26 @@ class StreamingExporter:
         logger.info(f"🚀 Starting streaming export: {total_features:,} features → {output_path}")
         logger.info(f"  Format: {format}, Batch size: {self.config.batch_size}")
 
+        # Empty layer short-circuit: without this, the writer is created lazily
+        # on the first batch — but no batch ever yields, so writer stays None,
+        # then os.path.getsize(output_path) at the end raises FileNotFoundError
+        # and the user sees a confusing "[Errno 2]" message instead of a clean
+        # "layer was empty" report.
+        if total_features <= 0:
+            elapsed_ms = (time.time() - start_time) * 1000
+            logger.info(
+                f"Layer is empty (0 features) — skipping streaming export to {output_path}"
+            )
+            return {
+                'features_exported': 0,
+                'bytes_written': 0,
+                'elapsed_time_ms': elapsed_ms,
+                'success': True,
+                'canceled': False,
+                'error': None,
+                'empty_layer': True,
+            }
+
         try:
             # Import QGIS writer
             from qgis.core import (

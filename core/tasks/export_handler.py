@@ -369,8 +369,16 @@ class ExportHandler:
         if not export_success:
             return False, message, None
 
-        if is_canceled():
-            return False, 'Export cancelled by user', None
+        # NOTE: a previous post-write ``if is_canceled(): return False, 'Export
+        # cancelled by user'`` lived here, but it was misleading — by this
+        # point ``writeAsVectorFormatV3`` has already completed and the file
+        # is on disk. The standard non-streaming LayerExporter doesn't accept
+        # a cancel callback, so cancel can't actually abort the write. Returning
+        # "Export cancelled" while the file exists confused users and skipped
+        # downstream zip / KML-merge steps. Cancel handling for in-progress
+        # writes lives in the streaming and batch paths (which DO check
+        # cancel between batches/layers); after a successful synchronous
+        # write, the right behavior is to report success.
 
         # Resolve the reported output location.
         reported_output = single_output if output_is_file else output_folder

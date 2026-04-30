@@ -1594,3 +1594,139 @@ class TestLayerStylesHelper:
         assert name == "roads"
         assert captured_qml in qml
         assert use_default == 1
+
+
+# ---------------------------------------------------------------------------
+# Tier 3 — empty-layer streaming + misleading post-write cancel
+# ---------------------------------------------------------------------------
+
+class TestEmptyLayerStreaming:
+    """A layer with featureCount() == 0 used to cause
+    ``FileNotFoundError`` because the writer was created lazily on the first
+    batch (which never arrived), then ``os.path.getsize(output_path)`` ran
+    against a path that didn't exist. Users saw a confusing ``[Errno 2]``
+    instead of a clean "empty layer" report."""
+
+    def test_empty_layer_short_circuits_with_success(self, tmp_path):
+        # Use the full filter_mate.* path to avoid clobbering the
+        # ``infrastructure`` package for tests in other dirs.
+        from filter_mate.infrastructure.streaming.result_streaming import (
+            StreamingExporter, StreamingConfig,
+        )
+
+        layer = MagicMock()
+        layer.featureCount.return_value = 0
+
+        exporter = StreamingExporter(StreamingConfig(batch_size=100))
+        result = exporter.export_layer_streaming(
+            source_layer=layer,
+            output_path=str(tmp_path / "empty.gpkg"),
+            format='gpkg',
+        )
+
+        assert result['success'] is True, \
+            f"Empty layer must report success, got {result}"
+        assert result['features_exported'] == 0
+        assert result['error'] is None
+        assert result.get('empty_layer') is True
+        # Must NOT have raised FileNotFoundError on the missing output file
+        assert 'No such file' not in str(result.get('error', ''))
+
+
+class TestPostWriteCancelNoLongerMisleading:
+    """Previously, after a successful synchronous LayerExporter write,
+    ``execute_exporting`` post-checked ``is_canceled()`` and returned
+    ``(False, 'Export cancelled by user', None)``. But the writer had
+    already completed and the file was on disk. Users saw "cancelled" while
+    holding a successful export. Plus the zip-creation and KML-merge
+    deferred steps were skipped."""
+
+    def _build_params_single_shp(self, output_path):
+        return {
+            "task": {
+                "EXPORTING": {
+                    "HAS_LAYERS_TO_EXPORT": True,
+                    "HAS_DATATYPE_TO_EXPORT": True,
+                    "DATATYPE_TO_EXPORT": "ESRI Shapefile",
+                    "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
+                    "OUTPUT_FOLDER_TO_EXPORT": output_path,
+                    "HAS_STYLES_TO_EXPORT": False,
+                },
+                "layers": [{"layer_name": "roads"}],
+            },
+            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                "enabled": {"value": False},
+            }}}},
+        }
+
+    def test_successful_write_with_late_cancel_reports_success(self, tmp_path):
+        """Cancel signal that arrives AFTER the writer completed must NOT
+        flip the result to False. The file is on disk, the export ran;
+        post-write cancel is too late and meaningless."""
+        from core.tasks.export_handler import ExportHandler
+        from core.export.layer_exporter import LayerExporter, ExportResult
+
+        out_file = str(tmp_path / "roads.shp")
+        params = self._build_params_single_shp(out_file)
+
+        validated = {
+            'layers': [{'layer_name': 'roads'}],
+            'projection': None, 'styles': None,
+            'datatype': "ESRI Shapefile",
+            'output_folder': out_file,
+            'zip_path': None, 'batch_output_folder': False,
+            'batch_zip': False, 'preserve_groups': False,
+        }
+
+        # is_canceled() returns True — but the writer already returned success.
+        # The handler must NOT flip the result to False/cancelled.
+        with patch.object(LayerExporter, 'export_single_layer',
+                          return_value=ExportResult(success=True, exported_count=1)), \
+             patch.object(ExportHandler, 'validate_export_parameters',
+                          return_value=validated):
+            handler = ExportHandler()
+            success, message, _ = handler.execute_exporting(
+                task_parameters=params, project=MagicMock(),
+                set_progress=MagicMock(), set_description=MagicMock(),
+                is_canceled=MagicMock(return_value=True),  # ← late cancel
+            )
+
+        assert success is True, \
+            f"Late cancel must not override successful write, got {message}"
+        assert 'cancelled' not in message.lower(), \
+            f"Message must report success, got: {message}"
+        assert 'exported to' in message.lower() or 'has been exported' in message.lower()
+
+    def test_failed_write_still_propagates_failure(self, tmp_path):
+        """Sanity check: actual writer failure (independent of cancel) still
+        returns False with the writer's error message."""
+        from core.tasks.export_handler import ExportHandler
+        from core.export.layer_exporter import LayerExporter, ExportResult
+
+        out_file = str(tmp_path / "roads.shp")
+        params = self._build_params_single_shp(out_file)
+        validated = {
+            'layers': [{'layer_name': 'roads'}],
+            'projection': None, 'styles': None,
+            'datatype': "ESRI Shapefile",
+            'output_folder': out_file,
+            'zip_path': None, 'batch_output_folder': False,
+            'batch_zip': False, 'preserve_groups': False,
+        }
+
+        with patch.object(LayerExporter, 'export_single_layer',
+                          return_value=ExportResult(
+                              success=False,
+                              error_message='Disk full while writing roads.shp'
+                          )), \
+             patch.object(ExportHandler, 'validate_export_parameters',
+                          return_value=validated):
+            handler = ExportHandler()
+            success, message, _ = handler.execute_exporting(
+                task_parameters=params, project=MagicMock(),
+                set_progress=MagicMock(), set_description=MagicMock(),
+                is_canceled=MagicMock(return_value=False),
+            )
+
+        assert success is False
+        assert 'Disk full' in message

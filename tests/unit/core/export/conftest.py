@@ -66,9 +66,19 @@ def _setup():
     infra = _ensure_package(f'{ROOT}.infrastructure', parent=ROOT)
     _ensure_package(f'{ROOT}.infrastructure.streaming', parent=f'{ROOT}.infrastructure')
     sys.modules[f'{ROOT}.infrastructure.logging'] = MagicMock(setup_logger=MagicMock(return_value=MagicMock()))
+    # The streaming package's __init__ re-exports from result_streaming. We
+    # mock it so the export_handler import (`from ...infrastructure.streaming
+    # import StreamingExporter, StreamingConfig`) resolves, but tests that
+    # need the real StreamingExporter import directly from
+    # `infrastructure.streaming.result_streaming` (loaded below as a real
+    # module).
     sys.modules[f'{ROOT}.infrastructure.streaming'] = MagicMock(
         StreamingExporter=MagicMock,
         StreamingConfig=MagicMock,
+    )
+    # Mock infrastructure.logging.get_logger used by result_streaming
+    sys.modules[f'{ROOT}.infrastructure.logging'].get_logger = MagicMock(
+        return_value=MagicMock()
     )
     _ensure_package(f'{ROOT}.config', parent=ROOT)
     sys.modules[f'{ROOT}.config.config'] = MagicMock(
@@ -109,6 +119,20 @@ def _setup():
         f'{ROOT}.core.tasks.export_handler', handler_path, f'{ROOT}.core.tasks',
     )
     sys.modules['core.tasks.export_handler'] = sys.modules[f'{ROOT}.core.tasks.export_handler']
+
+    # Load the real result_streaming module for direct streaming tests.
+    # Tests must import via the full ``filter_mate.infrastructure...`` path
+    # to avoid clobbering the real ``infrastructure`` package for tests in
+    # other directories (which expect their own infrastructure submodules
+    # like infrastructure.database, infrastructure.cache, etc.).
+    streaming_path = os.path.join(
+        project_root, 'infrastructure', 'streaming', 'result_streaming.py'
+    )
+    _load_file_as(
+        f'{ROOT}.infrastructure.streaming.result_streaming',
+        streaming_path,
+        f'{ROOT}.infrastructure.streaming',
+    )
 
 
 _setup()
