@@ -162,16 +162,20 @@ class BatchExporter:
         """
         self.project = project or (QgsProject.instance() if QGIS_AVAILABLE else None)
         self.layer_exporter = LayerExporter(project)
-        self._cancel_requested = False
-
-    def request_cancel(self):
-        """Request cancellation of current export operation."""
-        self._cancel_requested = True
-        logger.info("Batch export cancellation requested")
 
     def is_canceled(self) -> bool:
-        """Check if cancellation has been requested."""
-        return self._cancel_requested
+        """Cancel-check stub. Returns False by default.
+
+        Callers are expected to inject a real cancel callable by assigning
+        the QgsTask.isCanceled (or equivalent) bound method to this
+        attribute on the instance — see ExportHandler.execute_exporting:
+
+            batch_exporter.is_canceled = task.isCanceled
+
+        The instance assignment shadows this default, so the inner
+        ``if self.is_canceled():`` checks reach the caller's signal.
+        """
+        return False
 
     def export_to_folder(
         self,
@@ -201,9 +205,6 @@ class BatchExporter:
             BatchExportResult with detailed statistics
         """
         logger.info(f"Batch folder export: {len(layer_names)} layer(s) to {datatype} in {output_folder}")
-
-        # Reset cancel flag
-        self._cancel_requested = False
 
         # Ensure output directory exists
         if not os.path.exists(output_folder):
@@ -323,9 +324,6 @@ class BatchExporter:
             BatchExportResult with detailed statistics
         """
         logger.info(f"Batch ZIP export: {len(layer_names)} layer(s) to {datatype} ZIPs in {output_folder}")
-
-        # Reset cancel flag
-        self._cancel_requested = False
 
         # Ensure output directory exists
         if not os.path.exists(output_folder):
