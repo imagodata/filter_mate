@@ -11,10 +11,14 @@ Task Categories:
 - BaseTask: Abstract base for all tasks
 - FilterTask: Layer filtering operations
 - SpatialTask: Spatial filter operations
-- ExportTask: Data export operations
 - LayerTask: Layer management operations
 - MultiStepTask: Multi-step progressive filtering
 - ProgressHandler: Centralized progress reporting
+
+Note: Export operations live in core/tasks/export_handler.py and are
+driven by FilterEngineTask(task_action='export'). The standalone
+ExportTask/BatchExportTask wrappers were removed (unused, missing
+hardening from ad54833b/f769f134).
 
 Migration from modules/appTasks.py:
     OLD: from adapters.qgis.tasks import FilterEngineTask
@@ -35,11 +39,6 @@ from .filter_task import (  # noqa: F401
 from .spatial_task import (  # noqa: F401
     SpatialFilterTask,
     BufferFilterTask,
-)
-
-from .export_task import (  # noqa: F401
-    ExportTask,
-    BatchExportTask,
 )
 
 from .layer_task import (  # noqa: F401
@@ -70,9 +69,6 @@ __all__ = [
     # Spatial
     'SpatialFilterTask',
     'BufferFilterTask',
-    # Export
-    'ExportTask',
-    'BatchExportTask',
     # Layer
     'GatherLayerInfoTask',
     'ValidateExpressionsTask',
