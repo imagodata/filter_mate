@@ -302,22 +302,16 @@ class StreamingExporter:
                 QgsFields,
             )
 
-            # Determine driver name. Accepts either a short alias (e.g. 'shp',
-            # 'gpkg') or the exact OGR driver description (e.g. 'MapInfo File',
-            # 'XLSX', 'FlatGeobuf'). Unknown values are passed through
-            # case-preserved so case-sensitive driver names keep working.
-            driver_map = {
-                'gpkg': 'GPKG',
-                'geopackage': 'GPKG',
-                'shp': 'ESRI Shapefile',
-                'shapefile': 'ESRI Shapefile',
-                'geojson': 'GeoJSON',
-                'json': 'GeoJSON',
-                'csv': 'CSV',
-                'kml': 'KML',
-                'gml': 'GML'
-            }
-            driver_name = driver_map.get(format.lower(), format)
+            # ``format`` is expected to be the canonical OGR driver name
+            # (e.g. ``'GPKG'``, ``'ESRI Shapefile'``, ``'MapInfo File'``).
+            # The handler resolves aliases via core.export.layer_exporter's
+            # _FORMAT_REGISTRY before calling here, so we don't carry our
+            # own (smaller, drift-prone) alias dict. Direct callers that
+            # already know the canonical OGR driver name pass it through
+            # unchanged — anything else is forwarded case-preserved so OGR
+            # driver names like 'XLSX' / 'FlatGeobuf' keep working without
+            # a lookup round-trip.
+            driver_name = format
 
             # Create batch iterator
             batch_iterator = FeatureBatchIterator(

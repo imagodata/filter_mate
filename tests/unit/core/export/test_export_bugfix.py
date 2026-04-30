@@ -1941,3 +1941,112 @@ class TestStreamingExporterCleansPartialOutput:
             str(tmp_path / "ghost.gpkg"), "GPKG"
         )
         assert removed == 0
+
+
+# ---------------------------------------------------------------------------
+# Tier 4 — format registry consolidation: single source of truth for
+# OGR driver ↔ extension lookup. Both DRIVER_MAP and OGR_EXTENSION_MAP
+# are derived from _FORMAT_REGISTRY, so drift between them is impossible
+# by construction. Audit Tier 4 §H4.
+# ---------------------------------------------------------------------------
+
+class TestFormatRegistry:
+    """Tests guarding the registry's invariants."""
+
+    def test_driver_map_and_extension_map_share_keyset(self):
+        """The whole point of the consolidation: both dicts must have the
+        exact same keys. Drift is impossible if this invariant holds."""
+        from core.export.layer_exporter import (
+            OGR_EXTENSION_MAP, LayerExporter,
+        )
+        assert set(OGR_EXTENSION_MAP.keys()) == set(LayerExporter.DRIVER_MAP.keys()), \
+            "DRIVER_MAP and OGR_EXTENSION_MAP must have identical keysets"
+
+    def test_no_duplicate_aliases(self):
+        """If two registry entries claim the same alias, lookups would be
+        non-deterministic. Guard against typos in the registry."""
+        from core.export.layer_exporter import _FORMAT_REGISTRY
+        seen = {}
+        for spec in _FORMAT_REGISTRY:
+            keys = (spec.ogr_driver.upper(),) + spec.aliases
+            for key in keys:
+                if key in seen:
+                    pytest.fail(
+                        f"Duplicate alias '{key}': used by both "
+                        f"{seen[key]!r} and {spec.ogr_driver!r}"
+                    )
+                seen[key] = spec.ogr_driver
+
+    def test_each_entry_has_valid_extension(self):
+        """All extensions must start with a dot. Guards against typos like
+        'shp' instead of '.shp'."""
+        from core.export.layer_exporter import _FORMAT_REGISTRY
+        for spec in _FORMAT_REGISTRY:
+            assert spec.extension.startswith('.'), \
+                f"{spec.ogr_driver}: extension {spec.extension!r} must start with '.'"
+            assert len(spec.extension) > 1, \
+                f"{spec.ogr_driver}: extension cannot be just '.'"
+
+    def test_aliases_are_uppercase(self):
+        """Aliases are looked up via .upper(), so registering them in any
+        other case is a confusing no-op."""
+        from core.export.layer_exporter import _FORMAT_REGISTRY
+        for spec in _FORMAT_REGISTRY:
+            for alias in spec.aliases:
+                assert alias == alias.upper(), \
+                    f"{spec.ogr_driver}: alias {alias!r} must be uppercase"
+
+    def test_canonical_drivers_round_trip(self):
+        """Looking up a driver by its canonical name (uppercased) must
+        return that exact canonical name — not a variant like 'GeoPackage'
+        or 'esri shapefile'."""
+        from core.export.layer_exporter import _FORMAT_REGISTRY, LayerExporter
+        for spec in _FORMAT_REGISTRY:
+            looked_up = LayerExporter.DRIVER_MAP[spec.ogr_driver.upper()]
+            assert looked_up == spec.ogr_driver, \
+                f"Round-trip failed: {spec.ogr_driver!r} → {looked_up!r}"
+
+    def test_short_aliases_resolve_to_canonical(self):
+        """Sanity check: 'SHP' must resolve to 'ESRI Shapefile', not to
+        any case variant like 'esri shapefile' or 'SHP'."""
+        from core.export.layer_exporter import LayerExporter
+        assert LayerExporter.DRIVER_MAP['SHP'] == 'ESRI Shapefile'
+        assert LayerExporter.DRIVER_MAP['JSON'] == 'GeoJSON'
+        assert LayerExporter.DRIVER_MAP['TAB'] == 'MapInfo File'
+        assert LayerExporter.DRIVER_MAP['SHAPEFILE'] == 'ESRI Shapefile'
+
+    def test_streaming_no_longer_has_local_driver_map(self):
+        """StreamingExporter previously had its own (smaller) driver_map
+        that drifted from the canonical sources. After consolidation, the
+        format param is passed through verbatim — no local map should
+        exist."""
+        # Use the full path: filter_mate.infrastructure.streaming is a
+        # conftest MagicMock, but the real result_streaming module was
+        # loaded into sys.modules by conftest at the leaf level.
+        from filter_mate.infrastructure.streaming.result_streaming import (
+            StreamingExporter,
+        )
+        import inspect
+        source = inspect.getsource(StreamingExporter.export_layer_streaming)
+        assert "'gpkg': 'GPKG'" not in source, \
+            "StreamingExporter must not maintain its own driver alias dict"
+        assert "'shp': 'ESRI Shapefile'" not in source
+
+    def test_registry_includes_all_dialog_choices(self):
+        """The export dialog combobox shows GPKG, SHP, GeoJSON, KML, CSV,
+        XLSX, TAB. Every choice must resolve in the registry."""
+        from core.export.layer_exporter import LayerExporter
+        for choice in ('GPKG', 'SHP', 'GEOJSON', 'KML', 'CSV', 'XLSX', 'TAB'):
+            assert choice in LayerExporter.DRIVER_MAP, \
+                f"Dialog choice {choice!r} not in registry — would be rejected by validator"
+
+    def test_get_extension_for_format_uses_registry(self):
+        """get_extension_for_format() must reflect any registry changes —
+        no parallel hardcoded lookup table."""
+        from core.export.layer_exporter import get_extension_for_format
+        assert get_extension_for_format('GPKG') == '.gpkg'
+        assert get_extension_for_format('shp') == '.shp'  # case-insensitive
+        assert get_extension_for_format('ESRI Shapefile') == '.shp'
+        assert get_extension_for_format('TAB') == '.tab'
+        # Unknown driver still falls back gracefully
+        assert get_extension_for_format('Some_Unknown_Format') == '.some_unknown_format'

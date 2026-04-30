@@ -47,34 +47,86 @@ except ImportError:
 
 logger = logging.getLogger('FilterMate.Export')
 
-# Canonical mapping of uppercased OGR driver descriptions to file extensions.
-# Covers both short aliases (SHP, TAB) and full OGR names (ESRI SHAPEFILE, MAPINFO FILE).
-# Used by LayerExporter, BatchExporter, and ExportHandler for consistent extension resolution.
-OGR_EXTENSION_MAP = {
-    'GPKG': '.gpkg',
-    'SHP': '.shp',
-    'SHAPEFILE': '.shp',
-    'ESRI SHAPEFILE': '.shp',
-    'GEOJSON': '.geojson',
-    'JSON': '.geojson',
-    'GML': '.gml',
-    'KML': '.kml',
-    'LIBKML': '.kml',
-    'CSV': '.csv',
-    'XLSX': '.xlsx',
-    'TAB': '.tab',
-    'MAPINFO': '.tab',
-    'MAPINFO FILE': '.tab',
-    'DXF': '.dxf',
-    'SQLITE': '.sqlite',
+# =============================================================================
+# Format registry — single source of truth for OGR driver ↔ extension lookup.
+#
+# Previously, OGR_EXTENSION_MAP and LayerExporter.DRIVER_MAP were two parallel
+# dicts that could drift. They had: SHP → .shp, but DRIVER_MAP['ESRI FILEGDB']
+# didn't exist while OGR_EXTENSION_MAP['ESRI FILEGDB'] = '.gdb' (audit Tier 4
+# §H4). StreamingExporter had a *third*, smaller, lowercase variant that
+# silently dropped XLSX, MapInfo, FlatGeobuf, etc.
+#
+# The registry below is the only place format facts are written. Both
+# lookup dicts (DRIVER_MAP, OGR_EXTENSION_MAP) are derived from it, and
+# the streaming module no longer maintains its own.
+# =============================================================================
+
+@dataclass(frozen=True)
+class _FormatSpec:
+    """One canonical entry in the export format registry.
+
+    Attributes:
+        ogr_driver: Canonical OGR driver name (e.g. ``'ESRI Shapefile'``).
+                    The case here matters — OGR's driver lookup is
+                    case-sensitive when it matters (Shapefile not SHAPEFILE).
+        extension:  Primary file extension with leading dot.
+        aliases:    Additional uppercase-only short forms the user (or a
+                    saved task config) may type. The driver name itself
+                    .upper()'d is automatically registered as an alias —
+                    don't repeat it here.
+    """
+    ogr_driver: str
+    extension: str
+    aliases: tuple = ()
+
+
+# Order is human-readable, not significant. KML and LIBKML are *different*
+# OGR drivers that produce the same .kml output (LIBKML is richer); both
+# are kept as distinct registry entries because the validator and dispatcher
+# treat them differently (see export_validator's preserve_groups handling).
+_FORMAT_REGISTRY: tuple = (
+    _FormatSpec('GPKG',           '.gpkg',    ()),
+    _FormatSpec('ESRI Shapefile', '.shp',     ('SHP', 'SHAPEFILE')),
+    _FormatSpec('GeoJSON',        '.geojson', ('JSON',)),
+    _FormatSpec('GML',            '.gml',     ()),
+    _FormatSpec('KML',            '.kml',     ()),
+    _FormatSpec('LIBKML',         '.kml',     ()),
+    _FormatSpec('CSV',            '.csv',     ()),
+    _FormatSpec('XLSX',           '.xlsx',    ()),
+    _FormatSpec('MapInfo File',   '.tab',     ('TAB', 'MAPINFO')),
+    _FormatSpec('DXF',            '.dxf',     ()),
     # SpatiaLite uses .sqlite by QGIS/OGR convention; .spatialite is not
     # recognised by QGIS data-source loaders.
-    'SPATIALITE': '.sqlite',
-    'FLATGEOBUF': '.fgb',
-    'ESRI FILEGDB': '.gdb',
-    'OPENFILEGDB': '.gdb',
-    'PGDUMP': '.sql',
-}
+    _FormatSpec('SQLite',         '.sqlite',  ()),
+    _FormatSpec('SpatiaLite',     '.sqlite',  ()),
+    _FormatSpec('FlatGeobuf',     '.fgb',     ()),
+)
+
+
+def _build_lookup_dicts():
+    """Generate the alias→driver and alias→extension dicts from registry.
+
+    Each format contributes its uppercased OGR driver name as a key, plus
+    every entry in its aliases tuple. Both dicts share the exact same
+    keyset by construction — drift is impossible.
+    """
+    drivers = {}
+    extensions = {}
+    for spec in _FORMAT_REGISTRY:
+        keys = (spec.ogr_driver.upper(),) + spec.aliases
+        for key in keys:
+            drivers[key] = spec.ogr_driver
+            extensions[key] = spec.extension
+    return drivers, extensions
+
+
+_DRIVER_BY_ALIAS, _EXTENSION_BY_ALIAS = _build_lookup_dicts()
+
+# Public exports — backward-compatible with existing call sites.
+# These dicts are immutable views into the registry; callers must not
+# mutate them. (Kept as plain dict for backward compat; consolidation
+# guarantees their keysets match by construction.)
+OGR_EXTENSION_MAP = _EXTENSION_BY_ALIAS
 
 
 def get_extension_for_format(datatype: str) -> str:
@@ -339,27 +391,10 @@ class LayerExporter:
 
     """
 
-    # Format driver mapping (uppercased key → OGR driver name)
-    DRIVER_MAP = {
-        'GPKG': 'GPKG',
-        'SHP': 'ESRI Shapefile',
-        'SHAPEFILE': 'ESRI Shapefile',
-        'ESRI SHAPEFILE': 'ESRI Shapefile',
-        'GEOJSON': 'GeoJSON',
-        'JSON': 'GeoJSON',
-        'GML': 'GML',
-        'KML': 'KML',
-        'LIBKML': 'LIBKML',
-        'CSV': 'CSV',
-        'XLSX': 'XLSX',
-        'TAB': 'MapInfo File',
-        'MAPINFO': 'MapInfo File',
-        'MAPINFO FILE': 'MapInfo File',
-        'DXF': 'DXF',
-        'SQLITE': 'SQLite',
-        'SPATIALITE': 'SpatiaLite',
-        'FLATGEOBUF': 'FlatGeobuf',
-    }
+    # Derived from _FORMAT_REGISTRY (top of module). Keys are uppercased
+    # aliases; values are canonical OGR driver names. See module-level
+    # registry for the single source of truth.
+    DRIVER_MAP = _DRIVER_BY_ALIAS
 
     def __init__(self, project: Optional[QgsProject] = None):
         """
