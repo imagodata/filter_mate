@@ -41,9 +41,6 @@ class StreamingConfig:
     # Batch size for feature processing
     batch_size: int = 5000
 
-    # Memory limit in MB (0 = unlimited)
-    memory_limit_mb: int = 500
-
     # Commit interval (features between commits)
     commit_interval: int = 10000
 
@@ -58,7 +55,6 @@ class StreamingConfig:
         """Config optimized for large datasets (> 100k features)."""
         return cls(
             batch_size=10000,
-            memory_limit_mb=1000,
             commit_interval=25000
         )
 
@@ -67,7 +63,6 @@ class StreamingConfig:
         """Config for memory-constrained environments."""
         return cls(
             batch_size=1000,
-            memory_limit_mb=256,
             commit_interval=5000
         )
 
@@ -418,29 +413,6 @@ class StreamingExporter:
                 'success': False,
                 'error': str(e)
             }
-
-    def should_use_streaming(self, layer) -> bool:
-        """
-        Determine if streaming should be used for a layer.
-
-        Args:
-            layer: QgsVectorLayer to check
-
-        Returns:
-            bool: True if streaming recommended
-        """
-        feature_count = layer.featureCount()
-
-        # Streaming recommended for:
-        # - Large datasets (> 50k features)
-        # - Memory-constrained config
-        if feature_count > 50000:
-            return True
-
-        if self.config.memory_limit_mb < 500 and feature_count > 10000:
-            return True
-
-        return False
 
     def cancel(self) -> None:
         """Cancel the current export operation."""
