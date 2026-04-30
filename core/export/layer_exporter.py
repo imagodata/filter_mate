@@ -91,6 +91,90 @@ def get_extension_for_format(datatype: str) -> str:
     return f'.{clean}'
 
 
+# Sidecar file extensions per format. Used by cleanup_partial_export() to
+# remove orphan files when an export fails midway. Keys are uppercased OGR
+# driver names; values are lists of extensions (with leading dot) that share
+# the output's basename. The main file extension is included.
+_FORMAT_SIDECARS = {
+    'ESRI SHAPEFILE': ['.shp', '.dbf', '.shx', '.prj', '.cpg', '.qpj',
+                       '.qix', '.qmd', '.sbn', '.sbx', '.fbn', '.fbx',
+                       '.ain', '.aih', '.ixs', '.mxs', '.atx'],
+    'MAPINFO FILE':   ['.tab', '.dat', '.id', '.map', '.ind', '.qmd'],
+    'GPKG':           ['.gpkg', '.gpkg-journal', '.gpkg-wal', '.gpkg-shm'],
+    'GEOJSON':        ['.geojson', '.json'],
+    'GML':            ['.gml', '.xsd', '.gfs'],
+    'KML':            ['.kml'],
+    'LIBKML':         ['.kml'],
+    'CSV':            ['.csv', '.csvt', '.prj'],
+    'XLSX':           ['.xlsx'],
+    'DXF':            ['.dxf'],
+    'SQLITE':         ['.sqlite', '.sqlite-journal', '.sqlite-wal', '.sqlite-shm'],
+    'SPATIALITE':     ['.sqlite', '.sqlite-journal', '.sqlite-wal', '.sqlite-shm'],
+    'FLATGEOBUF':     ['.fgb'],
+    'PGDUMP':         ['.sql'],
+}
+
+
+def cleanup_partial_export(output_path: str, datatype: str) -> int:
+    """Delete a failed-export's main file and known sidecars sharing its basename.
+
+    When ``QgsVectorFileWriter.writeAsVectorFormatV3`` (or streaming) fails
+    midway through a write, partial output may be left on disk under the
+    target path. The user then sees an export-failure dialog AND a
+    same-named file/sidecars sitting in the output folder, with no way to
+    tell from the filename whether the file is complete (audit Tier 3 §24).
+
+    This helper removes the main output file plus all sibling files in the
+    same directory whose basename matches and whose extension is in
+    ``_FORMAT_SIDECARS[datatype]``. Files belonging to OTHER layers in the
+    same directory are not touched (extension match is exact).
+
+    Args:
+        output_path: The intended path of the failed export (the path
+            passed to the writer).
+        datatype: OGR driver name (e.g. 'ESRI Shapefile', 'GPKG').
+
+    Returns:
+        Number of files actually removed.
+    """
+    parent_dir = os.path.dirname(output_path) or '.'
+    if not os.path.isdir(parent_dir):
+        return 0
+
+    base = os.path.splitext(os.path.basename(output_path))[0]
+    if not base:
+        return 0
+
+    extensions = _FORMAT_SIDECARS.get(datatype.upper())
+    if not extensions:
+        # Unknown datatype: only remove the exact target_path if it exists.
+        # Don't glob unknown extensions — too easy to delete unrelated files.
+        if os.path.isfile(output_path):
+            try:
+                os.remove(output_path)
+                return 1
+            except OSError as e:
+                logger.warning(f"Cleanup failed for {output_path}: {e}")
+        return 0
+
+    removed = 0
+    for ext in extensions:
+        candidate = os.path.join(parent_dir, base + ext)
+        if os.path.isfile(candidate):
+            try:
+                os.remove(candidate)
+                removed += 1
+                logger.debug(f"Cleaned up partial export sidecar: {candidate}")
+            except OSError as e:
+                logger.warning(f"Cleanup failed for {candidate}: {e}")
+    if removed:
+        logger.info(
+            f"Cleaned up {removed} partial export file(s) for "
+            f"failed write of {output_path}"
+        )
+    return removed
+
+
 # Shapefile DBF allows only ASCII alphanumerics + underscore in field names,
 # max 10 chars, must start with a letter. OGR truncates/mangles silently.
 _DBF_VALID_FIELD = re.compile(r'^[A-Za-z][A-Za-z0-9_]{0,9}$')
@@ -421,6 +505,9 @@ class LayerExporter:
             if error != QgsVectorFileWriter.NoError:
                 msg = error_msg or "Unknown error"
                 logger.error(f"Export failed for layer '{layer.name()}': {msg}")
+                # Tier 3 fix: remove partial output so the user doesn't end
+                # up with a corrupt-but-named file that looks complete.
+                cleanup_partial_export(output_path, driver_name)
                 return ExportResult(
                     success=False,
                     error_message=msg
@@ -441,6 +528,12 @@ class LayerExporter:
         except Exception as e:
             error_msg = str(e)
             logger.error(f"Export exception for layer '{layer.name()}': {error_msg}")
+            # Same cleanup as the writer-error branch — exception during
+            # write may have left a partial file too.
+            try:
+                cleanup_partial_export(output_path, driver_name)
+            except Exception as cleanup_err:
+                logger.debug(f"Cleanup-on-exception failed: {cleanup_err}")
             return ExportResult(
                 success=False,
                 error_message=error_msg
@@ -608,6 +701,11 @@ class LayerExporter:
                 logger.error(
                     f"GPKG reprojection export failed for '{layer.name()}': {msg}"
                 )
+                # Cleanup the partial multi-layer GPKG. Even if some earlier
+                # layers wrote successfully, the file as a whole is incomplete
+                # — better to remove than leave a half-built GPKG that looks
+                # like a finished export.
+                cleanup_partial_export(output_path, 'GPKG')
                 return ExportResult(
                     success=False,
                     error_message=msg,

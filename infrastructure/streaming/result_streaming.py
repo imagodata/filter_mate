@@ -34,6 +34,58 @@ from ..logging import get_logger
 logger = get_logger(__name__)
 
 
+def _cleanup_partial_streaming_output(output_path: str, driver_name: str) -> int:
+    """Remove a partial output file left behind by a failed/cancelled
+    streaming export.
+
+    Streaming primarily targets single-file formats (GPKG, GeoJSON, CSV,
+    FlatGeobuf) where ``os.remove(output_path)`` is sufficient. For
+    multi-file formats (SHP, MapInfo) we additionally remove well-known
+    sidecars sharing the basename. Layering: the comprehensive sidecar
+    helper lives in ``core/export/layer_exporter.cleanup_partial_export``
+    (used by non-streaming paths); we don't import from ``core`` here to
+    keep the infrastructure layer self-contained — and streaming SHP is
+    a rare combination in practice.
+    """
+    if not output_path:
+        return 0
+
+    removed = 0
+    if os.path.isfile(output_path):
+        try:
+            os.remove(output_path)
+            removed += 1
+        except OSError as e:
+            logger.warning(f"Cleanup failed for {output_path}: {e}")
+
+    # Best-effort sidecar removal for the formats most likely to be
+    # streamed alongside multi-file output. Limited list intentional —
+    # see comment above.
+    SIDECAR_EXT_BY_DRIVER = {
+        'ESRI Shapefile': ['.dbf', '.shx', '.prj', '.cpg', '.qmd'],
+        'GPKG':           ['.gpkg-journal', '.gpkg-wal', '.gpkg-shm'],
+        'CSV':            ['.csvt', '.prj'],
+    }
+    sidecars = SIDECAR_EXT_BY_DRIVER.get(driver_name, [])
+    if sidecars:
+        base = os.path.splitext(output_path)[0]
+        for ext in sidecars:
+            sidecar_path = base + ext
+            if os.path.isfile(sidecar_path):
+                try:
+                    os.remove(sidecar_path)
+                    removed += 1
+                except OSError as e:
+                    logger.warning(f"Cleanup failed for {sidecar_path}: {e}")
+
+    if removed:
+        logger.info(
+            f"Cleaned up {removed} partial streaming output file(s) for "
+            f"{output_path}"
+        )
+    return removed
+
+
 @dataclass
 class StreamingConfig:
     """Configuration for streaming export operations."""
@@ -335,6 +387,10 @@ class StreamingExporter:
                     if writer.hasError() != QgsVectorFileWriter.NoError:
                         error_msg = writer.errorMessage()
                         logger.error(f"Failed to create writer: {error_msg}")
+                        # Tier 3 fix: any partial output that QgsVectorFileWriter
+                        # may have created before failing is removed so the user
+                        # doesn't see an orphan file alongside the failure dialog.
+                        _cleanup_partial_streaming_output(output_path, driver_name)
                         return {
                             'features_exported': 0,
                             'bytes_written': 0,
@@ -401,6 +457,13 @@ class StreamingExporter:
             if writer:
                 del writer
 
+            # Tier 3 fix: if cancellation interrupted the loop, the file on
+            # disk holds only the features that were written before the
+            # cancel. Remove it so the user doesn't end up with a same-named
+            # partial output that looks complete.
+            if self._canceled:
+                _cleanup_partial_streaming_output(output_path, driver_name)
+
             # Get final file size
             if os.path.exists(output_path):
                 bytes_written = os.path.getsize(output_path)
@@ -408,7 +471,10 @@ class StreamingExporter:
             elapsed_ms = (time.time() - start_time) * 1000
 
             if self._canceled:
-                logger.warning(f"Export canceled: {features_exported:,} features exported before cancellation")
+                logger.warning(
+                    f"Export canceled: {features_exported:,} features were "
+                    f"written before cancellation; partial output cleaned up"
+                )
             else:
                 logger.info(f"✓ Export complete: {features_exported:,} features in {elapsed_ms:.0f}ms")
                 logger.info(f"  Output size: {bytes_written / 1024 / 1024:.2f} MB")
@@ -425,6 +491,13 @@ class StreamingExporter:
         except Exception as e:
             elapsed_ms = (time.time() - start_time) * 1000
             logger.error(f"Export failed: {e}")
+
+            # Cleanup partial output on uncaught exception too — same
+            # rationale as the cancel branch.
+            try:
+                _cleanup_partial_streaming_output(output_path, driver_name)
+            except Exception as cleanup_err:
+                logger.debug(f"Cleanup-on-exception failed: {cleanup_err}")
 
             return {
                 'features_exported': features_exported,

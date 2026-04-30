@@ -1730,3 +1730,214 @@ class TestPostWriteCancelNoLongerMisleading:
 
         assert success is False
         assert 'Disk full' in message
+
+
+# ---------------------------------------------------------------------------
+# Tier 3 — cleanup-on-failure: failed exports must not leave partial files
+# ---------------------------------------------------------------------------
+
+class TestCleanupPartialExport:
+    """Direct unit tests of the ``cleanup_partial_export`` helper.
+
+    Audit Tier 3 §24: when a writer fails midway, partial output may stay
+    on disk under the target name with no way to tell from the filename
+    that it's incomplete. Cleanup-on-failure restores the simple
+    "either-or" UX: success → file present, failure → no orphan file.
+    """
+
+    def test_removes_main_file_for_known_driver(self, tmp_path):
+        from core.export.layer_exporter import cleanup_partial_export
+        target = tmp_path / "roads.gpkg"
+        target.write_bytes(b"partial gpkg content")
+
+        removed = cleanup_partial_export(str(target), "GPKG")
+        assert removed == 1
+        assert not target.exists()
+
+    def test_removes_shp_sidecars(self, tmp_path):
+        from core.export.layer_exporter import cleanup_partial_export
+
+        # Multi-file SHP layout
+        for ext in ('.shp', '.dbf', '.shx', '.prj', '.cpg'):
+            (tmp_path / f"roads{ext}").write_bytes(b"x")
+        # Unrelated file in same dir — must be left alone
+        (tmp_path / "other_layer.shp").write_bytes(b"x")
+        (tmp_path / "README.md").write_text("# nope")
+
+        removed = cleanup_partial_export(str(tmp_path / "roads.shp"),
+                                         "ESRI Shapefile")
+        assert removed == 5  # All 5 sidecars deleted
+        assert not (tmp_path / "roads.shp").exists()
+        assert not (tmp_path / "roads.dbf").exists()
+        # Hard tripwire: must not delete other layers
+        assert (tmp_path / "other_layer.shp").exists()
+        assert (tmp_path / "README.md").exists()
+
+    def test_removes_gpkg_journal_sidecars(self, tmp_path):
+        """GPKG WAL/journal files left behind after a crash should also be
+        cleaned to avoid partial-DB recovery on next open."""
+        from core.export.layer_exporter import cleanup_partial_export
+
+        for ext in ('.gpkg', '.gpkg-journal', '.gpkg-wal'):
+            (tmp_path / f"data{ext}").write_bytes(b"x")
+
+        removed = cleanup_partial_export(str(tmp_path / "data.gpkg"), "GPKG")
+        assert removed == 3
+        assert not (tmp_path / "data.gpkg").exists()
+        assert not (tmp_path / "data.gpkg-wal").exists()
+
+    def test_unknown_driver_only_removes_exact_path(self, tmp_path):
+        """For an unknown driver, only the exact target file is removed —
+        we don't glob unknown extensions, too risky."""
+        from core.export.layer_exporter import cleanup_partial_export
+
+        (tmp_path / "data.weird").write_bytes(b"x")
+        (tmp_path / "data.something_else").write_bytes(b"x")
+
+        removed = cleanup_partial_export(str(tmp_path / "data.weird"),
+                                         "SOME_UNKNOWN_DRIVER")
+        assert removed == 1
+        assert not (tmp_path / "data.weird").exists()
+        # Other files with same basename are untouched
+        assert (tmp_path / "data.something_else").exists()
+
+    def test_missing_file_no_op(self, tmp_path):
+        """Calling cleanup on a path that doesn't exist must be a no-op
+        (returns 0, doesn't raise)."""
+        from core.export.layer_exporter import cleanup_partial_export
+        removed = cleanup_partial_export(str(tmp_path / "ghost.gpkg"), "GPKG")
+        assert removed == 0
+
+    def test_missing_directory_no_op(self, tmp_path):
+        """If the parent directory doesn't exist, return 0 cleanly."""
+        from core.export.layer_exporter import cleanup_partial_export
+        removed = cleanup_partial_export(
+            str(tmp_path / "nonexistent_subdir" / "file.gpkg"), "GPKG"
+        )
+        assert removed == 0
+
+
+class TestExportSingleLayerCleansOnFailure:
+    """Wired test: when the writer returns non-NoError, the partial output
+    file is cleaned up before the failure result is returned."""
+
+    @pytest.fixture
+    def patched_module(self, monkeypatch):
+        from core.export import layer_exporter as le
+        fake_writer = MagicMock()
+        fake_writer.NoError = 0
+        # Writer returns an error code AND has already written a partial file
+        fake_writer.writeAsVectorFormatV3 = MagicMock(
+            return_value=(5, "Disk full mid-write", "", "")
+        )
+        fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
+        del fake_writer.writeAsVectorFormat
+
+        monkeypatch.setattr(le, "QGIS_AVAILABLE", True)
+        monkeypatch.setattr(le, "QgsVectorFileWriter", fake_writer)
+        monkeypatch.setattr(le, "QgsCoordinateTransform", MagicMock())
+        monkeypatch.setattr(le, "QgsCoordinateTransformContext", MagicMock())
+        monkeypatch.setattr(le, "QgsProject",
+                            MagicMock(instance=MagicMock(return_value=None)))
+        return le
+
+    def _make_layer(self):
+        layer = MagicMock()
+        layer.name.return_value = "roads"
+        crs = MagicMock()
+        crs.isValid.return_value = True
+        crs.__eq__ = lambda self, o: True
+        layer.sourceCrs.return_value = crs
+        return layer
+
+    def test_failed_gpkg_write_removes_partial_file(self, patched_module, tmp_path):
+        """Simulate writer failure with a pre-existing partial file on disk
+        (as if the writer crashed after partially writing). Cleanup must
+        remove it."""
+        le = patched_module
+        target = tmp_path / "roads.gpkg"
+        target.write_bytes(b"half-written gpkg")  # simulate partial output
+
+        exporter = le.LayerExporter(project=MagicMock())
+        exporter.get_layer_by_name = MagicMock(return_value=self._make_layer())
+        result = exporter.export_single_layer(
+            "roads", str(target), projection=None,
+            datatype="GPKG", style_format=None, save_styles=False,
+        )
+
+        assert result.success is False
+        assert "Disk full" in result.error_message
+        assert not target.exists(), \
+            "Partial GPKG must be cleaned up after writer failure"
+
+    def test_failed_shp_write_removes_all_sidecars(self, patched_module, tmp_path):
+        """Same scenario for SHP — both .shp and any sidecars left by a
+        failed writer must be removed."""
+        le = patched_module
+        for ext in ('.shp', '.dbf', '.shx'):
+            (tmp_path / f"roads{ext}").write_bytes(b"x")
+
+        exporter = le.LayerExporter(project=MagicMock())
+        exporter.get_layer_by_name = MagicMock(return_value=self._make_layer())
+        result = exporter.export_single_layer(
+            "roads", str(tmp_path / "roads.shp"), projection=None,
+            datatype="ESRI Shapefile", style_format=None, save_styles=False,
+        )
+
+        assert result.success is False
+        assert not (tmp_path / "roads.shp").exists()
+        assert not (tmp_path / "roads.dbf").exists()
+        assert not (tmp_path / "roads.shx").exists()
+
+
+class TestStreamingExporterCleansPartialOutput:
+    """Streaming exporter must remove its partial output file on
+    cancel-during-write or writer-creation failure."""
+
+    def test_cancel_during_streaming_removes_partial_file(self, tmp_path):
+        """When cancel is requested mid-stream, the file written so far
+        must be cleaned up so the user doesn't see a same-named partial."""
+        from filter_mate.infrastructure.streaming.result_streaming import (
+            StreamingExporter, StreamingConfig,
+        )
+
+        # Pretend a partial file was written
+        target = tmp_path / "out.gpkg"
+        target.write_bytes(b"partial streaming output")
+
+        # Build an exporter and simulate a cancelled streaming run by
+        # directly invoking the cleanup branch.
+        exporter = StreamingExporter(StreamingConfig(batch_size=10))
+        exporter._canceled = True
+
+        # Direct test of the helper rather than full streaming flow
+        from filter_mate.infrastructure.streaming.result_streaming import (
+            _cleanup_partial_streaming_output,
+        )
+        removed = _cleanup_partial_streaming_output(str(target), "GPKG")
+        assert removed >= 1
+        assert not target.exists()
+
+    def test_streaming_cleanup_removes_gpkg_journal_sidecars(self, tmp_path):
+        from filter_mate.infrastructure.streaming.result_streaming import (
+            _cleanup_partial_streaming_output,
+        )
+        for ext in ('.gpkg', '.gpkg-journal', '.gpkg-wal'):
+            (tmp_path / f"out{ext}").write_bytes(b"x")
+
+        removed = _cleanup_partial_streaming_output(
+            str(tmp_path / "out.gpkg"), "GPKG"
+        )
+        assert removed == 3
+        assert not (tmp_path / "out.gpkg").exists()
+        assert not (tmp_path / "out.gpkg-wal").exists()
+
+    def test_streaming_cleanup_missing_file_no_op(self, tmp_path):
+        """Cleanup of a non-existent path must not raise."""
+        from filter_mate.infrastructure.streaming.result_streaming import (
+            _cleanup_partial_streaming_output,
+        )
+        removed = _cleanup_partial_streaming_output(
+            str(tmp_path / "ghost.gpkg"), "GPKG"
+        )
+        assert removed == 0
