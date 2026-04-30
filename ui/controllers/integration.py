@@ -1670,11 +1670,10 @@ class ControllerIntegration:
                 return None
         return None
 
-    def delegate_execute_export(self) -> bool:
-        """Delegate export execution to exporting controller."""
-        if self._exporting_controller:
-            return self._exporting_controller.execute_export()
-        return False
+    # NOTE: delegate_execute_export() and delegate_export_execute() were
+    # removed alongside ExportingController.execute_export(). Both wrappers
+    # had zero external callers; the live export path is
+    # pushButton_action_export → FilterEngineTask(task_action='export').
 
     # === Exporting Controller Delegation Methods ===
 
@@ -2285,23 +2284,6 @@ class ControllerIntegration:
                 logger.warning(f"delegate_export_can_export failed: {e}")
                 return None
         return None
-
-    def delegate_export_execute(self) -> bool:
-        """
-        Delegate export execution.
-
-        v3.1 STORY-2.5: Executes the export operation.
-
-        Returns:
-            True if export succeeded, False otherwise
-        """
-        if self._exporting_controller:
-            try:
-                return self._exporting_controller.execute_export()
-            except Exception as e:
-                logger.warning(f"delegate_export_execute failed: {e}")
-                return False
-        return False
 
     def delegate_export_get_output_crs(self) -> Optional[str]:
         """

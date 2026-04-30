@@ -706,126 +706,13 @@ class ExportingController(BaseController):
         config = self.build_configuration()
         return config.is_valid()
 
-    def execute_export(self) -> bool:
-        """
-        Execute the export operation.
-
-        Returns:
-            True if export started, False otherwise
-        """
-        if not self.can_export():
-            return False
-
-        self._is_exporting = True
-        self._export_progress = 0.0
-
-        # Notify started
-        for callback in self._on_export_started_callbacks:
-            try:
-                callback()
-            except Exception:
-                pass
-
-        config = self.build_configuration()
-
-        try:
-            if config.mode == ExportMode.BATCH or len(config.layer_ids) > 1:
-                result = self._execute_batch_export(config)
-            else:
-                result = self._execute_single_export(config)
-
-            self._on_export_success(result)
-            return True
-
-        except Exception as e:
-            self._on_export_error(str(e))
-            return False
-
-    def _execute_single_export(self, config: ExportConfiguration) -> ExportResult:
-        """
-        Execute single layer export.
-
-        Args:
-            config: Export configuration
-
-        Returns:
-            Export result
-        """
-        # This is a simplified implementation
-        # Actual implementation would use QGIS processing or ogr2ogr
-
-        if not config.layer_ids:
-            return ExportResult(success=False, error_message="No layers selected")
-
-        # Simulate successful export
-        exported_path = config.output_path
-
-        return ExportResult(
-            success=True,
-            exported_files=[exported_path]
-        )
-
-    def _execute_batch_export(self, config: ExportConfiguration) -> ExportResult:
-        """
-        Execute batch export (multiple layers to separate files).
-
-        Args:
-            config: Export configuration
-
-        Returns:
-            Export result
-        """
-        exported_files = []
-        failed_layers = []
-
-        total = len(config.layer_ids)
-
-        for i, layer_id in enumerate(config.layer_ids):
-            try:
-                # Build output path for this layer
-                base_path = Path(config.output_path)
-                if base_path.suffix:
-                    # File path - add layer name before extension
-                    layer_path = base_path.parent / f"{base_path.stem}_{layer_id}{base_path.suffix}"
-                else:
-                    # Directory - use layer name as filename
-                    layer_path = base_path / f"{layer_id}{config.output_format.extension}"
-
-                # Simulate export
-                exported_files.append(str(layer_path))
-
-                # Update progress
-                self._export_progress = (i + 1) / total
-                self._notify_progress(self._export_progress)
-
-            except Exception:
-                failed_layers.append(layer_id)
-
-        return ExportResult(
-            success=len(failed_layers) == 0,
-            exported_files=exported_files,
-            failed_layers=failed_layers
-        )
-
-    def _on_export_success(self, result: ExportResult) -> None:
-        """Handle successful export."""
-        self._is_exporting = False
-        self._last_result = result
-        self._export_progress = 1.0
-
-        for callback in self._on_export_completed_callbacks:
-            try:
-                callback(result)
-            except Exception:
-                pass
-
-    def _on_export_error(self, error_message: str) -> None:
-        """Handle export error."""
-        self._is_exporting = False
-        self._last_result = ExportResult(
-            success=False,
-            error_message=error_message
-        )
+    # NOTE: execute_export()/_execute_single_export/_execute_batch_export
+    # were stubs ("Simulate successful export") that wrote no files. They
+    # were removed along with their _on_export_success/_on_export_error
+    # callback dispatchers — no caller invoked them in production. The live
+    # export path goes through pushButton_action_export → FilterEngineTask
+    # (task_action='export') → ExportHandler. See export_pipeline_audit
+    # 2026-04-30 in MEMORY.md.
 
     def get_last_result(self) -> Optional[ExportResult]:
         """Get result of last export operation."""
