@@ -99,5 +99,8 @@ TOOLS.md
 HEARTBEAT.md
 MEMORY.md
 memory/
+!.claude/memory/
+!.claude/memory/**
+!.claude/memory/MEMORY.md
 BOOTSTRAP.md
 .claude/settings.local.json
