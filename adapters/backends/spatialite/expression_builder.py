@@ -228,7 +228,28 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
 
         # Get SRIDs
         target_srid = self._get_layer_srid(layer)
-        source_srid = self._get_source_srid()
+
+        # 2026-07-29 fix: prefer the caller-supplied ``source_srid`` kwarg.
+        # ExpressionBuilder._get_expression_builder() computes it from
+        # ``self.source_layer_crs_authid``, which reflects the CRS the WKT
+        # was ACTUALLY generated in — including the metric reprojection
+        # applied by ``configure_metric_crs()`` for buffer calculations
+        # (triggered for any geographic/non-metric source CRS, unconditionally,
+        # not just when a buffer is requested). ``self._get_source_srid()``
+        # instead reads ``task_params['infos']['layer_crs_authid']``, which
+        # ``initialization_handler.py`` auto-fills ONCE from the layer's
+        # *original* CRS and never updates after reprojection. When source
+        # and target share that original CRS, ``source_srid == target_srid``
+        # skips ``ST_Transform`` entirely, so the (metric) WKT coordinates get
+        # tagged with the (geographic) original SRID and compared as-is —
+        # ``ST_Intersects`` never matches, ``setSubsetString`` succeeds, and
+        # the layer silently renders zero features. This mirrors the fix
+        # already applied to PostgreSQLExpressionBuilder.build_expression()
+        # (which reads ``kwargs.get('source_srid')``) — Spatialite's builder
+        # was never updated to match.
+        source_srid = kwargs.get('source_srid')
+        if source_srid is None:
+            source_srid = self._get_source_srid()
 
         self.log_debug(f"SRIDs: source={source_srid}, target={target_srid}")
 

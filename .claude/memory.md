@@ -2,6 +2,27 @@
 _Auto-maintained by project agent_
 
 
+## [2026-07-29] Fix: SpatialiteExpressionBuilder ignorait le kwarg source_srid
+Branche: `claude/spatialite-empty-filter-fix`
+Bug: `build_expression()` appelait toujours `self._get_source_srid()` (lit
+`task_params['infos']['layer_crs_authid']`, rempli une seule fois à
+l'initialisation, jamais mis à jour après `configure_metric_crs()`) au lieu du
+kwarg `source_srid` passé par l'appelant réel (qui, lui, reflète la CRS
+post-reprojection). Résultat : quand CRS source originale == CRS cible,
+`ST_Transform` était sauté, le WKT reprojeté (métrique) était comparé avec un
+SRID géographique erroné → `ST_Intersects` ne matchait jamais → couche filtrée
+à 0 entités sans erreur visible.
+Fix: `source_srid = kwargs.get('source_srid') or self._get_source_srid()` —
+aligne Spatialite sur le pattern déjà utilisé par
+`PostgreSQLExpressionBuilder.build_expression()`.
+Tests ajoutés dans `tests/unit/adapters/backends/spatialite/test_expression_builder.py`
+(`test_source_srid_kwarg_overrides_task_params`,
+`test_source_srid_falls_back_when_kwarg_missing`). Détail complet dans la
+mémoire Serena `spatialite_source_srid_kwarg_fix_2026_07_29`.
+Note env: pas de pytest/pip dans ce sandbox — validation faite via script
+Python autonome reproduisant le harnais de mocks du fichier de test.
+
+
 ## [2026-03-24 13:37]
 Delegate task: fais brainstormer les agents de narractive et FilterMate pour ajouter comme extension qgis pyqgis de narractive la gestion du plug-in FilterMate et son ui
 Result: Je ne trouve pas de trace de "Narractive" dans le codebase FilterMate. Pour lancer un brainstorming utile, j'ai besoin de contexte :
