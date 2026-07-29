@@ -263,6 +263,32 @@ class TestBuildExpression:
         )
         assert expr == "1 = 0"
 
+    def test_source_srid_kwarg_overrides_task_params(self, builder):
+        # builder fixture has task_params["source_srid"] = 2154, but no
+        # "layer" in layer_props means target_srid falls back to 4326.
+        # Passing source_srid=4326 via kwargs must win over the stale
+        # task_params-derived value, so no ST_Transform should be emitted.
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"intersects": True},
+            source_geom="POINT(0 0)",
+            source_srid=4326,
+        )
+        assert "ST_Transform" not in expr
+        assert "4326" in expr
+
+    def test_source_srid_falls_back_when_kwarg_missing(self, builder):
+        # Without the kwarg, _get_source_srid() (task_params["source_srid"]
+        # = 2154) must still be used, differing from the 4326 target and
+        # triggering a transform.
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"intersects": True},
+            source_geom="POINT(0 0)",
+        )
+        assert "ST_Transform" in expr
+        assert "2154" in expr
+
 
 # ===========================================================================
 # Tests -- GeoPackage detection
