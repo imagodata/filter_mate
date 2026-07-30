@@ -633,7 +633,7 @@ def determine_source_mode(
     # Determine mode
     if valid_features and len(valid_features) > 0:
         return "TASK_PARAMS", valid_features
-    elif has_subset or has_selection:
+    elif has_subset or (has_selection and not is_field_based):
         if has_selection and not has_subset:
             return "SELECTION", None
         return "SUBSET", None

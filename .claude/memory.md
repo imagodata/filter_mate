@@ -2,6 +2,38 @@
 _Auto-maintained by project agent_
 
 
+## [2026-07-30] Fix: sélection "all-features" (expression toujours vraie) écrasée par une sélection QGIS résiduelle
+Bug rapporté: filtre "intersecte" GeoPackage (backend Spatialite, routé via
+`.gpkg` → provider 'spatialite') retournait 0 entités sans erreur quand la
+couche source utilisait "Custom Selection" avec une expression toujours vraie
+(ex: `1`) — cas destiné à dire "utilise TOUTES les features de la couche
+source dans son état actuel (filtrée ou non)".
+Root cause: `determine_spatialite_source_mode()`
+(`adapters/backends/spatialite/filter_executor.py`) a une cascade de priorité
+TASK_PARAMS > SUBSET > SELECTION > FIELD_BASED > FALLBACK où la branche
+`elif has_selection:` n'était PAS gardée par `and not is_field_based_mode`,
+contrairement au garde déjà présent dans la classe sœur
+`SourceFeatureResolver._resolve_from_selection` (`adapters/qgis/source_feature_resolver.py`,
+écrite ~13h plus tôt le même jour, MIG-204). Donc si la couche source avait
+une sélection résiduelle QGIS (features surlignées, sans rapport avec
+l'intention "toutes les features"), le mode SELECTION gagnait sur FIELD_BASED
+→ géométrie source construite à partir d'une poignée de features non
+pertinentes au lieu de toutes les features respectant le subset courant →
+intersection avec la couche distante ne matchait rien, silencieusement.
+Même bug dupliqué dans `adapters/backends/ogr/filter_executor.py::determine_source_mode()`
+(`elif has_subset or has_selection:` sans garde `is_field_based`) — corrigé
+en parallèle car ce backend est aussi emprunté par GeoPackage via le sentinel
+`USE_OGR_FALLBACK` (buffer dynamique, GeometryCollection).
+Fix: ajout du garde `and not is_field_based_mode` (spatialite) /
+`and not is_field_based` (ogr) sur la branche SELECTION dans les deux fichiers.
+Tests: nouveau fichier `tests/unit/adapters/backends/spatialite/test_filter_executor.py`
+(6 tests) + 2 tests ajoutés à `tests/unit/adapters/backends/ogr/test_filter_executor.py`
+(`TestDetermineSourceMode`). Suite complète `tests/unit/` validée : 1491 passed.
+Note: la syntaxe SQL générée (`ST_Intersects`/`ST_MakeValid`/`ST_GeomFromText`
+pour GeoPackage-via-OGR) N'ÉTAIT PAS en cause — vérifiée empiriquement valide
+via `ogrinfo`/GDAL 3.11 avant d'investiguer plus loin (voir historique
+conversation pour le détail des tests GDAL).
+
 ## [2026-07-29] Fix: SpatialiteExpressionBuilder ignorait le kwarg source_srid
 Branche: `claude/spatialite-empty-filter-fix`
 Bug: `build_expression()` appelait toujours `self._get_source_srid()` (lit

@@ -428,3 +428,33 @@ class TestDetermineSourceMode:
         )
         mode, data = determine_source_mode(ctx)
         assert mode == "SUBSET"
+
+    def test_field_based_mode_wins_over_stale_selection(self):
+        """Custom Selection with an always-true expression ('1') must use
+        ALL current features of the source layer (FIELD_BASED), even when
+        the layer happens to have an unrelated leftover selection active.
+        Regression test mirroring the same fix applied to
+        adapters/backends/spatialite/filter_executor.py.
+        """
+        layer = MagicMock()
+        layer.subsetString.return_value = ""
+        layer.selectedFeatureCount.return_value = 3
+        ctx = OGRSourceContext(
+            source_layer=layer,
+            task_parameters={},
+            is_field_expression=(True, "__all_features__"),
+        )
+        mode, data = determine_source_mode(ctx)
+        assert mode == "FIELD_BASED"
+
+    def test_subset_mode_wins_over_stale_selection_when_field_based(self):
+        layer = MagicMock()
+        layer.subsetString.return_value = '"homecount" > 5'
+        layer.selectedFeatureCount.return_value = 2
+        ctx = OGRSourceContext(
+            source_layer=layer,
+            task_parameters={},
+            is_field_expression=(True, "__all_features__"),
+        )
+        mode, data = determine_source_mode(ctx)
+        assert mode == "SUBSET"

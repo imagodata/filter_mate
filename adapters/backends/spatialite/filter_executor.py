@@ -159,7 +159,7 @@ def determine_spatialite_source_mode(context: SpatialiteSourceContext) -> Tuple[
         return SourceMode.TASK_PARAMS, metadata
     elif has_subset and not has_task_features:
         return SourceMode.SUBSET, metadata
-    elif has_selection:
+    elif has_selection and not is_field_based_mode:
         return SourceMode.SELECTION, metadata
     elif is_field_based_mode:
         return SourceMode.FIELD_BASED, metadata
