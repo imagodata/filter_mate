@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.7.2** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.7.3** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -27,7 +27,14 @@
 | 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 
-### 🆕 What's new in 4.7.2
+### 🆕 What's new in 4.7.3
+
+- **Crash fix**: dockable panel creation could fail outright on QGIS 4.0.1 / Windows ("No module named 'sip'") due to an unguarded top-level `import sip`; routed through the plugin's already-hardened sip-safety helper instead. (#47)
+- **Security**: resolved every Bandit finding — real fixes (asserts replaced with explicit raises, corrected `nosec` code for the ElementTree import) plus documented suppressions for reviewed-safe patterns. Zero unresolved findings on re-scan.
+- **Qt6 readiness**: qualified ~165 flat PyQt/PyQGIS enum accesses to their scoped form and dropped `.exec_()` across 50 files — purely additive, no behavior change on the current Qt5 install.
+- **Tests**: 1491+ ✅.
+
+### What's new in 4.7.2
 
 - **Spatial filtering fixes**: SpatiaLite `source_srid` staleness fixed — filters no longer silently return 0 features when the source and target layers share their original CRS. Custom Selection "all-features" mode (an always-true expression like `1`) no longer gets shadowed by a leftover QGIS selection on the source layer.
 - **Export hardened further**: fixed export being blocked when no layer is picked in Exploring, SHP/batch warnings now surfaced to the user, GPKG styles embedded on the reprojection and streaming paths, empty-layer streaming crash fixed, partial output cleaned up on failure/cancel, format/driver maps consolidated into a single source of truth, ~900 LOC of dead export code removed.

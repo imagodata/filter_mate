@@ -2,6 +2,28 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.7.3] - 2026-07-30
+
+### Stability + Qt6 Readiness
+
+- **Fix**: `filter_mate_dockwidget.py` had a bare, unconditional `import sip` at module scope. On QGIS 4.0.1 / Windows the standalone `sip` package isn't reliably importable even when `PyQt6.sip` is (the plugin's other ~9 sip usages already handle this via a try/except fallback), so this one unguarded import crashed the whole module — and since this module defines `FilterMateDockWidget`, dockable panel creation itself failed with "No module named 'sip'". Dropped the bare import and routed the four `sip.isdeleted(layer)` call sites through the already-hardened `infrastructure.utils.validation_utils.is_sip_deleted()`, which degrades gracefully instead of crashing. Added `tests/test_no_unguarded_sip_import.py` as a static AST-based regression guard over the whole plugin source tree. Fixes #47.
+
+### Security
+
+- **Fix**: replaced 4 `assert` statements (B101, silently stripped under `python -O`) with explicit `ValueError`/`TypeError` raises in `task_orchestrator.py`, `filter_mate_app.py`, `custom_widgets.py` (x2).
+- **Fix**: corrected the Bandit `nosec` code on the ElementTree import in `gpkg_layer_tree_writer.py` and `kml_folder_writer.py` from `B314` to `B405` — the wrong code meant the suppression was silently a no-op (Bandit still flagged both lines); re-verified locally with 0 remaining issues.
+- **Review**: confirmed the 3 `subprocess.run` calls in the favorites-sharing git integration as safe (list-form argv, no `shell=True`, binaries resolved/verified before use, timeouts present).
+- **Documented**: ~161 intentional `except Exception: pass` guards (B110) and 5 `except Exception: continue` retry/skip patterns (B112) across best-effort cleanup, Qt signal (dis)connection, cosmetic UI updates, and DB rollback-after-failure paths, each annotated with a `# nosec` reason; 2 `QFIELDCLOUD_TOKEN`/`PASSWORD` env-var *name* constants (B105) confirmed as false positives, not hardcoded credentials.
+- Full Bandit re-scan: zero unresolved findings left in the plugin source.
+
+### Qt6 Readiness
+
+- Qualified ~165 flat PyQt/PyQGIS enum accesses to their scoped form (e.g. `Qt.LeftButton` → `Qt.MouseButton.LeftButton`, `QgsWkbTypes.PolygonGeometry` → `QgsWkbTypes.GeometryType.PolygonGeometry`) across 50 files, renamed `.exec_()` calls/overrides to `.exec()`, and switched 3 direct PyQt5 imports to `qgis.PyQt`. All forms used are valid under PyQt5 (current QGIS) as well as PyQt6 — purely additive, no behavior change on the current Qt5 install.
+
+### Tests
+
+- Full suite: 1491+ ✅ (new sip-import AST regression guard).
+
 ## [4.7.2] - 2026-07-30
 
 ### Spatial Filtering Fixes
