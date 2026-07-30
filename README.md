@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.7.1** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.7.2** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -27,7 +27,14 @@
 | 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 
-### 🆕 What's new in 4.7.1
+### 🆕 What's new in 4.7.2
+
+- **Spatial filtering fixes**: SpatiaLite `source_srid` staleness fixed — filters no longer silently return 0 features when the source and target layers share their original CRS. Custom Selection "all-features" mode (an always-true expression like `1`) no longer gets shadowed by a leftover QGIS selection on the source layer.
+- **Export hardened further**: fixed export being blocked when no layer is picked in Exploring, SHP/batch warnings now surfaced to the user, GPKG styles embedded on the reprojection and streaming paths, empty-layer streaming crash fixed, partial output cleaned up on failure/cancel, format/driver maps consolidated into a single source of truth, ~900 LOC of dead export code removed.
+- **HIDPI fix**: combobox/input fields no longer stuck at 20px on 4K/Retina/150%+ display scaling.
+- **Tests**: 1491 ✅.
+
+### What's new in 4.7.1
 
 - **Export hardened**: 12 fixes across SHP/CSV/GPKG/SpatiaLite/ZIP — including a critical ZIP path-traversal leak, V3 API migration, streaming CRS plumbing, batch collision detection.
 - **SpatiaLite cascade restored**: drop `GeomFromGPB` wrap (use `ST_*` prefix), preserve `ST_*` / `EXISTS(...)` / `NOT(...)` predicates in the sanitizer (3 silent no-op regressions fixed), restore the cache f-string interpolation that had been broken for 100+ days.

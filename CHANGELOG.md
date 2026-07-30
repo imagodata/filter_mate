@@ -2,6 +2,34 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.7.2] - 2026-07-30
+
+### Spatial Filtering Fixes
+
+- **Fix**: SpatiaLite `source_srid` staleness — `SpatialiteExpressionBuilder.build_expression()` always called `_get_source_srid()` (reads `task_params['infos']['layer_crs_authid']`, filled once at init and never updated after `configure_metric_crs()` reprojects the source geometry). When source and target layers shared their original CRS, `ST_Transform` was skipped, so a reprojected (metric) WKT got compared against the wrong SRID — `ST_Intersects` never matched, and the layer silently rendered zero features. Now prefers the caller-supplied `source_srid` kwarg, which reflects the actual post-reprojection CRS, mirroring the pattern already used by the PostgreSQL backend.
+- **Fix**: Custom Selection "all-features" mode — selecting a source layer's features via an always-true expression (e.g. `1`, meaning "use every feature of the layer in its current state, filtered or not") could be silently overridden by an unrelated, leftover QGIS selection on the source layer. The source-mode resolver prioritized any active *selection* over the intended "all features" mode, so the spatial filter ran against only the stray selection instead of the full layer — producing 0 matches on the target layer with no error. Fixed in both the SpatiaLite/GeoPackage and OGR backends' source-mode resolution (`determine_spatialite_source_mode`, `determine_source_mode`).
+
+### Export
+
+- **Fix**: export was blocked with a silent log-only error when no layer was picked in the Exploring tab — export is meant to be independent from Exploring.
+- **Fix**: SHP pre-flight warnings (e.g. truncated field names) and batch per-layer failures are now surfaced to the user instead of being silently dropped.
+- **Fix**: GPKG "Save styles" now embeds styles in the `layer_styles` table even when reprojecting or when routed through the streaming exporter — both paths previously dropped styles silently.
+- **Fix**: exporting an empty layer via the streaming path no longer raises `FileNotFoundError`; it now reports success with 0 features exported.
+- **Fix**: removed a misleading post-write cancel check that could report "Export cancelled" for an export that had actually completed successfully.
+- **Fix**: writer failures or cancellation during export now clean up partial output files (and format sidecars) instead of leaving incomplete files under the target name.
+- **Refactor**: consolidated three independently-drifting format/driver maps into a single `_FORMAT_REGISTRY` source of truth (structural fix — drift is now impossible by construction).
+- **Cleanup**: removed ~900 LOC of dead/unwired export code found during a full pipeline audit (`core/services/export_service.py`, `adapters/qgis/tasks/export_task.py`, a non-functional `ExportingController.execute_export` stub, dead `BatchExporter` cancel machinery, an unreachable `StreamingConfig` field).
+
+### UI
+
+- **Fix**: HIDPI display profile — combobox/input fields stayed stuck at 20px on 4K/Retina/150%+ Windows scaling because the QSS placeholder-substitution pipeline had been broken since v4.0.x. The profile is now recalibrated so it doesn't double-scale on top of Qt's own DPR auto-scaling.
+
+### Tests
+
+- Regression coverage for both source-mode-priority fixes (SpatiaLite + OGR backends).
+- ~40 new tests from the export pipeline hardening pass (partial-file cleanup, empty-layer streaming, GPKG style embedding, format registry, warning propagation).
+- Full suite: 1491 ✅.
+
 ## [4.7.1] - 2026-04-29
 
 ### Hardening + Audit Follow-Through
