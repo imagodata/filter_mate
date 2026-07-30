@@ -12,12 +12,12 @@ See docs/architecture.md for migration guide.
 
 from .config.config import ENV_VARS
 import os
-import sip
 import weakref
 
 # Import logging for error handling
 from .infrastructure.logging import get_app_logger
 from .infrastructure.signal_utils import SignalBlocker
+from .infrastructure.utils.validation_utils import is_sip_deleted
 logger = get_app_logger()
 
 # v4.0 Sprint 6: Widget configuration management
@@ -425,7 +425,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             try:
                 layer = self._feature_picker_layer_connection
                 # Check if layer is still valid before disconnecting
-                if layer and not sip.isdeleted(layer) and layer.isValid():
+                if layer and not is_sip_deleted(layer) and layer.isValid():
                     layer.willBeDeleted.disconnect(self._on_feature_picker_layer_deleted)
                     # FIX 2026-02-11: Disconnect subsetStringChanged
                     try:
@@ -471,7 +471,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         (picker.layer() is None), we skip — the guard's finally block handles reattach.
         """
         layer = self._feature_picker_layer_connection
-        if not layer or sip.isdeleted(layer) or not layer.isValid():
+        if not layer or is_sip_deleted(layer) or not layer.isValid():
             return
 
         try:
@@ -491,7 +491,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             # Reattach on next event loop iteration (layer is stable by then)
             def _reattach():
                 try:
-                    if layer and not sip.isdeleted(layer) and layer.isValid():
+                    if layer and not is_sip_deleted(layer) and layer.isValid():
                         picker.setLayer(layer)
                         logger.debug("FIX-2026-02-11: FeaturePickerWidget reattached after subset change")
                 except (RuntimeError, Exception) as e:
@@ -5425,9 +5425,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if layer is None: return True
         try:
             if self._layer_sync_ctrl: return self._controller_integration.delegate_is_layer_truly_deleted(layer)
-            import sip
-            return sip.isdeleted(layer)
-        except (ImportError, RuntimeError, AttributeError):
+            return is_sip_deleted(layer)
+        except (RuntimeError, AttributeError):
             return True  # Assume deleted if we can't check
 
     def current_layer_changed(self, layer: QgsVectorLayer, manual_change: bool = False) -> None:
