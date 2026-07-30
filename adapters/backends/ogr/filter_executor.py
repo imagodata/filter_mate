@@ -988,7 +988,7 @@ def execute_ogr_spatial_selection(
 
     # Configure processing context
     proc_context = QgsProcessingContext()
-    proc_context.setInvalidGeometryCheck(QgsFeatureRequest.GeometrySkipInvalid)
+    proc_context.setInvalidGeometryCheck(QgsFeatureRequest.InvalidGeometryCheck.GeometrySkipInvalid)
     feedback = QgsProcessingFeedback()
 
     # Create GEOS-safe source layer

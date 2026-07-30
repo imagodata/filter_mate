@@ -177,7 +177,7 @@ class LayersManagementEngineTask(QgsTask):
                 - task['project_layers']: Current project layers dict
                 - task['reset_all_layers_variables_flag']: Whether to reset all variables
         """
-        QgsTask.__init__(self, description, QgsTask.CanCancel)
+        QgsTask.__init__(self, description, QgsTask.Flag.CanCancel)
 
         self.exception = None
         self.task_action = task_action
@@ -1421,7 +1421,7 @@ class LayersManagementEngineTask(QgsTask):
             if not layer.isSpatial():
                 return True
 
-            if layer.hasSpatialIndex() != QgsFeatureSource.SpatialIndexNotPresent:
+            if layer.hasSpatialIndex() != QgsFeatureSource.SpatialIndexPresence.SpatialIndexNotPresent:
                 return True
 
             if layer.featureCount() == 0:

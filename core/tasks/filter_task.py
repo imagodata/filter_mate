@@ -259,7 +259,7 @@ class FilterEngineTask(QgsTask):
                              If None, falls back to legacy direct imports.
                              (v4.0.1 - Strangler Fig pattern)
         """
-        QgsTask.__init__(self, description, QgsTask.CanCancel)
+        QgsTask.__init__(self, description, QgsTask.Flag.CanCancel)
 
         self.exception = None
         self.task_action = task_action

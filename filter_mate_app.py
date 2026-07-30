@@ -657,19 +657,19 @@ class FilterMateApp:
             dock_position_str = self.CONFIG_DATA.get("APP", {}).get("DOCKWIDGET", {}).get("DOCK_POSITION", {}).get("value", "right")
 
             position_mapping = {
-                "left": Qt.LeftDockWidgetArea,
-                "right": Qt.RightDockWidgetArea,
-                "top": Qt.TopDockWidgetArea,
-                "bottom": Qt.BottomDockWidgetArea,
+                "left": Qt.DockWidgetArea.LeftDockWidgetArea,
+                "right": Qt.DockWidgetArea.RightDockWidgetArea,
+                "top": Qt.DockWidgetArea.TopDockWidgetArea,
+                "bottom": Qt.DockWidgetArea.BottomDockWidgetArea,
             }
 
-            dock_position = position_mapping.get(dock_position_str.lower(), Qt.RightDockWidgetArea)
+            dock_position = position_mapping.get(dock_position_str.lower(), Qt.DockWidgetArea.RightDockWidgetArea)
             logger.debug(f"FilterMate: Dock position configured as '{dock_position_str}'")
             return dock_position
 
         except Exception as e:
             logger.warning(f"FilterMate: Could not get dock position: {e}. Using default 'right'.")
-            return Qt.RightDockWidgetArea
+            return Qt.DockWidgetArea.RightDockWidgetArea
 
     def _check_and_reset_stale_flags(self):
         """Check for stale flags that might block operations and reset them. Returns True if any flags were reset."""
@@ -819,7 +819,7 @@ class FilterMateApp:
 
         # Show the dockwidget
         try:
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockwidget)
+            self.iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockwidget)
             self.dockwidget.show()
             logger.info("Dockwidget displayed (legacy mode)")
         except Exception as e:
@@ -1238,21 +1238,21 @@ class FilterMateApp:
         self.appTasks[task_name].resultingLayers.connect(
             lambda result_project_layers, tn=task_name:
                 self.layer_management_engine_task_completed(result_project_layers, tn),
-            Qt.QueuedConnection
+            Qt.ConnectionType.QueuedConnection
         )
         self.appTasks[task_name].savingLayerVariable.connect(
             lambda layer, variable_key, value_typped, type_returned:
                 self.saving_layer_variable(layer, variable_key, value_typped, type_returned),
-            Qt.QueuedConnection
+            Qt.ConnectionType.QueuedConnection
         )
         self.appTasks[task_name].removingLayerVariable.connect(
             lambda layer, variable_key:
                 self.removing_layer_variable(layer, variable_key),
-            Qt.QueuedConnection
+            Qt.ConnectionType.QueuedConnection
         )
         self.appTasks[task_name].taskTerminated.connect(
             lambda tn=task_name: self._handle_layer_task_terminated(tn),
-            Qt.QueuedConnection
+            Qt.ConnectionType.QueuedConnection
         )
 
         # Add to task manager
@@ -1679,18 +1679,18 @@ class FilterMateApp:
                 "FilterMateApp",
                 "Save Changes & {0}"
             ).format(task_label.capitalize()),
-            QMessageBox.AcceptRole
+            QMessageBox.ButtonRole.AcceptRole
         )
         rollback_btn = msg.addButton(
             QCoreApplication.translate(
                 "FilterMateApp",
                 "Discard Changes & {0}"
             ).format(task_label.capitalize()),
-            QMessageBox.DestructiveRole
+            QMessageBox.ButtonRole.DestructiveRole
         )
         cancel_btn = msg.addButton(
             QCoreApplication.translate("FilterMateApp", "Cancel"),
-            QMessageBox.RejectRole
+            QMessageBox.ButtonRole.RejectRole
         )
         msg.setDefaultButton(cancel_btn)
 
@@ -2648,7 +2648,7 @@ class FilterMateApp:
             if hasattr(self.dockwidget, 'comboBox_filtering_current_layer'):
                 # v4.2: Filter to show only vector layers WITH geometry (exclude non-spatial tables)
                 # HasGeometry = PointLayer | LineLayer | PolygonLayer (excludes NoGeometry tables)
-                self.dockwidget.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.HasGeometry)
+                self.dockwidget.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.Filter.HasGeometry)
         except Exception as e: logger.debug(f"ComboBox filter setup (non-critical): {e}")
 
         # Trigger layer change with active or first layer

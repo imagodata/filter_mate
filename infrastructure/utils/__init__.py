@@ -168,11 +168,11 @@ def geometry_type_to_string(geom_type):
 
         # Return LEGACY format for compatibility with v2.3.8
         type_map = {
-            QgsWkbTypes.PointGeometry: "GeometryType.Point",
-            QgsWkbTypes.LineGeometry: "GeometryType.Line",
-            QgsWkbTypes.PolygonGeometry: "GeometryType.Polygon",
-            QgsWkbTypes.NullGeometry: "GeometryType.UnknownGeometry",
-            QgsWkbTypes.UnknownGeometry: "GeometryType.UnknownGeometry",
+            QgsWkbTypes.GeometryType.PointGeometry: "GeometryType.Point",
+            QgsWkbTypes.GeometryType.LineGeometry: "GeometryType.Line",
+            QgsWkbTypes.GeometryType.PolygonGeometry: "GeometryType.Polygon",
+            QgsWkbTypes.GeometryType.NullGeometry: "GeometryType.UnknownGeometry",
+            QgsWkbTypes.GeometryType.UnknownGeometry: "GeometryType.UnknownGeometry",
         }
         return type_map.get(geom_type, "GeometryType.UnknownGeometry")
     except Exception:

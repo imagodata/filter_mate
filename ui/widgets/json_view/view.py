@@ -321,7 +321,7 @@ class JsonView(QtWidgets.QTreeView):
                 else:
                     qactions.append(action)
             menu.addActions(qactions)
-        action = menu.exec_(self.viewport().mapToGlobal(position))
+        action = menu.exec(self.viewport().mapToGlobal(position))
         if action:
             action_data = action.data()
             item = self.model.itemFromIndex(index)

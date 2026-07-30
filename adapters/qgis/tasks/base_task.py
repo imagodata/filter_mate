@@ -170,7 +170,7 @@ class BaseFilterMateTask(_get_qgs_task_base()):
         """
         try:
             from qgis.core import QgsTask
-            super().__init__(description, QgsTask.CanCancel)
+            super().__init__(description, QgsTask.Flag.CanCancel)
         except ImportError:
             super().__init__(description, 1)
 

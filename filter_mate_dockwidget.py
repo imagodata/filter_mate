@@ -580,7 +580,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # FIX 2026-01-21: Prevent style propagation to child dialogs
         # Set Qt attribute to prevent FilterMate styles from affecting QGIS dialogs
         # opened as children (e.g., QgsExpressionBuilderDialog)
-        self.setAttribute(Qt.WA_StyledBackground, False)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, False)
 
         # FIX 2026-01-21: The transparent palette issue has been fixed at source.
         # The palette with alpha=0 colors was removed from filter_mate_dockwidget_base.ui/.py
@@ -602,7 +602,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         oMetaObj = oObject.metaObject()
         for i in range(oMetaObj.methodCount()):
             oMetaMethod = oMetaObj.method(i)
-            if oMetaMethod.isValid() and oMetaMethod.methodType() == QMetaMethod.Signal and oMetaMethod.name() == strSignalName:
+            if oMetaMethod.isValid() and oMetaMethod.methodType() == QMetaMethod.MethodType.Signal and oMetaMethod.name() == strSignalName:
                 FilterMateDockWidget._signal_cache[cache_key] = oMetaMethod; return oMetaMethod
         FilterMateDockWidget._signal_cache[cache_key] = None; return None
 
@@ -1309,7 +1309,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         lbl.setCursor(Qt.CursorShape.PointingHandCursor); lbl.setToolTip(tooltip)
         # CRITICAL: Enable the widget to receive mouse events
         lbl.setEnabled(True)
-        lbl.setAttribute(Qt.WA_Hover, True)  # Enable hover events
+        lbl.setAttribute(Qt.WidgetAttribute.WA_Hover, True)  # Enable hover events
         lbl.set_click_handler(click_handler)
         logger.debug(f"Created indicator {name}: enabled={lbl.isEnabled()}, visible={lbl.isVisible()}, handler={click_handler is not None}")
         return lbl
@@ -5737,7 +5737,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         lp, lid = self.PROJECT_LAYERS[self.current_layer.id()], self.current_layer.id()
         prop_def = QgsPropertyDefinition(
             f"{lid}_buffer_property_definition",
-            QgsPropertyDefinition.DataTypeNumeric,
+            QgsPropertyDefinition.DataType.DataTypeNumeric,
             f"Replace buffer with expression for {lid}",
             'Expression must return numeric values (meters)'
         )
@@ -5778,7 +5778,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         if is_active:
             qgs_prop = w["BUFFER_VALUE_PROPERTY"]["WIDGET"].toProperty()
-            if qgs_prop.propertyType() == QgsProperty.ExpressionBasedProperty:
+            if qgs_prop.propertyType() == QgsProperty.Type.ExpressionBasedProperty:
                 expr = qgs_prop.asExpression()
                 has_valid_expr = bool(expr and expr.strip())
                 lf["buffer_value_expression"] = expr if has_valid_expr else ''
@@ -6862,10 +6862,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._reload_shortcut = QShortcut(QKeySequence("F5"), self)
         self._reload_shortcut.activated.connect(self._on_reload_layers_shortcut)
         self._reload_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self._undo_shortcut = QShortcut(QKeySequence.Undo, self)
+        self._undo_shortcut = QShortcut(QKeySequence.StandardKey.Undo, self)
         self._undo_shortcut.activated.connect(self._on_undo_shortcut)
         self._undo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
-        self._redo_shortcut = QShortcut(QKeySequence.Redo, self)
+        self._redo_shortcut = QShortcut(QKeySequence.StandardKey.Redo, self)
         self._redo_shortcut.activated.connect(self._on_redo_shortcut)
         self._redo_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         logger.debug("Keyboard shortcuts initialized: F5 = Reload layers, Ctrl+Z = Undo, Ctrl+Y = Redo")

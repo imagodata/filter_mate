@@ -537,7 +537,7 @@ class LayerExporter:
                 options,
             )
 
-            if error != QgsVectorFileWriter.NoError:
+            if error != QgsVectorFileWriter.WriterError.NoError:
                 msg = error_msg or "Unknown error"
                 logger.error(f"Export failed for layer '{layer.name()}': {msg}")
                 # Tier 3 fix: remove partial output so the user doesn't end
@@ -731,7 +731,7 @@ class LayerExporter:
             error, error_msg, _, _ = QgsVectorFileWriter.writeAsVectorFormatV3(
                 layer, output_path, transform_context, options
             )
-            if error != QgsVectorFileWriter.NoError:
+            if error != QgsVectorFileWriter.WriterError.NoError:
                 msg = error_msg or "Unknown error"
                 logger.error(
                     f"GPKG reprojection export failed for '{layer.name()}': {msg}"

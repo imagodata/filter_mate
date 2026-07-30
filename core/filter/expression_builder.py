@@ -644,7 +644,7 @@ class ExpressionBuilder:
                                     logger.warning("   ⚠️ Advanced optimization failed - falling back to FID extraction")
                                     # Fallback to FID extraction
                                     from qgis.core import QgsFeatureRequest
-                                    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry)
+                                    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
                                     filtered_features = list(self.source_layer.getFeatures(request))
 
                                     if filtered_features:
@@ -674,7 +674,7 @@ class ExpressionBuilder:
 
                                 # FALLBACK: Extract FIDs instead
                                 from qgis.core import QgsFeatureRequest
-                                request = QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry)
+                                request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
                                 filtered_features = list(self.source_layer.getFeatures(request))
 
                                 if filtered_features:
@@ -723,7 +723,7 @@ class ExpressionBuilder:
 
                         # Extract FIDs from filtered features
                         from qgis.core import QgsFeatureRequest
-                        request = QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry)
+                        request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
                         filtered_features = list(self.source_layer.getFeatures(request))
 
                         if filtered_features:
@@ -739,7 +739,7 @@ class ExpressionBuilder:
                     logger.info(f"   → Extracting FIDs from {filtered_count} filtered features")
 
                     from qgis.core import QgsFeatureRequest
-                    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry)
+                    request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
                     filtered_features = list(self.source_layer.getFeatures(request))
 
                     if filtered_features:
@@ -987,7 +987,7 @@ class ExpressionBuilder:
             from qgis.core import QgsFeatureRequest
 
             if self.source_layer:
-                request = QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry)
+                request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
                 filtered_features = list(self.source_layer.getFeatures(request))
 
                 if filtered_features:

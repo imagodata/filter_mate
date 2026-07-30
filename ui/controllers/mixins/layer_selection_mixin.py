@@ -301,11 +301,11 @@ class LayerSelectionMixin:
 
             # Map QGIS geometry types to readable names
             type_names = {
-                QgsWkbTypes.PointGeometry: 'Point',
-                QgsWkbTypes.LineGeometry: 'Line',
-                QgsWkbTypes.PolygonGeometry: 'Polygon',
-                QgsWkbTypes.UnknownGeometry: 'Unknown',
-                QgsWkbTypes.NullGeometry: 'NoGeometry',
+                QgsWkbTypes.GeometryType.PointGeometry: 'Point',
+                QgsWkbTypes.GeometryType.LineGeometry: 'Line',
+                QgsWkbTypes.GeometryType.PolygonGeometry: 'Polygon',
+                QgsWkbTypes.GeometryType.UnknownGeometry: 'Unknown',
+                QgsWkbTypes.GeometryType.NullGeometry: 'NoGeometry',
             }
 
             return type_names.get(geom_type, 'unknown')

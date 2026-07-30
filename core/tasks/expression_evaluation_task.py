@@ -119,7 +119,7 @@ class ExpressionEvaluationTask(QgsTask):
             include_geometry: Whether to include geometry in results
             context_variables: Additional variables for expression context
         """
-        super().__init__(description, QgsTask.CanCancel)
+        super().__init__(description, QgsTask.Flag.CanCancel)
 
         # Store parameters
         self.layer = layer
@@ -270,7 +270,7 @@ class ExpressionEvaluationTask(QgsTask):
 
             # Geometry flag (can save memory/time if not needed)
             if not self.include_geometry:
-                request.setFlags(QgsFeatureRequest.NoGeometry)
+                request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
 
             return request
 

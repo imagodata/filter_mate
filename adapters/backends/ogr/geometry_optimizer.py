@@ -90,16 +90,16 @@ def simplify_source_for_ogr_fallback(source_layer, logger=None):
         # Map geometry type to appropriate layer definition
         # Note: For Point/Line sources, buffers will convert to Polygons
         # so we check if simplification is for buffered output or raw geometry
-        if source_geom_type == QgsWkbTypes.PointGeometry:
+        if source_geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             # Points - if we expect buffering, use Polygon; else use Point
             # For OGR fallback with buffer, the result will be polygons
             layer_type = "MultiPolygon"  # Buffer output is always polygon
             log_info("  Point source detected - using MultiPolygon for buffer output")
-        elif source_geom_type == QgsWkbTypes.LineGeometry:
+        elif source_geom_type == QgsWkbTypes.GeometryType.LineGeometry:
             # Lines - buffer output will be polygons
             layer_type = "MultiPolygon"
             log_info("  Line source detected - using MultiPolygon for buffer output")
-        elif source_geom_type == QgsWkbTypes.PolygonGeometry:
+        elif source_geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             layer_type = "MultiPolygon"
         else:
             # Unknown or NoGeometry - try MultiPolygon as default
@@ -121,7 +121,7 @@ def simplify_source_for_ogr_fallback(source_layer, logger=None):
         # FIX v4.2.13: For Point/Line sources, simplification is not applicable
         # These geometry types should be buffered FIRST, then the buffer result
         # (which is a Polygon) can be simplified if needed
-        if source_geom_type != QgsWkbTypes.PolygonGeometry:
+        if source_geom_type != QgsWkbTypes.GeometryType.PolygonGeometry:
             log_info(f"  Source is not Polygon type (type={source_geom_type}), skipping simplification")
             log_info("  → Buffer should be applied first to create Polygon geometries")
             return source_layer
@@ -139,7 +139,7 @@ def simplify_source_for_ogr_fallback(source_layer, logger=None):
                 for part in geom.parts():
                     part_geom = QgsGeometry(part.clone())
                     geom_type = QgsWkbTypes.geometryType(part_geom.wkbType())
-                    if geom_type == QgsWkbTypes.PolygonGeometry:
+                    if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
                         if part_geom.isMultipart():
                             for sub in part_geom.parts():
                                 polygons.append(QgsGeometry(sub.clone()))

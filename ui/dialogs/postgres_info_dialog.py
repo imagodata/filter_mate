@@ -27,7 +27,7 @@ try:
     )
 except ImportError:
     from PyQt6.QtCore import Qt
-    from PyQt5.QtWidgets import (
+    from qgis.PyQt.QtWidgets import (
         QDialog, QVBoxLayout, QHBoxLayout, QFormLayout,
         QLabel, QPushButton, QCheckBox, QGroupBox,
         QListWidget, QMessageBox, QDialogButtonBox,
@@ -126,7 +126,7 @@ class PostgresInfoDialog(QDialog):
         )
         message.setAlignment(Qt.AlignmentFlag.AlignCenter)
         message.setWordWrap(True)
-        message.setTextFormat(Qt.RichText)
+        message.setTextFormat(Qt.TextFormat.RichText)
         message.setStyleSheet("color: #666; padding: 20px;")
         layout.addWidget(message)
 
@@ -237,7 +237,7 @@ class PostgresInfoDialog(QDialog):
             self._cleanup_btn.setEnabled(True)
         else:
             self._views_list.addItem(self.tr("(No temporary views)"))
-            self._views_list.item(0).setForeground(Qt.gray)
+            self._views_list.item(0).setForeground(Qt.GlobalColor.gray)
             self._cleanup_btn.setEnabled(False)
 
     def _on_auto_cleanup_changed(self, state: int) -> None:

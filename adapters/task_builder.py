@@ -559,7 +559,7 @@ class TaskParameterBuilder:
             if current_val:
                 from qgis.core import QgsProperty
                 qgs_prop = dw.mPropertyOverrideButton_filtering_buffer_value_property.toProperty()
-                if qgs_prop.propertyType() == QgsProperty.ExpressionBasedProperty:
+                if qgs_prop.propertyType() == QgsProperty.Type.ExpressionBasedProperty:
                     expr = qgs_prop.asExpression()
                     stored_expr = task_parameters["filtering"].get("buffer_value_expression", "")
                     if expr != stored_expr:

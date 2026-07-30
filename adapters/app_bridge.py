@@ -338,7 +338,7 @@ def _check_spatial_index(layer: 'QgsVectorLayer') -> bool:
         from qgis.core import QgsFeatureSource
         provider = layer.dataProvider()
         if hasattr(provider, 'hasSpatialIndex'):
-            return provider.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresent
+            return provider.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresence.SpatialIndexPresent
     except Exception:
         pass
     return False

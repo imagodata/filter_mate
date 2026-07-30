@@ -477,7 +477,7 @@ def process_spatialite_geometries(
             if polygon_parts:
                 collected_geometry = safe_collect_geometry(polygon_parts)
                 if collected_geometry and 'GeometryCollection' in get_geometry_type_name(collected_geometry):
-                    converted = collected_geometry.convertToType(QgsWkbTypes.PolygonGeometry, True)
+                    converted = collected_geometry.convertToType(QgsWkbTypes.GeometryType.PolygonGeometry, True)
                     if converted and not converted.isEmpty():
                         collected_geometry = converted
         elif has_lines:

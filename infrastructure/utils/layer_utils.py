@@ -381,7 +381,7 @@ def _field_has_values(layer, field_name: str, sample_size: int = 5) -> bool:
 
         # Create a request to fetch only the specified field (performance optimization)
         request = QgsFeatureRequest()
-        request.setFlags(QgsFeatureRequest.NoGeometry)
+        request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
         request.setSubsetOfAttributes([field_name], layer.fields())
         request.setLimit(sample_size)
 

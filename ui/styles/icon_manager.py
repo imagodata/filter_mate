@@ -325,7 +325,7 @@ class IconManager(StylerBase):
             return pixmap
 
         image = pixmap.toImage()
-        image.invertPixels(QImage.InvertRgb)
+        image.invertPixels(QImage.InvertMode.InvertRgb)
 
         return QPixmap.fromImage(image)
 

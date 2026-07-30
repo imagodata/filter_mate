@@ -146,7 +146,7 @@ except ImportError:
         def addSeparator(self):
             pass
 
-        def exec_(self, pos=None):
+        def exec(self, pos=None):
             pass
 
     class QAction:
@@ -433,7 +433,7 @@ class HistoryWidget(QWidget):
         # Show menu
         if global_pos is None and PYQT_AVAILABLE:
             global_pos = QCursor.pos()
-        menu.exec_(global_pos)
+        menu.exec(global_pos)
 
     def _on_clear_history(self):
         """Handle clear history request."""

@@ -96,7 +96,7 @@ def convert_geometry_collection_to_multipolygon(layer: QgsVectorLayer) -> QgsVec
         converted_layer = QgsMemoryProviderUtils.createMemoryLayer(
             f"{layer.name()}_converted",
             fields,
-            QgsWkbTypes.MultiPolygon,
+            QgsWkbTypes.Type.MultiPolygon,
             crs
         )
 

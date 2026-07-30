@@ -64,10 +64,10 @@ def is_metric_crs(crs: Optional[QgsCoordinateReferenceSystem]) -> bool:
 
     units = crs.mapUnits()
     return units in (
-        QgsUnitTypes.DistanceMeters,
-        QgsUnitTypes.DistanceKilometers,
-        QgsUnitTypes.DistanceCentimeters,
-        QgsUnitTypes.DistanceMillimeters
+        QgsUnitTypes.DistanceUnit.DistanceMeters,
+        QgsUnitTypes.DistanceUnit.DistanceKilometers,
+        QgsUnitTypes.DistanceUnit.DistanceCentimeters,
+        QgsUnitTypes.DistanceUnit.DistanceMillimeters
     )
 
 
@@ -86,15 +86,15 @@ def get_crs_units(crs: Optional[QgsCoordinateReferenceSystem]) -> str:
 
     units = crs.mapUnits()
     unit_names = {
-        QgsUnitTypes.DistanceMeters: "meters",
-        QgsUnitTypes.DistanceKilometers: "kilometers",
-        QgsUnitTypes.DistanceFeet: "feet",
-        QgsUnitTypes.DistanceNauticalMiles: "nautical miles",
-        QgsUnitTypes.DistanceYards: "yards",
-        QgsUnitTypes.DistanceMiles: "miles",
-        QgsUnitTypes.DistanceDegrees: "degrees",
-        QgsUnitTypes.DistanceCentimeters: "centimeters",
-        QgsUnitTypes.DistanceMillimeters: "millimeters",
+        QgsUnitTypes.DistanceUnit.DistanceMeters: "meters",
+        QgsUnitTypes.DistanceUnit.DistanceKilometers: "kilometers",
+        QgsUnitTypes.DistanceUnit.DistanceFeet: "feet",
+        QgsUnitTypes.DistanceUnit.DistanceNauticalMiles: "nautical miles",
+        QgsUnitTypes.DistanceUnit.DistanceYards: "yards",
+        QgsUnitTypes.DistanceUnit.DistanceMiles: "miles",
+        QgsUnitTypes.DistanceUnit.DistanceDegrees: "degrees",
+        QgsUnitTypes.DistanceUnit.DistanceCentimeters: "centimeters",
+        QgsUnitTypes.DistanceUnit.DistanceMillimeters: "millimeters",
     }
     return unit_names.get(units, "unknown")
 

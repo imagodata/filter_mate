@@ -729,7 +729,7 @@ class BackendController(BaseController):
         global_cleanup_action.setToolTip(self._tr("Clear ALL FilterMate temporary tables from all databases"))
 
         # Show menu
-        selected_action = menu.exec_(QCursor.pos())
+        selected_action = menu.exec(QCursor.pos())
 
         if selected_action:
             data = selected_action.data()

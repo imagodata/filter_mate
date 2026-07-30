@@ -134,7 +134,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
         # Configure to show only vector layers
         try:
             from qgis.gui import QgsMapLayerProxyModel
-            combo.setFilters(QgsMapLayerProxyModel.VectorLayer)
+            combo.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
         except (ImportError, AttributeError):
             pass
 

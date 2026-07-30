@@ -378,7 +378,7 @@ class StreamingExporter:
                         options
                     )
 
-                    if writer.hasError() != QgsVectorFileWriter.NoError:
+                    if writer.hasError() != QgsVectorFileWriter.WriterError.NoError:
                         error_msg = writer.errorMessage()
                         logger.error(f"Failed to create writer: {error_msg}")
                         # Tier 3 fix: any partial output that QgsVectorFileWriter

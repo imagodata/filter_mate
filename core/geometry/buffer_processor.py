@@ -265,7 +265,7 @@ def dissolve_and_add_to_layer(
                     dissolved_geom = collected
                     # Force conversion if still not polygon
                     if 'Polygon' not in get_geometry_type_name(dissolved_geom):
-                        converted = dissolved_geom.convertToType(QgsWkbTypes.PolygonGeometry, True)
+                        converted = dissolved_geom.convertToType(QgsWkbTypes.GeometryType.PolygonGeometry, True)
                         if converted and not converted.isEmpty():
                             dissolved_geom = converted
             else:
@@ -278,7 +278,7 @@ def dissolve_and_add_to_layer(
         logger.info(f"Final geometry type before adding: {final_type}")
 
         # Ensure it's MultiPolygon (not single Polygon)
-        if dissolved_geom.wkbType() == QgsWkbTypes.Polygon:
+        if dissolved_geom.wkbType() == QgsWkbTypes.Type.Polygon:
             # Convert single Polygon to MultiPolygon using safe wrapper
             poly_data = safe_as_polygon(dissolved_geom)
             if poly_data:
@@ -490,7 +490,7 @@ def apply_qgis_buffer(
 
     # CRITICAL: Configure processing context to skip invalid geometries
     context = QgsProcessingContext()
-    context.setInvalidGeometryCheck(QgsFeatureRequest.GeometryNoCheck)
+    context.setInvalidGeometryCheck(QgsFeatureRequest.InvalidGeometryCheck.GeometryNoCheck)
     feedback = QgsProcessingFeedback()
 
     result = processing.run(
@@ -603,7 +603,7 @@ def simplify_buffer_result(
         simplified_layer = QgsMemoryProviderUtils.createMemoryLayer(
             f"{layer.name()}_simplified",
             fields,
-            QgsWkbTypes.MultiPolygon,
+            QgsWkbTypes.Type.MultiPolygon,
             crs
         )
 

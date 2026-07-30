@@ -776,7 +776,7 @@ class PropertyController(BaseController):
                 geom_type = current_layer.geometryType()
 
                 # Check if geometry is polygon/multipolygon
-                is_polygon = geom_type == QgsWkbTypes.PolygonGeometry
+                is_polygon = geom_type == QgsWkbTypes.GeometryType.PolygonGeometry
 
                 # Check if centroids are enabled for source layer
                 # When using centroids, the source layer becomes points
@@ -807,9 +807,9 @@ class PropertyController(BaseController):
                     min_value = 0.0
 
                     # Get geometry type name for tooltip
-                    if geom_type == QgsWkbTypes.PointGeometry:
+                    if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
                         geom_name = "point"
-                    elif geom_type == QgsWkbTypes.LineGeometry:
+                    elif geom_type == QgsWkbTypes.GeometryType.LineGeometry:
                         geom_name = "line"
                     else:
                         geom_name = "non-polygon"

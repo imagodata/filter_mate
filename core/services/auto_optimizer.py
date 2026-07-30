@@ -315,7 +315,7 @@ class LayerAnalyzer:
         has_spatial_index = False
         try:
             from qgis.core import QgsFeatureSource
-            has_spatial_index = layer.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresent
+            has_spatial_index = layer.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresence.SpatialIndexPresent
         except (RuntimeError, AttributeError, ImportError):
             pass
 

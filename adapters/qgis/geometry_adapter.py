@@ -73,14 +73,14 @@ class QGISGeometryAdapter(IGeometry):
 
         # Map QgsWkbTypes to GeometryType enum
         type_map = {
-            QgsWkbTypes.Point: GeometryType.POINT,
-            QgsWkbTypes.LineString: GeometryType.LINE,
-            QgsWkbTypes.Polygon: GeometryType.POLYGON,
-            QgsWkbTypes.MultiPoint: GeometryType.MULTI_POINT,
-            QgsWkbTypes.MultiLineString: GeometryType.MULTI_LINE,
-            QgsWkbTypes.MultiPolygon: GeometryType.MULTI_POLYGON,
-            QgsWkbTypes.GeometryCollection: GeometryType.GEOMETRY_COLLECTION,
-            QgsWkbTypes.NoGeometry: GeometryType.NO_GEOMETRY,
+            QgsWkbTypes.Type.Point: GeometryType.POINT,
+            QgsWkbTypes.Type.LineString: GeometryType.LINE,
+            QgsWkbTypes.Type.Polygon: GeometryType.POLYGON,
+            QgsWkbTypes.Type.MultiPoint: GeometryType.MULTI_POINT,
+            QgsWkbTypes.Type.MultiLineString: GeometryType.MULTI_LINE,
+            QgsWkbTypes.Type.MultiPolygon: GeometryType.MULTI_POLYGON,
+            QgsWkbTypes.Type.GeometryCollection: GeometryType.GEOMETRY_COLLECTION,
+            QgsWkbTypes.Type.NoGeometry: GeometryType.NO_GEOMETRY,
         }
 
         # Handle 25D types

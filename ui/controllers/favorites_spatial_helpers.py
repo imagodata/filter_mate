@@ -53,7 +53,7 @@ def exact_filtered_feature_count(layer: Any) -> int:
         except (AttributeError, TypeError):
             pass
         try:
-            request.setFlags(QgsFeatureRequest.NoGeometry)
+            request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
         except (AttributeError, TypeError):
             pass
         count = 0

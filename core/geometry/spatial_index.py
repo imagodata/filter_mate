@@ -43,7 +43,7 @@ def verify_and_create_spatial_index(layer, layer_name: Optional[str] = None) -> 
     #   0 = SpatialIndexUnknown
     #   1 = SpatialIndexNotPresent
     #   2 = SpatialIndexPresent
-    if layer.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresent:
+    if layer.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresence.SpatialIndexPresent:
         logger.debug(f"Spatial index already exists for layer: {display_name}")
         return True
 
@@ -88,6 +88,6 @@ def has_spatial_index(layer) -> bool:
         return False
 
     try:
-        return layer.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresent
+        return layer.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresence.SpatialIndexPresent
     except Exception:
         return False

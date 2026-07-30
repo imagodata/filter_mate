@@ -115,7 +115,7 @@ def safe_as_polygon(geom: Optional[QgsGeometry]) -> Optional[QgsGeometry]:
 
     try:
         # Already a polygon type
-        if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.PolygonGeometry:
+        if QgsWkbTypes.geometryType(geom.wkbType()) == QgsWkbTypes.GeometryType.PolygonGeometry:
             return geom
 
         # Try to convert
@@ -169,16 +169,16 @@ def safe_convert_to_multi_polygon(geom: Optional[QgsGeometry]) -> Optional[QgsGe
         geom_type = geom.wkbType()
 
         # Already MultiPolygon
-        if geom_type in (QgsWkbTypes.MultiPolygon, QgsWkbTypes.MultiPolygonZ,
-                         QgsWkbTypes.MultiPolygonM, QgsWkbTypes.MultiPolygonZM):
+        if geom_type in (QgsWkbTypes.Type.MultiPolygon, QgsWkbTypes.Type.MultiPolygonZ,
+                         QgsWkbTypes.Type.MultiPolygonM, QgsWkbTypes.Type.MultiPolygonZM):
             return geom
 
         # Single Polygon -> MultiPolygon
-        if QgsWkbTypes.geometryType(geom_type) == QgsWkbTypes.PolygonGeometry:
+        if QgsWkbTypes.geometryType(geom_type) == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsGeometry.collectGeometry([geom])
 
         # GeometryCollection -> extract polygons
-        if geom_type in (QgsWkbTypes.GeometryCollection, QgsWkbTypes.GeometryCollectionZ):
+        if geom_type in (QgsWkbTypes.Type.GeometryCollection, QgsWkbTypes.Type.GeometryCollectionZ):
             polygons = extract_polygons_from_collection(geom)
             if polygons:
                 return QgsGeometry.collectGeometry(polygons)
@@ -207,7 +207,7 @@ def extract_polygons_from_collection(geom: Optional[QgsGeometry]) -> List[QgsGeo
         for part in geom.asGeometryCollection():
             if validate_geometry(part):
                 part_type = QgsWkbTypes.geometryType(part.wkbType())
-                if part_type == QgsWkbTypes.PolygonGeometry:
+                if part_type == QgsWkbTypes.GeometryType.PolygonGeometry:
                     polygons.append(part)
     except Exception as e:
         logger.debug(f"extract_polygons_from_collection failed: {e}")

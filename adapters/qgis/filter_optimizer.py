@@ -134,7 +134,7 @@ class QgisSelectivityEstimator(ISelectivityEstimator):
         #   0 = SpatialIndexUnknown, 1 = SpatialIndexNotPresent, 2 = SpatialIndexPresent
         has_spatial_index = False
         if hasattr(layer, 'hasSpatialIndex'):
-            has_spatial_index = layer.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresent
+            has_spatial_index = layer.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresence.SpatialIndexPresent
 
         stats = LayerStatistics(
             feature_count=feature_count,
@@ -477,7 +477,7 @@ class QgisFilterOptimizer(IFilterOptimizer):
 
             # Request only attributes (no geometry)
             request = QgsFeatureRequest()
-            request.setFlags(QgsFeatureRequest.NoGeometry)
+            request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
 
             total = layer.featureCount()
             processed = 0

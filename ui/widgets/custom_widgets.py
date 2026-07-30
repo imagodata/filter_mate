@@ -140,7 +140,7 @@ class ItemDelegate(QStyledItemDelegate):
 
         # Indicate Selected
         painter.setPen(QtGui.QPen(Qt.PenStyle.NoPen))
-        if option.state & QStyle.State_Selected:
+        if option.state & QStyle.StateFlag.State_Selected:
             painter.setBrush(QBrush(QColor(0, 70, 240, 128)))
         else:
             painter.setBrush(QBrush(Qt.BrushStyle.NoBrush))
@@ -151,13 +151,13 @@ class ItemDelegate(QStyledItemDelegate):
         if value is not None:
             opt = QStyleOptionViewItem()
             opt.rect = self.getCheckboxRect(option)
-            opt.state = opt.state & ~QStyle.State_HasFocus
+            opt.state = opt.state & ~QStyle.StateFlag.State_HasFocus
             if value == Qt.CheckState.Unchecked:
-                opt.state |= QStyle.State_Off
+                opt.state |= QStyle.StateFlag.State_Off
             elif value == Qt.CheckState.PartiallyChecked:
-                opt.state |= QStyle.State_NoChange
+                opt.state |= QStyle.StateFlag.State_NoChange
             elif value == Qt.CheckState.Checked:
-                opt.state = QStyle.State_On
+                opt.state = QStyle.StateFlag.State_On
             style = QApplication.style()
             style.drawPrimitive(
                 QStyle.PE_IndicatorViewItemCheck, opt, painter, None
@@ -342,7 +342,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
 
     def eventFilter(self, obj, event):
         """Handle mouse events for item selection and context menu."""
-        if event.type() == QEvent.MouseButtonRelease and obj == self.view().viewport() and event.button() == Qt.LeftButton:
+        if event.type() == QEvent.Type.MouseButtonRelease and obj == self.view().viewport() and event.button() == Qt.MouseButton.LeftButton:
             index = self.view().currentIndex()
             item = self.model().itemFromIndex(index)
             if item:
@@ -352,8 +352,8 @@ class QgsCheckableComboBoxLayer(QComboBox):
                 elif state == Qt.CheckState.Unchecked:
                     item.setCheckState(Qt.CheckState.Checked)
             return True
-        elif event.type() == QEvent.MouseButtonRelease and obj in [self.view().viewport(), self] and event.button() == Qt.RightButton:
-            action = self.context_menu.exec_(QCursor.pos())
+        elif event.type() == QEvent.Type.MouseButtonRelease and obj in [self.view().viewport(), self] and event.button() == Qt.MouseButton.RightButton:
+            action = self.context_menu.exec(QCursor.pos())
             if action:
                 return True
             else:
@@ -385,12 +385,12 @@ class QgsCheckableComboBoxLayer(QComboBox):
     def paintEvent(self, event):
         """Custom paint to show checked items as CSV in the display."""
         painter = QStylePainter(self)
-        painter.setPen(self.palette().color(QPalette.Text))
+        painter.setPen(self.palette().color(QPalette.ColorRole.Text))
         opt = QStyleOptionComboBox()
         self.initStyleOption(opt)
         opt.currentText = ",".join(self.checkedItems())
-        painter.drawComplexControl(QStyle.CC_ComboBox, opt)
-        painter.drawControl(QStyle.CE_ComboBoxLabel, opt)
+        painter.drawComplexControl(QStyle.ComplexControl.CC_ComboBox, opt)
+        painter.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opt)
 
 
 class ListWidgetWrapper(QListWidget):
@@ -689,10 +689,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             font_colors = ['#000000', '#808080', '#0000FF']
 
         self.font_by_state = {
-            'unChecked': (QFont("Segoe UI", 8, QFont.Medium), QColor(font_colors[0])),
-            'checked': (QFont("Segoe UI", 8, QFont.Bold), QColor(font_colors[0])),
-            'unCheckedFiltered': (QFont("Segoe UI", 8, QFont.Medium), QColor(font_colors[2])),
-            'checkedFiltered': (QFont("Segoe UI", 8, QFont.Bold), QColor(font_colors[2]))
+            'unChecked': (QFont("Segoe UI", 8, QFont.Weight.Medium), QColor(font_colors[0])),
+            'checked': (QFont("Segoe UI", 8, QFont.Weight.Bold), QColor(font_colors[0])),
+            'unCheckedFiltered': (QFont("Segoe UI", 8, QFont.Weight.Medium), QColor(font_colors[2])),
+            'checkedFiltered': (QFont("Segoe UI", 8, QFont.Weight.Bold), QColor(font_colors[2]))
         }
 
         self.list_widgets = {}
@@ -1076,7 +1076,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         # Request features
         request = QgsFeatureRequest()
-        request.setFlags(QgsFeatureRequest.NoGeometry)
+        request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
 
         features_data = []
         for feature in safe_iterate_features(self.layer, request):
@@ -1164,7 +1164,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         if self.layer.id() not in self.list_widgets:
             return False
 
-        if event.type() == QEvent.MouseButtonPress and obj == self.list_widgets[self.layer.id()].viewport():
+        if event.type() == QEvent.Type.MouseButtonPress and obj == self.list_widgets[self.layer.id()].viewport():
             identifier_field_name = self.list_widgets[self.layer.id()].getIdentifierFieldName()
 
             try:
@@ -1172,7 +1172,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             except Exception:
                 nonSubset_features_list = []
 
-            if event.button() == Qt.LeftButton:
+            if event.button() == Qt.MouseButton.LeftButton:
                 clicked_item = self.list_widgets[self.layer.id()].itemAt(event.pos())
                 if clicked_item is not None:
                     id_item = clicked_item.data(3)
@@ -1201,7 +1201,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                     self._emit_checked_items_update()
                 return True
 
-            elif event.button() == Qt.RightButton:
+            elif event.button() == Qt.MouseButton.RightButton:
                 self.context_menu.exec(QCursor.pos())
                 return True
         return False

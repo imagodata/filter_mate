@@ -138,7 +138,7 @@ def run_on_main_thread(
             done.set()
 
     QMetaObject.invokeMethod(  # pragma: no cover
-        dispatcher, "_run", Qt.QueuedConnection, Q_ARG(object, _wrapper)
+        dispatcher, "_run", Qt.ConnectionType.QueuedConnection, Q_ARG(object, _wrapper)
     )
     if not done.wait(timeout=timeout):  # pragma: no cover
         raise TimeoutError(

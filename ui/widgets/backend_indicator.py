@@ -221,7 +221,7 @@ class BackendIndicatorWidget(QLabel if HAS_QGIS else object):
         force_all_action.setData(('action', 'force_all'))
 
         # Show menu
-        selected_action = menu.exec_(QCursor.pos())
+        selected_action = menu.exec(QCursor.pos())
 
         if selected_action:
             self._handle_menu_action(selected_action.data(), current_layer)

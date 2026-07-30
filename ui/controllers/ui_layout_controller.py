@@ -19,7 +19,7 @@ try:
     )
 except ImportError:
     from PyQt6.QtCore import Qt, QSize
-    from PyQt5.QtWidgets import (
+    from qgis.PyQt.QtWidgets import (
         QWidget, QHBoxLayout, QLayout, QSizePolicy
     )
 

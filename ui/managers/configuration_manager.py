@@ -759,7 +759,7 @@ class ConfigurationManager(QObject):
 
                 # Configure text inputs
                 elif "LineEdit" in widget_type or "QgsDoubleSpinBox" in widget_type:
-                    widget_obj.setCursor(Qt.IBeamCursor)
+                    widget_obj.setCursor(Qt.CursorShape.IBeamCursor)
                     widget_obj.setFont(font)
 
                 # Configure property override buttons
@@ -827,7 +827,7 @@ class ConfigurationManager(QObject):
         d.checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection.show()
         logger.debug(f"Inserted multiple selection widget into layout, count: {d.horizontalLayout_exploring_multiple_feature_picker.count()}")
 
-        field_filters = QgsFieldProxyModel.AllTypes
+        field_filters = QgsFieldProxyModel.Filter.AllTypes
         for widget in [d.mFieldExpressionWidget_exploring_single_selection,
                        d.mFieldExpressionWidget_exploring_multiple_selection,
                        d.mFieldExpressionWidget_exploring_custom_selection]:
@@ -860,12 +860,12 @@ class ConfigurationManager(QObject):
         # HasGeometry = PointLayer | LineLayer | PolygonLayer = 4 | 8 | 16 = 28
         # This excludes tables without geometry (NoGeometry = 2)
         try:
-            d.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.HasGeometry)
+            d.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.Filter.HasGeometry)
             logger.info("comboBox_filtering_current_layer: Filter set to HasGeometry (exclude non-spatial tables)")
         except Exception as e:
             logger.warning(f"Could not set HasGeometry filter: {e}")
             # Fallback to VectorLayer only
-            d.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.VectorLayer)
+            d.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
 
         # Apply themed icon to centroids checkbox
         try:

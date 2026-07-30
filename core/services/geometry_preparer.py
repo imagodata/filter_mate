@@ -574,11 +574,11 @@ def prepare_geometries_by_provider(
                                 has_points = any('Point' in QgsWkbTypes.displayString(g.wkbType()) for g in all_geoms)
 
                                 if has_polygons:
-                                    converted = combined.convertToType(QgsWkbTypes.PolygonGeometry, True)
+                                    converted = combined.convertToType(QgsWkbTypes.GeometryType.PolygonGeometry, True)
                                 elif has_lines:
-                                    converted = combined.convertToType(QgsWkbTypes.LineGeometry, True)
+                                    converted = combined.convertToType(QgsWkbTypes.GeometryType.LineGeometry, True)
                                 elif has_points:
-                                    converted = combined.convertToType(QgsWkbTypes.PointGeometry, True)
+                                    converted = combined.convertToType(QgsWkbTypes.GeometryType.PointGeometry, True)
                                 else:
                                     converted = None
 

@@ -117,7 +117,7 @@ class TaskManagementService:
                         if layer_id in widget.tasks[task_type]:
                             task = widget.tasks[task_type][layer_id]
                             if isinstance(task, QgsTask) and not sip.isdeleted(task):
-                                if task.status() in [QgsTask.Running, QgsTask.Queued]:
+                                if task.status() in [QgsTask.TaskStatus.Running, QgsTask.TaskStatus.Queued]:
                                     logger.debug(f"Cancelling {task_type} task for layer {layer_id}")
                                     task.cancel()
         except Exception as e:

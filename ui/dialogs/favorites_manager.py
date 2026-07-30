@@ -568,7 +568,7 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
         general_layout = QFormLayout(general_tab)
         general_layout.setContentsMargins(12, 12, 12, 12)
         general_layout.setSpacing(10)
-        general_layout.setRowWrapPolicy(QFormLayout.DontWrapRows)
+        general_layout.setRowWrapPolicy(QFormLayout.RowWrapPolicy.DontWrapRows)
 
         self._name_edit = QLineEdit()
         self._name_edit.setPlaceholderText(self.tr("Favorite name"))

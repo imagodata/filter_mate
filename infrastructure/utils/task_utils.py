@@ -331,7 +331,7 @@ def get_best_metric_crs(layer_crs) -> str:
         layer_crs = QgsCoordinateReferenceSystem(layer_crs)
 
     # If already metric, return as-is
-    if layer_crs.mapUnits() in (QgsUnitTypes.DistanceMeters, QgsUnitTypes.DistanceKilometers):
+    if layer_crs.mapUnits() in (QgsUnitTypes.DistanceUnit.DistanceMeters, QgsUnitTypes.DistanceUnit.DistanceKilometers):
         return layer_crs.authid()
 
     # For geographic CRS, use Web Mercator as default
@@ -386,7 +386,7 @@ def needs_metric_conversion(layer) -> bool:
 
     try:
         units = layer.crs().mapUnits()
-        return units not in (QgsUnitTypes.DistanceMeters, QgsUnitTypes.DistanceKilometers)
+        return units not in (QgsUnitTypes.DistanceUnit.DistanceMeters, QgsUnitTypes.DistanceUnit.DistanceKilometers)
     except Exception:
         return True  # Assume conversion needed if can't determine
 

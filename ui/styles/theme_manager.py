@@ -249,8 +249,8 @@ class GlobalDialogStyleFilter(QObject):
             dialog.setAutoFillBackground(True)
 
             # Force the dialog to NOT inherit from parent
-            dialog.setAttribute(Qt.WA_StyledBackground, False)
-            dialog.setAttribute(Qt.WA_NoSystemBackground, False)
+            dialog.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, False)
+            dialog.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, False)
 
             # Import view classes for special handling
             from qgis.PyQt.QtWidgets import QTreeView, QListView, QAbstractItemView, QTreeWidget, QListWidget
@@ -274,7 +274,7 @@ class GlobalDialogStyleFilter(QObject):
                     child.setAutoFillBackground(True)
 
                     # Reset style attributes
-                    child.setAttribute(Qt.WA_StyledBackground, False)
+                    child.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, False)
 
                     # Special handling for tree/list views - they need explicit background
                     if isinstance(child, (QTreeView, QListView, QTreeWidget, QListWidget, QAbstractItemView)):
@@ -346,7 +346,7 @@ class ChildDialogStyleFilter(QObject):
             False to allow event to continue propagation
         """
         # Handle ChildAdded events on the parent
-        if event.type() == QEvent.ChildAdded:
+        if event.type() == QEvent.Type.ChildAdded:
             child = event.child()
             if child is not None and isinstance(child, QDialog):
                 widget_id = id(child)
@@ -356,7 +356,7 @@ class ChildDialogStyleFilter(QObject):
                     QTimer.singleShot(0, lambda w=child: self._reset_dialog_style(w))
 
         # Handle Show events - dialogs might be created later
-        elif event.type() == QEvent.Show:
+        elif event.type() == QEvent.Type.Show:
             if isinstance(watched, QDialog):
                 widget_id = id(watched)
                 if widget_id not in self._processed_widgets:

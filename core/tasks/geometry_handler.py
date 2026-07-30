@@ -496,7 +496,7 @@ class GeometryHandler:
         }
 
         context = QgsProcessingContext()
-        context.setInvalidGeometryCheck(QgsFeatureRequest.GeometryNoCheck)
+        context.setInvalidGeometryCheck(QgsFeatureRequest.InvalidGeometryCheck.GeometryNoCheck)
         feedback = QgsProcessingFeedback()
 
         outputs['alg_source_layer_params_reprojectlayer'] = processing.run(

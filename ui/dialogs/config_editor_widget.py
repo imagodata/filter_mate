@@ -147,7 +147,7 @@ class ConfigEditorWidget(QWidget):
         # Create scroll area for many options
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
         container = QWidget()
         self._content_layout = QVBoxLayout(container)

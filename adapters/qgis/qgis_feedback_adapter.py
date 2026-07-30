@@ -20,10 +20,10 @@ logger = logging.getLogger("filter_mate")
 
 
 _LEVEL_MAP: dict[MessageLevel, "Qgis.MessageLevel"] = {
-    MessageLevel.INFO: Qgis.Info,
-    MessageLevel.WARNING: Qgis.Warning,
-    MessageLevel.CRITICAL: Qgis.Critical,
-    MessageLevel.SUCCESS: Qgis.Success,
+    MessageLevel.INFO: Qgis.MessageLevel.Info,
+    MessageLevel.WARNING: Qgis.MessageLevel.Warning,
+    MessageLevel.CRITICAL: Qgis.MessageLevel.Critical,
+    MessageLevel.SUCCESS: Qgis.MessageLevel.Success,
 }
 
 
@@ -49,7 +49,7 @@ class QgisMessageBarFeedback(IFeedback):
             logger.warning("[%s] %s: %s", level.name, title, message)
             return
 
-        qgis_level = _LEVEL_MAP.get(level, Qgis.Info)
+        qgis_level = _LEVEL_MAP.get(level, Qgis.MessageLevel.Info)
         bar.pushMessage(title, message, level=qgis_level)
 
     def set_progress(self, value: float) -> None:

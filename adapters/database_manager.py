@@ -201,7 +201,7 @@ class DatabaseManager:
                 save_options
             )
 
-            if writer.hasError() != QgsVectorFileWriter.NoError:
+            if writer.hasError() != QgsVectorFileWriter.WriterError.NoError:
                 logger.error(f"Error creating database file: {writer.errorMessage()}")
                 return False
 

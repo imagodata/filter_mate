@@ -28,7 +28,7 @@ try:
     )
 except ImportError:
     from PyQt6.QtCore import pyqtSignal
-    from PyQt5.QtWidgets import (
+    from qgis.PyQt.QtWidgets import (
         QDialog, QVBoxLayout, QHBoxLayout, QGridLayout,
         QLabel, QPushButton, QCheckBox, QSpinBox, QWidget,
         QFrame, QDialogButtonBox, QGroupBox, QTabWidget
