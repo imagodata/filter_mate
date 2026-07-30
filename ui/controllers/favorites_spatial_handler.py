@@ -728,7 +728,7 @@ class FavoritesSpatialHandler:
                 pass
             try:
                 signature_to_layer[layer_signature_for(lobj)] = lobj
-            except Exception:
+            except Exception:  # nosec B110 - best-effort signature lookup build; layer just skipped for this index
                 pass
 
         applied: list = []
@@ -872,7 +872,7 @@ class FavoritesSpatialHandler:
                 canvas = iface.mapCanvas()
                 if canvas is not None and hasattr(canvas, "refreshAllLayers"):
                     canvas.refreshAllLayers()
-        except Exception:
+        except Exception:  # nosec B110 - best-effort canvas refresh; filter already applied regardless
             pass
 
         # Auto-zoom on the union extent of every layer the favorite

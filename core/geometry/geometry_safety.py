@@ -412,7 +412,7 @@ def repair_geometry(geom: Optional[QgsGeometry]) -> Optional[QgsGeometry]:
         repaired = geom.makeValid()
         if validate_geometry_for_geos(repaired):
             return repaired
-    except Exception:
+    except Exception:  # nosec B110 - repair strategy attempt only, next strategy tried below
         pass
 
     # Strategy 2: buffer(0)
@@ -420,7 +420,7 @@ def repair_geometry(geom: Optional[QgsGeometry]) -> Optional[QgsGeometry]:
         buffered = geom.buffer(0, 5)
         if validate_geometry_for_geos(buffered):
             return buffered
-    except Exception:
+    except Exception:  # nosec B110 - repair strategy attempt only, next strategy tried below
         pass
 
     # Strategy 3: simplify + makeValid
@@ -430,7 +430,7 @@ def repair_geometry(geom: Optional[QgsGeometry]) -> Optional[QgsGeometry]:
             repaired = simplified.makeValid()
             if validate_geometry_for_geos(repaired):
                 return repaired
-    except Exception:
+    except Exception:  # nosec B110 - last repair strategy, returns None below if it also fails
         pass
 
     return None

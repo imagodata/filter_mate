@@ -308,7 +308,7 @@ class HistoryRepository:
         if not self._is_external_cursor and self._cursor:
             try:
                 self._cursor.close()
-            except Exception:
+            except Exception:  # nosec B110 - cursor close best-effort during cleanup
                 pass
 
 

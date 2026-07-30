@@ -49,7 +49,7 @@ def show_info(message: str, title: str = "FilterMate"):
         from qgis.utils import iface  # noqa: F401
         if iface and should_show_message('info'):
             iface.messageBar().pushInfo(title, message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 
@@ -59,7 +59,7 @@ def show_warning(message: str, title: str = "FilterMate"):
         from qgis.utils import iface  # noqa: F401
         if iface and should_show_message('warning'):
             iface.messageBar().pushWarning(title, message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 
@@ -69,7 +69,7 @@ def show_error(message: str, title: str = "FilterMate"):
         from qgis.utils import iface  # noqa: F401
         if iface and should_show_message('error'):
             iface.messageBar().pushCritical(title, message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 
@@ -79,7 +79,7 @@ def show_success(message: str, title: str = "FilterMate"):
         from qgis.utils import iface  # noqa: F401
         if iface and should_show_message('success'):
             iface.messageBar().pushSuccess(title, message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 
@@ -94,7 +94,7 @@ def show_progress_message(message: str, current: int = None, total: int = None):
 
         if iface and should_show_message('progress_info'):
             iface.messageBar().pushInfo("FilterMate", full_message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 
@@ -119,7 +119,7 @@ def show_backend_info(provider_type: str, layer_count: int = 1,
 
         if iface and should_show_message('backend_info'):
             iface.messageBar().pushInfo("FilterMate", message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 
@@ -144,7 +144,7 @@ def show_success_with_backend(provider_type: str, operation: str = 'filter',
 
         if iface:
             iface.messageBar().pushSuccess("FilterMate", message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 
@@ -157,7 +157,7 @@ def show_performance_warning(provider_type: str, feature_count: int):
             from ...core.services.auto_optimizer import get_auto_optimization_config
             if not get_auto_optimization_config().get('show_optimization_hints', True):
                 return
-        except Exception:
+        except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
             pass
         if provider_type == 'postgresql':
             return
@@ -180,7 +180,7 @@ def show_performance_warning(provider_type: str, feature_count: int):
             ).format("{:,}".format(feature_count), backend_name)
             if iface:
                 iface.messageBar().pushInfo("FilterMate - Performance", message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 
@@ -206,7 +206,7 @@ def show_error_with_context(error_message: str, provider_type: str = None,
 
         if iface:
             iface.messageBar().pushCritical("FilterMate", message)
-    except Exception:
+    except Exception:  # nosec B110 - QGIS messageBar/iface may be unavailable (headless, teardown); safe to ignore
         pass
 
 

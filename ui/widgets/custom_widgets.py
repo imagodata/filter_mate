@@ -297,7 +297,8 @@ class QgsCheckableComboBoxLayer(QComboBox):
 
     def setItemsCheckState(self, input_list, state):
         """Set check state for multiple items by index."""
-        assert isinstance(input_list, list)
+        if not isinstance(input_list, list):
+            raise TypeError("input_list must be a list")
         for i in input_list:
             item = self.model().item(i)
             if item:
@@ -306,7 +307,8 @@ class QgsCheckableComboBoxLayer(QComboBox):
 
     def setCheckedItems(self, input_list):
         """Set checked items by text matching."""
-        assert isinstance(input_list, list)
+        if not isinstance(input_list, list):
+            raise TypeError("input_list must be a list")
         for text in input_list:
             items = self.model().findItems(text)
             for item in items:

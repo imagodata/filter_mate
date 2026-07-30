@@ -1159,7 +1159,7 @@ class ExpressionBuilder:
             if pk_attrs:
                 fields = self.source_layer.fields()
                 return fields[pk_attrs[0]].name()
-        except Exception:
+        except Exception:  # nosec B110 - fall back to common PK name search below
             pass
 
         # Fallback: try common PK names

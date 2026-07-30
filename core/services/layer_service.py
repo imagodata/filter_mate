@@ -611,7 +611,7 @@ class LayerService(QObject):
             fields = layer.fields()
             if fields:
                 return fields[0].name()
-        except Exception:
+        except Exception:  # nosec B110 - best-effort detection, falls back below
             pass
 
         return expression or ""

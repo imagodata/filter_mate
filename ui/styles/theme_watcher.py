@@ -85,7 +85,7 @@ class QGISThemeWatcher:
             app = QgsApplication.instance()
             if app:
                 app.paletteChanged.disconnect(self._on_palette_changed)
-        except Exception:
+        except Exception:  # nosec B110 - disconnect may fail if already disconnected, non-fatal
             pass
 
         self._is_watching = False

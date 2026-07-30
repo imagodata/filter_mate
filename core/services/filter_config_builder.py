@@ -641,7 +641,7 @@ class LayerFilterBuilder:
             geom_col = uri.geometryColumn()
             if geom_col:
                 return geom_col
-        except Exception:
+        except Exception:  # nosec B110 - best-effort detection, falls back below
             pass
 
         provider = layer.providerType()
@@ -661,7 +661,7 @@ class LayerFilterBuilder:
                 schema = source_uri.schema()
                 if schema:
                     return schema
-            except Exception:
+            except Exception:  # nosec B110 - best-effort detection, falls back below
                 pass
 
             source = layer.source()

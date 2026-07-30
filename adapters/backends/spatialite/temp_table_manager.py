@@ -47,7 +47,7 @@ except ImportError:
             try:
                 conn.load_extension(ext)
                 break
-            except Exception:
+            except Exception:  # nosec B112 - extension load best-effort, try next candidate name/path
                 continue
         return conn
 
@@ -422,7 +422,7 @@ class SpatialiteTempTableManager(MaterializedViewPort):
             # Also drop spatial index if exists
             try:
                 cursor.execute(f"SELECT DisableSpatialIndex('{view_name}', 'geometry')")  # nosec B608
-            except Exception:
+            except Exception:  # nosec B110 - Index may not exist
                 pass  # Index may not exist
 
             conn.commit()
@@ -529,7 +529,7 @@ class SpatialiteTempTableManager(MaterializedViewPort):
                         try:
                             cursor.execute(f'DROP TABLE IF EXISTS "{table_name}"')  # nosec B608
                             dropped += 1
-                        except Exception:
+                        except Exception:  # nosec B110 - best-effort drop of orphaned temp table, continue cleanup
                             pass
 
                 conn.commit()

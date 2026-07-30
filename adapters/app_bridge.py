@@ -119,7 +119,7 @@ def initialize_services(config: Optional[Dict[str, Any]] = None) -> None:
                 backend = _backend_factory.get_backend_for_provider(provider_type)
                 if backend:
                     backends[provider_type] = backend
-            except Exception:
+            except Exception:  # nosec B110 - backend instantiation best-effort, skip provider on failure
                 pass
 
         _filter_service = FilterService(
@@ -339,7 +339,7 @@ def _check_spatial_index(layer: 'QgsVectorLayer') -> bool:
         provider = layer.dataProvider()
         if hasattr(provider, 'hasSpatialIndex'):
             return provider.hasSpatialIndex() == QgsFeatureSource.SpatialIndexPresence.SpatialIndexPresent
-    except Exception:
+    except Exception:  # nosec B110 - spatial index check best-effort, treated as absent on failure
         pass
     return False
 
@@ -423,7 +423,7 @@ def _extract_primary_key(layer: 'QgsVectorLayer') -> str:
             if field.type() in [2, 4]:  # Integer types in QVariant
                 return field.name()
 
-    except Exception:
+    except Exception:  # nosec B110 - PK detection best-effort across strategies, caller applies fallback logic
         pass
 
     return ""

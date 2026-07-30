@@ -444,7 +444,7 @@ class BackendExpressionBuilder:
                     # Try feature.id() as fallback
                     try:
                         all_fids.append(feature.id())
-                    except Exception:
+                    except Exception:  # nosec B110 - fallback FID extraction, best-effort only
                         pass
 
             if not all_fids:

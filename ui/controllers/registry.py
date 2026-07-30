@@ -195,7 +195,7 @@ class ControllerRegistry:
                 try:
                     controller.setup()
                     count += 1
-                except Exception:
+                except Exception:  # nosec B110 - best-effort setup, non-fatal
                     pass
         return count
 

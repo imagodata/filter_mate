@@ -1853,14 +1853,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if groupbox in ("single_selection", "multiple_selection"): self._last_expression_change_source = groupbox
             if groupbox == "single_selection":
                 try: self.mFeaturePickerWidget_exploring_single_selection.update()
-                except Exception:  # Widget may not be ready - expected during initialization
+                except Exception:  # nosec B110 - Widget may not be ready - expected during initialization
                     pass
             elif groupbox == "multiple_selection":
                 try:
                     w = self.checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection
                     if w and hasattr(w, 'list_widgets') and self.current_layer and self.current_layer.id() in w.list_widgets:
                         w.list_widgets[self.current_layer.id()].viewport().update()
-                except Exception:  # Widget may not be ready - expected during initialization
+                except Exception:  # nosec B110 - Widget may not be ready - expected during initialization
                     pass
             self.exploring_source_params_changed(groupbox_override=groupbox, change_source=groupbox)
         finally:
@@ -1880,7 +1880,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if groupbox in ("custom_selection", None): widgets.append(self.mFieldExpressionWidget_exploring_custom_selection)
             for w in widgets:
                 if w and hasattr(w, 'setCursor'): w.setCursor(cursor)
-        except Exception:  # Cursor change is cosmetic - non-critical
+        except Exception:  # nosec B110 - Cursor change is cosmetic - non-critical
             pass
 
     def _get_cached_expression_result(self, layer_id: str, expression: str):
@@ -1990,7 +1990,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         if self.current_layer and not self.current_layer_selection_connection:
             try: self.current_layer.selectionChanged.connect(self.on_layer_selection_changed); self.current_layer_selection_connection = True
-            except Exception:  # Signal may already be connected - expected
+            except Exception:  # nosec B110 - Signal may already be connected - expected
                 pass
         self.widgetsInitialized.emit(); self._setup_keyboard_shortcuts()
         if self._pending_layers_update:
@@ -2648,7 +2648,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         for grp in [g for g in self.widgets if g != 'QGIS']:
             for w in self.widgets[grp]:
                 try: self.manageSignal([grp, w], 'connect')
-                except Exception:  # Signal may already be connected - expected
+                except Exception:  # nosec B110 - Signal may already be connected - expected
                     pass
 
     def disconnect_widgets_signals(self):
@@ -2665,7 +2665,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         for grp in [g for g in self.widgets if g != 'QGIS']:
             for w in self.widgets[grp]:
                 try: self.manageSignal([grp, w], 'disconnect')
-                except Exception:  # Signal may already be disconnected - expected
+                except Exception:  # nosec B110 - Signal may already be disconnected - expected
                     pass
 
     def force_reconnect_action_signals(self):
@@ -2714,7 +2714,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 widget.clicked.connect(handler)
                 self._signal_connection_states[key] = True
                 connected_count += 1
-            except Exception:
+            except Exception:  # nosec B110 - signal reconnection best-effort, safe to ignore
                 pass
 
     def force_reconnect_exporting_signals(self):
@@ -2815,7 +2815,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                         # Try to manually call the handler to see what happens
                         try:
                             handler(False)  # Simulate unchecked button click
-                        except Exception:
+                        except Exception:  # nosec B110 - handler simulation for diagnostics, safe to ignore
                             pass
 
         if self.current_layer:
@@ -2835,7 +2835,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 if not s_tuple[-1] or s_tuple[0] not in signals: continue
                 key = f"EXPLORING.{w}.{s_tuple[0]}"; self._signal_connection_states.pop(key, None)
                 try: self._signal_connection_states[key] = self.changeSignalState(['EXPLORING', w], s_tuple[0], s_tuple[-1], 'connect')
-                except Exception:  # Signal connection may fail if widget deleted - expected during cleanup
+                except Exception:  # nosec B110 - Signal connection may fail if widget deleted - expected during cleanup
                     pass
 
         # FIX 2026-01-14: CRITICAL - Connect exploring buttons DIRECTLY with explicit handlers
@@ -3064,7 +3064,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self.set_widgets_enabled_state(False)
             for sp in [["DOCK", "SINGLE_SELECTION"], ["DOCK", "MULTIPLE_SELECTION"], ["DOCK", "CUSTOM_SELECTION"]]:
                 try: self.manageSignal(sp, 'connect')
-                except Exception:  # Signal may already be connected - expected
+                except Exception:  # nosec B110 - Signal may already be connected - expected
                     pass
 
         self._connect_groupbox_signals_directly()
@@ -5002,7 +5002,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         for expr_key in ["SINGLE_SELECTION_EXPRESSION", "MULTIPLE_SELECTION_EXPRESSION", "CUSTOM_SELECTION_EXPRESSION"]:
             try: self.widgets.get("EXPLORING", {}).get(expr_key, {}).get("WIDGET", type('', (), {'setExpression': lambda s, x: None})()).setExpression("")
-            except Exception:  # Widget may not be ready - expected during initialization
+            except Exception:  # nosec B110 - Widget may not be ready - expected during initialization
                 pass
 
         if self.project_props.get("OPTIONS", {}).get("LAYERS", {}).get("LINK_LEGEND_LAYERS_AND_CURRENT_LAYER_FLAG"):
@@ -5341,7 +5341,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self.project_props and self.project_props.get("OPTIONS", {}).get("LAYERS", {}).get("LINK_LEGEND_LAYERS_AND_CURRENT_LAYER_FLAG", False):
             try:
                 self.manageSignal(["QGIS", "LAYER_TREE_VIEW"], 'connect')
-            except Exception:
+            except Exception:  # nosec B110 - signal connection best-effort, safe to ignore
                 pass
 
         # Connect selectionChanged for tracking
@@ -5349,7 +5349,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             try:
                 self.current_layer.selectionChanged.connect(self.on_layer_selection_changed)
                 self.current_layer_selection_connection = True
-            except Exception:
+            except Exception:  # nosec B110 - signal connection best-effort, safe to ignore
                 pass
 
         # Restore exploring groupbox state
@@ -5412,11 +5412,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             try:
                 result = self._controller_integration.delegate_ensure_valid_current_layer(requested_layer)
                 if result is not None: return result
-            except Exception:  # Delegation may fail if controller not ready - expected
+            except Exception:  # nosec B110 - Delegation may fail if controller not ready - expected
                 pass
         if requested_layer:
             try: _ = requested_layer.id(); return requested_layer
-            except Exception:  # Layer may be deleted - expected during cleanup
+            except Exception:  # nosec B110 - Layer may be deleted - expected during cleanup
                 pass
         return None
 
@@ -5512,7 +5512,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                         try:
                             widget_info["WIDGET"].update()
                             widget_info["WIDGET"].repaint()
-                        except Exception:
+                        except Exception:  # nosec B110 - visual refresh is cosmetic, safe to ignore
                             pass
                 logger.debug("Exploring widgets visually refreshed")
 
@@ -6398,10 +6398,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         # FIX 2026-03-16: Stop debounce timer on close
         try: self._feature_picker_debounce_timer.stop() if hasattr(self, '_feature_picker_debounce_timer') else None
-        except Exception: pass
+        except Exception: pass  # nosec B110 - best-effort timer stop during cleanup, safe to ignore
         # FIX 2026-01-19: Disconnect willBeDeleted signal before cleanup
         try: self._disconnect_feature_picker_layer_deletion() if hasattr(self, '_disconnect_feature_picker_layer_deletion') else None
-        except Exception:  # May already be disconnected - expected
+        except Exception:  # nosec B110 - May already be disconnected - expected
             pass
         try: self.comboBox_filtering_current_layer.setLayer(None) if hasattr(self, 'comboBox_filtering_current_layer') else None
         except RuntimeError:  # Widget may already be deleted - expected during shutdown
@@ -6410,13 +6410,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         except RuntimeError:  # Widget may already be deleted - expected during shutdown
             pass
         try: self._exploring_cache.invalidate_all() if hasattr(self, '_exploring_cache') else None
-        except Exception:  # Cache may be None - expected
+        except Exception:  # nosec B110 - Cache may be None - expected
             pass
         try: self._theme_watcher.remove_callback(self._on_qgis_theme_changed) if self._theme_watcher else None
-        except Exception:  # Callback may not be registered - expected
+        except Exception:  # nosec B110 - Callback may not be registered - expected
             pass
         try: self._controller_integration.teardown() if self._controller_integration else None
-        except Exception:  # Controller may already be torn down - expected
+        except Exception:  # nosec B110 - Controller may already be torn down - expected
             pass
 
         # FIX 2026-02-11: Unregister from module-level registry
@@ -6696,7 +6696,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         for w, sig, slot in widgets:
             if w and hasattr(w, sig):
                 try: getattr(w, sig).connect(slot); slot()
-                except Exception:  # Signal may already be connected - expected
+                except Exception:  # nosec B110 - Signal may already be connected - expected
                     pass
 
     def _update_combo_tooltip(self, combo):
@@ -6710,7 +6710,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 combo.setToolTip(QCoreApplication.translate("FilterMate", "Current layer: {0}").format(t))
             else:
                 combo.setToolTip(QCoreApplication.translate("FilterMate", "No layer selected"))
-        except Exception:  # Tooltip update is cosmetic - non-critical
+        except Exception:  # nosec B110 - Tooltip update is cosmetic - non-critical
             pass
 
     def _update_checkable_combo_tooltip(self, combo):
@@ -6720,7 +6720,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             items = combo.checkedItems()
             t = "\n".join([i.text() for i in items if hasattr(i, 'text')]) if items else ""
             combo.setToolTip(QCoreApplication.translate("FilterMate", "Selected layers:\n{0}").format(t) if t else QCoreApplication.translate("FilterMate", "No layers selected"))
-        except Exception:  # Tooltip update is cosmetic - non-critical
+        except Exception:  # nosec B110 - Tooltip update is cosmetic - non-critical
             pass
 
     def _update_export_buttons_state(self):
@@ -6742,7 +6742,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 expr_widget.setToolTip(
                     QCoreApplication.translate("FilterMate", "No expression defined")
                 )
-        except Exception:  # Tooltip update is cosmetic - non-critical
+        except Exception:  # nosec B110 - Tooltip update is cosmetic - non-critical
             pass
 
     def _update_feature_picker_tooltip(self, picker):
@@ -6767,7 +6767,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 f = picker.feature()
             if f and f.isValid() and f.attributes():
                 picker.setToolTip(QCoreApplication.translate("FilterMate", "Feature ID: {0}\nFirst attribute: {1}").format(f.id(), f.attributes()[0]))
-        except Exception:  # Tooltip update is cosmetic - non-critical
+        except Exception:  # nosec B110 - Tooltip update is cosmetic - non-critical
             pass
 
     def retranslate_dynamic_tooltips(self):

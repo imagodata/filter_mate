@@ -1774,7 +1774,7 @@ class LayersManagementEngineTask(QgsTask):
         # Use Python logger only (file-based, safe during shutdown).
         try:
             logger.info(f'"{self.description()}" task was canceled')
-        except Exception:  # catch-all safety net: logger may be destroyed during QGIS shutdown
+        except Exception:  # nosec B110 - catch-all safety net: logger may be destroyed during QGIS shutdown
             pass
 
         # Call parent cancel without any QGIS API calls

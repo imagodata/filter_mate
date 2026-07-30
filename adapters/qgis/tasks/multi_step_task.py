@@ -152,7 +152,7 @@ class MultiStepFilterTask(BaseFilterMateTask):
                             step.step_type.value,
                             self._current_candidates
                         )
-                    except Exception:
+                    except Exception:  # nosec B110 - step-complete callback failure must not abort the filter task
                         pass
 
                 # Early termination if no candidates
@@ -314,7 +314,7 @@ class MultiStepFilterTask(BaseFilterMateTask):
             pk_attrs = layer.primaryKeyAttributes()
             if pk_attrs:
                 return layer.fields()[pk_attrs[0]].name()
-        except Exception:
+        except Exception:  # nosec B110 - fall back to default "fid" primary key name below
             pass
         return "fid"
 

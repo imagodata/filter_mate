@@ -95,7 +95,7 @@ def ensure_temp_schema_exists(connexion, schema_name: str) -> str:
         # Rollback failed transaction
         try:
             connexion.rollback()
-        except Exception:
+        except Exception:  # nosec B110 - Connection may be in bad state
             pass  # Connection may be in bad state
 
         # Try with explicit AUTHORIZATION CURRENT_USER as fallback
@@ -109,7 +109,7 @@ def ensure_temp_schema_exists(connexion, schema_name: str) -> str:
             logger.warning(f"[PostgreSQL] Error creating schema with CURRENT_USER: {e2}")
             try:
                 connexion.rollback()
-            except Exception:
+            except Exception:  # nosec B110 - Connection may be in bad state
                 pass  # Connection may be in bad state
 
             # Final fallback: try with postgres authorization
@@ -122,7 +122,7 @@ def ensure_temp_schema_exists(connexion, schema_name: str) -> str:
             except Exception as e3:
                 try:
                     connexion.rollback()
-                except Exception:
+                except Exception:  # nosec B110 - Connection may be in bad state
                     pass  # Connection may be in bad state
 
                 # v2.8.8: Fallback to 'public' schema if temp schema cannot be created
@@ -249,7 +249,7 @@ def execute_commands(connexion, commands: list) -> bool:
         logger.error(f"[PostgreSQL] Error executing PostgreSQL commands: {e}")
         try:
             connexion.rollback()
-        except Exception:
+        except Exception:  # nosec B110 - rollback best-effort after failed command batch, connection may already be broken
             pass
         return False
 

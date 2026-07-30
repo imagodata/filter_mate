@@ -56,9 +56,9 @@ class CredentialsManager:
 
     # Environment variable names (fallback for CI/CD)
     ENV_URL = "QFIELDCLOUD_URL"
-    ENV_TOKEN = "QFIELDCLOUD_TOKEN"  # pragma: allowlist secret
+    ENV_TOKEN = "QFIELDCLOUD_TOKEN"  # nosec B105 - env var NAME, not a credential value  # pragma: allowlist secret
     ENV_USER = "QFIELDCLOUD_USER"
-    ENV_PASSWORD = "QFIELDCLOUD_PASSWORD"  # pragma: allowlist secret
+    ENV_PASSWORD = "QFIELDCLOUD_PASSWORD"  # nosec B105 - env var NAME, not a credential value  # pragma: allowlist secret
 
     # Keys that moved from QgsSettings → FilterMate config during v5
     # Each entry is (qgssettings_key, config_key, parse_fn)
@@ -190,7 +190,7 @@ class CredentialsManager:
                 continue
             try:
                 parsed = parser(raw)
-            except Exception:
+            except Exception:  # nosec B112 - unparseable legacy value; leave key in place, skip this migration
                 continue
             if self._write_ext_config(cfg_key, parsed):
                 settings.remove(full_key)
@@ -296,7 +296,7 @@ class CredentialsManager:
                 )
                 if pwd:
                     return pwd
-            except Exception:
+            except Exception:  # nosec B110 - keyring backend unavailable; fall back to env var
                 pass
 
         return os.environ.get(self.ENV_PASSWORD) or None
@@ -417,7 +417,7 @@ class CredentialsManager:
                 import keyring
                 keyring.delete_password(self.KEYRING_SERVICE, "token")
                 keyring.delete_password(self.KEYRING_SERVICE, "password")
-            except Exception:
+            except Exception:  # nosec B110 - best-effort keyring cleanup; settings already cleared above
                 pass
 
         logger.info("QFieldCloud credentials cleared (team-level settings preserved)")

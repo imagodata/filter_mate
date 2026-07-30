@@ -586,7 +586,7 @@ class FilterMate:
                         # Clear the message bar to remove QGIS's individual warnings
                         try:
                             self.iface.messageBar().clearWidgets()
-                        except Exception:
+                        except Exception:  # nosec B110 - best-effort message bar cleanup before showing consolidated warning
                             pass
 
                         # Show a single consolidated info message
@@ -775,7 +775,7 @@ class FilterMate:
                     ext_cfg = dw.CONFIG_DATA.get('EXTENSIONS', {}).get('qfieldcloud', {})
                     from .config.config import _get_option_value
                     ext_enabled = bool(_get_option_value(ext_cfg.get('enabled'), True))
-                except Exception:
+                except Exception:  # nosec B110 - best-effort config read; defaults to enabled
                     pass
                 if ext_enabled:
                     dw.widgets['ACTION']['QFIELDCLOUD'] = {
@@ -1270,7 +1270,7 @@ class FilterMate:
         if hasattr(self, '_public_api') and self._public_api is not None:
             try:
                 self._public_api.about_to_unload.emit()
-            except Exception:
+            except Exception:  # nosec B110 - Best-effort during shutdown
                 pass  # Best-effort during shutdown
 
         # Disconnect project change signals using dedicated method
@@ -1402,7 +1402,7 @@ class FilterMate:
                                     "FilterMate",
                                     self.tr(f"Unable to delete {filename}: {e}")
                                 )
-            except Exception:
+            except Exception:  # nosec B110 - Non-critical error, config was already reset
                 # Non-critical error, config was already reset
                 pass
 

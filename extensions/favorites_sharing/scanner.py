@@ -133,7 +133,7 @@ class ResourceSharingScanner:
                 candidate_roots.append(os.path.join(
                     settings_dir, 'resource_sharing', 'collections',
                 ))
-        except Exception:
+        except Exception:  # nosec B110 - best-effort candidate root discovery; falls through to next candidate
             pass
 
         # Environment override (set by some Resource Sharing setups)
@@ -222,7 +222,7 @@ class ResourceSharingScanner:
         if self._extension is not None:
             try:
                 return self._extension.get_resource_sharing_root()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort delegate lookup; falls back to direct ENV_VARS read below
                 pass
         try:
             from filter_mate.config.config import ENV_VARS, _get_option_value
@@ -242,7 +242,7 @@ class ResourceSharingScanner:
         if self._extension is not None:
             try:
                 return self._extension.get_allowed_collections()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort delegate lookup; falls back to direct ENV_VARS read below
                 pass
         try:
             from filter_mate.config.config import ENV_VARS, _get_option_value
@@ -252,7 +252,7 @@ class ResourceSharingScanner:
             value = _get_option_value(cfg.get("allowed_collections"), default=[])
             if isinstance(value, list):
                 return [str(v) for v in value if v]
-        except Exception:
+        except Exception:  # nosec B110 - best-effort config read; falls back to "allow everything" default
             pass
         return []
 

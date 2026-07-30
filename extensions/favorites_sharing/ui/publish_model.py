@@ -96,6 +96,6 @@ def read_config_defaults(
         if isinstance(meta, dict):
             for k in ('author', 'license', 'homepage'):
                 defaults['default_publish_metadata'][k] = str(meta.get(k) or '')
-    except Exception:
+    except Exception:  # nosec B110 - best-effort config read; falls back to empty defaults
         pass
     return defaults

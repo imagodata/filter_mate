@@ -348,7 +348,7 @@ class ConfigEditorWidget(QWidget):
         for callback in self._on_change_callbacks:
             try:
                 callback(config_path, value)
-            except Exception:
+            except Exception:  # nosec B110 - best-effort callback invocation, non-fatal
                 pass
 
     def get_config(self) -> Dict[str, Any]:

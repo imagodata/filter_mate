@@ -253,7 +253,7 @@ class GitClient:
 
         logger.debug("git run: cwd=%s cmd=%s", run_cwd, _scrub_command(cmd))
         try:
-            proc = subprocess.run(
+            proc = subprocess.run(  # nosec B603 - cmd is a list built from self.git_binary + fixed flags, no shell, timeout enforced
                 cmd,
                 cwd=run_cwd if run_cwd and os.path.isdir(run_cwd) else None,
                 capture_output=True,

@@ -215,7 +215,7 @@ class FilterTask(BaseFilterMateTask):
             pk_attrs = layer.primaryKeyAttributes()
             if pk_attrs:
                 return layer.fields()[pk_attrs[0]].name()
-        except Exception:
+        except Exception:  # nosec B110 - PK field lookup best-effort, falls back to default "fid" below
             pass
         return "fid"
 

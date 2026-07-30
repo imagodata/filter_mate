@@ -581,7 +581,7 @@ class TwoPhaseFilter:
                         )
                         if box_match:
                             return tuple(float(x) for x in box_match.groups())
-            except Exception:
+            except Exception:  # nosec B110 - best-effort parse, falls back below
                 pass
 
             return None

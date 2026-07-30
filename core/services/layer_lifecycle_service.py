@@ -383,7 +383,7 @@ class LayerLifecycleService:
             finally:
                 try:
                     connexion.close()
-                except Exception:
+                except Exception:  # nosec B110 - best-effort close, non-fatal
                     pass
 
         except CircuitOpenError:
@@ -456,7 +456,7 @@ class LayerLifecycleService:
         finally:
             try:
                 connexion.close()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort close, non-fatal
                 pass
 
         return cleaned_count

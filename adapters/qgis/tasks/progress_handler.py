@@ -169,7 +169,7 @@ class ProgressHandler:
             if self._on_phase_change:
                 try:
                     self._on_phase_change(phase)
-                except Exception:
+                except Exception:  # nosec B110 - phase-change callback failure must not abort progress reporting
                     pass
 
         base_percent = self._get_phase_start_percent(phase)
@@ -402,7 +402,7 @@ class ProgressAggregator:
         if self._on_progress:
             try:
                 self._on_progress(avg_percent, message)
-            except Exception:
+            except Exception:  # nosec B110 - progress callback failure must not abort progress reporting
                 pass
 
     @property

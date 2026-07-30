@@ -73,7 +73,7 @@ except ImportError:
                 logger.debug(f"[Spatialite] Extension Loaded - Name: {ext}")
                 loaded = True
                 break
-            except Exception:
+            except Exception:  # nosec B112 - extension load best-effort, try next candidate name/path
                 continue
 
         if not loaded:
@@ -476,7 +476,7 @@ class SpatialiteBackend(BackendPort):
         if self._owns_connection and hasattr(self, '_conn') and self._conn:
             try:
                 self._conn.close()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort cleanup during __del__, safe to ignore
                 pass
 
 

@@ -14,9 +14,9 @@ import os
 from typing import Dict
 try:
     from defusedxml.ElementTree import parse as _xml_parse
-    from xml.etree import ElementTree as ET
+    from xml.etree import ElementTree as ET  # nosec B314 - defusedxml preferred above; stdlib fallback only if defusedxml unavailable
 except ImportError:
-    from xml.etree import ElementTree as ET
+    from xml.etree import ElementTree as ET  # nosec B314 - defusedxml preferred above; stdlib fallback only if defusedxml unavailable
     _xml_parse = ET.parse
 
 logger = logging.getLogger(__name__)

@@ -671,7 +671,7 @@ class SpatialiteQueryBuilder:
 
             conn.close()
 
-        except Exception:
+        except Exception:  # nosec B110 - best-effort stats collection, safe to skip on failure
             pass
 
         return stats
@@ -817,7 +817,7 @@ class MemorySpatialIndex:
                 if match:
                     matching.add(feat.id())
 
-            except Exception:
+            except Exception:  # nosec B110 - skip feature on geometry predicate failure, continue matching
                 pass
 
         return matching

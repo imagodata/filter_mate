@@ -92,7 +92,7 @@ class GitOpsWorker(QThread):
             logger.exception("Git worker raised")
             try:
                 self.error.emit(str(exc))
-            except Exception:
+            except Exception:  # nosec B110 - Qt teardown: dialog already gone, nothing left to do
                 # If signal emission itself fails (Qt teardown), there's
                 # nothing left for us to do — the dialog is gone.
                 pass

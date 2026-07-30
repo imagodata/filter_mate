@@ -213,7 +213,7 @@ class GdalErrorHandler:
             from osgeo import gdal  # noqa: F401
             self.previous_handler = gdal.GetErrorHandler()
             gdal.PushErrorHandler('CPLQuietErrorHandler')
-        except Exception:
+        except Exception:  # nosec B110 - GDAL error handler push is best-effort; GDAL may be unavailable
             pass
         return self
 
@@ -221,7 +221,7 @@ class GdalErrorHandler:
         try:
             from osgeo import gdal  # noqa: F401
             gdal.PopErrorHandler()
-        except Exception:
+        except Exception:  # nosec B110 - GDAL error handler pop is best-effort; GDAL may be unavailable
             pass
         return False
 

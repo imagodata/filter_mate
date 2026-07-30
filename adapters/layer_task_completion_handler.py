@@ -153,11 +153,11 @@ class LayerTaskCompletionHandler:
             # STABILITY: Always close DB connection
             try:
                 cur.close()
-            except Exception:
+            except Exception:  # nosec B110 - cleanup best-effort in finally block, safe to ignore close() errors
                 pass
             try:
                 conn.close()
-            except Exception:
+            except Exception:  # nosec B110 - cleanup best-effort in finally block, safe to ignore close() errors
                 pass
 
         # Handle add_layers post-processing

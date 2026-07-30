@@ -171,7 +171,7 @@ def get_postgresql_field_types(layer: 'QgsVectorLayer', connection=None) -> Dict
         if close_conn and conn:
             try:
                 conn.close()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort connection close, ignore errors
                 pass
 
 

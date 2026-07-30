@@ -754,7 +754,7 @@ class ExportingController(BaseController):
         for callback in self._on_config_changed_callbacks:
             try:
                 callback(config)
-            except Exception:
+            except Exception:  # nosec B110 - don't let a listener error break config-change notification
                 pass
 
     def _notify_progress(self, progress: float) -> None:
@@ -762,7 +762,7 @@ class ExportingController(BaseController):
         for callback in self._on_progress_callbacks:
             try:
                 callback(progress)
-            except Exception:
+            except Exception:  # nosec B110 - don't let a listener error break progress notification
                 pass
 
     # === Lifecycle ===

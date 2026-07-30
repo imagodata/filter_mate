@@ -277,7 +277,7 @@ class ExploringFeaturesCache:
             if f and hasattr(f, 'id'):
                 try:
                     result.append(f.id())
-                except Exception:
+                except Exception:  # nosec B110 - best-effort feature ID extraction; skip invalid features
                     pass
         return result
 
@@ -305,7 +305,7 @@ class ExploringFeaturesCache:
                             bbox = geom.boundingBox()
                         else:
                             bbox.combineExtentWith(geom.boundingBox())
-                except Exception:
+                except Exception:  # nosec B110 - best-effort bounding box combination; skip invalid geometries
                     pass
 
         return bbox if not bbox.isEmpty() else None

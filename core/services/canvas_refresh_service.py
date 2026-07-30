@@ -122,7 +122,7 @@ class CanvasRefreshService:
             # Last resort fallback
             try:
                 iface.mapCanvas().refresh()
-            except Exception:
+            except Exception:  # nosec B110 - last resort fallback, nothing more to try
                 pass
 
     def delayed_canvas_refresh(self):
@@ -174,14 +174,14 @@ class CanvasRefreshService:
                                     logger.debug(f"  → reloadData() failed for {layer.name()}: {reload_err}")
                                     try:
                                         layer.reload()
-                                    except Exception:
+                                    except Exception:  # nosec B110 - best-effort reload fallback, already logged above
                                         pass
                             layers_refreshed['postgres'] += 1
                         else:
                             with SignalBlocker(layer):
                                 try:
                                     layer.reload()
-                                except Exception:
+                                except Exception:  # nosec B110 - best-effort reload, non-fatal
                                     pass
 
                     # For OGR/Spatialite: just triggerRepaint - NO reloadData()
@@ -236,7 +236,7 @@ class CanvasRefreshService:
                         if subset:
                             layer.triggerRepaint()
                             layers_repainted += 1
-                except Exception:
+                except Exception:  # nosec B110 - best-effort repaint, non-fatal
                     pass
 
             # Final canvas refresh
@@ -264,7 +264,7 @@ class CanvasRefreshService:
                     subset = layer.subsetString() or ''
                     if subset:
                         return True
-            except Exception:
+            except Exception:  # nosec B110 - best-effort detection, non-fatal
                 pass
         return False
 
@@ -302,13 +302,13 @@ class CanvasRefreshService:
                                 logger.debug(f"reloadData() failed for {layer.name()}: {reload_err}")
                                 try:
                                     layer.reload()
-                                except Exception:
+                                except Exception:  # nosec B110 - best-effort reload fallback, already logged above
                                     pass
                     else:
                         with SignalBlocker(layer):
                             try:
                                 layer.reload()
-                            except Exception:
+                            except Exception:  # nosec B110 - best-effort reload, non-fatal
                                 pass
 
                 # Spatialite: Use reload() for proper feature display

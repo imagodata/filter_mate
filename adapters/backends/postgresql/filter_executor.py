@@ -582,7 +582,7 @@ def build_spatial_join_query(
     if expression:
         try:
             is_field = QgsExpression(expression).isField()
-        except Exception:
+        except Exception:  # nosec B110 - isField() best-effort, defaults to False (non-field expression)
             pass
 
     # Build query based on combine operator and expression type
@@ -986,7 +986,7 @@ def _is_pk_numeric(layer, pk_field: str) -> bool:
                 QVariant.ULongLong, QVariant.Double
             ]
             return field_type in numeric_types
-    except Exception:
+    except Exception:  # nosec B110 - field type lookup best-effort, falls through to default numeric assumption
         pass
 
     return True  # Default to numeric

@@ -256,7 +256,7 @@ class FilterChainOptimizer:
             logger.error(f"Failed to create chain MV: {e}")
             try:
                 self._connection.rollback()
-            except Exception:
+            except Exception:  # nosec B110 - Rollback may fail if connection is broken
                 pass  # Rollback may fail if connection is broken
             return None
 

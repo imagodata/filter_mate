@@ -20,9 +20,9 @@ from datetime import datetime
 from typing import Dict, List, Optional
 try:
     from defusedxml.ElementTree import fromstring as _xml_fromstring, ParseError
-    from xml.etree import ElementTree as ET
+    from xml.etree import ElementTree as ET  # nosec B314 - defusedxml preferred above; stdlib fallback only if defusedxml unavailable
 except ImportError:
-    from xml.etree import ElementTree as ET
+    from xml.etree import ElementTree as ET  # nosec B314 - defusedxml preferred above; stdlib fallback only if defusedxml unavailable
     _xml_fromstring = ET.fromstring
     ParseError = ET.ParseError
 
@@ -233,7 +233,7 @@ def _read_gpkg_metadata(gpkg_path: str) -> Dict[str, dict]:
                             if crs.authid():
                                 srs_entry['authid'] = crs.authid()
                             srs_entry['srid'] = crs.postgisSrid()
-                    except Exception:
+                    except Exception:  # nosec B110 - keep basic srs_entry without resolved CRS details on failure
                         pass
                 srs_map[srs_id] = srs_entry
         except sqlite3.OperationalError:

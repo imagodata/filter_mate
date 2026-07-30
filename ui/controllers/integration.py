@@ -615,7 +615,7 @@ class ControllerIntegration:
                         "ControllerIntegration", "Property error: {0}"
                     ).format(error_msg)
                 )
-        except Exception:
+        except Exception:  # nosec B110 - best-effort message bar notification, non-fatal
             pass
 
     def _on_buffer_style_changed(self, buffer_value: float) -> None:

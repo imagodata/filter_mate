@@ -350,7 +350,7 @@ def _extract_self_extracting_7z(archive_path: str, dest_dir: str) -> None:
     cmd = [archive_path, "-y", f"-o{dest_dir}"]
     logger.debug("Extracting Portable Git: %s", cmd)
     try:
-        proc = subprocess.run(
+        proc = subprocess.run(  # nosec B603 - cmd is a list built from a SHA-256-verified downloaded archive path + fixed flags, no shell, timeout enforced
             cmd,
             capture_output=True,
             text=True,

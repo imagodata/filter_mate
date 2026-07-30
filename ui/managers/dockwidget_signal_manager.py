@@ -235,7 +235,7 @@ class DockwidgetSignalManager:
             for w in self.widgets[grp]:
                 try:
                     self.manage_signal([grp, w], 'connect')
-                except Exception:
+                except Exception:  # nosec B110 - Signal may already be connected - expected
                     # Signal may already be connected - expected
                     pass
 
@@ -253,7 +253,7 @@ class DockwidgetSignalManager:
             for w in self.widgets[grp]:
                 try:
                     self.manage_signal([grp, w], 'disconnect')
-                except Exception:
+                except Exception:  # nosec B110 - Signal may already be disconnected - expected
                     # Signal may already be disconnected - expected
                     pass
 
@@ -291,7 +291,7 @@ class DockwidgetSignalManager:
                 widget = self.widgets.get("EXPLORING", {}).get(expr_key, {}).get("WIDGET")
                 if widget and hasattr(widget, 'setExpression'):
                     widget.setExpression("")
-            except Exception:
+            except Exception:  # nosec B110 - Widget may not be ready - expected during initialization
                 # Widget may not be ready - expected during initialization
                 pass
 
@@ -454,7 +454,7 @@ class DockwidgetSignalManager:
                     self._signal_connection_states[key] = self.change_signal_state(
                         ['EXPLORING', w], s_tuple[0], s_tuple[-1], 'connect'
                     )
-                except Exception:
+                except Exception:  # nosec B110 - Signal connection may fail if widget deleted
                     # Signal connection may fail if widget deleted
                     pass
 

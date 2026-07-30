@@ -296,7 +296,7 @@ class BaseFilterMateTask(_get_qgs_task_base()):
             try:
                 progress_pct = int((current / total) * 100) if total > 0 else 0
                 self._on_progress_callback(progress_pct, message or "")
-            except Exception:
+            except Exception:  # nosec B110 - progress callback best-effort, must not abort task if consumer raises
                 pass
 
     def check_cancelled(self) -> bool:

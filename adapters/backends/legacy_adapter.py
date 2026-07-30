@@ -269,7 +269,7 @@ class BaseLegacyAdapter(GeometricFilterBackend):
                 from ...core.domain.layer_info import LayerInfo
                 layer_info = LayerInfo.from_qgis_layer(layer)
                 return self._new_backend.supports_layer(layer_info)
-            except Exception:
+            except Exception:  # nosec B110 - best-effort check via new backend, falls back to legacy backend below
                 pass
 
         if self._legacy_backend:

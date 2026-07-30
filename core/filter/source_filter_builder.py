@@ -89,7 +89,7 @@ def get_primary_key_field(layer) -> Optional[str]:
         if pk_attrs:
             fields = layer.fields()
             return fields[pk_attrs[0]].name()
-    except Exception:
+    except Exception:  # nosec B110 - fall back to common PK name search below
         pass
 
     # Fallback: try common PK names
@@ -242,7 +242,7 @@ def get_visible_feature_ids(layer, pk_field: str) -> List[Any]:
                 fid_val = feature.attribute(pk_field)
                 if fid_val is not None:
                     visible_fids.append(fid_val)
-            except Exception:
+            except Exception:  # nosec B110 - skip feature with unreadable attribute, continue collecting
                 pass
     except Exception as e:
         logger.error(f"Failed to get visible features: {e}")

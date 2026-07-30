@@ -64,7 +64,7 @@ def _from_os() -> Optional[str]:
     for fn in (os.getlogin, getpass.getuser):
         try:
             value = fn()
-        except Exception:
+        except Exception:  # nosec B112 - try next OS username source, no source is mandatory
             continue
         value = str(value or "").strip()
         if value:

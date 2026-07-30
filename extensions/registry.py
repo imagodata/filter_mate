@@ -153,7 +153,7 @@ class ExtensionRegistry:
                 "FilterMate",
                 Qgis.MessageLevel.Info,
             )
-        except Exception:
+        except Exception:  # nosec B110 - best-effort diagnostic log; discovery result unaffected
             pass
 
     def _load_extension_module(self, package_name: str) -> Optional[BaseExtension]:
@@ -210,7 +210,7 @@ class ExtensionRegistry:
                 "FilterMate",
                 Qgis.MessageLevel.Warning,
             )
-        except Exception:
+        except Exception:  # nosec B110 - logging must never crash plugin startup
             pass
 
     def register(self, extension: BaseExtension) -> None:

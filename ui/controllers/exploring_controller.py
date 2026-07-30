@@ -974,7 +974,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 if qgs_expr.isField() and not self._is_valid_field_expression(custom_expr, layer_fields):
                     logger.info(f"Resetting custom_selection_expression to '{fallback_field}'")
                     exploring["custom_selection_expression"] = fallback_field
-            except Exception:
+            except Exception:  # nosec B110 - best-effort expression validation; leaves current value untouched on failure
                 pass
         elif not custom_expr:
             exploring["custom_selection_expression"] = fallback_field

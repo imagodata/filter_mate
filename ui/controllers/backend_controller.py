@@ -941,7 +941,7 @@ class BackendController(BaseController):
         finally:
             try:
                 connexion.close()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort connection close, safe to ignore
                 pass
 
     def cleanup_postgresql_schema_if_empty(self, force: bool = False) -> bool:
@@ -1005,7 +1005,7 @@ class BackendController(BaseController):
         finally:
             try:
                 connexion.close()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort connection close, safe to ignore
                 pass
 
     def get_postgresql_session_info(self) -> dict:
@@ -1063,7 +1063,7 @@ class BackendController(BaseController):
             finally:
                 try:
                     connexion.close()
-                except Exception:
+                except Exception:  # nosec B110 - best-effort connection close, safe to ignore
                     pass
 
         return info
@@ -1172,7 +1172,7 @@ class BackendController(BaseController):
         finally:
             try:
                 connexion.close()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort connection close, safe to ignore
                 pass
 
     def _cleanup_postgresql_all_sessions(self) -> int:
@@ -1282,7 +1282,7 @@ class BackendController(BaseController):
         finally:
             try:
                 connexion.close()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort connection close, safe to ignore
                 pass
 
     def _cleanup_spatialite_project_tables(self) -> int:

@@ -324,7 +324,7 @@ class GeometricFilterPort(ABC):
                                 geom_col = part.split('=')[1]
                                 self.log_debug(f"Detected geometry column via URI parse: '{geom_col}'")
                                 return geom_col
-                except Exception:
+                except Exception:  # nosec B110 - fall back to default geometry column name below
                     pass
 
             except Exception as e:
@@ -375,7 +375,7 @@ class GeometricFilterPort(ABC):
                 authid = crs.authid()
                 if ':' in authid:
                     return int(authid.split(':')[1])
-        except Exception:
+        except Exception:  # nosec B110 - fall back to default SRID 4326 below
             pass
 
         return 4326

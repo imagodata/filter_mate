@@ -281,7 +281,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                                     except Exception as probe_inner:
                                         try:
                                             conn.rollback()
-                                        except Exception:
+                                        except Exception:  # nosec B110 - best-effort rollback after connection probe failure
                                             pass
                                         logger.warning(f"[SQL]   PostgreSQL connection BROKEN: {probe_inner}")
                                         logger.warning("[SQL]   → Root cause: prior query may have aborted the transaction")
@@ -455,7 +455,7 @@ def format_pk_values_for_sql(
             if all_numeric_values:
                 pk_is_numeric = True
                 logger.debug(f"PK '{pk_field}' detected as numeric from VALUES (all int/float)")
-        except Exception:
+        except Exception:  # nosec B110 - numeric type detection heuristic; ignore and fall through on error
             pass
 
     # Strategy 2: Check if string values look like integers
@@ -469,7 +469,7 @@ def format_pk_values_for_sql(
             if all_look_numeric:
                 pk_is_numeric = True
                 logger.debug(f"PK '{pk_field}' detected as numeric from string VALUES")
-        except Exception:
+        except Exception:  # nosec B110 - numeric type detection heuristic; ignore and fall through on error
             pass
 
     # Strategy 3: Check field schema (may be unreliable for OGR)

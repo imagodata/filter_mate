@@ -515,7 +515,7 @@ def get_best_display_field(layer, sample_size: int = 10, use_value_relations: bo
                         return field.name()
                     else:
                         logger.debug(f"Skipping text field '{field.name()}' - no values found")
-    except Exception:
+    except Exception:  # nosec B110 - best-effort field value check; skip field on error
         pass
 
     # If no text field but we have a ValueRelation expression, use it
@@ -599,7 +599,7 @@ def is_value_relation_layer_available(layer_id: str, layer_name: str = None) -> 
             for layer in layers_by_name:
                 if layer and layer.isValid():
                     return True
-    except Exception:
+    except Exception:  # nosec B110 - best-effort layer availability check; treat as unavailable on error
         pass
 
     return False

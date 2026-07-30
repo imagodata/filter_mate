@@ -320,7 +320,7 @@ def fix_expression_for_postgresql(
                 if ftype.lower() in ('varchar', 'character varying', 'text', 'char', 'character')
                 or ftype.lower().startswith('varchar(')
             ]
-        except Exception:
+        except Exception:  # nosec B110 - best-effort varchar field detection; skip type casting on error
             pass
 
     return apply_type_casting_to_expression(expression, varchar_fields)

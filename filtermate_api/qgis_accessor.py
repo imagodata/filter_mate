@@ -305,7 +305,7 @@ class QGISFilterMateAccessor:
                 continue
             try:
                 layer.setSubsetString(prev_subset or "")
-            except Exception:
+            except Exception:  # nosec B112 - skip layer whose subset string could not be restored, continue with others
                 continue
             target_layer_name = _safe(layer.name, layer_id)
             target_expression = prev_subset or ""

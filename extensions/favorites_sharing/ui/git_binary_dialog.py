@@ -343,7 +343,7 @@ class GitBinaryConfigDialog(QDialog if HAS_QT else object):
             return
         import subprocess
         try:
-            proc = subprocess.run(
+            proc = subprocess.run(  # nosec B603 - res.binary_path is a resolved/validated git binary path (list arg, no shell), timeout enforced
                 [res.binary_path, "--version"],
                 capture_output=True, text=True, timeout=10, check=False,
             )

@@ -906,7 +906,7 @@ class MultiStepFilterExecutor:
                 row = cur.fetchone()
                 if row:
                     return max(0, int(row[0]))
-        except Exception:
+        except Exception:  # nosec B110 - best-effort estimate, falls back below
             pass
         return 0
 

@@ -410,7 +410,7 @@ class PostgreSQLConnectionPool:
             # Rollback any uncommitted transaction
             try:
                 conn.rollback()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort rollback before returning connection to pool
                 pass
 
             # Check health and return to pool
@@ -420,7 +420,7 @@ class PostgreSQLConnectionPool:
                     self._connection_timestamps[id(conn)] = time.time()
                     logger.debug(f"Connection returned to pool {self._pool_key}")
                     return
-                except Exception:
+                except Exception:  # nosec B110 - Pool is full, close the connection
                     # Pool is full, close the connection
                     pass
 
@@ -648,7 +648,7 @@ class PostgreSQLPoolManager:
                 try:
                     if conn and not conn.closed:
                         conn.close()
-                except Exception:
+                except Exception:  # nosec B110 - best-effort connection close on release, ignore errors
                     pass
 
     @contextmanager
@@ -870,7 +870,7 @@ def release_pooled_connection(conn, source_uri) -> None:
         try:
             if conn and not conn.closed:
                 conn.close()
-        except Exception:
+        except Exception:  # nosec B110 - best-effort connection close in fallback release path
             pass
 
 
@@ -970,7 +970,7 @@ def _atexit_cleanup():
         try:
             _pool_manager.close_all_pools()
             _pool_manager = None
-        except Exception:
+        except Exception:  # nosec B110 - Silently ignore errors during exit
             pass  # Silently ignore errors during exit
 
 

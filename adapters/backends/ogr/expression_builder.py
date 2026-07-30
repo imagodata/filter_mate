@@ -95,7 +95,7 @@ class CancellableFeedback(QgsProcessingFeedback if _HAS_PROCESSING_FEEDBACK else
         if _HAS_PROCESSING_FEEDBACK:
             try:
                 super().cancel()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort forward to base feedback, safe to ignore if unavailable
                 pass
 
     def setProgress(self, progress: float):
@@ -103,7 +103,7 @@ class CancellableFeedback(QgsProcessingFeedback if _HAS_PROCESSING_FEEDBACK else
         if _HAS_PROCESSING_FEEDBACK:
             try:
                 super().setProgress(progress)
-            except Exception:
+            except Exception:  # nosec B110 - best-effort forward to base feedback, safe to ignore if unavailable
                 pass
 
 
@@ -440,7 +440,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 storage = ""
                 try:
                     storage = layer.dataProvider().storageType()
-                except Exception:
+                except Exception:  # nosec B110 - storageType() best-effort, diagnostic field only, defaults to ""
                     pass
                 self.last_error = (
                     f"setSubsetString failed for {layer.name()} "
@@ -503,7 +503,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         storage_type = ""
         try:
             storage_type = layer.dataProvider().storageType().lower()
-        except Exception:
+        except Exception:  # nosec B110 - storageType() best-effort, defaults to "" if provider call fails
             pass
 
         pk_field = self._get_primary_key(layer)
@@ -518,7 +518,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 from qgis.PyQt.QtCore import QVariant
                 field_type = fields.at(pk_idx).type()
                 is_numeric_pk = field_type in (QVariant.Int, QVariant.LongLong, QVariant.UInt, QVariant.ULongLong, QVariant.Double)
-        except Exception:
+        except Exception:  # nosec B110 - field type detection best-effort, defaults to numeric assumption
             pass
 
         # Build value list based on PK type
@@ -595,7 +595,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 if all_look_numeric:
                     is_numeric_pk = True
                     self.log_info("  - PK type detected from string VALUES: numeric (all values look like integers)")
-            except Exception:
+            except Exception:  # nosec B110 - value-based detection best-effort, falls through to next strategy
                 pass
 
         # Strategy 3: Check field type from layer fields (may be unreliable for OGR)
@@ -891,7 +891,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     pk_name = fields.at(pk_indexes[0]).name()
                     self.log_debug(f"Using provider PK: {pk_name}")
                     return pk_name
-            except Exception:
+            except Exception:  # nosec B110 - provider PK lookup best-effort, falls through to heuristics below
                 pass
 
             # 2. Look for exact match PK names

@@ -1045,7 +1045,7 @@ class FilteringController(BaseController, LayerSelectionMixin):
         for callback in self._on_expression_changed_callbacks:
             try:
                 callback(expression)
-            except Exception:
+            except Exception:  # nosec B110 - Don't let callback errors break flow
                 pass  # Don't let callback errors break flow
 
     def _notify_config_changed(self) -> None:
@@ -1054,7 +1054,7 @@ class FilteringController(BaseController, LayerSelectionMixin):
         for callback in self._on_config_changed_callbacks:
             try:
                 callback(config)
-            except Exception:
+            except Exception:  # nosec B110 - don't let a listener error break config-change notification
                 pass
 
     # === Lifecycle ===

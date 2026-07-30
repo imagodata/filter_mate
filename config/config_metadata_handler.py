@@ -227,7 +227,7 @@ class MetadataAwareConfigModel:
         if hasattr(index, 'data') and callable(index.data):
             try:
                 return index.data()  # Simplified - real implementation may differ
-            except Exception:
+            except Exception:  # nosec B110 - Simplified - real implementation may differ
                 pass
 
         if hasattr(index, 'path'):

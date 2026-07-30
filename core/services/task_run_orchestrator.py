@@ -379,7 +379,7 @@ class TaskRunOrchestrator:
             from .auto_optimizer import get_auto_optimization_config
             if not get_auto_optimization_config().get('show_optimization_hints', True):
                 return warnings
-        except Exception:
+        except Exception:  # nosec B110 - best-effort config read, non-fatal
             pass
 
         if elapsed_time >= VERY_LONG_QUERY_WARNING_THRESHOLD:

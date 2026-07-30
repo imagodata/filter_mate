@@ -911,7 +911,7 @@ class UIConfig:
                     return DisplayProfile.EXPANDED
                 else:
                     return DisplayProfile.NORMAL
-        except Exception:
+        except Exception:  # nosec B110 - best-effort detection, falls back below
             pass
 
         return DisplayProfile.NORMAL

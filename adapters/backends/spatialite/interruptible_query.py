@@ -176,7 +176,7 @@ class InterruptibleSQLiteQuery:
                 progress = min(elapsed / timeout, 0.99)  # Never report 100% until done
                 try:
                     progress_callback(progress)
-                except Exception:
+                except Exception:  # nosec B110 - Ignore callback errors
                     pass  # Ignore callback errors
 
             # Check timeout

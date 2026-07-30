@@ -273,7 +273,7 @@ class FilterEngineTask(QgsTask):
         try:
             from ...adapters.auto_zoom import bump_subset_change_token
             self.task_parameters["_subset_change_token"] = bump_subset_change_token()
-        except Exception:
+        except Exception:  # nosec B110 - Bumping is opportunistic — never fail task creation over it.
             # Bumping is opportunistic — never fail task creation over it.
             pass
 
@@ -2889,7 +2889,7 @@ class FilterEngineTask(QgsTask):
         # QgsMessageLog may be destroyed during QGIS shutdown, causing access violation
         try:
             logger.info(f'"{self.description()}" task was canceled')
-        except Exception:  # catch-all safety net: logger may be destroyed during QGIS shutdown
+        except Exception:  # nosec B110 - catch-all safety net: logger may be destroyed during QGIS shutdown
             pass  # Intentional silent catch
 
         super().cancel()

@@ -376,6 +376,6 @@ class BufferFilterTask(BaseFilterMateTask):
             pk_attrs = layer.primaryKeyAttributes()
             if pk_attrs:
                 return layer.fields()[pk_attrs[0]].name()
-        except Exception:
+        except Exception:  # nosec B110 - fall back to default "fid" primary key name below
             pass
         return "fid"

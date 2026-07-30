@@ -191,7 +191,7 @@ class FavoritesForkService:
         if emit_fn is not None and hasattr(emit_fn, 'emit'):
             try:
                 emit_fn.emit()
-            except Exception:
+            except Exception:  # nosec B110 - best-effort UI refresh signal; fork already succeeded
                 pass
 
     def _persist_qgz_backup(self, favorites_service) -> None:

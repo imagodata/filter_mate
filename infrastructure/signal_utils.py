@@ -320,7 +320,7 @@ class SafeSignalEmitter:
             if self.error_handler:
                 try:
                     self.error_handler(e)
-                except Exception:
+                except Exception:  # nosec B110 - error_handler callback is best-effort; failure already logged above
                     pass
             return False
 

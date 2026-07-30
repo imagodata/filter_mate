@@ -183,9 +183,10 @@ class TaskOrchestrator:
             True if task was dispatched successfully, False otherwise
 
         Raises:
-            AssertionError: If task_name is not recognized
+            ValueError: If task_name is not recognized
         """
-        assert task_name in self.TASK_DESCRIPTIONS, f"Unknown task: {task_name}"
+        if task_name not in self.TASK_DESCRIPTIONS:
+            raise ValueError(f"Unknown task: {task_name}")
 
         logger.info("=" * 60)
         logger.info(f"TaskOrchestrator.dispatch_task: RECEIVED task_name='{task_name}'")

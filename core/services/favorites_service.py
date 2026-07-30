@@ -619,7 +619,7 @@ class FavoritesService(QObject):
                 for line in f:
                     if line.startswith('version='):
                         return line.split('=', 1)[1].strip()
-        except Exception:
+        except Exception:  # nosec B110 - best-effort version read, non-fatal
             pass
         return None
 

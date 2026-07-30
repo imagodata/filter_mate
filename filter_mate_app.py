@@ -1337,7 +1337,7 @@ class FilterMateApp:
             self.dockwidget.manageSignal(["FILTERING", "CURRENT_LAYER"], 'disconnect')
             self.dockwidget.comboBox_filtering_current_layer.blockSignals(True)
             self.dockwidget.manageSignal(["QGIS", "LAYER_TREE_VIEW"], 'disconnect')
-        except Exception:  # Signal may already be disconnected - expected during filtering protection
+        except Exception:  # nosec B110 - Signal may already be disconnected - expected during filtering protection
             pass
 
     def _show_filter_start_message(self, task_name, task_parameters, layers_props, layers, current_layer):
@@ -1385,7 +1385,8 @@ class FilterMateApp:
         """
         logger.debug(f"manage_task: task_name={task_name}, data={data is not None}")
 
-        assert task_name in list(self.tasks_descriptions.keys()), f"Unknown task: {task_name}"
+        if task_name not in self.tasks_descriptions:
+            raise ValueError(f"Unknown task: {task_name}")
 
         # v4.1.0: STABILITY FIX - Check and reset stale flags before processing
         self._check_and_reset_stale_flags()

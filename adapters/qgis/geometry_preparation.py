@@ -1047,7 +1047,7 @@ class GeometryPreparationAdapter:
                         geometry=hull,
                         wkt=hull_wkt.replace("'", "''")
                     )
-        except Exception:
+        except Exception:  # nosec B110 - fallback attempt only, next strategy tried below
             pass
 
         # Fallback 2: Oriented Bounding Box
@@ -1062,7 +1062,7 @@ class GeometryPreparationAdapter:
                         geometry=oriented_bbox,
                         wkt=bbox_wkt.replace("'", "''")
                     )
-        except Exception:
+        except Exception:  # nosec B110 - fallback attempt only, next strategy tried below
             pass
 
         # Fallback 3: Simple Bounding Box
@@ -1078,7 +1078,7 @@ class GeometryPreparationAdapter:
                         geometry=bbox_geom,
                         wkt=bbox_wkt.replace("'", "''")
                     )
-        except Exception:
+        except Exception:  # nosec B110 - last fallback attempt, returns None below if it also fails
             pass
 
         return None
@@ -1130,7 +1130,7 @@ class GeometryPreparationAdapter:
             repaired = geom.makeValid()
             if repaired and repaired.isGeosValid():
                 return repaired
-        except Exception:
+        except Exception:  # nosec B110 - repair strategy attempt only, next strategy tried below
             pass
 
         # Strategy 2: buffer(0)
@@ -1138,7 +1138,7 @@ class GeometryPreparationAdapter:
             buffered = geom.buffer(0, 5)
             if buffered and buffered.isGeosValid():
                 return buffered
-        except Exception:
+        except Exception:  # nosec B110 - repair strategy attempt only, next strategy tried below
             pass
 
         # Strategy 3: simplify then makeValid
@@ -1148,7 +1148,7 @@ class GeometryPreparationAdapter:
                 repaired = simplified.makeValid()
                 if repaired and repaired.isGeosValid():
                     return repaired
-        except Exception:
+        except Exception:  # nosec B110 - repair strategy attempt only, next strategy tried below
             pass
 
         # Strategy 4: convexHull
@@ -1157,7 +1157,7 @@ class GeometryPreparationAdapter:
             if hull and hull.isGeosValid():
                 logger.warning("Using convexHull fallback - some precision lost")
                 return hull
-        except Exception:
+        except Exception:  # nosec B110 - last repair strategy, returns None below if it also fails
             pass
 
         return None

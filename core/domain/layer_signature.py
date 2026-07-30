@@ -74,7 +74,7 @@ class LayerSignature:
                 if base:
                     stem, _ = os.path.splitext(base)
                     return f"ogr::{stem}"
-        except Exception:
+        except Exception:  # nosec B110 - fall back to generic provider::name signature below
             pass
 
         try:
