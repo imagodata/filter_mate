@@ -2,6 +2,49 @@
 _Auto-maintained by project agent_
 
 
+## [2026-07-31] Release v4.8.0 — pipeline CI de release était cassé depuis 2 tags (v4.7.2, v4.7.3)
+En préparant la release v4.8.0 (bump metadata.txt/README/CHANGELOG, zip via
+`scripts/prepare_plugin_zip.sh`, tag `v4.8.0` → `.github/workflows/release.yml`),
+découverte que le job `Tests` du workflow échouait systématiquement depuis au
+moins 2 releases (`gh run list --workflow=release.yml` : v4.7.3 et v4.7.2
+tous deux en `failure`) — donc `Build & Publish` (qui dépend de `Tests`) ne
+s'est **jamais exécuté** pour ces deux tags : les GitHub Releases v4.7.2/
+v4.7.3 existent mais ont 0 asset (`gh release view v4.7.3 --json assets` →
+`[]`), et rien n'a été poussé sur plugins.qgis.org pour ces versions. Root
+cause : `tests/unit/core/export/test_export_bugfix.py` — 7 fixtures stubbent
+`fake_writer.NoError = 0` (MagicMock) mais le code de production
+(`core/export/layer_exporter.py:540`) compare contre la forme scopée
+`QgsVectorFileWriter.WriterError.NoError` (correcte, issue d'un passage Qt6
+enum-scoping antérieur) ; `fake_writer.WriterError.NoError` n'étant jamais
+stubbé, l'auto-vivification MagicMock ne compare jamais égal à 0 → chaque
+export mocké prenait silencieusement la branche d'erreur ("Unknown error").
+Pas un bug de prod — uniquement un mock resté sur l'ancienne forme plate
+après la migration enum. Fix : ajout de `fake_writer.WriterError =
+MagicMock(NoError=0)` dans les 7 fixtures concernées (commit `3130282e`).
+Suite : 1493 passed, 1 skipped, 0 failed (était 7 failed depuis au moins
+v4.7.2). Le tag `v4.8.0` a été déplacé (delete+recreate, rien n'avait encore
+été publié dessous) pour repartir sur ce commit corrigé.
+Résultat : `Tests` + `Build & Publish` passent maintenant, GitHub Release
+v4.8.0 créée avec le zip attaché (5.9 Mo). Seule l'étape finale "Publier sur
+plugins.qgis.org" échoue avec un `502 Bad Gateway` (Cloudflare) sur
+`plugins.qgis.org/plugins/RPC2` — reproductible sur 2 tentatives consécutives
+espacées d'~1 min, alors que le site principal répond 200 → panne/latence
+côté infra QGIS plugin repository, pas un problème de credentials
+(`OSGEO_USERNAME`/`OSGEO_PASSWORD` bien injectés) ni de notre pipeline.
+Pas re-tenté davantage pour éviter de marteler leur endpoint. À relancer plus
+tard via `gh run rerun <run_id> --failed` sur le run du tag `v4.8.0`, ou
+upload manuel du zip `dist/filter_mate_v4.8.0.zip` (regénérable via
+`bash scripts/prepare_plugin_zip.sh`) sur https://plugins.qgis.org.
+Leçon retenue : le gate `Tests` du workflow de release n'a aucune tolérance
+(`pytest tests/ -v -o "addopts="`, pas de `-k`/marker qui exclurait des
+échecs "connus") — un futur échec de test, même documenté comme
+"pré-existant" ailleurs, bloque silencieusement toute la release (zip +
+GitHub Release + plugins.qgis.org) sans que personne ne s'en rende compte
+tant que quelqu'un ne va pas lire les logs Actions. Vérifier
+`gh run list --workflow=release.yml` après CHAQUE tag poussé, pas seulement
+supposer que le tag = release publiée.
+
+
 ## [2026-07-31] Portage QGIS 4.2 / Qt6 — 2e passe : la clôture précédente était incomplète
 Suite immédiate de l'entrée ci-dessous ("suite et clôture"), qui affirmait le
 portage Qt6 terminé après vérification manuelle + agent dédié. Un re-balayage
