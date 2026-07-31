@@ -2,6 +2,52 @@
 _Auto-maintained by project agent_
 
 
+## [2026-07-31] Post-v4.8.2 : triage live de 3 signalements (autopilot), 1 fix cosmétique, 2 non-bugs confirmés
+Suite du test en direct sur QGIS 4.2/Windows/PostgreSQL après v4.8.2. Trois
+signalements reçus, triés sans pouvoir déboguer le process Windows en
+direct (aucune trace d'erreur pour 2 des 3) :
+
+1. **"Adding layers" bloqué à 33%** (répondu : QGIS reste réactif, gros
+   projet PostgreSQL, toujours bloqué après plusieurs minutes). Screenshot
+   fourni par l'utilisateur : la fenêtre "Adding layers" est le dialogue
+   **natif de QGIS** (chargement de projet), pas un widget FilterMate — le
+   panneau FilterMate est visible séparément, sans indicateur de progression
+   propre. Conclusion : hang côté cœur QGIS / connectivité PostgreSQL (~20+
+   groupes de couches), **hors périmètre de ce repo**. Vérifié que les
+   connexions SQLite de FilterMate (`infrastructure/utils/task_utils.py`,
+   `safe_spatialite_connect`) ont déjà un `SQLITE_TIMEOUT` borné — ne peuvent
+   donc pas être la source d'un hang illimité. Pas de code touché.
+2. **Log répété "Configuration reloaded from:
+   ...AppData\Roaming\QGIS\QGIS3\profiles\default\FilterMate\config.json"**
+   alors que le profil réel est QGIS4. Pas un bug : `config/config.py::
+   init_env_vars()` utilise `QgsApplication.qgisSettingsDirPath()` (API QGIS
+   native), et **QGIS 4.2 lui-même renvoie encore un chemin nommé
+   "QGIS3"** pour ce répertoire de settings (continuité de profil,
+   décision côté projet QGIS, pas FilterMate). Le seul `'QGIS3'` en dur du
+   code (`extensions/favorites_sharing/scanner.py:153`, chemin de repli pour
+   localiser les collections Resource Sharing) est donc cohérent avec ce
+   comportement réel, pas une erreur. Pas de code touché.
+3. **Warning répété "Schema file not found: .../config_schema.json"** à
+   chaque (re)chargement de config (donc très fréquent). `config_schema.json`
+   a été supprimé intentionnellement comme "unused" dans `cf9e96f2`, mais
+   `config/config_validator.py::_load_schema()` loggait toujours ça en
+   `Warning` — condition permanente et attendue, pas un problème
+   actionnable. Fix (commit `d671a299`) : passage en `Info`. Pas de nouvelle
+   release dédiée pour ce seul changement cosmétique (décision : accumuler
+   avec la prochaine release fonctionnelle plutôt que publier un 4ᵉ hotfix
+   consécutif en ~1h).
+
+**plugins.qgis.org** : 5 tentatives consécutives de publication ont toutes
+échoué avec un `502 Bad Gateway` (Cloudflare) sur `/plugins/RPC2`, étalées
+sur ~40 min (v4.8.0 ×2, v4.8.1 ×1, v4.8.2 ×2 dont un retry explicite après
+cette session). Panne persistante côté infra QGIS officielle, confirmée
+non liée aux credentials ni au pipeline. v4.8.0/4.8.1/4.8.2 sont toutes
+disponibles en GitHub Release avec zip, mais **aucune n'est encore montée
+sur plugins.qgis.org** — à relancer manuellement plus tard
+(`gh run rerun <run_id> --failed` sur le run du tag le plus récent, ou
+upload manuel du zip) une fois leur service revenu.
+
+
 ## [2026-07-31] v4.8.2 hotfix — le fix v4.8.1 lui-même cassait encore (AllDockWidgetFeatures totalement supprimé en Qt6)
 Suite immédiate de l'entrée v4.8.1 ci-dessous : l'utilisateur a réinstallé et
 retesté sur le vrai QGIS 4.2/Windows, nouveau crash au même endroit :
