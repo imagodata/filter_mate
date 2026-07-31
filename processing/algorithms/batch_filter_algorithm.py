@@ -16,6 +16,7 @@ from qgis.core import (
     QgsProcessingParameterExpression,
     QgsProcessingParameterMultipleLayers,
 )
+from qgis.PyQt.QtCore import QCoreApplication
 
 from ...infrastructure.logging import get_logger
 
@@ -35,6 +36,15 @@ class BatchFilterAlgorithm(QgsProcessingAlgorithm):
     EXPRESSION = "EXPRESSION"
     LAYERS_FILTERED = "LAYERS_FILTERED"
     LAYERS_FAILED = "LAYERS_FAILED"
+
+    def tr(self, string):
+        """Traduit une chaîne via le contexte Processing.
+
+        QgsProcessingAlgorithm n'hérite pas de QObject et ne fournit donc
+        pas tr() nativement -- doit être défini explicitement par chaque
+        algorithme (cf. QGIS Processing scripting cookbook).
+        """
+        return QCoreApplication.translate("Processing", string)
 
     def initAlgorithm(self, config=None):
         """Déclare les paramètres d'entrée de l'algorithme.

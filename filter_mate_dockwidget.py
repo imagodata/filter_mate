@@ -577,6 +577,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except Exception as e: logger.debug(f"IconThemeManager init (non-critical): {e}")
         self.setupUi(self)
 
+        # PyQt6's dynamic `uic` loader can't resolve the `features` <set>
+        # property (QDockWidget::AllDockWidgetFeatures) from the .ui XML
+        # under Qt6 -- crashed dockwidget creation on QGIS 4.x. Set it here
+        # instead, in the scoped form valid under both PyQt5 and PyQt6.
+        self.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.AllDockWidgetFeatures)
+
         # FIX 2026-01-21: Prevent style propagation to child dialogs
         # Set Qt attribute to prevent FilterMate styles from affecting QGIS dialogs
         # opened as children (e.g., QgsExpressionBuilderDialog)
