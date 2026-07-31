@@ -2,6 +2,31 @@
 _Auto-maintained by project agent_
 
 
+## [2026-07-31] v4.8.2 hotfix — le fix v4.8.1 lui-même cassait encore (AllDockWidgetFeatures totalement supprimé en Qt6)
+Suite immédiate de l'entrée v4.8.1 ci-dessous : l'utilisateur a réinstallé et
+retesté sur le vrai QGIS 4.2/Windows, nouveau crash au même endroit :
+`type object 'DockWidgetFeature' has no attribute 'AllDockWidgetFeatures'`
+— cette fois sur la ligne Python que je venais d'ajouter
+(`self.setFeatures(QDockWidget.DockWidgetFeature.AllDockWidgetFeatures)`).
+Diagnostic affiné : mon hypothèse initiale ("juste un problème de scope
+d'enum") était incomplète. `AllDockWidgetFeatures` était déjà **déprécié
+depuis Qt 5.13** (la doc Qt recommandait explicitement d'utiliser les 3
+flags individuels à la place) et a été **entièrement supprimé en Qt6** —
+il n'existe donc AUCUNE forme, scopée ou non, de ce raccourci sous Qt6.
+Fix définitif : combiner les 3 flags individuels qu'il représentait —
+`DockWidgetClosable | DockWidgetMovable | DockWidgetFloatable` — valables
+PyQt5 + PyQt6. Publié en `v4.8.2`.
+Leçon affinée : pour du code Qt6, ne pas se contenter de "renommer vers la
+forme scopée" comme réflexe systématique — certains membres n'ont **aucun**
+équivalent Qt6 (dépréciés puis supprimés), auquel cas il faut retrouver ce
+que le raccourci représentait réellement et le reconstruire explicitement.
+Un `AttributeError` sur le nom du **type conteneur** de l'enum lui-même
+(`'DockWidgetFeature' has no attribute ...`, pas `'QDockWidget' has no
+attribute ...`) est le signal distinctif que la forme scopée existe mais
+que le *membre* a disparu — différent du signal initial (accès non scopé)
+qui pointait juste vers "il manque un niveau de scope".
+
+
 ## [2026-07-31] v4.8.1 hotfix — deux crashes réels sur QGIS 4.2/Windows, invisibles à tous les audits statiques
 Immédiatement après le déploiement de v4.8.0, l'utilisateur a testé en
 conditions réelles sur QGIS 4.2.0/Windows/PyQt6 et remonté 2 crashes en live :
