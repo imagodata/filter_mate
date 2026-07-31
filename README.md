@@ -1,17 +1,17 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.1** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.2** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#481---2026-07-31)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#482---2026-07-31)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.1 fixes a critical dockwidget-load crash on QGIS 4.x found right after v4.8.0 shipped. See [what's new](#-whats-new-in-481).
+🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.2 fixes a second dockwidget-load crash on QGIS 4.x found right after v4.8.1 shipped. See [what's new](#-whats-new-in-482).
 
 ---
 
@@ -31,7 +31,12 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.1
+### 🆕 What's new in 4.8.2
+
+- 🚑 **Second QGIS 4.x hotfix**: v4.8.1's dockwidget fix still crashed (`DockWidgetFeature has no attribute 'AllDockWidgetFeatures'`) — that convenience constant was deprecated in Qt 5.13 and is fully removed in Qt6, not just moved into a nested enum. Now ORs the 3 individual flags it used to stand for.
+- **Tests**: 1493 ✅.
+
+### What's new in 4.8.1
 
 - 🚑 **Critical QGIS 4.x fix**: the dockwidget could fail to load entirely on QGIS 4.x — PyQt6's UI loader can't resolve the `.ui` file's dock-widget `features` flag, so plugin startup crashed outright. Now set programmatically instead. Also fixed the new Processing Toolbox algorithm crashing on open (`BatchFilterAlgorithm.tr()` was missing — `QgsProcessingAlgorithm` never provides it). Found via real-world QGIS 4.2/Windows testing right after v4.8.0.
 - **Tests**: 1493 ✅.
@@ -48,13 +53,6 @@
 - **Security**: resolved every Bandit finding — real fixes (asserts replaced with explicit raises, corrected `nosec` code for the ElementTree import) plus documented suppressions for reviewed-safe patterns. Zero unresolved findings on re-scan.
 - **Qt6 readiness**: qualified ~165 flat PyQt/PyQGIS enum accesses to their scoped form and dropped `.exec_()` across 50 files — purely additive, no behavior change on the current Qt5 install.
 - **Tests**: 1491+ ✅.
-
-### What's new in 4.7.2
-
-- **Spatial filtering fixes**: SpatiaLite `source_srid` staleness fixed — filters no longer silently return 0 features when the source and target layers share their original CRS. Custom Selection "all-features" mode (an always-true expression like `1`) no longer gets shadowed by a leftover QGIS selection on the source layer.
-- **Export hardened further**: fixed export being blocked when no layer is picked in Exploring, SHP/batch warnings now surfaced to the user, GPKG styles embedded on the reprojection and streaming paths, empty-layer streaming crash fixed, partial output cleaned up on failure/cancel, format/driver maps consolidated into a single source of truth, ~900 LOC of dead export code removed.
-- **HIDPI fix**: combobox/input fields no longer stuck at 20px on 4K/Retina/150%+ display scaling.
-- **Tests**: 1491 ✅.
 
 ---
 

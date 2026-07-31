@@ -2,6 +2,15 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.8.2] - 2026-07-31
+
+### 🚑 Second QGIS 4.x hotfix
+
+The v4.8.1 fix for the dockwidget-load crash still crashed on real QGIS 4.2 / Windows testing:
+
+- **Fix (critical)**: `type object 'DockWidgetFeature' has no attribute 'AllDockWidgetFeatures'`. v4.8.1 moved the `features` property from the `.ui` file to a programmatic `self.setFeatures(QDockWidget.DockWidgetFeature.AllDockWidgetFeatures)` call — but the root cause was more specific than "wrong enum scope": `AllDockWidgetFeatures` was deprecated in Qt 5.13 (docs recommended the 3 individual flags instead) and is **removed entirely in Qt6**, not just relocated into a nested enum — no scoped form of it exists anywhere. Fixed by ORing the individual flags it used to expand to: `DockWidgetClosable | DockWidgetMovable | DockWidgetFloatable`, valid under both PyQt5 and PyQt6.
+- **Tests**: 1493 passed, 1 skipped.
+
 ## [4.8.1] - 2026-07-31
 
 ### 🚑 Critical QGIS 4.x fix
