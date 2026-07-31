@@ -143,6 +143,7 @@ class FilterMate:
         self._auto_activation_signals_connected = False
         self._project_read_connection = None
         self._new_project_connection = None
+        self.processing_provider = None
 
     # noinspection PyMethodMayBeStatic
 
@@ -349,6 +350,10 @@ class FilterMate:
             # v5.0: Discover and initialize extensions (QFieldCloud, etc.)
             logger.debug("FilterMate.initGui: Initializing extension system")
             self._init_extensions()
+
+            # Register FilterMate algorithms in the Processing Toolbox
+            logger.debug("FilterMate.initGui: Registering Processing provider")
+            self._register_processing_provider()
 
             logger.debug("FilterMate.initGui: Completed successfully")
 
@@ -741,6 +746,22 @@ class FilterMate:
         except Exception as e:
             logger.warning("FilterMate: Extension system error: %s", e)
             # Extension failure must never block core FilterMate
+
+    def _register_processing_provider(self):
+        """Register FilterMate's algorithms in the QGIS Processing Toolbox.
+
+        Best-effort: a failure here must never block core FilterMate loading.
+        """
+        try:
+            from qgis.core import QgsApplication
+            from .processing.provider import FilterMateProcessingProvider
+
+            self.processing_provider = FilterMateProcessingProvider()
+            QgsApplication.processingRegistry().addProvider(self.processing_provider)
+            logger.debug("FilterMate: Processing provider registered")
+        except Exception as e:
+            logger.warning("FilterMate: Could not register Processing provider: %s", e)
+            self.processing_provider = None
 
     def _init_extensions_dockwidget_ui(self):
         """Inject extension UI into the FilterMate dockwidget.
@@ -1317,6 +1338,16 @@ class FilterMate:
 
         # v5.0: Teardown extensions before core cleanup
         self._teardown_extensions()
+
+        # Unregister the Processing provider
+        if self.processing_provider is not None:
+            try:
+                from qgis.core import QgsApplication
+                QgsApplication.processingRegistry().removeProvider(self.processing_provider)
+                logger.debug("FilterMate: Processing provider unregistered")
+            except Exception as e:
+                logger.debug(f"FilterMate: Error unregistering Processing provider: {e}")
+            self.processing_provider = None
 
         # Nettoyer les ressources de l'application FilterMate
         if self.app:
