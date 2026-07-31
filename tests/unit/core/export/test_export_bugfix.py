@@ -265,6 +265,11 @@ class TestExportSingleLayerV3API:
 
         fake_writer = MagicMock()
         fake_writer.NoError = 0
+        # QgsVectorFileWriter.WriterError is a scoped enum under Qt6/QGIS4
+        # (layer_exporter.py compares against WriterError.NoError, not the
+        # legacy flat NoError attribute) -- stub both so the mock matches
+        # production regardless of which form the code under test reads.
+        fake_writer.WriterError = MagicMock(NoError=0)
         fake_writer.writeAsVectorFormatV3 = MagicMock(
             return_value=(0, "", "", "")
         )
@@ -516,6 +521,11 @@ class TestCsvLayerOptions:
         from core.export import layer_exporter as le
         fake_writer = MagicMock()
         fake_writer.NoError = 0
+        # QgsVectorFileWriter.WriterError is a scoped enum under Qt6/QGIS4
+        # (layer_exporter.py compares against WriterError.NoError, not the
+        # legacy flat NoError attribute) -- stub both so the mock matches
+        # production regardless of which form the code under test reads.
+        fake_writer.WriterError = MagicMock(NoError=0)
         fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
         fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
         del fake_writer.writeAsVectorFormat
@@ -585,6 +595,11 @@ class TestGpkgReprojection:
         from core.export import layer_exporter as le
         fake_writer = MagicMock()
         fake_writer.NoError = 0
+        # QgsVectorFileWriter.WriterError is a scoped enum under Qt6/QGIS4
+        # (layer_exporter.py compares against WriterError.NoError, not the
+        # legacy flat NoError attribute) -- stub both so the mock matches
+        # production regardless of which form the code under test reads.
+        fake_writer.WriterError = MagicMock(NoError=0)
         fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
         fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
         # ActionOnExistingFile enum stub
@@ -852,6 +867,11 @@ class TestShapefilePreflightConstraints:
 
         fake_writer = MagicMock()
         fake_writer.NoError = 0
+        # QgsVectorFileWriter.WriterError is a scoped enum under Qt6/QGIS4
+        # (layer_exporter.py compares against WriterError.NoError, not the
+        # legacy flat NoError attribute) -- stub both so the mock matches
+        # production regardless of which form the code under test reads.
+        fake_writer.WriterError = MagicMock(NoError=0)
         fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
         fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
         del fake_writer.writeAsVectorFormat
@@ -899,6 +919,11 @@ class TestShapefilePreflightConstraints:
 
         fake_writer = MagicMock()
         fake_writer.NoError = 0
+        # QgsVectorFileWriter.WriterError is a scoped enum under Qt6/QGIS4
+        # (layer_exporter.py compares against WriterError.NoError, not the
+        # legacy flat NoError attribute) -- stub both so the mock matches
+        # production regardless of which form the code under test reads.
+        fake_writer.WriterError = MagicMock(NoError=0)
         fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
         fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
         del fake_writer.writeAsVectorFormat
@@ -1252,6 +1277,11 @@ class TestGpkgReprojectionStyles:
         from core.export import layer_exporter as le
         fake_writer = MagicMock()
         fake_writer.NoError = 0
+        # QgsVectorFileWriter.WriterError is a scoped enum under Qt6/QGIS4
+        # (layer_exporter.py compares against WriterError.NoError, not the
+        # legacy flat NoError attribute) -- stub both so the mock matches
+        # production regardless of which form the code under test reads.
+        fake_writer.WriterError = MagicMock(NoError=0)
         fake_writer.writeAsVectorFormatV3 = MagicMock(return_value=(0, "", "", ""))
         fake_writer.SaveVectorOptions = MagicMock(side_effect=lambda: MagicMock())
         fake_writer.ActionOnExistingFile = MagicMock(
@@ -1826,6 +1856,11 @@ class TestExportSingleLayerCleansOnFailure:
         from core.export import layer_exporter as le
         fake_writer = MagicMock()
         fake_writer.NoError = 0
+        # QgsVectorFileWriter.WriterError is a scoped enum under Qt6/QGIS4
+        # (layer_exporter.py compares against WriterError.NoError, not the
+        # legacy flat NoError attribute) -- stub both so the mock matches
+        # production regardless of which form the code under test reads.
+        fake_writer.WriterError = MagicMock(NoError=0)
         # Writer returns an error code AND has already written a partial file
         fake_writer.writeAsVectorFormatV3 = MagicMock(
             return_value=(5, "Disk full mid-write", "", "")
