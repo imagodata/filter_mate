@@ -2,6 +2,16 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.8.1] - 2026-07-31
+
+### 🚑 Critical QGIS 4.x fix
+
+Found via real-world testing on QGIS 4.2.0 / Windows immediately after v4.8.0 shipped — the plugin failed to load its main UI at all on QGIS 4.x, and the new Processing Toolbox algorithm crashed on open. Neither bug was reachable by the prior static enum-scoping sweeps or the unit test suite.
+
+- **Fix (critical)**: `filter_mate_dockwidget_base.ui` set the dock widget's `features` property as a Designer `<set>` value (`QDockWidget::AllDockWidgetFeatures`). PyQt6's dynamic `uic` loader can't resolve this specific flag combination and raised `AttributeError: type object 'QDockWidget' has no attribute 'AllDockWidgetFeatures'` while building the widget tree — dockwidget creation failed outright, so the plugin had no UI on QGIS 4.x. Removed the property from the `.ui` file and set it programmatically in `FilterMateDockWidget.__init__` instead, using the scoped form (`QDockWidget.DockWidgetFeature.AllDockWidgetFeatures`) valid under both PyQt5 and PyQt6. This is a blind spot the earlier Qt6 audits never covered — they only scanned `.py` files, never `.ui` XML.
+- **Fix**: `BatchFilterAlgorithm.tr()` didn't exist, crashing every method that called it (`initAlgorithm`, `displayName`, `group`, `shortHelpString`) as soon as Processing tried to load the algorithm. `QgsProcessingAlgorithm` isn't a `QObject` subclass and has never provided `tr()` on any QGIS/Qt version — every Processing algorithm is expected to define its own (per the QGIS Processing scripting cookbook). Added the standard `tr()` implementation.
+- **Tests**: 1493 passed, 1 skipped.
+
 ## [4.8.0] - 2026-07-31
 
 ### 🎉 Full QGIS 4.2 / Qt6 Support

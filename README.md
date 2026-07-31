@@ -1,17 +1,17 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.0** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.1** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#480---2026-07-31)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#481---2026-07-31)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-🎉 **v4.8.0: FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. See [what's new](#-whats-new-in-480).
+🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.1 fixes a critical dockwidget-load crash on QGIS 4.x found right after v4.8.0 shipped. See [what's new](#-whats-new-in-481).
 
 ---
 
@@ -31,7 +31,12 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.0
+### 🆕 What's new in 4.8.1
+
+- 🚑 **Critical QGIS 4.x fix**: the dockwidget could fail to load entirely on QGIS 4.x — PyQt6's UI loader can't resolve the `.ui` file's dock-widget `features` flag, so plugin startup crashed outright. Now set programmatically instead. Also fixed the new Processing Toolbox algorithm crashing on open (`BatchFilterAlgorithm.tr()` was missing — `QgsProcessingAlgorithm` never provides it). Found via real-world QGIS 4.2/Windows testing right after v4.8.0.
+- **Tests**: 1493 ✅.
+
+### What's new in 4.8.0
 
 - 🎉 **Full QGIS 4.2 / Qt6 support**: closed out every remaining PyQt5→PyQt6 gap found by three sweeps across the codebase — `QgsField.type()` field-detection migrated to `QMetaType.Type`, `QShortcut` moved back to `QtGui` (Qt6 relocated it there along with `QAction`/`QActionGroup`/`QFileSystemModel`/`QUndoCommand`/`QUndoGroup`/`QUndoStack`, which was breaking dockwidget keyboard shortcuts and the JSON config search widget at load time), and the last flat PyQt5-style enum accesses qualified to their scoped form. Two new AST-based static regression guards keep these bug classes from resurfacing.
 - **New — Processing Toolbox**: FilterMate algorithms are now registered via a `QgsProcessingProvider`. First algorithm, **"Filtrer plusieurs couches (batch)"**, applies one filter expression to multiple vector layers in a single run — usable from Processing models and batch processing.
@@ -50,16 +55,6 @@
 - **Export hardened further**: fixed export being blocked when no layer is picked in Exploring, SHP/batch warnings now surfaced to the user, GPKG styles embedded on the reprojection and streaming paths, empty-layer streaming crash fixed, partial output cleaned up on failure/cancel, format/driver maps consolidated into a single source of truth, ~900 LOC of dead export code removed.
 - **HIDPI fix**: combobox/input fields no longer stuck at 20px on 4K/Retina/150%+ display scaling.
 - **Tests**: 1491 ✅.
-
-### What's new in 4.7.1
-
-- **Export hardened**: 12 fixes across SHP/CSV/GPKG/SpatiaLite/ZIP — including a critical ZIP path-traversal leak, V3 API migration, streaming CRS plumbing, batch collision detection.
-- **SpatiaLite cascade restored**: drop `GeomFromGPB` wrap (use `ST_*` prefix), preserve `ST_*` / `EXISTS(...)` / `NOT(...)` predicates in the sanitizer (3 silent no-op regressions fixed), restore the cache f-string interpolation that had been broken for 100+ days.
-- **REST API hardening**: refuse insecure default `api_key`, hash-at-rest, 503 when favorites unavailable, no input echo on errors, 1 MiB body cap, Qt main-thread marshalling for accessor mutations.
-- **Security**: PortableGit installer requires SHA-256 digest + http(s)-only URLs, defense-in-depth PostgreSQL SQL guards, sanitizer collapses whitespace runs before marker scan.
-- **Favorites deep audit follow-through**: `FavoritesSpatialHandler` extraction, `FavoritesError` exception family, `FavoritesExtensionBridge` + `FavoritesMenuBuilder` + `FavoriteImportHandler` + `LayerSignature`, signal leak fixes, ~24 commits closing 37 findings.
-- **Auto-zoom**: zoom on filtered-layers union after filter/favorite apply, with a subset-change token to block stale post-task zoom.
-- **Tests**: 1493 ✅ (+200 since v4.7.0).
 
 ---
 
