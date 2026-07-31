@@ -2,6 +2,122 @@
 _Auto-maintained by project agent_
 
 
+## [2026-07-31] Portage QGIS 4.2 / Qt6 — 2e passe : la clôture précédente était incomplète
+Suite immédiate de l'entrée ci-dessous ("suite et clôture"), qui affirmait le
+portage Qt6 terminé après vérification manuelle + agent dédié. Un re-balayage
+ciblé (grep sur les enums plats connus pour casser sous PyQt6 + sur les
+classes déplacées QtWidgets→QtGui) a trouvé 4 fichiers non couverts par
+l'audit précédent (qui portait sur "50 fichiers" — celui-ci en touchait
+d'autres, notamment tout `ui/widgets/json_view/`, resté hors radar) :
+- `filter_mate_dockwidget.py` + `ui/widgets/json_view/searchable_view.py` :
+  `QShortcut` importé depuis `QtWidgets` au lieu de `QtGui` — Qt6/PyQt6 a
+  déplacé `QAction`, `QActionGroup`, `QFileSystemModel`, `QShortcut`,
+  `QUndoCommand`, `QUndoGroup`, `QUndoStack` de `QtWidgets` vers `QtGui`.
+  Cassait au chargement du dockwidget (`_setup_keyboard_shortcuts`) et du
+  widget de recherche JSON sous QGIS4/PyQt6 — pas du tout détectable par
+  l'audit "enums plats" précédent, car c'est un problème d'emplacement de
+  classe, pas d'enum.
+- `ui/widgets/json_view/datatypes.py` (×4), `view.py` (×2 + 1 QPalette),
+  `searchable_view.py` (`Qt.CaseInsensitive` + `QPalette.Window`),
+  `ui/managers/configuration_manager.py` (×2 `Qt.RightToLeft`) : enums plats
+  historiques (`Qt.ForegroundRole`, `Qt.CaseInsensitive`, `Qt.RightToLeft`,
+  `QPalette.Window`) valides en PyQt5 par promotion dans l'espace de noms
+  global, supprimés en PyQt6 — même famille de bug que l'audit "~165 accès"
+  de la session précédente, juste dans des fichiers qu'il n'avait pas
+  couverts.
+Fix : forme scopée partout (`Qt.ItemDataRole.ForegroundRole`,
+`Qt.CaseSensitivity.CaseInsensitive`, `Qt.LayoutDirection.RightToLeft`,
+`QPalette.ColorRole.Window`, imports `QShortcut` déplacés vers `QtGui`).
+Ajout de `tests/test_no_qtwidgets_relocated_symbols.py` (garde-fou AST, même
+esprit que `tests/test_no_unguarded_sip_import.py` pour #47) pour empêcher la
+réintroduction de `QAction`/`QActionGroup`/`QFileSystemModel`/`QShortcut`/
+`QUndoCommand`/`QUndoGroup`/`QUndoStack` importés ou référencés via
+`QtWidgets`. Pas de garde-fou générique ajouté pour les enums plats
+(ensemble de noms trop large pour un AST-check fiable sans faux positifs ;
+seule la classe de bug QtWidgets→QtGui, précise et bornée, a été couverte).
+Suite complète `tests/unit/` : 1484 passed / 7 failed (mêmes échecs
+pré-existants que la session précédente, `test_export_bugfix.py`, aucune
+régression introduite).
+Complément (autopilot, même journée) : élargissement du balayage à d'autres
+familles d'enums (QIcon, QLineEdit.EchoMode, QPainter render hints, Qt.Key_*
+en forme attribut, Qt.SortOrder/ArrowType/Corner/Edge/FillRule/PenCapStyle/
+PenJoinStyle/ClipOperation/TimeSpec/DateFormat/ToolButtonStyle/InputMethodHint/
+FocusReason/ScreenOrientation/ApplicationState) — toutes propres, aucune
+occurrence. `Qt.QueuedConnection` et `Qt.LeftDockWidgetArea` trouvés en forme
+plate mais uniquement dans des commentaires/docstrings (pas de code réel,
+laissés tels quels). En revanche `QStyle` a livré 2 vrais positifs manqués par
+tous les passages précédents : `ui/widgets/json_view/datatypes.py:470`
+(`QtWidgets.QStyle.CC_SpinBox` → `.ComplexControl.CC_SpinBox`) et
+`ui/widgets/custom_widgets.py:163` (`QStyle.PE_IndicatorViewItemCheck` →
+`.PrimitiveElement.PE_IndicatorViewItemCheck`), plus un `QAbstractSpinBox.
+NoButtons` plat au même endroit (`datatypes.py:463` → `.ButtonSymbols.
+NoButtons`). Les 12 autres usages de `QStyle` dans le repo (delegate.py,
+custom_widgets.py) étaient déjà correctement scopés — seuls ces 2 CC_/PE_
+isolés avaient été oubliés. Suite complète re-vérifiée après coup : 1486
+passed / 7 failed (mêmes échecs pré-existants).
+Leçon retenue : ne pas prendre "audité, plus aucune occurrence" pour acquis
+même juste après une clôture annoncée — un balayage automatisé peut avoir un
+périmètre de fichiers incomplet (ex. `ui/widgets/json_view/` semble avoir été
+ajouté/modifié hors du balayage initial). Si on reprend ce portage plus tard,
+il reste probablement utile de refaire un balayage large avec la liste
+complète des membres d'enum PyQt5 promus globalement (Qt.Key_*, QIcon.*,
+QPainter.*, etc.) — non exhaustif ici, seuls les motifs à forte confiance
+trouvés par grep ciblé ont été corrigés.
+
+
+## [2026-07-31] Portage QGIS 4.2 / Qt6 — suite et clôture du passage QMetaType + câblage Processing Toolbox
+Contexte : v4.7.3 (commit `eb9353c1`) avait déjà qualifié ~165 accès enum
+PyQt/PyQGIS non scopés sur 50 fichiers, renommé `.exec_()` → `.exec()`, et
+sécurisé tous les `import sip` (fallback `PyQt6.sip`). Cette session a
+terminé le reliquat trouvé dans le worktree (branche
+`claude/fix-processing-typevectorany`), non lié au code déjà commité :
+
+1. **Migration `QVariant.Xxx` → `QMetaType.Type.Xxx`** (commit `656ab053`) :
+   `QgsField.type()` renvoie un `QMetaType.Type` sous les bindings Qt6/QGIS4.
+   6 fichiers touchés (`adapters/app_bridge.py`,
+   `adapters/backends/ogr/expression_builder.py`,
+   `adapters/backends/postgresql/filter_executor.py`,
+   `adapters/qgis/layer_adapter.py`, `core/services/layer_service.py`,
+   `infrastructure/utils/layer_utils.py`) pour la détection de PK
+   numérique/texte. Piège à retenir : les membres `Int/UInt/LongLong/
+   ULongLong/Double` gardent le même nom entre `QVariant.Type` et
+   `QMetaType.Type`, mais `String/Date/Time/DateTime/ByteArray/Char`
+   deviennent `QString/QDate/QTime/QDateTime/QByteArray/QChar` (préfixe `Q`)
+   — erreur facile si on renomme mécaniquement sans vérifier chaque membre.
+   Toutes les formes utilisées restent valides sous PyQt5/QGIS3.22+ (pas de
+   rupture sur l'install Qt5 actuelle) — pattern additif, cohérent avec
+   `eb9353c1`.
+   Complément : `QgsMessageLog.INFO/WARNING` → `Qgis.MessageLevel.Info/
+   Warning` (`geometry_optimizer.py`), `event.pos()` →
+   `event.position().toPoint()` pour `QMouseEvent` (`custom_widgets.py`),
+   et `supportsQt6=yes` déclaré dans `metadata.txt`.
+2. **Câblage Processing Toolbox** (commit `efbedc2e`) : un fichier
+   `processing/algorithms/batch_filter_algorithm.py` (nouvel algorithme
+   `BatchFilterAlgorithm`, applique une expression à plusieurs couches)
+   existait déjà dans le worktree mais n'était enregistré nulle part — pas
+   de `QgsProcessingProvider`, rien chargé depuis `filter_mate.py`. Ajout de
+   `processing/provider.py` (`FilterMateProcessingProvider`) + enregistrement
+   dans `initGui()` / désenregistrement dans `unload()` via
+   `QgsApplication.processingRegistry()`, suivant le même pattern
+   défensif try/except que `_init_extensions()` (un échec ne doit jamais
+   bloquer le chargement du cœur du plugin). Corrigé au passage : import
+   cassé `from ...infrastructure.logging.logger import get_logger` (le
+   sous-module `logger` n'existe pas — `get_logger` vit dans
+   `infrastructure/logging/__init__.py`).
+
+Vérification faite avant/après (balayage manuel + agent dédié) : plus aucun
+`QVariant`, `QRegExp`, `.exec_()`, import PyQt5 direct, `import sip` non
+gardé, ou énum non scopée dans tout le repo (hors tests/). Le portage Qt6
+semble donc complet à ce stade. Suite de tests : 1485 passed / 7 failed
+(préexistants, `tests/unit/core/export/test_export_bugfix.py`, confirmés
+présents avant tout changement de cette session — sans rapport avec Qt6,
+non traités ici).
+
+Note pour la suite : `.serena/project.yml` a une diff non commitée (mise à
+jour auto du format de config Serena — `languages` → `language_servers`,
+etc.), sans rapport avec le plugin, laissée telle quelle intentionnellement.
+
+
 ## [2026-07-30] Fix: sélection "all-features" (expression toujours vraie) écrasée par une sélection QGIS résiduelle
 Bug rapporté: filtre "intersecte" GeoPackage (backend Spatialite, routé via
 `.gpkg` → provider 'spatialite') retournait 0 entités sans erreur quand la
