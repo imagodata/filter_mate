@@ -2,6 +2,47 @@
 _Auto-maintained by project agent_
 
 
+## [2026-07-31] v4.8.1 hotfix — deux crashes réels sur QGIS 4.2/Windows, invisibles à tous les audits statiques
+Immédiatement après le déploiement de v4.8.0, l'utilisateur a testé en
+conditions réelles sur QGIS 4.2.0/Windows/PyQt6 et remonté 2 crashes en live :
+
+1. **Dockwidget entier ne se charge plus** :
+   `AttributeError: type object 'QDockWidget' has no attribute
+   'AllDockWidgetFeatures'`. Cause : `filter_mate_dockwidget_base.ui` définit
+   la propriété `features` en `<set>QDockWidget::AllDockWidgetFeatures</set>`
+   (XML Designer). Le chargeur `uic` dynamique de PyQt6
+   (`qgis.PyQt.uic.loadUiType` + `setupUi()`) ne sait pas résoudre cette
+   combinaison de flags précise sous Qt6 (les enums `<enum>` simples comme
+   `Qt::Horizontal`/`QFrame::NoFrame` marchent très bien — seul ce `<set>`
+   spécifique posait problème ; l'autre `<set>` du fichier,
+   `QDialogButtonBox::Cancel|QDialogButtonBox::Ok`, est resté intact car
+   trop standard/répandu pour être cassé sans que ce soit un bug PyQt6
+   connu). **Angle mort total** : tous les audits Qt6 de la session
+   précédente (celle-ci comprise) n'ont scanné que des fichiers `.py` —
+   jamais le `.ui`, qui est pourtant interprété dynamiquement par le même
+   mécanisme de résolution d'enum. Fix : propriété retirée du `.ui`, réglée
+   en Python après `setupUi()` avec la forme scopée
+   `self.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.
+   AllDockWidgetFeatures)` (valide PyQt5 + PyQt6).
+2. **Processing Toolbox crash à l'ouverture de l'algorithme** :
+   `BatchFilterAlgorithm.tr()` n'existe pas. `QgsProcessingAlgorithm`
+   n'hérite PAS de `QObject` et n'a jamais fourni `tr()` nativement, sur
+   AUCUNE version de QGIS/Qt — chaque algorithme Processing doit définir le
+   sien (pattern standard du cookbook QGIS). Ce n'est donc pas un bug lié à
+   Qt6, juste du code jamais réellement exécuté avant ce test utilisateur
+   (le provider avait été câblé dans `efbedc2e` mais jamais ouvert dans un
+   vrai QGIS). Fix : ajout de `tr()` (`QCoreApplication.translate`).
+Suite : 1493 passed. Publié en `v4.8.1` (hotfix immédiat après v4.8.0).
+Leçon retenue pour la suite du portage QGIS4/Qt6 : **le seul test qui compte
+vraiment est un run réel dans QGIS** — voir aussi la note similaire laissée
+dans l'entrée "2e passe" ci-dessous. Deux classes de bugs entières
+(propriétés `.ui` non résolvables par `uic` sous Qt6, méthodes jamais
+exercées faute d'exécution réelle) sont invisibles à grep/AST/pytest avec
+mocks. S'il existe d'autres futurs fichiers `.ui` dans le projet, les
+auditer aussi pour les propriétés `<set>` (flags) exotiques, pas seulement
+le code Python.
+
+
 ## [2026-07-31] Release v4.8.0 — pipeline CI de release était cassé depuis 2 tags (v4.7.2, v4.7.3)
 En préparant la release v4.8.0 (bump metadata.txt/README/CHANGELOG, zip via
 `scripts/prepare_plugin_zip.sh`, tag `v4.8.0` → `.github/workflows/release.yml`),
