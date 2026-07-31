@@ -65,7 +65,7 @@ class DataType(object):
         key_item.setData(datatype, TypeRole)
         key_item.setData(datatype.__class__.__name__, QtCore.Qt.ItemDataRole.ToolTipRole)
         key_item.setData(
-            QtGui.QBrush(self.get_color()), QtCore.Qt.ForegroundRole)
+            QtGui.QBrush(self.get_color()), QtCore.Qt.ItemDataRole.ForegroundRole)
         key_item.setFlags(
             QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled)
         if editable and model.editable_keys:
@@ -79,7 +79,7 @@ class DataType(object):
         item.setData(display_value, QtCore.Qt.ItemDataRole.DisplayRole)
         item.setData(value, QtCore.Qt.ItemDataRole.UserRole)
         item.setData(self, TypeRole)
-        item.setData(QtGui.QBrush(self.get_color()), QtCore.Qt.ForegroundRole)
+        item.setData(QtGui.QBrush(self.get_color()), QtCore.Qt.ItemDataRole.ForegroundRole)
         item.setFlags(
             QtCore.Qt.ItemFlag.ItemIsSelectable |
             QtCore.Qt.ItemFlag.ItemIsEnabled)
@@ -452,7 +452,7 @@ class RangeType(DataType):
 
         painter.save()
 
-        painter.setPen(QtGui.QPen(index.data(QtCore.Qt.ForegroundRole).color()))
+        painter.setPen(QtGui.QPen(index.data(QtCore.Qt.ItemDataRole.ForegroundRole).color()))
         metrics = painter.fontMetrics()
         spinbox_option = QtWidgets.QStyleOptionSpinBox()
         start_rect = QtCore.QRect(option.rect)
@@ -460,14 +460,14 @@ class RangeType(DataType):
         spinbox_option.rect = start_rect
         spinbox_option.frame = True
         spinbox_option.state = option.state
-        spinbox_option.buttonSymbols = QtWidgets.QAbstractSpinBox.NoButtons
+        spinbox_option.buttonSymbols = QtWidgets.QAbstractSpinBox.ButtonSymbols.NoButtons
         for i, key in enumerate(self.KEYS):
             if i > 0:
                 spinbox_option.rect.adjust(
                     spinbox_option.rect.width(), 0,
                     spinbox_option.rect.width(), 0)
             QtWidgets.QApplication.style().drawComplexControl(
-                QtWidgets.QStyle.CC_SpinBox, spinbox_option, painter)
+                QtWidgets.QStyle.ComplexControl.CC_SpinBox, spinbox_option, painter)
             value = str(data[key])
             value_rect = QtCore.QRectF(
                 spinbox_option.rect.adjusted(6, 1, -2, -2))
@@ -938,7 +938,7 @@ class ConfigValueType(DataType):
         value_item.setData(display_text, QtCore.Qt.ItemDataRole.DisplayRole)
         value_item.setData(value, QtCore.Qt.ItemDataRole.UserRole)
         value_item.setData(self, TypeRole)
-        value_item.setData(QtGui.QBrush(self.get_color()), QtCore.Qt.ForegroundRole)
+        value_item.setData(QtGui.QBrush(self.get_color()), QtCore.Qt.ItemDataRole.ForegroundRole)
         value_item.setFlags(
             QtCore.Qt.ItemFlag.ItemIsSelectable |
             QtCore.Qt.ItemFlag.ItemIsEnabled)

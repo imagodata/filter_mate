@@ -878,7 +878,7 @@ class ConfigurationManager(QObject):
             icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
             d.checkBox_filtering_use_centroids_source_layer.setIcon(icon)
             d.checkBox_filtering_use_centroids_source_layer.setText("")
-            d.checkBox_filtering_use_centroids_source_layer.setLayoutDirection(QtCore.Qt.RightToLeft)
+            d.checkBox_filtering_use_centroids_source_layer.setLayoutDirection(QtCore.Qt.LayoutDirection.RightToLeft)
 
         # Configure centroids distant layers checkbox (created in setupUiCustom)
         # Widget already created in setupUiCustom() - just configure appearance
@@ -889,7 +889,7 @@ class ConfigurationManager(QObject):
             if os.path.exists(icon_path):
                 icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
                 d.checkBox_filtering_use_centroids_distant_layers.setIcon(icon)
-            d.checkBox_filtering_use_centroids_distant_layers.setLayoutDirection(QtCore.Qt.RightToLeft)
+            d.checkBox_filtering_use_centroids_distant_layers.setLayoutDirection(QtCore.Qt.LayoutDirection.RightToLeft)
             d.checkBox_filtering_use_centroids_distant_layers.setSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 
         # Create horizontal layout and insert widgets.

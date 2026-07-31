@@ -58,7 +58,7 @@ class JsonView(QtWidgets.QTreeView):
             try:
                 from qgis.core import QgsApplication
                 palette = QgsApplication.palette()
-                bg_color = palette.color(QtGui.QPalette.Window)
+                bg_color = palette.color(QtGui.QPalette.ColorRole.Window)
                 is_dark = bg_color.lightness() < 128
             except (ImportError, AttributeError):
                 is_dark = False
@@ -400,7 +400,7 @@ class JsonView(QtWidgets.QTreeView):
             # Update the item's color if it has a DataType
             data_type = item.data(TypeRole)
             if data_type is not None:
-                item.setData(QtGui.QBrush(data_type.get_color()), QtCore.Qt.ForegroundRole)
+                item.setData(QtGui.QBrush(data_type.get_color()), QtCore.Qt.ItemDataRole.ForegroundRole)
 
             # Update children
             for row in range(item.rowCount()):

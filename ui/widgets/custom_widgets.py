@@ -160,7 +160,7 @@ class ItemDelegate(QStyledItemDelegate):
                 opt.state = QStyle.StateFlag.State_On
             style = QApplication.style()
             style.drawPrimitive(
-                QStyle.PE_IndicatorViewItemCheck, opt, painter, None
+                QStyle.PrimitiveElement.PE_IndicatorViewItemCheck, opt, painter, None
             )
 
         painter.restore()

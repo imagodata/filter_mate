@@ -96,7 +96,7 @@ class SearchableJsonView(QtWidgets.QWidget):
         """Setup the filter proxy model."""
         self._proxy_model = JsonSortFilterProxyModel()
         self._proxy_model.setSourceModel(self._source_model)
-        self._proxy_model.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self._proxy_model.setFilterCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)
         self._proxy_model.setFilterKeyColumn(0)  # Filter on property column
 
         # Keep source model for now - filtering is optional
@@ -109,11 +109,11 @@ class SearchableJsonView(QtWidgets.QWidget):
         self._search_input.returnPressed.connect(self._on_search_enter)
 
         # Keyboard shortcut for search
-        shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+F"), self)
+        shortcut = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+F"), self)
         shortcut.activated.connect(self._focus_search)
 
         # Escape to clear search
-        escape_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Escape"), self._search_input)
+        escape_shortcut = QtGui.QShortcut(QtGui.QKeySequence("Escape"), self._search_input)
         escape_shortcut.activated.connect(self._clear_search)
 
     def _apply_search_styling(self):
@@ -121,7 +121,7 @@ class SearchableJsonView(QtWidgets.QWidget):
         try:
             from qgis.core import QgsApplication
             palette = QgsApplication.palette()
-            bg_color = palette.color(QtGui.QPalette.Window)
+            bg_color = palette.color(QtGui.QPalette.ColorRole.Window)
             is_dark = bg_color.lightness() < 128
         except (ImportError, AttributeError):
             is_dark = False
