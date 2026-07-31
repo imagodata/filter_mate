@@ -1,14 +1,17 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.7.3** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.0** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#480---2026-07-31)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
+
+🎉 **v4.8.0: FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. See [what's new](#-whats-new-in-480).
 
 ---
 
@@ -26,8 +29,15 @@
 | 🎨 **Dark Mode** | Automatic theme detection |
 | 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
+| 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.7.3
+### 🆕 What's new in 4.8.0
+
+- 🎉 **Full QGIS 4.2 / Qt6 support**: closed out every remaining PyQt5→PyQt6 gap found by three sweeps across the codebase — `QgsField.type()` field-detection migrated to `QMetaType.Type`, `QShortcut` moved back to `QtGui` (Qt6 relocated it there along with `QAction`/`QActionGroup`/`QFileSystemModel`/`QUndoCommand`/`QUndoGroup`/`QUndoStack`, which was breaking dockwidget keyboard shortcuts and the JSON config search widget at load time), and the last flat PyQt5-style enum accesses qualified to their scoped form. Two new AST-based static regression guards keep these bug classes from resurfacing.
+- **New — Processing Toolbox**: FilterMate algorithms are now registered via a `QgsProcessingProvider`. First algorithm, **"Filtrer plusieurs couches (batch)"**, applies one filter expression to multiple vector layers in a single run — usable from Processing models and batch processing.
+- **Tests**: 1486 ✅ (7 pre-existing, unrelated export-pipeline failures tracked separately).
+
+### What's new in 4.7.3
 
 - **Crash fix**: dockable panel creation could fail outright on QGIS 4.0.1 / Windows ("No module named 'sip'") due to an unguarded top-level `import sip`; routed through the plugin's already-hardened sip-safety helper instead. (#47)
 - **Security**: resolved every Bandit finding — real fixes (asserts replaced with explicit raises, corrected `nosec` code for the ElementTree import) plus documented suppressions for reviewed-safe patterns. Zero unresolved findings on re-scan.
@@ -50,14 +60,6 @@
 - **Favorites deep audit follow-through**: `FavoritesSpatialHandler` extraction, `FavoritesError` exception family, `FavoritesExtensionBridge` + `FavoritesMenuBuilder` + `FavoriteImportHandler` + `LayerSignature`, signal leak fixes, ~24 commits closing 37 findings.
 - **Auto-zoom**: zoom on filtered-layers union after filter/favorite apply, with a subset-change token to block stale post-task zoom.
 - **Tests**: 1493 ✅ (+200 since v4.7.0).
-
-### What's new in 4.7.0
-
-- **Favorites Sharing**: git-backed publish to remote repos, repo manager dialog, 1-click *Quick publish*, optional Resource Sharing extension, JSON Schema v3, per-user scope.
-- **REST API**: `GET /layers`, `POST /filters/apply`, `/filters/status`, `/undo`, `/redo`, `/favorites` — protected by `X-API-Key` middleware.
-- **Performance**: streaming feature IDs, cached parsed expressions, single buffer-distance fetch.
-- **Hardening**: path-traversal + argv-injection guards, git stderr scrubbing, sanitizer at `setSubsetString` chokepoint, single `HistoryService`, `QgsDataSourceUri`-based PostgreSQL table parsing.
-- **UX/UI**: HIDPI profile + QSS cascade cleanup, harmonized groupbox display modes, favorites scope filter combo + list badges, full 34-locale coverage for new features.
 
 ---
 
@@ -112,8 +114,8 @@ pip install psycopg2-binary
 
 ## 📋 Requirements
 
-- **QGIS**: 3.0+
-- **Python**: 3.7+ (included with QGIS)
+- **QGIS**: 3.22+ — including **QGIS 4.x / Qt6** (fully supported since v4.8.0)
+- **Python**: 3.9+ (included with QGIS)
 - **Optional**: psycopg2 for PostgreSQL backend
 
 ---

@@ -2,6 +2,26 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.8.0] - 2026-07-31
+
+### 🎉 Full QGIS 4.2 / Qt6 Support
+
+FilterMate is now fully compatible with QGIS 4.x / PyQt6, in addition to QGIS 3.22+ / PyQt5. This closes out the Qt6-readiness effort started in v4.6.1 and continued in v4.7.3 with three additional sweeps across the codebase:
+
+- **Fix**: `QgsField.type()` field-type detection migrated from `QVariant.Xxx` to `QMetaType.Type.Xxx` across primary-key detection and field-type mapping code (`adapters/app_bridge.py`, `adapters/backends/ogr/expression_builder.py`, `adapters/backends/postgresql/filter_executor.py`, `adapters/qgis/layer_adapter.py`, `core/services/layer_service.py`, `infrastructure/utils/layer_utils.py`) — `QgsField.type()` returns a `QMetaType.Type` value under the Qt6/QGIS4 bindings, not the old `QVariant.Type`.
+- **Fix**: `QShortcut` imported from `QtWidgets` instead of `QtGui` in `filter_mate_dockwidget.py` and `ui/widgets/json_view/searchable_view.py`. Qt6 relocated `QAction`, `QActionGroup`, `QFileSystemModel`, `QShortcut`, `QUndoCommand`, `QUndoGroup` and `QUndoStack` from `QtWidgets` to `QtGui` — this broke dockwidget keyboard shortcuts (F5 reload, Ctrl+Z undo, Ctrl+Y redo) and the JSON config search widget (Ctrl+F) at load time under PyQt6.
+- **Fix**: remaining flat PyQt5-style enum accesses — valid only via PyQt5's global-namespace promotion, removed in PyQt6 — qualified to their scoped form: `Qt.ForegroundRole` → `Qt.ItemDataRole.ForegroundRole`, `Qt.CaseInsensitive` → `Qt.CaseSensitivity.CaseInsensitive`, `Qt.RightToLeft` → `Qt.LayoutDirection.RightToLeft`, `QPalette.Window` → `QPalette.ColorRole.Window`, `QStyle.CC_SpinBox` → `QStyle.ComplexControl.CC_SpinBox`, `QStyle.PE_IndicatorViewItemCheck` → `QStyle.PrimitiveElement.PE_IndicatorViewItemCheck`, `QAbstractSpinBox.NoButtons` → `QAbstractSpinBox.ButtonSymbols.NoButtons`. Found in `ui/widgets/json_view/{datatypes,view,searchable_view}.py`, `ui/widgets/custom_widgets.py` and `ui/managers/configuration_manager.py` — files outside the scope of the original 50-file enum audit from v4.7.3.
+- **Tests**: added `tests/test_no_qtwidgets_relocated_symbols.py`, an AST-based static regression guard (same pattern as `tests/test_no_unguarded_sip_import.py` for #47) that scans the whole plugin tree and blocks `QAction`/`QActionGroup`/`QFileSystemModel`/`QShortcut`/`QUndoCommand`/`QUndoGroup`/`QUndoStack` from being imported or referenced via `QtWidgets` again.
+- `hasProcessingProvider` now correctly declared `yes` in `metadata.txt`.
+
+### Processing Toolbox
+
+- **New**: FilterMate algorithms are now exposed in the QGIS Processing Toolbox via a `QgsProcessingProvider` (`processing/provider.py`). First algorithm — **"Filtrer plusieurs couches (batch)"** (`filtermate:batch_filter`) — applies one filter expression to multiple vector layers in a single run; usable from Processing models and batch processing.
+
+### Tests
+
+- Full suite: 1486 ✅ (7 pre-existing, unrelated `test_export_bugfix.py` failures — tracked separately, confirmed present before this release).
+
 ## [4.7.3] - 2026-07-30
 
 ### Stability + Qt6 Readiness
