@@ -7,6 +7,7 @@
 name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
+supportsQt6=yes
 description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector data with lightning-fast performance on ANY data source.
 version=4.7.3
 author=imagodata

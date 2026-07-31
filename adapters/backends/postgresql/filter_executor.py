@@ -976,14 +976,14 @@ def _is_pk_numeric(layer, pk_field: str) -> bool:
         return True  # Default to numeric assumption
 
     try:
-        from qgis.PyQt.QtCore import QVariant
+        from qgis.PyQt.QtCore import QMetaType
         field_idx = layer.fields().indexOf(pk_field)
         if field_idx >= 0:
             field_type = layer.fields().at(field_idx).type()
             # Check for numeric types
             numeric_types = [
-                QVariant.Int, QVariant.UInt, QVariant.LongLong,
-                QVariant.ULongLong, QVariant.Double
+                QMetaType.Type.Int, QMetaType.Type.UInt, QMetaType.Type.LongLong,
+                QMetaType.Type.ULongLong, QMetaType.Type.Double
             ]
             return field_type in numeric_types
     except Exception:  # nosec B110 - field type lookup best-effort, falls through to default numeric assumption

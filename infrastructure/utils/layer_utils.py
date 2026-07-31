@@ -31,14 +31,14 @@ try:
         QgsApplication,
         QgsAuthMethodConfig,
     )
-    from qgis.PyQt.QtCore import QVariant
+    from qgis.PyQt.QtCore import QMetaType
     QGIS_AVAILABLE = True
 except ImportError:
     QGIS_AVAILABLE = False
     QgsVectorLayer = object
     QgsDataSourceUri = None
     QgsFeatureRequest = None
-    QVariant = None
+    QMetaType = None
 
 # psycopg2 availability
 try:
@@ -304,8 +304,8 @@ def get_primary_key_name(layer) -> Optional[str]:
 
     # Fallback: first integer field
     try:
-        from qgis.PyQt.QtCore import QVariant
-        int_types = [QVariant.Int, QVariant.LongLong, QVariant.UInt, QVariant.ULongLong]
+        from qgis.PyQt.QtCore import QMetaType
+        int_types = [QMetaType.Type.Int, QMetaType.Type.LongLong, QMetaType.Type.UInt, QMetaType.Type.ULongLong]
         for field in fields:
             if field.type() in int_types:
                 return field.name()
@@ -505,7 +505,7 @@ def get_best_display_field(layer, sample_size: int = 10, use_value_relations: bo
 
     # Priority 4: Try to find first text field (not an ID) WITH VALUES
     try:
-        string_types = [QVariant.String, QVariant.Char] if QVariant else []
+        string_types = [QMetaType.Type.QString, QMetaType.Type.QChar] if QMetaType else []
         for field in fields:
             if field.type() in string_types:
                 field_name_lower = field.name().lower()

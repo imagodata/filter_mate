@@ -12,7 +12,7 @@ License: GNU GPL v2+
 
 from typing import Optional, List
 from qgis.core import QgsVectorLayer, QgsWkbTypes
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 
 from ...core.ports.qgis_port import (
     IVectorLayer,
@@ -131,19 +131,19 @@ class QGISVectorLayerAdapter(IVectorLayer):
 
         qvariant_type = fields.at(field_idx).type()
 
-        # Map QVariant types to FieldType enum
+        # Map QMetaType (formerly QVariant) types to FieldType enum
         type_map = {
-            QVariant.Int: FieldType.INT,
-            QVariant.UInt: FieldType.UINT,
-            QVariant.LongLong: FieldType.LONGLONG,
-            QVariant.ULongLong: FieldType.ULONGLONG,
-            QVariant.Double: FieldType.DOUBLE,
-            QVariant.String: FieldType.STRING,
-            QVariant.Date: FieldType.DATE,
-            QVariant.Time: FieldType.TIME,
-            QVariant.DateTime: FieldType.DATETIME,
-            QVariant.Bool: FieldType.BOOL,
-            QVariant.ByteArray: FieldType.BLOB,
+            QMetaType.Type.Int: FieldType.INT,
+            QMetaType.Type.UInt: FieldType.UINT,
+            QMetaType.Type.LongLong: FieldType.LONGLONG,
+            QMetaType.Type.ULongLong: FieldType.ULONGLONG,
+            QMetaType.Type.Double: FieldType.DOUBLE,
+            QMetaType.Type.QString: FieldType.STRING,
+            QMetaType.Type.QDate: FieldType.DATE,
+            QMetaType.Type.QTime: FieldType.TIME,
+            QMetaType.Type.QDateTime: FieldType.DATETIME,
+            QMetaType.Type.Bool: FieldType.BOOL,
+            QMetaType.Type.QByteArray: FieldType.BLOB,
         }
 
         return type_map.get(qvariant_type, FieldType.INVALID)

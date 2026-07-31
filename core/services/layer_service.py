@@ -356,7 +356,7 @@ class LayerService(QObject):
             return None
 
         try:
-            from qgis.PyQt.QtCore import QVariant
+            from qgis.PyQt.QtCore import QMetaType
 
             fields = layer.fields()
             if not fields:
@@ -382,7 +382,7 @@ class LayerService(QObject):
                         return f.name()
 
             # 4. Look for numeric fields with ID patterns
-            numeric_types = (QVariant.Int, QVariant.LongLong, QVariant.UInt, QVariant.ULongLong)
+            numeric_types = (QMetaType.Type.Int, QMetaType.Type.LongLong, QMetaType.Type.UInt, QMetaType.Type.ULongLong)
             for f in fields:
                 field_name_lower = f.name().lower()
                 for pattern in self.ID_PATTERNS:

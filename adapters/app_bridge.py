@@ -419,8 +419,10 @@ def _extract_primary_key(layer: 'QgsVectorLayer') -> str:
                 return field_name
 
         # Last resort: first integer field
+        from qgis.PyQt.QtCore import QMetaType
+        int_types = (QMetaType.Type.Int, QMetaType.Type.LongLong)
         for field in fields:
-            if field.type() in [2, 4]:  # Integer types in QVariant
+            if field.type() in int_types:
                 return field.name()
 
     except Exception:  # nosec B110 - PK detection best-effort across strategies, caller applies fallback logic

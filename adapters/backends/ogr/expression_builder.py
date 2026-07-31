@@ -515,9 +515,9 @@ class OGRExpressionBuilder(GeometricFilterPort):
             fields = layer.fields()
             pk_idx = fields.indexOf(pk_field)
             if pk_idx >= 0:
-                from qgis.PyQt.QtCore import QVariant
+                from qgis.PyQt.QtCore import QMetaType
                 field_type = fields.at(pk_idx).type()
-                is_numeric_pk = field_type in (QVariant.Int, QVariant.LongLong, QVariant.UInt, QVariant.ULongLong, QVariant.Double)
+                is_numeric_pk = field_type in (QMetaType.Type.Int, QMetaType.Type.LongLong, QMetaType.Type.UInt, QMetaType.Type.ULongLong, QMetaType.Type.Double)
         except Exception:  # nosec B110 - field type detection best-effort, defaults to numeric assumption
             pass
 
@@ -604,11 +604,11 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 fields = layer.fields()
                 pk_idx = fields.indexOf(pk_field)
                 if pk_idx >= 0:
-                    from qgis.PyQt.QtCore import QVariant
+                    from qgis.PyQt.QtCore import QMetaType
                     field_type = fields.at(pk_idx).type()
-                    numeric_types = (QVariant.Int, QVariant.LongLong, QVariant.UInt, QVariant.ULongLong, QVariant.Double)
+                    numeric_types = (QMetaType.Type.Int, QMetaType.Type.LongLong, QMetaType.Type.UInt, QMetaType.Type.ULongLong, QMetaType.Type.Double)
                     is_numeric_pk = field_type in numeric_types
-                    self.log_info(f"  - PK type detected from field schema: {'numeric' if is_numeric_pk else 'text'} (QVariant type={field_type})")
+                    self.log_info(f"  - PK type detected from field schema: {'numeric' if is_numeric_pk else 'text'} (QMetaType type={field_type})")
             except Exception as field_e:
                 self.log_debug(f"  - Field type detection failed: {field_e}")
 
@@ -878,7 +878,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         ID_PATTERNS = ['_id', 'id_', 'identifier', 'feature_id', 'object_id']
 
         try:
-            from qgis.PyQt.QtCore import QVariant
+            from qgis.PyQt.QtCore import QMetaType
 
             fields = layer.fields()
             if not fields:
@@ -909,7 +909,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                         return field.name()
 
             # 4. Look for numeric fields with ID patterns
-            numeric_types = (QVariant.Int, QVariant.LongLong, QVariant.UInt, QVariant.ULongLong)
+            numeric_types = (QMetaType.Type.Int, QMetaType.Type.LongLong, QMetaType.Type.UInt, QMetaType.Type.ULongLong)
             for field in fields:
                 field_name_lower = field.name().lower()
                 if field.type() in numeric_types:

@@ -10,7 +10,7 @@ import traceback
 
 from qgis.core import (
     QgsVectorLayer, QgsFeature, QgsGeometry,
-    QgsWkbTypes, QgsMessageLog
+    QgsWkbTypes, QgsMessageLog, Qgis
 )
 
 
@@ -35,13 +35,13 @@ def simplify_source_for_ogr_fallback(source_layer, logger=None):
         if logger:
             logger.info(msg)
         else:
-            QgsMessageLog.logMessage(msg, "FilterMate", level=QgsMessageLog.INFO)
+            QgsMessageLog.logMessage(msg, "FilterMate", level=Qgis.MessageLevel.Info)
 
     def log_warning(msg):
         if logger:
             logger.warning(msg)
         else:
-            QgsMessageLog.logMessage(msg, "FilterMate", level=QgsMessageLog.WARNING)
+            QgsMessageLog.logMessage(msg, "FilterMate", level=Qgis.MessageLevel.Warning)
 
     def log_debug(msg):
         if logger:

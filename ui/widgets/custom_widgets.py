@@ -1175,7 +1175,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 nonSubset_features_list = []
 
             if event.button() == Qt.MouseButton.LeftButton:
-                clicked_item = self.list_widgets[self.layer.id()].itemAt(event.pos())
+                clicked_item = self.list_widgets[self.layer.id()].itemAt(event.position().toPoint())
                 if clicked_item is not None:
                     id_item = clicked_item.data(3)
                     if clicked_item.checkState() == Qt.CheckState.Checked:
