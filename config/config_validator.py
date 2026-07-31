@@ -77,10 +77,13 @@ class ConfigValidator:
             return True
 
         if not os.path.exists(self.schema_path):
+            # config_schema.json was intentionally removed as unused (see
+            # commit cf9e96f2) -- schema-based validation is a permanent
+            # no-op now, not an actionable warning on every config reload.
             QgsMessageLog.logMessage(
-                f"Schema file not found: {self.schema_path}",
+                f"Schema file not found, skipping schema validation: {self.schema_path}",
                 "FilterMate",
-                Qgis.MessageLevel.Warning
+                Qgis.MessageLevel.Info
             )
             return False
 
