@@ -1,17 +1,17 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.2** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.3** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#482---2026-07-31)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#483---2026-07-31)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.2 fixes a second dockwidget-load crash on QGIS 4.x found right after v4.8.1 shipped. See [what's new](#-whats-new-in-482).
+🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.3 is a config-log cleanup from continued real-world QGIS 4.2 testing. See [what's new](#-whats-new-in-483).
 
 ---
 
@@ -31,7 +31,12 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.2
+### 🆕 What's new in 4.8.3
+
+- **Config log cleanup**: the "Schema file not found" message logged on every config reload (the schema was intentionally removed as unused in an earlier release) is now `Info` instead of `Warning`. Also closed out 2 live-testing reports as confirmed non-bugs: the `QGIS3`-named settings path is QGIS 4.2's own behavior, and a 33%-stuck "Adding layers" dialog turned out to be QGIS's own project loader, not FilterMate.
+- **Tests**: 1493 ✅.
+
+### What's new in 4.8.2
 
 - 🚑 **Second QGIS 4.x hotfix**: v4.8.1's dockwidget fix still crashed (`DockWidgetFeature has no attribute 'AllDockWidgetFeatures'`) — that convenience constant was deprecated in Qt 5.13 and is fully removed in Qt6, not just moved into a nested enum. Now ORs the 3 individual flags it used to stand for.
 - **Tests**: 1493 ✅.
@@ -46,13 +51,6 @@
 - 🎉 **Full QGIS 4.2 / Qt6 support**: closed out every remaining PyQt5→PyQt6 gap found by three sweeps across the codebase — `QgsField.type()` field-detection migrated to `QMetaType.Type`, `QShortcut` moved back to `QtGui` (Qt6 relocated it there along with `QAction`/`QActionGroup`/`QFileSystemModel`/`QUndoCommand`/`QUndoGroup`/`QUndoStack`, which was breaking dockwidget keyboard shortcuts and the JSON config search widget at load time), and the last flat PyQt5-style enum accesses qualified to their scoped form. Two new AST-based static regression guards keep these bug classes from resurfacing.
 - **New — Processing Toolbox**: FilterMate algorithms are now registered via a `QgsProcessingProvider`. First algorithm, **"Filtrer plusieurs couches (batch)"**, applies one filter expression to multiple vector layers in a single run — usable from Processing models and batch processing.
 - **Tests**: 1486 ✅ (7 pre-existing, unrelated export-pipeline failures tracked separately).
-
-### What's new in 4.7.3
-
-- **Crash fix**: dockable panel creation could fail outright on QGIS 4.0.1 / Windows ("No module named 'sip'") due to an unguarded top-level `import sip`; routed through the plugin's already-hardened sip-safety helper instead. (#47)
-- **Security**: resolved every Bandit finding — real fixes (asserts replaced with explicit raises, corrected `nosec` code for the ElementTree import) plus documented suppressions for reviewed-safe patterns. Zero unresolved findings on re-scan.
-- **Qt6 readiness**: qualified ~165 flat PyQt/PyQGIS enum accesses to their scoped form and dropped `.exec_()` across 50 files — purely additive, no behavior change on the current Qt5 install.
-- **Tests**: 1491+ ✅.
 
 ---
 

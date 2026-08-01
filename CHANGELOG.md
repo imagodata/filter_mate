@@ -2,6 +2,18 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.8.3] - 2026-07-31
+
+### Config log cleanup
+
+Follow-up from continued real-world QGIS 4.2 / PostgreSQL testing after v4.8.2.
+
+- **Fix**: `config/config_validator.py` logged a `Warning` on every single config load/reload for "Schema file not found: config_schema.json" — but that file was intentionally deleted as unused in an earlier release, making this a permanent, expected condition rather than an operator-actionable problem. Downgraded to `Info`.
+- **Investigated, confirmed non-bugs (no code change)**:
+  - The repeated `Configuration reloaded from: .../QGIS3/profiles/.../FilterMate/config.json` log while running QGIS 4.2 is not a FilterMate bug — `QgsApplication.qgisSettingsDirPath()` (a native QGIS API call) still returns a `QGIS3`-named settings directory under QGIS 4.2 itself, for profile continuity across the major-version bump.
+  - An "Adding layers" progress dialog stuck at 33% on a large PostgreSQL project — confirmed via screenshot to be **QGIS's own native project-loading dialog**, not a FilterMate task or UI element. Out of this plugin's scope; FilterMate's own SQLite connections already use a bounded timeout (`SQLITE_TIMEOUT`), so they can't be the source of an unbounded hang.
+- **Tests**: 1493 passed, 1 skipped.
+
 ## [4.8.2] - 2026-07-31
 
 ### 🚑 Second QGIS 4.x hotfix
