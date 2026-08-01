@@ -2,6 +2,56 @@
 _Auto-maintained by project agent_
 
 
+## [2026-08-01] v4.8.3 shippé cassé — % non échappé dans changelog=, ma propre vérification était trouée
+Immédiatement après le tag v4.8.3, l'utilisateur a tenté d'installer le zip
+GitHub Release dans QGIS et a eu : *"Errors parsing filter_mate/metadata.txt.
+'%' must be followed by '%' or '(', found: '% on a large PostgreSQL
+project..."* — plugin totalement non installable. Cause : le texte du
+`changelog=` que j'avais rédigé pour v4.8.3 contenait un `33%` littéral
+(note sur l'incident "Adding layers bloqué à 33%") sans le doubler en `33%%`
+— `metadata.txt` est lu par `configparser` (format INI), qui traite `%`
+comme un début de directive d'interpolation sauf s'il est doublé. Même
+classe de bug que `78bdf31d` (déjà corrigée une fois avant, sur `about=`).
+
+**Pourquoi ma vérification ne l'a pas attrapée** : à partir de v4.8.1, j'ai
+remplacé la vraie validation par un raccourci `grep -n "^%" metadata.txt |
+grep -v "%%"` — qui ne cherche `%` qu'en **début de ligne**, alors que
+`changelog=`/`about=` sont des blocs multi-lignes avec le `%` fautif planté
+au milieu. Un seul essai antérieur (v4.8.0) avait fait un vrai `configparser
+.read()` + `.get()`, mais seulement sur 2 clés (`version`,
+`hasProcessingProvider`) — jamais sur `changelog`/`about`, les seuls champs
+en texte libre où ce risque existe réellement.
+
+Fix : `33%` → `33%%` (commit `58afd058`). Tag `v4.8.3` déplacé (delete +
+recreate, cohérent avec la pratique déjà établie cette session pour un
+artifact jamais fonctionnel — celui-ci ne s'installait pas du tout, donc
+personne n'a pu l'utiliser) et republié ; vérifié par téléchargement direct
+du zip **depuis la GitHub Release elle-même** (pas juste le zip local) et
+parsing `configparser` complet (`.get()` sur CHAQUE clé de CHAQUE section).
+
+**Procédure de vérification corrigée pour toute future release** (à
+toujours faire avant de tag) :
+```python
+import configparser, re
+# 1. scan regex complet, pas seulement début de ligne
+for i, line in enumerate(open('metadata.txt', encoding='utf-8'), 1):
+    for m in re.finditer(r'%', line):
+        p = m.start()
+        if line[p-1:p] != '%' and line[p+1:p+2] != '%':
+            print('BAD', i, line)
+# 2. configparser : forcer l'interpolation sur CHAQUE clé, pas 2 au hasard
+cp = configparser.ConfigParser(); cp.read('metadata.txt', encoding='utf-8')
+for s in cp.sections():
+    for k in cp[s]:
+        cp.get(s, k)  # lève si % mal échappé
+```
+Leçon retenue : un raccourci de vérification qui a l'air de couvrir le cas
+(`grep "^%"`) peut être silencieusement incomplet — la vraie garantie est de
+faire faire le travail par l'outil qui va réellement échouer (ici
+`configparser`), pas une regex approximative écrite à la main. Vérifier
+CHAQUE champ texte libre, pas un échantillon.
+
+
 ## [2026-07-31] Post-v4.8.2 : triage live de 3 signalements (autopilot), 1 fix cosmétique, 2 non-bugs confirmés
 Suite du test en direct sur QGIS 4.2/Windows/PostgreSQL après v4.8.2. Trois
 signalements reçus, triés sans pouvoir déboguer le process Windows en
