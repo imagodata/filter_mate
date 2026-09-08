@@ -1,17 +1,17 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.5** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.6** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#485---2026-09-08)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#486---2026-09-08)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.5 fixes theme synchronization for existing profiles, dark-mode PNG icon contrast and filtering-row alignment. See [what's new](#-whats-new-in-485).
+**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.6 fixes theme synchronization for existing profiles, dark-mode PNG icon contrast and filtering-row alignment. See [what's new](#-whats-new-in-486).
 
 ---
 
@@ -31,7 +31,7 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.5
+### 🆕 What's new in 4.8.6
 
 - **QGIS themes**: follow native colors in Default, Night Mapping and Blend of Gray. Existing `default` settings now follow QGIS; choose `light` or `dark` to force an appearance.
 - **Readable icons**: invert PNG artwork in dark mode and refresh icons after startup and subsequent changes, including tabs and centroid controls.

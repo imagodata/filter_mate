@@ -2,7 +2,7 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [4.8.5] - 2026-09-08
+## [4.8.6] - 2026-09-08
 
 ### QGIS 3 / Qt5 and QGIS 4 / Qt6 theme fixes
 
@@ -12,6 +12,13 @@ All notable changes to FilterMate will be documented in this file.
 - Reduce the filtering icon rail to match the exploration rail, and give the target-layer row the same horizontal expansion as the source-layer row. Preserve every button and its dimensions.
 - Retain the checkbox-painting and feature-list mouse-event fixes from 4.8.4.
 - Validation: 37 targeted tests pass separately under PyQt5 and PyQt6. Eight isolated renders use real QGIS 3.44.8 / Qt 5.15.13 and QGIS 4.2.0 / Qt 6.11.0 widgets. These renders do not replace a complete interactive plugin test.
+
+## [4.8.5] - 2026-09-08
+
+### Release metadata and documentation
+
+- Update release metadata and documentation while retaining the Qt5/Qt6 checkbox and mouse-event fixes from 4.8.4.
+- The subsequent theme, icon and alignment corrections are published to the QGIS repository as 4.8.6; the repository does not accept replacement uploads with the same version number.
 
 ## [4.8.4] - 2026-09-08
 
