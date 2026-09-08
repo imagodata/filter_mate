@@ -2,7 +2,7 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [4.8.4] - 2026-08-01
+## [4.8.4] - 2026-09-08
 
 ### 🚑 Third QGIS 4.x hotfix — checkbox delegate crash
 

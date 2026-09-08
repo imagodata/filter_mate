@@ -50,6 +50,8 @@ rsync -a --quiet \
     --exclude='.github/**' \
     --exclude='.vscode' \
     --exclude='.vscode/**' \
+    --exclude='.agents' \
+    --exclude='.codex' \
     --exclude='.claude' \
     --exclude='.claude/**' \
     --exclude='.serena' \

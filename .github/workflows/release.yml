@@ -97,7 +97,8 @@ jobs:
         run: |
           ZIP_PATH="dist/${{ steps.meta.outputs.ZIP_NAME }}"
           ls -lh "$ZIP_PATH"
-          unzip -l "$ZIP_PATH" | head -30
+          python3 -m zipfile -t "$ZIP_PATH"
+          python3 scripts/publish_qgis.py "$ZIP_PATH" --validate-only
 
       # ── Upload artifact inter-jobs ───────────────────────────────────────────
       - name: Sauvegarder le ZIP
@@ -113,8 +114,10 @@ jobs:
         run: |
           VERSION="${{ steps.meta.outputs.VERSION }}"
           # Cherche la section ## [VERSION] jusqu'à la prochaine section ##
-          NOTES=$(awk "/^## \[?${VERSION}\]?/,/^## [^[]/" CHANGELOG.md \
-                  | grep -v "^## " | sed '/^$/d' | head -80)
+          NOTES=$(awk -v version="$VERSION" '
+            /^## / { if (found) exit; if (index($0, "[" version "]")) found=1; next }
+            found { print }
+          ' CHANGELOG.md)
           if [ -z "$NOTES" ]; then
             NOTES="Release v${VERSION} — voir CHANGELOG.md pour les détails."
           fi
@@ -153,30 +156,7 @@ jobs:
           OSGEO_PASSWORD: ${{ secrets.OSGEO_PASSWORD }}
         run: |
           ZIP_PATH="dist/${{ steps.meta.outputs.ZIP_NAME }}"
-          VERSION="${{ steps.meta.outputs.VERSION }}"
-
-          echo "📤 Publication de FilterMate v${VERSION} sur plugins.qgis.org…"
-
-          HTTP_CODE=$(curl --silent --output response.json --write-out "%{http_code}" \
-            --request POST \
-            --user "${OSGEO_USERNAME}:${OSGEO_PASSWORD}" \
-            --form "package=@${ZIP_PATH}" \
-            "https://plugins.qgis.org/plugins/RPC2")
-
-          echo "Code HTTP : $HTTP_CODE"
-          cat response.json || true
-
-          if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
-            echo "✅ Plugin publié avec succès sur plugins.qgis.org !"
-          else
-            echo "❌ Échec de la publication (HTTP $HTTP_CODE)"
-            python3 -c "
-          import sys
-          content = open('response.json').read()
-          print(content[:2000])
-          " || true
-            exit 1
-          fi
+          python3 scripts/publish_qgis.py "$ZIP_PATH"
 
       - name: Résumé de la release
         run: |
@@ -188,7 +168,7 @@ jobs:
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             echo "| plugins.qgis.org | ⏭️ Skippé (dry-run) |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| plugins.qgis.org | ✅ Publiée |" >> $GITHUB_STEP_SUMMARY
+            echo "| plugins.qgis.org | ✅ Envoyée (approbation QGIS distincte) |" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📦 ZIP : \`${{ steps.meta.outputs.ZIP_NAME }}\`" >> $GITHUB_STEP_SUMMARY

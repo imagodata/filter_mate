@@ -1,17 +1,17 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.3** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.4** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#483---2026-07-31)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#484---2026-09-08)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.3 is a config-log cleanup from continued real-world QGIS 4.2 testing. See [what's new](#-whats-new-in-483).
+🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.4 fixes checkbox painting on QGIS 4 and feature-list clicks on QGIS 3. See [what's new](#-whats-new-in-484).
 
 ---
 
@@ -31,7 +31,13 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.3
+### 🆕 What's new in 4.8.4
+
+- **Checkbox rendering**: correct the QStyle primitive name used by the custom delegate.
+- **Feature-list clicks**: support both Qt5 `pos()` and Qt6 `position()`.
+- **Tests**: 1499 passed, 1 skipped (Python 3.12).
+
+### What's new in 4.8.3
 
 - **Config log cleanup**: the "Schema file not found" message logged on every config reload (the schema was intentionally removed as unused in an earlier release) is now `Info` instead of `Warning`. Also closed out 2 live-testing reports as confirmed non-bugs: the `QGIS3`-named settings path is QGIS 4.2's own behavior, and a 33%-stuck "Adding layers" dialog turned out to be QGIS's own project loader, not FilterMate.
 - **Tests**: 1493 ✅.
