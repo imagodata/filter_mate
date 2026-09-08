@@ -639,6 +639,8 @@ class ThemeManager(StylerBase):
         Args:
             theme: Theme name ('light', 'dark', 'default', 'auto')
         """
+        if theme == 'default':
+            theme = 'auto'
         old_auto = self._auto_detect
         self._auto_detect = theme == 'auto'
         if self._auto_detect:

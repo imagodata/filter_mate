@@ -108,6 +108,9 @@ class IconManager(StylerBase):
         self._sync_with_theme_manager()
 
         self._initialized = True
+        # Buttons are configured before ThemeManager.setup(). Reapply their
+        # registered artwork now that the actual text contrast is known.
+        self.apply()
         logger.info(f"IconManager initialized with theme: {self._current_theme}")
 
     def apply(self) -> bool:
@@ -242,6 +245,18 @@ class IconManager(StylerBase):
                 if not icon.isNull():
                     button.setIcon(icon)
                     updated += 1
+
+        toolbox = getattr(self.dockwidget, 'toolBox_tabTools', None)
+        if toolbox is not None:
+            for index, filename in enumerate(('filter_multi.png', 'save.png', 'parameters.png')):
+                if index < toolbox.count():
+                    toolbox.setItemIcon(index, self.get_icon(filename))
+
+        for name in ('checkBox_filtering_use_centroids_source_layer',
+                     'checkBox_filtering_use_centroids_distant_layers'):
+            checkbox = getattr(self.dockwidget, name, None)
+            if checkbox is not None:
+                self.set_button_icon(checkbox, 'centroid.png')
 
         logger.info(f"Refreshed {updated} button icons for theme '{self._current_theme}'")
         return updated

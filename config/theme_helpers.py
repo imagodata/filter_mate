@@ -41,17 +41,16 @@ def get_active_theme(config_data: Dict[str, Any]) -> str:
         config_data: Configuration dictionary
 
     Returns:
-        Active theme name, defaults to 'default'
+        Active theme name. Legacy 'default' follows QGIS; 'light' forces light.
     """
     # Try new structure
     theme = get_config_value(config_data, "app", "active_theme")
-    if theme:
-        return theme.get('value', 'auto') if isinstance(theme, dict) else theme
-    # Try old structure
-    theme = get_config_value(config_data, "APP", "DOCKWIDGET", "COLORS", "ACTIVE_THEME")
+    if not theme:
+        # Try old structure. Existing profiles retain this value across updates.
+        theme = get_config_value(config_data, "APP", "DOCKWIDGET", "COLORS", "ACTIVE_THEME")
     if isinstance(theme, dict):
         theme = theme.get('value')
-    return theme or "auto"
+    return "auto" if not theme or theme == "default" else theme
 
 
 def get_theme_colors(config_data: Dict[str, Any], theme_name: str) -> Dict[str, Any]:

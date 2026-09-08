@@ -4,7 +4,9 @@
 
 Le mode `auto` suit les couleurs effectives de QGIS : fonds, champs, texte,
 sélections et contraste des icônes. Il devient le choix des configurations
-livrées. Les choix explicites `default`, `light` et `dark` restent disponibles.
+livrées. L'ancien choix enregistré `default` suit également QGIS, pour les
+profils existants sous QGIS 3 et 4. Les choix explicites `light` et `dark`
+restent disponibles pour imposer une apparence.
 
 Les couleurs sont lues sur des widgets Qt non affichés, indépendants du panneau
 FilterMate. Cela tient compte des thèmes QSS qui ne modifient pas la palette
@@ -39,7 +41,7 @@ des icônes sont compatibles Qt 5 et Qt 6. Les fichiers d'icônes sont conservé
 les variantes sombres sont dérivées du dessin clair, car plusieurs fichiers
 nommés `white` contiennent en réalité des pixels noirs.
 
-Les 30 tests ciblés passent avec PyQt5 et PyQt6 : synchronisation, ancienne
+Les 37 tests ciblés passent avec PyQt5 et PyQt6 : synchronisation, ancienne
 configuration, absence du signal QGIS 4, contraste des icônes et conservation
 des contraintes des boutons lors du remplacement des couleurs.
 
@@ -60,3 +62,8 @@ Pour chaque apparence, il reste à vérifier dans une session interactive :
 - panneaux Favoris et Configuration, qui possèdent encore des styles propres.
 
 La correction porte sur les couleurs du panneau principal et leur synchronisation.
+
+Les icônes PNG chargées avant le thème sont réappliquées après synchronisation.
+Les rechargements et changements d’état passent par IconManager, y compris
+les onglets et les cases de centroïdes. La deuxième ligne de filtrage reçoit
+le même facteur d’étirement horizontal que la première.

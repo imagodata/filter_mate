@@ -85,6 +85,10 @@ def test_effective_theme_colors(theme_modules, monkeypatch, background, field, t
 
 @pytest.mark.parametrize('config,expected', [
     ({}, 'auto'),
+    ({'app': {'active_theme': 'default'}}, 'auto'),
+    ({'app': {'active_theme': {'value': 'default'}}}, 'auto'),
+    ({'APP': {'DOCKWIDGET': {'COLORS': {'ACTIVE_THEME': {'value': 'default'}}}}}, 'auto'),
+    ({'APP': {'DOCKWIDGET': {'COLORS': {'ACTIVE_THEME': 'default'}}}}, 'auto'),
     ({'app': {'active_theme': 'dark'}}, 'dark'),
     ({'APP': {'DOCKWIDGET': {'COLORS': {'ACTIVE_THEME': {'value': 'auto'}}}}}, 'auto'),
     ({'APP': {'DOCKWIDGET': {'COLORS': {'ACTIVE_THEME': {'value': 'light'}}}}}, 'light'),
@@ -107,6 +111,27 @@ def test_explicit_theme_stops_following_qgis(theme_modules, monkeypatch):
     manager.set_theme('dark')
     assert not manager.follows_qgis_theme
     assert manager.get_colors()['color_bg_0'] == '#1E1E1E'
+
+
+def test_existing_default_profile_follows_qgis_colors(theme_modules, monkeypatch):
+    config = {'APP': {'DOCKWIDGET': {'COLORS': {'ACTIVE_THEME': {'value': 'default'}}}}}
+    manager = theme_modules.theme_manager.ThemeManager(types.SimpleNamespace(CONFIG_DATA=config))
+    colors = theme_modules.style_loader.StyleLoader.COLOR_SCHEMES['dark'].copy()
+    monkeypatch.setattr(theme_modules.style_loader.StyleLoader, 'get_qgis_colors', lambda: colors)
+    manager._load_config()
+    assert manager.follows_qgis_theme
+    assert manager.get_colors() == colors
+
+
+def test_selecting_default_resumes_qgis_theme(theme_modules, monkeypatch):
+    manager = theme_modules.theme_manager.ThemeManager(types.SimpleNamespace())
+    monkeypatch.setattr(manager, 'apply', lambda: True)
+    monkeypatch.setattr(manager, 'detect_system_theme', lambda: 'dark')
+    manager.set_theme('light')
+    assert not manager.follows_qgis_theme
+    manager.set_theme('default')
+    assert manager.follows_qgis_theme
+    assert manager.current_theme == 'dark'
 
 
 def test_auto_stylesheet_refreshes_colors_without_changing_contrast(theme_modules, monkeypatch):

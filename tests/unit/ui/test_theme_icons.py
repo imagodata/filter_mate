@@ -105,3 +105,28 @@ def test_button_theme_replacement_changes_only_colors(styles):
     assert button.size() == size
     assert button.sizeHint() == hint
     assert button.icon().cacheKey() == icon
+
+
+def test_setup_recolors_icons_loaded_before_theme_and_refreshes_auxiliary_icons(styles):
+    _, modules = styles
+    dock = QtWidgets.QWidget()
+    dock.plugin_dir = str(ROOT)
+    callbacks = []
+    dock._theme_manager = types.SimpleNamespace(
+        current_theme='dark', add_theme_changed_callback=callbacks.append)
+    dock.toolBox_tabTools = QtWidgets.QToolBox(dock)
+    for label in ('Filtering', 'Exporting', 'Configuration'):
+        dock.toolBox_tabTools.addItem(QtWidgets.QWidget(), label)
+    dock.checkBox_filtering_use_centroids_source_layer = QtWidgets.QCheckBox(dock)
+    button = QtWidgets.QPushButton(dock)
+    manager = modules.icon_manager.IconManager(dock)
+    manager.set_button_icon(button, 'filter.png')  # Real startup loads icons first.
+    light = button.icon().pixmap(24, 24).toImage()
+    manager.setup()
+    dark = button.icon().pixmap(24, 24).toImage()
+    assert dark != light
+    assert dark == manager.get_icon('filter.png').pixmap(24, 24).toImage()
+    assert dock.toolBox_tabTools.itemIcon(0).pixmap(24, 24).toImage() == manager.get_icon('filter_multi.png').pixmap(24, 24).toImage()
+    assert not dock.checkBox_filtering_use_centroids_source_layer.icon().isNull()
+    callbacks[0]('default')
+    assert button.icon().pixmap(24, 24).toImage() == light

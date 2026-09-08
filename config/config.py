@@ -39,7 +39,7 @@ FALLBACK_CONFIG = {
             },
             "COLORS": {
                 "ACTIVE_THEME": {
-                    "value": "default",
+                    "value": "auto",
                     "choices": ["auto", "default", "dark", "light"],
                     "description": "Color theme for UI"
                 },

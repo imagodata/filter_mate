@@ -900,7 +900,7 @@ class ConfigurationManager(QObject):
         d.horizontalLayout_filtering_distant_layers = QtWidgets.QHBoxLayout()
         d.horizontalLayout_filtering_distant_layers.setSpacing(4)
         d.horizontalLayout_filtering_distant_layers.setContentsMargins(0, 0, 0, 0)
-        d.horizontalLayout_filtering_distant_layers.addWidget(d.checkableComboBoxLayer_filtering_layers_to_filter)
+        d.horizontalLayout_filtering_distant_layers.addWidget(d.checkableComboBoxLayer_filtering_layers_to_filter, 1)
         d.horizontalLayout_filtering_distant_layers.addWidget(d.checkBox_filtering_use_centroids_distant_layers)
 
         # Insert into main vertical layout at position 2 (after current layer, before predicates)
@@ -919,9 +919,7 @@ class ConfigurationManager(QObject):
         # inconsistent policies, which manifested as a squeezed row vs the
         # sibling QgsMapLayerComboBox row. Only the size policy is set here.
         d.checkableComboBoxLayer_filtering_layers_to_filter.setSizePolicy(
-            QtWidgets.QSizePolicy.Policy.Preferred,
-            QtWidgets.QSizePolicy.Policy.Fixed,
-        )
+            d.comboBox_filtering_current_layer.sizePolicy())
 
     def setup_exporting_tab_widgets(self):
         """v4.0 Sprint 16: Configure widgets for Exporting tab (migrated from dockwidget)."""

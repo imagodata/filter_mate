@@ -834,8 +834,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     if not os.path.exists(p):
                         logger.warning(f"_load_all_pushbutton_icons: Icon file not found: {p}")
                         continue
-                    icon = get_themed_icon(p) if ICON_THEME_AVAILABLE else QtGui.QIcon(p)
-                    w.setIcon(icon)
+                    if self._icon_manager:
+                        self._icon_manager.set_button_icon(w, p)
+                    else:
+                        icon = get_themed_icon(p) if ICON_THEME_AVAILABLE else QtGui.QIcon(p)
+                        w.setIcon(icon)
                     w.setIconSize(QtCore.QSize(sz, sz))
                     loaded_count += 1
                     logger.info(f"✓ {grp}.{name}: {ico_file}")
@@ -2313,7 +2316,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             for key in ["ICON_ON_FALSE", "ICON_ON_TRUE"]:
                 if key in cfg: wgt[key] = os.path.join(self.plugin_dir, "icons", cfg[key]); file_path = wgt[key]
         elif isinstance(cfg, str): wgt["ICON"] = file_path = os.path.join(self.plugin_dir, "icons", cfg)
-        if file_path:
+        if file_path and self._icon_manager:
+            self._icon_manager.set_button_icon(wgt["WIDGET"], file_path)
+        elif file_path:
             icon = get_themed_icon(file_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(file_path)
             wgt["WIDGET"].setIcon(icon)
 
@@ -2321,8 +2326,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 Sprint 17: Switch widget icon based on state."""
         key = "ICON_ON_TRUE" if state else "ICON_ON_FALSE"
         icon_path = self.widgets[widget_path[0].upper()][widget_path[1].upper()][key]
-        icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
-        self.widgets[widget_path[0].upper()][widget_path[1].upper()]["WIDGET"].setIcon(icon)
+        widget = self.widgets[widget_path[0].upper()][widget_path[1].upper()]["WIDGET"]
+        if self._icon_manager:
+            self._icon_manager.set_button_icon(widget, icon_path)
+        else:
+            icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
+            widget.setIcon(icon)
 
     def icon_per_geometry_type(self, geometry_type):
         """v4.0 Sprint 17: Get cached icon for geometry type.
@@ -2608,6 +2617,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def _refresh_icons_for_theme(self):
         """Refresh all button icons for the current theme."""
+        if self._icon_manager:
+            self._icon_manager.apply()
+            return
         if not ICON_THEME_AVAILABLE or not self.widgets_initialized: return
         try:
             for idx, icon in enumerate(["filter_multi.png", "save.png", "parameters.png"]):
