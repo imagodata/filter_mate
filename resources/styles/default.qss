@@ -97,6 +97,16 @@ END OF REMOVED SECTION */
     max-height: {combobox_height};
 }
 
+/* Style the embedded controls explicitly: QGIS themes may target these
+   descendants separately from the composite widget's background. */
+#dockWidgetContents QgsFeaturePickerWidget QComboBox,
+#dockWidgetContents QgsFeaturePickerWidget QLineEdit,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox,
+#dockWidgetContents QgsFieldExpressionWidget QLineEdit {
+    background-color: {color_1};
+    color: {color_font_0};
+}
+
 #dockWidgetContents QgsFeaturePickerWidget:hover,
 #dockWidgetContents QgsProjectionSelectionWidget:hover,
 #dockWidgetContents QgsMapLayerComboBox:hover,
@@ -885,9 +895,9 @@ QPushButton[objectName^="pushButton_checkable_exporting_"] {
 
 /* Widget Keys Panels - Sidebar buttons with responsive layout */
 /* Enhanced styling for better alignment and visual hierarchy */
-QWidget#widget_exploring_keys,
-QWidget#widget_filtering_keys,
-QWidget#widget_exporting_keys {
+#dockWidgetContents QWidget#widget_exploring_keys,
+#dockWidgetContents QWidget#widget_filtering_keys,
+#dockWidgetContents QWidget#widget_exporting_keys {
     background-color: {color_1};
     border: 1px solid {color_2};
     border-radius: 6px;

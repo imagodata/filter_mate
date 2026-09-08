@@ -623,6 +623,19 @@ class ThemeManager(StylerBase):
                         target_widget = contents
 
                 target_widget.setStyleSheet(stylesheet)
+                # Composite QGIS widgets and native sidebar QWidgets must paint
+                # their own QSS background instead of exposing the parent panel.
+                for name in (
+                    'widget_exploring_keys', 'widget_filtering_keys',
+                    'widget_exporting_keys',
+                    'mFeaturePickerWidget_exploring_single_selection',
+                    'mFieldExpressionWidget_exploring_single_selection',
+                    'mFieldExpressionWidget_exploring_multiple_selection',
+                    'mFieldExpressionWidget_exploring_custom_selection',
+                ):
+                    widget = getattr(self.dockwidget, name, None)
+                    if widget is not None:
+                        widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
                 logger.debug(f"Applied theme '{self._current_theme}' to {target_widget.objectName() or 'dockwidget'}")
                 return True
             else:

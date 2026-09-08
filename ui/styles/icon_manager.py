@@ -156,7 +156,7 @@ class IconManager(StylerBase):
             return QIcon()
 
         # Check exclusions
-        if icon_name in self.EXCLUDE_FROM_INVERSION:
+        if os.path.basename(icon_path) in self.EXCLUDE_FROM_INVERSION:
             return QIcon(icon_path)
 
         # Configurations can name either member of a black/white pair. Several
