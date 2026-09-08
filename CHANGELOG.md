@@ -2,6 +2,14 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.8.5] - 2026-09-08
+
+### Release metadata and documentation
+
+- Align the plugin version, About text, README and changelog with 4.8.5.
+- Document the checkbox-rendering and mouse-event compatibility fixes inherited from 4.8.4 for QGIS 3 / Qt5 and QGIS 4 / Qt6.
+- No runtime code changes in this release.
+
 ## [4.8.4] - 2026-09-08
 
 ### 🚑 Third QGIS 4.x hotfix — checkbox delegate crash

@@ -1,17 +1,17 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.4** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.5** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#484---2026-09-08)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#485---2026-09-08)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.4 fixes checkbox painting on QGIS 4 and feature-list clicks on QGIS 3. See [what's new](#-whats-new-in-484).
+🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.5 refreshes release metadata and documentation, retaining the v4.8.4 fixes for checkbox painting on QGIS 4 and feature-list clicks on QGIS 3. See [what's new](#-whats-new-in-485).
 
 ---
 
@@ -31,7 +31,13 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.4
+### 🆕 What's new in 4.8.5
+
+- **Release information**: align metadata, About text, README and changelog with 4.8.5.
+- **Qt5/Qt6 compatibility**: retains the checkbox-rendering and feature-list click fixes shipped in 4.8.4.
+- **Scope**: documentation and metadata update; no runtime code changes.
+
+### What's new in 4.8.4
 
 - **Checkbox rendering**: correct the QStyle primitive name used by the custom delegate.
 - **Feature-list clicks**: support both Qt5 `pos()` and Qt6 `position()`.
