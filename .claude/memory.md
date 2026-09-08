@@ -2,6 +2,39 @@
 _Auto-maintained by project agent_
 
 
+## [2026-08-01] v4.8.4 — troisième hotfix QGIS 4.x : la correction v4.8.0 de `PE_IndicatorViewItemCheck` était elle-même fausse
+Rapport utilisateur en direct (traceback QGIS 4.2/Windows) :
+`AttributeError: type object 'PrimitiveElement' has no attribute
+'PE_IndicatorViewItemCheck'. Did you mean: 'PE_IndicatorItemViewItemCheck'?`
+sur `ui/widgets/custom_widgets.py:163`, dans `paint()` du delegate checkbox
+personnalisé — crash à chaque rendu de ligne dès qu'un `CheckStateRole` est
+présent.
+
+Cause racine : le passage Qt6 de v4.8.0 (voir entrée `[2026-07-31]` "2 vrais
+positifs manqués... `QStyle.PE_IndicatorViewItemCheck` →
+`.PrimitiveElement.PE_IndicatorViewItemCheck`") a bien *scopé* l'accès mais
+n'a jamais vérifié que le nom de membre lui-même existait. Il n'a **jamais**
+existé sous l'orthographe `PE_IndicatorViewItemCheck` dans Qt4/5/6 — le vrai
+membre est `PE_IndicatorItemViewItemCheck` (un "Item" en plus). Sous PyQt5,
+l'ancien code non scopé (`QStyle.PE_IndicatorViewItemCheck`) aurait
+probablement levé la même AttributeError — juste jamais exercé en pratique
+avant ce report QGIS 4.2 (aucun test unitaire n'importe PyQt5/6 réel dans cet
+environnement, donc rien ne pouvait l'attraper statiquement).
+
+**Leçon** : un audit de "scoping d'enum" (forme plate → forme qualifiée) ne
+garantit pas que le nom de membre est correct — il faut aussi vérifier
+l'existence du membre final, pas seulement son espace de noms. Suggestion
+Qt a d'ailleurs donné la bonne orthographe directement dans le traceback
+("Did you mean: ...") : toujours lire ce champ avant de chercher plus loin.
+
+Fix : `QStyle.PrimitiveElement.PE_IndicatorViewItemCheck` →
+`QStyle.PrimitiveElement.PE_IndicatorItemViewItemCheck`
+(`ui/widgets/custom_widgets.py:163`). Seule occurrence dans tout le repo
+(vérifié par grep). Suite complète : 1493 passed / 1 skipped, aucune
+régression. Version bump 4.8.3 → 4.8.4, `metadata.txt` re-vérifié par
+parsing `configparser.get()` complet sur chaque clé (leçon de l'incident
+précédent [[v4.8.3 % non échappé]] — ne jamais se contenter d'un grep `^%`).
+
 ## [2026-08-01] v4.8.3 shippé cassé — % non échappé dans changelog=, ma propre vérification était trouée
 Immédiatement après le tag v4.8.3, l'utilisateur a tenté d'installer le zip
 GitHub Release dans QGIS et a eu : *"Errors parsing filter_mate/metadata.txt.

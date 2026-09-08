@@ -2,6 +2,16 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.8.4] - 2026-08-01
+
+### 🚑 Third QGIS 4.x hotfix — checkbox delegate crash
+
+Found via real-world QGIS 4.2/Windows testing after v4.8.3.
+
+- **Fix (critical)**: `AttributeError: type object 'PrimitiveElement' has no attribute 'PE_IndicatorViewItemCheck'`, raised on every paint of the custom checkbox delegate in `ui/widgets/custom_widgets.py`, crashing any view using it on QGIS 4.2/PyQt6. Root cause: the v4.8.0 Qt6-readiness sweep correctly *scoped* the enum access (`QStyle.PE_IndicatorViewItemCheck` → `QStyle.PrimitiveElement.PE_IndicatorViewItemCheck`) but never verified the base member name itself — `PE_IndicatorViewItemCheck` never existed under that spelling in Qt4/5/6; the real member has always been `PE_IndicatorItemViewItemCheck` (extra "Item"). Fixed to `QStyle.PrimitiveElement.PE_IndicatorItemViewItemCheck`, valid under both PyQt5 and PyQt6.
+- **Fix (Qt5)**: Feature-list clicks now use `event.pos()` on Qt5 and `event.position().toPoint()` on Qt6, fixing `QMouseEvent` AttributeError on QGIS 3.44.
+- **Tests**: 1499 passed, 1 skipped, including six mouse-event regression cases for Qt5/Qt6.
+
 ## [4.8.3] - 2026-07-31
 
 ### Config log cleanup

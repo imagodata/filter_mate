@@ -160,7 +160,7 @@ class ItemDelegate(QStyledItemDelegate):
                 opt.state = QStyle.StateFlag.State_On
             style = QApplication.style()
             style.drawPrimitive(
-                QStyle.PrimitiveElement.PE_IndicatorViewItemCheck, opt, painter, None
+                QStyle.PrimitiveElement.PE_IndicatorItemViewItemCheck, opt, painter, None
             )
 
         painter.restore()
@@ -1175,7 +1175,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 nonSubset_features_list = []
 
             if event.button() == Qt.MouseButton.LeftButton:
-                clicked_item = self.list_widgets[self.layer.id()].itemAt(event.position().toPoint())
+                # Qt6 exposes position() as QPointF; Qt5 uses pos() as QPoint.
+                click_pos = event.position().toPoint() if hasattr(event, 'position') else event.pos()
+                clicked_item = self.list_widgets[self.layer.id()].itemAt(click_pos)
                 if clicked_item is not None:
                     id_item = clicked_item.data(3)
                     if clicked_item.checkState() == Qt.CheckState.Checked:
