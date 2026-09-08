@@ -11,7 +11,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-🎉 **FilterMate now fully supports QGIS 4.2 / Qt6** — alongside QGIS 3.22+ / Qt5 — after three sweeps closing out every remaining PyQt5→PyQt6 compatibility gap, plus static regression guards to keep it that way. v4.8.5 refreshes release metadata and documentation, retaining the v4.8.4 fixes for checkbox painting on QGIS 4 and feature-list clicks on QGIS 3. See [what's new](#-whats-new-in-485).
+**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.5 fixes theme synchronization for existing profiles, dark-mode PNG icon contrast and filtering-row alignment. See [what's new](#-whats-new-in-485).
 
 ---
 
@@ -33,9 +33,10 @@
 
 ### 🆕 What's new in 4.8.5
 
-- **Release information**: align metadata, About text, README and changelog with 4.8.5.
-- **Qt5/Qt6 compatibility**: retains the checkbox-rendering and feature-list click fixes shipped in 4.8.4.
-- **Scope**: documentation and metadata update; no runtime code changes.
+- **QGIS themes**: follow native colors in Default, Night Mapping and Blend of Gray. Existing `default` settings now follow QGIS; choose `light` or `dark` to force an appearance.
+- **Readable icons**: invert PNG artwork in dark mode and refresh icons after startup and subsequent changes, including tabs and centroid controls.
+- **Filtering alignment**: match the upper and lower icon-rail widths and expand the second layer row like the first. All buttons and their dimensions are preserved.
+- **Compatibility**: retain the Qt5/Qt6 checkbox and mouse-event fixes. The 37 targeted theme/configuration tests pass under both bindings; see [validation details](docs/UI_UX_QGIS4.md).
 
 ### What's new in 4.8.4
 

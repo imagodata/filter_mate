@@ -4,11 +4,14 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [4.8.5] - 2026-09-08
 
-### Release metadata and documentation
+### QGIS 3 / Qt5 and QGIS 4 / Qt6 theme fixes
 
-- Align the plugin version, About text, README and changelog with 4.8.5.
-- Document the checkbox-rendering and mouse-event compatibility fixes inherited from 4.8.4 for QGIS 3 / Qt5 and QGIS 4 / Qt6.
-- No runtime code changes in this release.
+- Follow effective QGIS window, field, text and selection colors, including Night Mapping and Blend of Gray.
+- Treat the legacy saved `default` theme as `auto` so existing profiles follow QGIS after upgrading. Explicit `light` and `dark` choices remain available.
+- Invert monochrome PNG icons in dark mode while preserving transparency and artwork. Refresh icons loaded before theme initialization, including toolbox tabs and centroid controls; keep subsequent icon changes theme-aware.
+- Reduce the filtering icon rail to match the exploration rail, and give the target-layer row the same horizontal expansion as the source-layer row. Preserve every button and its dimensions.
+- Retain the checkbox-painting and feature-list mouse-event fixes from 4.8.4.
+- Validation: 37 targeted tests pass separately under PyQt5 and PyQt6. Eight isolated renders use real QGIS 3.44.8 / Qt 5.15.13 and QGIS 4.2.0 / Qt 6.11.0 widgets. These renders do not replace a complete interactive plugin test.
 
 ## [4.8.4] - 2026-09-08
 
