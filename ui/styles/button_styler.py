@@ -10,6 +10,7 @@ Phase: 6 - God Class DockWidget Migration
 
 from typing import TYPE_CHECKING, List
 import logging
+import re
 
 from qgis.PyQt.QtWidgets import QPushButton, QToolButton, QAbstractButton, QSizePolicy
 from qgis.PyQt.QtCore import Qt, QSize
@@ -128,6 +129,9 @@ class ButtonStyler(StylerBase):
         Called during dockwidget initialization.
         """
         self._detect_theme()
+        tm = getattr(self.dockwidget, '_theme_manager', None)
+        if tm is not None:
+            tm.add_theme_changed_callback(self.on_theme_changed)
         success = self.apply()
         if not success:
             logger.warning("ButtonStyler: Initial setup failed - some buttons may be unstyled")
@@ -176,7 +180,9 @@ class ButtonStyler(StylerBase):
     def _detect_theme(self) -> None:
         """Detect theme from dockwidget or QGIS."""
         try:
-            if hasattr(self.dockwidget, 'theme_manager'):
+            if getattr(self.dockwidget, '_theme_manager', None) is not None:
+                self._current_theme = self.dockwidget._theme_manager.current_theme
+            elif hasattr(self.dockwidget, 'theme_manager'):
                 self._current_theme = self.dockwidget.theme_manager.current_theme
             elif hasattr(self.dockwidget, '_current_theme'):
                 self._current_theme = self.dockwidget._current_theme
@@ -303,7 +309,7 @@ class ButtonStyler(StylerBase):
 
             # Update enabled state visual
             if not button.isEnabled():
-                button.setStyleSheet(self._get_disabled_style())
+                button.setStyleSheet(self._theme_colors_only(self._get_disabled_style()))
 
     def _get_action_buttons(self) -> List[QPushButton]:
         """Get list of action buttons from dockwidget."""
@@ -340,13 +346,35 @@ class ButtonStyler(StylerBase):
         button.setIconSize(QSize(action_icon, action_icon))
 
         # Apply theme-specific styling
-        if self.is_dark_theme():
+        if self._follows_qgis_theme():
+            # Keep the existing button geometry and states; replace colors only.
+            button.setStyleSheet(self._theme_colors_only(self._get_light_action_button_style()))
+        elif self.is_dark_theme():
             button.setStyleSheet(self._get_dark_action_button_style())
         else:
             button.setStyleSheet(self._get_light_action_button_style())
 
         if button not in self._styled_buttons:
             self._styled_buttons.append(button)
+
+    def _follows_qgis_theme(self) -> bool:
+        tm = getattr(self.dockwidget, '_theme_manager', None)
+        return tm is not None and tm.follows_qgis_theme
+
+    def _theme_colors_only(self, stylesheet: str) -> str:
+        """Adapt inline colors without changing padding, borders, icons or sizing."""
+        if not self._follows_qgis_theme():
+            return stylesheet
+        colors = self.dockwidget._theme_manager.get_colors()
+        replacements = {
+            '#f8f9fa': colors['color_bg_0'], '#212529': colors['color_font_0'],
+            '#dee2e6': colors['color_2'], '#e9ecef': colors['color_1'],
+            '#adb5bd': colors['color_font_2'], '#0d6efd': colors['color_accent'],
+            '#ffffff': colors['color_selected_text'], '#2d2d2d': colors['color_bg_0'],
+            '#666666': colors['color_font_2'], '#444444': colors['color_2'],
+        }
+        return re.sub(r'#[0-9a-fA-F]{6}',
+                      lambda match: replacements.get(match.group().lower(), match.group()), stylesheet)
 
     def _get_dark_action_button_style(self) -> str:
         """
@@ -475,5 +503,8 @@ class ButtonStyler(StylerBase):
 
     def teardown(self) -> None:
         """Clean up resources."""
+        tm = getattr(self.dockwidget, '_theme_manager', None)
+        if tm is not None:
+            tm.remove_theme_changed_callback(self.on_theme_changed)
         self._styled_buttons.clear()
         super().teardown()

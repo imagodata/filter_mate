@@ -212,7 +212,7 @@
       "COLORS": {
         "_display_name": "Appearance",
         "ACTIVE_THEME": {
-          "value": "default",
+          "value": "auto",
           "choices": [
             "auto",
             "default",

@@ -46,10 +46,12 @@ def get_active_theme(config_data: Dict[str, Any]) -> str:
     # Try new structure
     theme = get_config_value(config_data, "app", "active_theme")
     if theme:
-        return theme
+        return theme.get('value', 'auto') if isinstance(theme, dict) else theme
     # Try old structure
     theme = get_config_value(config_data, "APP", "DOCKWIDGET", "COLORS", "ACTIVE_THEME")
-    return theme or "default"
+    if isinstance(theme, dict):
+        theme = theme.get('value')
+    return theme or "auto"
 
 
 def get_theme_colors(config_data: Dict[str, Any], theme_name: str) -> Dict[str, Any]:
@@ -66,11 +68,11 @@ def get_theme_colors(config_data: Dict[str, Any], theme_name: str) -> Dict[str, 
     # Try new structure
     themes = get_config_value(config_data, "app", "themes")
     if themes and theme_name in themes:
-        return themes[theme_name]
+        return {key.lower(): value for key, value in themes[theme_name].items()}
     # Try old structure
     themes = get_config_value(config_data, "APP", "DOCKWIDGET", "COLORS", "THEMES")
     if themes and theme_name in themes:
-        return themes[theme_name]
+        return {key.lower(): value for key, value in themes[theme_name].items()}
     return {}
 
 

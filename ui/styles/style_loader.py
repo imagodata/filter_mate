@@ -54,6 +54,7 @@ class StyleLoader:
             'color_accent_pressed': '#0D47A1',   # Accent pressed (very dark blue)
             'color_accent_light_bg': '#E3F2FD',  # Accent light background
             'color_accent_dark': '#01579B',     # Accent dark border
+            'color_selected_text': '#FFFFFF',
             'icon_filter': 'none'               # No icon inversion for light theme
         },
         'dark': {
@@ -70,6 +71,7 @@ class StyleLoader:
             'color_accent_pressed': '#005A9E',  # Pressed reste sombre
             'color_accent_light_bg': '#264F78',  # Background accentué plus visible (harmonisé)
             'color_accent_dark': '#FFFFFF',     # Text sur fond accentué (blanc pour contraste)
+            'color_selected_text': '#FFFFFF',
             'icon_filter': 'invert(100%)'       # Invert icons to white for dark theme
         },
         'light': {
@@ -86,6 +88,7 @@ class StyleLoader:
             'color_accent_pressed': '#0D47A1',  # Accent pressed (dark blue)
             'color_accent_light_bg': '#E3F2FD',  # Accent light background
             'color_accent_dark': '#0D47A1',     # Accent dark border
+            'color_selected_text': '#FFFFFF',
             'icon_filter': 'none'               # No icon inversion for light theme
         }
     }
@@ -224,6 +227,7 @@ class StyleLoader:
                 '{color_accent_hover}': accent.get('HOVER', bg[3]),
                 '{color_accent_pressed}': accent.get('PRESSED', bg[3]),
                 '{color_accent_light_bg}': accent.get('LIGHT_BG', bg[2]),
+                '{color_selected_text}': accent.get('TEXT', '#FFFFFF'),
                 '{color_accent_dark}': accent.get('DARK', bg[3])
             }
 
@@ -254,13 +258,22 @@ class StyleLoader:
             config_data: Configuration dictionary
             theme: Theme name (None = use ACTIVE_THEME from config, 'auto' = detect from QGIS)
         """
+        from ...config.theme_helpers import get_active_theme
+        follow_qgis = theme == 'auto' or (theme is None and get_active_theme(config_data) == 'auto')
         # Auto-detect theme from config if not specified
         if theme is None:
             theme = cls.get_active_theme_from_config(config_data)
         elif theme == 'auto':
             theme = cls.detect_qgis_theme()
 
-        stylesheet = cls.load_stylesheet_from_config(config_data, theme)
+        if follow_qgis:
+            stylesheet = cls._load_raw_stylesheet('default')
+            for key, value in cls.get_qgis_colors().items():
+                stylesheet = stylesheet.replace(f'{{{key}}}', value)
+            if UI_CONFIG_AVAILABLE:
+                stylesheet = cls._apply_dynamic_dimensions(stylesheet)
+        else:
+            stylesheet = cls.load_stylesheet_from_config(config_data, theme)
         if stylesheet:
             widget.setStyleSheet(stylesheet)
             cls._current_theme = theme
@@ -314,7 +327,59 @@ class StyleLoader:
         return list(cls.COLOR_SCHEMES.keys())
 
     @classmethod
+    def get_qgis_colors(cls) -> Dict[str, str]:
+        """Read effective QGIS colors, including themes implemented with QSS.
+
+        Unshown probes inherit only the application style, never FilterMate's
+        stylesheet. QGIS's named themes can style windows and inputs differently
+        without updating QApplication.palette().
+        """
+        from qgis.PyQt.QtWidgets import QMainWindow, QLineEdit
+        probes = []
+        try:
+            window = QMainWindow()
+            probes.append(window)
+            field = QLineEdit(window)
+            for widget in (window, field):
+                widget.ensurePolished()
+            palette, inputs = window.palette(), field.palette()
+            colors = {
+                'color_bg_0': palette.window().color().name(),
+                'color_1': inputs.base().color().name(),
+                'color_2': palette.mid().color().name(),
+                'color_bg_3': inputs.highlight().color().name(),
+                'color_3': inputs.text().color().name(),
+                'color_font_0': inputs.text().color().name(),
+                'color_font_1': palette.windowText().color().name(),
+                'color_font_2': palette.placeholderText().color().name(),
+                'color_accent': inputs.highlight().color().name(),
+                'color_accent_hover': inputs.highlight().color().lighter(115).name(),
+                'color_accent_pressed': inputs.highlight().color().darker(115).name(),
+                # Named QSS themes may leave AlternateBase at its light default.
+                # Use a matched field background/text pair for subtle accents.
+                'color_accent_light_bg': inputs.base().color().name(),
+                'color_accent_dark': inputs.text().color().name(),
+                'color_selected_text': inputs.highlightedText().color().name(),
+            }
+            colors['icon_filter'] = (
+                'invert(100%)' if inputs.text().color().lightness() > inputs.base().color().lightness()
+                else 'none'
+            )
+            return colors
+        except (AttributeError, RuntimeError, TypeError) as e:
+            logger.debug(f"Could not read effective QGIS colors: {e}")
+            return cls.COLOR_SCHEMES[cls._detect_palette_theme()].copy()
+        finally:
+            for widget in probes:
+                widget.deleteLater()
+
+    @classmethod
     def detect_qgis_theme(cls) -> str:
+        """Choose icon contrast from the effective QGIS input colors."""
+        return 'dark' if cls.get_qgis_colors()['icon_filter'] != 'none' else 'default'
+
+    @classmethod
+    def _detect_palette_theme(cls) -> str:
         """
         Detect current QGIS theme and return appropriate plugin theme.
 
@@ -326,7 +391,9 @@ class StyleLoader:
         try:
             palette = QgsApplication.instance().palette()
             # Check background color brightness
-            bg_color = palette.color(palette.Window)
+            # The brush accessor works with both Qt 5 and Qt 6, where the
+            # unscoped palette.Window enum alias is no longer available.
+            bg_color = palette.window().color()
             # Calculate luminance (perceived brightness)
             # Formula: (0.299*R + 0.587*G + 0.114*B)
             luminance = (0.299 * bg_color.red() +

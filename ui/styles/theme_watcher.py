@@ -33,6 +33,7 @@ class QGISThemeWatcher:
     _instance = None
     _callbacks = []
     _last_theme = None
+    _last_colors = None
     _is_watching = False
 
     def __new__(cls):
@@ -67,7 +68,10 @@ class QGISThemeWatcher:
             app = QgsApplication.instance()
             if app:
                 app.paletteChanged.connect(self._on_palette_changed)
+                if hasattr(app, 'themeChanged'):
+                    app.themeChanged.connect(self._on_palette_changed)
                 self._last_theme = StyleLoader.detect_qgis_theme()
+                self._last_colors = StyleLoader.get_qgis_colors()
                 self._is_watching = True
                 logger.info(f"QGISThemeWatcher started (current theme: {self._last_theme})")
                 return True
@@ -85,6 +89,8 @@ class QGISThemeWatcher:
             app = QgsApplication.instance()
             if app:
                 app.paletteChanged.disconnect(self._on_palette_changed)
+                if hasattr(app, 'themeChanged'):
+                    app.themeChanged.disconnect(self._on_palette_changed)
         except Exception:  # nosec B110 - disconnect may fail if already disconnected, non-fatal
             pass
 
@@ -106,16 +112,18 @@ class QGISThemeWatcher:
         if callback in self._callbacks:
             self._callbacks.remove(callback)
 
-    def _on_palette_changed(self, palette) -> None:
+    def _on_palette_changed(self, palette=None) -> None:
         """Handle palette change from QGIS."""
         # Import here to avoid circular import
         from .style_loader import StyleLoader
 
         new_theme = StyleLoader.detect_qgis_theme()
+        new_colors = StyleLoader.get_qgis_colors()
 
-        if new_theme != self._last_theme:
+        if new_theme != self._last_theme or new_colors != self._last_colors:
             logger.info(f"QGIS theme changed: {self._last_theme} -> {new_theme}")
             self._last_theme = new_theme
+            self._last_colors = new_colors
 
             # Update StyleLoader current theme
             StyleLoader._current_theme = new_theme

@@ -2545,6 +2545,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         if self._theme_manager:
             self._theme_manager.setup()
+            self._setup_theme_watcher()
         else:
             self._apply_auto_configuration()
             self._apply_stylesheet()
@@ -2592,8 +2593,15 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def _on_qgis_theme_changed(self, new_theme: str):
         """Handle QGIS theme change event."""
         try:
+            from .config.theme_helpers import get_active_theme
+            if get_active_theme(self.CONFIG_DATA) != 'auto':
+                return
             if ICON_THEME_AVAILABLE: IconThemeManager.set_theme(new_theme)
-            StyleLoader.set_theme_from_config(self.dockWidgetContents, self.CONFIG_DATA, new_theme); self._refresh_icons_for_theme()
+            if self._theme_manager:
+                self._theme_manager.on_theme_changed(new_theme)
+            else:
+                StyleLoader.set_theme_from_config(self.dockWidgetContents, self.CONFIG_DATA, 'auto')
+            self._refresh_icons_for_theme()
             if hasattr(self, 'config_view') and self.config_view: self.config_view.refresh_theme_stylesheet(force_dark=(new_theme == 'dark'))
             show_info("FilterMate", self.tr("Theme adapted: {0}").format(self.tr("Dark mode") if new_theme == 'dark' else self.tr("Light mode")))
         except Exception as e: logger.error(f"Error applying theme change: {e}")

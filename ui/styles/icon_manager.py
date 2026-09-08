@@ -156,6 +156,23 @@ class IconManager(StylerBase):
         if icon_name in self.EXCLUDE_FROM_INVERSION:
             return QIcon(icon_path)
 
+        # Configurations can name either member of a black/white pair. Several
+        # shipped "white" files actually contain black pixels. Derive dark-mode
+        # contrast from the light artwork instead of trusting the filename.
+        if not force_invert:
+            filename = os.path.basename(icon_path)
+            for light_name, dark_name in self.VARIANT_ICONS.values():
+                if filename in (light_name, dark_name):
+                    variant_path = os.path.join(os.path.dirname(icon_path), light_name)
+                    if os.path.exists(variant_path):
+                        if self.is_dark_mode:
+                            cache_key = f"{variant_path}_{self._current_theme}"
+                            if cache_key not in self._icon_cache:
+                                self._icon_cache[cache_key] = QIcon(
+                                    self._invert_pixmap(QPixmap(variant_path)))
+                            return self._icon_cache[cache_key]
+                        return QIcon(variant_path)
+
         # For light themes, return original
         if not self.is_dark_mode:
             return QIcon(icon_path)
@@ -333,10 +350,13 @@ class IconManager(StylerBase):
         """Sync theme from ThemeManager if available."""
         try:
             # Try to get theme from dockwidget's theme manager
-            if hasattr(self.dockwidget, 'theme_manager'):
-                tm = self.dockwidget.theme_manager
+            tm = getattr(self.dockwidget, '_theme_manager', None)
+            if tm is None:
+                tm = getattr(self.dockwidget, 'theme_manager', None)
+            if tm is not None:
                 if hasattr(tm, 'current_theme'):
                     self._current_theme = tm.current_theme
+                    tm.add_theme_changed_callback(self.on_theme_changed)
                     return
 
             # Try legacy StyleLoader
@@ -348,5 +368,8 @@ class IconManager(StylerBase):
 
     def teardown(self) -> None:
         """Clean up resources."""
+        tm = getattr(self.dockwidget, '_theme_manager', None)
+        if tm is not None:
+            tm.remove_theme_changed_callback(self.on_theme_changed)
         self.clear_cache()
         super().teardown()

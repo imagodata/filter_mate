@@ -788,6 +788,12 @@ class DimensionsManager(LayoutManagerBase):
                     layout.setContentsMargins(0, 0, 0, 0)
                     layout.setSpacing(4)
 
+            # Keep the filtering icon rail compact, like the exploring rail;
+            # give surplus horizontal space to the fields instead.
+            if hasattr(self.dockwidget, 'horizontalLayout_filtering_content'):
+                self.dockwidget.horizontalLayout_filtering_content.setStretch(0, 0)
+                self.dockwidget.horizontalLayout_filtering_content.setStretch(1, 1)
+
             # Configure column stretch for gridLayout_main_actions
             if hasattr(self.dockwidget, 'gridLayout_main_actions'):
                 self.dockwidget.gridLayout_main_actions.setColumnStretch(0, 0)

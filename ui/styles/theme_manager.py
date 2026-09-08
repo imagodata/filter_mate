@@ -456,6 +456,7 @@ class ThemeManager(StylerBase):
             'color_accent_pressed': '#0D47A1',
             'color_accent_light_bg': '#E3F2FD',
             'color_accent_dark': '#01579B',
+            'color_selected_text': '#FFFFFF',
             'icon_filter': 'none'
         },
         'dark': {
@@ -472,6 +473,7 @@ class ThemeManager(StylerBase):
             'color_accent_pressed': '#005A9E',
             'color_accent_light_bg': '#264F78',
             'color_accent_dark': '#FFFFFF',
+            'color_selected_text': '#FFFFFF',
             'icon_filter': 'invert(100%)'
         },
         'light': {
@@ -488,6 +490,7 @@ class ThemeManager(StylerBase):
             'color_accent_pressed': '#0D47A1',
             'color_accent_light_bg': '#E3F2FD',
             'color_accent_dark': '#0D47A1',
+            'color_selected_text': '#FFFFFF',
             'icon_filter': 'none'
         }
     }
@@ -545,6 +548,10 @@ class ThemeManager(StylerBase):
     def is_dark_mode(self) -> bool:
         """Check if current theme is dark mode."""
         return self._current_theme == 'dark'
+
+    @property
+    def follows_qgis_theme(self) -> bool:
+        return self._auto_detect
 
     def setup(self) -> None:
         """
@@ -632,14 +639,16 @@ class ThemeManager(StylerBase):
         Args:
             theme: Theme name ('light', 'dark', 'default', 'auto')
         """
-        if theme == 'auto':
+        old_auto = self._auto_detect
+        self._auto_detect = theme == 'auto'
+        if self._auto_detect:
             theme = self.detect_system_theme()
 
         if theme not in self.COLOR_SCHEMES:
             logger.warning(f"Unknown theme '{theme}', falling back to 'default'")
             theme = 'default'
 
-        if theme != self._current_theme:
+        if theme != self._current_theme or old_auto != self._auto_detect:
             old_theme = self._current_theme
             self._current_theme = theme
             success = self.apply()
@@ -649,6 +658,7 @@ class ThemeManager(StylerBase):
             else:
                 logger.error(f"Theme change from '{old_theme}' to '{theme}' FAILED - reverting")
                 self._current_theme = old_theme  # Revert on failure
+                self._auto_detect = old_auto
 
     def detect_system_theme(self) -> str:
         """
@@ -659,29 +669,8 @@ class ThemeManager(StylerBase):
         Returns:
             str: 'dark' if QGIS uses dark theme, 'default' for light theme
         """
-        try:
-            app = QgsApplication.instance()
-            if app is None:
-                return 'default'
-
-            palette = app.palette()
-            bg_color = palette.color(palette.Window)
-
-            # Calculate luminance (perceived brightness)
-            luminance = (0.299 * bg_color.red() +
-                        0.587 * bg_color.green() +
-                        0.114 * bg_color.blue())
-
-            if luminance < 128:
-                logger.debug(f"Detected QGIS dark theme (luminance: {luminance:.0f})")
-                return 'dark'
-            else:
-                logger.debug(f"Detected QGIS light theme (luminance: {luminance:.0f})")
-                return 'default'
-
-        except Exception as e:
-            logger.warning(f"Could not detect QGIS theme: {e}")
-            return 'default'
+        from .style_loader import StyleLoader
+        return StyleLoader.detect_qgis_theme()
 
     def on_theme_changed(self, theme: str) -> None:
         """
@@ -690,7 +679,13 @@ class ThemeManager(StylerBase):
         Args:
             theme: New theme name
         """
-        self.set_theme(theme)
+        if self._auto_detect:
+            self._current_theme = self.detect_system_theme()
+            self.clear_cache()
+            if self.apply():
+                self._emit_theme_changed(self._current_theme)
+        else:
+            self.set_theme(theme)
 
     def get_color(self, color_key: str) -> str:
         """
@@ -702,7 +697,7 @@ class ThemeManager(StylerBase):
         Returns:
             str: Color value (hex) or empty string if not found
         """
-        colors = self.COLOR_SCHEMES.get(self._current_theme, {})
+        colors = self.get_colors()
         return colors.get(color_key, '')
 
     def get_colors(self) -> Dict[str, str]:
@@ -712,6 +707,9 @@ class ThemeManager(StylerBase):
         Returns:
             Dict of color key -> color value
         """
+        if self._auto_detect:
+            from .style_loader import StyleLoader
+            return StyleLoader.get_qgis_colors()
         return self.COLOR_SCHEMES.get(self._current_theme, {}).copy()
 
     def get_available_themes(self) -> list:
@@ -731,12 +729,15 @@ class ThemeManager(StylerBase):
     def _load_config(self) -> None:
         """Load configuration from dockwidget or config file."""
         try:
-            if hasattr(self.dockwidget, 'config_data'):
-                self._config_data = self.dockwidget.config_data
+            self._config_data = getattr(self.dockwidget, 'CONFIG_DATA', None)
+            if self._config_data is None:
+                self._config_data = getattr(self.dockwidget, 'config_data', None)
+            if self._config_data is not None:
 
                 # Check for auto-detect setting
                 if self._config_data:
-                    active_theme = self._config_data.get('app', {}).get('active_theme', 'auto')
+                    from ...config.theme_helpers import get_active_theme
+                    active_theme = get_active_theme(self._config_data)
                     self._auto_detect = (active_theme == 'auto')
                     if not self._auto_detect:
                         self._current_theme = active_theme
@@ -754,7 +755,7 @@ class ThemeManager(StylerBase):
             Stylesheet content with colors applied
         """
         # Check cache
-        if theme in self._styles_cache:
+        if not self._auto_detect and theme in self._styles_cache:
             return self._styles_cache[theme]
 
         # Get raw stylesheet
@@ -763,7 +764,7 @@ class ThemeManager(StylerBase):
             return ""
 
         # Apply colors
-        colors = self.COLOR_SCHEMES.get(theme, self.COLOR_SCHEMES['default'])
+        colors = self.get_colors()
         for key, value in colors.items():
             stylesheet = stylesheet.replace(f'{{{key}}}', value)
 
@@ -777,7 +778,8 @@ class ThemeManager(StylerBase):
             logger.debug(f"Could not apply dynamic dimensions: {e}")
 
         # Cache result
-        self._styles_cache[theme] = stylesheet
+        if not self._auto_detect:
+            self._styles_cache[theme] = stylesheet
 
         return stylesheet
 
