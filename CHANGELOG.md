@@ -2,6 +2,20 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [4.8.7] - 2026-09-09
+
+### Interface and themes
+
+- Harmonize Exploring and Filtering input heights, borders, checkboxes and button bars across dark, light and gray QGIS themes.
+- Match scroll-area gutters and surrounding containers to the panel background. Update the dark palette with charcoal panels, darker inputs and white text.
+- Add 10 px below Exploring group titles to separate them from their child inputs.
+- Render configuration-tree labels and values in white on dark backgrounds, including custom color and range cells, while preserving selected-text contrast.
+
+### Fixes
+
+- Fix `AttributeError: type object 'IconManager' has no attribute 'set_theme'` when the QGIS palette changes. Notify each dock's icon manager through its instance API and preserve explicit theme overrides.
+- Stop pending layer additions and deferred callbacks during bulk layer removal and shutdown. Reset the dock once and disconnect widget signals before QGIS destroys the layers, avoiding repeated per-layer work.
+
 ## [4.8.6] - 2026-09-08
 
 ### QGIS 3 / Qt5 and QGIS 4 / Qt6 theme fixes
