@@ -164,7 +164,6 @@ def test_same_contrast_different_theme_notifies(theme_modules, monkeypatch):
     loader = theme_modules.style_loader.StyleLoader
     monkeypatch.setattr(loader, 'detect_qgis_theme', lambda: 'dark')
     monkeypatch.setattr(loader, 'get_qgis_colors', lambda: {'color_bg_0': '#323232'})
-    monkeypatch.setattr(loader, 'sync_icon_theme', lambda: None)
     watcher = theme_modules.theme_watcher.QGISThemeWatcher()
     watcher._last_theme = 'dark'
     watcher._last_colors = {'color_bg_0': '#202020'}
@@ -173,6 +172,26 @@ def test_same_contrast_different_theme_notifies(theme_modules, monkeypatch):
     watcher._on_palette_changed()
     watcher._on_palette_changed()
     callback.assert_called_once_with('dark')
+
+
+@pytest.mark.parametrize('nested', [False, True])
+def test_reload_theme_notifies_owning_icon_manager(theme_modules, monkeypatch, nested):
+    loader = theme_modules.style_loader.StyleLoader
+    manager = types.SimpleNamespace(on_theme_changed=MagicMock())
+    dock = types.SimpleNamespace(_icon_manager=manager)
+    widget = types.SimpleNamespace(parentWidget=lambda: dock) if nested else dock
+    def apply_theme(target, theme):
+        assert target is widget
+        loader._current_theme = theme
+    monkeypatch.setattr(loader, 'set_theme', apply_theme)
+    loader.reload_theme(widget, 'dark')
+    manager.on_theme_changed.assert_called_once_with('dark')
+
+
+def test_icon_sync_without_a_dock_is_safe(theme_modules):
+    loader = theme_modules.style_loader.StyleLoader
+    loader.sync_icon_theme()
+    loader.sync_icon_theme(types.SimpleNamespace())
 
 
 def test_qgis4_signal_lifecycle(theme_modules, monkeypatch):

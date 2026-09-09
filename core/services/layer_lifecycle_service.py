@@ -666,6 +666,27 @@ class LayerLifecycleService:
 
         # CRITICAL: Check if dockwidget exists before accessing its methods
         if dockwidget is not None:
+            # Reset once for the entire project, before QGIS destroys layers.
+            # Disconnect widget callbacks first: setLayer(None) otherwise emits
+            # changes that can rebuild selectors against the outgoing project.
+            dockwidget.disconnect_widgets_signals()
+            dockwidget._signals_connected = False
+            dockwidget.current_layer = None
+            dockwidget.has_loaded_layers = False
+            dockwidget._plugin_busy = False
+            dockwidget._updating_layers = False
+            dockwidget.PROJECT_LAYERS.clear()
+            picker = getattr(dockwidget, 'checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection', None)
+            if picker is not None:
+                try:
+                    previous = picker.blockSignals(True)
+                    try:
+                        picker.reset()
+                    finally:
+                        picker.blockSignals(previous)
+                except RuntimeError:
+                    pass  # Qt may already have destroyed the widget on unload.
+
             # CRITICAL: Reset layer combo box to prevent access violations
             # NOTE: Do NOT call clear() - it breaks the proxy model synchronization
             try:
@@ -688,6 +709,7 @@ class LayerLifecycleService:
             try:
                 if hasattr(iface, 'layerTreeView') and iface.layerTreeView():
                     iface.layerTreeView().currentLayerChanged.disconnect(dockwidget.on_layerTreeView_currentLayerChanged)
+                    dockwidget._layer_tree_view_signal_connected = False
                     logger.debug("FilterMate: Disconnected layerTreeView signal during remove_all_layers")
             except Exception as e:
                 logger.debug(f"FilterMate: Error disconnecting layerTreeView signal during remove_all_layers: {e}")

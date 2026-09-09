@@ -129,10 +129,8 @@ class QGISThemeWatcher:
             StyleLoader._current_theme = new_theme
             StyleLoader.clear_cache()
 
-            # Sync icon theme
-            StyleLoader.sync_icon_theme()
-
-            # Notify all callbacks
+            # Dock callbacks refresh their own IconManager after applying the
+            # theme, respecting docks that use an explicit theme override.
             for callback in self._callbacks:
                 try:
                     callback(new_theme)

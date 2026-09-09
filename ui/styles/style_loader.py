@@ -601,12 +601,7 @@ class StyleLoader:
         theme_to_apply = theme or cls._current_theme
         cls.set_theme(widget, theme_to_apply)
 
-        # Also update icon theme
-        try:
-            from .icon_manager import IconManager as IconThemeManager
-            IconThemeManager.set_theme(theme_to_apply)
-        except ImportError:
-            pass
+        cls.sync_icon_theme(widget)
 
     @classmethod
     def is_dark_mode(cls) -> bool:
@@ -619,13 +614,12 @@ class StyleLoader:
         return cls._current_theme == 'dark'
 
     @classmethod
-    def sync_icon_theme(cls) -> None:
-        """
-        Synchronize IconThemeManager with current StyleLoader theme.
-        """
-        try:
-            from .icon_manager import IconManager as IconThemeManager
-            IconThemeManager.set_theme(cls._current_theme)
-            logger.debug(f"Synced IconThemeManager to theme: {cls._current_theme}")
-        except ImportError:
-            logger.warning("IconThemeManager not available")
+    def sync_icon_theme(cls, widget=None) -> None:
+        """Notify the owning dock's icon manager; there is no global icon manager."""
+        while widget is not None:
+            manager = getattr(widget, '_icon_manager', None)
+            if manager is not None:
+                manager.on_theme_changed(cls._current_theme)
+                return
+            parent_widget = getattr(widget, 'parentWidget', None)
+            widget = parent_widget() if callable(parent_widget) else None

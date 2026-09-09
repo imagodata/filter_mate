@@ -236,6 +236,10 @@ class FilterMateApp:
 
     def _on_layers_added(self, layers):
         """Signal handler for layersAdded: accumulate layers and process as single batch."""
+        if getattr(self, '_unloading', False):
+            return
+        # A real addition starts a new lifecycle after removeAllMapLayers().
+        self._removing_all_layers = False
         # Accumulate layers during startup burst
         if not hasattr(self, '_pending_added_layers'):
             self._pending_added_layers = []
@@ -257,6 +261,8 @@ class FilterMateApp:
 
     def _process_pending_added_layers(self):
         """Process all accumulated layers as a single batch."""
+        if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
+            return
         if not hasattr(self, '_pending_added_layers') or not self._pending_added_layers:
             return
 
@@ -294,6 +300,11 @@ class FilterMateApp:
 
     def cleanup(self):
         """Clean up plugin resources on unload or reload. Delegates to LayerLifecycleService."""
+        if getattr(self, '_unloading', False):
+            return
+        self._unloading = True
+        self._stop_pending_layer_additions()
+        self._safe_cancel_all_tasks()
         service = self._get_layer_lifecycle_service()
         if service:
             auto_cleanup_enabled = getattr(self.dockwidget, '_pg_auto_cleanup_enabled', True) if self.dockwidget else True
@@ -996,6 +1007,8 @@ class FilterMateApp:
 
     def _safe_layer_operation(self, layer, properties, operation):
         """Safely execute a layer operation by deferring to Qt event loop and re-fetching layer."""
+        if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
+            return
         from qgis.PyQt.QtCore import QTimer
         try:
             if layer is None or sip.isdeleted(layer): return
@@ -1007,6 +1020,8 @@ class FilterMateApp:
         # callback to run as soon as control returns to the event loop.
 
         def deferred_operation():
+            if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
+                return
             # CRASH FIX (v2.3.18): Check if QGIS is still alive before any operations
             if not is_qgis_alive():
                 logger.debug("_safe_layer_operation: QGIS is shutting down, skipping")
@@ -1062,8 +1077,24 @@ class FilterMateApp:
             logger.error(f"Spatialite connection fallback failed: {e}")
             return None
 
+    def _stop_pending_layer_additions(self):
+        """Discard queued additions before their layer objects are destroyed."""
+        timer = getattr(self, '_layers_added_timer', None)
+        if timer is not None:
+            timer.stop()
+        self._pending_added_layers = []
+        self._add_layers_queue.clear()
+        self._pending_add_layers_tasks = 0
+
     def _handle_remove_all_layers(self):
         """Delegates to LayerLifecycleService.handle_remove_all_layers()."""
+        if getattr(self, '_removing_all_layers', False):
+            return
+        # QGIS emits allLayersRemoved BEFORE layersWillBeRemoved. Keep this
+        # guard until the next project/addition so trailing signals and queued
+        # task callbacks cannot rebuild UI or start per-layer removal work.
+        self._removing_all_layers = True
+        self._stop_pending_layer_additions()
         service = self._get_layer_lifecycle_service()
         if not service:
             logger.error("LayerLifecycleService not available, cannot handle remove all layers")
@@ -1073,6 +1104,8 @@ class FilterMateApp:
             cancel_tasks_callback=self._safe_cancel_all_tasks,
             dockwidget=self.dockwidget
         )
+        self.PROJECT_LAYERS.clear()
+        self.project_datasources = {'postgresql': {}, 'spatialite': {}, 'ogr': {}}
 
     def _handle_project_initialization(self, task_name):
         """Handle project read/new project initialization. Delegates to LayerLifecycleService."""
@@ -1386,6 +1419,16 @@ class FilterMateApp:
 
         v4.1.0: Restored from before_migration with full guards and protections.
         """
+        if getattr(self, '_unloading', False):
+            return
+        if task_name == 'remove_all_layers':
+            self._handle_remove_all_layers()
+            return
+        if task_name in ('project_read', 'new_project'):
+            self._removing_all_layers = False
+        elif getattr(self, '_removing_all_layers', False):
+            return
+
         logger.debug(f"manage_task: task_name={task_name}, data={data is not None}")
 
         if task_name not in self.tasks_descriptions:
@@ -1516,6 +1559,8 @@ class FilterMateApp:
 
     def _handle_layer_task_terminated(self, task_name):
         """Handle layer management task termination (failure or cancellation) to prevent stuck UI."""
+        if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
+            return
         logger.warning(f"Layer management task '{task_name}' was terminated")
 
         # STABILITY FIX: Reset counters and flags on task failure using tracked flags
@@ -2352,6 +2397,8 @@ class FilterMateApp:
 
     def filter_engine_task_completed(self, task_name, source_layer, task_parameters):
         """Handle completion of filtering operations via FilterResultHandler."""
+        if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
+            return
         if not self._filter_result_handler:
             logger.error("FilterResultHandler not available")
             iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error: result handler missing"))
@@ -2542,6 +2589,8 @@ class FilterMateApp:
 
     def layer_management_engine_task_completed(self, result_project_layers, task_name):
         """Handle layer management task completion. Delegates to LayerTaskCompletionHandler."""
+        if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
+            return
         if self._layer_task_completion_handler is not None:
             try:
                 # Initialize ENV_VARS before delegation
