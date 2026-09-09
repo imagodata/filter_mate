@@ -1,0 +1,93 @@
+/* Keep the space surrounding the filtering controls at panel brightness. */
+#dockWidgetContents QToolBox#toolBox_tabTools,
+#dockWidgetContents QWidget#FILTERING,
+#dockWidgetContents QWidget#EXPORTING,
+#dockWidgetContents QWidget#CONFIGURATION,
+#dockWidgetContents QFrame#frame_exploring,
+#dockWidgetContents QgsCollapsibleGroupBox {
+    background-color: {color_bg_0};
+}
+
+/* Scroll-area frames and viewports paint the gutters outside the controls. */
+#dockWidgetContents QScrollArea {
+    background-color: {color_bg_0};
+    border-color: {color_bg_0};
+}
+
+#dockWidgetContents QScrollArea > QWidget#qt_scrollarea_viewport,
+#dockWidgetContents QWidget#scrollAreaWidgetContents {
+    background-color: {color_bg_0};
+}
+
+/* Composite inputs have the same total height as filtering combo boxes. */
+#dockWidgetContents QgsFeaturePickerWidget,
+#dockWidgetContents QgsFieldExpressionWidget {
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+    min-height: {combobox_outer_height};
+    max-height: {combobox_outer_height};
+}
+
+/* Composite widgets leave the input outline to their embedded combo box. */
+#dockWidgetContents QgsFeaturePickerWidget QComboBox,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox {
+    background-color: {control_surface};
+    color: {control_text};
+    border: 1px solid {control_border};
+    border-radius: 4px;
+    padding: 4px 8px;
+    min-height: 0px;
+    max-height: {combobox_height};
+}
+
+#dockWidgetContents QgsFeaturePickerWidget QComboBox QLineEdit,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox QLineEdit {
+    background-color: {control_surface};
+    color: {control_text};
+    border: none;
+    padding: 0px;
+    min-height: 0px;
+}
+
+#dockWidgetContents QgsFeaturePickerWidget QComboBox:hover,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox:hover,
+#dockWidgetContents QgsFeaturePickerWidget QComboBox:focus,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox:focus {
+    border-color: {color_accent};
+}
+
+#dockWidgetContents QgsFeaturePickerWidget QToolButton,
+#dockWidgetContents QgsFieldExpressionWidget QToolButton {
+    background-color: {control_surface};
+    border: 1px solid {control_border};
+    border-radius: 4px;
+}
+
+#dockWidgetContents QgsCollapsibleGroupBox::indicator {
+    width: 18px;
+    height: 18px;
+    border: 2px solid {control_border};
+    border-radius: 3px;
+    background-color: {color_bg_0};
+}
+
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:checked {
+    background-color: {button_active_background};
+    image: url("{control_check_icon}");
+}
+
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:hover {
+    border-color: {color_accent};
+}
+
+#dockWidgetContents #widget_exploring_keys QPushButton:checked,
+#dockWidgetContents #widget_filtering_keys QPushButton:checked,
+#dockWidgetContents #widget_exporting_keys QPushButton:checked,
+#dockWidgetContents #frame_actions QPushButton:checked,
+#dockWidgetContents #widget_exploring_keys QToolButton:checked,
+#dockWidgetContents #widget_filtering_keys QToolButton:checked,
+#dockWidgetContents #widget_exporting_keys QToolButton:checked,
+#dockWidgetContents #frame_actions QToolButton:checked {
+    border: 1px solid {button_active_border};
+}

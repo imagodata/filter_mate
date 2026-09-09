@@ -58,14 +58,14 @@ class StyleLoader:
             'icon_filter': 'none'               # No icon inversion for light theme
         },
         'dark': {
-            'color_bg_0': '#1E1E1E',    # Dark frame background (harmonisé avec JsonView)
-            'color_1': '#252526',       # Widget background (VS Code dark style)
-            'color_2': '#37373D',       # Selected items (plus visible)
+            'color_bg_0': '#3A3A3A',    # Charcoal panel background
+            'color_1': '#2C2C2C',       # Recessed fields and icon bars
+            'color_2': '#242424',       # Subtle dark borders
             'color_bg_3': '#0E639C',    # Splitter hover (bleu plus sombre)
             'color_3': '#CCCCCC',       # Light text (légèrement plus doux)
-            'color_font_0': '#D4D4D4',  # Primary text (plus confortable pour les yeux)
-            'color_font_1': '#9D9D9D',  # Secondary text (plus de contraste avec primary)
-            'color_font_2': '#6A6A6A',  # Disabled text (plus foncé pour bien différencier)
+            'color_font_0': '#FFFFFF',  # Primary text (plus confortable pour les yeux)
+            'color_font_1': '#BFBFBF',  # Secondary text (plus de contraste avec primary)
+            'color_font_2': '#666666',  # Disabled text (plus foncé pour bien différencier)
             'color_accent': '#007ACC',  # Bleu VS Code (parfait)
             'color_accent_hover': '#1177BB',    # Hover plus subtil
             'color_accent_pressed': '#005A9E',  # Pressed reste sombre
@@ -101,21 +101,36 @@ class StyleLoader:
         background = QColor(colors.get('color_1', '#ffffff'))
         foreground = QColor(colors.get('color_font_0', '#000000'))
         dark = background.lightness() < 128 and foreground.lightness() > background.lightness()
-        surface = '#555555' if dark else (
+        surface = '#2c2c2c' if dark else (
             '#c8c8c8' if background.lightness() < 200 else '#ffffff')
-        text = '#eeeeee' if dark else colors.get('color_font_0', '#000000')
+        text = '#ffffff' if dark else colors.get('color_font_0', '#000000')
         path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
                             'resources', 'styles', 'control_surfaces.qss')
         with open(path, encoding='utf-8') as source:
             stylesheet += '\n' + source.read().replace(
                 '{control_surface}', surface).replace('{control_text}', text)
-        if dark or background.lightness() < 200:
-            with open(os.path.join(os.path.dirname(path), 'panel_buttons.qss'), encoding='utf-8') as source:
-                panel = QColor(colors.get('color_bg_0', '#1e1e1e'))
-                active_background = (panel.name() if panel.lightness() < background.lightness()
-                                     else background.name())
-                stylesheet += '\n' + source.read().replace(
-                    '{button_active_background}', active_background)
+        panel = QColor(colors.get('color_bg_0', '#ffffff'))
+        if dark:
+            active_background = '#444444'
+        elif background.lightness() < 200:
+            active_background = (panel.name() if panel.lightness() < background.lightness()
+                                 else background.name())
+        else:
+            active_background = colors.get('color_accent', '#1565C0')
+        replacements = {
+            'control_surface': surface,
+            'control_text': text,
+            'control_border': '#242424' if dark else colors.get('color_2', '#cccccc'),
+            'button_active_background': active_background,
+            'button_active_border': '#222222' if dark else colors.get('color_accent_dark', '#01579B'),
+            'control_check_icon': os.path.join(os.path.dirname(path), 'check_white.svg').replace('\\', '/'),
+        }
+        for filename in ('panel_buttons.qss', 'themed_controls.qss'):
+            with open(os.path.join(os.path.dirname(path), filename), encoding='utf-8') as source:
+                rules = source.read()
+            for key, value in replacements.items():
+                rules = rules.replace(f'{{{key}}}', value)
+            stylesheet += '\n' + rules
         return stylesheet
 
     @classmethod
@@ -538,6 +553,11 @@ class StyleLoader:
             }
 
             # Apply replacements
+            # The composite QWidget has no border/padding of its own; reserve
+            # the embedded combo's content height plus its 4px padding and 1px border.
+            combo_height = UIConfig.get_config('combobox', 'height')
+            if combo_height is not None:
+                stylesheet = stylesheet.replace('{combobox_outer_height}', f'{int(combo_height) + 10}px')
             for placeholder, (component, key) in dimension_map.items():
                 value = UIConfig.get_config(component, key)
                 if value is not None:

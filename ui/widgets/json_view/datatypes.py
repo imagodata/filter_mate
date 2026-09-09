@@ -15,6 +15,18 @@ HiddenDataRole = QtCore.Qt.ItemDataRole.UserRole + 10
 PLUGIN_DIR = ''
 
 
+def text_color(option, index):
+    """Keep configuration text white on dark surfaces, including custom cells."""
+    if option.state & QtWidgets.QStyle.StateFlag.State_Selected:
+        return option.palette.color(QtGui.QPalette.ColorRole.HighlightedText)
+    if option.palette.color(QtGui.QPalette.ColorRole.Base).lightness() < 128:
+        return QtGui.QColor('#FFFFFF')
+    foreground = index.data(QtCore.Qt.ItemDataRole.ForegroundRole)
+    if isinstance(foreground, QtGui.QBrush):
+        return foreground.color()
+    return option.palette.color(QtGui.QPalette.ColorRole.Text)
+
+
 class DataType(object):
     """Base class for data types."""
     COLOR = QtCore.Qt.GlobalColor.black
@@ -208,7 +220,7 @@ class ColorType(DataType):
                 rect.width() - color_rect.width() - 7,
                 rect.height()
             )
-            painter.setPen(self.get_color())
+            painter.setPen(text_color(option, index))
             painter.drawText(
                 text_rect,
                 QtCore.Qt.AlignmentFlag.AlignVCenter | QtCore.Qt.AlignmentFlag.AlignLeft,
@@ -216,7 +228,7 @@ class ColorType(DataType):
             )
         else:
             # Fallback to default painting if color is invalid
-            painter.setPen(self.get_color())
+            painter.setPen(text_color(option, index))
             painter.drawText(
                 option.rect,
                 QtCore.Qt.AlignmentFlag.AlignVCenter | QtCore.Qt.AlignmentFlag.AlignLeft,
@@ -452,7 +464,7 @@ class RangeType(DataType):
 
         painter.save()
 
-        painter.setPen(QtGui.QPen(index.data(QtCore.Qt.ItemDataRole.ForegroundRole).color()))
+        painter.setPen(QtGui.QPen(text_color(option, index)))
         metrics = painter.fontMetrics()
         spinbox_option = QtWidgets.QStyleOptionSpinBox()
         start_rect = QtCore.QRect(option.rect)

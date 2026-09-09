@@ -1,6 +1,6 @@
 from qgis.PyQt import QtWidgets, QtCore, QtGui
 
-from .datatypes import DataType, TypeRole
+from .datatypes import DataType, TypeRole, text_color
 
 
 # Type badge colors (used for the small colored dot next to keys)
@@ -107,14 +107,7 @@ class JsonDelegate(QtWidgets.QStyledItemDelegate):
             painter.setFont(base_font)
 
         # Set text color
-        if option.state & QtWidgets.QStyle.StateFlag.State_Selected:
-            painter.setPen(option.palette.color(QtGui.QPalette.ColorRole.HighlightedText))
-        else:
-            fg = index.data(QtCore.Qt.ItemDataRole.ForegroundRole)
-            if fg and isinstance(fg, QtGui.QBrush):
-                painter.setPen(fg.color())
-            else:
-                painter.setPen(option.palette.color(QtGui.QPalette.ColorRole.Text))
+        painter.setPen(text_color(option, index))
 
         # Draw key text
         key_text = index.data(QtCore.Qt.ItemDataRole.DisplayRole) or ''
@@ -157,14 +150,7 @@ class JsonDelegate(QtWidgets.QStyledItemDelegate):
         rect = option.rect.adjusted(6, 0, -4, 0)
 
         # Set text color
-        if option.state & QtWidgets.QStyle.StateFlag.State_Selected:
-            painter.setPen(option.palette.color(QtGui.QPalette.ColorRole.HighlightedText))
-        else:
-            fg = index.data(QtCore.Qt.ItemDataRole.ForegroundRole)
-            if fg and isinstance(fg, QtGui.QBrush):
-                painter.setPen(fg.color())
-            else:
-                painter.setPen(option.palette.color(QtGui.QPalette.ColorRole.Text))
+        painter.setPen(text_color(option, index))
 
         base_font = option.font
         alignment = QtCore.Qt.AlignmentFlag.AlignVCenter | QtCore.Qt.AlignmentFlag.AlignLeft

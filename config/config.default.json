@@ -253,15 +253,15 @@
           },
           "dark": {
             "BACKGROUND": [
-              "#1E1E1E",
-              "#2D2D30",
-              "#3E3E42",
+              "#3A3A3A",
+              "#2C2C2C",
+              "#242424",
               "#4A4A4F"
             ],
             "FONT": [
-              "#F5F5F5",
-              "#E0E0E0",
-              "#A0A0A0"
+              "#FFFFFF",
+              "#BFBFBF",
+              "#666666"
             ],
             "ACCENT": {
               "PRIMARY": "#007ACC",

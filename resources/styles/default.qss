@@ -571,6 +571,13 @@ QWidget#widget_exporting_content {
     color: {color_font_0};
 }
 
+/* Leave 10px more room between Exploring titles and their first input. */
+#dockWidgetContents QgsCollapsibleGroupBox#mGroupBox_exploring_single_selection,
+#dockWidgetContents QgsCollapsibleGroupBox#mGroupBox_exploring_multiple_selection,
+#dockWidgetContents QgsCollapsibleGroupBox#mGroupBox_exploring_custom_selection {
+    padding-top: 36px;
+}
+
 #dockWidgetContents QgsCollapsibleGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;

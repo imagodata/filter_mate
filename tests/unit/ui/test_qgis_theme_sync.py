@@ -111,7 +111,7 @@ def test_explicit_theme_stops_following_qgis(theme_modules, monkeypatch):
     monkeypatch.setattr(manager, 'apply', lambda: True)
     manager.set_theme('dark')
     assert not manager.follows_qgis_theme
-    assert manager.get_colors()['color_bg_0'] == '#1E1E1E'
+    assert manager.get_colors()['color_bg_0'] == '#3A3A3A'
 
 
 def test_existing_default_profile_follows_qgis_colors(theme_modules, monkeypatch):

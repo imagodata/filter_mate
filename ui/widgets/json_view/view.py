@@ -79,7 +79,7 @@ class JsonView(QtWidgets.QTreeView):
                 selection-background-color: #264F78;
                 selection-color: #FFFFFF;
                 border: 1px solid #3E3E42;
-                color: #D4D4D4;
+                color: #FFFFFF;
                 outline: none;
             }
             QTreeView::item {
@@ -142,7 +142,7 @@ class JsonView(QtWidgets.QTreeView):
                 font-weight: bold;
                 font-size: 9pt;
                 min-height: 26px;
-                color: #CCCCCC;
+                color: #FFFFFF;
             }
             QHeaderView::section:first {
                 border-left: none;

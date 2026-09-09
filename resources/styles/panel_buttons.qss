@@ -1,4 +1,4 @@
-/* Idle buttons share the bar; active buttons use the darkest panel background.
+/* Idle buttons share the bar; active buttons use a contrasting theme surface.
    Existing borders continue to distinguish hover, pressed and checked states. */
 #dockWidgetContents #widget_exploring_keys QPushButton,
 #dockWidgetContents #widget_filtering_keys QPushButton,
