@@ -102,7 +102,7 @@ class StyleLoader:
         foreground = QColor(colors.get('color_font_0', '#000000'))
         dark = background.lightness() < 128 and foreground.lightness() > background.lightness()
         surface = '#555555' if dark else (
-            '#c8c8c8' if background.lightness() < 200 else '#f4f4f4')
+            '#c8c8c8' if background.lightness() < 200 else '#ffffff')
         text = '#eeeeee' if dark else colors.get('color_font_0', '#000000')
         path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
                             'resources', 'styles', 'control_surfaces.qss')
