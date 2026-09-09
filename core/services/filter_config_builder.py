@@ -711,10 +711,10 @@ class LayerFilterBuilder:
         if len(all_available) > 5:
             _layer_logger.debug(f"    ... and {len(all_available) - 5} more")
 
-        qgis_layers = [l for l in self._project.mapLayers().values() if isinstance(l, QVL)]
+        qgis_layers = [layer_item for layer_item in self._project.mapLayers().values() if isinstance(layer_item, QVL)]
         missing = [
-            l.name() for l in qgis_layers
-            if l.id() not in self._project_layers and l.id() != source_layer.id()
+            layer_item.name() for layer_item in qgis_layers
+            if layer_item.id() not in self._project_layers and layer_item.id() != source_layer.id()
         ]
 
         if missing:

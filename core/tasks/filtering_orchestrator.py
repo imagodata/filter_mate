@@ -219,7 +219,7 @@ class FilteringOrchestrator:
         logger.info(f"  layers_count: {layers_count}")
 
         # Log layer names to QGIS message panel for visibility
-        layer_names = [l.get('layer_name', 'unknown') for l in task_parameters['task'].get('layers', [])]
+        layer_names = [layer_item.get('layer_name', 'unknown') for layer_item in task_parameters['task'].get('layers', [])]
         QgsMessageLog.logMessage(
             f"Distant layers to filter ({len(layer_names)}): {', '.join(layer_names[:5])}{'...' if len(layer_names) > 5 else ''}",
             "FilterMate", QgisLevel.Info

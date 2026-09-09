@@ -1,0 +1,31 @@
+/* Idle buttons share the bar; active buttons use the darkest panel background.
+   Existing borders continue to distinguish hover, pressed and checked states. */
+#dockWidgetContents #widget_exploring_keys QPushButton,
+#dockWidgetContents #widget_filtering_keys QPushButton,
+#dockWidgetContents #widget_exporting_keys QPushButton,
+#dockWidgetContents #frame_actions QPushButton,
+#dockWidgetContents #widget_exploring_keys QToolButton,
+#dockWidgetContents #widget_filtering_keys QToolButton,
+#dockWidgetContents #widget_exporting_keys QToolButton,
+#dockWidgetContents #frame_actions QToolButton {
+    background-color: transparent;
+}
+
+#dockWidgetContents #widget_exploring_keys QPushButton:checked,
+#dockWidgetContents #widget_exploring_keys QPushButton:pressed,
+#dockWidgetContents #widget_exploring_keys QToolButton:checked,
+#dockWidgetContents #widget_exploring_keys QToolButton:pressed,
+#dockWidgetContents #widget_filtering_keys QPushButton:checked,
+#dockWidgetContents #widget_filtering_keys QPushButton:pressed,
+#dockWidgetContents #widget_filtering_keys QToolButton:checked,
+#dockWidgetContents #widget_filtering_keys QToolButton:pressed,
+#dockWidgetContents #widget_exporting_keys QPushButton:checked,
+#dockWidgetContents #widget_exporting_keys QPushButton:pressed,
+#dockWidgetContents #widget_exporting_keys QToolButton:checked,
+#dockWidgetContents #widget_exporting_keys QToolButton:pressed,
+#dockWidgetContents #frame_actions QPushButton:checked,
+#dockWidgetContents #frame_actions QPushButton:pressed,
+#dockWidgetContents #frame_actions QToolButton:checked,
+#dockWidgetContents #frame_actions QToolButton:pressed {
+    background-color: {button_active_background};
+}

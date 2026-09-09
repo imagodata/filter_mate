@@ -437,12 +437,12 @@ class FilteringController(BaseController, LayerSelectionMixin):
 
             # Diagnostic logging
             # Exclude non-spatial layers: add_project_layer intentionally skips them (isSpatial() = False)
-            qgis_vector_layers = [l for l in project.mapLayers().values()
-                                  if isinstance(l, QgsVectorLayer) and l.id() != layer.id()]
-            missing = [l for l in qgis_vector_layers if l.id() not in dockwidget.PROJECT_LAYERS and l.isSpatial()]
+            qgis_vector_layers = [layer_item for layer_item in project.mapLayers().values()
+                                  if isinstance(layer_item, QgsVectorLayer) and layer_item.id() != layer.id()]
+            missing = [layer_item for layer_item in qgis_vector_layers if layer_item.id() not in dockwidget.PROJECT_LAYERS and layer_item.isSpatial()]
             if missing:
                 logger.warning(f"populate_layers_checkable_combobox: {len(missing)} layer(s) NOT in PROJECT_LAYERS")
-                logger.warning(f"Layers in QGIS but NOT in PROJECT_LAYERS: {[l.name() for l in missing]}")
+                logger.warning(f"Layers in QGIS but NOT in PROJECT_LAYERS: {[layer_item.name() for layer_item in missing]}")
 
                 # FIX 2026-01-16 v2: Robust automatic addition with retry
                 # BYPASS queue system for critical sync + retry after 1s
@@ -455,8 +455,8 @@ class FilteringController(BaseController, LayerSelectionMixin):
 
                         # Retry after 1s to ensure completion
                         def retry_add_missing():
-                            still_missing = [l for l in missing
-                                           if l.id() not in dockwidget.PROJECT_LAYERS]
+                            still_missing = [layer_item for layer_item in missing
+                                           if layer_item.id() not in dockwidget.PROJECT_LAYERS]
                             if still_missing:
                                 logger.warning(f"⚠️ Retrying add_layers for {len(still_missing)} layers")
                                 dockwidget.app._pending_add_layers_tasks = 0

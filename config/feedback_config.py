@@ -251,9 +251,22 @@ def get_feedback_config_summary() -> Dict[str, Any]:
     }
 
 
-# Convenience constants for common checks
-SHOW_FILTER_COUNTS = lambda: should_show_message('filter_count')
-SHOW_UNDO_REDO = lambda: should_show_message('undo_redo')
-SHOW_BACKEND_INFO = lambda: should_show_message('backend_info')
-SHOW_CONFIG_CHANGES = lambda: should_show_message('config_changes')
-SHOW_HISTORY_STATUS = lambda: should_show_message('history_status')
+# Convenience functions for common checks
+def SHOW_FILTER_COUNTS():
+    return should_show_message('filter_count')
+
+
+def SHOW_UNDO_REDO():
+    return should_show_message('undo_redo')
+
+
+def SHOW_BACKEND_INFO():
+    return should_show_message('backend_info')
+
+
+def SHOW_CONFIG_CHANGES():
+    return should_show_message('config_changes')
+
+
+def SHOW_HISTORY_STATUS():
+    return should_show_message('history_status')

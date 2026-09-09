@@ -4,7 +4,6 @@ FilterMate FavoritesManagerDialog.
 Dialog for managing filter favorites with list, edit, delete, and search capabilities.
 Extracted from filter_mate_dockwidget.py for better modularity.
 """
-from typing import Optional
 import logging
 
 try:
@@ -41,7 +40,9 @@ except ImportError:
     QHeaderView = None
     QTabWidget = object
     Qt = None
-    pyqtSignal = lambda *args: None
+
+    def pyqtSignal(*args):
+        return None
 
 # Scope badge + label constants — kept close to the UI so copywriter
 # tweaks don't require touching the domain layer.
@@ -1303,5 +1304,3 @@ class FavoritesManagerDialog(QDialog if HAS_QGIS else object):
             return
         self._all_favorites = self._favorites_service.get_all_favorites()
         self._refresh_filtered_list()
-
-    

@@ -276,18 +276,18 @@ class ExportingController(BaseController):
             project = QgsProject.instance()
 
             # Collect diagnostic info
-            qgis_layers = [l for l in project.mapLayers().values() if isinstance(l, QgsVectorLayer)]
-            postgres_layers = [l for l in qgis_layers if l.providerType() == 'postgres']
-            remote_layers = [l for l in qgis_layers if l.providerType() in REMOTE_PROVIDERS]
+            qgis_layers = [layer_item for layer_item in project.mapLayers().values() if isinstance(layer_item, QgsVectorLayer)]
+            postgres_layers = [layer_item for layer_item in qgis_layers if layer_item.providerType() == 'postgres']
+            remote_layers = [layer_item for layer_item in qgis_layers if layer_item.providerType() in REMOTE_PROVIDERS]
 
             # Find layers missing from PROJECT_LAYERS
             # Exclude non-spatial layers: add_project_layer intentionally skips them (isSpatial() = False)
-            missing_postgres = [l for l in postgres_layers if l.id() not in dockwidget.PROJECT_LAYERS and l.isSpatial()]
-            missing_remote = [l for l in remote_layers if l.id() not in dockwidget.PROJECT_LAYERS and l.isSpatial()]
+            missing_postgres = [layer_item for layer_item in postgres_layers if layer_item.id() not in dockwidget.PROJECT_LAYERS and layer_item.isSpatial()]
+            missing_remote = [layer_item for layer_item in remote_layers if layer_item.id() not in dockwidget.PROJECT_LAYERS and layer_item.isSpatial()]
 
             if missing_postgres:
                 logger.warning(f"populate_export_combobox: {len(missing_postgres)} PostgreSQL layer(s) missing from PROJECT_LAYERS")
-                logger.warning(f"Layers in QGIS but NOT in PROJECT_LAYERS: {[l.name() for l in missing_postgres]}")
+                logger.warning(f"Layers in QGIS but NOT in PROJECT_LAYERS: {[layer_item.name() for layer_item in missing_postgres]}")
 
                 # FIX 2026-01-16 v2: Robust automatic addition with retry
                 # BYPASS queue system for critical sync + retry after 1s
@@ -300,8 +300,8 @@ class ExportingController(BaseController):
 
                         # Retry after 1s to ensure completion
                         def retry_add_postgres():
-                            still_missing = [l for l in missing_postgres
-                                           if l.id() not in dockwidget.PROJECT_LAYERS]
+                            still_missing = [layer_item for layer_item in missing_postgres
+                                           if layer_item.id() not in dockwidget.PROJECT_LAYERS]
                             if still_missing:
                                 logger.warning(f"⚠️ Retrying add_layers for {len(still_missing)} PostgreSQL layers")
                                 dockwidget.app._pending_add_layers_tasks = 0
@@ -312,7 +312,7 @@ class ExportingController(BaseController):
 
             if missing_remote:
                 logger.warning(f"populate_export_combobox: {len(missing_remote)} remote layer(s) missing from PROJECT_LAYERS")
-                logger.warning(f"Remote layers in QGIS but NOT in PROJECT_LAYERS: {[l.name() for l in missing_remote]}")
+                logger.warning(f"Remote layers in QGIS but NOT in PROJECT_LAYERS: {[layer_item.name() for layer_item in missing_remote]}")
 
                 # FIX 2026-01-16 v2: Robust automatic addition with retry
                 if hasattr(dockwidget, 'app') and dockwidget.app:
@@ -324,8 +324,8 @@ class ExportingController(BaseController):
 
                         # Retry after 1s to ensure completion
                         def retry_add_remote():
-                            still_missing = [l for l in missing_remote
-                                           if l.id() not in dockwidget.PROJECT_LAYERS]
+                            still_missing = [layer_item for layer_item in missing_remote
+                                           if layer_item.id() not in dockwidget.PROJECT_LAYERS]
                             if still_missing:
                                 logger.warning(f"⚠️ Retrying add_layers for {len(still_missing)} remote layers")
                                 dockwidget.app._pending_add_layers_tasks = 0

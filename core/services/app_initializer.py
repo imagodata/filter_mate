@@ -546,12 +546,12 @@ class AppInitializer:
 
         # Include ALL valid vector layers
         all_valid_vector_layers = [
-            l for l in all_layers
-            if isinstance(l, QgsVectorLayer)
-            and l.isValid()
-            and not sip.isdeleted(l)
+            layer_item for layer_item in all_layers
+            if isinstance(layer_item, QgsVectorLayer)
+            and layer_item.isValid()
+            and not sip.isdeleted(layer_item)
         ]
-        missed_layers = [l for l in all_valid_vector_layers if l not in current_layers]
+        missed_layers = [layer_item for layer_item in all_valid_vector_layers if layer_item not in current_layers]
 
         if missed_layers:
             logger.warning(f"Recovery: Found {len(missed_layers)} valid vector layers that were filtered - forcing inclusion")
@@ -644,7 +644,7 @@ class AppInitializer:
             usable_layers: List of layers to add
         """
         # Re-filter to remove layers deleted during the delay
-        still_valid = [l for l in usable_layers if l is not None and not sip.isdeleted(l)]
+        still_valid = [layer_item for layer_item in usable_layers if layer_item is not None and not sip.isdeleted(layer_item)]
         if still_valid and self._manage_task:
             self._manage_task('add_layers', still_valid)
 

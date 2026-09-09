@@ -156,7 +156,7 @@ def auto_zoom_to_filtered(
     if canvas is None:
         return False
 
-    valid_layers = [l for l in layers if l is not None]
+    valid_layers = [layer_item for layer_item in layers if layer_item is not None]
     if not valid_layers:
         canvas.refresh()
         return False

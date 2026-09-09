@@ -93,6 +93,31 @@ class StyleLoader:
         }
     }
 
+    @staticmethod
+    def _apply_control_surfaces(stylesheet: str, colors: Dict[str, str]) -> str:
+        """Give editable fields and button bars one shared surface per theme."""
+        from qgis.PyQt.QtGui import QColor
+
+        background = QColor(colors.get('color_1', '#ffffff'))
+        foreground = QColor(colors.get('color_font_0', '#000000'))
+        dark = background.lightness() < 128 and foreground.lightness() > background.lightness()
+        surface = '#555555' if dark else (
+            '#c8c8c8' if background.lightness() < 200 else '#f4f4f4')
+        text = '#eeeeee' if dark else colors.get('color_font_0', '#000000')
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                            'resources', 'styles', 'control_surfaces.qss')
+        with open(path, encoding='utf-8') as source:
+            stylesheet += '\n' + source.read().replace(
+                '{control_surface}', surface).replace('{control_text}', text)
+        if dark or background.lightness() < 200:
+            with open(os.path.join(os.path.dirname(path), 'panel_buttons.qss'), encoding='utf-8') as source:
+                panel = QColor(colors.get('color_bg_0', '#1e1e1e'))
+                active_background = (panel.name() if panel.lightness() < background.lightness()
+                                     else background.name())
+                stylesheet += '\n' + source.read().replace(
+                    '{button_active_background}', active_background)
+        return stylesheet
+
     @classmethod
     def _load_raw_stylesheet(cls, theme: str = 'default') -> str:
         """
@@ -154,6 +179,7 @@ class StyleLoader:
         try:
             # Apply color scheme from COLOR_SCHEMES
             colors = cls.COLOR_SCHEMES.get(theme, cls.COLOR_SCHEMES['default'])
+            stylesheet = cls._apply_control_surfaces(stylesheet, colors)
             for color_key, color_value in colors.items():
                 stylesheet = stylesheet.replace(f'{{{color_key}}}', color_value)
 
@@ -231,6 +257,9 @@ class StyleLoader:
                 '{color_accent_dark}': accent.get('DARK', bg[3])
             }
 
+            stylesheet = cls._apply_control_surfaces(
+                stylesheet, {key.strip('{}'): value for key, value in color_map.items()})
+
             # Apply color replacements
             for placeholder, color_value in color_map.items():
                 stylesheet = stylesheet.replace(placeholder, color_value)
@@ -268,7 +297,9 @@ class StyleLoader:
 
         if follow_qgis:
             stylesheet = cls._load_raw_stylesheet('default')
-            for key, value in cls.get_qgis_colors().items():
+            colors = cls.get_qgis_colors()
+            stylesheet = cls._apply_control_surfaces(stylesheet, colors)
+            for key, value in colors.items():
                 stylesheet = stylesheet.replace(f'{{{key}}}', value)
             if UI_CONFIG_AVAILABLE:
                 stylesheet = cls._apply_dynamic_dimensions(stylesheet)

@@ -351,7 +351,7 @@ class BackendService(QObject):
             from qgis.core import QgsProject, QgsVectorLayer
             project = QgsProject.instance()
             all_layers = project.mapLayers().values()
-            layers = [l for l in all_layers if isinstance(l, QgsVectorLayer)]
+            layers = [layer_item for layer_item in all_layers if isinstance(layer_item, QgsVectorLayer)]
 
         logger.info("=" * 60)
         logger.debug(f"FORCING {backend_type.value.upper()} BACKEND FOR ALL LAYERS")

@@ -133,12 +133,18 @@ try:
 except ImportError as e:
     CONTROLLERS_AVAILABLE = False
     get_filter_service = None
-    is_hexagonal_initialized = lambda: False
+
+    def is_hexagonal_initialized():
+        return False
+
     logger.debug(f"Controllers import failed: {e}")
 except Exception as e:
     CONTROLLERS_AVAILABLE = False
     get_filter_service = None
-    is_hexagonal_initialized = lambda: False
+
+    def is_hexagonal_initialized():
+        return False
+
     logger.debug(f"Unexpected error importing controllers: {e}")
 
 # Layout Managers
@@ -505,7 +511,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 Sprint 15: Initialize layers, managers, controllers, and UI."""
         self.init_layer, self.has_loaded_layers = None, False
         if self.PROJECT:
-            vector_layers = [l for l in self.PROJECT.mapLayers().values() if isinstance(l, QgsVectorLayer)]
+            vector_layers = [layer_item for layer_item in self.PROJECT.mapLayers().values() if isinstance(layer_item, QgsVectorLayer)]
             if vector_layers:
                 self.init_layer, self.has_loaded_layers = self.iface.activeLayer() or vector_layers[0], True
         self.widgets, self.widgets_initialized, self.current_exploring_groupbox, self.tabTools_current_index = None, False, None, 0
@@ -6112,9 +6118,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v3.1 Sprint 12: Simplified - determine active layer for UI."""
         try:
             if self.current_layer and self.current_layer.id() in self.PROJECT_LAYERS:
-                layers = [l for l in self.PROJECT.mapLayersByName(
+                layers = [layer_item for layer_item in self.PROJECT.mapLayersByName(
                     self.PROJECT_LAYERS[self.current_layer.id()]["infos"]["layer_name"]
-                ) if l.id() == self.current_layer.id()]
+                ) if layer_item.id() == self.current_layer.id()]
                 if layers:
                     return layers[0]
             if self.iface.activeLayer():

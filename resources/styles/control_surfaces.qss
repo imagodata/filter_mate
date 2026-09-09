@@ -1,0 +1,36 @@
+/* Matching editable fields and button bars for every theme, scoped to FilterMate.
+   Keep the theme's existing borders and focus/selection indicators. */
+#dockWidgetContents QgsFeaturePickerWidget,
+#dockWidgetContents QgsProjectionSelectionWidget,
+#dockWidgetContents QgsMapLayerComboBox,
+#dockWidgetContents QgsFieldComboBox,
+#dockWidgetContents QgsFieldExpressionWidget,
+#dockWidgetContents QgsCheckableComboBox,
+#dockWidgetContents QgsCheckableComboBoxLayer,
+#dockWidgetContents QComboBox,
+#dockWidgetContents QLineEdit:!focus,
+#dockWidgetContents QSpinBox:!focus,
+#dockWidgetContents QDoubleSpinBox:!focus,
+#dockWidgetContents QgsFeaturePickerWidget QComboBox,
+#dockWidgetContents QgsFeaturePickerWidget QLineEdit:!focus,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox,
+#dockWidgetContents QgsFieldExpressionWidget QLineEdit:!focus,
+#dockWidgetContents QComboBox QAbstractItemView {
+    background-color: {control_surface};
+    color: {control_text};
+}
+
+#dockWidgetContents QWidget#widget_exploring_keys,
+#dockWidgetContents QWidget#widget_filtering_keys,
+#dockWidgetContents QWidget#widget_exporting_keys,
+#dockWidgetContents QFrame#frame_actions {
+    background-color: {control_surface};
+}
+
+#dockWidgetContents QLineEdit:disabled,
+#dockWidgetContents QSpinBox:disabled,
+#dockWidgetContents QDoubleSpinBox:disabled,
+#dockWidgetContents QComboBox:disabled {
+    background-color: {control_surface};
+    color: {color_font_2};
+}

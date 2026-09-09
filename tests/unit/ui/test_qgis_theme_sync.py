@@ -10,6 +10,7 @@ import pytest
 
 @pytest.fixture
 def theme_modules(monkeypatch):
+    monkeypatch.setattr(sys.modules['qgis.PyQt.QtGui'], 'QColor', Color)
     root = Path(__file__).resolve().parents[3]
     prefix = '_theme_sync_test'
     for name, path in [('', root), ('.ui', root / 'ui'),

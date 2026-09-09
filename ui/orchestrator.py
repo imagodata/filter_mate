@@ -44,7 +44,10 @@ except ImportError:
     QDockWidget = MagicMock
     QWidget = MagicMock
     Qt = MagicMock()
-    pyqtSignal = lambda *args: MagicMock()
+
+    def pyqtSignal(*args):
+        return MagicMock()
+
     QTimer = MagicMock
     HAS_QGIS = False
 

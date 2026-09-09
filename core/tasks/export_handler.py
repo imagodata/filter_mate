@@ -411,11 +411,11 @@ class ExportHandler:
             and not output_is_file
         ):
             layer_ids = []
-            for l in layers:
-                if isinstance(l, dict):
-                    layer_ids.append(l.get('layer_id', ''))
+            for layer_item in layers:
+                if isinstance(layer_item, dict):
+                    layer_ids.append(layer_item.get('layer_id', ''))
                 else:
-                    layer_ids.append(str(l))
+                    layer_ids.append(str(layer_item))
             self._pending_kml_merge = {
                 'output_folder': output_folder,
                 'layer_ids': layer_ids,
@@ -506,11 +506,11 @@ class ExportHandler:
         # Store deferred layer tree write for main thread execution (in finished())
         if preserve_groups:
             layer_ids = []
-            for l in layers:
-                if isinstance(l, dict):
-                    layer_ids.append(l.get('layer_id', ''))
+            for layer_item in layers:
+                if isinstance(layer_item, dict):
+                    layer_ids.append(layer_item.get('layer_id', ''))
                 else:
-                    layer_ids.append(str(l))
+                    layer_ids.append(str(layer_item))
             self._pending_layer_tree_write = {
                 'gpkg_path': gpkg_output_path,
                 'layer_ids': layer_ids,

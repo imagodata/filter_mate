@@ -232,7 +232,7 @@ class FilterMateApp:
         service = self._get_layer_lifecycle_service()
         if service: return service.filter_usable_layers(layers, POSTGRESQL_AVAILABLE)
         # Fallback: minimal validation
-        return [l for l in layers if isinstance(l, QgsVectorLayer) and l.isValid() and is_layer_source_available(l)]
+        return [layer_item for layer_item in layers if isinstance(layer_item, QgsVectorLayer) and layer_item.isValid() and is_layer_source_available(layer_item)]
 
     def _on_layers_added(self, layers):
         """Signal handler for layersAdded: accumulate layers and process as single batch."""
@@ -268,21 +268,21 @@ class FilterMateApp:
         self._check_and_reset_stale_flags()
 
         # Identify PostgreSQL layers
-        all_postgres = [l for l in layers if isinstance(l, QgsVectorLayer) and l.providerType() == 'postgres']
+        all_postgres = [layer_item for layer_item in layers if isinstance(layer_item, QgsVectorLayer) and layer_item.providerType() == 'postgres']
         if all_postgres and not POSTGRESQL_AVAILABLE:
-            names = ', '.join([l.name() for l in all_postgres[:3]]) + (" (+{0} more)".format(len(all_postgres) - 3) if len(all_postgres) > 3 else "")
+            names = ', '.join([layer_item.name() for layer_item in all_postgres[:3]]) + (" (+{0} more)".format(len(all_postgres) - 3) if len(all_postgres) > 3 else "")
             show_warning(QCoreApplication.translate("FilterMateApp", "PostgreSQL layers detected ({0}) but psycopg2 is not installed.").format(names))
             logger.warning(f"FilterMate: Cannot use {len(all_postgres)} PostgreSQL layer(s) - psycopg2 not available")
 
         filtered = self._filter_usable_layers(layers)
-        postgres_pending = [l for l in all_postgres if l.id() not in [f.id() for f in filtered] and not is_sip_deleted(l)]
+        postgres_pending = [layer_item for layer_item in all_postgres if layer_item.id() not in [f.id() for f in filtered] and not is_sip_deleted(layer_item)]
 
         if not filtered and not postgres_pending:
             logger.info("FilterMate: Ignoring layersAdded (no usable layers)"); return
 
         # Delegate PostgreSQL cleanup/retry to LayerLifecycleService
         service = self._get_layer_lifecycle_service()
-        if service and (postgres_to_validate := [l for l in filtered if l.providerType() == 'postgres']):
+        if service and (postgres_to_validate := [layer_item for layer_item in filtered if layer_item.providerType() == 'postgres']):
             service.validate_and_cleanup_postgres_layers_on_add(postgres_to_validate)
 
         if filtered: self.manage_task('add_layers', filtered)
@@ -386,7 +386,10 @@ class FilterMateApp:
             "add_layers": None, "remove_layers": None, "remove_all_layers": None,
             "new_project": None, "project_read": None
         }
-        _tr = lambda msg: QCoreApplication.translate("FilterMateApp", msg)
+
+        def _tr(msg):
+            return QCoreApplication.translate('FilterMateApp', msg)
+
         self.tasks_descriptions = {
             'filter': _tr('Filtering data'),
             'unfilter': _tr('Unfiltering data'),
@@ -1353,7 +1356,7 @@ class FilterMateApp:
         # Check for forced backends
         is_fallback = False
         if forced := (getattr(self.dockwidget, 'forced_backends', {}) if self.dockwidget else {}):
-            all_ids = [current_layer.id()] + [l.id() for l in layers]
+            all_ids = [current_layer.id()] + [layer_item.id() for layer_item in layers]
             forced_types = set(forced.get(lid) for lid in all_ids if lid in forced)
             if len(forced_types) == 1 and None not in forced_types:
                 provider_type = list(forced_types)[0]
@@ -1655,7 +1658,7 @@ class FilterMateApp:
         Returns:
             bool: True if the task can proceed, False to abort.
         """
-        layer_names = '\n'.join(f'  • "{l.name()}"' for l in edit_layers)
+        layer_names = '\n'.join(f'  • "{layer_item.name()}"' for layer_item in edit_layers)
 
         if task_name == 'filter':
             task_label = QCoreApplication.translate("FilterMateApp", "filter")
@@ -2273,7 +2276,7 @@ class FilterMateApp:
                         logger.warning(f"FilterMate: Remote layer {remote_id} no longer exists, skipping")
                         continue
 
-                    remote_layers = [l for l in self.PROJECT.mapLayers().values() if l.id() == remote_id]
+                    remote_layers = [layer_item for layer_item in self.PROJECT.mapLayers().values() if layer_item.id() == remote_id]
                     if remote_layers:
                         remote_layer = remote_layers[0]
                         if not is_layer_source_available(remote_layer):

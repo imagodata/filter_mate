@@ -17,7 +17,9 @@ except ImportError:
     QLabel = object
     QWidget = object
     Qt = None
-    pyqtSignal = lambda *args: None
+
+    def pyqtSignal(*args):
+        return None
 
 logger = logging.getLogger(__name__)
 

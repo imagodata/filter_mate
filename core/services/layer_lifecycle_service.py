@@ -100,27 +100,27 @@ class LayerLifecycleService:
 
             logger.info(f"filter_usable_layers: Processing {input_count} layers (POSTGRESQL_AVAILABLE={postgresql_available})")
 
-            for l in (layers or []):
+            for layer_item in (layers or []):
                 # CRITICAL: Check if C++ object was deleted before any access
-                if is_sip_deleted(l):
+                if is_sip_deleted(layer_item):
                     filtered_reasons.append("unknown: C++ object deleted")
                     continue
 
-                if not isinstance(l, QgsVectorLayer):
+                if not isinstance(layer_item, QgsVectorLayer):
                     try:
-                        name = l.name() if hasattr(l, 'name') else 'unknown'
+                        name = layer_item.name() if hasattr(layer_item, 'name') else 'unknown'
                     except RuntimeError:
                         name = 'unknown'
                     filtered_reasons.append(f"{name}: not a vector layer")
                     continue
 
-                is_postgres = l.providerType() == 'postgres'
+                is_postgres = layer_item.providerType() == 'postgres'
 
                 # Use object_safety module for comprehensive validation
-                if not is_valid_layer(l):
+                if not is_valid_layer(layer_item):
                     try:
-                        name = l.name()
-                        is_valid_qgis = l.isValid()
+                        name = layer_item.name()
+                        is_valid_qgis = layer_item.isValid()
                     except RuntimeError:
                         name = 'unknown'
                         is_valid_qgis = False
@@ -134,14 +134,14 @@ class LayerLifecycleService:
                 # For PostgreSQL: if layer is valid, include it even if source check fails
                 # The connection may be initializing and will work shortly
                 if is_postgres:
-                    logger.info(f"PostgreSQL layer '{l.name()}': including despite any source availability issues (will retry connection later)")
-                    usable.append(l)
-                elif not is_layer_source_available(l, require_psycopg2=False):
-                    reason = f"{l.name()}: source not available (provider={l.providerType()})"
+                    logger.info(f"PostgreSQL layer '{layer_item.name()}': including despite any source availability issues (will retry connection later)")
+                    usable.append(layer_item)
+                elif not is_layer_source_available(layer_item, require_psycopg2=False):
+                    reason = f"{layer_item.name()}: source not available (provider={layer_item.providerType()})"
                     filtered_reasons.append(reason)
                     continue
                 else:
-                    usable.append(l)
+                    usable.append(layer_item)
 
             if filtered_reasons and input_count != len(usable):
                 logger.info(f"filter_usable_layers: {input_count} input layers -> {len(usable)} usable layers. Filtered: {len(filtered_reasons)}")
@@ -201,11 +201,11 @@ class LayerLifecycleService:
         self._last_layer_change_timestamp = current_time
 
         # Identify PostgreSQL layers
-        all_postgres = [l for l in layers if isinstance(l, QgsVectorLayer) and l.providerType() == 'postgres']
+        all_postgres = [layer_item for layer_item in layers if isinstance(layer_item, QgsVectorLayer) and layer_item.providerType() == 'postgres']
 
         # Warn if PostgreSQL layers without psycopg2
         if all_postgres and not postgresql_available:
-            layer_names = ', '.join([l.name() for l in all_postgres[:3]])
+            layer_names = ', '.join([layer_item.name() for layer_item in all_postgres[:3]])
             if len(all_postgres) > 3:
                 layer_names += " (+{0} more)".format(len(all_postgres) - 3)
 
@@ -222,16 +222,16 @@ class LayerLifecycleService:
         filtered = self.filter_usable_layers(layers, postgresql_available)
 
         # Identify PostgreSQL layers that failed validation (may be initializing)
-        postgres_pending = [l for l in all_postgres
-                          if l.id() not in [f.id() for f in filtered]
-                          and not is_sip_deleted(l)]
+        postgres_pending = [layer_item for layer_item in all_postgres
+                          if layer_item.id() not in [f.id() for f in filtered]
+                          and not is_sip_deleted(layer_item)]
 
         if not filtered and not postgres_pending:
             logger.info("FilterMate: Ignoring layersAdded (no usable layers)")
             return
 
         # Validate PostgreSQL layers for orphaned MV references BEFORE adding them
-        postgres_to_validate = [l for l in filtered if l.providerType() == 'postgres']
+        postgres_to_validate = [layer_item for layer_item in filtered if layer_item.providerType() == 'postgres']
         if postgres_to_validate:
             try:
                 cleaned = validate_and_cleanup_postgres_layers(postgres_to_validate)
@@ -928,7 +928,7 @@ class LayerLifecycleService:
             logger.debug("validate_and_cleanup_postgres_layers not available")
             return []
 
-        postgres_to_validate = [l for l in layers if l.providerType() == 'postgres']
+        postgres_to_validate = [layer_item for layer_item in layers if layer_item.providerType() == 'postgres']
         if not postgres_to_validate:
             return []
 

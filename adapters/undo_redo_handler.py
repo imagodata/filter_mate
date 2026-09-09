@@ -897,7 +897,7 @@ class UndoRedoHandler:
         for layer_info in layers_to_filter:
             layer_id = layer_info.get("layer_id")
             if layer_id and layer_id in project_layers:
-                assoc_layers = [l for l in project.mapLayers().values() if l.id() == layer_id]
+                assoc_layers = [layer_item for layer_item in project.mapLayers().values() if layer_item.id() == layer_id]
                 if len(assoc_layers) == 1:
                     assoc_layer = assoc_layers[0]
                     assoc_history = self._history_manager.get_or_create_history(assoc_layer.id())

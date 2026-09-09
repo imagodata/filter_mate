@@ -780,6 +780,8 @@ class ThemeManager(StylerBase):
 
         # Apply colors
         colors = self.get_colors()
+        from .style_loader import StyleLoader
+        stylesheet = StyleLoader._apply_control_surfaces(stylesheet, colors)
         for key, value in colors.items():
             stylesheet = stylesheet.replace(f'{{{key}}}', value)
 

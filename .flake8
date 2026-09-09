@@ -28,13 +28,9 @@ ignore =
     E125,
     E127,
     E128,
-    # Lambda assignments (used for signal connections)
-    E731,
     # Line too long (handled by max-line-length)
     W503,
     W504,
-    # Ambiguous variable name (e.g., 'l' for layer - common in GIS)
-    E741,
     # Unused global declarations (code pattern, not bugs)
     F824,
     # Multiple spaces after ',' / ':' — intentional column alignment in

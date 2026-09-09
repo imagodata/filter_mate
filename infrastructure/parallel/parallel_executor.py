@@ -466,9 +466,9 @@ class ParallelFilterExecutor:
 
         # FIX v3.0.8: Log layer names to be processed
         layer_names = []
-        for l, lp in layers:
+        for layer_item, lp in layers:
             try:
-                layer_names.append(l.name() if hasattr(l, 'name') else 'unknown')
+                layer_names.append(layer_item.name() if hasattr(layer_item, 'name') else 'unknown')
             except Exception:  # FIX v3.0.20: Avoid bare except clause
                 layer_names.append('invalid')
         logger.info(f"🔄 Layers to process: {layer_names}")

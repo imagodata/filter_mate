@@ -205,14 +205,14 @@ class QFieldCloudPushDialog(QDialog):
                 first_filter = first_filter[:57] + "..."
             self._filter_label.setText(first_filter)
 
-            total_features = sum(l.featureCount() for l in filtered_layers)
+            total_features = sum(layer_item.featureCount() for layer_item in filtered_layers)
             self._layers_label.setText(
                 self.tr("{0} layers ({1} features)").format(len(filtered_layers), total_features)
             )
         else:
             # Show all vector layers if no filter active
             all_vector = [
-                l for l in layers if isinstance(l, QgsVectorLayer)
+                layer_item for layer_item in layers if isinstance(layer_item, QgsVectorLayer)
             ]
             self._layers_label.setText(
                 self.tr("{0} layers (no filter active)").format(len(all_vector))
@@ -220,7 +220,7 @@ class QFieldCloudPushDialog(QDialog):
 
         # Populate layer actions table
         vector_layers = [
-            l for l in layers if isinstance(l, QgsVectorLayer) and l.isValid()
+            layer_item for layer_item in layers if isinstance(layer_item, QgsVectorLayer) and layer_item.isValid()
         ]
         self._layers_table.setRowCount(len(vector_layers))
 
@@ -357,8 +357,8 @@ class QFieldCloudPushDialog(QDialog):
 
         project = QgsProject.instance()
         layers = [
-            l for l in project.mapLayers().values()
-            if isinstance(l, QgsVectorLayer) and l.isValid()
+            layer_item for layer_item in project.mapLayers().values()
+            if isinstance(layer_item, QgsVectorLayer) and layer_item.isValid()
         ]
 
         if not layers:
