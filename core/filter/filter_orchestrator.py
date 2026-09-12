@@ -815,30 +815,46 @@ class FilterOrchestrator:
             backend_name: Backend that applied the filter
         """
         final_expression = layer.subsetString()
-        feature_count = layer.featureCount()
 
+        # PERF 2026-09-12: no featureCount() here. On PostgreSQL it was a second
+        # COUNT query per target layer (the subset is applied in this worker);
+        # on Spatialite/OGR the subset is only queued for the main thread, so
+        # the number was the unfiltered total and misled the reader
+        # ("1,173,829 features after filter"). The completion handler reports
+        # the real counts once the subsets are applied. No triggerRepaint()
+        # from the worker either: the canvas is refreshed once at the end.
         logger.debug(f"✓ orchestrate_geometric_filter: {layer.name()} → backend returned SUCCESS")
-        logger.info(f"  - Features after filter: {feature_count:,}")
         logger.info(f"  - Subset string applied: {final_expression[:200] if final_expression else '(empty)'}")
         logger.info(f"  - Layer is valid: {layer.isValid()}")
         logger.info(f"  - Provider: {layer.providerType()}")
         logger.info(f"  - CRS: {layer.crs().authid()}")
 
-        # Trigger layer repaint
-        try:
-            layer.triggerRepaint()
-            logger.debug("  - Triggered layer repaint")
-        except Exception as e:
-            logger.warning(f"  - Could not trigger repaint: {e}")
-
-        # Warn if no features after filtering
-        if feature_count == 0:
+        # Warn if no features after filtering. Only meaningful when the subset
+        # is already applied (PostgreSQL applies it in this worker); a LIMIT 1
+        # probe stops at the first match instead of counting everything.
+        if layer.providerType() == QGIS_PROVIDER_POSTGRES and final_expression and not self._has_any_feature(layer):
             logger.warning(
                 f"⚠️ WARNING: {layer.name()} has ZERO features after filtering!\n"
                 f"   Provider: {backend_name}, Expression length: {len(final_expression) if final_expression else 0}"
             )
 
-        logger.info(f"✓ Successfully filtered {layer.name()}: {feature_count:,} features match")
+        logger.info(f"✓ Successfully filtered {layer.name()} (counts are reported once the subsets are applied)")
+
+    @staticmethod
+    def _has_any_feature(layer: QgsVectorLayer) -> bool:
+        """True when the layer yields at least one feature under its current subset."""
+        try:
+            from qgis.core import QgsFeatureRequest
+            request = QgsFeatureRequest()
+            request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
+            request.setNoAttributes()
+            request.setLimit(1)
+            for _ in layer.getFeatures(request):
+                return True
+            return False
+        except Exception as e:
+            logger.debug(f"_has_any_feature probe failed for {layer.name()}: {e}")
+            return True
 
     def _log_filter_failure(self, layer: QgsVectorLayer, backend_name: str) -> None:
         """
