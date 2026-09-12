@@ -16,6 +16,7 @@ import weakref
 
 # Import logging for error handling
 from .infrastructure.logging import get_app_logger
+from .infrastructure.perf_timer import perf_mark_start, perf_mark_end
 from .infrastructure.signal_utils import SignalBlocker
 from .infrastructure.utils.validation_utils import is_sip_deleted
 logger = get_app_logger()
@@ -5528,6 +5529,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.warning("current_layer_changed: Layer C++ object deleted")
             return
         self._updating_current_layer = True
+        # PERF 2026-09-12: "layer change → all widgets reloaded" latency; closed
+        # in the finally below so every exit path of the update is measured.
+        perf_mark_start("layer_change")
         self._reset_selection_tracking_for_layer(layer)
         try:
             should_continue, validated_layer, layer_props = self._validate_and_prepare_layer(layer)
@@ -5575,6 +5579,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.error(f"Traceback:\n{traceback.format_exc()}")
         finally:
             self._updating_current_layer = False
+            try:
+                perf_mark_end("layer_change", layer.name())
+            except (RuntimeError, AttributeError):
+                perf_mark_end("layer_change")
             logger.debug("current_layer_changed: Lock released")
 
     def _defer_layer_change(self, layer):
