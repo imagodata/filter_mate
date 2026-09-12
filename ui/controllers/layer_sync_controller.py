@@ -21,15 +21,6 @@ from qgis.core import QgsVectorLayer, QgsProject
 from .base_controller import BaseController
 from ...infrastructure.signal_utils import SignalBlocker
 
-try:
-    from ...infrastructure.perf_timer import perf_mark_start, perf_mark_end
-except ImportError:  # test harnesses that stub the infrastructure package
-    def perf_mark_start(name):  # noqa: D103 - no-op fallback
-        return None
-
-    def perf_mark_end(name, details=None):  # noqa: D103 - no-op fallback
-        return None
-
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
 
@@ -215,15 +206,11 @@ class LayerSyncController(BaseController):
 
         # Accept the layer change
         self._updating_current_layer = True
-        # PERF 2026-09-12: "layer change → widgets synced" latency (the emits
-        # below run every synchronous handler, exploring widgets included)
-        perf_mark_start("layer_change")
         try:
             self._current_layer_id = layer.id()
             self.layer_changed.emit(layer)
             self.layer_synchronized.emit(layer)
             logger.debug(f"Layer synchronized: {layer.name()}")
-            perf_mark_end("layer_change", layer.name())
             return True
         finally:
             self._updating_current_layer = False
