@@ -163,6 +163,11 @@ def _freeze_canvas(request_count: int):
         canvas = iface.mapCanvas()
         if canvas is None:
             return None
+        # A render job still running for the previous subsets (e.g. the whole
+        # dataset after an unfilter) holds the layers' data sources; the first
+        # setSubsetString/reload of the loop waited 44 s for it on a 1.2 M-row
+        # GeoPackage layer. That render is obsolete: cancel it first.
+        canvas.stopRendering()
         canvas.freeze(True)
         return canvas
     except (RuntimeError, AttributeError) as e:
@@ -269,7 +274,10 @@ def apply_pending_subset_requests(
 
     canvas = _freeze_canvas(len(pending_requests))
 
+    import time as _perf_time
+
     for layer, expression in pending_requests:
+        layer_started = _perf_time.perf_counter()
         try:
             layer.name() if layer else "NONE"
 
@@ -424,12 +432,18 @@ def apply_pending_subset_requests(
                 "FilterMate", Qgis.MessageLevel.Critical
             )
 
-        # Track last-touched DB path so the next iteration knows whether
-        # to throttle on the same shared SQLite file.
+        # Track last-touched DB path so the next iteration knows whether the
+        # lock-error retry applies (same shared SQLite file).
         if layer is not None:
             db_path_after = _layer_database_path(layer)
             if db_path_after:
                 last_db_path = db_path_after
+            layer_ms = (_perf_time.perf_counter() - layer_started) * 1000.0
+            if layer_ms >= 250:
+                try:
+                    logger.info(f"⏱ apply_subset_layer: {layer_ms:.0f} ms ({layer.name()})")
+                except (RuntimeError, AttributeError):
+                    logger.info(f"⏱ apply_subset_layer: {layer_ms:.0f} ms")
 
     _unfreeze_canvas(canvas)
 
