@@ -167,8 +167,13 @@ class FilterResultHandler:
         self._update_backend_indicator(task_parameters, provider_type, display_backend, is_fallback)
 
         # Zoom to filtered extent (global flag or per-layer is_tracking)
+        # PERF 2026-09-12: only after a filter. After an unfilter/reset the
+        # union extent is the whole dataset: zooming there launched a render of
+        # ~2 M GeoPackage features that the next filter then waited 84 s for.
+        # Removing a filter keeps the view where the user is.
         perf_mark_start("post_filter_zoom")
-        self._handle_auto_zoom(source_layer, task_parameters)
+        if task_name == 'filter':
+            self._handle_auto_zoom(source_layer, task_parameters)
         perf_mark_end("post_filter_zoom")
 
         # Sync PROJECT_LAYERS between app and dockwidget
