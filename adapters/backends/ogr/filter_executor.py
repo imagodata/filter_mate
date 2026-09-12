@@ -19,6 +19,7 @@ Created: January 2026 (EPIC-1 Phase E4)
 import logging
 import re
 import threading
+import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -33,6 +34,27 @@ logger = logging.getLogger('FilterMate.Adapters.Backends.OGR.FilterExecutor')
 
 _temp_layer_registry_lock = threading.Lock()
 _temp_layer_registry = []  # List of layer IDs to clean up
+
+
+def _log_ogr_phase(name: str, started: float, layer=None, threshold_ms: float = 250.0) -> None:
+    """Log ``⏱ <name>`` at INFO when an OGR phase exceeds ``threshold_ms`` (PERF 2026-09-12)."""
+    elapsed_ms = (time.perf_counter() - started) * 1000.0
+    if elapsed_ms < threshold_ms:
+        return
+    try:
+        label = f" ({layer.name()})" if layer is not None else ""
+    except (RuntimeError, AttributeError):
+        label = ""
+    logger.info(f"⏱ {name}: {elapsed_ms:.0f} ms{label}")
+
+
+def _target_needs_geos_repair(layer) -> bool:
+    """True when the target layer holds at least one GEOS-invalid geometry."""
+    try:
+        from ....core.geometry.geometry_safety import layer_has_invalid_geometries
+    except ImportError:
+        return True  # keep the historical behaviour (always repair)
+    return layer_has_invalid_geometries(layer)
 
 
 def register_temp_layer(layer_id: str) -> None:
@@ -1004,10 +1026,12 @@ def execute_ogr_spatial_selection(
 
     # Create GEOS-safe source layer
     logger.info("[OGR] 🛡️ Creating GEOS-safe source layer...")
+    phase_started = time.perf_counter()
     if create_geos_safe_layer:
         safe_source_geom = create_geos_safe_layer(ogr_source_geom, "_safe_source")
     else:
         safe_source_geom = ogr_source_geom
+    _log_ogr_phase("ogr_safe_source", phase_started, ogr_source_geom)
 
     if safe_source_geom is None:
         logger.warning("[OGR] create_geos_safe_layer returned None, using original")  # nosec B608
@@ -1024,12 +1048,21 @@ def execute_ogr_spatial_selection(
     use_safe_current = False
     target_count = current_layer.featureCount()
     if target_count and target_count <= 50000 and create_geos_safe_layer:
-        logger.debug("[OGR] 🛡️ Creating GEOS-safe target layer...")
-        temp_safe = create_geos_safe_layer(current_layer, "_safe_target")
-        if temp_safe and temp_safe.isValid() and temp_safe.featureCount() > 0:
-            safe_current_layer = temp_safe
-            use_safe_current = True
-            logger.info(f"[OGR] ✓ Safe target layer: {safe_current_layer.featureCount()} features")
+        # PERF 2026-09-12: copy the target into a repaired memory layer ONLY
+        # when a validity scan finds an invalid geometry. Clean layers (the
+        # common case) skip a Python copy of up to 50 000 features per filter.
+        phase_started = time.perf_counter()
+        needs_repair = _target_needs_geos_repair(current_layer)
+        _log_ogr_phase("ogr_target_validity_scan", phase_started, current_layer)
+        if needs_repair:
+            logger.debug("[OGR] 🛡️ Creating GEOS-safe target layer...")
+            phase_started = time.perf_counter()
+            temp_safe = create_geos_safe_layer(current_layer, "_safe_target")
+            if temp_safe and temp_safe.isValid() and temp_safe.featureCount() > 0:
+                safe_current_layer = temp_safe
+                use_safe_current = True
+                logger.info(f"[OGR] ✓ Safe target layer: {safe_current_layer.featureCount()} features")
+            _log_ogr_phase("ogr_safe_target", phase_started, current_layer)
 
     # FIX 2026-01-15: Extract numeric QGIS predicate codes from current_predicates
     # current_predicates peut contenir:
@@ -1151,7 +1184,9 @@ def execute_ogr_spatial_selection(
             'METHOD': method,
             'PREDICATE': predicate_list
         }
+        phase_started = time.perf_counter()
         processing.run("qgis:selectbylocation", alg_params, context=proc_context, feedback=feedback)
+        _log_ogr_phase("ogr_selectbylocation", phase_started, current_layer)
         map_selection_to_original()
     else:
         if verify_index:
@@ -1162,4 +1197,6 @@ def execute_ogr_spatial_selection(
             'METHOD': 0,
             'PREDICATE': predicate_list
         }
+        phase_started = time.perf_counter()
         processing.run("qgis:selectbylocation", alg_params, context=proc_context, feedback=feedback)
+        _log_ogr_phase("ogr_selectbylocation", phase_started, current_layer)

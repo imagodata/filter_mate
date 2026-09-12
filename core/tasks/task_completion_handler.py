@@ -135,6 +135,51 @@ def _layer_database_path(layer: Any) -> Optional[str]:
         return None
 
 
+_SQLITE_LOCK_ERROR_MARKERS = ('unable to open database file', 'database is locked', 'sqlite3_step')
+
+
+def _is_sqlite_lock_error(layer: Any) -> bool:
+    """True when the provider's last error is the SQLite file-lock signature."""
+    try:
+        error = layer.error()
+        message = error.message() if error is not None and hasattr(error, 'message') else str(error or '')
+    except (RuntimeError, AttributeError):
+        return False
+    lowered = (message or '').lower()
+    return any(marker in lowered for marker in _SQLITE_LOCK_ERROR_MARKERS)
+
+
+def _freeze_canvas(request_count: int):
+    """Freeze the map canvas while several subsets are applied (PERF 2026-09-12).
+
+    A frozen canvas issues no redraw between two setSubsetString/reload calls,
+    which is what used to trigger ``sqlite3_step(): unable to open database
+    file`` on layers sharing one SQLite file, and it turns N repaints into one.
+    Returns the canvas to unfreeze, or None.
+    """
+    if request_count < 2 or iface is None:
+        return None
+    try:
+        canvas = iface.mapCanvas()
+        if canvas is None:
+            return None
+        canvas.freeze(True)
+        return canvas
+    except (RuntimeError, AttributeError) as e:
+        logger.debug(f"Could not freeze canvas: {e}")
+        return None
+
+
+def _unfreeze_canvas(canvas) -> None:
+    if canvas is None:
+        return
+    try:
+        canvas.freeze(False)
+        canvas.refresh()
+    except (RuntimeError, AttributeError) as e:
+        logger.debug(f"Could not unfreeze canvas: {e}")
+
+
 def apply_pending_subset_requests(
     pending_requests: List[Tuple[Any, str]],  # List[Tuple[QgsVectorLayer, str]]
     safe_set_subset_fn: Callable[[Any, str], bool]  # Callable[[QgsVectorLayer, str], bool]
@@ -222,6 +267,8 @@ def apply_pending_subset_requests(
     applied_count = 0
     last_db_path: Optional[str] = None
 
+    canvas = _freeze_canvas(len(pending_requests))
+
     for layer, expression in pending_requests:
         try:
             layer.name() if layer else "NONE"
@@ -233,21 +280,13 @@ def apply_pending_subset_requests(
                 )
                 continue
 
-            # 2026-04-29: throttle consecutive applies on the same SQLite
-            # file. Adaptive delay matches the existing parallel-executor
-            # heuristic — more layers per DB → longer pause to let the
-            # previous setSubsetString+reload release its file lock.
+            # PERF 2026-09-12: the fixed 0.2-0.5 s pause between layers of the
+            # same SQLite file (2026-04-29) is gone. Its purpose was to let the
+            # redraw triggered by the previous apply release the file before the
+            # next setSubsetString+reload; the canvas is now frozen for the whole
+            # loop (no redraw at all), and a lock error is retried once below.
             current_db_path = _layer_database_path(layer)
-            if current_db_path and current_db_path == last_db_path:
-                shared_count = db_layer_counts.get(current_db_path, 1)
-                if shared_count > 10:
-                    delay = 0.5
-                elif shared_count > 5:
-                    delay = 0.3
-                else:
-                    delay = 0.2
-                import time as _time
-                _time.sleep(delay)
+            shares_file = bool(current_db_path and current_db_path == last_db_path)
 
             current_subset = layer.subsetString() or ''
             expression_str = expression or ''
@@ -299,6 +338,12 @@ def apply_pending_subset_requests(
             else:
                 # Apply new filter
                 success = safe_set_subset_fn(layer, expression_str)
+                if not success and shares_file and _is_sqlite_lock_error(layer):
+                    # The previous layer's provider still holds the file: give it
+                    # a moment and retry once (replaces the blind pause of old).
+                    import time as _time
+                    _time.sleep(0.3)
+                    success = safe_set_subset_fn(layer, expression_str)
 
                 if success:
                     # Force reload for PostgreSQL/OGR layers
@@ -385,6 +430,8 @@ def apply_pending_subset_requests(
             db_path_after = _layer_database_path(layer)
             if db_path_after:
                 last_db_path = db_path_after
+
+    _unfreeze_canvas(canvas)
 
     # Handle large expressions with deferred application
     if large_expressions:
