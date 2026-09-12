@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.8** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.9** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -11,7 +11,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.8 is a performance release: no more multi-second freezes on large layers in the multiple-selection list, faster project load, cascaded geometry unions and timing lines in the log. See [what's new](#-whats-new-in-488).
+**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.9 is a measured performance release: spatial cascades on GeoPackage use the R-tree (371 s to under 3 s on a 37-layer project), PostgreSQL targets keep their GiST index with the centroid option, no more connection stalls on `localhost`, and the canvas is redrawn once per task. See [what's new](#-whats-new-in-489).
 
 ---
 
@@ -31,7 +31,17 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.8
+### 🆕 What's new in 4.8.9
+
+- **GeoPackage cascades use the spatial index**: the Spatialite expression starts with the R-tree candidate clause GDAL uses for its own spatial filter. Filtering 37 BD TOPO layers by the commune of Toulouse took 371 s; it now takes 1.6 to 3 s. No second full scan after a filter (`reload()` removed on PostgreSQL/OGR).
+- **PostgreSQL with the centroid option keeps its GiST index**: `"t"."geom" && source` is tested before `ST_Intersects(ST_PointOnSurface("t"."geom"), source)`. A five-commune cascade went from 49.6 s to under 4 s, and the worker no longer counts each target twice.
+- **Connection and rendering**: psycopg2 tries an IPv4 `hostaddr` with `gssencmode=disable` first (a 21 s stall on `localhost` resolving to IPv6 first), the canvas is frozen for the whole task and redrawn once, no auto-zoom after unfilter/reset, no fixed pauses between layers of the same GeoPackage.
+- **Fix**: a filter launched with no target layer no longer fails.
+- More `⏱` timing lines in `filtermate.log` (`pg_layer_connect`, `apply_subsets`, `apply_subset_layer`, `layer_filter`, `cascade_filter`, `set_subset`).
+
+See the [4.8.9 changelog](CHANGELOG.md#489---2026-09-12) for details.
+
+### What's new in 4.8.8
 
 - **No more freezes on large layers**: the multiple-selection list loads at most `feature_picker_limit` rows (default 1000, sorted). When truncated, the text filter searches the whole layer, "Select All" loads the full list and canvas selections beyond the loaded rows are fetched by identifier. A click on a row is one indexed lookup instead of a full-layer scan.
 - **Faster project load**: layer variables are applied per layer in one batched write instead of 42 gated writes per layer; unchanged values are skipped; display-field detection is memoised.
