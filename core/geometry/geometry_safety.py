@@ -498,6 +498,9 @@ def create_geos_safe_layer(
         # FIX v4.1.1: Register layer for cleanup after filtering completes
         try:
             from qgis.core import QgsProject
+            # PERF 2026-09-12: marker read by FilterMate's layersAdded/WillBeRemoved
+            # handlers so this scratch layer never triggers a layer-management task
+            safe_layer.setCustomProperty('filterMate/internal_temp', True)
             QgsProject.instance().addMapLayer(safe_layer, False)  # addToLegend=False
             logger.debug(f"create_geos_safe_layer: Added '{safe_layer.name()}' to project registry for GC protection")
 

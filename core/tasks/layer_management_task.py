@@ -31,6 +31,7 @@ import logging
 import os
 import json
 import sqlite3
+import time
 import uuid
 from collections import OrderedDict
 import re
@@ -279,6 +280,7 @@ class LayersManagementEngineTask(QgsTask):
             self.project_uuid = self.task_parameters["task"]["project_uuid"]
 
             logger.info(f"LayersManagementEngineTask.run() started: action={self.task_action}, db_path={self.db_file_path}")
+            self._perf_run_started = time.perf_counter()
 
             if self.task_action == 'add_layers':
                 self.layers = self.task_parameters["task"]["layers"]
@@ -1800,6 +1802,11 @@ class LayersManagementEngineTask(QgsTask):
             result (bool): Task result
         """
         logger.info(f"LayersManagementEngineTask.finished(): task_action={self.task_action}, result={result}, project_layers count={len(self.project_layers) if self.project_layers else 0}")
+        run_started = getattr(self, '_perf_run_started', None)
+        if run_started is not None:
+            # PERF 2026-09-12: worker run + wait for the main thread, per layer task
+            logger.info(f"⏱ layer_task_{self.task_action}: {(time.perf_counter() - run_started) * 1000:.0f} ms "
+                        f"({len(self.layers) if self.layers else 0} layer(s))")
 
         # THREAD SAFETY (v2.3.10): Apply deferred layer variable operations
         # These operations MUST happen in the main thread (finished() runs in main thread)

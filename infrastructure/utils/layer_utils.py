@@ -232,6 +232,9 @@ def get_datasource_connexion_from_layer(layer) -> Tuple[Optional[Any], Optional[
 
         if ssl_mode is not None:
             connect_kwargs['sslmode'] = source_uri.encodeSslMode(ssl_mode)
+        # PERF 2026-09-12: bound the TCP connect (Windows waits ~21 s per
+        # unreachable address otherwise)
+        connect_kwargs.setdefault('connect_timeout', 15)
 
         connexion = psycopg2.connect(**connect_kwargs)
 

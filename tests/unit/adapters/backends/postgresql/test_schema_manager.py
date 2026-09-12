@@ -327,3 +327,67 @@ class TestCleanupSessionMaterializedViews:
         conn.cursor.side_effect = Exception("connection lost")
         count = cleanup_session_materialized_views(conn, "filtermate_temp", "abc123")
         assert count == 0
+
+
+# ===========================================================================
+# ensure_table_stats (PERF 2026-09-12)
+# ===========================================================================
+
+class TestEnsureTableStats:
+    """pg_stat_user_tables lookup, ANALYZE when never analyzed, session cache."""
+
+    @pytest.fixture(autouse=True)
+    def _fresh_cache(self):
+        _mod.clear_table_stats_cache()
+        yield
+        _mod.clear_table_stats_cache()
+
+    def test_analyzed_table_needs_no_analyze(self, mock_connexion, mock_cursor):
+        mock_cursor.fetchone.return_value = (True,)
+
+        assert ensure_table_stats(mock_connexion, "ign", "commune", "geometrie") is True
+
+        sql_calls = [call.args[0] for call in mock_cursor.execute.call_args_list]
+        assert len(sql_calls) == 1
+        assert "pg_stat_user_tables" in sql_calls[0]
+        assert "pg_stats" not in sql_calls[0].replace("pg_stat_user_tables", "")
+        mock_connexion.commit.assert_not_called()
+
+    def test_never_analyzed_table_gets_analyze(self, mock_connexion, mock_cursor):
+        mock_cursor.fetchone.return_value = (False,)
+
+        assert ensure_table_stats(mock_connexion, "ign", "commune", "geometrie") is True
+
+        sql_calls = [call.args[0] for call in mock_cursor.execute.call_args_list]
+        assert len(sql_calls) == 2
+        assert sql_calls[1] == 'ANALYZE "ign"."commune";'
+        mock_connexion.commit.assert_called_once()
+
+    def test_unknown_table_is_treated_as_never_analyzed(self, mock_connexion, mock_cursor):
+        mock_cursor.fetchone.return_value = None
+        assert ensure_table_stats(mock_connexion, "ign", "vue", "geometrie") is True
+        assert mock_cursor.execute.call_count == 2
+
+    def test_second_call_is_served_from_cache(self, mock_connexion, mock_cursor):
+        mock_cursor.fetchone.return_value = (True,)
+        ensure_table_stats(mock_connexion, "ign", "commune", "geometrie")
+        ensure_table_stats(mock_connexion, "ign", "commune", "geometrie")
+        assert mock_cursor.execute.call_count == 1
+
+        # A different table is a different cache key
+        ensure_table_stats(mock_connexion, "ign", "batiment", "geometrie")
+        assert mock_cursor.execute.call_count == 2
+
+    def test_cache_can_be_bypassed(self, mock_connexion, mock_cursor):
+        mock_cursor.fetchone.return_value = (True,)
+        ensure_table_stats(mock_connexion, "ign", "commune", "geometrie")
+        ensure_table_stats(mock_connexion, "ign", "commune", "geometrie", use_cache=False)
+        assert mock_cursor.execute.call_count == 2
+
+    def test_failure_is_not_cached(self, mock_connexion, mock_cursor):
+        mock_cursor.execute.side_effect = RuntimeError("permission denied")
+        assert ensure_table_stats(mock_connexion, "ign", "commune", "geometrie") is False
+        mock_cursor.execute.side_effect = None
+        mock_cursor.fetchone.return_value = (True,)
+        assert ensure_table_stats(mock_connexion, "ign", "commune", "geometrie") is True
+        assert mock_cursor.execute.call_count == 2

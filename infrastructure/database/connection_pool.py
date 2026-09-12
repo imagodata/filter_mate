@@ -63,6 +63,9 @@ logger = logging.getLogger('FilterMate.ConnectionPool')
 from .postgresql_support import psycopg2, POSTGRESQL_AVAILABLE
 
 
+PG_CONNECT_TIMEOUT_SECONDS = 15  # PERF 2026-09-12: bound the TCP connect of pooled connections
+
+
 @dataclass
 class PoolStats:
     """Statistics for a connection pool."""
@@ -201,8 +204,13 @@ class PostgreSQLConnectionPool:
             }
             if self.sslmode:
                 connect_args['sslmode'] = self.sslmode
+            # PERF 2026-09-12: never wait the OS TCP timeout (~21 s on Windows)
+            # on an unreachable address before libpq tries the next one
+            connect_args['connect_timeout'] = PG_CONNECT_TIMEOUT_SECONDS
 
+            connect_started = time.perf_counter()
             conn = psycopg2.connect(**connect_args)
+            logger.info(f"⏱ pg_connect: {(time.perf_counter() - connect_started) * 1000:.0f} ms ({self._pool_key})")
 
             with self._lock:
                 self._active_connections += 1

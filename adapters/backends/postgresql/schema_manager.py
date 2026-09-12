@@ -16,6 +16,7 @@ Date: January 2026
 """
 
 import logging
+import time
 from typing import Optional, Tuple
 
 from ....infrastructure.database.sql_utils import sanitize_sql_identifier
@@ -183,46 +184,68 @@ def schema_exists(connexion, schema_name: str) -> bool:
         return False
 
 
-def ensure_table_stats(connexion, schema: str, table: str, geom_field: str) -> bool:
-    """
-    Ensure PostgreSQL statistics exist for source table geometry column.
+# PERF 2026-09-12: (schema, table, geom_field) triplets whose statistics were
+# verified during this QGIS session. The check used to run on every filter.
+_STATS_VERIFIED: set = set()
 
-    Checks pg_stats for geometry column statistics and runs ANALYZE if missing.
-    This prevents "stats for X.geom do not exist" warnings from PostgreSQL
-    query planner.
+
+def clear_table_stats_cache() -> int:
+    """Forget which source tables were verified (tests, reconnection)."""
+    count = len(_STATS_VERIFIED)
+    _STATS_VERIFIED.clear()
+    return count
+
+
+def ensure_table_stats(connexion, schema: str, table: str, geom_field: str, use_cache: bool = True) -> bool:
+    """
+    Ensure PostgreSQL statistics exist for a source table and run ANALYZE if not.
+
+    PERF 2026-09-12: the previous implementation counted rows of ``pg_stats``.
+    That view evaluates a privilege check for every column of every table in
+    the database, so on a large catalog (BD TOPO: hundreds of tables) the
+    query took ~20 s, on every filter, before the first target layer was even
+    touched. ``pg_stat_user_tables`` answers "was this table ever analyzed?"
+    from the statistics collector in milliseconds, and the answer is cached
+    for the session.
 
     Args:
         connexion: psycopg2 connection
         schema: Table schema name
         table: Table name
-        geom_field: Geometry column name
+        geom_field: Geometry column name (kept for logging / cache key)
+        use_cache: Skip the query when the table was already verified
 
     Returns:
         bool: True if stats exist or were created, False on error
     """
+    key = (schema, table, geom_field)
+    if use_cache and key in _STATS_VERIFIED:
+        return True
+
+    started = time.perf_counter()
     try:
         with connexion.cursor() as cursor:
-            # Check if stats exist for geometry column
             cursor.execute("""
-                SELECT COUNT(*) FROM pg_stats
-                WHERE schemaname = %s
-                AND tablename = %s
-                AND attname = %s;
-            """, (schema, table, geom_field))
-
+                SELECT (last_analyze IS NOT NULL OR last_autoanalyze IS NOT NULL)
+                FROM pg_stat_user_tables
+                WHERE schemaname = %s AND relname = %s;
+            """, (schema, table))
             result = cursor.fetchone()
-            has_stats = result[0] > 0 if result else False
+            has_stats = bool(result[0]) if result else False
 
             if not has_stats:
                 safe_schema = sanitize_sql_identifier(schema)
                 safe_table = sanitize_sql_identifier(table)
-                logger.info(f"Running ANALYZE on source table \"{safe_schema}\".\"{safe_table}\" (missing stats for {geom_field})")
+                logger.info(f"Running ANALYZE on source table \"{safe_schema}\".\"{safe_table}\" (never analyzed, stats needed for {geom_field})")
                 cursor.execute(f'ANALYZE "{safe_schema}"."{safe_table}";')
                 connexion.commit()
                 logger.debug(f"ANALYZE completed for \"{safe_schema}\".\"{safe_table}\"")
 
+            _STATS_VERIFIED.add(key)
+            elapsed_ms = (time.perf_counter() - started) * 1000.0
+            if elapsed_ms > 250:
+                logger.info(f"⏱ pg_ensure_stats: {elapsed_ms:.0f} ms ({schema}.{table})")
             return True
-
     except Exception as e:
         logger.warning(f"Could not check/create stats for \"{schema}\".\"{table}\": {e}")
         return False

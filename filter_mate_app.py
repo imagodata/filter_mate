@@ -1431,6 +1431,19 @@ class FilterMateApp:
             self._removing_all_layers = False
         elif getattr(self, '_removing_all_layers', False):
             return
+        if task_name == 'remove_layers' and data:
+            # PERF 2026-09-12: the plugin's own scratch layers (GEOS-safe copies,
+            # memory source layers) are removed at the end of every filter; they
+            # must not cost a LayersManagementEngineTask + full UI rebuild.
+            try:
+                from .infrastructure.utils import is_filtermate_temp_layer_id as _is_temp_layer_id
+            except Exception:  # relative import unavailable when the method is exec'd standalone (tests)
+                _is_temp_layer_id = None
+            if _is_temp_layer_id is not None:
+                data = [layer_id for layer_id in data if _is_temp_layer_id(layer_id) is not True]
+                if not data:
+                    logger.debug("manage_task: only FilterMate temporary layers removed - nothing to do")
+                    return
 
         logger.debug(f"manage_task: task_name={task_name}, data={data is not None}")
 

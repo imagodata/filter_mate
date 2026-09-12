@@ -98,6 +98,11 @@ class LayerLifecycleService:
             - More permissive with PostgreSQL layers (connection may be initializing)
         """
         from ...infrastructure.utils import is_sip_deleted, is_layer_valid as is_valid_layer, is_layer_source_available
+        try:
+            from ...infrastructure.utils import is_filtermate_temp_layer
+        except ImportError:  # stubbed package in some test suites
+            def is_filtermate_temp_layer(_layer):  # noqa: D103 - no-op fallback
+                return False
 
         try:
             input_count = len(layers or [])
@@ -118,6 +123,11 @@ class LayerLifecycleService:
                     except RuntimeError:
                         name = 'unknown'
                     filtered_reasons.append(f"{name}: not a vector layer")
+                    continue
+
+                # PERF 2026-09-12: the plugin's own scratch layers never enter PROJECT_LAYERS
+                if is_filtermate_temp_layer(layer_item) is True:
+                    filtered_reasons.append(f"{layer_item.name()}: FilterMate temporary layer")
                     continue
 
                 is_postgres = layer_item.providerType() == 'postgres'
