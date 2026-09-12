@@ -519,3 +519,72 @@ class TestApplyFilterQueueRouting:
 
         assert result is False
         callback.assert_not_called()
+
+
+# ===========================================================================
+# PERF 2026-09-12: index-aware predicate with the centroid optimisation
+# ===========================================================================
+
+class TestIndexAwarePredicate:
+    """``ST_PointOnSurface("t"."geom")`` cannot use the GiST index of ``geom``;
+    a ``"t"."geom" && source`` test in front of the predicate restores it."""
+
+    def test_centroid_predicate_gets_a_bbox_test(self, builder):
+        expr = builder._index_aware_predicate(
+            "ST_Intersects", 'ST_PointOnSurface("b"."geom")', '__source."geom"', raw_geom_expr='"b"."geom"'
+        )
+        assert expr == '("b"."geom" && __source."geom" AND ST_Intersects(ST_PointOnSurface("b"."geom"), __source."geom"))'
+
+    def test_raw_column_predicate_is_left_alone(self, builder):
+        expr = builder._index_aware_predicate("ST_Intersects", '"b"."geom"', '__source."geom"', raw_geom_expr='"b"."geom"')
+        assert expr == 'ST_Intersects("b"."geom", __source."geom")'
+
+    def test_disjoint_and_reprojected_geometry_are_left_alone(self, builder):
+        disjoint = builder._index_aware_predicate(
+            "ST_Disjoint", 'ST_PointOnSurface("b"."geom")', '__source."geom"', raw_geom_expr='"b"."geom"'
+        )
+        transformed = builder._index_aware_predicate(
+            "ST_Intersects", 'ST_PointOnSurface(ST_Transform("b"."geom", 2154))', '__source."geom"', raw_geom_expr='"b"."geom"'
+        )
+        assert disjoint == 'ST_Disjoint(ST_PointOnSurface("b"."geom"), __source."geom")'
+        assert transformed.startswith("ST_Intersects(")
+
+    def test_simple_wkt_path(self, builder):
+        expr = builder._build_simple_wkt_expression(
+            geom_expr='ST_PointOnSurface("t"."geom")',
+            predicate_func="ST_Intersects",
+            source_wkt="POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))",
+            source_srid=2154,
+            buffer_value=None,
+            raw_geom_expr='"t"."geom"',
+        )
+        assert expr.startswith('("t"."geom" && ST_MakeValid(ST_GeomFromText(')
+        assert 'AND ST_Intersects(ST_PointOnSurface("t"."geom"), ST_MakeValid(' in expr
+
+    def test_exists_path(self, builder):
+        expr = builder._build_exists_expression(
+            geom_expr='ST_PointOnSurface("batiment"."geometrie")',
+            predicate_func="ST_Intersects",
+            source_geom='"ign"."commune"."geometrie"',
+            source_filter='"commune"."fid" IN (8, 34)',
+            buffer_value=None,
+            layer_props={},
+            original_source_table="commune",
+            raw_geom_expr='"batiment"."geometrie"',
+        )
+        assert expr.startswith('EXISTS (SELECT 1 FROM "ign"."commune" AS __source WHERE ')
+        assert ('("batiment"."geometrie" && __source."geometrie" AND '
+                'ST_Intersects(ST_PointOnSurface("batiment"."geometrie"), __source."geometrie"))') in expr
+        assert '__source."fid" IN (8, 34)' in expr
+
+    def test_exists_path_with_buffer_tests_the_buffered_source(self, builder):
+        expr = builder._build_exists_expression(
+            geom_expr='ST_PointOnSurface("b"."geom")',
+            predicate_func="ST_Intersects",
+            source_geom='"s"."commune"."geom"',
+            source_filter=None,
+            buffer_value=50,
+            layer_props={},
+            raw_geom_expr='"b"."geom"',
+        )
+        assert '"b"."geom" && ST_Buffer(__source."geom", 50' in expr

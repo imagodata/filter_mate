@@ -327,3 +327,44 @@ class TestSafeSetSubsetStringSanitization:
         from infrastructure.database.sql_utils import safe_set_subset_string
 
         assert safe_set_subset_string(None, "anything") is False
+
+
+# ---------------------------------------------------------------------------
+# PERF 2026-09-12: phase timings of safe_set_subset_string
+# ---------------------------------------------------------------------------
+
+class TestSafeSetSubsetStringTiming:
+
+    def test_slow_call_logs_its_phases(self, monkeypatch, caplog):
+        import itertools
+        import logging
+        from unittest.mock import MagicMock
+        from infrastructure.database import sql_utils
+
+        ticks = itertools.count(step=0.2)
+        monkeypatch.setattr(sql_utils._perf, "perf_counter", lambda: next(ticks))
+        layer = MagicMock()
+        layer.name.return_value = "batiment"
+        layer.providerType.return_value = "ogr"
+        layer.setSubsetString.return_value = True
+        caplog.set_level(logging.INFO)
+
+        assert sql_utils.safe_set_subset_string(layer, "fid IN (1)") is True
+
+        lines = [r.getMessage() for r in caplog.records if r.getMessage().startswith("⏱ set_subset: ")]
+        assert len(lines) == 1
+        assert "(batiment: types " in lines[0] and "setSubsetString " in lines[0]
+
+    def test_fast_call_stays_quiet(self, caplog):
+        import logging
+        from unittest.mock import MagicMock
+        from infrastructure.database import sql_utils
+
+        layer = MagicMock()
+        layer.providerType.return_value = "ogr"
+        layer.setSubsetString.return_value = True
+        caplog.set_level(logging.INFO)
+
+        sql_utils.safe_set_subset_string(layer, "fid IN (1)")
+
+        assert not any(r.getMessage().startswith("⏱ set_subset: ") for r in caplog.records)

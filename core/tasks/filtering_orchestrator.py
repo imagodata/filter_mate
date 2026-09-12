@@ -28,6 +28,7 @@ Location: core/tasks/filtering_orchestrator.py (Application Layer)
 
 import logging
 import os
+import time
 from typing import Any, Callable, Dict, List, Optional
 
 from qgis.core import QgsVectorLayer
@@ -38,12 +39,41 @@ from ...infrastructure.utils import is_layer_valid
 from ...infrastructure.parallel import ParallelFilterExecutor, ParallelConfig
 from ...config.config import ENV_VARS
 
+# PERF 2026-09-12: per-layer cascade timings. A target that takes longer than
+# this gets its own ``⏱ layer_filter`` line; the cascade total is always logged.
+# They measure the worker side only: on PostgreSQL the subset is applied there,
+# on Spatialite/OGR it is only built and queued and the cost shows up in the
+# ``⏱ apply_subset_layer`` lines of the main thread.
+# The module logger above writes to its own file (setup_logger, propagate off);
+# the ⏱ lines go through the shared perf logger so they land in filtermate.log
+# next to the other timings.
+LAYER_FILTER_LOG_THRESHOLD_MS = 200
+perf_logger = logging.getLogger('FilterMate.Perf')
+
 # Setup logger with rotation
 logger = setup_logger(
     'FilterMate.Tasks.FilteringOrchestrator',
     os.path.join(ENV_VARS.get("PATH_ABSOLUTE_PROJECT", "."), 'logs', 'filtermate_tasks.log'),
     level=logging.INFO
 )
+
+
+def _progress_percent(done: int, layers_count: int) -> float:
+    """Progress in percent; a task with no target layer is simply complete.
+
+    2026-09-12: a filter launched with the source layer only (no target
+    checked) raised ZeroDivisionError here and the whole action failed.
+    """
+    if layers_count <= 0:
+        return 100.0
+    return (done / layers_count) * 100.0
+
+
+def _log_cascade_timing(layer_count: int, cascade_ms: float,
+                        slowest_name: Optional[str], slowest_ms: float) -> None:
+    """Log the worker-side cascade total and its slowest layer."""
+    slowest = f", slowest: {slowest_name} {slowest_ms:.0f} ms" if slowest_name else ""
+    perf_logger.info(f"⏱ cascade_filter: {cascade_ms:.0f} ms ({layer_count} layer(s) in the worker{slowest})")
 
 
 class FilteringOrchestrator:
@@ -195,7 +225,7 @@ class FilteringOrchestrator:
             logger.warning("  -> Distant layers may return no results")
             logger.warning("  -> Consider adjusting filter criteria")
 
-        set_progress_callback((1 / layers_count) * 100)
+        set_progress_callback(_progress_percent(1, layers_count))
 
         # ===================================================================
         # STEP 2: FILTER DISTANT LAYERS (if geometric predicates configured)
@@ -385,7 +415,7 @@ class FilteringOrchestrator:
         # FIX 2026-01-15: Protect against division by zero when no layers selected
         i = 1
         if layers_count > 0:
-            set_progress_callback((i / layers_count) * 100)
+            set_progress_callback(_progress_percent(i, layers_count))
 
         for layer_provider_type in layers:
             logger.debug(f"  -> Processing {len(layers[layer_provider_type])} {layer_provider_type} layer(s)")
@@ -394,7 +424,7 @@ class FilteringOrchestrator:
                 logger.info(f"    -> Queued clear on: {layer.name()}")
                 i += 1
                 if layers_count > 0:
-                    set_progress_callback((i / layers_count) * 100)
+                    set_progress_callback(_progress_percent(i, layers_count))
                 if is_canceled_callback():
                     logger.warning("FilterMate: Unfilter canceled by user")
                     return False
@@ -445,7 +475,7 @@ class FilteringOrchestrator:
         manage_layer_subset_strings_callback(source_layer)
         # FIX 2026-01-15: Protect against division by zero when no layers selected
         if layers_count > 0:
-            set_progress_callback((i / layers_count) * 100)
+            set_progress_callback(_progress_percent(i, layers_count))
 
         for layer_provider_type in layers:
             logger.debug(f"  -> Processing {len(layers[layer_provider_type])} {layer_provider_type} layer(s)")
@@ -453,7 +483,7 @@ class FilteringOrchestrator:
                 logger.info(f"    -> Resetting: {layer.name()}")
                 manage_layer_subset_strings_callback(layer)
                 i += 1
-                set_progress_callback((i / layers_count) * 100)
+                set_progress_callback(_progress_percent(i, layers_count))
                 if is_canceled_callback():
                     logger.warning("FilterMate: Reset canceled by user")
                     return False
@@ -753,12 +783,15 @@ class FilteringOrchestrator:
         }
         # Pass cancel_check callback to executor
         # This allows parallel workers to check if task was canceled and stop immediately
+        cascade_start = time.perf_counter()
         results = executor.filter_layers_parallel(
             all_layers,
             execute_geometric_filtering_callback,
             task_parameters,
             cancel_check=is_canceled_callback
         )
+        cascade_ms = (time.perf_counter() - cascade_start) * 1000.0
+        slowest_name, slowest_ms = None, 0.0
 
         # Process results and update progress
         successful_filters = 0
@@ -773,22 +806,40 @@ class FilteringOrchestrator:
             layer, layer_props = layer_tuple
             set_description_callback(f"Filtering layer {i}/{layers_count}: {layer.name()}")
 
+            # Results come back in completion order when the executor really
+            # runs in parallel: name the layer from the result, not from the
+            # zipped input.
+            layer_ms = float(getattr(filter_result, 'execution_time_ms', 0.0) or 0.0)
+            result_name = getattr(filter_result, 'layer_name', None) or layer.name()
+            if layer_ms > slowest_ms:
+                slowest_name, slowest_ms = result_name, layer_ms
+            if layer_ms >= LAYER_FILTER_LOG_THRESHOLD_MS:
+                perf_logger.info(f"⏱ layer_filter: {layer_ms:.0f} ms ({result_name})")
+
             if filter_result.success:
                 successful_filters += 1
-                logger.info(f"  {layer.name()} has been filtered -> {layer.featureCount()} features")
+                # PERF 2026-09-12: no featureCount() here. On PostgreSQL it was a
+                # real COUNT query per target (uncached right after a subset
+                # change); with every backend queueing its subset for the main
+                # thread the number was stale anyway. The completion handler
+                # reports the counts once the subsets are applied.
+                logger.info(f"  {layer.name()} filtered in {layer_ms:.0f} ms")
             else:
                 failed_filters += 1
                 failed_layer_names.append(layer.name())
                 error_msg = filter_result.error_message if hasattr(filter_result, 'error_message') else getattr(filter_result, 'error', 'Unknown error')
                 logger.error(f"  {layer.name()} - errors occurred during filtering: {error_msg}")
 
-            progress_percent = int((i / layers_count) * 100)
+            progress_percent = int(_progress_percent(i, layers_count))
             set_progress_callback(progress_percent)
 
             if is_canceled_callback():
                 logger.warning(f"Filtering canceled at layer {i}/{layers_count}")
+                _log_cascade_timing(len(results), cascade_ms, slowest_name, slowest_ms)
                 result['success'] = False
                 return result
+
+        _log_cascade_timing(len(results), cascade_ms, slowest_name, slowest_ms)
 
         # DIAGNOSTIC: Summary of filtering results
         self._log_filtering_summary(layers_count, successful_filters, failed_filters, failed_layer_names)
@@ -839,6 +890,9 @@ class FilteringOrchestrator:
         successful_filters = 0
         failed_filters = 0
         failed_layer_names = []
+        cascade_start = time.perf_counter()
+        slowest_name, slowest_ms = None, 0.0
+        executed = 0  # layers actually handed to the callback (skipped ones excluded)
 
         logger.debug(f"Processing providers: {list(layers.keys())}")
         for provider_type in layers:
@@ -857,7 +911,6 @@ class FilteringOrchestrator:
                         continue
 
                     layer_name = layer.name()
-                    layer_feature_count = layer.featureCount()
                 except (RuntimeError, AttributeError) as access_error:
                     logger.error(f"Layer {i}/{layers_count} access error (C++ object deleted): {access_error}")
                     failed_filters += 1
@@ -870,37 +923,46 @@ class FilteringOrchestrator:
 
                 logger.info("")
                 logger.debug(f"FILTERING {i}/{layers_count}: {layer_name} ({layer_provider_type})")
-                logger.info(f"   Features before filter: {layer_feature_count}")
 
+                # PERF 2026-09-12: no featureCount() before or after the call.
+                # On PostgreSQL each one was a real COUNT query per target; the
+                # subset is queued for the main thread, so the "after" number
+                # was stale anyway. Timing replaces the counts.
+                layer_start = time.perf_counter()
+                executed += 1
                 try:
                     filter_result = execute_geometric_filtering_callback(layer_provider_type, layer, layer_props)
                 except Exception as filter_exc:
                     filter_result = False
                     logger.error(f"  {layer_name} - filtering exception: {filter_exc}")
+                layer_ms = (time.perf_counter() - layer_start) * 1000.0
+                if layer_ms > slowest_ms:
+                    slowest_name, slowest_ms = layer_name, layer_ms
+                if layer_ms >= LAYER_FILTER_LOG_THRESHOLD_MS:
+                    perf_logger.info(f"⏱ layer_filter: {layer_ms:.0f} ms ({layer_name})")
 
                 # Log result VISIBLY for debugging
                 logger.info(f"   -> execute_geometric_filtering RESULT: {filter_result}")
 
                 if filter_result:
                     successful_filters += 1
-                    try:
-                        final_count = layer.featureCount()
-                        logger.info(f"  {layer_name} has been filtered -> {final_count} features")
-                    except (RuntimeError, AttributeError):
-                        logger.info(f"  {layer_name} has been filtered (count unavailable)")
+                    logger.info(f"  {layer_name} filtered in {layer_ms:.0f} ms")
                 else:
                     failed_filters += 1
                     failed_layer_names.append(layer_name)
                     logger.error(f"  {layer_name} - errors occurred during filtering")
 
                 i += 1
-                progress_percent = int((i / layers_count) * 100)
+                progress_percent = int(_progress_percent(i, layers_count))
                 set_progress_callback(progress_percent)
 
                 if is_canceled_callback():
                     logger.warning(f"Filtering canceled at layer {i}/{layers_count}")
+                    _log_cascade_timing(executed, (time.perf_counter() - cascade_start) * 1000.0, slowest_name, slowest_ms)
                     result['success'] = False
                     return result
+
+        _log_cascade_timing(executed, (time.perf_counter() - cascade_start) * 1000.0, slowest_name, slowest_ms)
 
         # DIAGNOSTIC: Summary of filtering results
         self._log_filtering_summary(layers_count, successful_filters, failed_filters, failed_layer_names)

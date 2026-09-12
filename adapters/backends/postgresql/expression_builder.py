@@ -230,6 +230,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # For PostgreSQL setSubsetString, the schema is implicit in the layer context
         # Format: "table"."geom" - NOT "schema"."table"."geom"
         geom_expr = f'"{table}"."{geom_field}"'
+        raw_geom_expr = geom_expr
 
         # Apply centroid optimization if enabled
         if use_centroids:
@@ -356,7 +357,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     predicate_func=predicate_func,
                     source_wkt=source_wkt,
                     source_srid=source_srid,
-                    buffer_value=buffer_value
+                    buffer_value=buffer_value,
+                    raw_geom_expr=raw_geom_expr
                 )
             else:
                 # CRITICAL: Use unqualified geom_expr for EXISTS subquery
@@ -372,7 +374,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     layer_props=layer_props,
                     original_source_table=original_source_table,
                     buffer_expression=buffer_expression,  # FIX v4.2.11: Pass dynamic buffer expression
-                    is_filter_chaining=is_filter_chaining  # FIX v4.3.1: Use local variable instead of recalculating
+                    is_filter_chaining=is_filter_chaining,  # FIX v4.3.1: Use local variable instead of recalculating
+                    raw_geom_expr=raw_geom_expr
                 )
 
             if expr:
@@ -1116,7 +1119,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         predicate_func: str,
         source_wkt: str,
         source_srid: int,
-        buffer_value: Optional[float] = None
+        buffer_value: Optional[float] = None,
+        raw_geom_expr: Optional[str] = None
     ) -> str:
         """
         Build simple PostGIS expression using direct WKT.
@@ -1149,7 +1153,33 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     source_geom_sql, buffer_value
                 )
 
-        return f"{predicate_func}({geom_expr}, {source_geom_sql})"
+        return self._index_aware_predicate(predicate_func, geom_expr, source_geom_sql, raw_geom_expr)
+
+    @staticmethod
+    def _index_aware_predicate(
+        predicate_func: str,
+        geom_expr: str,
+        source_expr: str,
+        raw_geom_expr: Optional[str] = None
+    ) -> str:
+        """``predicate(geom, source)``, preceded by a bbox test when needed.
+
+        PERF 2026-09-12: with the centroid optimisation the predicate is
+        evaluated on ``ST_PointOnSurface("table"."geom")``, an expression
+        PostgreSQL cannot look up in the GiST index of ``geom``: every row of
+        the target was scanned (16 s on the 1.2 M-row batiment table for five
+        communes). ``"table"."geom" && source`` in front of the predicate
+        brings the index back; it never changes the result because a feature's
+        point-on-surface (or centroid) lies inside the feature's own bounding
+        box. Skipped for ST_Disjoint, for a reprojected target geometry (bbox
+        in another CRS) and when the predicate already uses the raw column.
+        """
+        predicate = f"{predicate_func}({geom_expr}, {source_expr})"
+        if not raw_geom_expr or raw_geom_expr == geom_expr:
+            return predicate
+        if predicate_func.upper() == 'ST_DISJOINT' or 'ST_TRANSFORM(' in geom_expr.upper():
+            return predicate
+        return f"({raw_geom_expr} && {source_expr} AND {predicate})"
 
     def _build_exists_expression(
         self,
@@ -1161,7 +1191,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         layer_props: Dict,
         original_source_table: Optional[str] = None,
         buffer_expression: Optional[str] = None,
-        is_filter_chaining: bool = False  # FIX v4.3.1: Explicit flag
+        is_filter_chaining: bool = False,  # FIX v4.3.1: Explicit flag
+        raw_geom_expr: Optional[str] = None
     ) -> str:
         """
         Build EXISTS subquery expression.
@@ -1346,7 +1377,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         # Build WHERE clause
         # CRITICAL: The spatial predicate checks intersection between target and source
-        where_clauses = [f"{predicate_func}({geom_expr}, {source_geom_in_subquery})"]
+        where_clauses = [self._index_aware_predicate(predicate_func, geom_expr, source_geom_in_subquery, raw_geom_expr)]
 
         if source_filter:
             # CRITICAL FIX v4.2.8 (2026-01-21): Handle combined EXISTS filters properly

@@ -19,7 +19,13 @@ Date: January 2026
 """
 
 import logging
-from typing import Dict, Optional, Any
+import math
+import os
+import sqlite3
+import threading
+import time
+from typing import Dict, Optional, Any, Tuple
+from urllib.request import pathname2url
 
 try:
     from qgis.core import QgsVectorLayer
@@ -52,6 +58,96 @@ USE_OGR_FALLBACK = "__USE_OGR_FALLBACK__"
 
 # Thresholds
 SPATIALITE_WKT_SIMPLIFY_THRESHOLD = 100000  # 100KB - simplify WKT above this
+
+# PERF 2026-09-12: GeoPackage R-tree prefilter. SQLite evaluates the spatial
+# predicate row by row over the whole table: with a 2,000-vertex source polygon
+# (Toulouse, 43 KB of WKT) a 1.2 M-row layer took 164 s. Restricting the rows
+# to the R-tree candidates of the source bounding box first (the clause GDAL
+# itself emits for its spatial filter) leaves the exact predicate a few
+# thousand rows. The R-tree table is looked up once per file/table/column and
+# remembered for RTREE_CHECK_TTL_SECONDS.
+RTREE_CHECK_TTL_SECONDS = 120
+# Predicates for which "the target's bounding box overlaps the source's" is a
+# necessary condition (a shared point exists). Anything else - Disjoint, a
+# future distance predicate - gets no prefilter.
+RTREE_PREFILTER_PREDICATES = frozenset((
+    'intersects', 'contains', 'within', 'touches', 'overlaps', 'crosses', 'equals', 'covers', 'coveredby',
+))
+_RTREE_CACHE: Dict[tuple, tuple] = {}
+_RTREE_CACHE_LOCK = threading.Lock()
+
+
+def gpkg_layer_location(layer) -> Tuple[Optional[str], Optional[str]]:
+    """(file path, table name) of an OGR GeoPackage layer, from its source URI."""
+    try:
+        source = layer.source() or ''
+    except Exception:
+        return None, None
+    path, _, options = source.partition('|')
+    table = None
+    for part in options.split('|'):
+        key, separator, value = part.partition('=')
+        if separator and key.strip().lower() == 'layername':
+            table = value.strip()
+    return (path.strip() or None), (table or None)
+
+
+def gpkg_has_rtree(path: Optional[str], table: Optional[str], geom_column: Optional[str]) -> bool:
+    """True when the GeoPackage holds a registered R-tree for the column.
+
+    Same test as GDAL's ``HasSpatialIndex``: the ``gpkg_rtree_index`` extension
+    is registered for (table, column) in ``gpkg_extensions`` and the
+    ``rtree_<table>_<column>`` table exists. Read-only lookup through a
+    separate connection; a definite answer is cached per file/table/column
+    for RTREE_CHECK_TTL_SECONDS, a failed lookup (locked file...) is not.
+    """
+    if not (path and table and geom_column):
+        return False
+    path = os.path.abspath(path)
+    key = (path, table, geom_column)
+    now = time.monotonic()
+    with _RTREE_CACHE_LOCK:
+        cached = _RTREE_CACHE.get(key)
+        if cached is not None and now - cached[1] < RTREE_CHECK_TTL_SECONDS:
+            return cached[0]
+    if not os.path.isfile(path):
+        return False
+    try:
+        connection = sqlite3.connect(f"file:{pathname2url(path)}?mode=ro", uri=True, timeout=1.0)
+        try:
+            registered = connection.execute(
+                "SELECT 1 FROM gpkg_extensions WHERE table_name = ? AND column_name = ? "
+                "AND extension_name = 'gpkg_rtree_index'",
+                (table, geom_column),
+            ).fetchone()
+            table_row = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+                (f"rtree_{table}_{geom_column}",),
+            ).fetchone()
+        finally:
+            connection.close()
+    except sqlite3.OperationalError as exc:
+        # "no such table: gpkg_extensions" is a definite no; a lock or an I/O
+        # error is transient and must not disable the prefilter for 2 minutes.
+        if 'no such table' in str(exc).lower():
+            with _RTREE_CACHE_LOCK:
+                _RTREE_CACHE[key] = (False, now)
+        else:
+            logger.info(f"R-tree lookup skipped for {os.path.basename(path)} ({table}): {exc}")
+        return False
+    except (sqlite3.Error, OSError, ValueError) as exc:
+        logger.info(f"R-tree lookup skipped for {os.path.basename(path)} ({table}): {exc}")
+        return False
+    found = registered is not None and table_row is not None
+    with _RTREE_CACHE_LOCK:
+        _RTREE_CACHE[key] = (found, now)
+    return found
+
+
+def clear_rtree_cache() -> None:
+    """Forget the R-tree lookups (tests, or after a file is rebuilt)."""
+    with _RTREE_CACHE_LOCK:
+        _RTREE_CACHE.clear()
 
 
 class SpatialiteExpressionBuilder(GeometricFilterPort):
@@ -282,9 +378,17 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             return "1 = 0"
 
         if len(predicate_expressions) == 1:
-            return predicate_expressions[0]
+            expression = predicate_expressions[0]
         else:
-            return f"({' OR '.join(predicate_expressions)})"
+            expression = f"({' OR '.join(predicate_expressions)})"
+
+        prefilter = self._rtree_prefilter(
+            layer, geom_field, source_geom, source_srid, target_srid, buffer_value, predicates
+        )
+        if prefilter:
+            self.log_info(f"✓ GeoPackage R-tree prefilter added for {layer_props.get('layer_name', 'layer')}")
+            return f"{prefilter} AND {expression}"
+        return expression
 
     def apply_filter(
         self,
@@ -365,6 +469,93 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
 
     # NOTE v4.0.1: _detect_geometry_column, _apply_centroid_transform,
     # _get_layer_srid, _get_source_srid are inherited from GeometricFilterPort
+
+    def _rtree_prefilter(
+        self,
+        layer,
+        geom_field: str,
+        source_wkt: str,
+        source_srid: int,
+        target_srid: int,
+        buffer_value: Optional[float],
+        predicates: Dict[str, bool]
+    ) -> Optional[str]:
+        """R-tree candidate clause for a GeoPackage target, or None.
+
+        Valid for every predicate except Disjoint: a feature that intersects,
+        contains, touches... the source (or whose point-on-surface does) has a
+        bounding box that overlaps the source bounding box, grown by the
+        buffer. Returns None whenever anything needed is missing, so the plain
+        predicate keeps working as before.
+        """
+        if not layer or not self._is_geopackage(layer):
+            return None
+        try:
+            if layer.providerType() != 'ogr':
+                return None
+            layer_name = layer.name()
+        except Exception:
+            return None
+        active = [str(name).lower().replace('st_', '') for name, enabled in predicates.items() if enabled]
+        unsupported = [name for name in active if name not in RTREE_PREFILTER_PREDICATES]
+        if unsupported:
+            self.log_info(f"R-tree prefilter not applied for {layer_name}: predicate {unsupported[0]}")
+            return None
+        path, table = gpkg_layer_location(layer)
+        if not path or not table:
+            self.log_info(f"R-tree prefilter not applied for {layer_name}: no file path or layername in the source URI")
+            return None
+        if not gpkg_has_rtree(path, table, geom_field):
+            self.log_info(f"R-tree prefilter not applied for {layer_name}: no registered R-tree on {table}.{geom_field}")
+            return None
+        bbox = self._source_bbox(source_wkt, source_srid, target_srid, buffer_value)
+        if bbox is None:
+            self.log_info(f"R-tree prefilter not applied for {layer_name}: source bounding box unavailable")
+            return None
+        xmin, ymin, xmax, ymax = bbox
+        rtree_table = f"rtree_{table}_{geom_field}".replace('"', '""')
+        return (
+            f'ROWID IN (SELECT id FROM "{rtree_table}" '
+            f'WHERE minx <= {xmax!r} AND maxx >= {xmin!r} AND miny <= {ymax!r} AND maxy >= {ymin!r})'
+        )
+
+    def _source_bbox(
+        self,
+        source_wkt: str,
+        source_srid: int,
+        target_srid: int,
+        buffer_value: Optional[float]
+    ) -> Optional[Tuple[float, float, float, float]]:
+        """Bounding box of the source WKT in the target CRS, grown by the buffer."""
+        try:
+            from qgis.core import (
+                QgsGeometry, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
+            )
+            geometry = QgsGeometry.fromWkt(source_wkt)
+            if geometry is None or geometry.isEmpty():
+                return None
+            bbox = geometry.boundingBox()
+            if source_srid != target_srid:
+                source_crs = QgsCoordinateReferenceSystem(f"EPSG:{source_srid}")
+                target_crs = QgsCoordinateReferenceSystem(f"EPSG:{target_srid}")
+                if not source_crs.isValid() or not target_crs.isValid():
+                    return None
+                bbox = QgsCoordinateTransform(source_crs, target_crs, QgsProject.instance()).transformBoundingBox(bbox)
+            if bbox.isNull():
+                return None
+            margin = max(float(buffer_value or 0.0), 0.0)
+            bounds = (
+                float(bbox.xMinimum()) - margin, float(bbox.yMinimum()) - margin,
+                float(bbox.xMaximum()) + margin, float(bbox.yMaximum()) + margin,
+            )
+            # A transform out of the target CRS domain yields inf/nan, which
+            # SQLite would read as column names: no prefilter in that case.
+            if not all(math.isfinite(value) for value in bounds):
+                return None
+            return bounds
+        except Exception as exc:
+            self.log_debug(f"R-tree prefilter skipped (source bbox unavailable): {exc}")
+            return None
 
     def _is_geopackage(self, layer) -> bool:
         """Check if layer is from a GeoPackage."""

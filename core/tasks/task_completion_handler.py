@@ -24,7 +24,7 @@ except ImportError:  # stubbed package in the handler test suite
     def perf_mark_end(name, details=None):  # noqa: D103 - no-op fallback
         return None
 from ...infrastructure.constants import (
-    QGIS_PROVIDER_POSTGRES, QGIS_PROVIDER_SPATIALITE, QGIS_PROVIDER_OGR,
+    QGIS_PROVIDER_POSTGRES, QGIS_PROVIDER_SPATIALITE,
     QGIS_PROVIDER_MEMORY,
 )
 
@@ -168,6 +168,11 @@ def _freeze_canvas(request_count: int):
         # setSubsetString/reload of the loop waited 44 s for it on a 1.2 M-row
         # GeoPackage layer. That render is obsolete: cancel it first.
         canvas.stopRendering()
+        if bool(canvas.isFrozen()):
+            # Frozen by whoever launched the task (FilterMateApp freezes the
+            # canvas for the whole task): that owner thaws and refreshes once
+            # at the end, this loop must not do it halfway through.
+            return None
         canvas.freeze(True)
         return canvas
     except (RuntimeError, AttributeError) as e:
@@ -278,6 +283,7 @@ def apply_pending_subset_requests(
 
     for layer, expression in pending_requests:
         layer_started = _perf_time.perf_counter()
+        phase_details = ''
         try:
             layer.name() if layer else "NONE"
 
@@ -307,19 +313,20 @@ def apply_pending_subset_requests(
 
             # Check if filter already applied
             if current_subset.strip() == expression_str.strip():
-                # Filter already applied - force reload for PostgreSQL/OGR layers
-                # FIX 2026-01-24: Skip reload for Spatialite with empty subset (unfilter operation)
-                # layer.reload() on Spatialite with empty subset causes freeze because it tries
-                # to reload from temporary tables that don't exist for unfilter operations.
-                should_reload = (layer.providerType() in (QGIS_PROVIDER_POSTGRES, QGIS_PROVIDER_OGR) or
-                                (layer.providerType() == QGIS_PROVIDER_SPATIALITE and expression_str.strip() != ''))
-
-                if should_reload:
+                # Filter already applied. PERF 2026-09-12: same rules as a new
+                # filter below - no reload() on PostgreSQL/OGR (a reload reopens
+                # a GeoPackage and forces a full recount), reload kept on
+                # Spatialite for non-empty subsets (FIX 2026-01-24), and the
+                # count only where the provider already holds it.
+                if layer.providerType() == QGIS_PROVIDER_SPATIALITE and expression_str.strip() != '':
                     with SignalBlocker(layer):
                         layer.reload()
 
                 # Update extents for smaller layers
-                feature_count = layer.featureCount()
+                if layer.providerType() == QGIS_PROVIDER_POSTGRES:
+                    feature_count = -1
+                else:
+                    feature_count = layer.featureCount()
                 if feature_count is not None and feature_count >= 0 and feature_count < MAX_FEATURES_FOR_UPDATE_EXTENTS:
                     try:
                         layer.updateExtents()
@@ -336,7 +343,7 @@ def apply_pending_subset_requests(
                     except (RuntimeError, AttributeError) as sel_err:
                         logger.debug(f"Could not clear selection: {sel_err}")
 
-                count_str = f"{feature_count} features" if feature_count >= 0 else "(count pending)"
+                count_str = f"{feature_count} features" if feature_count is not None and feature_count >= 0 else "(count pending)"
                 logger.debug(f"  ✓ Filter already applied to {layer.name()}, triggered reload+repaint")
                 QgsMessageLog.logMessage(
                     f"finished() ✓ Repaint: {layer.name()} → {count_str} (filter already applied)",
@@ -344,6 +351,7 @@ def apply_pending_subset_requests(
                 )
                 applied_count += 1
             else:
+                set_started = _perf_time.perf_counter()
                 # Apply new filter
                 success = safe_set_subset_fn(layer, expression_str)
                 if not success and shares_file and _is_sqlite_lock_error(layer):
@@ -353,26 +361,34 @@ def apply_pending_subset_requests(
                     _time.sleep(0.3)
                     success = safe_set_subset_fn(layer, expression_str)
 
+                set_ms = (_perf_time.perf_counter() - set_started) * 1000.0
+                phase_details = f", set {set_ms:.0f} ms"
                 if success:
-                    # Force reload for PostgreSQL/OGR layers
-                    # FIX 2026-01-24: Skip reload for Spatialite with empty subset (unfilter operation)
-                    # layer.reload() on Spatialite with empty subset causes freeze because it tries
-                    # to reload from temporary tables that don't exist for unfilter operations.
-                    should_reload = (layer.providerType() in (QGIS_PROVIDER_POSTGRES, QGIS_PROVIDER_OGR) or
-                                    (layer.providerType() == QGIS_PROVIDER_SPATIALITE and expression_str.strip() != ''))
-
-                    if should_reload:
+                    # PERF 2026-09-12: no reload() after a successful setSubsetString. The
+                    # provider already emits dataChanged; on OGR/GeoPackage the reload
+                    # reopened the dataset and dropped the count QGIS had just computed, so
+                    # featureCount() ran the filter a second time (164 s of the 371 s
+                    # Toulouse cascade were the second scan of `batiment`). Spatialite keeps
+                    # its reload for non-empty subsets (FIX 2026-01-24, unmeasured).
+                    if layer.providerType() == QGIS_PROVIDER_SPATIALITE and expression_str.strip() != '':
                         with SignalBlocker(layer):
                             layer.reload()
-
+                    # The count is free on OGR (computed inside setSubsetString) and a real
+                    # COUNT query with the spatial predicate on PostgreSQL: only ask for it
+                    # when the provider already holds it.
+                    count_started = _perf_time.perf_counter()
+                    if layer.providerType() == QGIS_PROVIDER_POSTGRES:
+                        feature_count = -1
+                    else:
+                        feature_count = layer.featureCount()
+                    count_ms = (_perf_time.perf_counter() - count_started) * 1000.0
+                    phase_details = f", set {set_ms:.0f} ms, count {count_ms:.0f} ms"
                     # Update extents for smaller layers
-                    feature_count = layer.featureCount()
                     if feature_count is not None and feature_count >= 0 and feature_count < MAX_FEATURES_FOR_UPDATE_EXTENTS:
                         try:
                             layer.updateExtents()
                         except (RuntimeError, AttributeError):
                             pass
-
                     layer.triggerRepaint()
 
                     # FIX v2.9.24: Clear selection for Spatialite layers
@@ -441,7 +457,7 @@ def apply_pending_subset_requests(
             layer_ms = (_perf_time.perf_counter() - layer_started) * 1000.0
             if layer_ms >= 250:
                 try:
-                    logger.info(f"⏱ apply_subset_layer: {layer_ms:.0f} ms ({layer.name()})")
+                    logger.info(f"⏱ apply_subset_layer: {layer_ms:.0f} ms ({layer.name()}{phase_details})")
                 except (RuntimeError, AttributeError):
                     logger.info(f"⏱ apply_subset_layer: {layer_ms:.0f} ms")
 
