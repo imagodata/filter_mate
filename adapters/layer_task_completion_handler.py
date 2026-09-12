@@ -14,6 +14,12 @@ import weakref
 from typing import Dict, Callable, Optional, Any
 from qgis.PyQt.QtCore import QTimer
 
+try:
+    from ..infrastructure.perf_timer import perf_mark_end
+except ImportError:  # test harnesses that stub the infrastructure package
+    def perf_mark_end(name, details=None):  # noqa: D103 - no-op fallback
+        return None
+
 logger = logging.getLogger('FilterMate.LayerTaskCompletionHandler')
 
 
@@ -163,6 +169,12 @@ class LayerTaskCompletionHandler:
         # Handle add_layers post-processing
         if task_name == 'add_layers':
             self._handle_add_layers_completion(loading_new_project, dockwidget)
+            # PERF 2026-09-12: closes the span opened at project read / first add_layers
+            try:
+                layer_total = len(result_project_layers) if result_project_layers else 0
+            except TypeError:
+                layer_total = 0
+            perf_mark_end("project_open", f"{layer_total} layers registered")
 
     def _update_env_paths(self) -> None:
         """Update ENV_VARS with current project paths."""

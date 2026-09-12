@@ -43,7 +43,7 @@ from .infrastructure.utils import (
     is_layer_source_available,
 )
 from .infrastructure.database.sql_utils import safe_set_subset_string
-from .infrastructure.perf_timer import perf_mark_start, perf_mark_end
+from .infrastructure.perf_timer import perf_mark_start, perf_mark_end, perf_elapsed_ms
 from .infrastructure.field_utils import cleanup_corrupted_layer_filters
 from .infrastructure.utils.type_utils import return_typed_value
 from .infrastructure.feedback import (
@@ -1457,6 +1457,12 @@ class FilterMateApp:
         if task_name == 'add_layers' and self._initializing_project:
             logger.debug("Skipping add_layers - project initialization in progress")
             return
+
+        # PERF 2026-09-12: "project open → panel ready" starts at the latest with
+        # the first layer registration (handle_project_initialization starts it
+        # earlier when it runs); it ends in LayerTaskCompletionHandler.
+        if task_name == 'add_layers' and perf_elapsed_ms("project_open") is None:
+            perf_mark_start("project_open")
 
         # v4.1.0: STABILITY FIX - Queue concurrent add_layers tasks
         if task_name == 'add_layers':
