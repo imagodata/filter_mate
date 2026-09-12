@@ -219,7 +219,7 @@ favorites_spatial_helpers = sys.modules[
 
 class TestShouldDowngradeSingleSelection:
     def test_downgrades_when_single_selection_has_no_source_feature(self):
-        assert favorites_controller.should_downgrade_single_selection(
+        assert favorites_spatial_helpers.should_downgrade_single_selection(
             current_groupbox='single_selection',
             has_restored_features=False,
             picker_feature_valid=False,
@@ -227,7 +227,7 @@ class TestShouldDowngradeSingleSelection:
         ) is True
 
     def test_no_downgrade_if_picker_has_valid_feature(self):
-        assert favorites_controller.should_downgrade_single_selection(
+        assert favorites_spatial_helpers.should_downgrade_single_selection(
             current_groupbox='single_selection',
             has_restored_features=False,
             picker_feature_valid=True,
@@ -235,7 +235,7 @@ class TestShouldDowngradeSingleSelection:
         ) is False
 
     def test_no_downgrade_if_restored_task_features_available(self):
-        assert favorites_controller.should_downgrade_single_selection(
+        assert favorites_spatial_helpers.should_downgrade_single_selection(
             current_groupbox='single_selection',
             has_restored_features=True,
             picker_feature_valid=False,
@@ -243,7 +243,7 @@ class TestShouldDowngradeSingleSelection:
         ) is False
 
     def test_no_downgrade_if_layer_has_selected_features(self):
-        assert favorites_controller.should_downgrade_single_selection(
+        assert favorites_spatial_helpers.should_downgrade_single_selection(
             current_groupbox='single_selection',
             has_restored_features=False,
             picker_feature_valid=False,
@@ -251,7 +251,7 @@ class TestShouldDowngradeSingleSelection:
         ) is False
 
     def test_no_downgrade_in_multiple_selection_mode(self):
-        assert favorites_controller.should_downgrade_single_selection(
+        assert favorites_spatial_helpers.should_downgrade_single_selection(
             current_groupbox='multiple_selection',
             has_restored_features=False,
             picker_feature_valid=False,
@@ -259,7 +259,7 @@ class TestShouldDowngradeSingleSelection:
         ) is False
 
     def test_no_downgrade_in_custom_selection_mode(self):
-        assert favorites_controller.should_downgrade_single_selection(
+        assert favorites_spatial_helpers.should_downgrade_single_selection(
             current_groupbox='custom_selection',
             has_restored_features=False,
             picker_feature_valid=False,
@@ -267,7 +267,7 @@ class TestShouldDowngradeSingleSelection:
         ) is False
 
     def test_no_downgrade_when_groupbox_unset(self):
-        assert favorites_controller.should_downgrade_single_selection(
+        assert favorites_spatial_helpers.should_downgrade_single_selection(
             current_groupbox=None,
             has_restored_features=False,
             picker_feature_valid=False,
@@ -446,7 +446,7 @@ class TestFavoriteMatchesCurrentLayer:
         ctrl, _ = _make_controller_with_dw()
         fav = MagicMock()
         fav.layer_id = "layer-A"
-        assert favorites_controller.favorite_matches_current_layer(fav, None) is False
+        assert favorites_spatial_helpers.favorite_matches_current_layer(fav, None) is False
 
     def test_matches_by_signature_when_available(self, monkeypatch):
         ctrl, _ = _make_controller_with_dw()
@@ -455,7 +455,7 @@ class TestFavoriteMatchesCurrentLayer:
         # F4.2 (2026-04-28): favorite_matches_current_layer lives in
         # favorites_spatial_helpers and calls layer_signature_for from
         # that module's namespace — patch the helpers binding, not the
-        # controller's re-export.
+        # controller (which no longer re-exports it).
         monkeypatch.setattr(
             favorites_spatial_helpers,
             "layer_signature_for",
@@ -466,7 +466,7 @@ class TestFavoriteMatchesCurrentLayer:
         fav.spatial_config = {"source_layer_signature": "postgres::public.points"}
         fav.layer_id = "original-uuid-A"  # stale UUID, signature wins
         fav.layer_name = "Points de demande"
-        assert favorites_controller.favorite_matches_current_layer(fav, layer) is True
+        assert favorites_spatial_helpers.favorite_matches_current_layer(fav, layer) is True
 
     def test_matches_by_layer_id_when_no_signature(self):
         ctrl, _ = _make_controller_with_dw()
@@ -475,7 +475,7 @@ class TestFavoriteMatchesCurrentLayer:
         fav.spatial_config = None
         fav.layer_id = "layer-A"
         fav.layer_name = "Bar"
-        assert favorites_controller.favorite_matches_current_layer(fav, layer) is True
+        assert favorites_spatial_helpers.favorite_matches_current_layer(fav, layer) is True
 
     def test_matches_by_layer_name_as_last_resort(self):
         ctrl, _ = _make_controller_with_dw()
@@ -484,7 +484,7 @@ class TestFavoriteMatchesCurrentLayer:
         fav.spatial_config = {}
         fav.layer_id = None
         fav.layer_name = "MyLayer"
-        assert favorites_controller.favorite_matches_current_layer(fav, layer) is True
+        assert favorites_spatial_helpers.favorite_matches_current_layer(fav, layer) is True
 
     def test_rejects_cross_layer_apply(self, monkeypatch):
         """Different layer_id, different name, different signature -> reject."""
@@ -502,7 +502,7 @@ class TestFavoriteMatchesCurrentLayer:
         fav.spatial_config = {"source_layer_signature": "postgres::public.points"}
         fav.layer_id = "layer-A"
         fav.layer_name = "MyLayer"
-        assert favorites_controller.favorite_matches_current_layer(fav, layer) is False
+        assert favorites_spatial_helpers.favorite_matches_current_layer(fav, layer) is False
 
     def test_tolerates_runtime_error_on_layer_id(self):
         """A deleted QGIS layer raises on .id()/.name() — must not crash."""
@@ -515,7 +515,7 @@ class TestFavoriteMatchesCurrentLayer:
         fav.layer_id = "layer-A"
         fav.layer_name = "Foo"
         # No match possible, but the predicate should return False gracefully
-        assert favorites_controller.favorite_matches_current_layer(fav, layer) is False
+        assert favorites_spatial_helpers.favorite_matches_current_layer(fav, layer) is False
 
 
 # ---------------------------------------------------------------------------

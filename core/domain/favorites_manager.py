@@ -539,8 +539,6 @@ class FavoritesManager:
         """Get favorite by ID."""
         return self._favorites.get(favorite_id)
 
-    
-
     def get_favorite_by_name(self, name: str) -> Optional[FilterFavorite]:
         """Get favorite by name."""
         for fav in self._favorites.values():
@@ -893,10 +891,6 @@ class FavoritesManager:
         # Favorites are saved to database immediately in add/update/remove
         logger.debug("save_to_project called (favorites already persisted)")
 
-    
-
-    
-
     # ─────────────────────────────────────────────────────────────────
     # Global Favorites Support
     # ─────────────────────────────────────────────────────────────────
@@ -954,8 +948,6 @@ class FavoritesManager:
         except Exception as e:
             logger.error(f"Failed to load global favorites: {e}")
             return []
-
-    
 
     def make_favorite_global(self, favorite_id: str) -> bool:
         """

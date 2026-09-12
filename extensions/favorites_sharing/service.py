@@ -150,7 +150,3 @@ class FavoritesSharingService:
         publish path).
         """
         BundlePublisher._strip_owner_from_bundle(bundle_path)
-
-    
-
-    

@@ -13,6 +13,14 @@ A 34 s filter on a 17-layer PostgreSQL project broke down as 21 s before the fir
 - psycopg2 connections use `connect_timeout` (15 s) so an unreachable address never waits the OS TCP timeout.
 - More timing lines in `filtermate.log`: `⏱ pg_connect`, `⏱ pg_ensure_stats` / `pg_direct_prepare` (when slow), `⏱ apply_subsets`, `⏱ post_filter_canvas` / `_count` / `_history` / `_zoom` / `_ui`, `⏱ layer_task_<action>`. The `⏱ layer_change` span now wraps the dockwidget method that actually reloads the widgets (it measured 0 ms before).
 
+### Code quality (general audit of 2026-09-12)
+
+- JSON config tree (`ui/widgets/json_view/datatypes.py`): drop the four Python 2 `unicode` checks. They only worked because QGIS injects `builtins.unicode = str` in its own `qgis/utils.py`; outside QGIS, `match_type()` raised `NameError` on any non-string value. The corresponding per-file flake8 exemption is removed.
+- Merge the root `utils/` package (`deprecation.py`, `type_utils.py`) into `infrastructure/utils/`, where the other shared helpers already live. Two importers updated.
+- Remove the dead imports flagged by flake8 in `favorites_controller.py`, `favorites_menu_builder.py` and `favorites_service.py`; clean the blank-line and trailing-whitespace leftovers of the favorites refactor (61 flake8 findings, now 0).
+- Test loaders: stop passing `submodule_search_locations=[]` to `spec_from_file_location` in three conftest/test files. It turned the loaded module into a package whose spec parent disagreed with `__package__`, which Python reports as `DeprecationWarning: __package__ != __spec__.parent` on every relative import (82 warnings, now 0).
+- Repository hygiene: delete `debug_gpkg_project.py` (diagnostic script with a hard-coded Windows path, flagged for removal by the 2026-04-22 audit) and move `CHECKPOINT_2026_04_28.md` under `docs/favorites/`.
+
 ## [4.8.8] - 2026-09-12
 
 ### Performance (audit of 2026-09-12)

@@ -43,7 +43,5 @@ per-file-ignores =
     __init__.py: F401
     # Qt resources wildcard import
     filter_mate.py: F403
-    # Third-party vendored widget
-    ui/widgets/json_view/datatypes.py: F821
     # Diagnostic script
     scripts/check_imports.py: F401

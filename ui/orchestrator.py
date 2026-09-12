@@ -19,16 +19,17 @@ Components coordinated:
 from typing import TYPE_CHECKING, Dict, Any, List
 import logging
 
-# The deprecation decorator lives in the sibling `utils` package. Under the
-# QGIS plugin runtime the parent package is `filter_mate`, so the relative
-# `..utils.deprecation` resolves; under pytest's direct project-root layout
-# `ui` is loaded as a top-level package and the relative import fails. Fall
-# back to a no-op decorator so the test suite can still import this module.
+# The deprecation decorator lives in `infrastructure.utils`. Under the QGIS
+# plugin runtime the parent package is `filter_mate`, so the relative
+# `..infrastructure.utils.deprecation` resolves; under pytest's direct
+# project-root layout `ui` is loaded as a top-level package and the relative
+# import fails. Fall back to a no-op decorator so the test suite can still
+# import this module.
 try:
-    from ..utils.deprecation import deprecated
+    from ..infrastructure.utils.deprecation import deprecated
 except ImportError:
     try:
-        from utils.deprecation import deprecated  # type: ignore[no-redef]
+        from infrastructure.utils.deprecation import deprecated  # type: ignore[no-redef]
     except ImportError:
         def deprecated(*_a, **_kw):  # type: ignore[no-redef]
             def _decorator(func):

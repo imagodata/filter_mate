@@ -22,7 +22,10 @@ try:
     from defusedxml.ElementTree import fromstring as _xml_fromstring, ParseError
     from xml.etree import ElementTree as ET  # nosec B405 - used only for tree construction/serialization (Element/SubElement/tostring); untrusted parsing goes through defusedxml's fromstring above
 except ImportError:
-    from xml.etree import ElementTree as ET  # nosec B405 - used only for tree construction/serialization (Element/SubElement/tostring); untrusted parsing goes through _xml_fromstring, aliased to ET.fromstring only as a last-resort fallback when defusedxml is unavailable
+    # nosec B405 - used only for tree construction/serialization (Element/SubElement/tostring);
+    # untrusted parsing goes through _xml_fromstring, aliased to ET.fromstring only as a
+    # last-resort fallback when defusedxml is unavailable
+    from xml.etree import ElementTree as ET  # nosec B405
     _xml_fromstring = ET.fromstring
     ParseError = ET.ParseError
 
