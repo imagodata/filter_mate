@@ -32,6 +32,12 @@ except ImportError:
 
 from ...infrastructure.database.sql_utils import sanitize_sql_identifier
 
+try:
+    from ...infrastructure.perf_timer import perf_mark_start
+except ImportError:  # test harnesses that stub the infrastructure package
+    def perf_mark_start(name):  # noqa: D103 - no-op fallback
+        return None
+
 logger = logging.getLogger('FilterMate.LayerLifecycleService')
 
 
@@ -753,6 +759,10 @@ class LayerLifecycleService:
             stability_constants: Timing constants dictionary
         """
         logger.debug(f"_handle_project_initialization called with task_name={task_name}")
+
+        # PERF 2026-09-12: "project open → panel enabled" latency; the span is
+        # closed by FilterMateApp._refresh_ui_with_layers.
+        perf_mark_start("project_open")
 
         # STABILITY FIX: Check and reset stale flags that might block operations
         check_reset_flags_callback()

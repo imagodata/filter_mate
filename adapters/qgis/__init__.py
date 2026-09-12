@@ -15,7 +15,6 @@ from .filter_optimizer import (  # noqa: F401
     QgisSelectivityEstimator,
     SpatialiteQueryBuilder,
     OgrSubsetBuilder,
-    MemorySpatialIndex,
     get_filter_optimizer,
     create_filter_optimizer,
 )
@@ -41,7 +40,6 @@ __all__ = [
     'QgisSelectivityEstimator',
     'SpatialiteQueryBuilder',
     'OgrSubsetBuilder',
-    'MemorySpatialIndex',
     'get_filter_optimizer',
     'create_filter_optimizer',
     # Geometry preparation

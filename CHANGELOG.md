@@ -2,6 +2,22 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [Unreleased]
+
+### Performance (audit of 2026-09-12)
+
+- Multiple-selection list: bound the synchronous feature scan to `APP.OPTIONS.EXPLORATION.feature_picker_limit` (default 1000, previously read but never applied), sorted by display value so the first N rows are predictable. When the list is truncated the text filter searches the whole layer server-side, "Select All" loads the full list first, canvas selections beyond the loaded rows are fetched by identifier, and checked rows are recovered across rebuilds. A click on a row now runs one indexed lookup instead of scanning the whole layer with attributes. Remove the `processEvents()` call that re-entered pending signals during a rebuild.
+- Layer variables: apply the deferred queue per layer in one batched write (`safe_set_layer_variables_batch`) instead of one gated write per variable (42 per layer, each with a `processEvents()` on Windows). Values already stored with the same content are skipped.
+- Post-filter apply: reuse the feature count computed after `setSubsetString` instead of asking the provider again; pass the source count to the completion message.
+- Display-field detection (`get_best_display_field`): memoised per layer id, field names and subset string for 120 s.
+- Geometry: `safe_unary_union` and the spatial task use GEOS cascaded union (`QgsGeometry.unaryUnion`) with the iterative `combine()` loop kept as fallback.
+- Spatialite source resolution: load source features without attributes; the OGR buffer evaluation reads only the first feature.
+- Spatialite interruptible query: wake up as soon as the worker finishes instead of polling every 500 ms; on cancel or timeout, re-issue `interrupt()` until the worker actually stops (a single interrupt sent before the statement started was lost).
+- FilterMate database: purge unsaved projects (no name, no path) older than 30 days at initialisation, keeping the current project and the most recent unsaved one (the row `_load_or_create_project` reuses), inside a savepoint; one commit per property batch instead of one per row.
+- Logging: root level INFO by default (`FILTERMATE_LOG_LEVEL=DEBUG` restores verbose output); loggers named after the package now reach `filtermate.log`; per-selection diagnostic banners moved to debug level.
+- Instrumentation: three wall-clock spans logged at INFO in `filtermate.log` (`⏱ project_open`, `⏱ layer_change`, `⏱ task_filter` / `task_unfilter` / `task_reset`) so the user-facing latencies can be compared from release to release (`infrastructure/perf_timer.py`).
+- Remove the unused `MemorySpatialIndex` class (no caller; its cache was never evicted).
+
 ## [4.8.7] - 2026-09-09
 
 ### Interface and themes

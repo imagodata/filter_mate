@@ -18,7 +18,7 @@ Date: January 2026
 """
 
 import logging
-from typing import Optional, Tuple, List, Any
+from typing import Optional, Tuple, List, Any, Dict
 
 logger = logging.getLogger('FilterMate.LayerUtils')
 
@@ -400,7 +400,78 @@ def _field_has_values(layer, field_name: str, sample_size: int = 5) -> bool:
         return True  # Assume has values on error to avoid breaking existing behavior
 
 
+import threading as _threading
+
+_DISPLAY_FIELD_CACHE: Dict[Any, Tuple[str, float]] = {}
+_DISPLAY_FIELD_CACHE_TTL_SECONDS = 120.0
+_DISPLAY_FIELD_CACHE_MAX_ENTRIES = 256
+# The cache is read from the GUI thread and from the layer-registration QgsTask.
+_DISPLAY_FIELD_LOCK = _threading.Lock()
+
+
+def clear_display_field_cache(layer_id: Optional[str] = None) -> int:
+    """Forget memoised display-field choices (all layers, or one layer id)."""
+    with _DISPLAY_FIELD_LOCK:
+        if layer_id is None:
+            count = len(_DISPLAY_FIELD_CACHE)
+            _DISPLAY_FIELD_CACHE.clear()
+            return count
+        stale = [key for key in _DISPLAY_FIELD_CACHE if key[0] == layer_id]
+        for key in stale:
+            _DISPLAY_FIELD_CACHE.pop(key, None)
+        return len(stale)
+
+
+def _display_field_cache_key(layer, sample_size: int, use_value_relations: bool):
+    """Cache key: layer id, field names, subset string and call parameters."""
+    field_names = tuple(field.name() for field in layer.fields())
+    subset = layer.subsetString() or ''
+    try:
+        display_expression = layer.displayExpression() or ''
+    except (RuntimeError, AttributeError):
+        display_expression = ''
+    return (layer.id(), field_names, subset, display_expression, int(sample_size), bool(use_value_relations))
+
+
 def get_best_display_field(layer, sample_size: int = 10, use_value_relations: bool = True) -> str:
+    """
+    Memoised front-end of :func:`_compute_best_display_field`.
+
+    PERF 2026-09-12: the detection samples features field by field (one
+    ``LIMIT n`` query per candidate). It was recomputed on the GUI thread at
+    every current-layer change although the answer only changes when the
+    fields or the subset change. Results are cached per (layer id, field
+    names, subset string) for a short TTL; ``clear_display_field_cache``
+    drops entries explicitly.
+    """
+    import time as _time
+
+    try:
+        key = _display_field_cache_key(layer, sample_size, use_value_relations)
+    except Exception:
+        key = None
+
+    if key is not None:
+        with _DISPLAY_FIELD_LOCK:
+            cached = _DISPLAY_FIELD_CACHE.get(key)
+            if cached is not None:
+                value, stamp = cached
+                if _time.monotonic() - stamp < _DISPLAY_FIELD_CACHE_TTL_SECONDS:
+                    return value
+                _DISPLAY_FIELD_CACHE.pop(key, None)
+
+    value = _compute_best_display_field(layer, sample_size, use_value_relations)
+
+    if key is not None:
+        with _DISPLAY_FIELD_LOCK:
+            if len(_DISPLAY_FIELD_CACHE) >= _DISPLAY_FIELD_CACHE_MAX_ENTRIES:
+                oldest = min(_DISPLAY_FIELD_CACHE, key=lambda k: _DISPLAY_FIELD_CACHE[k][1])
+                _DISPLAY_FIELD_CACHE.pop(oldest, None)
+            _DISPLAY_FIELD_CACHE[key] = (value, _time.monotonic())
+    return value
+
+
+def _compute_best_display_field(layer, sample_size: int = 10, use_value_relations: bool = True) -> str:
     """
     Determine the best field or expression to use for display in a layer.
 
