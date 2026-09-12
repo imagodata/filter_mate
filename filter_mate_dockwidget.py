@@ -4321,6 +4321,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try:
             MAX_FEATURES = 10000
             layer.updateExtents()
+            # PERF 2026-09-12: the PostgreSQL provider computes the filtered extent
+            # server-side (ST_Extent under the subset) in one round trip. Streaming
+            # up to 10 000 geometries per layer to rebuild it here cost 2.2 s of
+            # ⏱ post_filter_zoom on 18 layers. Estimated metadata is the one case
+            # where extent() is not exact: keep the feature scan for it.
+            try:
+                if layer.providerType() == 'postgres' and 'estimatedmetadata=true' not in (layer.source() or '').lower():
+                    return layer.extent()
+            except (RuntimeError, AttributeError):
+                pass
             if layer.featureCount() > MAX_FEATURES: return layer.extent()
 
             extent, count = QgsRectangle(), 0
