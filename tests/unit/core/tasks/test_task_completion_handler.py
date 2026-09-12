@@ -155,6 +155,7 @@ class TestApplyPendingSharedSqlite:
     def test_canvas_frozen_around_the_loop(self, monkeypatch):
         fake_iface = MagicMock()
         canvas = fake_iface.mapCanvas.return_value
+        canvas.isFrozen.return_value = False
         monkeypatch.setattr(_tch, "iface", fake_iface)
         layers = self._shared_layers(3)
         calls = []
@@ -222,3 +223,78 @@ class TestApplyPendingSharedSqlite:
         assert applied == 1
         mock_sleep.assert_not_called()
         assert safe_set.call_count == 2
+
+
+# ---------------------------------------------------------------------------
+# PERF 2026-09-12: provider work after a successful setSubsetString
+# ---------------------------------------------------------------------------
+
+@pytest.mark.unit
+class TestApplyPendingProviderWork:
+    """No reload() after a successful apply; the count is only read where the
+    provider already holds it (OGR computes it inside setSubsetString, a
+    PostgreSQL count is a real query with the spatial predicate)."""
+
+    def _apply(self, monkeypatch, layer):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        # the constants module is stubbed in this suite: pin the real provider names
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_POSTGRES", "postgres", raising=False)
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_OGR", "ogr", raising=False)
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_SPATIALITE", "spatialite", raising=False)
+        return apply_pending_subset_requests([(layer, "ROWID IN (SELECT 1)")], MagicMock(return_value=True))
+
+    def test_ogr_layer_skips_reload_and_reads_the_cached_count(self, monkeypatch):
+        layer = _make_layer("batiment", "/data/bdtopo.gpkg|layername=batiment", provider="ogr")
+
+        assert self._apply(monkeypatch, layer) == 1
+        layer.reload.assert_not_called()
+        layer.featureCount.assert_called_once()
+        layer.updateExtents.assert_called_once()
+        layer.triggerRepaint.assert_called_once()
+
+    def test_postgres_layer_skips_reload_count_and_extents(self, monkeypatch):
+        layer = _make_layer("batiment", "dbname='bd' table=\"batiment\"", provider="postgres")
+
+        assert self._apply(monkeypatch, layer) == 1
+        layer.reload.assert_not_called()
+        layer.featureCount.assert_not_called()
+        layer.updateExtents.assert_not_called()
+        layer.triggerRepaint.assert_called_once()
+
+    def test_spatialite_layer_still_reloads_a_non_empty_subset(self, monkeypatch):
+        layer = _make_layer("batiment", "dbname='/data/x.sqlite' table=\"batiment\"", provider="spatialite")
+
+        assert self._apply(monkeypatch, layer) == 1
+        layer.reload.assert_called_once()
+        layer.featureCount.assert_called_once()
+
+    def test_already_frozen_canvas_is_left_to_its_owner(self, monkeypatch):
+        """The task launcher froze the canvas for the whole task: the loop must
+        neither thaw it halfway nor refresh (the owner refreshes once)."""
+        fake_iface = MagicMock()
+        canvas = fake_iface.mapCanvas.return_value
+        canvas.isFrozen.return_value = True
+        monkeypatch.setattr(_tch, "iface", fake_iface)
+
+        layers = [_make_layer(f"l{i}", "dbname='/data/server.sqlite'") for i in range(3)]
+        apply_pending_subset_requests([(l, "1") for l in layers], MagicMock(return_value=True))
+
+        canvas.freeze.assert_not_called()
+        canvas.refresh.assert_not_called()
+        canvas.stopRendering.assert_called_once()
+
+    def test_already_applied_ogr_subset_is_not_reloaded(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_POSTGRES", "postgres", raising=False)
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_OGR", "ogr", raising=False)
+        monkeypatch.setattr(_tch, "QGIS_PROVIDER_SPATIALITE", "spatialite", raising=False)
+        layer = _make_layer("batiment", "/data/bdtopo.gpkg|layername=batiment", provider="ogr")
+        layer.subsetString.return_value = "ROWID IN (SELECT 1)"
+        safe_set = MagicMock(return_value=True)
+
+        assert apply_pending_subset_requests([(layer, "ROWID IN (SELECT 1)")], safe_set) == 1
+
+        safe_set.assert_not_called()
+        layer.reload.assert_not_called()
+        layer.featureCount.assert_called_once()
+        layer.triggerRepaint.assert_called_once()

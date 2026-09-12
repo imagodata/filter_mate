@@ -837,6 +837,10 @@ class FilterOrchestrator:
                 f"⚠️ WARNING: {layer.name()} has ZERO features after filtering!\n"
                 f"   Provider: {backend_name}, Expression length: {len(final_expression) if final_expression else 0}"
             )
+            QgsMessageLog.logMessage(
+                f"⚠️ {layer.name()} → 0 features (filter may be too restrictive)",
+                "FilterMate", Qgis.MessageLevel.Warning
+            )
 
         logger.info(f"✓ Successfully filtered {layer.name()} (counts are reported once the subsets are applied)")
 

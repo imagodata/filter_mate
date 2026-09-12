@@ -50,7 +50,8 @@ def should_skip_source_subset(source_subset: Optional[str]) -> bool:
     if any(pattern in source_subset_upper for pattern in [
         '__SOURCE',
         'EXISTS(',
-        'EXISTS ('
+        'EXISTS (',
+        'FROM "RTREE_',  # GeoPackage R-tree prefilter (PERF 2026-09-12): SQLite-only, file-specific
     ]):
         return True
 

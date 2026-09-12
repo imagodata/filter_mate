@@ -294,7 +294,7 @@ class ParallelFilterExecutor:
                         progress_callback(completed_count, layer_count, layer_name)
 
                     status = "✓" if result.success else "✗"
-                    logger.info(f"{status} {layer_name}: {result.feature_count} features ({result.execution_time_ms:.0f}ms)")
+                    logger.info(f"{status} {layer_name} ({result.execution_time_ms:.0f} ms)")
 
                 except Exception as e:
                     error_result = FilterResult(
@@ -403,13 +403,11 @@ class ParallelFilterExecutor:
             # FIX v3.0.8: Log result
             logger.info(f"  → {layer_name}: filter_func returned {success}")
 
-            # Get feature count after filtering
-            feature_count = 0
-            if hasattr(layer, 'featureCount'):
-                try:
-                    feature_count = layer.featureCount()
-                except Exception as exc:
-                    logger.debug("featureCount() failed for layer %s: %s", layer_name, exc)
+            # PERF 2026-09-12: no featureCount() here. On PostgreSQL the subset
+            # is applied in this worker, so the call was a real COUNT query with
+            # the spatial predicate for every target; on the other backends the
+            # subset is only queued and the number was the unfiltered total.
+            feature_count = -1  # unknown (the error branches below keep 0)
 
             execution_time = (time.time() - start_time) * 1000
 

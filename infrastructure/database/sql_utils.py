@@ -9,6 +9,7 @@ Migrated from modules/appUtils.py to infrastructure/database/sql_utils.py
 
 import re
 import logging
+import time as _perf
 from contextlib import contextmanager
 
 try:
@@ -121,6 +122,11 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
         logger.warning("safe_set_subset_string: layer is None")
         return False
 
+    # PERF 2026-09-12: phase timings, logged when the whole call takes 250 ms
+    # or more. A 16 s setSubsetString was measured on a PostgreSQL target and
+    # nothing between "Applying subset" and the result said which phase it was.
+    _t_start = _perf.perf_counter()
+    _types_ms = _cast_ms = _set_ms = 0.0
     try:
         if hasattr(layer, 'setSubsetString'):
             # FIX v4.2.13: Enhanced diagnostics for setSubsetString failures
@@ -161,6 +167,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
 
             # FIX v4.8.2: Detect type mismatches BEFORE applying to PostgreSQL
             # Prevents "operator does not exist: character varying < integer" errors
+            _t_phase = _perf.perf_counter()
             if subset_expression and layer.providerType() == 'postgres':
                 try:
                     from ..database.field_type_detector import get_field_types_from_layer
@@ -197,6 +204,8 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
 
             # FIX v4.8.1: Apply PostgreSQL type casting for PostgreSQL layers
             # This ensures numeric comparisons have ::numeric casting
+            _types_ms = (_perf.perf_counter() - _t_phase) * 1000.0
+            _t_phase = _perf.perf_counter()
             if subset_expression and layer.providerType() == 'postgres':
                 try:
                     # Import from adapters (infrastructure/database -> adapters/backends)
@@ -213,6 +222,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                     subset_expression = re.sub(pattern, add_cast, subset_expression)
                     logger.debug("[SQL]   PostgreSQL type casting applied (fallback)")
 
+            _cast_ms = (_perf.perf_counter() - _t_phase) * 1000.0
             if subset_expression:
                 # Log first 500 chars of expression for debugging
                 preview = subset_expression[:500]
@@ -221,6 +231,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                 logger.debug(f"[SQL]   Expression: {preview}")
 
             # FIX 2026-02-11: Detach FeaturePickerWidget before subset change to prevent crash
+            _t_phase = _perf.perf_counter()
             with feature_picker_guard(layer):
                 result = layer.setSubsetString(subset_expression)
 
@@ -244,6 +255,13 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                         logger.warning("[SQL]   ✗ Retry also failed after reloadData()")
                 except Exception as _retry_err:
                     logger.warning(f"[SQL]   ⚠️ Retry attempt raised exception: {_retry_err}")
+            _set_ms = (_perf.perf_counter() - _t_phase) * 1000.0
+            _total_ms = (_perf.perf_counter() - _t_start) * 1000.0
+            if _total_ms >= 250:
+                logger.info(
+                    f"⏱ set_subset: {_total_ms:.0f} ms ({layer.name()}: types {_types_ms:.0f} ms, "
+                    f"cast {_cast_ms:.0f} ms, setSubsetString {_set_ms:.0f} ms)"
+                )
 
             if not result:
                 logger.warning(f"setSubsetString returned False for layer {layer.name()}")

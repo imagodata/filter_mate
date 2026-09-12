@@ -166,6 +166,12 @@ STABILITY_CONSTANTS = {
     'POSTGRESQL_EXTRA_DELAY_MS': 1000, 'SPATIALITE_STABILIZATION_MS': 200}
 
 
+# PERF 2026-09-12: the canvas stays frozen while a filter task runs (see
+# FilterMateApp._freeze_canvas_for_task); this watchdog thaws it if neither
+# taskCompleted nor taskTerminated ever fires.
+CANVAS_FREEZE_WATCHDOG_MS = 600000
+
+
 class FilterMateApp:
     """
     FilterMate Application Orchestrator (Legacy).
@@ -1249,6 +1255,16 @@ class FilterMateApp:
 
         # Cancel conflicting tasks and add to task manager
         self._cancel_conflicting_tasks()
+        if not is_export:
+            freeze_token = self._freeze_canvas_for_task(task_name)
+            # Connected after filter_engine_task_completed: the subsets, zoom
+            # and messages run first, the single refresh comes last.
+            self.appTasks[task_name].taskCompleted.connect(
+                lambda tok=freeze_token: self._unfreeze_canvas_after_task(tok)
+            )
+            self.appTasks[task_name].taskTerminated.connect(
+                lambda tok=freeze_token: self._unfreeze_canvas_after_task(tok)
+            )
         QgsApplication.taskManager().addTask(self.appTasks[task_name])
 
     def _execute_layer_task(self, task_name: str, task_parameters: dict):
@@ -1403,6 +1419,57 @@ class FilterMateApp:
             is_fallback = task_parameters["infos"].get("postgresql_connection_available", True) is False
 
         show_backend_info(provider_type, len(layers) + 1, operation=task_name, is_fallback=is_fallback)
+
+    def _freeze_canvas_for_task(self, task_name):
+        """Freeze the canvas for the duration of a filter/unfilter/reset task.
+
+        PERF 2026-09-12: every setSubsetString issued by the worker (PostgreSQL
+        targets are filtered there) asks the canvas for a repaint. With 17
+        targets that was up to 17 renders of the whole project, each querying
+        the database, while the cascade was still running. A frozen canvas
+        ignores those requests; it is thawed and refreshed once when the task
+        completes or terminates, or by a watchdog after
+        CANVAS_FREEZE_WATCHDOG_MS. Returns the token that identifies this
+        freeze (a later task's freeze supersedes it).
+        """
+        self._canvas_freeze_token = getattr(self, '_canvas_freeze_token', 0) + 1
+        token = self._canvas_freeze_token
+        try:
+            canvas = iface.mapCanvas() if iface is not None else None
+            if canvas is None:
+                return token
+            canvas.stopRendering()
+            canvas.freeze(True)
+            self._canvas_frozen_token = token
+            app_ref = weakref.ref(self)  # the timer must not keep the app alive after unload
+            QTimer.singleShot(
+                CANVAS_FREEZE_WATCHDOG_MS,
+                lambda tok=token, tn=task_name: (
+                    app_ref() is not None and app_ref()._unfreeze_canvas_after_task(tok, watchdog_task=tn)
+                )
+            )
+        except Exception as exc:  # headless/test contexts without a canvas
+            logger.debug(f"Canvas freeze skipped for {task_name}: {exc}")
+        return token
+
+    def _unfreeze_canvas_after_task(self, token, watchdog_task=None):
+        """Thaw the canvas frozen by _freeze_canvas_for_task, once, and refresh it."""
+        if getattr(self, '_canvas_frozen_token', None) != token:
+            return
+        if watchdog_task is not None:
+            logger.warning(
+                f"Canvas thawed by the watchdog {CANVAS_FREEZE_WATCHDOG_MS} ms after the {watchdog_task} task started"
+            )
+        try:
+            canvas = iface.mapCanvas()
+            if canvas.isFrozen():
+                canvas.freeze(False)
+                canvas.refresh()
+        except Exception as exc:
+            # keep the token: the watchdog (or the next signal) tries again
+            logger.warning(f"Canvas thaw failed, will retry: {exc}")
+            return
+        self._canvas_frozen_token = None
 
     def _cancel_conflicting_tasks(self):
         """Cancel any conflicting filter tasks that are currently running."""
