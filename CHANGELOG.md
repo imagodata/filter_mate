@@ -2,9 +2,9 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
+## [4.8.9] - 2026-09-12
 
-### Performance (first real measurement of 4.8.8)
+### Performance (real measurements after 4.8.8)
 
 A 34 s filter on a 17-layer PostgreSQL project broke down as 21 s before the first target layer, 4 s of actual filtering and 9 s of post-processing.
 
