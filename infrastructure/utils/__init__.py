@@ -102,6 +102,7 @@ from .signal_utils import (  # noqa: F401
     safe_emit,
     safe_set_layer_variable,
     safe_set_layer_variables,
+    safe_set_layer_variables_batch,
 )
 
 # Import SQL utilities (from infrastructure.database)
@@ -440,6 +441,7 @@ __all__ = [
     'safe_emit',
     'safe_set_layer_variable',
     'safe_set_layer_variables',
+    'safe_set_layer_variables_batch',
     # Feature iteration utilities (EPIC-1 migration from widgets.py)
     'safe_iterate_features',
     'get_feature_attribute',

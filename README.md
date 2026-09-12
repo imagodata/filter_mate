@@ -1,17 +1,17 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.7** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.8** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#487---2026-09-09)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#488---2026-09-12)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.7 harmonizes dark, light and gray themes, fixes icon-theme synchronization errors and avoids repeated work during bulk layer removal and shutdown. See [what's new](#-whats-new-in-487).
+**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.8 is a performance release: no more multi-second freezes on large layers in the multiple-selection list, faster project load, cascaded geometry unions and timing lines in the log. See [what's new](#-whats-new-in-488).
 
 ---
 
@@ -31,7 +31,16 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.7
+### 🆕 What's new in 4.8.8
+
+- **No more freezes on large layers**: the multiple-selection list loads at most `feature_picker_limit` rows (default 1000, sorted). When truncated, the text filter searches the whole layer, "Select All" loads the full list and canvas selections beyond the loaded rows are fetched by identifier. A click on a row is one indexed lookup instead of a full-layer scan.
+- **Faster project load**: layer variables are applied per layer in one batched write instead of 42 gated writes per layer; unchanged values are skipped; display-field detection is memoised.
+- **Filter engine**: GEOS cascaded union replaces the quadratic `combine()` loop, Spatialite source features load without attributes, interruptible SQLite queries wake up as soon as the worker finishes.
+- **Hygiene**: stale unsaved projects are purged from the FilterMate database, INFO log level by default (`FILTERMATE_LOG_LEVEL=DEBUG` for verbose output), and three timing lines (`⏱ project_open`, `⏱ layer_change`, `⏱ task_filter`) in `filtermate.log` to compare releases.
+
+See the [4.8.8 changelog](CHANGELOG.md#488---2026-09-12) for details.
+
+### What's new in 4.8.7
 
 - **Consistent panels**: Exploring and Filtering share input dimensions, button-bar styles and checkboxes across dark, light and gray themes. Gutters match the panel background, with more space below Exploring titles.
 - **Readable configuration**: white labels and values on dark backgrounds, including custom configuration cells.

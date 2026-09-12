@@ -2,7 +2,7 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
+## [4.8.8] - 2026-09-12
 
 ### Performance (audit of 2026-09-12)
 
@@ -17,6 +17,12 @@ All notable changes to FilterMate will be documented in this file.
 - Logging: root level INFO by default (`FILTERMATE_LOG_LEVEL=DEBUG` restores verbose output); loggers named after the package now reach `filtermate.log`; per-selection diagnostic banners moved to debug level.
 - Instrumentation: three wall-clock spans logged at INFO in `filtermate.log` (`⏱ project_open`, `⏱ layer_change`, `⏱ task_filter` / `task_unfilter` / `task_reset`) so the user-facing latencies can be compared from release to release (`infrastructure/perf_timer.py`).
 - Remove the unused `MemorySpatialIndex` class (no caller; its cache was never evicted).
+
+### Fixes
+
+- Export `safe_set_layer_variables_batch` from `infrastructure.utils`: the layer-registration task imported it from the package and failed with `cannot import name` at plugin load (found on the first real QGIS test of the audit fixes).
+- `DockWidgetOrchestrator._init_services` imported `BackendService`, `LayerService` and `PostgresSessionManager` from the `core.services` package, which deliberately does not re-export them; import them from their modules.
+- New static guard `tests/test_package_import_exports.py`: every unguarded `from <plugin package> import name` must be provided by that package's `__init__.py`. Both bugs above were invisible to the unit suite because the affected packages are stubbed there.
 
 ## [4.8.7] - 2026-09-09
 
