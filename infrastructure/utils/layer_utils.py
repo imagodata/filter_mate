@@ -232,11 +232,16 @@ def get_datasource_connexion_from_layer(layer) -> Tuple[Optional[Any], Optional[
 
         if ssl_mode is not None:
             connect_kwargs['sslmode'] = source_uri.encodeSslMode(ssl_mode)
-        # PERF 2026-09-12: bound the TCP connect (Windows waits ~21 s per
-        # unreachable address otherwise)
-        connect_kwargs.setdefault('connect_timeout', 15)
 
-        connexion = psycopg2.connect(**connect_kwargs)
+        # PERF 2026-09-12: fast attempt (IPv4 hostaddr, no GSSAPI negotiation,
+        # short timeout) then plain parameters — a 15-21 s stall per filter was
+        # measured inside psycopg2.connect() for a server answering in ms.
+        from ..database.pg_connect import pg_connect_with_fallback
+        try:
+            layer_label = f"layer '{layer.name()}'"
+        except (RuntimeError, AttributeError):
+            layer_label = ''
+        connexion = pg_connect_with_fallback(connect_kwargs, layer_label)
 
         # Set statement timeout to prevent blocking queries
         try:

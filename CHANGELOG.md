@@ -10,7 +10,8 @@ A 34 s filter on a 17-layer PostgreSQL project broke down as 21 s before the fir
 
 - PostgreSQL source statistics check: query `pg_stat_user_tables` instead of counting rows of `pg_stats`, whose per-column privilege checks scan the whole catalog (the 21 s stall on a 574-row source layer); cache the answer per table for the session.
 - FilterMate scratch layers (GEOS-safe copies, memory source layers) carry a `filterMate/internal_temp` custom property and are ignored by the `layersAdded` / `layersWillBeRemoved` handlers: adding and removing them no longer runs a `LayersManagementEngineTask` with SQLite round-trips and a full UI rebuild inside every filter.
-- psycopg2 connections use `connect_timeout` (15 s) so an unreachable address never waits the OS TCP timeout.
+- psycopg2 connections open through `infrastructure/database/pg_connect.py`: a fast attempt (IPv4 `hostaddr` when the host is dual-stack, `gssencmode=disable`, 5 s timeout) then the plain parameters. The second measurement showed the source-layer connection waiting exactly the `connect_timeout` (15 s) before succeeding on the next attempt, on every filter.
+- Auto-zoom after a filter: PostgreSQL layers use the provider's server-side filtered extent instead of streaming up to 10 000 geometries per layer (`⏱ post_filter_zoom` was 2.2 s on 18 layers).
 - More timing lines in `filtermate.log`: `⏱ pg_connect`, `⏱ pg_ensure_stats` / `pg_direct_prepare` (when slow), `⏱ apply_subsets`, `⏱ post_filter_canvas` / `_count` / `_history` / `_zoom` / `_ui`, `⏱ layer_task_<action>`. The `⏱ layer_change` span now wraps the dockwidget method that actually reloads the widgets (it measured 0 ms before).
 
 ### Code quality (general audit of 2026-09-12)
