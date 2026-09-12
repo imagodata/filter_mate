@@ -241,12 +241,13 @@ class DockWidgetOrchestrator:
 
     def _init_services(self) -> None:
         """Initialize business services."""
-        from ..core.services import (
-            BackendService,
-            FilterService,
-            LayerService,
-            PostgresSessionManager,
-        )
+        # BackendService, LayerService and PostgresSessionManager are deliberately
+        # not re-exported by core.services (see its __init__): import them from
+        # their modules, otherwise this raised "cannot import name" when called.
+        from ..core.services import FilterService
+        from ..core.services.backend_service import BackendService
+        from ..core.services.layer_service import LayerService
+        from ..core.services.postgres_session_manager import PostgresSessionManager
 
         # FavoritesService is owned by FilterMateApp and synced to the
         # dockwidget at init_filterMate_db() time. The controller binds
