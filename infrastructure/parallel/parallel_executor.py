@@ -47,6 +47,17 @@ from ..logging import get_logger
 logger = get_logger(__name__)
 
 
+_SQLITE_LOCK_MARKERS = ('unable to open database file', 'database is locked', 'sqlite3_step')
+
+
+def _is_sqlite_lock_message(message) -> bool:
+    """True when an error message carries the SQLite file-lock signature."""
+    if not message:
+        return False
+    lowered = str(message).lower()
+    return any(marker in lowered for marker in _SQLITE_LOCK_MARKERS)
+
+
 @dataclass
 class FilterResult:
     """Result of a single layer filtering operation."""
@@ -488,18 +499,9 @@ class ParallelFilterExecutor:
                     "FilterMate", Qgis.MessageLevel.Warning
                 )
 
-        # STABILITY FIX v2.4.2: Track SQLite database file paths for inter-layer delay
-        # When multiple layers from the same SQLite database are processed sequentially,
-        # add a delay between operations to allow SQLite locks to release.
-        # This applies to: GeoPackage (.gpkg), Spatialite (.sqlite, .spatialite, .db)
+        # Track the SQLite/GeoPackage file of the previous layer: a lock error on
+        # a layer sharing that file is the only case retried (see loop below).
         last_db_path = None
-
-        # Count layers per database for adaptive delay calculation
-        db_layer_counts = {}
-        for layer, layer_props in layers:
-            db_path = self._get_layer_database_path(layer)
-            if db_path:
-                db_layer_counts[db_path] = db_layer_counts.get(db_path, 0) + 1
 
         for i, (layer, layer_props) in enumerate(layers):
             # v4.2.8: Check for cancellation at the start of each layer processing
@@ -531,22 +533,18 @@ class ParallelFilterExecutor:
 
             # Get current layer's database path
             current_db_path = self._get_layer_database_path(layer)
+            shares_file = bool(current_db_path and current_db_path == last_db_path)
 
-            # STABILITY FIX v2.4.2: Add inter-layer delay for same SQLite database
-            # Delay is adaptive based on number of layers sharing the database
-            if current_db_path and current_db_path == last_db_path:
-                # Calculate adaptive delay: more layers = longer delay
-                layer_count_in_db = db_layer_counts.get(current_db_path, 1)
-                if layer_count_in_db > 10:
-                    delay = 0.5  # 500ms for large number of layers
-                elif layer_count_in_db > 5:
-                    delay = 0.3  # 300ms for medium number of layers
-                else:
-                    delay = 0.2  # 200ms for small number of layers
-
-                time.sleep(delay)
-
+            # PERF 2026-09-12: the fixed 0.2/0.3/0.5 s pause between layers of the
+            # same SQLite file (v2.4.2) is gone. Measured on a 37-layer GeoPackage
+            # cascade: 17.5 s of the 19.5 s filter were these pauses, while the
+            # worker only builds expressions and queues subsets for the main
+            # thread. A genuine lock error is retried once after a short pause.
             result = self._filter_single_layer(filter_func, provider_type, layer, layer_props)
+            if not result.success and shares_file and _is_sqlite_lock_message(result.error_message):
+                logger.warning(f"SQLite lock on shared file while filtering {result.layer_name}: retrying once after 0.3 s")
+                time.sleep(0.3)
+                result = self._filter_single_layer(filter_func, provider_type, layer, layer_props)
             results.append(result)
 
             # Track last database path for next iteration
