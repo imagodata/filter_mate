@@ -16,6 +16,7 @@ A 34 s filter on a 17-layer PostgreSQL project broke down as 21 s before the fir
 
 ### Code quality (general audit of 2026-09-12)
 
+- Remove `video_automation/` and `video_toolkit/` (230 files) from the plugin repository. They were stale copies of the tutorial-video tooling that lives in its own project; the zip build already excluded them. The matching exclusions in `scripts/prepare_plugin_zip.sh` and the three repository-wide AST guard tests are dropped.
 - JSON config tree (`ui/widgets/json_view/datatypes.py`): drop the four Python 2 `unicode` checks. They only worked because QGIS injects `builtins.unicode = str` in its own `qgis/utils.py`; outside QGIS, `match_type()` raised `NameError` on any non-string value. The corresponding per-file flake8 exemption is removed.
 - Merge the root `utils/` package (`deprecation.py`, `type_utils.py`) into `infrastructure/utils/`, where the other shared helpers already live. Two importers updated.
 - Remove the dead imports flagged by flake8 in `favorites_controller.py`, `favorites_menu_builder.py` and `favorites_service.py`; clean the blank-line and trailing-whitespace leftovers of the favorites refactor (61 flake8 findings, now 0).

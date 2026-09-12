@@ -21,7 +21,7 @@ import pytest
 PLUGIN_ROOT = Path(__file__).resolve().parent.parent
 
 EXCLUDED_DIRS = {
-    "tests", "video_toolkit", "video_automation", ".git", "__pycache__",
+    "tests", ".git", "__pycache__",
     "_bmad", "_bmad-output", "website", "docs", "knowledge", "dist", "build",
 }
 

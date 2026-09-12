@@ -20,7 +20,7 @@ from pathlib import Path
 import pytest
 
 _ROOT = Path(__file__).resolve().parents[1]
-_SKIP_PARTS = {'tests', 'dist', '_bmad', '_bmad-output', 'video_automation', 'video_toolkit',
+_SKIP_PARTS = {'tests', 'dist', '_bmad', '_bmad-output',
                '.git', 'website', '__pycache__', 'filtermate_api', 'knowledge', 'scripts'}
 
 
