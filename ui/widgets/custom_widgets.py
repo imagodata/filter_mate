@@ -28,6 +28,7 @@ from functools import partial
 
 from qgis.PyQt import QtGui
 from qgis.PyQt.QtCore import (
+    QCoreApplication,
     QEvent,
     QRect,
     QSize,
@@ -438,6 +439,10 @@ class ListWidgetWrapper(QListWidget):
         except (ImportError, AttributeError, TypeError):
             self.limit = 1000
         self.total_features_list_count = 0
+        # PERF 2026-09-12: True when the list holds only the first `limit` rows
+        # of the layer; `search_text` is the server-side search currently shown.
+        self.truncated = False
+        self.search_text = ''
 
     def setFilterExpression(self, filter_expression):
         self.filter_expression = filter_expression
@@ -532,6 +537,18 @@ class ListWidgetWrapper(QListWidget):
 
     def setLimit(self, limit):
         self.limit = limit
+
+    def setTruncated(self, truncated):
+        self.truncated = bool(truncated)
+
+    def isTruncated(self):
+        return bool(self.truncated)
+
+    def setSearchText(self, search_text):
+        self.search_text = search_text or ''
+
+    def getSearchText(self):
+        return self.search_text
 
     def getFilterExpression(self):
         return self.filter_expression
@@ -1008,10 +1025,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
             # FIX 2026-01-19 v4: Don't clear here - _populate_features_sync will do it
             # and can preserve checked items. Just update visuals.
+            # PERF 2026-09-12: no processEvents() here — it re-entered pending
+            # selection/layer signals in the middle of a rebuild.
             try:
                 self.list_widgets[self.layer.id()].viewport().update()
-                from qgis.PyQt.QtCore import QCoreApplication
-                QCoreApplication.processEvents()
             except Exception as clear_err:
                 logger.debug(f"Could not update widget: {clear_err}")
 
@@ -1042,7 +1059,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 except Exception as restore_err:
                     logger.warning(f"Could not restore checked items: {restore_err}")
 
-    def _populate_features_sync(self, expression, preserve_checked=False):
+    def _populate_features_sync(self, expression, preserve_checked=False, force_full=False, search_text=None):
         """Populate features list synchronously.
 
         FIX 2026-01-19: Added explicit visual refresh after population to ensure
@@ -1051,9 +1068,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         FIX 2026-01-19 v4: Added preserve_checked parameter to maintain checkbox state
         during repopulation. This prevents the auto-uncheck issue.
 
+        PERF 2026-09-12: the scan is bounded by ``feature_picker_limit`` (rows are
+        requested sorted by the display expression so the first N are
+        predictable). Checked rows beyond the limit are recovered by identifier,
+        ``search_text`` runs the text filter server-side over the whole layer,
+        and ``force_full`` loads everything (used by "Select All").
+
         Args:
             expression: The display expression to use
             preserve_checked: If True, save and restore checked items after population
+            force_full: Ignore the fetch limit and load every feature
+            search_text: Case-insensitive text to match against the display value
         """
         if not is_layer_valid(self.layer) or self.layer.id() not in self.list_widgets:
             return
@@ -1069,40 +1094,56 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         list_widget.clear()
 
-        # Build expression
-        expr = QgsExpression(expression) if expression and not QgsExpression(expression).isField() else None
-        context = QgsExpressionContext()
-        context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(self.layer))
-
         identifier_field = list_widget.getIdentifierFieldName()
+        identifier_numeric = bool(getattr(list_widget, 'identifier_field_type_numeric', False))
+        expr, context = self._make_display_evaluator(expression)
+
+        # PERF 2026-09-12: bound the synchronous scan. Before this, the whole
+        # layer was iterated on the GUI thread at every layer change (a
+        # 500k-feature BD TOPO layer froze QGIS for seconds). The limit comes
+        # from APP.OPTIONS.EXPLORATION.feature_picker_limit (default 1000, at
+        # least 100 from the options panel; 0 only by code disables it).
+        fetch_limit = 0
+        if not force_full:
+            try:
+                fetch_limit = int(list_widget.getLimit() or 0)
+            except (TypeError, ValueError):
+                fetch_limit = 0
 
         # Request features
         request = QgsFeatureRequest()
         request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
+        search_text = (search_text or '').strip()
+        display_sql = self._display_expression_sql(expression, list_widget)
+        if search_text:
+            request.setFilterExpression(
+                f"lower(to_string({display_sql})) LIKE {QgsExpression.quotedValue('%' + search_text.lower() + '%')}"
+            )
+        if fetch_limit > 0:
+            # Sorted by display value so "the first N" is predictable, and one
+            # extra row so truncation is detected exactly.
+            try:
+                order = QgsFeatureRequest.OrderBy([
+                    QgsFeatureRequest.OrderByClause(display_sql, self._sort_order != 'DESC')
+                ])
+                request.setOrderBy(order)
+            except Exception as order_err:
+                logger.debug(f"_populate_features_sync: could not order request: {order_err}")
+            request.setLimit(fetch_limit + 1)
 
         features_data = []
+        scanned = 0
         for feature in safe_iterate_features(self.layer, request):
+            scanned += 1
+            if fetch_limit > 0 and scanned > fetch_limit:
+                break
             try:
-                fid = feature[identifier_field] if identifier_field else feature.id()
-
-                if expr:
-                    context.setFeature(feature)
-                    display_value = str(expr.evaluate(context))
-                else:
-                    # Simple field access
-                    display_value = str(feature[expression]) if expression else str(fid)
-
-                # UUID FIX v4.0: Ensure fid is converted to string for UUID/text PKs
-                # This ensures proper handling when building SQL expressions later
-                fid_value = str(fid) if not isinstance(fid, (int, float)) else fid
-                features_data.append((display_value, fid_value))
+                features_data.append(self._row_from_feature(feature, identifier_field, expression, expr, context))
             except Exception as e:
                 logger.debug(f"Error processing feature: {e}")
                 continue
 
-        # Sort features
-        reverse = self._sort_order == 'DESC'
-        features_data.sort(key=lambda x: (x[0] if x[0] is not None else ""), reverse=reverse)
+        truncated = fetch_limit > 0 and scanned > fetch_limit
 
         # FIX 2026-01-19 v4: Build set of checked FIDs for O(1) lookup
         checked_fid_set = set()
@@ -1113,26 +1154,47 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 if not isinstance(fid, str):
                     checked_fid_set.add(str(fid))
 
+        # PERF 2026-09-12: rows checked before the rebuild that fall outside the
+        # (limited or searched) scan must still be shown, otherwise a multi-step
+        # filter would silently drop them. Fetch just those rows by identifier.
+        if checked_fid_set and (truncated or search_text):
+            loaded_fids = {row[1] for row in features_data}
+            loaded_fids.update(str(f) for f in list(loaded_fids))
+            missing = [fid for fid in saved_checked_fids if fid not in loaded_fids and str(fid) not in loaded_fids]
+            if missing:
+                recovered = self._fetch_rows_by_identifier(identifier_field, missing, expression, identifier_numeric)
+                features_data.extend(recovered)
+                logger.debug(f"_populate_features_sync: Recovered {len(recovered)}/{len(missing)} checked items beyond the scan")
+
+        # Sort features
+        reverse = self._sort_order == 'DESC'
+        features_data.sort(key=lambda x: (x[0] if x[0] is not None else ""), reverse=reverse)
+
+        list_widget.setTruncated(truncated)
+        list_widget.setSearchText(search_text)
+        if truncated:
+            logger.info(f"_populate_features_sync: List limited to the first {fetch_limit} features (feature_picker_limit)")
+            tooltip = QCoreApplication.translate(
+                "QgsCheckableComboBoxFeaturesListPickerWidget",
+                "Showing the first {0} features sorted by display value. "
+                "Type in the text filter to search the whole layer; "
+                "\"Select All\" loads the full list."
+            ).format(fetch_limit)
+        elif search_text:
+            tooltip = QCoreApplication.translate(
+                "QgsCheckableComboBoxFeaturesListPickerWidget",
+                "Search results for \"{0}\" over the whole layer."
+            ).format(search_text)
+        else:
+            tooltip = ""
+        try:
+            list_widget.setToolTip(tooltip)
+        except Exception:  # nosec B110 - tooltip is cosmetic
+            pass
+
         # Populate list widget
         for display_value, fid in features_data:
-            item = QListWidgetItem(display_value)
-            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-
-            # FIX 2026-01-19 v4: Restore checked state if in saved list
-            is_checked = fid in checked_fid_set
-            item.setCheckState(Qt.CheckState.Checked if is_checked else Qt.CheckState.Unchecked)
-
-            item.setData(0, display_value)
-            item.setData(3, fid)
-            item.setData(4, "True")
-            # Set font/color based on checked state
-            if is_checked:
-                item.setData(6, self.font_by_state['checked'][0])
-                item.setData(9, QBrush(self.font_by_state['checked'][1]))
-            else:
-                item.setData(6, self.font_by_state['unChecked'][0])
-                item.setData(9, QBrush(self.font_by_state['unChecked'][1]))
-            list_widget.addItem(item)
+            self._add_row_item(list_widget, display_value, fid, fid in checked_fid_set)
 
         list_widget.setFeaturesList(features_data)
         list_widget.setTotalFeaturesListCount(len(features_data))
@@ -1158,6 +1220,69 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         restored_count = len([fid for fid in saved_checked_fids if fid in checked_fid_set]) if saved_checked_fids else 0
         logger.debug(f"Populated {len(features_data)} features (restored {restored_count} checked), visible={list_widget.isVisible()}")
 
+    def _make_display_evaluator(self, expression):
+        """Return ``(expr, context)`` for the display expression; ``expr`` is None for a plain field."""
+        expr = QgsExpression(expression) if expression and not QgsExpression(expression).isField() else None
+        context = QgsExpressionContext()
+        context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(self.layer))
+        return expr, context
+
+    @staticmethod
+    def _display_expression_sql(expression, list_widget):
+        """Display expression as an expression string (quoted when it is a bare field name)."""
+        if list_widget.getExpressionFieldFlag() or QgsExpression(expression).isField():
+            return QgsExpression.quotedColumnRef(expression.replace('"', ''))
+        return f"({expression})"
+
+    @staticmethod
+    def _row_from_feature(feature, identifier_field, expression, expr, context):
+        """Build the ``(display_value, fid)`` row for a feature."""
+        fid = feature[identifier_field] if identifier_field else feature.id()
+        if expr:
+            context.setFeature(feature)
+            display_value = str(expr.evaluate(context))
+        else:
+            # Simple field access
+            display_value = str(feature[expression]) if expression else str(fid)
+        # UUID FIX v4.0: Ensure fid is converted to string for UUID/text PKs
+        # This ensures proper handling when building SQL expressions later
+        fid_value = str(fid) if not isinstance(fid, (int, float)) else fid
+        return (display_value, fid_value)
+
+    def _fetch_rows_by_identifier(self, identifier_field, values, expression, identifier_numeric=False, chunk_size=500):
+        """Fetch ``(display_value, fid)`` rows for the given identifiers, in chunks."""
+        rows = []
+        values = list(values)
+        if not values:
+            return rows
+        try:
+            expr, context = self._make_display_evaluator(expression)
+            for start in range(0, len(values), chunk_size):
+                chunk = values[start:start + chunk_size]
+                request = self._build_identifier_lookup_request(identifier_field, chunk, identifier_numeric)
+                for feature in safe_iterate_features(self.layer, request):
+                    try:
+                        rows.append(self._row_from_feature(feature, identifier_field, expression, expr, context))
+                    except Exception as e:
+                        logger.debug(f"Error processing looked-up feature: {e}")
+        except Exception as lookup_err:
+            logger.debug(f"_fetch_rows_by_identifier failed: {lookup_err}")
+        return rows
+
+    def _add_row_item(self, list_widget, display_value, fid, checked):
+        """Append one checkable row to the list widget."""
+        item = QListWidgetItem(display_value)
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+        item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+        item.setData(0, display_value)
+        item.setData(3, fid)
+        item.setData(4, "True")
+        state = 'checked' if checked else 'unChecked'
+        item.setData(6, self.font_by_state[state][0])
+        item.setData(9, QBrush(self.font_by_state[state][1]))
+        list_widget.addItem(item)
+        return item
+
     def eventFilter(self, obj, event):
         """Handle mouse events for feature selection and context menu."""
         # Use is_layer_valid to check both None and deleted C++ object
@@ -1169,20 +1294,18 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         if event.type() == QEvent.Type.MouseButtonPress and obj == self.list_widgets[self.layer.id()].viewport():
             identifier_field_name = self.list_widgets[self.layer.id()].getIdentifierFieldName()
 
-            try:
-                nonSubset_features_list = [feature[identifier_field_name] for feature in safe_iterate_features(self.layer)]
-            except Exception:
-                nonSubset_features_list = []
-
             if event.button() == Qt.MouseButton.LeftButton:
                 # Qt6 exposes position() as QPointF; Qt5 uses pos() as QPoint.
                 click_pos = event.position().toPoint() if hasattr(event, 'position') else event.pos()
                 clicked_item = self.list_widgets[self.layer.id()].itemAt(click_pos)
                 if clicked_item is not None:
                     id_item = clicked_item.data(3)
+                    # PERF 2026-09-12: one indexed lookup for the clicked row instead
+                    # of scanning the whole layer (with attributes) on every click.
+                    in_layer = self._is_feature_in_layer(identifier_field_name, id_item)
                     if clicked_item.checkState() == Qt.CheckState.Checked:
                         clicked_item.setCheckState(Qt.CheckState.Unchecked)
-                        if id_item in nonSubset_features_list:
+                        if in_layer:
                             clicked_item.setData(6, self.font_by_state['unChecked'][0])
                             clicked_item.setData(9, QBrush(self.font_by_state['unChecked'][1]))
                             clicked_item.setData(4, "True")
@@ -1192,7 +1315,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                             clicked_item.setData(4, "False")
                     else:
                         clicked_item.setCheckState(Qt.CheckState.Checked)
-                        if id_item in nonSubset_features_list:
+                        if in_layer:
                             clicked_item.setData(6, self.font_by_state['checked'][0])
                             clicked_item.setData(9, QBrush(self.font_by_state['checked'][1]))
                             clicked_item.setData(4, "True")
@@ -1209,6 +1332,82 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 self.context_menu.exec(QCursor.pos())
                 return True
         return False
+
+    @staticmethod
+    def _build_identifier_lookup_request(identifier_field_name, values, identifier_numeric=False):
+        """Build a request selecting rows whose identifier is in ``values``.
+
+        Without an identifier field the values are treated as feature ids.
+        With a numeric identifier, text values are cast back to numbers so the
+        expression compiles to ``"id" IN (1, 2)`` rather than ``IN ('1', '2')``
+        (which matches nothing once compiled to SQL). The request never
+        fetches geometry. Used to check membership of a single clicked row and
+        to recover checked rows beyond the fetch limit.
+        """
+        request = QgsFeatureRequest()
+        request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
+        values = list(values)
+        if identifier_field_name:
+            if identifier_numeric:
+                values = [QgsCheckableComboBoxFeaturesListPickerWidget._to_number(v) for v in values]
+            quoted_values = ", ".join(QgsExpression.quotedValue(v) for v in values)
+            request.setFilterExpression(
+                f"{QgsExpression.quotedColumnRef(identifier_field_name)} IN ({quoted_values})"
+            )
+        else:
+            fids = []
+            for v in values:
+                try:
+                    fids.append(int(v))
+                except (TypeError, ValueError):
+                    continue
+            request.setFilterFids(fids)
+        return request
+
+    @staticmethod
+    def _to_number(value):
+        """Cast a text identifier back to int/float when possible."""
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return value
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return value
+
+    def _identifier_is_numeric(self):
+        try:
+            return bool(self.list_widgets[self.layer.id()].identifier_field_type_numeric)
+        except Exception:
+            return False
+
+    def _is_feature_in_layer(self, identifier_field_name, id_value):
+        """Return True when the row identified by ``id_value`` exists in the
+        layer's current subset.
+
+        Returns True when the answer cannot be established (request could not be
+        built, expression does not parse) so the click keeps its previous,
+        non-filtered styling. A provider that silently rejects the request still
+        yields False: that matches what the former full scan returned on error.
+        """
+        try:
+            request = self._build_identifier_lookup_request(
+                identifier_field_name, [id_value], self._identifier_is_numeric())
+            request.setLimit(1)
+            try:
+                filter_expression = request.filterExpression()
+                if filter_expression is not None and filter_expression.hasParserError():
+                    return True
+            except Exception:  # nosec B110 - parser check is best effort
+                pass
+            for _ in safe_iterate_features(self.layer, request):
+                return True
+            return False
+        except Exception as lookup_err:
+            logger.debug(f"_is_feature_in_layer: lookup failed, assuming present: {lookup_err}")
+            return True
 
     def setDockwidgetRef(self, dockwidget):
         """Set reference to parent dockwidget for sync protection checks."""
@@ -1266,6 +1465,12 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 try:
                     self.filter_le.editingFinished.disconnect()
                 except TypeError:
+                    pass
+                # PERF 2026-09-12: the list is rebuilt more often now (server-side
+                # search); never stack a second textChanged connection.
+                try:
+                    self.filter_le.textChanged.disconnect(self._on_filter_text_changed)
+                except (TypeError, RuntimeError):
                     pass
                 self.filter_le.textChanged.connect(self._on_filter_text_changed)
             else:
@@ -1419,6 +1624,14 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             return
 
         list_widget = self.list_widgets[self.layer.id()]
+        # PERF 2026-09-12: the list normally holds only the first
+        # feature_picker_limit rows. "Select All" means all of them, so load
+        # the full list on this explicit action only (the former default cost
+        # of every layer change).
+        if list_widget.isTruncated() or list_widget.getSearchText():
+            logger.info("select_all: loading the full feature list before selecting")
+            self._populate_features_sync(list_widget.getDisplayExpression(), preserve_checked=True, force_full=True)
+            list_widget = self.list_widgets[self.layer.id()]
         for i in range(list_widget.count()):
             item = list_widget.item(i)
             if item:
@@ -1464,6 +1677,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             return
 
         list_widget = self.list_widgets[self.layer.id()]
+
+        # PERF 2026-09-12: when the list is truncated, the text filter searches
+        # the whole layer server-side (rows beyond the limit would otherwise be
+        # unreachable); clearing the text goes back to the first N rows.
+        wanted_search = self.filter_txt.strip() if list_widget.isTruncated() or list_widget.getSearchText() else ''
+        if wanted_search != list_widget.getSearchText():
+            self._populate_features_sync(
+                list_widget.getDisplayExpression(), preserve_checked=True,
+                search_text=wanted_search or None)
+            list_widget = self.list_widgets[self.layer.id()]
+
         list_widget.setFilterText(self.filter_txt)
 
         filter_lower = self.filter_txt.lower()
@@ -1537,6 +1761,29 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 normalized_fids.add(str(fid))
 
         checked_count = list_widget.setCheckedByFeatureIds(normalized_fids, self)
+
+        # PERF 2026-09-12: ids not present in a truncated/searched list (canvas
+        # selection of a feature beyond the first N) are fetched by identifier
+        # and appended as checked rows.
+        if checked_count < len(feature_ids) and (list_widget.isTruncated() or list_widget.getSearchText()):
+            present = set()
+            for i in range(list_widget.count()):
+                item = list_widget.item(i)
+                if item:
+                    present.add(item.data(3))
+            present.update(str(v) for v in list(present))
+            missing = [fid for fid in feature_ids if fid not in present and str(fid) not in present]
+            if missing:
+                rows = self._fetch_rows_by_identifier(
+                    list_widget.getIdentifierFieldName(), missing,
+                    list_widget.getDisplayExpression(), self._identifier_is_numeric())
+                for display_value, fid in rows:
+                    self._add_row_item(list_widget, display_value, fid, True)
+                    checked_count += 1
+                if rows:
+                    list_widget.setFeaturesList(list(list_widget.getFeaturesList()) + rows)
+                    list_widget.setTotalFeaturesListCount(list_widget.count())
+                    logger.debug(f"setCheckedFeatureIds: appended {len(rows)} rows beyond the loaded list")
 
         logger.debug(f"setCheckedFeatureIds: Checked {checked_count}/{len(feature_ids)} items (emit_signal={emit_signal})")
 

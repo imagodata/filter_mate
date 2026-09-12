@@ -157,41 +157,62 @@ def _ensure_root_logger_configured():
     if _root_logger_configured:
         return
 
-    root_logger = logging.getLogger('FilterMate')
-    root_logger.setLevel(logging.DEBUG)  # Capture all levels, handlers will filter
+    # PERF 2026-09-12: the root level used to be DEBUG while no handler accepted
+    # anything below INFO, so every logger.debug() call (about 3 900 sites)
+    # built a LogRecord, walked the stack for the caller and was then dropped.
+    # INFO by default; FILTERMATE_LOG_LEVEL=DEBUG re-enables the verbose output.
+    root_level = _resolve_root_log_level()
 
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    # Console handler - WARNING and above only
-    has_safe_handler = any(isinstance(h, SafeStreamHandler) for h in root_logger.handlers)
-    if not has_safe_handler:
-        console_handler = SafeStreamHandler(sys.stderr)
-        console_handler.setFormatter(formatter)
-        console_handler.setLevel(logging.WARNING)
-        root_logger.addHandler(console_handler)
+    # Two roots: 'FilterMate' (explicit get_*_logger() names) and the package
+    # name 'filter_mate' (modules using logging.getLogger(__name__)). Before this
+    # the second family never reached filtermate.log.
+    for root_name in ('FilterMate', _PACKAGE_LOGGER_NAME):
+        root_logger = logging.getLogger(root_name)
+        root_logger.setLevel(root_level)
 
-    # File handler - INFO and above (captures more detail)
-    has_file_handler = any(isinstance(h, RotatingFileHandler) for h in root_logger.handlers)
-    if not has_file_handler and _LOG_FILE:
-        try:
-            _file_handler = RotatingFileHandler(
-                _LOG_FILE,
-                maxBytes=10 * 1024 * 1024,  # 10 MB
-                backupCount=5,
-                encoding='utf-8',
-                delay=True
-            )
-            _file_handler.setFormatter(formatter)
-            _file_handler.setLevel(logging.INFO)  # INFO and above to file
-            root_logger.addHandler(_file_handler)
-        except (OSError, PermissionError):
-            # Silently fail if file can't be created
-            pass
+        # Console handler - WARNING and above only
+        has_safe_handler = any(isinstance(h, SafeStreamHandler) for h in root_logger.handlers)
+        if not has_safe_handler:
+            console_handler = SafeStreamHandler(sys.stderr)
+            console_handler.setFormatter(formatter)
+            console_handler.setLevel(logging.WARNING)
+            root_logger.addHandler(console_handler)
+
+        # File handler - INFO and above (captures more detail), shared instance
+        has_file_handler = any(isinstance(h, RotatingFileHandler) for h in root_logger.handlers)
+        if not has_file_handler and _LOG_FILE:
+            try:
+                if _file_handler is None:
+                    _file_handler = RotatingFileHandler(
+                        _LOG_FILE,
+                        maxBytes=10 * 1024 * 1024,  # 10 MB
+                        backupCount=5,
+                        encoding='utf-8',
+                        delay=True
+                    )
+                    _file_handler.setFormatter(formatter)
+                    _file_handler.setLevel(min(logging.INFO, root_level))
+                root_logger.addHandler(_file_handler)
+            except (OSError, PermissionError):
+                # Silently fail if file can't be created
+                pass
 
     _root_logger_configured = True
+
+
+_PACKAGE_LOGGER_NAME = __name__.split('.')[0] if '.' in __name__ else 'filter_mate'
+
+
+def _resolve_root_log_level() -> int:
+    """Root level from FILTERMATE_LOG_LEVEL (DEBUG/INFO/WARNING/ERROR), INFO by default."""
+    level_name = os.environ.get('FILTERMATE_LOG_LEVEL', 'INFO').strip().upper()
+    level = getattr(logging, level_name, None)
+    return level if isinstance(level, int) else logging.INFO
 
 
 def get_app_logger():

@@ -113,6 +113,9 @@ class InterruptibleSQLiteQuery:
         self.completed: bool = False
         self._thread: Optional[threading.Thread] = None
         self._start_time: float = 0.0
+        # PERF 2026-09-12: signalled by the worker so the waiting side wakes up
+        # immediately instead of sleeping a full SPATIALITE_INTERRUPT_CHECK_INTERVAL.
+        self._done = threading.Event()
 
     def _execute_query(self):
         """Execute the query in background thread."""
@@ -124,6 +127,8 @@ class InterruptibleSQLiteQuery:
         except Exception as e:
             self.error = e
             self.completed = True
+        finally:
+            self._done.set()
 
     def execute(
         self,
@@ -161,6 +166,12 @@ class InterruptibleSQLiteQuery:
         """
         self._start_time = time.time()
 
+        # Reset state so an instance can be executed more than once
+        self.results = []
+        self.error = None
+        self.completed = False
+        self._done.clear()
+
         # Start query in background thread
         self._thread = threading.Thread(target=self._execute_query, daemon=True)
         self._thread.start()
@@ -182,7 +193,7 @@ class InterruptibleSQLiteQuery:
             # Check timeout
             if elapsed > timeout:
                 logger.warning(f"[InterruptibleQuery] Query timeout after {timeout}s")
-                self._interrupt_query()
+                self._abort_and_wait()
                 return [], Exception(f"Query timeout after {timeout}s")
 
             # Check for cancellation
@@ -190,13 +201,14 @@ class InterruptibleSQLiteQuery:
                 try:
                     if cancel_check():
                         logger.info("[InterruptibleQuery] Query cancelled by user")
-                        self._interrupt_query()
+                        self._abort_and_wait()
                         return [], Exception("Query cancelled by user")
                 except Exception as e:
                     logger.warning(f"[InterruptibleQuery] Cancel check failed: {e}")
 
-            # Sleep briefly before next check
-            time.sleep(SPATIALITE_INTERRUPT_CHECK_INTERVAL)
+            # Wait for completion, waking up early as soon as the worker signals
+            # (a 20 ms query no longer pays a 500 ms polling penalty)
+            self._done.wait(SPATIALITE_INTERRUPT_CHECK_INTERVAL)
 
         # Wait for thread to finish (should be immediate since completed=True)
         if self._thread is not None:
@@ -210,6 +222,22 @@ class InterruptibleSQLiteQuery:
 
         logger.debug(f"[InterruptibleQuery] Query completed in {elapsed:.2f}s ({len(self.results)} rows)")
         return self.results, None
+
+    def _abort_and_wait(self, max_wait: float = 2.0):
+        """Interrupt the running statement and wait for the worker to stop.
+
+        ``sqlite3_interrupt`` only affects a statement that is already
+        executing: a single call issued before the worker reached
+        ``cursor.execute`` is lost. Re-issue it until the worker exits (bounded
+        by ``max_wait``), so the connection is never closed underneath a
+        statement still running in the worker thread.
+        """
+        deadline = time.time() + max_wait
+        while self._thread is not None and self._thread.is_alive() and time.time() < deadline:
+            self._interrupt_query()
+            self._done.wait(0.05)
+        if self._thread is not None and self._thread.is_alive():
+            logger.warning("[InterruptibleQuery] Worker thread still running after interrupt")
 
     def _interrupt_query(self):
         """Interrupt the SQLite query using connection.interrupt()."""

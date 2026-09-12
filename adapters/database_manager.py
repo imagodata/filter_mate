@@ -33,6 +33,69 @@ from ..infrastructure.feedback import show_error
 logger = logging.getLogger('FilterMate.DatabaseManager')
 
 
+STALE_PROJECT_MAX_AGE_DAYS = 30
+
+
+def purge_stale_projects(cursor, keep_project_uuid: Optional[str] = None,
+                         max_age_days: int = STALE_PROJECT_MAX_AGE_DAYS) -> int:
+    """
+    Delete FilterMate rows of unsaved projects not touched for ``max_age_days``.
+
+    An unsaved QGIS project has neither name nor path in ``fm_projects``. Only
+    the MOST RECENT such row is ever reused by ``_load_or_create_project``
+    (``ORDER BY _created_at DESC LIMIT 1``), so every older unsaved row is
+    unreachable garbage once it is old enough. Saved projects (non-empty path
+    or name), the newest unsaved project and the session's current project
+    are never touched. The deletion runs inside a SAVEPOINT: on any error it
+    is rolled back as a whole and the error re-raised.
+
+    Args:
+        cursor: Open sqlite3 cursor on the FilterMate database
+        keep_project_uuid: UUID of the session's current project, always kept
+        max_age_days: Age threshold in days
+
+    Returns:
+        int: Number of project rows deleted
+    """
+    params = [str(int(max_age_days))]
+    keep_clause = ""
+    if keep_project_uuid:
+        keep_clause = " AND project_id != ?"
+        params.append(str(keep_project_uuid))
+
+    cursor.execute(
+        "SELECT project_id FROM fm_projects "
+        "WHERE (project_path IS NULL OR project_path = '') "
+        "AND (project_name IS NULL OR project_name = '') "
+        "AND datetime(_updated_at) < datetime('now', '-' || ? || ' days')"
+        + keep_clause +
+        " AND project_id != ("
+        "   SELECT project_id FROM fm_projects "
+        "   WHERE (project_path IS NULL OR project_path = '') "
+        "   AND (project_name IS NULL OR project_name = '') "
+        "   ORDER BY _created_at DESC LIMIT 1)",
+        params
+    )
+    stale_ids = [row[0] for row in cursor.fetchall()]
+    if not stale_ids:
+        return 0
+
+    cursor.execute("SAVEPOINT fm_purge_stale_projects")
+    try:
+        for chunk_start in range(0, len(stale_ids), 200):
+            chunk = stale_ids[chunk_start:chunk_start + 200]
+            placeholders = ",".join("?" * len(chunk))
+            cursor.execute(f"DELETE FROM fm_project_layers_properties WHERE fk_project IN ({placeholders})", chunk)  # nosec B608 - placeholders only
+            cursor.execute(f"DELETE FROM fm_subset_history WHERE fk_project IN ({placeholders})", chunk)  # nosec B608 - placeholders only
+            cursor.execute(f"DELETE FROM fm_projects WHERE project_id IN ({placeholders})", chunk)  # nosec B608 - placeholders only
+    except Exception:
+        cursor.execute("ROLLBACK TO SAVEPOINT fm_purge_stale_projects")
+        cursor.execute("RELEASE SAVEPOINT fm_purge_stale_projects")
+        raise
+    cursor.execute("RELEASE SAVEPOINT fm_purge_stale_projects")
+    return len(stale_ids)
+
+
 class DatabaseManager:
     """
     Manages FilterMate's Spatialite database.
@@ -520,6 +583,18 @@ class DatabaseManager:
                         cur, project_settings, config_data
                     )
                     conn.commit()
+
+                    # PERF 2026-09-12: drop stale entries of never-saved projects.
+                    # Every session on an unsaved project creates a new UUID that
+                    # can never be matched again; a real profile accumulated 75 of
+                    # them (31 MB) in a few weeks.
+                    try:
+                        purged = purge_stale_projects(cur, keep_project_uuid=self._project_uuid)
+                        if purged:
+                            conn.commit()
+                            logger.info(f"Purged {purged} stale unsaved project(s) from FilterMate database")
+                    except Exception as purge_err:
+                        logger.debug(f"Stale project purge skipped: {purge_err}")
 
             return True, config_data
 

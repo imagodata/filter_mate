@@ -818,10 +818,18 @@ def prepare_ogr_source_geom(
 
         eval_distance = buffer_distance
         if QgsProperty and isinstance(buffer_distance, QgsProperty):
-            features = list(layer.getFeatures())
-            if features:
+            # PERF 2026-09-12: only the first feature is needed to evaluate the
+            # data-defined distance; do not materialise the whole layer.
+            from qgis.core import QgsFeatureRequest
+            iterator = layer.getFeatures(QgsFeatureRequest().setLimit(1))
+            first_feature = next(iter(iterator), None)
+            try:
+                iterator.close()  # release the provider cursor right away
+            except (AttributeError, RuntimeError):
+                pass
+            if first_feature is not None:
                 ctx = QgsExpressionContext()
-                ctx.setFeature(features[0])
+                ctx.setFeature(first_feature)
                 eval_distance = buffer_distance.value(ctx, 0)
 
         if is_geographic and eval_distance and float(eval_distance) > 1:

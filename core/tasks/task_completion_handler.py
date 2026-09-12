@@ -322,8 +322,10 @@ def apply_pending_subset_requests(
 
                     logger.debug(f"  ✓ Applied filter to {layer.name()}: {len(expression_str)} chars")
 
-                    # Handle feature count and logging
-                    feature_count = layer.featureCount()
+                    # Handle feature count and logging (PERF 2026-09-12: reuse the
+                    # count computed above instead of asking the provider again)
+                    if feature_count is None:
+                        feature_count = -1
                     if feature_count >= 0:
                         QgsMessageLog.logMessage(
                             f"✓ Filter APPLIED: {layer.name()} → {feature_count} features",

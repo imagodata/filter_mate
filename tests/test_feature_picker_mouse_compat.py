@@ -56,6 +56,9 @@ def test_left_click_with_qt5_and_qt6(mouse_handler, qt_version, initial_state):
         list_widgets={'layer': list_widget},
         font_by_state={'checked': ('font', 'color'), 'unChecked': ('font', 'color')},
         _emit_checked_items_update=MagicMock(),
+        # PERF 2026-09-12: membership is now a single indexed lookup, not a
+        # full-layer scan; the handler only needs its boolean answer.
+        _is_feature_in_layer=lambda identifier_field_name, id_value: True,
     )
 
     assert mouse_handler(picker, viewport, event) is True

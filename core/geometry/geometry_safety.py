@@ -344,17 +344,26 @@ def safe_unary_union(geometries: List[QgsGeometry]) -> Optional[QgsGeometry]:
     if not valid_geoms:
         return None
 
-    try:
-        if len(valid_geoms) == 1:
-            return valid_geoms[0]
+    if len(valid_geoms) == 1:
+        return valid_geoms[0]
 
+    # PERF 2026-09-12: GEOS cascaded union (n log n) instead of an iterative
+    # combine() that re-validated a growing geometry at every step (n²).
+    try:
+        result = QgsGeometry.unaryUnion(valid_geoms)
+        if validate_geometry(result):
+            return result
+        logger.warning("safe_unary_union: unaryUnion produced an invalid result, falling back to iterative combine")
+    except Exception as e:
+        logger.warning(f"safe_unary_union: unaryUnion failed ({e}), falling back to iterative combine")
+
+    try:
         result = valid_geoms[0]
         for geom in valid_geoms[1:]:
             result = result.combine(geom)
-            if not validate_geometry(result):
-                logger.warning("safe_unary_union: Intermediate result invalid")
-                return None
-
+        if not validate_geometry(result):
+            logger.warning("safe_unary_union: Iterative combine result invalid")
+            return None
         return result
     except Exception as e:
         logger.error(f"safe_unary_union failed: {e}")

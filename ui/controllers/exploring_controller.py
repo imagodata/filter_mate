@@ -1716,9 +1716,10 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
                     # Preemptive reload for PostgreSQL layers with many features (high risk)
                     layer = self._dockwidget.current_layer
-                    if layer.providerType() == 'postgres' and layer.featureCount() > 1000:
+                    layer_feature_count = layer.featureCount() if layer.providerType() == 'postgres' else -1
+                    if layer_feature_count > 1000:
                         # Always reload from database to get fresh C++ object
-                        logger.debug(f"Proactive reload for PostgreSQL layer with {layer.featureCount()} features")
+                        logger.debug(f"Proactive reload for PostgreSQL layer with {layer_feature_count} features")
                         reloaded = layer.getFeature(input.id())
                         if reloaded.isValid():
                             input = reloaded
@@ -2934,14 +2935,16 @@ class ExploringController(BaseController, LayerSelectionMixin):
             selecting_button_checked = btn_selecting.isChecked()
             tracking_button_checked = btn_tracking.isChecked()
 
-            # DIAGNOSTIC LOGGING v4
-            logger.info("=" * 60)
-            logger.info("handle_layer_selection_changed TRIGGERED")
-            logger.info(f"  Layer: {self._dockwidget.current_layer.name()}")
-            logger.info(f"  Selected IDs: {len(selected)}, Deselected: {len(deselected)}")
-            logger.info(f"  is_selecting (PROJECT_LAYERS): {is_selecting}, Button: {selecting_button_checked}")
-            logger.info(f"  is_tracking (PROJECT_LAYERS): {is_tracking}, Button: {tracking_button_checked}")
-            logger.info(f"  Current groupbox: {self._dockwidget.current_exploring_groupbox}")
+            # DIAGNOSTIC LOGGING v4 (PERF 2026-09-12: debug level — this ran on
+            # every canvas selection change, six lines and a file flush each)
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug("=" * 60)
+                logger.debug("handle_layer_selection_changed TRIGGERED")
+                logger.debug(f"  Layer: {self._dockwidget.current_layer.name()}")
+                logger.debug(f"  Selected IDs: {len(selected)}, Deselected: {len(deselected)}")
+                logger.debug(f"  is_selecting (PROJECT_LAYERS): {is_selecting}, Button: {selecting_button_checked}")
+                logger.debug(f"  is_tracking (PROJECT_LAYERS): {is_tracking}, Button: {tracking_button_checked}")
+                logger.debug(f"  Current groupbox: {self._dockwidget.current_exploring_groupbox}")
 
             # FIX v4: Detect and CORRECT mismatch for is_selecting
             if selecting_button_checked != is_selecting:

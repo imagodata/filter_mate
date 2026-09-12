@@ -86,8 +86,8 @@ except ImportError:
 # Import object safety utilities (migrated from modules.object_safety)
 from ...infrastructure.utils import (
     safe_emit,
-    safe_set_layer_variable,
     safe_set_layer_variables,
+    safe_set_layer_variables_batch,
     is_qgis_alive
 )
 
@@ -1496,7 +1496,8 @@ class LayersManagementEngineTask(QgsTask):
                                         value_typped.replace("\'", "\'\'") if type_returned in (str, dict, list) else value_typped
                                     )
                                 )
-                                conn.commit()
+                        # PERF 2026-09-12: one commit for the whole layer, not one per row
+                        conn.commit()
                     else:
                         for layer_property in layer_properties:
                             if layer_property[0] in ("infos", "exploring", "filtering"):
@@ -1521,7 +1522,8 @@ class LayersManagementEngineTask(QgsTask):
                                             value_typped.replace("\'", "\'\'") if type_returned in (str, dict, list) else value_typped
                                         )
                                     )
-                                    conn.commit()
+                        # PERF 2026-09-12: one commit for the whole batch, not one per row
+                        conn.commit()
                 finally:
                     cur.close()
 
@@ -1836,20 +1838,46 @@ class LayersManagementEngineTask(QgsTask):
                             logger.debug("QGIS not alive in deferred callback, skipping layer variables")
                             return
 
-                        for layer_id, variable_key, value in operations_to_apply:
-                            # Re-check QGIS alive status for each operation
-                            if not is_qgis_alive():
-                                logger.debug("QGIS became unavailable during layer variable loop")
-                                break
+                        # PERF 2026-09-12: group the queue per layer so each layer
+                        # goes through the crash-safety gates ONCE and receives
+                        # all its variables in a single batched write, instead of
+                        # 42 gated writes (each with a processEvents() on Windows).
+                        # Order is preserved: a "clear" entry flushes the pending
+                        # batch for that layer before being applied.
+                        pending_batches = {}  # layer_id -> dict(variable_key -> value)
+                        batch_order = []
 
+                        def _flush_batch(target_layer_id):
+                            variables = pending_batches.pop(target_layer_id, None)
+                            if not variables:
+                                return
+                            written, ok = safe_set_layer_variables_batch(target_layer_id, variables)
+                            if not ok:
+                                logger.debug(f"Could not set {len(variables)} layer variables for {target_layer_id} (layer may be deleted)")
+                            elif written:
+                                logger.debug(f"Set {written}/{len(variables)} layer variables for {target_layer_id} (rest unchanged)")
+
+                        for layer_id, variable_key, value in operations_to_apply:
                             if variable_key is None:
+                                if not is_qgis_alive():
+                                    logger.debug("QGIS became unavailable during layer variable loop")
+                                    break
+                                _flush_batch(layer_id)
                                 # Clear all layer variables using safe wrapper
                                 if not safe_set_layer_variables(layer_id, {}):
                                     logger.debug(f"Could not clear layer variables for {layer_id} (layer may be deleted)")
-                            else:
-                                # Set individual variable using safe wrapper
-                                if not safe_set_layer_variable(layer_id, variable_key, value):
-                                    logger.debug(f"Could not set layer variable {variable_key} for {layer_id} (layer may be deleted)")
+                                continue
+                            if layer_id not in pending_batches:
+                                pending_batches[layer_id] = {}
+                                batch_order.append(layer_id)
+                            pending_batches[layer_id][variable_key] = value
+
+                        for layer_id in batch_order:
+                            # Re-check QGIS alive status for each layer
+                            if not is_qgis_alive():
+                                logger.debug("QGIS became unavailable during layer variable loop")
+                                break
+                            _flush_batch(layer_id)
                     except (RuntimeError, AttributeError, TypeError) as e:
                         logger.warning(f"Error in deferred layer variable callback: {e}")
 

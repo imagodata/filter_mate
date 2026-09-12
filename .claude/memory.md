@@ -1,6 +1,34 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-09-12] Audit perfs + correctifs sur branche `claude/perf-audit-fixes` (non fusionnée)
+Audit statique complet (rapport : https://claude.ai/code/artifact/c7bf3a2c-93cc-4cbe-98d4-620c1169557a),
+puis correctifs en autopilot, revue adversariale Opus traitée. Décisions à connaître :
+- `feature_picker_limit` (défaut 1000, min 100 dans l'UI) est désormais **appliqué** à la
+  liste de sélection multiple, triée par valeur d'affichage. Pour ne rien rendre inatteignable :
+  filtre texte = recherche serveur (`lower(to_string(expr)) LIKE`) quand la liste est tronquée,
+  « Tout sélectionner » recharge la liste complète, la synchro canevas va chercher par
+  identifiant les entités hors liste. Le clic sur une ligne fait une requête indexée limitée à 1
+  (avant : parcours complet de la couche avec attributs à chaque clic).
+- Variables de couche appliquées par lot (`safe_set_layer_variables_batch`) : une chaîne de
+  gardes par couche, `variableNames` écrit avant les valeurs, valeurs identiques ignorées
+  (comparaison stricte de type). Sous Windows : un `processEvents()` par couche, pas par variable.
+- Les `time.sleep` inter-couches SQLite (task_completion_handler, parallel_executor) et les
+  temporisations de démarrage sont **volontairement conservés** : correctifs de stabilité
+  d'avril 2026 non revalidables sans QGIS réel.
+- Nuance vérifiée : les fournisseurs QGIS cachent `featureCount()` après le premier calcul
+  (invalidé par setSubsetString/reload) ; `updateExtents()` ne fait qu'invalider.
+- Purge des projets fantômes de la base (sans nom ni chemin, > 30 j) : ne touche jamais le
+  projet courant ni l'orphelin le plus récent (réutilisé par `_load_or_create_project`),
+  dans un SAVEPOINT.
+- Logging : racine INFO par défaut, `FILTERMATE_LOG_LEVEL=DEBUG` pour le verbeux ; les loggers
+  `logging.getLogger(__name__)` (paquet `filter_mate.*`) atteignent enfin `filtermate.log`.
+- Trois chronomètres INFO dans le log (`infrastructure/perf_timer.py`) : `⏱ project_open`,
+  `⏱ layer_change`, `⏱ task_filter` — à suivre de version en version.
+- `MemorySpatialIndex` (aucun appelant) supprimé.
+Bug pré-existant non corrigé : `safe_set_layer_variables(layer_id, {})` retourne True sans rien
+effacer (le « clear » différé de `remove_variables_from_all_layers` n'a jamais eu d'effet).
+
 
 ## [2026-08-01] v4.8.4 — troisième hotfix QGIS 4.x : la correction v4.8.0 de `PE_IndicatorViewItemCheck` était elle-même fausse
 Rapport utilisateur en direct (traceback QGIS 4.2/Windows) :

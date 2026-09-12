@@ -43,6 +43,7 @@ from .infrastructure.utils import (
     is_layer_source_available,
 )
 from .infrastructure.database.sql_utils import safe_set_subset_string
+from .infrastructure.perf_timer import perf_mark_start, perf_mark_end
 from .infrastructure.field_utils import cleanup_corrupted_layer_filters
 from .utils.type_utils import return_typed_value
 from .infrastructure.feedback import (
@@ -1218,6 +1219,8 @@ class FilterMateApp:
 
         # Create task with backend registry for hexagonal architecture (v4.0.1)
         logger.info(f"📦 Creating FilterEngineTask with {len(task_parameters.get('task', {}).get('layers', []))} layers")
+        # PERF 2026-09-12: span closed by FilterResultHandler.handle_task_completion
+        perf_mark_start(f"task_{task_name}")
         self.appTasks[task_name] = FilterEngineTask(
             self.tasks_descriptions[task_name],
             task_name,
@@ -2697,6 +2700,8 @@ class FilterMateApp:
         self.dockwidget.get_project_layers_from_app(self.PROJECT_LAYERS, self.PROJECT)
         self.dockwidget.has_loaded_layers = True
         if hasattr(self.dockwidget, 'set_widgets_enabled_state'): self.dockwidget.set_widgets_enabled_state(True)
+        # PERF 2026-09-12: span opened by LayerLifecycleService.handle_project_initialization
+        perf_mark_end("project_open", f"{len(self.PROJECT_LAYERS)} layers")
         try:
             if hasattr(self.dockwidget, 'comboBox_filtering_current_layer'):
                 # v4.2: Filter to show only vector layers WITH geometry (exclude non-spatial tables)

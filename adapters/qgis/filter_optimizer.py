@@ -18,9 +18,7 @@ from qgis.core import (
     QgsFeature,
     QgsFeatureRequest,
     QgsFeatureSource,
-    QgsGeometry,
     QgsRectangle,
-    QgsSpatialIndex,
     QgsExpression,
     QgsExpressionContext,
     QgsExpressionContextUtils,
@@ -736,88 +734,3 @@ class OgrSubsetBuilder:
 
         ranges.append((start, end))
         return ranges
-
-
-class MemorySpatialIndex:
-    """Manages spatial indices for memory layers."""
-
-    _index_cache: Dict[str, Tuple[QgsSpatialIndex, Dict[int, QgsGeometry]]] = {}
-
-    @classmethod
-    def get_or_create(
-        cls,
-        layer: QgsVectorLayer
-    ) -> Tuple[QgsSpatialIndex, Dict[int, QgsGeometry]]:
-        """Get or create spatial index for a memory layer."""
-        layer_id = layer.id()
-
-        if layer_id in cls._index_cache:
-            return cls._index_cache[layer_id]
-
-        spatial_index = QgsSpatialIndex()
-        geom_cache: Dict[int, QgsGeometry] = {}
-
-        for feat in layer.getFeatures():
-            geom = feat.geometry()
-            if geom and not geom.isEmpty() and geom.isGeosValid():
-                spatial_index.addFeature(feat)
-                geom_cache[feat.id()] = geom
-
-        cls._index_cache[layer_id] = (spatial_index, geom_cache)
-        return spatial_index, geom_cache
-
-    @classmethod
-    def clear_cache(cls, layer_id: Optional[str] = None) -> int:
-        """Clear index cache."""
-        if layer_id:
-            if layer_id in cls._index_cache:
-                del cls._index_cache[layer_id]
-                return 1
-            return 0
-        else:
-            count = len(cls._index_cache)
-            cls._index_cache.clear()
-            return count
-
-    @classmethod
-    def filter_by_spatial_predicate(
-        cls,
-        layer: QgsVectorLayer,
-        fids: Set[int],
-        intersect_geom: QgsGeometry,
-        predicate: str = 'intersects'
-    ) -> Set[int]:
-        """Apply spatial predicate to pre-filtered FIDs."""
-        matching: Set[int] = set()
-
-        if not fids:
-            return matching
-
-        request = QgsFeatureRequest()
-        request.setFilterFids(list(fids))
-
-        predicate_lower = predicate.lower()
-
-        for feat in layer.getFeatures(request):
-            geom = feat.geometry()
-            if not geom or geom.isEmpty():
-                continue
-
-            try:
-                match = False
-                if predicate_lower == 'intersects':
-                    match = geom.intersects(intersect_geom)
-                elif predicate_lower == 'within':
-                    match = geom.within(intersect_geom)
-                elif predicate_lower == 'contains':
-                    match = geom.contains(intersect_geom)
-                elif predicate_lower == 'overlaps':
-                    match = geom.overlaps(intersect_geom)
-
-                if match:
-                    matching.add(feat.id())
-
-            except Exception:  # nosec B110 - skip feature on geometry predicate failure, continue matching
-                pass
-
-        return matching

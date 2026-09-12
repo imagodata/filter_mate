@@ -18,7 +18,7 @@ Version: 4.0.8
 """
 
 import logging
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, Tuple
 
 logger = logging.getLogger('FilterMate.SignalUtils')
 
@@ -179,6 +179,149 @@ def safe_emit(signal: Any, *args) -> bool:
 # Layer Variable Management
 # =============================================================================
 
+def _resolve_layer_for_variable_write(layer_id: str, project: Optional[Any] = None) -> Optional[Any]:
+    """
+    Run the full crash-safety gate chain once and return a fresh, validated layer.
+
+    PERF 2026-09-12: extracted from safe_set_layer_variable so that a batch of
+    variables for one layer pays the gates (sip checks, isValid, Windows
+    processEvents flush, re-fetch) a single time instead of once per variable.
+
+    Returns:
+        The layer object to write to, or None when it is unsafe to touch it.
+    """
+    try:
+        # CRASH FIX (v2.3.14): Check if QGIS is alive BEFORE QgsProject.instance()
+        # Windows access violations cannot be caught by try/except
+        if not is_qgis_alive():
+            logger.debug("QGIS is not alive, skipping safe_set_layer_variable")
+            return None
+
+        if project is None:
+            project = QgsProject.instance()
+
+        if project is None:
+            logger.debug("No project available for safe_set_layer_variable")
+            return None
+
+        # CRASH FIX (v2.3.13): Check if project itself is still valid
+        if sip is not None:
+            try:
+                if sip.isdeleted(project):
+                    logger.debug("Project C++ object is deleted")
+                    return None
+            except (TypeError, AttributeError):
+                pass
+
+        # Re-fetch layer fresh from project registry
+        # This is the safest way - let QGIS give us the current layer object
+        layer = project.mapLayer(layer_id)
+
+        if layer is None:
+            logger.debug(f"Layer {layer_id} not found in project")
+            return None
+
+        # CRASH FIX (v2.3.13): Immediate sip deletion check FIRST
+        # This must happen before ANY method call on the layer object
+        if sip is not None:
+            try:
+                if sip.isdeleted(layer):
+                    logger.debug(f"Layer {layer_id} C++ object is deleted")
+                    return None
+            except (TypeError, AttributeError) as e:
+                # If sip.isdeleted() itself fails, layer is likely corrupted
+                logger.debug(f"sip.isdeleted check failed for {layer_id}: {e}")
+                return None
+
+        # CRASH FIX (v2.3.13): Wrap isValid() call in its own try/except
+        # layer.isValid() can cause access violation if layer is partially deleted
+        try:
+            is_valid = layer.isValid()
+        except (RuntimeError, OSError, SystemError) as e:
+            logger.debug(f"Layer {layer_id} validity check failed: {e}")
+            return None
+
+        if not is_valid:
+            logger.debug(f"Layer {layer_id} is invalid")
+            return None
+
+        # CRASH FIX (v2.3.13): Final sip check immediately before C++ call
+        # Minimizes race condition window
+        if sip is not None:
+            try:
+                if sip.isdeleted(layer):
+                    logger.debug(f"Layer {layer_id} deleted before setLayerVariable")
+                    return None
+            except (TypeError, AttributeError):
+                return None
+
+        # CRASH FIX (v2.4.7): Flush pending Qt events BEFORE the C++ call
+        # This allows any pending layer deletions to complete, reducing the race window.
+        # Critical for Windows where access violations are fatal and cannot be caught.
+        if IS_WINDOWS:
+            try:
+                app = QApplication.instance()
+                if app is not None:
+                    # Process pending events that might include layer deletions
+                    app.processEvents()
+
+                    # Re-verify layer after processing events
+                    if sip is not None:
+                        try:
+                            if sip.isdeleted(layer):
+                                logger.debug(f"Layer {layer_id} deleted after processEvents")
+                                return None
+                        except (TypeError, AttributeError):
+                            return None
+
+                    # Re-fetch layer one more time to be absolutely sure
+                    layer = project.mapLayer(layer_id)
+                    if layer is None:
+                        logger.debug(f"Layer {layer_id} no longer in project after processEvents")
+                        return None
+            except Exception as e:
+                logger.debug(f"Error during pre-operation event flush: {e}")
+                return None
+
+        # CRASH FIX (v2.4.8): Atomic-style final validation before C++ call
+        # Re-fetch the layer immediately before the call to minimize race window
+        # This is the absolute last defense before the C++ operation
+        fresh_layer = project.mapLayer(layer_id)
+        if fresh_layer is None:
+            logger.debug(f"Layer {layer_id} not found in final fetch before setLayerVariable")
+            return None
+
+        # Immediate sip check on the fresh layer reference
+        if sip is not None:
+            try:
+                if sip.isdeleted(fresh_layer):
+                    logger.debug(f"Fresh layer {layer_id} is sip-deleted before setLayerVariable")
+                    return None
+            except (TypeError, AttributeError):
+                logger.debug(f"sip check failed on fresh layer {layer_id}")
+                return None
+
+        # Final validity check on the fresh layer
+        try:
+            if not fresh_layer.isValid():
+                logger.debug(f"Fresh layer {layer_id} is invalid before setLayerVariable")
+                return None
+        except (RuntimeError, OSError, SystemError):
+            logger.debug(f"Fresh layer {layer_id} validity check crashed")
+            return None
+
+        return fresh_layer
+    except RuntimeError as e:
+        logger.debug(f"RuntimeError resolving layer {layer_id} for variable write: {e}")
+        return None
+    except (OSError, SystemError) as e:
+        logger.debug(f"System error resolving layer {layer_id} for variable write: {e}")
+        return None
+    except Exception as e:
+        logger.warning(f"Error resolving layer {layer_id} for variable write: {e}")
+        return None
+
+
 def safe_set_layer_variable(layer_id: str, variable_key: str, value: Any, project: Optional[Any] = None) -> bool:
     """
     Safely set a layer variable, preventing access violations.
@@ -204,123 +347,8 @@ def safe_set_layer_variable(layer_id: str, variable_key: str, value: Any, projec
         True if the variable was set successfully
     """
     try:
-        # CRASH FIX (v2.3.14): Check if QGIS is alive BEFORE QgsProject.instance()
-        # Windows access violations cannot be caught by try/except
-        if not is_qgis_alive():
-            logger.debug("QGIS is not alive, skipping safe_set_layer_variable")
-            return False
-
-        if project is None:
-            project = QgsProject.instance()
-
-        if project is None:
-            logger.debug("No project available for safe_set_layer_variable")
-            return False
-
-        # CRASH FIX (v2.3.13): Check if project itself is still valid
-        if sip is not None:
-            try:
-                if sip.isdeleted(project):
-                    logger.debug("Project C++ object is deleted")
-                    return False
-            except (TypeError, AttributeError):
-                pass
-
-        # Re-fetch layer fresh from project registry
-        # This is the safest way - let QGIS give us the current layer object
-        layer = project.mapLayer(layer_id)
-
-        if layer is None:
-            logger.debug(f"Layer {layer_id} not found in project")
-            return False
-
-        # CRASH FIX (v2.3.13): Immediate sip deletion check FIRST
-        # This must happen before ANY method call on the layer object
-        if sip is not None:
-            try:
-                if sip.isdeleted(layer):
-                    logger.debug(f"Layer {layer_id} C++ object is deleted")
-                    return False
-            except (TypeError, AttributeError) as e:
-                # If sip.isdeleted() itself fails, layer is likely corrupted
-                logger.debug(f"sip.isdeleted check failed for {layer_id}: {e}")
-                return False
-
-        # CRASH FIX (v2.3.13): Wrap isValid() call in its own try/except
-        # layer.isValid() can cause access violation if layer is partially deleted
-        try:
-            is_valid = layer.isValid()
-        except (RuntimeError, OSError, SystemError) as e:
-            logger.debug(f"Layer {layer_id} validity check failed: {e}")
-            return False
-
-        if not is_valid:
-            logger.debug(f"Layer {layer_id} is invalid")
-            return False
-
-        # CRASH FIX (v2.3.13): Final sip check immediately before C++ call
-        # Minimizes race condition window
-        if sip is not None:
-            try:
-                if sip.isdeleted(layer):
-                    logger.debug(f"Layer {layer_id} deleted before setLayerVariable")
-                    return False
-            except (TypeError, AttributeError):
-                return False
-
-        # CRASH FIX (v2.4.7): Flush pending Qt events BEFORE the C++ call
-        # This allows any pending layer deletions to complete, reducing the race window.
-        # Critical for Windows where access violations are fatal and cannot be caught.
-        if IS_WINDOWS:
-            try:
-                app = QApplication.instance()
-                if app is not None:
-                    # Process pending events that might include layer deletions
-                    app.processEvents()
-
-                    # Re-verify layer after processing events
-                    if sip is not None:
-                        try:
-                            if sip.isdeleted(layer):
-                                logger.debug(f"Layer {layer_id} deleted after processEvents")
-                                return False
-                        except (TypeError, AttributeError):
-                            return False
-
-                    # Re-fetch layer one more time to be absolutely sure
-                    layer = project.mapLayer(layer_id)
-                    if layer is None:
-                        logger.debug(f"Layer {layer_id} no longer in project after processEvents")
-                        return False
-            except Exception as e:
-                logger.debug(f"Error during pre-operation event flush: {e}")
-                return False
-
-        # CRASH FIX (v2.4.8): Atomic-style final validation before C++ call
-        # Re-fetch the layer immediately before the call to minimize race window
-        # This is the absolute last defense before the C++ operation
-        fresh_layer = project.mapLayer(layer_id)
+        fresh_layer = _resolve_layer_for_variable_write(layer_id, project)
         if fresh_layer is None:
-            logger.debug(f"Layer {layer_id} not found in final fetch before setLayerVariable")
-            return False
-
-        # Immediate sip check on the fresh layer reference
-        if sip is not None:
-            try:
-                if sip.isdeleted(fresh_layer):
-                    logger.debug(f"Fresh layer {layer_id} is sip-deleted before setLayerVariable")
-                    return False
-            except (TypeError, AttributeError):
-                logger.debug(f"sip check failed on fresh layer {layer_id}")
-                return False
-
-        # Final validity check on the fresh layer
-        try:
-            if not fresh_layer.isValid():
-                logger.debug(f"Fresh layer {layer_id} is invalid before setLayerVariable")
-                return False
-        except (RuntimeError, OSError, SystemError):
-            logger.debug(f"Fresh layer {layer_id} validity check crashed")
             return False
 
         # CRASH FIX (v2.4.9): Use direct setCustomProperty instead of
@@ -396,6 +424,102 @@ def safe_set_layer_variables(layer_id: str, variables: Dict[str, Any], project: 
 # Exports
 # =============================================================================
 
+def _variable_values_equal(current: Any, value: Any) -> bool:
+    """True when a stored custom property already holds ``value``.
+
+    Deliberately strict: same type and equal (numbers of different numeric
+    types excepted). A stored ``"0"`` is NOT equal to ``0`` so the property
+    type is never left stale by a skipped write.
+    """
+    if isinstance(current, bool) or isinstance(value, bool):
+        return type(current) is type(value) and current == value
+    if isinstance(current, (int, float)) and isinstance(value, (int, float)):
+        return current == value
+    if type(current) is not type(value):
+        return False
+    try:
+        return current == value
+    except Exception:
+        return False
+
+
+def safe_set_layer_variables_batch(
+    layer_id: str,
+    variables: Dict[str, Any],
+    project: Optional[Any] = None,
+    skip_unchanged: bool = True
+) -> Tuple[int, bool]:
+    """
+    Set several layer variables with ONE pass through the crash-safety gates.
+
+    PERF 2026-09-12: replaces N calls to safe_set_layer_variable for the same
+    layer (N gate chains, N re-writes of the growing ``variableNames`` list and,
+    on Windows, N processEvents() flushes) by one gated resolution, one
+    ``variableNames`` write and one ``variableValues/<key>`` write per changed
+    value. Values already stored with the same content are skipped when
+    ``skip_unchanged`` is True, which is the case for every layer re-loaded
+    from a saved project.
+
+    Args:
+        layer_id: Layer ID to write to
+        variables: Mapping variable key -> value
+        project: Optional project (defaults to QgsProject.instance())
+        skip_unchanged: Skip properties whose stored value is already equal
+
+    Returns:
+        (written_count, ok): number of values actually written and whether the
+        layer could be accessed at all.
+    """
+    if not variables:
+        return 0, True
+
+    fresh_layer = _resolve_layer_for_variable_write(layer_id, project)
+    if fresh_layer is None:
+        return 0, False
+
+    written = 0
+    try:
+        existing_names = fresh_layer.customProperty('variableNames', [])
+        if not isinstance(existing_names, list):
+            existing_names = [existing_names] if existing_names else []
+        existing_set = set(existing_names)
+        names_changed = False
+
+        to_write = []
+        for variable_key, value in variables.items():
+            prop_key = f"variableValues/{variable_key}"
+            if variable_key in existing_set and skip_unchanged:
+                try:
+                    current = fresh_layer.customProperty(prop_key, None)
+                except (RuntimeError, OSError, SystemError):
+                    current = None
+                if current is not None and _variable_values_equal(current, value):
+                    continue
+            if variable_key not in existing_set:
+                existing_names.append(variable_key)
+                existing_set.add(variable_key)
+                names_changed = True
+            to_write.append((prop_key, value))
+
+        # Names first (as QgsExpressionContextUtils.setLayerVariable does), so a
+        # value written just before the layer disappears is never unreferenced.
+        if names_changed:
+            fresh_layer.setCustomProperty('variableNames', existing_names)
+
+        for prop_key, value in to_write:
+            fresh_layer.setCustomProperty(prop_key, value)
+            written += 1
+
+        logger.debug(f"Batch-set {written}/{len(variables)} layer variables for {layer_id}")
+        return written, True
+    except (RuntimeError, OSError, SystemError) as e:
+        logger.debug(f"Layer {layer_id} was deleted during batched setCustomProperty: {e}")
+        return written, False
+    except Exception as e:
+        logger.warning(f"Error in safe_set_layer_variables_batch for {layer_id}: {e}")
+        return written, False
+
+
 __all__ = [
     'is_qgis_alive',
     'is_layer_in_project',
@@ -403,4 +527,5 @@ __all__ = [
     'safe_emit',
     'safe_set_layer_variable',
     'safe_set_layer_variables',
+    'safe_set_layer_variables_batch',
 ]

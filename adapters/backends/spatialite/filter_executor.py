@@ -225,6 +225,20 @@ def validate_spatialite_features(
     return valid_features, validation_errors, skipped_no_geometry
 
 
+def _geometry_only_features(layer) -> List:
+    """Materialise the layer's current features WITHOUT attributes.
+
+    PERF 2026-09-12: the resolved source features only feed
+    :func:`process_spatialite_geometries` (geometry) and the geometry cache key
+    (feature ids). Loading attributes for every row of a filtered source layer
+    doubled the memory footprint for nothing.
+    """
+    from qgis.core import QgsFeatureRequest
+    request = QgsFeatureRequest()
+    request.setNoAttributes()
+    return list(layer.getFeatures(request))
+
+
 def recover_spatialite_features_from_fids(
     layer: Any,
     feature_fids: List
@@ -325,7 +339,7 @@ def resolve_spatialite_features(
     elif mode == SourceMode.SUBSET:
         logger.info("[Spatialite] === resolve_spatialite_features (FILTERED MODE) ===")
         logger.info(f"[Spatialite]   Source layer has filter: {source_layer.subsetString()[:100]}")
-        features = list(source_layer.getFeatures())
+        features = _geometry_only_features(source_layer)
         logger.debug(f"[Spatialite]   Retrieved {len(features)} features")
 
     elif mode == SourceMode.SELECTION:
@@ -342,7 +356,7 @@ def resolve_spatialite_features(
     elif mode == SourceMode.FIELD_BASED:
         logger.info("[Spatialite] === resolve_spatialite_features (FIELD-BASED MODE) ===")
         logger.info(f"[Spatialite]   Field name: '{context.is_field_expression[1] if context.is_field_expression else 'unknown'}'")
-        features = list(source_layer.getFeatures())
+        features = _geometry_only_features(source_layer)
 
     else:  # FALLBACK
         logger.info("[Spatialite] === resolve_spatialite_features (FALLBACK MODE) ===")
@@ -351,7 +365,7 @@ def resolve_spatialite_features(
             f"⚠️ FALLBACK MODE: Using ALL {source_layer.featureCount()} features",
             "FilterMate", Qgis.MessageLevel.Warning
         )
-        features = list(source_layer.getFeatures())
+        features = _geometry_only_features(source_layer)
 
     return features, recovery_attempted
 
@@ -623,7 +637,7 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
                 logger.warning(f"[Spatialite] Expression fallback failed: {e}")
 
         if not features:
-            features = list(source_layer.getFeatures())
+            features = _geometry_only_features(source_layer)
             logger.info(f"[Spatialite] Final fallback: Using all {len(features)} features")
 
     if not features:

@@ -24,6 +24,30 @@ from .base_task import BaseFilterMateTask, TaskResult
 logger = logging.getLogger('FilterMate.Tasks.Spatial')
 
 
+def _union_geometries(geometries):
+    """Union a list of geometries with GEOS cascaded union, with an
+    iterative combine() fallback when unaryUnion is unavailable or fails.
+
+    Module-level so both SpatialFilterTask and BufferFilterTask share it.
+    """
+    geometries = [g for g in geometries if g is not None]
+    if not geometries:
+        return None
+    if len(geometries) == 1:
+        return geometries[0]
+    try:
+        from qgis.core import QgsGeometry
+        result = QgsGeometry.unaryUnion(geometries)
+        if result is not None and not result.isNull():
+            return result
+    except Exception:  # nosec B110 - fall back to the slow path below
+        pass
+    combined = geometries[0]
+    for geom in geometries[1:]:
+        combined = combined.combine(geom)
+    return combined
+
+
 class SpatialFilterTask(BaseFilterMateTask):
     """
     Async task for spatial filtering operations.
@@ -97,10 +121,10 @@ class SpatialFilterTask(BaseFilterMateTask):
 
             self.report_progress(10, 100, "Processing targets...")
 
-            # Combine source geometries
-            combined_geom = source_geoms[0]
-            for geom in source_geoms[1:]:
-                combined_geom = combined_geom.combine(geom)
+            # Combine source geometries (PERF 2026-09-12: cascaded union, not n² combine)
+            combined_geom = _union_geometries(source_geoms)
+            if combined_geom is None:
+                return TaskResult.error_result("Could not combine source geometries")
 
             total = len(self._target_layer_ids)
             total_matches = 0
@@ -326,22 +350,18 @@ class BufferFilterTask(BaseFilterMateTask):
         else:
             request = QgsFeatureRequest()
 
-        combined = None
+        buffered_geoms = []
         for feature in layer.getFeatures(request):
             if not feature.hasGeometry():
                 continue
 
-            buffered = feature.geometry().buffer(
+            buffered_geoms.append(feature.geometry().buffer(
                 self._buffer_distance,
                 self._buffer_segments
-            )
+            ))
 
-            if combined is None:
-                combined = buffered
-            else:
-                combined = combined.combine(buffered)
-
-        return combined
+        # PERF 2026-09-12: cascaded union of all buffers instead of n² combine
+        return _union_geometries(buffered_geoms)
 
     def _filter_by_buffer(self, layer, buffer_geom) -> List[int]:
         """Find features intersecting buffer."""

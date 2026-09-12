@@ -25,6 +25,12 @@ from qgis.utils import iface
 
 from ..infrastructure.logging import get_app_logger
 from ..infrastructure.signal_utils import SignalBlocker
+
+try:
+    from ..infrastructure.perf_timer import perf_mark_end
+except ImportError:  # test harnesses that stub the infrastructure package
+    def perf_mark_end(name, details=None):  # noqa: D103 - no-op fallback
+        return None
 from ..config.feedback_config import should_show_message
 from ..infrastructure.feedback import show_success_with_backend, show_info
 
@@ -143,7 +149,8 @@ class FilterResultHandler:
             self._update_undo_redo_buttons()
 
         # Show success message with actual backend used
-        self._show_task_completion_message(task_name, source_layer, display_backend, layer_count, is_fallback)
+        self._show_task_completion_message(task_name, source_layer, display_backend, layer_count, is_fallback,
+                                           feature_count=feature_count)
 
         # Update backend indicator with actual backend used
         self._update_backend_indicator(task_parameters, provider_type, display_backend, is_fallback)
@@ -175,6 +182,12 @@ class FilterResultHandler:
 
         # v2.8.13: CRITICAL - Invalidate expression cache after filtering
         self._invalidate_expression_cache(source_layer, task_parameters)
+
+        # PERF 2026-09-12: span opened when the task was created (FilterMateApp)
+        try:
+            perf_mark_end(f"task_{task_name}", f"{source_layer.name()}, {layer_count} layer(s)")
+        except (RuntimeError, AttributeError):
+            perf_mark_end(f"task_{task_name}")
 
     def _clear_spatialite_cache(self, source_layer: QgsVectorLayer, task_parameters: Dict[str, Any]) -> None:
         """
@@ -245,7 +258,8 @@ class FilterResultHandler:
         source_layer: QgsVectorLayer,
         provider_type: str,
         layer_count: int,
-        is_fallback: bool
+        is_fallback: bool,
+        feature_count: Optional[int] = None
     ) -> None:
         """
         Show success message with backend info and feature counts.
@@ -256,8 +270,11 @@ class FilterResultHandler:
             provider_type: Backend provider type
             layer_count: Number of layers affected
             is_fallback: True if OGR was used as fallback
+            feature_count: Count already obtained by the caller (avoids a
+                second provider round-trip); computed here when omitted
         """
-        feature_count = source_layer.featureCount()
+        if feature_count is None:
+            feature_count = source_layer.featureCount()
         show_success_with_backend(provider_type, task_name, layer_count, is_fallback=is_fallback)
 
         # Only show feature count if configured to do so
