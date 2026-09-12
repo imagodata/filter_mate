@@ -64,12 +64,12 @@ def purge_stale_projects(cursor, keep_project_uuid: Optional[str] = None,
         params.append(str(keep_project_uuid))
 
     cursor.execute(
-        "SELECT project_id FROM fm_projects "
+        "SELECT project_id FROM fm_projects "  # nosec B608 - keep_clause is a literal with a ? placeholder, values bound via params
         "WHERE (project_path IS NULL OR project_path = '') "
         "AND (project_name IS NULL OR project_name = '') "
         "AND datetime(_updated_at) < datetime('now', '-' || ? || ' days')"
         + keep_clause +
-        " AND project_id != ("
+        " AND project_id != ("  # nosec B608 - same statement, placeholders only
         "   SELECT project_id FROM fm_projects "
         "   WHERE (project_path IS NULL OR project_path = '') "
         "   AND (project_name IS NULL OR project_name = '') "

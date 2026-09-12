@@ -515,7 +515,7 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         xmin, ymin, xmax, ymax = bbox
         rtree_table = f"rtree_{table}_{geom_field}".replace('"', '""')
         return (
-            f'ROWID IN (SELECT id FROM "{rtree_table}" '
+            f'ROWID IN (SELECT id FROM "{rtree_table}" '  # nosec B608 - finite floats, table name from the layer URI with quotes doubled, OGR subset string not a cursor
             f'WHERE minx <= {xmax!r} AND maxx >= {xmin!r} AND miny <= {ymax!r} AND maxy >= {ymin!r})'
         )
 
