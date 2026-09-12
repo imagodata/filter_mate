@@ -11,10 +11,27 @@ Usage:
     pytest -m integration        # Run only integration tests (requires QGIS)
     pytest tests/unit/core/      # Run only core unit tests
 """
+import pkgutil
 import sys
+import unittest.mock
 from unittest.mock import MagicMock
 
 import pytest
+
+
+# ---------------------------------------------------------------------------
+# mock.patch target resolution -- align Python 3.10 with 3.11+
+# ---------------------------------------------------------------------------
+# Many test modules register plugin packages as stubs in ``sys.modules``
+# without attaching each child as an attribute of its parent. Python 3.11+
+# resolves ``patch("pkg.mod.name")`` through ``pkgutil.resolve_name``, which
+# reads ``sys.modules`` directly, so that works. Python 3.10 still walks a
+# getattr chain from the top-level module and fails with
+# ``AttributeError: module 'pkg' has no attribute 'mod'``. Use the same
+# resolver on every version so the suite behaves identically on the CI
+# matrix (3.10 and 3.12).
+if getattr(unittest.mock, "_importer", None) is not pkgutil.resolve_name:
+    unittest.mock._importer = pkgutil.resolve_name
 
 
 # ---------------------------------------------------------------------------

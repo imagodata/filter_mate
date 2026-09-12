@@ -62,6 +62,16 @@ def _ensure_task_bridge_mocks():
     for name, mod in mocks_to_install.items():
         sys.modules.setdefault(name, mod)
 
+    # Python 3.10's ``mock.patch`` resolves dotted targets with a getattr
+    # chain from the top-level module (3.12 uses ``pkgutil.resolve_name``,
+    # which reads ``sys.modules`` directly), so every stub must also be an
+    # attribute of its parent stub.
+    for name in mocks_to_install:
+        parent_name, _, short = name.rpartition(".")
+        parent = sys.modules.get(parent_name)
+        if parent is not None and not hasattr(parent, short):
+            setattr(parent, short, sys.modules[name])
+
 
 _ensure_task_bridge_mocks()
 
