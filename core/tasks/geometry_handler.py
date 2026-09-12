@@ -292,7 +292,7 @@ class GeometryHandler:
         Returns:
             QgsVectorLayer: Simplified layer
         """
-        from ..backends.auto_optimizer import get_auto_optimization_config
+        from ..services.auto_optimizer import get_auto_optimization_config
         from ..geometry import simplify_buffer_result
         config = get_auto_optimization_config()
         return simplify_buffer_result(

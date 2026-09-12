@@ -95,3 +95,39 @@ def test_every_unguarded_package_import_is_exported():
         "Names imported from a plugin package that its __init__.py does not provide "
         "(QGIS would fail with 'cannot import name'):\n  " + "\n  ".join(missing)
     )
+
+
+def _unguarded_relative_imports_of_missing_modules():
+    """Relative imports (outside try blocks) whose target module or package does not exist."""
+    for py in sorted(_ROOT.rglob('*.py')):
+        if any(part in _SKIP_PARTS for part in py.parts):
+            continue
+        try:
+            tree = ast.parse(py.read_text(encoding='utf-8'))
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        guarded = _import_lines_inside_try(tree)
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.ImportFrom) and node.level >= 1):
+                continue
+            if node.lineno in guarded:
+                continue
+            base = py.parent
+            for _ in range(node.level - 1):
+                base = base.parent
+            target = base.joinpath(*node.module.split('.')) if node.module else base
+            if target.with_suffix('.py').exists() or (target / '__init__.py').exists():
+                continue
+            yield py.relative_to(_ROOT), node.lineno, '.' * node.level + (node.module or '')
+
+
+@pytest.mark.unit
+def test_every_unguarded_relative_import_targets_an_existing_module():
+    """Regression for PR #52: utils/type_utils.py moved to infrastructure/utils/ but
+    core/tasks/layer_management_task.py kept importing ``...utils.type_utils`` — the
+    plugin failed at add_layers with "No module named 'filter_mate.utils'"."""
+    missing = [f"{path}:{line} from {module} import ..." for path, line, module in _unguarded_relative_imports_of_missing_modules()]
+    assert not missing, (
+        "Relative imports of modules that no longer exist (QGIS would fail with 'No module named'):\n  "
+        + "\n  ".join(missing)
+    )
