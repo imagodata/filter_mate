@@ -2,6 +2,17 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [Unreleased]
+
+### Performance (first real measurement of 4.8.8)
+
+A 34 s filter on a 17-layer PostgreSQL project broke down as 21 s before the first target layer, 4 s of actual filtering and 9 s of post-processing.
+
+- PostgreSQL source statistics check: query `pg_stat_user_tables` instead of counting rows of `pg_stats`, whose per-column privilege checks scan the whole catalog (the 21 s stall on a 574-row source layer); cache the answer per table for the session.
+- FilterMate scratch layers (GEOS-safe copies, memory source layers) carry a `filterMate/internal_temp` custom property and are ignored by the `layersAdded` / `layersWillBeRemoved` handlers: adding and removing them no longer runs a `LayersManagementEngineTask` with SQLite round-trips and a full UI rebuild inside every filter.
+- psycopg2 connections use `connect_timeout` (15 s) so an unreachable address never waits the OS TCP timeout.
+- More timing lines in `filtermate.log`: `⏱ pg_connect`, `⏱ pg_ensure_stats` / `pg_direct_prepare` (when slow), `⏱ apply_subsets`, `⏱ post_filter_canvas` / `_count` / `_history` / `_zoom` / `_ui`, `⏱ layer_task_<action>`. The `⏱ layer_change` span now wraps the dockwidget method that actually reloads the widgets (it measured 0 ms before).
+
 ## [4.8.8] - 2026-09-12
 
 ### Performance (audit of 2026-09-12)

@@ -14,6 +14,15 @@ from qgis.PyQt.QtCore import QTimer
 
 from ...core.ports.qgis_port import get_qgis_factory
 from ...infrastructure.signal_utils import SignalBlocker
+
+try:
+    from ...infrastructure.perf_timer import perf_mark_start, perf_mark_end
+except ImportError:  # stubbed package in the handler test suite
+    def perf_mark_start(name):  # noqa: D103 - no-op fallback
+        return None
+
+    def perf_mark_end(name, details=None):  # noqa: D103 - no-op fallback
+        return None
 from ...infrastructure.constants import (
     QGIS_PROVIDER_POSTGRES, QGIS_PROVIDER_SPATIALITE, QGIS_PROVIDER_OGR,
     QGIS_PROVIDER_MEMORY,
@@ -172,6 +181,7 @@ def apply_pending_subset_requests(
         "FilterMate", Qgis.MessageLevel.Info
     )
     logger.info(f"finished(): Applying {len(pending_requests)} pending subset requests on main thread")
+    perf_mark_start("apply_subsets")
 
     # Log all pending requests details — promoted to QGIS log panel 2026-04-29
     # so the user can see exactly what subset is being applied per cascade
@@ -381,6 +391,7 @@ def apply_pending_subset_requests(
         logger.info(f"  📦 Applying {len(large_expressions)} large expressions with deferred processing")
         _schedule_deferred_filter_application(large_expressions, safe_set_subset_fn)
 
+    perf_mark_end("apply_subsets", f"{applied_count} layer(s) on the main thread")
     return applied_count
 
 

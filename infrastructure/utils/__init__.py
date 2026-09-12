@@ -33,6 +33,9 @@ from .validation_utils import (  # noqa: F401
     safe_get_layer_name,
     safe_get_layer_id,
     safe_get_layer_source,
+    mark_filtermate_temp_layer,
+    is_filtermate_temp_layer,
+    is_filtermate_temp_layer_id,
     # v4.1.0: Expression type detection for filtering
     is_filter_expression,
     is_display_expression,
@@ -366,6 +369,9 @@ __all__ = [
     'safe_get_layer_name',
     'safe_get_layer_id',
     'safe_get_layer_source',
+    'mark_filtermate_temp_layer',
+    'is_filtermate_temp_layer',
+    'is_filtermate_temp_layer_id',
     # Layer utils (EPIC-1 migration)
     'detect_layer_provider_type',
     'get_datasource_connexion_from_layer',

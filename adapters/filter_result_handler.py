@@ -27,8 +27,11 @@ from ..infrastructure.logging import get_app_logger
 from ..infrastructure.signal_utils import SignalBlocker
 
 try:
-    from ..infrastructure.perf_timer import perf_mark_end
+    from ..infrastructure.perf_timer import perf_mark_start, perf_mark_end
 except ImportError:  # test harnesses that stub the infrastructure package
+    def perf_mark_start(name):  # noqa: D103 - no-op fallback
+        return None
+
     def perf_mark_end(name, details=None):  # noqa: D103 - no-op fallback
         return None
 from ..config.feedback_config import should_show_message
@@ -124,11 +127,17 @@ class FilterResultHandler:
             self._clear_spatialite_cache(source_layer, task_parameters)
 
         # Refresh layers and map canvas
+        # PERF 2026-09-12: each post-filter phase is timed (⏱ post_filter_*) so a
+        # slow step shows up in filtermate.log instead of an unexplained gap.
         if self._refresh_layers_and_canvas:
+            perf_mark_start("post_filter_canvas")
             self._refresh_layers_and_canvas(source_layer)
+            perf_mark_end("post_filter_canvas")
 
         # Get task metadata
+        perf_mark_start("post_filter_count")
         feature_count = source_layer.featureCount()
+        perf_mark_end("post_filter_count", source_layer.name())
         provider_type = task_parameters["infos"].get("layer_provider_type", "unknown")
         layer_count = len(task_parameters.get("task", {}).get("layers", [])) + 1
 
@@ -137,12 +146,14 @@ class FilterResultHandler:
         display_backend, is_fallback = self._determine_backend(task_parameters, provider_type)
 
         # Handle filter history based on task type
+        perf_mark_start("post_filter_history")
         if task_name == 'filter':
             if self._push_filter_to_history:
                 self._push_filter_to_history(source_layer, task_parameters, feature_count, provider_type, layer_count)
         elif task_name == 'reset':
             if self._clear_filter_history:
                 self._clear_filter_history(source_layer, task_parameters)
+        perf_mark_end("post_filter_history")
 
         # Update undo/redo button states
         if self._update_undo_redo_buttons:
@@ -156,7 +167,9 @@ class FilterResultHandler:
         self._update_backend_indicator(task_parameters, provider_type, display_backend, is_fallback)
 
         # Zoom to filtered extent (global flag or per-layer is_tracking)
+        perf_mark_start("post_filter_zoom")
         self._handle_auto_zoom(source_layer, task_parameters)
+        perf_mark_end("post_filter_zoom")
 
         # Sync PROJECT_LAYERS between app and dockwidget
         self._sync_project_layers()
@@ -172,6 +185,7 @@ class FilterResultHandler:
         dockwidget = self._get_dockwidget() if self._get_dockwidget else None
         if dockwidget:
             dockwidget._suppress_tracking_zoom = True
+        perf_mark_start("post_filter_ui")
         try:
             # v2.8.15: CRITICAL FIX - Ensure current_layer combo and exploring panel stay synchronized
             # v3.0.10: Use restored_layer directly to avoid issues if current_layer is modified by async signals
@@ -179,6 +193,7 @@ class FilterResultHandler:
         finally:
             if dockwidget:
                 dockwidget._suppress_tracking_zoom = False
+            perf_mark_end("post_filter_ui")
 
         # v2.8.13: CRITICAL - Invalidate expression cache after filtering
         self._invalidate_expression_cache(source_layer, task_parameters)

@@ -880,6 +880,9 @@ def prepare_ogr_source_geom(
     # FIX v4.1.1: Register layer for cleanup after filtering completes
     if layer and layer.isValid() and layer.providerType() == 'memory':
         logger.debug("[OGR]   Adding memory layer to project (prevent GC)")
+        # PERF 2026-09-12: marker read by FilterMate's layersAdded/WillBeRemoved
+        # handlers so this scratch layer never triggers a layer-management task
+        layer.setCustomProperty('filterMate/internal_temp', True)
         QgsProject.instance().addMapLayer(layer, addToLegend=False)
         register_temp_layer(layer.id())  # Register for cleanup
 

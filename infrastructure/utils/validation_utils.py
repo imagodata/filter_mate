@@ -691,3 +691,49 @@ def safe_get_layer_id(layer) -> Optional[str]:
 def safe_get_layer_source(layer) -> Optional[str]:
     """Safely get layer source, returns None if layer is invalid."""
     return layer.source()
+
+
+# =============================================================================
+# FilterMate temporary layers (PERF 2026-09-12)
+# =============================================================================
+# Memory layers the plugin adds to the project during a filter (GEOS-safe
+# copies, reprojected/centroid source layers) are registered with
+# addToLegend=False and removed when the task ends. Without a marker, each one
+# fired layersAdded/layersWillBeRemoved and FilterMate ran a full
+# LayersManagementEngineTask (SQLite round-trips + complete UI rebuild) for
+# its own scratch layer, in the middle of every filter.
+
+FILTERMATE_TEMP_LAYER_PROPERTY = 'filterMate/internal_temp'
+
+
+def mark_filtermate_temp_layer(layer) -> bool:
+    """Flag a layer as a FilterMate scratch layer (see FILTERMATE_TEMP_LAYER_PROPERTY)."""
+    try:
+        layer.setCustomProperty(FILTERMATE_TEMP_LAYER_PROPERTY, True)
+        return True
+    except (RuntimeError, AttributeError):
+        return False
+
+
+def is_filtermate_temp_layer(layer) -> bool:
+    """True when ``layer`` carries the FilterMate scratch-layer marker."""
+    if layer is None:
+        return False
+    try:
+        value = layer.customProperty(FILTERMATE_TEMP_LAYER_PROPERTY, False)
+    except (RuntimeError, AttributeError):
+        return False
+    return value is True or value in ('true', 'True', 1)
+
+
+def is_filtermate_temp_layer_id(layer_id: str, project=None) -> bool:
+    """True when the project layer with this id is a FilterMate scratch layer."""
+    if not layer_id:
+        return False
+    try:
+        if project is None:
+            from qgis.core import QgsProject
+            project = QgsProject.instance()
+        return is_filtermate_temp_layer(project.mapLayer(layer_id))
+    except Exception:
+        return False

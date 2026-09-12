@@ -526,8 +526,18 @@ def execute_filter_action_postgresql_direct(
     start_time = time.time()
 
     # Ensure source table has statistics for query optimization
+    # PERF 2026-09-12: both steps are timed. A 21 s stall was measured right here
+    # on a 574-row source layer (pg_stats catalog scan) and was invisible in the
+    # log because nothing between "Small dataset" and "queued" reported a time.
     connexion = get_connection_fn()
+    connect_elapsed = time.time() - start_time
     ensure_stats_fn(connexion, source_schema, source_table, source_geom)
+    stats_elapsed = time.time() - start_time - connect_elapsed
+    if connect_elapsed > 0.25 or stats_elapsed > 0.25:
+        logger.info(
+            f"⏱ pg_direct_prepare: connection {connect_elapsed * 1000:.0f} ms, "
+            f"table stats {stats_elapsed * 1000:.0f} ms ({source_schema}.{source_table})"
+        )
 
     try:
         # Extract WHERE clause from SELECT statement
