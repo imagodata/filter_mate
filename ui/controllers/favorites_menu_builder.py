@@ -11,7 +11,7 @@ the same names back.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Callable, List, Protocol
+from typing import TYPE_CHECKING, Any, List, Protocol
 
 try:
     from qgis.PyQt.QtWidgets import QMenu, QWidget
@@ -107,6 +107,7 @@ class MenuActionsProvider(Protocol):
     """
 
     def get_menu_actions(self, context: MenuActionsContext) -> List[MenuActionSpec]: ...
+
 
 if TYPE_CHECKING:
     from .favorites_controller import FavoritesController

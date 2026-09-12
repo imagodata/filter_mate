@@ -13,6 +13,16 @@ A 34 s filter on a 17-layer PostgreSQL project broke down as 21 s before the fir
 - psycopg2 connections use `connect_timeout` (15 s) so an unreachable address never waits the OS TCP timeout.
 - More timing lines in `filtermate.log`: `⏱ pg_connect`, `⏱ pg_ensure_stats` / `pg_direct_prepare` (when slow), `⏱ apply_subsets`, `⏱ post_filter_canvas` / `_count` / `_history` / `_zoom` / `_ui`, `⏱ layer_task_<action>`. The `⏱ layer_change` span now wraps the dockwidget method that actually reloads the widgets (it measured 0 ms before).
 
+### Code quality (general audit of 2026-09-12)
+
+- JSON config tree (`ui/widgets/json_view/datatypes.py`): drop the four Python 2 `unicode` checks. They only worked because QGIS injects `builtins.unicode = str` in its own `qgis/utils.py`; outside QGIS, `match_type()` raised `NameError` on any non-string value. The corresponding per-file flake8 exemption is removed.
+- Merge the root `utils/` package (`deprecation.py`, `type_utils.py`) into `infrastructure/utils/`, where the other shared helpers already live. Two importers updated.
+- Remove the dead imports flagged by flake8 in `favorites_controller.py`, `favorites_menu_builder.py` and `favorites_service.py`; clean the blank-line and trailing-whitespace leftovers of the favorites refactor (61 flake8 findings, now 0).
+- Test loaders: stop passing `submodule_search_locations=[]` to `spec_from_file_location` in three conftest/test files. It turned the loaded module into a package whose spec parent disagreed with `__package__`, which Python reports as `DeprecationWarning: __package__ != __spec__.parent` on every relative import (82 warnings, now 0).
+- CI: the `Tests` workflow had been red on Python 3.10 since at least 4.8.7 (11 failures, 74 errors, green on 3.12). Cause: Python 3.10's `mock.patch` resolves dotted targets by walking attributes from the top-level module, and the test stubs register child modules in `sys.modules` without attaching them to their parent. The root `tests/conftest.py` now installs `pkgutil.resolve_name` as the mock resolver, which is what Python 3.11+ uses; the matrix is green on both versions.
+- CI: the `Deploy Documentation` workflow still ran `npm run build` for a Docusaurus site that was replaced by the static `website/` folder, so it failed on every push to main and the published site was last updated by hand on 2026-04-07. It now publishes `website/` as-is to `gh-pages`.
+- Repository hygiene: delete `debug_gpkg_project.py` (diagnostic script with a hard-coded Windows path, flagged for removal by the 2026-04-22 audit) and move `CHECKPOINT_2026_04_28.md` under `docs/favorites/`.
+
 ## [4.8.8] - 2026-09-12
 
 ### Performance (audit of 2026-09-12)

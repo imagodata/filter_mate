@@ -83,7 +83,6 @@ _module_path = _project_root / "ui" / "managers" / "dockwidget_signal_manager.py
 _spec = importlib.util.spec_from_file_location(
     "filter_mate.ui.managers.dockwidget_signal_manager",
     str(_module_path),
-    submodule_search_locations=[],
 )
 _module = importlib.util.module_from_spec(_spec)
 _module.__package__ = "filter_mate.ui.managers"

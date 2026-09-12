@@ -13,7 +13,7 @@ import logging
 
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtWidgets import (
-    QMenu, QInputDialog, QMessageBox, QFileDialog,
+    QInputDialog, QMessageBox, QFileDialog,
     QLabel
 )
 from qgis.PyQt.QtGui import QCursor
@@ -27,11 +27,7 @@ from ...core.domain.exceptions import (
 from .base_controller import BaseController
 from .favorites_spatial_helpers import (
     exact_filtered_feature_count,
-    favorite_matches_current_layer,
     layer_signature_for,
-    resolve_favorite_source_layer,
-    resolve_remote_layer_entry,
-    should_downgrade_single_selection,
 )
 
 if TYPE_CHECKING:
@@ -39,10 +35,7 @@ if TYPE_CHECKING:
     from ...core.services.favorites_service import FilterFavorite
     from ...core.domain.favorites_manager import FavoritesManager
 
-from ..styles.favorites_styles import (
-    FAVORITES_STYLES,
-    build_indicator_stylesheet,
-)
+from ..styles.favorites_styles import build_indicator_stylesheet
 from .favorites_extension_bridge import FavoritesExtensionBridge
 from .favorites_spatial_handler import FavoritesSpatialHandler
 from .favorites_menu_builder import (
@@ -705,8 +698,6 @@ class FavoritesController(BaseController):
             "FilterMateApp to publish one via sync_with_dockwidget_manager()."
         )
 
-    
-
     def _get_indicator_style(self, state: str) -> str:
         """Get stylesheet for indicator state."""
         return build_indicator_stylesheet(state)
@@ -903,8 +894,6 @@ class FavoritesController(BaseController):
             logger.error(f"Failed to create favorite: {e}")
             return False
 
-    
-
     def _apply_favorite_expression(self, favorite: 'FilterFavorite') -> bool:
         """Apply a favorite by pushing its saved subset strings directly.
 
@@ -930,28 +919,6 @@ class FavoritesController(BaseController):
             import traceback
             logger.debug(traceback.format_exc())
             return False
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
 
     def _show_info(self, message: str) -> None:
         """Push an info to the QGIS message bar (transient, non-blocking)."""
@@ -1037,8 +1004,6 @@ class FavoritesController(BaseController):
 
         self._show_warning(self.tr("Failed to copy to global favorites"))
         return False
-
-    
 
     def _backup_to_project(self) -> None:
         """Backup favorites to the QGIS project file."""

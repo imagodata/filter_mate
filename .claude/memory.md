@@ -1,6 +1,24 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-09-12] Audit général post-4.8.8 → PR #52 `claude/audit-cleanup`
+Décisions à connaître :
+- `unicode` retiré du visualiseur JSON (`ui/widgets/json_view/datatypes.py`) : il ne marchait que parce
+  que `qgis/utils.py` fait `builtins.unicode = str`. Ne jamais réintroduire de compat Python 2.
+- Le paquet racine `utils/` n'existe plus : `deprecation.py` et `type_utils.py` vivent dans
+  `infrastructure/utils/`.
+- Lint de référence : `python3 -m flake8` avec `.flake8` (pyflakes brut ignore les `noqa`). Plugin à 0
+  constat ; les tests ne sont pas couverts par la CI flake8.
+- Chargeurs de tests : ne pas passer `submodule_search_locations=[]` à `spec_from_file_location`
+  (le module devient un paquet dont le parent de spec diffère de `__package__` → DeprecationWarning à
+  chaque import relatif).
+- `tests/conftest.py` force `unittest.mock._importer = pkgutil.resolve_name` : sans cela la CI 3.10
+  échoue (stubs `sys.modules` sans attribut sur le parent). Garder ce shim tant que 3.10 est dans la matrice.
+- `website/` est un site statique publié tel quel sur `gh-pages` par `deploy-docs.yml` (plus de npm).
+- Non traité, à décider : `video_automation/` et `video_toolkit/` (copies périmées d'un autre projet,
+  230 fichiers) et `_bmad/` restent dans le dépôt ; couverture 29 %, cœur (dockwidget, filter_task,
+  integration) quasi non testé.
+
 ## [2026-09-12] Audit perfs + correctifs sur branche `claude/perf-audit-fixes` (non fusionnée)
 Audit statique complet (rapport : https://claude.ai/code/artifact/c7bf3a2c-93cc-4cbe-98d4-620c1169557a),
 puis correctifs en autopilot, revue adversariale Opus traitée. Décisions à connaître :

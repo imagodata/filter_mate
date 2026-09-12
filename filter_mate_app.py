@@ -45,7 +45,7 @@ from .infrastructure.utils import (
 from .infrastructure.database.sql_utils import safe_set_subset_string
 from .infrastructure.perf_timer import perf_mark_start, perf_mark_end
 from .infrastructure.field_utils import cleanup_corrupted_layer_filters
-from .utils.type_utils import return_typed_value
+from .infrastructure.utils.type_utils import return_typed_value
 from .infrastructure.feedback import (
     show_backend_info, show_success_with_backend,
     show_info, show_warning, show_error

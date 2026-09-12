@@ -61,6 +61,7 @@ logger = logging.getLogger('FilterMate.Export')
 # the streaming module no longer maintains its own.
 # =============================================================================
 
+
 @dataclass(frozen=True)
 class _FormatSpec:
     """One canonical entry in the export format registry.

@@ -10,16 +10,13 @@ Pattern: Strangler Fig - Gradual extraction
 """
 
 import logging
-from typing import Dict, List, Optional, Any, TYPE_CHECKING
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
 try:
     from qgis.PyQt.QtCore import pyqtSignal, QObject
 except ImportError:
     from PyQt6.QtCore import pyqtSignal, QObject
-
-if TYPE_CHECKING:
-    from qgis.core import QgsVectorLayer
 
 # Export FilterFavorite from domain
 from ..domain.exceptions import (
@@ -197,16 +194,12 @@ class FavoritesService(QObject):
                 "check earlier logs for FavoritesManager import errors."
             )
 
-    
-
     @property
     def count(self) -> int:
         """Get the number of favorites."""
         if not self._favorites_manager:
             return 0
         return self._favorites_manager.count
-
-    
 
     # ─────────────────────────────────────────────────────────────────
     # CRUD Operations
@@ -436,13 +429,9 @@ class FavoritesService(QObject):
 
         return self._favorites_manager.search_favorites(query)
 
-    
-
     # ─────────────────────────────────────────────────────────────────
     # Apply Operations
     # ─────────────────────────────────────────────────────────────────
-
-    
 
     def mark_favorite_used(self, favorite_id: str) -> bool:
         """
@@ -467,8 +456,6 @@ class FavoritesService(QObject):
     # ─────────────────────────────────────────────────────────────────
     # Create from Current State
     # ─────────────────────────────────────────────────────────────────
-
-    
 
     # ─────────────────────────────────────────────────────────────────
     # Import/Export
@@ -782,8 +769,6 @@ class FavoritesService(QObject):
             logger.error(f"Error saving favorites: {e}")
             raise FavoritePersistenceError("save", e) from e
 
-    
-
     # ─────────────────────────────────────────────────────────────────
     # Project File (.qgz) Backup/Restore
     # ─────────────────────────────────────────────────────────────────
@@ -967,8 +952,6 @@ class FavoritesService(QObject):
         if not self._favorites_manager:
             return []
         return self._favorites_manager.get_global_favorites()
-
-    
 
     def make_favorite_global(self, favorite_id: str) -> bool:
         """

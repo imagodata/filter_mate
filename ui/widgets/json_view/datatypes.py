@@ -130,10 +130,10 @@ class NoneType(DataType):
 
 
 class StrType(DataType):
-    """Strings and unicodes"""
+    """Strings."""
 
     def matches(self, data):
-        return isinstance(data, str) or isinstance(data, unicode)  # noqa: F821
+        return isinstance(data, str)
 
 
 class ColorType(DataType):
@@ -559,7 +559,7 @@ class UrlType(DataType):
     REGEX = re.compile(r'(?:https?):\/\/|(?:file):\/\\/')
 
     def matches(self, data):
-        if isinstance(data, str) or isinstance(data, unicode):  # noqa: F821
+        if isinstance(data, str):
             if self.REGEX.match(data) is not None:
                 return True
         return False
@@ -579,7 +579,7 @@ class FilepathType(DataType):
     NEGATIVE_REGEX = re.compile(r'(\.png)|(\.jpg)|(\.jpeg)|(\.gif)$')
 
     def matches(self, data):
-        if isinstance(data, str) or isinstance(data, unicode):  # noqa: F821
+        if isinstance(data, str):
             if self.POSITIVE_REGEX.search(data) is not None:
                 if self.NEGATIVE_REGEX.search(data) is None:
                     return True
@@ -644,7 +644,7 @@ class FilepathTypeImages(DataType):
     REGEX = re.compile(r'(\.png)|(\.jpg)|(\.jpeg)|(\.gif)$')
 
     def matches(self, data):
-        if isinstance(data, str) or isinstance(data, unicode):  # noqa: F821
+        if isinstance(data, str):
             if self.REGEX.search(data) is not None:
                 return True
         return False

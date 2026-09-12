@@ -1,13 +1,17 @@
 name: Deploy Documentation
 
+# `website/` is a static site (index.html, roadmap.html, tutorial scripts,
+# diagrams). It is published as-is to the `gh-pages` branch, which GitHub
+# Pages serves at https://imagodata.github.io/filter_mate/. The previous
+# version of this workflow ran an `npm run build` that no longer exists and
+# failed on every push to main since the Docusaurus site was replaced.
+
 on:
   push:
     branches:
       - main
     paths:
       - 'website/**'
-      - 'docs/**'
-      - 'README.md'
   pull_request:
     branches:
       - main
@@ -17,47 +21,30 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Full history for better git metadata
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: website/package.json
-      
-      - name: Install dependencies
+
+      - name: Check the site entry points exist
         working-directory: website
-        run: npm install
-      
-      - name: Build website
-        working-directory: website
-        run: npm run build
-        env:
-          NODE_ENV: production
-      
+        run: test -f index.html && test -f roadmap.html
+
       - name: Add .nojekyll file
-        working-directory: website/build
+        working-directory: website
         run: touch .nojekyll
-      
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website/build
-          cname: false  # Set to your custom domain if you have one
+          publish_dir: ./website
+          exclude_assets: 'extract_diagrams.py,*.md'
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy documentation ${{ github.sha }}'

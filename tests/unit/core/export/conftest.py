@@ -30,7 +30,7 @@ def _load_file_as(module_name: str, file_path: str, package: str):
     if module_name in sys.modules and not isinstance(sys.modules[module_name], MagicMock):
         return sys.modules[module_name]
     spec = importlib.util.spec_from_file_location(
-        module_name, file_path, submodule_search_locations=[],
+        module_name, file_path,
     )
     module = importlib.util.module_from_spec(spec)
     module.__package__ = package

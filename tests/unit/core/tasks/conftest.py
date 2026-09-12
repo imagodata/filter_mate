@@ -255,7 +255,6 @@ def _setup_handler_mocks():
         spec = importlib.util.spec_from_file_location(
             fm_module_name,
             file_path,
-            submodule_search_locations=[],
         )
         if spec and spec.loader:
             module = importlib.util.module_from_spec(spec)

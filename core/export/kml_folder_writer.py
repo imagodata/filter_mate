@@ -16,7 +16,10 @@ try:
     from defusedxml.ElementTree import parse as _xml_parse
     from xml.etree import ElementTree as ET  # nosec B405 - used only for tree construction/serialization (Element/SubElement/tostring/indent); untrusted parsing goes through defusedxml's parse above
 except ImportError:
-    from xml.etree import ElementTree as ET  # nosec B405 - used only for tree construction/serialization (Element/SubElement/tostring/indent); untrusted parsing goes through _xml_parse, aliased to ET.parse only as a last-resort fallback when defusedxml is unavailable
+    # nosec B405 - used only for tree construction/serialization (Element/SubElement/tostring);
+    # untrusted parsing goes through _xml_fromstring, aliased to ET.fromstring only as a
+    # last-resort fallback when defusedxml is unavailable
+    from xml.etree import ElementTree as ET  # nosec B405
     _xml_parse = ET.parse
 
 logger = logging.getLogger(__name__)

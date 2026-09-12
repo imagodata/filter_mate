@@ -213,8 +213,6 @@ class FavoritesMigrationService:
     # Global Favorites
     # ─────────────────────────────────────────────────────────────────
 
-    
-
     def get_global_favorites_count(self) -> int:
         """Get count of global favorites."""
         if not self._db_path:

@@ -100,10 +100,6 @@ class PublishFavoritesDialog(QDialog if HAS_QT else object):
             self._populate_favorites()
             self._apply_default_metadata_prefill()
 
-    
-
-    
-
     def _apply_default_metadata_prefill(self) -> None:
         """Prefill author / license / homepage fields from config when the
         user hasn't already put something there (existing collection
