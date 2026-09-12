@@ -371,7 +371,7 @@ class FilterResultHandler:
             task_parameters: Original task parameters; used to discover
                 cascade target layers via ``task["layers"]``.
         """
-        from .auto_zoom import auto_zoom_to_filtered
+        from .auto_zoom import auto_zoom_to_filtered, cascade_zoom_scope
 
         # H1 (audit 2026-04-29): the filter task captured a subset-change
         # token at scheduling time. If a favorite has been applied between
@@ -383,7 +383,16 @@ class FilterResultHandler:
 
         layers = [source_layer]
 
-        if task_parameters:
+        # PERF 2026-09-12: after a spatial cascade the targets sit around the
+        # source features; their extents cost 2.2-9.8 s of provider queries on
+        # the main thread and only widened the view. Zoom to the source layer.
+        try:
+            source_is_geographic = bool(source_layer.crs().isGeographic())
+        except (RuntimeError, AttributeError):
+            source_is_geographic = False
+        source_only, grow_by = cascade_zoom_scope(task_parameters, source_is_geographic)
+
+        if task_parameters and not source_only:
             project = QgsProject.instance()
             for entry in task_parameters.get("task", {}).get("layers", []) or []:
                 if not isinstance(entry, dict):
@@ -405,6 +414,7 @@ class FilterResultHandler:
             dockwidget=dockwidget,
             iface_obj=iface_obj,
             expected_token=expected_token,
+            grow_by=grow_by,
         )
 
     def _sync_project_layers(self) -> None:

@@ -4321,16 +4321,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try:
             MAX_FEATURES = 10000
             layer.updateExtents()
-            # PERF 2026-09-12: the PostgreSQL provider computes the filtered extent
-            # server-side (ST_Extent under the subset) in one round trip. Streaming
-            # up to 10 000 geometries per layer to rebuild it here cost 2.2 s of
-            # ⏱ post_filter_zoom on 18 layers. Estimated metadata is the one case
-            # where extent() is not exact: keep the feature scan for it.
-            try:
-                if layer.providerType() == 'postgres' and 'estimatedmetadata=true' not in (layer.source() or '').lower():
-                    return layer.extent()
-            except (RuntimeError, AttributeError):
-                pass
+            # PERF 2026-09-12: measured — asking the PostgreSQL provider for the
+            # server-side filtered extent here (ST_Extent under an EXISTS subset)
+            # took 9.8 s on 17 layers against 2.2 s for this feature scan, so the
+            # scan stays. The real saving is upstream: after a spatial cascade the
+            # zoom only needs the source layer (see FilterResultHandler._handle_auto_zoom).
             if layer.featureCount() > MAX_FEATURES: return layer.extent()
 
             extent, count = QgsRectangle(), 0

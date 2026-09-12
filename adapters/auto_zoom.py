@@ -85,6 +85,47 @@ def _is_tracking(layer_id: str, project_layers: Mapping[str, Any]) -> bool:
     return bool(exploring.get("is_tracking", False))
 
 
+# Predicates whose targets may lie far outside the source features: keep the
+# union of every filtered layer for them. Names are matched by prefix because
+# the UI stores them as "Intersect", "Contain", "Disjoint", ...
+_UNBOUNDED_PREDICATE_PREFIXES = ('disjoint', 'contain')
+
+
+def cascade_zoom_scope(task_parameters: Optional[Mapping[str, Any]], source_crs_is_geographic: bool = False):
+    """
+    Decide which layers the post-filter auto-zoom needs.
+
+    PERF 2026-09-12: computing the union extent of 17 PostgreSQL target
+    layers cost 2.2 s (feature scan) to 9.8 s (server-side ST_Extent) on the
+    main thread after every filter. After a spatial cascade the targets were
+    selected *around the source features*, so the source layer's own filtered
+    extent (a handful of features) is the view the user asked for.
+
+    Returns:
+        (source_only, margin): ``source_only`` is True when the zoom can be
+        computed from the source layer alone; ``margin`` is the buffer
+        distance to grow the extent by (layer units, projected CRS only).
+    """
+    filtering = (task_parameters or {}).get("filtering") or {}
+    if not isinstance(filtering, Mapping) or not filtering.get("has_geometric_predicates"):
+        return False, 0.0
+    predicates = filtering.get("geometric_predicates") or []
+    names = [str(p).strip().lower() for p in predicates if p]
+    if not names:
+        return False, 0.0
+    if any(name.startswith(_UNBOUNDED_PREDICATE_PREFIXES) for name in names):
+        return False, 0.0
+
+    margin = 0.0
+    if filtering.get("has_buffer_value") and not filtering.get("buffer_value_property") \
+            and not filtering.get("buffer_value_expression") and not source_crs_is_geographic:
+        try:
+            margin = max(0.0, float(filtering.get("buffer_value") or 0.0))
+        except (TypeError, ValueError):
+            margin = 0.0
+    return True, margin
+
+
 def _layer_extent(layer: QgsVectorLayer, dockwidget: Any = None) -> Optional[QgsRectangle]:
     try:
         layer.updateExtents()
@@ -113,6 +154,7 @@ def auto_zoom_to_filtered(
     dockwidget: Any = None,
     iface_obj: Any = None,
     expected_token: Optional[int] = None,
+    grow_by: float = 0.0,
 ) -> bool:
     """Zoom the map canvas to the union extent of filtered layers.
 
@@ -132,6 +174,8 @@ def auto_zoom_to_filtered(
             newer subset (typically a favorite apply) already drove the
             canvas to a different extent and this stale zoom would clobber
             it.
+        grow_by: Distance (layer units) to grow the final extent by, e.g. the
+            buffer of a spatial cascade when only the source layer is passed.
 
     Returns:
         True when a zoom was performed, False when only a refresh was issued
@@ -187,6 +231,9 @@ def auto_zoom_to_filtered(
     if union.isEmpty():
         canvas.refresh()
         return False
+
+    if grow_by and grow_by > 0:
+        union.grow(grow_by)
 
     canvas.zoomToFeatureExtent(union)
     logger.debug(
