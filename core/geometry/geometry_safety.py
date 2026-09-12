@@ -25,6 +25,7 @@ import logging
 from typing import Optional, List
 
 from qgis.core import (
+    QgsFeatureRequest,
     QgsGeometry,
     QgsWkbTypes,
     QgsVectorLayer,
@@ -443,6 +444,37 @@ def repair_geometry(geom: Optional[QgsGeometry]) -> Optional[QgsGeometry]:
         pass
 
     return None
+
+
+def layer_has_invalid_geometries(layer: QgsVectorLayer, max_features: Optional[int] = None) -> bool:
+    """
+    Return True as soon as one feature of ``layer`` has a GEOS-invalid geometry.
+
+    PERF 2026-09-12: the OGR spatial selection copied EVERY target layer
+    (up to 50 000 features) into a repaired memory layer before running
+    selectbylocation, for every filter, whether or not any geometry was
+    invalid. A validity scan in C++ (no attributes, early exit) costs a
+    fraction of that copy and lets the copy be skipped on clean data.
+    """
+    if layer is None:
+        return False
+    try:
+        request = QgsFeatureRequest()
+        request.setSubsetOfAttributes([])  # geometry only
+        checked = 0
+        for feature in layer.getFeatures(request):
+            if max_features is not None and checked >= max_features:
+                break
+            checked += 1
+            geometry = feature.geometry()
+            if geometry is None or geometry.isNull() or geometry.isEmpty():
+                continue
+            if not geometry.isGeosValid():
+                return True
+        return False
+    except Exception as e:
+        logger.debug(f"layer_has_invalid_geometries: scan failed ({e}), assuming invalid geometries")
+        return True
 
 
 def create_geos_safe_layer(

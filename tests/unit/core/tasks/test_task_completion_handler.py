@@ -12,7 +12,7 @@ the cascade silently looked like a no-op.
 
 The fix mirrors the throttle already used in
 `ParallelFilterExecutor._filter_sequential`: track the previous layer's DB
-path and sleep 0.2/0.3/0.5s when consecutive layers share the same file.
+path; consecutive layers of the same file are applied under a frozen canvas.
 """
 import sys
 import types
@@ -133,103 +133,92 @@ class TestLayerDatabasePath:
 # apply_pending_subset_requests: throttle on shared SQLite
 # ---------------------------------------------------------------------------
 
-class TestApplyPendingThrottle:
-    """The cascade's main fix: pause between consecutive applies on the
-    same SQLite file so the previous setSubsetString+reload releases its
-    file lock before the next one opens a new connection."""
+class TestApplyPendingSharedSqlite:
+    """PERF 2026-09-12: the fixed 0.2/0.3/0.5 s pauses between layers of the
+    same SQLite file are gone. The canvas is frozen for the whole apply loop
+    (no redraw can hold the file between two applies) and a lock error on a
+    shared file is retried once after a short pause."""
 
-    def test_no_sleep_for_single_layer(self):
-        layer = _make_layer("cables", "dbname='/data/server.sqlite'")
+    def _shared_layers(self, count):
+        return [_make_layer(f"l{i}", "dbname='/data/server.sqlite'") for i in range(count)]
+
+    def test_no_fixed_pause_between_shared_layers(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        layers = self._shared_layers(12)
         safe_set = MagicMock(return_value=True)
+        with patch("time.sleep") as mock_sleep:
+            applied = apply_pending_subset_requests(
+                [(l, f"fid IN ({i})") for i, l in enumerate(layers)], safe_set)
+        mock_sleep.assert_not_called()
+        assert applied == 12
+
+    def test_canvas_frozen_around_the_loop(self, monkeypatch):
+        fake_iface = MagicMock()
+        canvas = fake_iface.mapCanvas.return_value
+        monkeypatch.setattr(_tch, "iface", fake_iface)
+        layers = self._shared_layers(3)
+        calls = []
+        canvas.freeze.side_effect = lambda flag: calls.append(("freeze", flag))
+        safe_set = MagicMock(side_effect=lambda *_: calls.append(("apply", None)) or True)
+
+        apply_pending_subset_requests([(l, "1") for l in layers], safe_set)
+
+        assert calls[0] == ("freeze", True)
+        assert calls[-1] == ("freeze", False)
+        assert calls.count(("apply", None)) == 3
+        canvas.refresh.assert_called_once()
+
+    def test_single_request_does_not_freeze(self, monkeypatch):
+        fake_iface = MagicMock()
+        monkeypatch.setattr(_tch, "iface", fake_iface)
+        apply_pending_subset_requests([(_make_layer("solo", "dbname='/data/a.sqlite'"), "1")],
+                                      MagicMock(return_value=True))
+        fake_iface.mapCanvas.return_value.freeze.assert_not_called()
+
+    def test_lock_error_on_shared_file_is_retried_once(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        first, second = self._shared_layers(2)
+        error = MagicMock()
+        error.message.return_value = "OGR error: sqlite3_step(): unable to open database file"
+        second.error.return_value = error
+        outcomes = {second.id(): [False, True]}
+
+        def safe_set(layer, expr):
+            queue = outcomes.get(layer.id())
+            return queue.pop(0) if queue else True
 
         with patch("time.sleep") as mock_sleep:
-            apply_pending_subset_requests([(layer, "fid IN (1, 2)")], safe_set)
+            applied = apply_pending_subset_requests([(first, "1"), (second, "2")], safe_set)
 
+        assert applied == 2
+        mock_sleep.assert_called_once_with(0.3)
+
+    def test_lock_error_on_first_layer_of_a_file_is_not_retried(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        a = _make_layer("a", "dbname='/data/a.sqlite'")
+        b = _make_layer("b", "dbname='/data/b.sqlite'")
+        error = MagicMock()
+        error.message.return_value = "database is locked"
+        b.error.return_value = error
+        safe_set = MagicMock(side_effect=lambda layer, expr: layer is a)
+
+        with patch("time.sleep") as mock_sleep:
+            applied = apply_pending_subset_requests([(a, "1"), (b, "2")], safe_set)
+
+        assert applied == 1
         mock_sleep.assert_not_called()
 
-    def test_no_sleep_for_distinct_databases(self):
-        layer_a = _make_layer("cables", "dbname='/data/a.sqlite'")
-        layer_b = _make_layer("ducts", "dbname='/data/b.sqlite'")
-        safe_set = MagicMock(return_value=True)
+    def test_unrelated_failure_is_not_retried(self, monkeypatch):
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        first, second = self._shared_layers(2)
+        error = MagicMock()
+        error.message.return_value = "syntax error near IN"
+        second.error.return_value = error
+        safe_set = MagicMock(side_effect=lambda layer, expr: layer is first)
 
         with patch("time.sleep") as mock_sleep:
-            apply_pending_subset_requests(
-                [(layer_a, "fid IN (1)"), (layer_b, "fid IN (2)")],
-                safe_set,
-            )
+            applied = apply_pending_subset_requests([(first, "1"), (second, "2")], safe_set)
 
+        assert applied == 1
         mock_sleep.assert_not_called()
-
-    def test_short_delay_for_2_to_5_shared_layers(self):
-        # 3 layers in the same SQLite → 0.2s pause between consecutive ones.
-        layers = [
-            _make_layer(f"l{i}", "dbname='/data/server.sqlite'")
-            for i in range(3)
-        ]
-        safe_set = MagicMock(return_value=True)
-
-        with patch("time.sleep") as mock_sleep:
-            apply_pending_subset_requests(
-                [(l, f"fid IN ({i})") for i, l in enumerate(layers)],
-                safe_set,
-            )
-
-        # 2 inter-layer pauses (between layer0→1 and layer1→2).
-        assert mock_sleep.call_count == 2
-        for call in mock_sleep.call_args_list:
-            assert call.args[0] == 0.2
-
-    def test_medium_delay_for_6_to_10_shared_layers(self):
-        # 8 layers (the user's exact case) → 0.3s pause.
-        layers = [
-            _make_layer(f"l{i}", "dbname='/data/server.sqlite'")
-            for i in range(8)
-        ]
-        safe_set = MagicMock(return_value=True)
-
-        with patch("time.sleep") as mock_sleep:
-            apply_pending_subset_requests(
-                [(l, f"fid IN ({i})") for i, l in enumerate(layers)],
-                safe_set,
-            )
-
-        assert mock_sleep.call_count == 7
-        for call in mock_sleep.call_args_list:
-            assert call.args[0] == 0.3
-
-    def test_long_delay_for_more_than_10_shared_layers(self):
-        layers = [
-            _make_layer(f"l{i}", "dbname='/data/server.sqlite'")
-            for i in range(12)
-        ]
-        safe_set = MagicMock(return_value=True)
-
-        with patch("time.sleep") as mock_sleep:
-            apply_pending_subset_requests(
-                [(l, f"fid IN ({i})") for i, l in enumerate(layers)],
-                safe_set,
-            )
-
-        assert mock_sleep.call_count == 11
-        for call in mock_sleep.call_args_list:
-            assert call.args[0] == 0.5
-
-    def test_throttle_resets_when_layer_switches_database(self):
-        # a, a, b, a — only the second 'a' gets a sleep (after the first 'a').
-        # Then 'b' breaks the run, and the next 'a' shouldn't sleep because
-        # the previous DB was 'b', not 'a'.
-        a1 = _make_layer("a1", "dbname='/data/a.sqlite'")
-        a2 = _make_layer("a2", "dbname='/data/a.sqlite'")
-        b1 = _make_layer("b1", "dbname='/data/b.sqlite'")
-        a3 = _make_layer("a3", "dbname='/data/a.sqlite'")
-        safe_set = MagicMock(return_value=True)
-
-        with patch("time.sleep") as mock_sleep:
-            apply_pending_subset_requests(
-                [(a1, "1"), (a2, "2"), (b1, "3"), (a3, "4")],
-                safe_set,
-            )
-
-        # Only one sleep: between a1 and a2. b1 is a different DB → no sleep.
-        # a3 follows b1 (different DB) → no sleep.
-        assert mock_sleep.call_count == 1
+        assert safe_set.call_count == 2
