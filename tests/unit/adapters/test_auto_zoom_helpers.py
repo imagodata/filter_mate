@@ -430,3 +430,84 @@ class TestAutoZoomEndToEnd:
         )
         assert result is False
         canvas.refresh.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# cascade_zoom_scope (PERF 2026-09-12): source-only zoom after a spatial cascade
+# ---------------------------------------------------------------------------
+
+class TestCascadeZoomScope:
+
+    def _params(self, **filtering):
+        return {"filtering": filtering}
+
+    def test_no_parameters_keeps_union(self):
+        assert auto_zoom_mod.cascade_zoom_scope(None) == (False, 0.0)
+        assert auto_zoom_mod.cascade_zoom_scope({}) == (False, 0.0)
+        assert auto_zoom_mod.cascade_zoom_scope({"filtering": "junk"}) == (False, 0.0)
+
+    def test_attribute_only_cascade_keeps_union(self):
+        params = self._params(has_geometric_predicates=False, geometric_predicates=[])
+        assert auto_zoom_mod.cascade_zoom_scope(params) == (False, 0.0)
+
+    def test_intersect_cascade_zooms_to_source(self):
+        params = self._params(has_geometric_predicates=True, geometric_predicates=["Intersect"])
+        assert auto_zoom_mod.cascade_zoom_scope(params) == (True, 0.0)
+
+    @pytest.mark.parametrize("predicate", ["Disjoint", "disjoint", "Contain", "Contains"])
+    def test_unbounded_predicates_keep_union(self, predicate):
+        params = self._params(has_geometric_predicates=True, geometric_predicates=["Intersect", predicate])
+        assert auto_zoom_mod.cascade_zoom_scope(params) == (False, 0.0)
+
+    def test_buffer_becomes_margin_on_projected_crs(self):
+        params = self._params(has_geometric_predicates=True, geometric_predicates=["Within"],
+                              has_buffer_value=True, buffer_value=250.0)
+        assert auto_zoom_mod.cascade_zoom_scope(params, source_crs_is_geographic=False) == (True, 250.0)
+
+    def test_buffer_ignored_on_geographic_crs_or_expression(self):
+        params = self._params(has_geometric_predicates=True, geometric_predicates=["Within"],
+                              has_buffer_value=True, buffer_value=250.0)
+        assert auto_zoom_mod.cascade_zoom_scope(params, source_crs_is_geographic=True) == (True, 0.0)
+        params["filtering"]["buffer_value_expression"] = '"width" * 2'
+        assert auto_zoom_mod.cascade_zoom_scope(params) == (True, 0.0)
+
+    def test_garbage_buffer_value(self):
+        params = self._params(has_geometric_predicates=True, geometric_predicates=["Touch"],
+                              has_buffer_value=True, buffer_value="abc")
+        assert auto_zoom_mod.cascade_zoom_scope(params) == (True, 0.0)
+
+
+class TestGrowBy:
+
+    def test_union_is_grown_before_zoom(self, monkeypatch):
+        layer = _make_layer("L1")
+        iface_obj = MagicMock()
+        canvas = iface_obj.mapCanvas.return_value
+        grown = []
+        real_rect = auto_zoom_mod.QgsRectangle  # the fake the module captured at import
+
+        class GrowingRect(real_rect):
+            def grow(self, value):
+                grown.append(value)
+
+        monkeypatch.setattr(auto_zoom_mod, "QgsRectangle", GrowingRect)
+        monkeypatch.setattr(auto_zoom_mod, "_read_global_auto_zoom_flag", lambda: True)
+
+        assert auto_zoom_mod.auto_zoom_to_filtered([layer], iface_obj=iface_obj, grow_by=42.0) is True
+        assert grown == [42.0]
+        canvas.zoomToFeatureExtent.assert_called_once()
+
+    def test_zero_margin_does_not_grow(self, monkeypatch):
+        layer = _make_layer("L1")
+        iface_obj = MagicMock()
+        real_rect = auto_zoom_mod.QgsRectangle  # the fake the module captured at import
+        grown = []
+
+        class GrowingRect(real_rect):
+            def grow(self, value):
+                grown.append(value)
+
+        monkeypatch.setattr(auto_zoom_mod, "QgsRectangle", GrowingRect)
+        monkeypatch.setattr(auto_zoom_mod, "_read_global_auto_zoom_flag", lambda: True)
+        auto_zoom_mod.auto_zoom_to_filtered([layer], iface_obj=iface_obj)
+        assert grown == []
