@@ -421,7 +421,6 @@ class FilterOrchestrator:
         Args:
             layer: Layer to check and clean
         """
-        import re
         current_subset = layer.subsetString()
 
         if not current_subset or '__source' not in current_subset.lower():
@@ -429,11 +428,14 @@ class FilterOrchestrator:
 
         # Check if this is a VALID EXISTS expression (well-formed)
         # Pattern: EXISTS (SELECT ... FROM ... AS __source WHERE ...)
-        is_valid_exists = bool(re.match(
-            r'^\s*EXISTS\s*\(\s*SELECT\s+.+\s+FROM\s+.+\s+AS\s+__source\s+WHERE\s+.+\)\s*$',
-            current_subset,
-            re.IGNORECASE | re.DOTALL
-        ))
+        # 2026-09-13: the expression may be preceded by the source envelope
+        # prefilter ``("t"."geom" && (SELECT ... AS __source WHERE ...)) AND
+        # EXISTS (...)`` (PostgreSQL builder), so a well-formed EXISTS block
+        # anywhere in the subset is enough. Clearing such subsets queued an
+        # empty subset that was applied on the main thread AFTER the worker
+        # had set the new filter: every PostgreSQL target ended unfiltered.
+        from .expression_sanitizer import contains_well_formed_exists
+        is_valid_exists = contains_well_formed_exists(current_subset)
 
         if is_valid_exists:
             logger.debug(f"✓ Layer {layer.name()} has VALID EXISTS expression - keeping it")
