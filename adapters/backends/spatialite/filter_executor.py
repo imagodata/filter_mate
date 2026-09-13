@@ -994,7 +994,7 @@ def build_spatialite_query(
             {buffer_expr} as buffer_value
         FROM {table_name}
         WHERE {primary_key_name} IN ({sql_subset_string})
-    """
+    """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
     return query
 

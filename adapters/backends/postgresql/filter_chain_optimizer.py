@@ -321,7 +321,7 @@ class FilterChainOptimizer:
         expression = f'''EXISTS (
     SELECT 1 FROM "{self.MV_SCHEMA}"."{mv_name}" AS __source
     WHERE {predicate}("{distant_table}"."{distant_geom_column}", {source_geom})
-)'''
+)'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         return expression
 
@@ -456,7 +456,7 @@ class FilterChainOptimizer:
             # Build EXISTS subquery
             exists_clause = f'''EXISTS (
                 SELECT 1 FROM "{filter_schema}"."{filter_table}" f
-                WHERE {predicate}({src_geom}, {filter_geom_ref})'''
+                WHERE {predicate}({src_geom}, {filter_geom_ref})'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
             if filter_condition:
                 exists_clause += f' AND ({filter_condition})'
@@ -474,7 +474,7 @@ SELECT src.*
 FROM "{context.source_schema}"."{context.source_table}" src
 WHERE {where_combined}
 WITH DATA
-'''
+'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         return sql.strip()
 

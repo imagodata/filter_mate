@@ -683,7 +683,7 @@ class CombinedQueryOptimizer:
            ST_Buffer("{source_geom_col}", {buffer_distance}, '{buffer_style}') AS geom_buffered
     FROM "{source_schema}"."{source_table}"
     WHERE "{fid_column}" IN ({fid_list_str})
-    WITH DATA;'''
+    WITH DATA;'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
             source_mv_info = SourceMVInfo(
                 schema=mv_schema,  # v2.8.8: Use temp schema
@@ -707,7 +707,7 @@ class CombinedQueryOptimizer:
         FROM "{mv_schema}"."{src_mv_name}" AS __src
         WHERE {spatial_predicate}(mv."geom", __src.geom_buffered)
     )
-)'''
+)'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
             logger.info(f"🔧 v2.9.0: Will create source MV '{mv_schema}.{src_mv_name}' for {fid_count} FIDs with pre-computed buffer")
         else:
             # Standard inline subquery for small FID lists
@@ -724,7 +724,7 @@ class CombinedQueryOptimizer:
         ) AS __src
         WHERE {spatial_predicate}(mv."geom", __src.geom_buffered)
     )
-)'''
+)'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         return optimized, source_mv_info
 
@@ -989,7 +989,7 @@ class CombinedQueryOptimizer:
             {exists_info.source_alias}.geom_buffered
         )
     )
-)'''
+)'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
         return optimized.strip()
 
     def _build_filtered_source_query(
@@ -1018,7 +1018,7 @@ class CombinedQueryOptimizer:
             {exists_info.source_geometry}
         )
     )
-)'''
+)'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
         return optimized.strip()
 
     def _build_mv_source_query(
@@ -1044,7 +1044,7 @@ class CombinedQueryOptimizer:
             {exists_info.source_geometry}
         )
     )
-)'''
+)'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
         return optimized.strip()
 
     # ============== Spatialite/OGR Optimization Methods ==============

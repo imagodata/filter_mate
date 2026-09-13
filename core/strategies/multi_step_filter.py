@@ -792,14 +792,14 @@ class MultiStepFilterExecutor:
                 FROM "{self.schema}"."{self.table}"
                 WHERE "{self.primary_key}" IN ({ids_str})
                   AND {step.expression}
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
         else:
             # Full table scan with bbox
             query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE {step.expression}
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         return self._fetch_ids(query)
 
@@ -823,13 +823,13 @@ class MultiStepFilterExecutor:
                 FROM "{self.schema}"."{self.table}"
                 WHERE "{self.primary_key}" IN ({ids_str})
                   AND ({step.expression})
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
         else:
             query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE {step.expression}
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         return self._fetch_ids(query)
 
@@ -852,13 +852,13 @@ class MultiStepFilterExecutor:
                 FROM "{self.schema}"."{self.table}"
                 WHERE "{self.primary_key}" IN ({ids_str})
                   AND ({step.expression})
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
         else:
             query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE {step.expression}
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         return self._fetch_ids(query)
 
@@ -879,7 +879,7 @@ class MultiStepFilterExecutor:
                 FROM "{self.schema}"."{self.table}"
                 WHERE "{self.primary_key}" IN ({ids_str})
                   AND ({step.expression})
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
             chunk_results = self._fetch_ids(query)
             results.extend(chunk_results)

@@ -355,7 +355,7 @@ class PostgreSQLBackend(BackendPort):
                 SELECT "{clean_pk_field}" as pk, "{clean_geom_field}" as geom
                 FROM {full_table}
                 WHERE "{clean_pk_field}" IN ({formatted_fids})
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
             logger.debug(f"[PostgreSQL] MV query: {query[:200]}...")
 
@@ -538,7 +538,7 @@ class PostgreSQLBackend(BackendPort):
                 SELECT "{clean_pk_field}" as pk
                 FROM "{table_name}"
                 WHERE "{clean_pk_field}" IN ({formatted_fids})
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
             cursor.execute(create_sql)
 
             # Create index for fast lookups

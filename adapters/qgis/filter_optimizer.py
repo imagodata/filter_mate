@@ -624,7 +624,7 @@ class SpatialiteQueryBuilder:
                       AND ymin <= MbrMaxY({geom_expr})
                       AND ymax >= MbrMinY({geom_expr})
                 )
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
             where_clauses.append(bbox_filter.strip())
 
         # Exact spatial predicate
