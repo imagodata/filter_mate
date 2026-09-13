@@ -582,3 +582,8 @@ Result: Que veux-tu faire dans cette session ?
 - Lancer la veille techno
 - Continuer le sprint REST API FilterMate (T2, T9...)
 - Autre chose sur FilterMate
+
+## [2026-09-13] Guide utilisateur du site de doc
+- `website/guide.html` (13 sections, anglais, charte de `index.html`) + 16 captures `website/img/guide/` prises dans QGIS 4.2 réel via `scripts/guide_screenshots.py` (QGIS Windows piloté depuis WSL, `--lang en --code`). PR #66.
+- Bug corrigé au passage : menu favoris illisible en thème sombre (`ui/styles/favorites_styles.py`, QMenu blanc sans `color`).
+- Restent à regarder : libellés vides dans la liste de sélection multiple (délégué Qt6, capture `exploring-multiple.png`), doc en français si besoin (le site est en anglais).
