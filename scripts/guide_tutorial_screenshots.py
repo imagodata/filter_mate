@@ -59,7 +59,9 @@ def s_open():
     plugins['filter_mate'].run()
 
 def s_step1():
-    dock().setMinimumWidth(640)
+    d = dock()
+    d.setMinimumWidth(0)
+    iface.mainWindow().resizeDocks([d], [413], Qt.Orientation.Horizontal)
     iface.setActiveLayer(layer('troncon_de_route'))
 
 def s_grab1():
