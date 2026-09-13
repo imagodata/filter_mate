@@ -30,11 +30,16 @@ FAVORITES_STYLES: Dict[str, Dict[str, str]] = {
 FAVORITES_MENU_STYLESHEET: str = """
     QMenu {
         background-color: white;
+        color: #2c3e50;
         border: 1px solid #cccccc;
         padding: 5px;
     }
     QMenu::item {
+        color: #2c3e50;
         padding: 6px 20px;
+    }
+    QMenu::item:disabled {
+        color: #95a5a6;
     }
     QMenu::item:selected {
         background-color: #f39c12;
