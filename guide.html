@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterMate User Guide — Spatial Filtering for QGIS</title>
+    <meta name="description" content="Step-by-step user guide for FilterMate, the QGIS plugin for exploring, filtering and exporting vector data: installation, interface, spatial predicates, buffers, favorites, export and configuration.">
+    <meta name="keywords" content="QGIS, plugin, FilterMate, user guide, tutorial, spatial filter, PostGIS, GeoPackage, SpatiaLite">
+    <meta property="og:title" content="FilterMate User Guide">
+    <meta property="og:description" content="Learn FilterMate in 15 minutes: explore, filter and export vector data in QGIS.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/guide.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-mid: #111528;
+            --bg-light: #1a1f3a;
+            --accent-blue: #4fc3f7;
+            --accent-green: #589632;
+            --accent-purple: #b388ff;
+            --accent-orange: #f0b27a;
+            --cta-start: #4fc3f7;
+            --cta-end: #00e676;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a0a8c0;
+            --text-dim: #6b7394;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(79, 195, 247, 0.15);
+            --code-bg: rgba(255, 255, 255, 0.06);
+        }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        /* ===== NAVBAR (shared look with index.html) ===== */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 0.8rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(79, 195, 247, 0.08);
+        }
+        .navbar-logo {
+            display: flex; align-items: center; gap: 0.6rem;
+            text-decoration: none; color: var(--text-primary);
+            font-weight: 700; font-size: 1.15rem;
+        }
+        .navbar-logo img { width: 32px; height: 32px; border-radius: 6px; }
+        .navbar-links { display: flex; align-items: center; gap: 1.8rem; list-style: none; }
+        .navbar-links a {
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 0.85rem; font-weight: 500; transition: color 0.2s;
+        }
+        .navbar-links a:hover, .navbar-links a.active { color: var(--accent-blue); }
+        .btn-install {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.5rem 1.2rem;
+            background: linear-gradient(135deg, var(--cta-start), var(--cta-end));
+            color: var(--bg-dark); font-weight: 600; font-size: 0.85rem;
+            border-radius: 8px; text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-install:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(79, 195, 247, 0.3); }
+        .hamburger {
+            display: none; flex-direction: column; gap: 5px; cursor: pointer;
+            background: none; border: none; padding: 4px;
+        }
+        .hamburger span { display: block; width: 24px; height: 2px; background: var(--text-primary); border-radius: 2px; }
+
+        /* ===== LAYOUT ===== */
+        .page {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            gap: 3rem;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 6rem 2rem 4rem;
+        }
+        .toc {
+            position: sticky; top: 5.5rem;
+            align-self: start;
+            max-height: calc(100vh - 7rem);
+            overflow-y: auto;
+            padding-right: 1rem;
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+        .toc-title {
+            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.8rem;
+        }
+        .toc ol { list-style: none; }
+        .toc li { margin: 0.15rem 0; }
+        .toc a {
+            display: block; padding: 0.3rem 0.6rem; border-radius: 6px;
+            color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;
+            border-left: 2px solid transparent;
+        }
+        .toc a:hover { color: var(--text-primary); background: var(--card-bg); }
+        .toc a.active { color: var(--accent-blue); border-left-color: var(--accent-blue); background: rgba(79,195,247,0.06); }
+        .toc .num { color: var(--text-dim); font-size: 0.75rem; margin-right: 0.4rem; }
+
+        .content { min-width: 0; }
+
+        /* ===== TYPOGRAPHY ===== */
+        .hero { margin-bottom: 3rem; }
+        .section-label {
+            display: inline-block; font-size: 0.75rem; font-weight: 600;
+            letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-blue);
+            margin-bottom: 0.6rem;
+        }
+        h1 {
+            font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.15;
+            letter-spacing: -0.02em; margin-bottom: 0.8rem;
+        }
+        h1 span {
+            background: linear-gradient(135deg, var(--cta-start), var(--cta-end));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .lead { color: var(--text-secondary); font-size: 1.1rem; max-width: 62ch; }
+        section { margin-bottom: 4rem; scroll-margin-top: 90px; }
+        h2 {
+            font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em;
+            margin-bottom: 1rem; padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(79,195,247,0.15);
+        }
+        h2 .num { color: var(--accent-blue); font-weight: 800; margin-right: 0.5rem; }
+        h3 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.6rem; color: var(--text-primary); }
+        h4 { font-size: 0.95rem; font-weight: 600; margin: 1.2rem 0 0.4rem; color: var(--accent-blue); }
+        p { margin-bottom: 1rem; color: var(--text-secondary); max-width: 72ch; }
+        p strong, li strong { color: var(--text-primary); font-weight: 600; }
+        a { color: var(--accent-blue); }
+        ul, ol { margin: 0 0 1rem 1.3rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.35rem; }
+        code, kbd {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.85em; background: var(--code-bg);
+            padding: 0.1em 0.4em; border-radius: 4px; color: var(--text-primary);
+        }
+        kbd { border: 1px solid rgba(255,255,255,0.15); border-bottom-width: 2px; }
+        pre {
+            background: var(--bg-mid); border: 1px solid var(--card-border);
+            border-radius: 8px; padding: 1rem; overflow-x: auto; margin-bottom: 1rem;
+            font-size: 0.85rem; line-height: 1.5;
+        }
+        pre code { background: none; padding: 0; }
+
+        /* ===== FIGURES ===== */
+        figure {
+            margin: 1.2rem 0 1.8rem;
+            background: var(--bg-mid);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 0.8rem;
+        }
+        figure img {
+            display: block; max-width: 100%; height: auto;
+            border-radius: 8px; margin: 0 auto;
+        }
+        figure.narrow img { width: min(100%, 480px); }
+        figure.tiny img { width: min(100%, 320px); }
+        figcaption {
+            margin-top: 0.7rem; font-size: 0.82rem; color: var(--text-dim); text-align: center;
+        }
+        .fig-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 1rem; }
+        .fig-row figure { margin: 0.6rem 0; }
+
+        /* ===== CALLOUTS ===== */
+        .callout {
+            border-left: 3px solid var(--accent-blue);
+            background: rgba(79,195,247,0.06);
+            border-radius: 0 8px 8px 0;
+            padding: 0.8rem 1rem; margin: 1rem 0 1.4rem;
+            color: var(--text-secondary); font-size: 0.93rem;
+        }
+        .callout p:last-child { margin-bottom: 0; }
+        .callout strong:first-child { color: var(--accent-blue); }
+        .callout.tip { border-color: #00e676; background: rgba(0,230,118,0.06); }
+        .callout.tip strong:first-child { color: #00e676; }
+        .callout.warn { border-color: var(--accent-orange); background: rgba(240,178,122,0.08); }
+        .callout.warn strong:first-child { color: var(--accent-orange); }
+
+        /* ===== TABLES ===== */
+        .table-wrap { overflow-x: auto; margin-bottom: 1.4rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.07); vertical-align: top; }
+        th { color: var(--text-primary); font-weight: 600; background: var(--card-bg); }
+        td { color: var(--text-secondary); }
+
+        /* ===== STEPS / CARDS ===== */
+        .steps { list-style: none; margin: 0 0 1.5rem; counter-reset: step; }
+        .steps li {
+            position: relative; padding: 0.7rem 0 0.7rem 3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-secondary);
+        }
+        .steps li::before {
+            counter-increment: step; content: counter(step);
+            position: absolute; left: 0; top: 0.7rem;
+            width: 2rem; height: 2rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--cta-start), var(--cta-end));
+            color: var(--bg-dark); font-weight: 700; font-size: 0.85rem;
+        }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 1.1rem 1.2rem;
+        }
+        .card h4 { margin: 0 0 0.4rem; }
+        .card p { font-size: 0.88rem; margin: 0; }
+        .badge {
+            display: inline-block; padding: 0.1em 0.6em; border-radius: 999px;
+            font-size: 0.75rem; font-weight: 600; color: var(--bg-dark); vertical-align: middle;
+        }
+
+        /* ===== FOOTER ===== */
+        .guide-footer {
+            margin-top: 3rem; padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;
+            justify-content: space-between; color: var(--text-dim); font-size: 0.85rem;
+        }
+        .guide-footer a { color: var(--text-secondary); text-decoration: none; }
+        .guide-footer a:hover { color: var(--accent-blue); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 960px) {
+            .page { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding: 5.5rem 1.2rem 3rem; }
+            .toc {
+                position: static; max-height: none; border-right: none;
+                border: 1px solid var(--card-border); border-radius: 12px;
+                padding: 1rem; background: var(--bg-mid);
+            }
+            .toc ol { columns: 2; column-gap: 1rem; }
+        }
+        @media (max-width: 768px) {
+            .navbar { padding: 0.7rem 1.2rem; }
+            .navbar-links {
+                display: none; position: absolute; top: 100%; left: 0; right: 0;
+                flex-direction: column; gap: 0; padding: 0.5rem 0;
+                background: rgba(10, 14, 26, 0.97); border-bottom: 1px solid rgba(79,195,247,0.1);
+            }
+            .navbar-links.open { display: flex; }
+            .navbar-links li { width: 100%; }
+            .navbar-links a { display: block; padding: 0.8rem 1.5rem; }
+            .btn-install { display: none; }
+            .hamburger { display: flex; }
+            .toc ol { columns: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <a href="index.html" class="navbar-logo">
+        <img src="logo.png" alt="FilterMate" width="32" height="32">
+        FilterMate
+    </a>
+    <ul class="navbar-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="guide.html" class="active">User Guide</a></li>
+        <li><a href="roadmap.html" style="color:var(--accent-purple);">Roadmap</a></li>
+        <li><a href="https://github.com/imagodata/filter_mate" target="_blank" rel="noopener">GitHub</a></li>
+    </ul>
+    <a href="https://plugins.qgis.org/plugins/filter_mate/" class="btn-install" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Install
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+    </button>
+</nav>
+
+<div class="page">
+
+<!-- ===== TABLE OF CONTENTS ===== -->
+<aside class="toc" id="toc">
+    <div class="toc-title">User Guide</div>
+    <ol>
+        <li><a href="#overview"><span class="num">1</span>How FilterMate works</a></li>
+        <li><a href="#install"><span class="num">2</span>Installation</a></li>
+        <li><a href="#interface"><span class="num">3</span>The panel at a glance</a></li>
+        <li><a href="#exploring"><span class="num">4</span>Exploring a layer</a></li>
+        <li><a href="#filtering"><span class="num">5</span>The Filtering tab</a></li>
+        <li><a href="#tutorial"><span class="num">6</span>Tutorial: your first spatial filter</a></li>
+        <li><a href="#actions"><span class="num">7</span>Action bar, undo and history</a></li>
+        <li><a href="#favorites"><span class="num">8</span>Favorites</a></li>
+        <li><a href="#export"><span class="num">9</span>Exporting</a></li>
+        <li><a href="#configuration"><span class="num">10</span>Configuration</a></li>
+        <li><a href="#backends"><span class="num">11</span>Backends and performance</a></li>
+        <li><a href="#processing"><span class="num">12</span>Processing Toolbox</a></li>
+        <li><a href="#troubleshooting"><span class="num">13</span>Troubleshooting</a></li>
+    </ol>
+</aside>
+
+<!-- ===== CONTENT ===== -->
+<main class="content">
+
+<header class="hero">
+    <span class="section-label">User Guide &middot; FilterMate 4.8</span>
+    <h1>Explore, filter and export <span>without writing SQL</span></h1>
+    <p class="lead">
+        This guide walks through every part of the FilterMate panel with screenshots taken in
+        QGIS 4.2. Read it top to bottom the first time, then use the table of contents as a reference.
+        Everything shown here works the same on QGIS 3.x (Qt5) and QGIS 4.x (Qt6).
+    </p>
+</header>
+
+<!-- 1 ------------------------------------------------------------------ -->
+<section id="overview">
+    <h2><span class="num">1</span>How FilterMate works</h2>
+    <p>
+        FilterMate applies a <strong>subset filter</strong> to your vector layers. Nothing is deleted or copied:
+        the filtered layer simply shows only the features that match, exactly as if you had typed a
+        provider filter in the layer properties. FilterMate builds that filter for you, in the native
+        language of the data source (PostGIS SQL, SpatiaLite SQL or a QGIS expression for files).
+    </p>
+    <p>Every spatial filter follows the same three-part pattern:</p>
+    <div class="cards">
+        <div class="card">
+            <h4>1. Source layer</h4>
+            <p>The layer you pick a reference geometry from, using the <strong>Exploring</strong> zone: one feature, several features or an expression.</p>
+        </div>
+        <div class="card">
+            <h4>2. Spatial predicate</h4>
+            <p>The relation to test: <em>Intersect</em>, <em>Contain</em>, <em>Are within</em>, <em>Touch</em>, and so on, optionally with a buffer distance.</p>
+        </div>
+        <div class="card">
+            <h4>3. Target layers</h4>
+            <p>The layers that get filtered. Only their features that satisfy the predicate against the source geometry remain visible.</p>
+        </div>
+    </div>
+    <p>
+        Attribute-only filters also work: with no target layers and no predicate, FilterMate filters the
+        source layer itself on the features you selected in the Exploring zone. Filters can be chained
+        with <code>AND</code>, <code>OR</code> and <code>AND NOT</code>, undone, redone, saved as favorites, and
+        exported to a new file or GeoPackage project.
+    </p>
+</section>
+
+<!-- 2 ------------------------------------------------------------------ -->
+<section id="install">
+    <h2><span class="num">2</span>Installation</h2>
+    <h3>From the QGIS plugin repository (recommended)</h3>
+    <ol class="steps">
+        <li>In QGIS, open <strong>Plugins &rarr; Manage and Install Plugins&hellip;</strong></li>
+        <li>Search for <strong>FilterMate</strong> in the <em>All</em> tab and click <strong>Install Plugin</strong>.</li>
+        <li>A FilterMate button appears in the plugin toolbar. Click it to open the panel.</li>
+    </ol>
+    <figure class="tiny">
+        <img src="img/guide/toolbar-button.png" alt="The FilterMate button in the QGIS plugin toolbar" width="150" height="59">
+        <figcaption>The FilterMate toolbar button. It is also listed under <em>Plugins &rarr; FilterMate</em>.</figcaption>
+    </figure>
+
+    <h3>Manual installation</h3>
+    <p>Download the ZIP from <a href="https://github.com/imagodata/filter_mate/releases" target="_blank" rel="noopener">GitHub Releases</a>, then either use <em>Install from ZIP</em> in the plugin manager or unzip it into your profile's plugin folder:</p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>OS</th><th>Plugin folder</th></tr>
+        <tr><td>Windows</td><td><code>%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\</code></td></tr>
+        <tr><td>Linux</td><td><code>~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/</code></td></tr>
+        <tr><td>macOS</td><td><code>~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/</code></td></tr>
+    </table>
+    </div>
+    <div class="callout">
+        <strong>QGIS 4</strong> keeps the same layout under a <code>QGIS4</code> profile directory on some platforms.
+        <em>Settings &rarr; User Profiles &rarr; Open Active Profile Folder</em> always opens the right place.
+    </div>
+
+    <h3>Optional: PostgreSQL / PostGIS</h3>
+    <p>FilterMate filters PostGIS layers server-side. This needs the <code>psycopg2</code> Python package inside the QGIS Python environment:</p>
+    <pre><code>pip install psycopg2-binary</code></pre>
+    <p>On Windows, run it from the <strong>OSGeo4W Shell</strong> that ships with QGIS. Without it, PostgreSQL layers still work through the generic OGR backend, only slower.</p>
+</section>
+
+<!-- 3 ------------------------------------------------------------------ -->
+<section id="interface">
+    <h2><span class="num">3</span>The panel at a glance</h2>
+    <p>FilterMate is a dock panel. By default it opens on the right side of the QGIS window and can be moved, floated or resized like any other QGIS panel.</p>
+    <figure>
+        <img src="img/guide/qgis-window.png" alt="QGIS 4.2 with a small BD TOPO project and the FilterMate panel docked on the right" loading="lazy">
+        <figcaption>QGIS 4.2 (dark theme) with the FilterMate panel docked on the right. The project holds five GeoPackage layers.</figcaption>
+    </figure>
+
+    <p>The panel is made of four areas, from top to bottom:</p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Area</th><th>What it does</th></tr>
+        <tr><td><strong>Header badges</strong></td><td>The <span class="badge" style="background:#f39c12;">&#9733; n</span> badge counts saved favorites and opens the favorites menu. The colored badge shows which backend handles the current layer: <span class="badge" style="background:#58d68d;">PostgreSQL</span> <span class="badge" style="background:#bb8fce;">Spatialite</span> <span class="badge" style="background:#5dade2;">OGR</span> <span class="badge" style="background:#f0b27a;">Memory</span>.</td></tr>
+        <tr><td><strong>Exploring zone</strong></td><td>Pick the reference features on the current layer: single, multiple or expression-based selection, plus a vertical rail of navigation buttons.</td></tr>
+        <tr><td><strong>Tool tabs</strong></td><td>Three collapsible tabs: <strong>Filtering</strong>, <strong>Exporting</strong> and <strong>Configuration</strong>. Only one is open at a time.</td></tr>
+        <tr><td><strong>Action bar</strong></td><td>The six buttons that actually do something: Filter, Undo, Redo, Unfilter, Export, About.</td></tr>
+    </table>
+    </div>
+
+    <div class="fig-row">
+        <figure class="narrow">
+            <img src="img/guide/dock-overview.png" alt="The whole FilterMate panel with the Filtering tab open" loading="lazy">
+            <figcaption>The whole panel with the Filtering tab open.</figcaption>
+        </figure>
+        <div>
+            <figure>
+                <img src="img/guide/header-badges.png" alt="Favorites and backend badges in the panel header" loading="lazy">
+                <figcaption>Header: 4 favorites saved, current layer handled by the Spatialite backend.</figcaption>
+            </figure>
+            <figure>
+                <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Unfilter, Export and About" loading="lazy">
+                <figcaption>Action bar after a filter: Undo is enabled, Redo is not yet.</figcaption>
+            </figure>
+        </div>
+    </div>
+
+    <div class="callout tip">
+        <strong>Tip</strong> The panel follows the QGIS theme (Default, Night Mapping, Blend of Gray). You can force a light or dark look
+        in the <a href="#configuration">Configuration</a> tab, and move the action bar to the top, left or right of the panel.
+    </div>
+</section>
+
+<!-- 4 ------------------------------------------------------------------ -->
+<section id="exploring">
+    <h2><span class="num">4</span>Exploring a layer</h2>
+    <p>
+        The Exploring zone works on the <strong>current layer</strong>, shown in the first row of the Filtering tab.
+        By default it follows the layer selected in the QGIS Layers panel (the <em>auto current layer</em> button, first in the
+        Filtering rail). Turn that button off to pick the layer manually from the drop-down.
+    </p>
+    <p>Three selection modes are available. Ticking one un-ticks the others, and the header of each box expands or collapses it.</p>
+
+    <h3>Single selection</h3>
+    <figure class="narrow">
+        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy">
+        <figcaption>Single selection on a road layer: the feature is picked by name, the field below sets which attribute is displayed.</figcaption>
+    </figure>
+    <p>
+        Pick one feature from a searchable drop-down. The second row is the <strong>display expression</strong>:
+        FilterMate detects a sensible name field automatically (name, label, id&hellip;) but you can type any QGIS expression,
+        for instance <code>"code" || ' - ' || "name"</code>. The blue arrows step to the previous or next feature.
+    </p>
+
+    <h3>Multiple selection</h3>
+    <figure class="narrow">
+        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy">
+        <figcaption>Multiple selection: four roads are checked. The line above the list summarises the selection; the text box filters the list as you type.</figcaption>
+    </figure>
+    <p>
+        Tick as many features as you need. The list loads at most 1000 rows (configurable) so that huge layers never freeze QGIS.
+        When the list is truncated, typing in the filter box searches the whole layer, and <em>Select All</em> in the right-click menu loads everything.
+    </p>
+
+    <h3>Custom selection (expression)</h3>
+    <figure class="narrow">
+        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy">
+        <figcaption>Custom selection: any QGIS expression, here roads whose importance is 3 or 4.</figcaption>
+    </figure>
+    <p>
+        Write a QGIS expression; every feature it matches becomes part of the reference geometry. This is the mode to use for
+        "all features": an always-true expression such as <code>1</code> or <code>TRUE</code> takes the whole source layer.
+    </p>
+
+    <h3>The exploring rail</h3>
+    <p>The vertical buttons to the left of the selection boxes, from top to bottom:</p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Button</th><th>Effect</th></tr>
+        <tr><td><strong>Identify</strong></td><td>Identifies the selected feature on the map (same as the QGIS identify tool).</td></tr>
+        <tr><td><strong>Zoom</strong></td><td>Zooms the map canvas to the selected feature(s).</td></tr>
+        <tr><td><strong>Selecting</strong> (toggle)</td><td>Mirrors your FilterMate selection as a QGIS selection on the map, and the other way round: selecting on the canvas updates the Exploring boxes.</td></tr>
+        <tr><td><strong>Tracking</strong> (toggle)</td><td>Auto-zooms every time the selected feature changes.</td></tr>
+        <tr><td><strong>Linking</strong> (toggle)</td><td>Keeps the three selection boxes in sync: switching mode carries the current features over.</td></tr>
+        <tr><td><strong>Reset</strong></td><td>Clears every exploring property stored for the layer (display expression, selection, mode).</td></tr>
+    </table>
+    </div>
+    <p>
+        Each layer remembers its own exploring settings in the project, so switching layers and coming back restores your selection.
+    </p>
+</section>
+
+<!-- 5 ------------------------------------------------------------------ -->
+<section id="filtering">
+    <h2><span class="num">5</span>The Filtering tab</h2>
+    <figure class="narrow">
+        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy">
+        <figcaption>Filtering tab: source layer, two target layers, combine operators, Intersect predicate, 50 m round buffer.</figcaption>
+    </figure>
+    <p>
+        Each row of the Filtering tab is switched on and off by the button in the rail on its left. A row that is switched off is ignored when you press Filter,
+        which lets you keep a buffer or a predicate configured without using it.
+    </p>
+
+    <h3>Row by row</h3>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Rail button</th><th>Row</th><th>Meaning</th></tr>
+        <tr><td><strong>Auto current layer</strong></td><td>Source layer</td><td>When on, the source layer follows the QGIS Layers panel. When off, choose it in the drop-down. The small icon and checkbox to the right enable the <em>centroid</em> option for the source geometry.</td></tr>
+        <tr><td><strong>Layers to filter</strong></td><td>Target layers</td><td>A checkable list of every other vector layer in the project. Right-click for <em>Select All</em>, <em>Deselect All</em> or by geometry type. The checkbox on the right uses centroids for distant (target) layers.</td></tr>
+        <tr><td><strong>Combine operator</strong></td><td>Two drop-downs</td><td>How a new filter combines with the one already applied. Left: for the source layer. Right: for the target layers. Values are <code>AND</code>, <code>OR</code> and <code>AND NOT</code>.</td></tr>
+        <tr><td><strong>Geometric predicates</strong></td><td>Predicate list</td><td>Checkable list of spatial relations. Several can be ticked; they are combined with OR.</td></tr>
+        <tr><td><strong>Buffer value</strong></td><td>Distance in metres</td><td>Expands (positive) or shrinks (negative) the source geometry before the predicate is tested. Click the small arrow to switch to a QGIS expression, e.g. <code>"width" * 2</code>.</td></tr>
+        <tr><td><strong>Buffer type</strong></td><td>Style and segments</td><td>End-cap style (<em>Round</em>, <em>Flat</em>, <em>Square</em>) and the number of segments per quarter circle (default 5). Fewer segments are faster on very complex geometries.</td></tr>
+    </table>
+    </div>
+
+    <h3>The eight predicates</h3>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Predicate</th><th>Keeps a target feature when&hellip;</th><th>Typical use</th></tr>
+        <tr><td><strong>Intersect</strong></td><td>it shares at least one point with the source geometry.</td><td>Everything touching a zone. The default and by far the most common.</td></tr>
+        <tr><td><strong>Contain</strong></td><td>it completely contains the source geometry.</td><td>Which parcel contains this point?</td></tr>
+        <tr><td><strong>Are within</strong></td><td>it lies entirely inside the source geometry.</td><td>Buildings fully inside a commune.</td></tr>
+        <tr><td><strong>Touch</strong></td><td>it touches the boundary without overlapping the interior.</td><td>Neighbouring parcels.</td></tr>
+        <tr><td><strong>Overlap</strong></td><td>it partly overlaps the source (same dimension, neither contains the other).</td><td>Zones straddling a boundary.</td></tr>
+        <tr><td><strong>Cross</strong></td><td>it crosses the source (a line through a polygon, two crossing lines).</td><td>Roads crossing a river.</td></tr>
+        <tr><td><strong>Equal</strong></td><td>its geometry is identical to the source.</td><td>Finding duplicates between layers.</td></tr>
+        <tr><td><strong>Disjoint</strong></td><td>it has no point in common with the source.</td><td>Everything <em>outside</em> a zone. Combine with a buffer for exclusion rings.</td></tr>
+    </table>
+    </div>
+
+    <h3>Buffers</h3>
+    <ul>
+        <li><strong>Positive buffer</strong>, e.g. 50 m: "everything within 50 m of the selected road". Use <em>Intersect</em> as the predicate.</li>
+        <li><strong>Negative buffer</strong>, e.g. -20 m on a polygon: keeps only the features well inside it, away from the edges.</li>
+        <li><strong>Expression buffer</strong>: the distance is evaluated per source feature, so a regulatory distance can come from an attribute.</li>
+        <li>Distances are always in <strong>metres</strong>. Layers in a geographic CRS (degrees) are reprojected on the fly.</li>
+    </ul>
+
+    <h3>Centroids</h3>
+    <p>
+        The two centroid checkboxes replace polygons by a representative point (a point guaranteed to be on the surface) during the test.
+        With very detailed polygons this can make a cascade several times faster, at the cost of exactness on the borders. FilterMate
+        keeps the spatial index usable in both cases.
+    </p>
+</section>
+
+<!-- 6 ------------------------------------------------------------------ -->
+<section id="tutorial">
+    <h2><span class="num">6</span>Tutorial: your first spatial filter</h2>
+    <p>
+        Goal: show only the <strong>buildings and hedges within 50 m of one road</strong>. The screenshots use a small BD TOPO extract
+        (one commune, 373 buildings, 130 road sections) stored in a GeoPackage, but any project with a line layer and a polygon layer will do.
+    </p>
+    <ol class="steps">
+        <li>Load your layers and open FilterMate. In the Layers panel, click the <strong>road</strong> layer: it becomes the source layer (the <em>auto current layer</em> button is on by default).</li>
+        <li>In the Exploring zone, tick <strong>Single selection</strong> and pick a road in the drop-down. If the drop-down shows identifiers rather than names, change the display field in the row below.</li>
+        <li>Open the <strong>Filtering</strong> tab. Switch on <strong>Layers to filter</strong> (second rail button) and tick <em>batiment</em> and <em>haie</em> in the list.</li>
+        <li>Switch on <strong>Geometric predicates</strong> and make sure <em>Intersect</em> is ticked.</li>
+        <li>Switch on <strong>Buffer value</strong> and type <code>50</code>.</li>
+        <li>Press the <strong>Filter</strong> button (first button of the action bar). The map canvas is frozen for the duration of the task and redrawn once at the end.</li>
+    </ol>
+    <figure>
+        <img src="img/guide/filter-result.png" alt="Map showing only the buildings and hedges within 50 m of the selected road" loading="lazy">
+        <figcaption>Result: only buildings (pink) and hedges (green) within 50 m of the selected road remain. The road layer itself is filtered to the selected feature.</figcaption>
+    </figure>
+    <p>What FilterMate generated for the GeoPackage buildings layer, as you can read it in <em>Layer Properties &rarr; Source &rarr; Provider Feature Filter</em>:</p>
+    <pre><code>ROWID IN (SELECT id FROM "rtree_batiment_geom"
+          WHERE minx &lt;= 598540.4 AND maxx &gt;= 598349.4
+            AND miny &lt;= 6265342.3 AND maxy &gt;= 6265157.7)
+AND ST_Intersects("geom",
+      ST_Buffer(ST_MakeValid(ST_GeomFromText('LineString (…)', 2154)), 50.0))</code></pre>
+    <p>
+        The first clause queries the GeoPackage R-tree so that SQLite only evaluates the expensive predicate on candidate rows.
+        That is what turns a 6-minute cascade on a 37-layer project into a 3-second one.
+    </p>
+    <div class="callout">
+        <strong>Chaining filters</strong> Change the selection or the predicate and press Filter again. With the combine operators on
+        <code>AND</code> the new condition narrows the previous result; with <code>OR</code> it widens it; <code>AND NOT</code> removes features.
+        The layer properties show the full combined expression.
+    </div>
+</section>
+
+<!-- 7 ------------------------------------------------------------------ -->
+<section id="actions">
+    <h2><span class="num">7</span>Action bar, undo and history</h2>
+    <figure>
+        <img src="img/guide/action-bar.png" alt="The six action buttons" loading="lazy">
+        <figcaption>From left to right: Filter, Undo, Redo, Unfilter, Export, About.</figcaption>
+    </figure>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Button</th><th>Action</th></tr>
+        <tr><td><strong>Filter</strong></td><td>Builds and applies the filter described by the Exploring zone and the Filtering tab.</td></tr>
+        <tr><td><strong>Undo</strong></td><td>Restores the previous filter state of the affected layers. The history is per project and survives a restart of QGIS.</td></tr>
+        <tr><td><strong>Redo</strong></td><td>Re-applies a filter you just undid.</td></tr>
+        <tr><td><strong>Unfilter</strong></td><td>Removes FilterMate's filter from the source layer and its targets, leaving other layers alone. Unlike Undo, it does not step back through history.</td></tr>
+        <tr><td><strong>Export</strong></td><td>Runs the export configured in the Exporting tab.</td></tr>
+        <tr><td><strong>About</strong></td><td>Opens the FilterMate website in your browser.</td></tr>
+    </table>
+    </div>
+    <div class="callout warn">
+        <strong>Layers in edit mode</strong> A layer being edited cannot receive a new subset filter. FilterMate detects this and asks whether
+        to save, discard or cancel before filtering or unfiltering. Nothing is changed until you answer.
+    </div>
+    <p>
+        Buttons are greyed out when they cannot apply: Undo before any filter, Redo when nothing was undone, Export while the Exporting tab is not configured.
+    </p>
+</section>
+
+<!-- 8 ------------------------------------------------------------------ -->
+<section id="favorites">
+    <h2><span class="num">8</span>Favorites</h2>
+    <p>
+        A favorite stores a complete filter: source layer, selection, predicates, buffer and target layers. Re-applying it takes one click,
+        which makes favorites the natural way to keep regulatory or recurring queries.
+    </p>
+    <div class="fig-row">
+        <figure class="tiny">
+            <img src="img/guide/favorites-menu.png" alt="The favorites menu opened from the star badge" loading="lazy">
+            <figcaption>Click the &#9733; badge to open the favorites menu.</figcaption>
+        </figure>
+        <div>
+            <h4>The favorites menu</h4>
+            <ul>
+                <li><strong>Add filter</strong> saves the filter currently applied. It is disabled when no filter is active.</li>
+                <li>Saved favorites are listed in the <strong>Quick filtering</strong> section at the top: one click applies them.</li>
+                <li><strong>Manage favorites&hellip;</strong> opens the manager described below.</li>
+                <li><strong>Export&hellip;</strong> / <strong>Import&hellip;</strong> exchange favorites as JSON files between projects or colleagues.</li>
+                <li><strong>Global favorites</strong> lists the favorites shared across all your projects.</li>
+                <li><strong>Maintenance</strong> holds database statistics and cleanup tools.</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>The favorites manager</h3>
+    <figure>
+        <img src="img/guide/favorites-manager.png" alt="The favorites manager dialog with the General tab" loading="lazy">
+        <figcaption>The manager: search and scope filter at the top, favorites on the left, details on the right.</figcaption>
+    </figure>
+    <ul>
+        <li><strong>General</strong>: rename the favorite, add a description and tags, see its source layer, provider and usage count. <em>Visibility</em> switches between <em>This project</em> and <em>All projects</em> (global).</li>
+        <li><strong>Expression</strong>: the exact filter expression, editable for advanced users.</li>
+        <li><strong>Remote</strong>: publishing to a shared git repository. FilterMate uses the QGIS authentication manager for credentials, so a team can maintain a common library of filters. This requires the optional <em>QGIS Resource Sharing</em> plugin.</li>
+    </ul>
+    <p><strong>Apply</strong> runs the favorite on the current project, <strong>Save Changes</strong> stores your edits, <strong>Delete</strong> removes it. Favorites are stored in FilterMate's own SQLite database in your QGIS profile and, for project-scoped ones, in the project file too.</p>
+</section>
+
+<!-- 9 ------------------------------------------------------------------ -->
+<section id="export">
+    <h2><span class="num">9</span>Exporting</h2>
+    <figure class="narrow">
+        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy">
+        <figcaption>Exporting tab: layers, CRS, style format, output format, output folder with batch mode, ZIP.</figcaption>
+    </figure>
+    <p>
+        The Exporting tab writes the <strong>currently visible features</strong> of the chosen layers to disk, filters included.
+        As in the Filtering tab, each row is enabled by its rail button.
+    </p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Row</th><th>Meaning</th></tr>
+        <tr><td><strong>Layers</strong></td><td>Checkable list of the layers to export.</td></tr>
+        <tr><td><strong>Projection</strong></td><td>Output CRS. Layers in another CRS are reprojected during the export.</td></tr>
+        <tr><td><strong>Styles</strong></td><td>Save the layer styles alongside the data as <code>QML</code> (QGIS native) or <code>SLD</code> (interoperable). With GeoPackage output the style is embedded in the file.</td></tr>
+        <tr><td><strong>Output format</strong></td><td>Any vector format QGIS can write: GeoPackage (default), Shapefile, GeoJSON, KML, CSV, FlatGeobuf&hellip;</td></tr>
+        <tr><td><strong>Output folder</strong></td><td>Where files are written. <strong>Batch mode</strong> writes one file per layer instead of one multi-layer file.</td></tr>
+        <tr><td><strong>ZIP</strong></td><td>Packs the result in a single archive, optionally in batch mode as well.</td></tr>
+    </table>
+    </div>
+    <h3>GeoPackage projects</h3>
+    <p>
+        When the output format is GeoPackage and several layers are exported together, FilterMate embeds a QGIS project in the file with
+        the layer group hierarchy, styles and CRS preserved. Before writing, a recap dialog lists what will be exported and lets you keep or flatten the group structure.
+        Opening the resulting <code>.gpkg</code> in QGIS restores the whole map.
+    </p>
+    <div class="callout tip">
+        <strong>Large exports</strong> Layers above a few thousand features are streamed in chunks, so memory stays flat and the progress bar is accurate. Cancelling cleans up partial files.
+    </div>
+</section>
+
+<!-- 10 ----------------------------------------------------------------- -->
+<section id="configuration">
+    <h2><span class="num">10</span>Configuration</h2>
+    <figure class="narrow">
+        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy">
+        <figcaption>Configuration tab: a tree of settings, edited in place. Changes are saved immediately.</figcaption>
+    </figure>
+    <p>
+        The Configuration tab exposes FilterMate's settings as a tree. Double-click a value to edit it; drop-down values offer their allowed choices.
+        Most changes apply live, a few (dock position, UI profile) need the panel to be closed and reopened.
+    </p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Setting</th><th>Values</th><th>Notes</th></tr>
+        <tr><td><code>AUTO_ACTIVATE</code></td><td>true / false</td><td>Open the panel automatically when a project with vector layers loads.</td></tr>
+        <tr><td><code>FEEDBACK_LEVEL</code></td><td>minimal / normal / verbose</td><td>How many messages appear in the QGIS message bar. <em>verbose</em> is useful when reporting a problem.</td></tr>
+        <tr><td><code>LANGUAGE</code></td><td>auto or one of 34 locales</td><td><em>auto</em> follows the QGIS locale. The interface retranslates without restart.</td></tr>
+        <tr><td><code>UI_PROFILE</code></td><td>auto / compact / normal / hidpi</td><td>Widget sizes. <em>auto</em> picks from screen size and scaling; force <em>hidpi</em> on 4K displays if controls look small.</td></tr>
+        <tr><td><code>DOCK_POSITION</code></td><td>left / right / top / bottom</td><td>Where the panel docks when opened.</td></tr>
+        <tr><td><code>ACTION_BAR_POSITION</code></td><td>top / bottom / left / right</td><td>Position of the six action buttons.</td></tr>
+        <tr><td><code>ACTIVE_THEME</code></td><td>auto / default / dark / light</td><td><em>auto</em> follows the QGIS theme.</td></tr>
+        <tr><td><code>feature_picker_limit</code></td><td>number, default 1000</td><td>Maximum rows loaded in the multiple-selection list.</td></tr>
+    </table>
+    </div>
+    <p>
+        The tree also holds performance thresholds (when to switch optimisations on), the expression cache size, export defaults and the
+        <strong>Extensions</strong> section (favorites sharing, QFieldCloud). The complete file lives at <code>config/config.json</code> in the plugin folder;
+        <code>config/config.default.json</code> next to it documents every key and can be copied back to reset everything.
+    </p>
+</section>
+
+<!-- 11 ----------------------------------------------------------------- -->
+<section id="backends">
+    <h2><span class="num">11</span>Backends and performance</h2>
+    <p>
+        FilterMate picks a <strong>backend</strong> per layer, based on its data provider, and shows it in the header badge. The backend decides
+        where the spatial test runs: in the database whenever possible, in QGIS otherwise.
+    </p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Badge</th><th>Used for</th><th>How it filters</th></tr>
+        <tr><td><span class="badge" style="background:#58d68d;">PostgreSQL</span></td><td>PostGIS layers, with <code>psycopg2</code> installed</td><td>Native SQL with <code>ST_*</code> functions, an index-friendly <code>&amp;&amp;</code> bounding-box test, primary-key detection, and temporary materialized views (<code>fm_temp_mv_*</code>) for very large cascades.</td></tr>
+        <tr><td><span class="badge" style="background:#bb8fce;">Spatialite</span></td><td>GeoPackage and SpatiaLite files</td><td>SpatiaLite SQL. On GeoPackage the R-tree candidate clause is added first so the predicate only runs on candidates.</td></tr>
+        <tr><td><span class="badge" style="background:#5dade2;">OGR</span></td><td>Shapefile, GeoJSON, KML and every other file format</td><td>QGIS expressions evaluated with the GEOS engine, with geometry simplification and a cascaded union of the source features.</td></tr>
+        <tr><td><span class="badge" style="background:#f0b27a;">Memory</span></td><td>Scratch and temporary layers</td><td>In-memory evaluation.</td></tr>
+    </table>
+    </div>
+    <p>Measured on real projects with version 4.8.9 (timings from <code>filtermate.log</code>):</p>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Scenario</th><th>Before</th><th>Now</th></tr>
+        <tr><td>37 GeoPackage layers filtered by one commune (Toulouse)</td><td>371 s</td><td>1.6 to 3 s</td></tr>
+        <tr><td>17 PostGIS layers, five communes, centroid option</td><td>49.6 s</td><td>under 4 s</td></tr>
+        <tr><td>First connection to a local PostgreSQL server</td><td>21 s stall</td><td>immediate</td></tr>
+    </table>
+    </div>
+    <ul>
+        <li>The map canvas is frozen during a filter task and redrawn once, so the interface stays responsive.</li>
+        <li>Click the backend badge to see the backends available for the current layer and force one when the automatic choice is not what you want.</li>
+        <li>Every step above a few milliseconds is logged with a <code>&#9201;</code> prefix; compare two runs by grepping the log.</li>
+    </ul>
+</section>
+
+<!-- 12 ----------------------------------------------------------------- -->
+<section id="processing">
+    <h2><span class="num">12</span>Processing Toolbox</h2>
+    <figure class="narrow">
+        <img src="img/guide/processing-batch-filter.png" alt="The batch filter algorithm dialog in the Processing Toolbox" loading="lazy">
+        <figcaption>The <em>Filter several layers (batch)</em> algorithm: pick layers, type an expression, run.</figcaption>
+    </figure>
+    <p>
+        FilterMate registers a Processing provider. Its first algorithm, <code>filtermate:batch_filter</code>, applies one filter expression to several vector layers in a single run.
+        Because it is a regular Processing algorithm it can be used in the graphical modeler, in batch mode, or from Python:
+    </p>
+    <pre><code>import processing
+processing.run("filtermate:batch_filter", {
+    "INPUT_LAYERS": ["batiment", "haie"],
+    "EXPRESSION": "\"etat_de_l_objet\" = 'En service'",
+})</code></pre>
+</section>
+
+<!-- 13 ----------------------------------------------------------------- -->
+<section id="troubleshooting">
+    <h2><span class="num">13</span>Troubleshooting</h2>
+    <h3>Where to look first</h3>
+    <ul>
+        <li><strong>QGIS Log Messages panel</strong>, <em>FilterMate</em> tab: warnings and errors of the current session.</li>
+        <li><strong><code>logs/filtermate.log</code></strong> in the plugin folder: the full log, including <code>&#9201;</code> timing lines. Set the environment variable <code>FILTERMATE_LOG_LEVEL=DEBUG</code> before starting QGIS for a verbose log.</li>
+        <li>Switch <code>FEEDBACK_LEVEL</code> to <em>verbose</em> in the Configuration tab to see every message in the message bar.</li>
+    </ul>
+
+    <h3>Common questions</h3>
+    <div class="table-wrap">
+    <table>
+        <tr><th>Symptom</th><th>Cause and fix</th></tr>
+        <tr><td>The filter returns no feature</td><td>Check that the predicate matches the geometry types (a line never <em>contains</em> a polygon), that the buffer sign is what you meant, and that no stray QGIS selection is left on the source layer when using an all-features expression.</td></tr>
+        <tr><td>"No target layer" or nothing happens</td><td>The <em>Layers to filter</em> row is switched off or empty. Attribute-only filters need at least a selection in the Exploring zone.</td></tr>
+        <tr><td>A layer cannot be filtered</td><td>It is in edit mode: answer the dialog, or toggle editing off in QGIS.</td></tr>
+        <tr><td>The badge says OGR on a PostGIS layer</td><td><code>psycopg2</code> is missing from the QGIS Python. Install it and restart QGIS.</td></tr>
+        <tr><td>Controls look tiny on a 4K screen</td><td>Set <code>UI_PROFILE</code> to <em>hidpi</em>.</td></tr>
+        <tr><td>The panel opens in the wrong language</td><td>Set <code>LANGUAGE</code> explicitly instead of <em>auto</em>.</td></tr>
+        <tr><td>A filter from an old session is still applied</td><td>Filters live in the project file. Use <strong>Unfilter</strong>, or clear the provider filter in the layer properties.</td></tr>
+    </table>
+    </div>
+
+    <h3>Getting help</h3>
+    <ul>
+        <li>Report bugs with the log excerpt on <a href="https://github.com/imagodata/filter_mate/issues" target="_blank" rel="noopener">GitHub Issues</a>.</li>
+        <li>Ask questions on the <a href="https://discord.gg/9DNbuVYQ" target="_blank" rel="noopener">Discord server</a>.</li>
+        <li>Watch the <a href="https://www.youtube.com/watch?v=oQq45xZkzDc" target="_blank" rel="noopener">video tutorials</a>.</li>
+    </ul>
+</section>
+
+<footer class="guide-footer">
+    <span>FilterMate 4.8.9 &mdash; Made with care by imagodata &mdash; Open Source (GPL-3.0)</span>
+    <span>
+        <a href="index.html">Home</a> &nbsp;&middot;&nbsp;
+        <a href="roadmap.html">Roadmap</a> &nbsp;&middot;&nbsp;
+        <a href="https://github.com/imagodata/filter_mate" target="_blank" rel="noopener">GitHub</a> &nbsp;&middot;&nbsp;
+        <a href="https://plugins.qgis.org/plugins/filter_mate/" target="_blank" rel="noopener">QGIS plugin page</a>
+    </span>
+</footer>
+
+</main>
+</div>
+
+<script>
+// Hamburger menu
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+// Highlight the current section in the table of contents
+const tocLinks = Array.from(document.querySelectorAll('.toc a'));
+const sections = tocLinks.map(a => document.querySelector(a.getAttribute('href')));
+const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            const id = '#' + e.target.id;
+            tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === id));
+        }
+    });
+}, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+sections.forEach(s => s && obs.observe(s));
+</script>
+
+</body>
+</html>
