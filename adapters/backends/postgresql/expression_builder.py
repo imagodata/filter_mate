@@ -1155,6 +1155,47 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         return self._index_aware_predicate(predicate_func, geom_expr, source_geom_sql, raw_geom_expr)
 
+    @staticmethod
+    def _source_envelope_prefilter(
+        target_geom: str,
+        geom_expr: str,
+        predicate_func: str,
+        source_schema: str,
+        source_table: str,
+        source_geom_field: str,
+        aliased_source_filter: Optional[str],
+        buffer_value: Optional[float],
+    ) -> Optional[str]:
+        """``target && <envelope of the selected source rows>``, or None.
+
+        PERF 2026-09-13: with ``EXISTS (SELECT 1 FROM source AS __source WHERE
+        ST_DWithin(target, __source.geom, d) AND __source.fid IN (...))``
+        PostgreSQL scanned every row of the target and ran the subquery per
+        row: 322 s on zone_de_vegetation, 35 s on batiment for 300 road
+        segments. The envelope of the selected source rows (grown by the
+        buffer) is computed once by an uncorrelated scalar subquery, and the
+        ``&&`` test against it drives the GiST index of the target before the
+        EXISTS runs - the PostgreSQL counterpart of the GeoPackage R-tree
+        prefilter. It never changes the result for the predicates that imply
+        a bbox overlap; skipped for ST_Disjoint, for a reprojected target
+        geometry, and when the whole source table is the selection.
+        """
+        if not aliased_source_filter or not aliased_source_filter.strip():
+            return None
+        if predicate_func.upper() == 'ST_DISJOINT' or 'ST_TRANSFORM(' in geom_expr.upper():
+            return None
+        margin = float(buffer_value) if buffer_value else 0.0
+        if margin < 0:
+            margin = 0.0
+        source_col = f'__source."{source_geom_field}"'
+        envelope = (
+            f'SELECT ST_SetSRID(ST_Expand(ST_Extent({source_col})::geometry, {margin}), '
+            f'MAX(ST_SRID({source_col}))) '
+            f'FROM "{source_schema}"."{source_table}" AS __source '  # nosec B608
+            f'WHERE ({aliased_source_filter})'
+        )
+        return f'{target_geom} && ({envelope})'
+
     def _buffered_predicate(
         self,
         predicate_func: str,
@@ -1422,6 +1463,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         else:
             first_clause = self._index_aware_predicate(predicate_func, geom_expr, source_geom_in_subquery, raw_geom_expr)
         where_clauses = [first_clause]
+        prefilter_filter = None  # 2026-09-13: aliased simple source filter for the envelope prefilter
 
         if source_filter:
             # CRITICAL FIX v4.2.8 (2026-01-21): Handle combined EXISTS filters properly
@@ -1498,6 +1540,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                         )
 
                 self.log_debug(f"Aliased source_filter: {aliased_source_filter[:100]}...")
+                prefilter_filter = aliased_source_filter
                 where_clauses.append(f"({aliased_source_filter})")
 
         where_clause = " AND ".join(where_clauses)
@@ -1509,6 +1552,19 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             f'WHERE {where_clause}'
             ')'
         )
+        envelope_prefilter = self._source_envelope_prefilter(
+            target_geom=raw_geom_expr or geom_expr,
+            geom_expr=geom_expr,
+            predicate_func=predicate_func,
+            source_schema=source_schema,
+            source_table=source_table,
+            source_geom_field=source_geom_field,
+            aliased_source_filter=prefilter_filter,
+            buffer_value=static_buffer,
+        )
+        if envelope_prefilter:
+            exists_expr = f"({envelope_prefilter} AND {exists_expr})"
+            self.log_info("📦 Source envelope prefilter added (GiST index on the target)")
 
         # FIX v4.2.13: Enhanced diagnostics for EXISTS expression
         self.log_info("📝 EXISTS expression built:")
