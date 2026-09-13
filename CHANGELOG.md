@@ -13,6 +13,7 @@ All notable changes to FilterMate will be documented in this file.
 ### Performance
 
 - Exploring feature list: an identical population request (same layer, display expression, subset, sort and mode) within 3 s of a completed one is skipped. `setLayer()` followed by `setDisplayExpression()` during a layer change rebuilt the same list twice — two ordered scans of a filtered PostgreSQL road layer, 6 s each. `⏱ picker_populate` is logged when a population takes 250 ms or more.
+- Single-selection feature picker: its model now fetches at most `feature_picker_limit` rows (default 1 000, the limit the multiple-selection list already uses) instead of every feature of the current layer at each layer change; the picker's text filter still searches the whole layer. No-op on QGIS versions without `QgsFeaturePickerWidget.setFetchLimit()`.
 - `⏱ layer_change_sync` / `layer_change_reload` / `layer_change_groupbox` sub-spans (logged above 250 ms) split the layer-change latency (an 80 s `layer_change` was measured without any detail); `perf_mark_end()` accepts `min_ms`.
 - `filtermate.log`: the per-layer expression-building trace (`core/filter/expression_builder.py`, `core/filter/filter_orchestrator.py`) and the per-layer "Organizing layer" lines are DEBUG now. A 36-layer filter wrote about 3 000 INFO lines (900 KB in five minutes) and the `⏱` timing lines were lost in them.
 

@@ -81,6 +81,37 @@ from ...infrastructure.utils import safe_iterate_features, is_layer_valid
 # during a layer change rebuilt the same list twice.
 POPULATE_DEDUPE_SECONDS = 3.0
 
+
+def feature_picker_limit() -> int:
+    """Row limit of the exploring feature pickers (APP.OPTIONS.EXPLORATION.feature_picker_limit)."""
+    try:
+        from ...config.config import ENV_VARS, _get_option_value
+        exploration = ENV_VARS.get('CONFIG_DATA', {}).get('APP', {}).get('OPTIONS', {}).get('EXPLORATION', {})
+        return int(_get_option_value(exploration.get('feature_picker_limit'), 1000) or 0)
+    except (ImportError, AttributeError, TypeError, ValueError):
+        return 1000
+
+
+def apply_feature_picker_fetch_limit(picker) -> None:
+    """Bound the rows fetched by a QgsFeaturePickerWidget to ``feature_picker_limit``.
+
+    PERF 2026-09-13: the single-selection picker fetched every feature of the
+    current layer (its model has no limit by default), one full scan of a
+    filtered PostgreSQL layer at each layer change. Call it before
+    ``setLayer()`` so the model fetches once, with the limit. A no-op on QGIS
+    versions without ``setFetchLimit``.
+    """
+    limit = feature_picker_limit()
+    if limit <= 0 or picker is None or not hasattr(picker, 'setFetchLimit'):
+        return
+    try:
+        if hasattr(picker, 'fetchLimit') and picker.fetchLimit() == limit:
+            return
+        picker.setFetchLimit(limit)
+    except (RuntimeError, TypeError, AttributeError) as exc:
+        logger.debug(f"apply_feature_picker_fetch_limit: skipped ({exc})")
+
+
 logger = logging.getLogger('FilterMate.UI.Widgets.CustomWidgets')
 
 

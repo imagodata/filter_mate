@@ -84,6 +84,7 @@ from qgis.utils import iface
 
 import webbrowser
 from .ui.widgets import QgsCheckableComboBoxFeaturesListPickerWidget
+from .ui.widgets.custom_widgets import apply_feature_picker_fetch_limit
 
 # Object safety and layer utilities (migrated to infrastructure)
 from .infrastructure.utils import is_layer_valid as is_valid_layer
@@ -1769,6 +1770,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     # FIX 2026-03-16: Force full model rebuild by setting layer to None first
                     # setLayer(same_layer) may be ignored by the widget if already set
                     picker.setLayer(None)
+                    apply_feature_picker_fetch_limit(picker)
                     picker.setLayer(self.current_layer)
                     # Reconnect willBeDeleted signal after setLayer reset
                     self._connect_feature_picker_layer_deletion(self.current_layer)

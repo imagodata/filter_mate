@@ -16,6 +16,8 @@ Décisions à connaître :
   du « pb buffer routes ».
 - Liste d'entités (multiple selection) : dédoublonnage des `_populate_features_sync` identiques
   sous 3 s (`POPULATE_DEDUPE_SECONDS`) ; ligne `⏱ picker_populate` au-delà de 250 ms.
+- Sélecteur simple (`QgsFeaturePickerWidget`) : `apply_feature_picker_fetch_limit()` (custom_widgets) appelé
+  AVANT chaque `setLayer` → `setFetchLimit(feature_picker_limit)` ; sans limite il chargeait toute la couche.
 - Sous-chronos `⏱ layer_change_sync/_reload/_groupbox` (≥ 250 ms) pour expliquer le
   `layer_change: 80675 ms` vu dans le log (non expliqué à ce jour ; probablement la population du
   picker sur PostgreSQL avec sous-requête EXISTS).
