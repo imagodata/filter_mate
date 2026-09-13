@@ -2,6 +2,12 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [Unreleased]
+
+### Performance
+
+- PostgreSQL source-selection materialized view: built once per task and reused by every target layer (17 identical 1 734-row views were created for a 17-layer cascade), and the EXISTS now reads the view itself (`FROM "filtermate_temp"."fm_temp_mv_…" AS __source`, `pk`/`geom` columns, GiST index) instead of joining the whole source table through `"fid" IN (SELECT pk FROM …)`; the envelope prefilter is computed over the view. Measured before: 54.7 s for a roads + 20 m buffer cascade on 17 layers (batiment 18 s) with the view, 25 s with the inline `IN` list.
+
 ## [4.8.10] - 2026-09-13
 ### Fixed
 

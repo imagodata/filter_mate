@@ -1156,6 +1156,24 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         return self._index_aware_predicate(predicate_func, geom_expr, source_geom_sql, raw_geom_expr)
 
     @staticmethod
+    def _source_selection_mv_ref(source_filter: Optional[str]) -> Optional[tuple]:
+        """``(schema, name)`` of the source-selection MV referenced by ``source_filter``, or None.
+
+        Matches the filter built by the core ExpressionBuilder:
+        ``"table"."pk" IN (SELECT pk FROM "filtermate_temp"."fm_temp_mv_...")``.
+        """
+        if not source_filter:
+            return None
+        match = re.fullmatch(
+            r'\s*"?[^"]*"?\.?"?[^"]*"?\s+IN\s*\(\s*SELECT\s+pk\s+FROM\s+"([^"]+)"\."([^"]+)"\s*\)\s*',
+            source_filter,
+            re.IGNORECASE,
+        )
+        if not match:
+            return None
+        return match.group(1), match.group(2)
+
+    @staticmethod
     def _source_envelope_prefilter(
         target_geom: str,
         geom_expr: str,
@@ -1304,6 +1322,21 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         source_schema = source_ref.get('schema', 'public')
         source_table = source_ref['table']
         source_geom_field = source_ref['geom_field']
+
+        # 2026-09-13: when the selection lives in the source-selection MV
+        # ("pk" and "geom" columns, GiST index), read the MV itself instead
+        # of joining the whole source table through "fid" IN (SELECT pk ...):
+        # the EXISTS then touches 1 734 rows instead of 500 000.
+        mv_selection = self._source_selection_mv_ref(source_filter)
+        if mv_selection and not (buffer_expression and buffer_expression.strip()):
+            mv_schema, mv_table = mv_selection
+            self.log_info(f"🗄️ EXISTS reads the source selection MV directly: \"{mv_schema}\".\"{mv_table}\"")
+            source_schema, source_table, source_geom_field = mv_schema, mv_table, "geom"
+            source_filter = None
+            original_source_table = None
+            whole_source_is_selection = True
+        else:
+            whole_source_is_selection = False
 
         # Build source geometry in subquery
         source_geom_in_subquery = f'__source."{source_geom_field}"'
@@ -1464,6 +1497,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             first_clause = self._index_aware_predicate(predicate_func, geom_expr, source_geom_in_subquery, raw_geom_expr)
         where_clauses = [first_clause]
         prefilter_filter = None  # 2026-09-13: aliased simple source filter for the envelope prefilter
+        if whole_source_is_selection:
+            prefilter_filter = "TRUE"  # the MV holds exactly the selection
 
         if source_filter:
             # CRITICAL FIX v4.2.8 (2026-01-21): Handle combined EXISTS filters properly
