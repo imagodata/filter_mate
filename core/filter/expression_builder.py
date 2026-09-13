@@ -96,6 +96,10 @@ class ExpressionBuilder:
 
         # Materialized views created for source selections (cleanup needed)
         self._source_selection_mvs = []
+        # PERF 2026-09-13: the source-selection MV filter is built once per
+        # task and reused by every target layer (17 identical MVs of 1 734
+        # rows were created for a 17-layer cascade).
+        self._source_selection_mv_cache: Dict[Any, str] = {}
 
         logger.debug("ExpressionBuilder initialized")
 
@@ -1239,6 +1243,11 @@ class ExpressionBuilder:
             'source_mv_fid_threshold': 500,  # Create MV when > 500 FIDs
         }
 
+    @staticmethod
+    def _selection_cache_key(fids: List[Any], pk_field: str, source_table_name: Optional[str]) -> tuple:
+        """Key identifying a source selection (order-insensitive) within a task."""
+        return (source_table_name, pk_field, tuple(sorted(str(fid) for fid in fids)))
+
     def _create_source_selection_mv_filter(
         self,
         fids: List[Any],
@@ -1259,6 +1268,11 @@ class ExpressionBuilder:
             Optional[str]: MV-based filter or inline filter on failure
         """
         logger.debug(f"🗄️ Source selection ({len(fids)} FIDs) > threshold (500)")
+        cache_key = self._selection_cache_key(fids, pk_field, source_table_name)
+        cached = self._source_selection_mv_cache.get(cache_key)
+        if cached:
+            logger.debug("   → Reusing the source selection MV filter built for this task")
+            return cached
         logger.debug("   → Creating temporary MV for optimized EXISTS query")
 
         # Get geometry field name
@@ -1320,6 +1334,7 @@ class ExpressionBuilder:
 
             # Store MV reference for cleanup
             self._source_selection_mvs.append(mv_ref)
+            self._source_selection_mv_cache[cache_key] = source_filter
 
             logger.debug(f"   ✓ MV created: {mv_ref}")
             logger.debug(f"   → Using source selection MV ({len(fids)} features) for EXISTS optimization")

@@ -680,3 +680,31 @@ class TestSourceEnvelopePrefilter:
         expr = self._expr(builder, source_filter='EXISTS (SELECT 1 FROM "s"."zone" AS __source WHERE 1=1)')
         assert expr.startswith('EXISTS (')
         assert 'ST_Extent' not in expr
+
+
+class TestSourceSelectionMvAsSource:
+    MV_FILTER = '"troncon_de_route"."fid" IN (SELECT pk FROM "filtermate_temp"."fm_temp_mv_session_ab_cd")'
+
+    def test_mv_ref_parsing(self, builder):
+        assert builder._source_selection_mv_ref(self.MV_FILTER) == ("filtermate_temp", "fm_temp_mv_session_ab_cd")
+        assert builder._source_selection_mv_ref('"fid" IN (SELECT pk FROM "filtermate_temp"."x")') == ("filtermate_temp", "x")
+        assert builder._source_selection_mv_ref('"troncon_de_route"."fid" IN (1, 2, 3)') is None
+        assert builder._source_selection_mv_ref(None) is None
+
+    def test_exists_reads_the_mv_directly(self, builder):
+        expr = builder._build_exists_expression(
+            geom_expr='"b"."geom"',
+            predicate_func="ST_Intersects",
+            source_geom='"ign"."troncon_de_route"."geometrie"',
+            source_filter=self.MV_FILTER,
+            buffer_value=20,
+            layer_props={},
+            original_source_table="troncon_de_route",
+            raw_geom_expr='"b"."geom"',
+        )
+        assert ('EXISTS (SELECT 1 FROM "filtermate_temp"."fm_temp_mv_session_ab_cd" AS __source '
+                'WHERE ST_DWithin("b"."geom", __source."geom", 20))') in expr
+        assert expr.startswith('("b"."geom" && (SELECT ST_SetSRID(ST_Expand(ST_Extent(__source."geom")::geometry, 20.0), ')
+        assert 'FROM "filtermate_temp"."fm_temp_mv_session_ab_cd" AS __source WHERE (TRUE))' in expr
+        assert '"ign"."troncon_de_route"' not in expr
+        assert 'IN (SELECT pk' not in expr

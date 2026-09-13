@@ -2,6 +2,8 @@
 _Auto-maintained by project agent_
 
 ## [2026-09-13 soir] PostgreSQL buffer, MV, rechargement projet, OGR → branche `claude/pg-buffer-project-reload`
+- MV de sélection : mémoïsée par tâche (`_source_selection_mv_cache`, clé = fids triés) et lue directement par
+  l'EXISTS PostgreSQL (`_source_selection_mv_ref` → FROM la MV, préfiltre d'emprise `WHERE (TRUE)`).
 - `_clean_corrupted_subsets` (filter_orchestrator) doit accepter un EXISTS n'importe où dans le subset (préfiltre
   d'emprise devant) : sinon il met en file un subset vide appliqué APRÈS le filtre posé par le worker → cibles vides.
 - Préfiltre d'emprise PostgreSQL (`_source_envelope_prefilter`) : `target && (SELECT ST_Expand(ST_Extent(src)…) WHERE sélection)`
