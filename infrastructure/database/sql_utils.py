@@ -385,7 +385,7 @@ def create_temp_spatialite_table(
         # Create spatial index
         try:
             # Register geometry column
-            cursor.execute("""
+            cursor.execute(f"""
                 SELECT RecoverGeometryColumn(
                     '{sanitize_sql_identifier(table_name)}',
                     '{sanitize_sql_identifier(geom_field)}',

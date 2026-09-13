@@ -19,6 +19,7 @@ from qgis.PyQt.QtCore import QObject
 # Local imports
 from ...config.config import ENV_VARS
 from ...infrastructure.logging import get_logger
+from ...infrastructure.database.sql_utils import sanitize_sql_identifier
 from ...infrastructure.utils.layer_utils import (
     get_datasource_connexion_from_layer,
     get_data_source_uri,
@@ -452,12 +453,12 @@ class DatasourceManager(QObject):
 
         config_data = self._get_config_data()
 
-        sql_request = """CREATE EXTENSION IF NOT EXISTS ogr_fdw;
+        sql_request = f"""CREATE EXTENSION IF NOT EXISTS ogr_fdw;
                         CREATE SCHEMA IF NOT EXISTS filter_mate_temp AUTHORIZATION postgres;
                         DROP SERVER IF exists server_{sanitize_sql_identifier(datasource)} CASCADE;
                         CREATE SERVER server_{sanitize_sql_identifier(datasource)}
                         FOREIGN DATA WRAPPER ogr_fdw OPTIONS (
-                            datasource '{project_datasource.replace(chr(92)+chr(92), chr(92))}',
+                            datasource '{project_datasource.replace(chr(92) + chr(92), chr(92))}',
                             format '{format}');
                         IMPORT FOREIGN SCHEMA ogr_all
                         FROM SERVER server_{sanitize_sql_identifier(datasource)} INTO filter_mate_temp;"""

@@ -399,7 +399,6 @@ class FilterExpression:
             SQL expression string
         """
         # If provider specified and different, note it in logs
-        provider or self.provider
 
         # Return stored SQL (may need conversion by caller)
         return self.sql

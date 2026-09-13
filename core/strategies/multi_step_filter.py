@@ -354,7 +354,6 @@ class SelectivityEstimator:
             return 0.0  # No overlap
 
         # Calculate areas
-        (src_xmax - src_xmin) * (src_ymax - src_ymin)
         lyr_area = (lyr_xmax - lyr_xmin) * (lyr_ymax - lyr_ymin)
         int_area = (int_xmax - int_xmin) * (int_ymax - int_ymin)
 
@@ -787,8 +786,8 @@ class MultiStepFilterExecutor:
 
         if candidate_ids is not None and len(candidate_ids) <= self.MAX_IN_CLAUSE_SIZE:
             # Filter within candidate set
-            ','.join(str(id) for id in candidate_ids)
-            query = """
+            ids_str = ','.join(str(id) for id in candidate_ids)
+            query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE "{self.primary_key}" IN ({ids_str})
@@ -796,7 +795,7 @@ class MultiStepFilterExecutor:
             """
         else:
             # Full table scan with bbox
-            query = """
+            query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE {step.expression}
@@ -818,15 +817,15 @@ class MultiStepFilterExecutor:
             if len(candidate_ids) > self.MAX_IN_CLAUSE_SIZE:
                 return self._execute_chunked(step, candidate_ids)
 
-            ','.join(str(id) for id in candidate_ids)
-            query = """
+            ids_str = ','.join(str(id) for id in candidate_ids)
+            query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE "{self.primary_key}" IN ({ids_str})
                   AND ({step.expression})
             """
         else:
-            query = """
+            query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE {step.expression}
@@ -847,15 +846,15 @@ class MultiStepFilterExecutor:
             if len(candidate_ids) > self.MAX_IN_CLAUSE_SIZE:
                 return self._execute_chunked(step, candidate_ids)
 
-            ','.join(str(id) for id in candidate_ids)
-            query = """
+            ids_str = ','.join(str(id) for id in candidate_ids)
+            query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE "{self.primary_key}" IN ({ids_str})
                   AND ({step.expression})
             """
         else:
-            query = """
+            query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE {step.expression}
@@ -873,9 +872,9 @@ class MultiStepFilterExecutor:
 
         for i in range(0, len(candidate_ids), self.chunk_size):
             chunk = candidate_ids[i:i + self.chunk_size]
-            ','.join(str(id) for id in chunk)
+            ids_str = ','.join(str(id) for id in chunk)
 
-            query = """
+            query = f"""
                 SELECT "{self.primary_key}"
                 FROM "{self.schema}"."{self.table}"
                 WHERE "{self.primary_key}" IN ({ids_str})

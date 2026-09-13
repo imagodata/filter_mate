@@ -279,7 +279,6 @@ class BaseLegacyAdapter(GeometricFilterBackend):
 
     def get_backend_name(self) -> str:
         """Get backend display name for logging (internal name must be plain 'PostgreSQL')."""
-        "(v4)" if self._use_new_backend else "(Legacy)"
         # Return plain provider name for TaskBridge compatibility
         # Display suffix is added only in user messages via infrastructure/feedback
         return self.provider_type.capitalize()
@@ -450,7 +449,6 @@ def set_new_backend_enabled(provider_type: str, enabled: bool):
         >>> set_new_backend_enabled('memory', True)
     """
     if provider_type.lower() in ENABLE_NEW_BACKENDS:
-        ENABLE_NEW_BACKENDS[provider_type.lower()]
         ENABLE_NEW_BACKENDS[provider_type.lower()] = enabled
         logger.debug(f"🔄 Backend {provider_type.upper()}: {'LEGACY → NEW' if enabled else 'NEW → LEGACY'}")
     else:

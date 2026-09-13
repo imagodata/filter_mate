@@ -897,7 +897,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # FIX v4.2.19: Check if table already exists (for filter chaining)
         try:
             with connexion.cursor() as cursor:
-                cursor.execute("""
+                cursor.execute(f"""
                     SELECT EXISTS (
                         SELECT 1 FROM information_schema.tables
                         WHERE table_schema = '{temp_schema}'
@@ -908,7 +908,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 if table_exists:
                     self.log_info(f"♻️ Reusing existing buffer table: {temp_schema}.{temp_table_name}")
                     # FIX v4.2.20: Build EXISTS expression using existing table
-                    exists_expr = '''EXISTS (
+                    exists_expr = f'''EXISTS (
               SELECT 1
               FROM "{temp_schema}"."{temp_table_name}" AS __buffer
               WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
@@ -930,7 +930,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         primary_key_column = None
         try:
             with connexion.cursor() as cursor:
-                cursor.execute("""
+                cursor.execute(f"""
                     SELECT a.attname
                     FROM pg_index i
                     JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
@@ -1025,7 +1025,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             self.log_info("   → Buffers pre-calculated, will be reused across all distant layers")
 
             # Build EXISTS using buffer table (with schema prefix for QGIS visibility)
-            exists_expr = """EXISTS (
+            exists_expr = f"""EXISTS (
                 SELECT 1
                 FROM "{temp_schema}"."{temp_table_name}" AS __buffer
                 WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)

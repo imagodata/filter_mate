@@ -169,7 +169,6 @@ class LayerSignalHandler:
             try:
                 # Use signal manager if available
                 if self._signal_manager:
-                    f"layer_{layer_id}_{signal_name}"
                     conn_id = self._signal_manager.connect(
                         sender=layer,
                         signal_name=signal_name,

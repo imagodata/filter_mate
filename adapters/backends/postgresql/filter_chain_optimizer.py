@@ -318,7 +318,7 @@ class FilterChainOptimizer:
             source_geom = f"ST_Buffer({source_geom}, {context.buffer_value}, 'quad_segs=5')"
 
         # Build optimized EXISTS
-        expression = '''EXISTS (
+        expression = f'''EXISTS (
     SELECT 1 FROM "{self.MV_SCHEMA}"."{mv_name}" AS __source
     WHERE {predicate}("{distant_table}"."{distant_geom_column}", {source_geom})
 )'''
@@ -438,15 +438,15 @@ class FilterChainOptimizer:
         where_clauses = []
 
         for filter_info in context.spatial_filters:
-            filter_info.get('table')
-            filter_info.get('schema', 'public')
+            filter_table = filter_info.get('table')
+            filter_schema = filter_info.get('schema', 'public')
             filter_geom = filter_info.get('geom_column', 'geom')
-            filter_info.get('predicate', 'ST_Intersects')
+            predicate = filter_info.get('predicate', 'ST_Intersects')
             filter_buffer = filter_info.get('buffer')
             filter_condition = filter_info.get('condition')  # e.g., id IN (...)
 
             # Build source geometry reference
-            f'src."{context.source_geom_column}"'
+            src_geom = f'src."{context.source_geom_column}"'
 
             # Build filter geometry reference
             filter_geom_ref = f'f."{filter_geom}"'
@@ -454,7 +454,7 @@ class FilterChainOptimizer:
                 filter_geom_ref = f"ST_Buffer({filter_geom_ref}, {filter_buffer}, 'quad_segs=5')"
 
             # Build EXISTS subquery
-            exists_clause = '''EXISTS (
+            exists_clause = f'''EXISTS (
                 SELECT 1 FROM "{filter_schema}"."{filter_table}" f
                 WHERE {predicate}({src_geom}, {filter_geom_ref})'''
 
@@ -465,10 +465,10 @@ class FilterChainOptimizer:
             where_clauses.append(exists_clause)
 
         # Combine all constraints
-        ' AND '.join(where_clauses)
+        where_combined = ' AND '.join(where_clauses)
 
         # Build CREATE MATERIALIZED VIEW SQL
-        sql = '''
+        sql = f'''
 CREATE MATERIALIZED VIEW "{self.MV_SCHEMA}"."{mv_name}" AS
 SELECT src.*
 FROM "{context.source_schema}"."{context.source_table}" src
@@ -489,8 +489,8 @@ WITH DATA
         exists_clauses = []
 
         for filter_info in context.spatial_filters:
-            filter_info.get('table')
-            filter_info.get('schema', 'public')
+            filter_table = filter_info.get('table')
+            filter_schema = filter_info.get('schema', 'public')
             filter_geom = filter_info.get('geom_column', 'geom')
             filter_buffer = filter_info.get('buffer')
             filter_condition = filter_info.get('condition')
@@ -501,7 +501,7 @@ WITH DATA
                 src_geom = f"ST_Buffer({src_geom}, {filter_buffer}, 'quad_segs=5')"
 
             # Build EXISTS
-            exists_sql = '''EXISTS (SELECT 1 FROM "{filter_schema}"."{filter_table}" AS __source WHERE {predicate}("{distant_table}"."{distant_geom_column}", {src_geom})'''  # nosec B608
+            exists_sql = f'''EXISTS (SELECT 1 FROM "{filter_schema}"."{filter_table}" AS __source WHERE {predicate}("{distant_table}"."{distant_geom_column}", {src_geom})'''  # nosec B608
 
             if filter_condition:
                 exists_sql += f' AND ({filter_condition})'

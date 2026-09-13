@@ -285,7 +285,6 @@ def apply_pending_subset_requests(
         layer_started = _perf_time.perf_counter()
         phase_details = ''
         try:
-            layer.name() if layer else "NONE"
 
             if not layer or not is_valid_layer(layer):
                 QgsMessageLog.logMessage(
