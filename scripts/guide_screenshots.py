@@ -88,7 +88,8 @@ def s_open_plugin():
 
 def s_after_open():
     d = dock()
-    d.setMinimumWidth(640)
+    d.setMinimumWidth(0)
+    iface.mainWindow().resizeDocks([d], [413], Qt.Orientation.Horizontal)
     save(plugins['filter_mate'].toolbar, '00-toolbar')
 
 def s_exploring_single():
