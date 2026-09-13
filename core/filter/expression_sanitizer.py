@@ -759,3 +759,22 @@ def extract_spatial_clauses_for_exists(filter_expr: str, source_table: Optional[
 
     logger.info(f"extract_spatial_clauses: Extracted spatial filter: '{cleaned[:100]}...'")
     return cleaned
+
+
+_WELL_FORMED_EXISTS = re.compile(
+    r'EXISTS\s*\(\s*SELECT\s+.+?\s+FROM\s+.+?\s+AS\s+__source\s+WHERE\s+.+\)',
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def contains_well_formed_exists(subset_string: Optional[str]) -> bool:
+    """True when ``subset_string`` holds a complete ``EXISTS (SELECT ... AS __source WHERE ...)`` block.
+
+    2026-09-13: used by the corrupted-subset cleaner. The PostgreSQL builder
+    may put the source envelope prefilter in front of the EXISTS
+    (``("t"."geom" && (SELECT ... AS __source WHERE ...)) AND EXISTS (...)``),
+    so the block is searched anywhere, not only at the start.
+    """
+    if not subset_string:
+        return False
+    return bool(_WELL_FORMED_EXISTS.search(subset_string))

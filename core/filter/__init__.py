@@ -24,6 +24,7 @@ from .expression_builder import (  # noqa: F401
 # Expression sanitizers
 from .expression_sanitizer import (  # noqa: F401
     sanitize_subset_string,
+    contains_well_formed_exists,
     optimize_duplicate_in_clauses,
 )
 
@@ -59,6 +60,7 @@ __all__ = [
     'build_combined_filter_expression',
     # Sanitizers
     'sanitize_subset_string',
+    'contains_well_formed_exists',
     'optimize_duplicate_in_clauses',
     # PK formatters
     'is_pk_numeric',
