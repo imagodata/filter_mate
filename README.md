@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.9** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.8.10** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -11,7 +11,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.9 is a measured performance release: spatial cascades on GeoPackage use the R-tree (371 s to under 3 s on a 37-layer project), PostgreSQL targets keep their GiST index with the centroid option, no more connection stalls on `localhost`, and the canvas is redrawn once per task. See [what's new](#-whats-new-in-489).
+**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.10 fixes the PostgreSQL buffer filters (a roads + 20 m buffer cascade went from never finishing to 25 s for 16 layers, with `ST_DWithin` and a source envelope prefilter on each target's GiST index), reloads the panel when another project is opened, applies GeoPackage buffers once in QGIS instead of falling back to a convex hull, and restores 48 SQL templates broken since February. See [what's new](#-whats-new-in-4810).
 
 ---
 
@@ -31,7 +31,18 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.9
+### 🆕 What's new in 4.8.10
+
+- **PostgreSQL buffer filters**: `ST_Intersects(target, ST_Buffer(source, d))` is replaced by `ST_DWithin(target, source, d)` for intersects with a positive round buffer, and every EXISTS is preceded by a bbox test of the target against the envelope of the selected source rows, served by the target's GiST index. A roads + 20 m buffer cascade that never finished now takes 25 s for 16 layers (zone_de_vegetation 322 s to 3 s). The source-selection materialized view is created with the right index columns and committed, and the corrupted-subset cleaner accepts the new expressions.
+- **Project switch**: with `APP.AUTO_ACTIVATE` off (the default) the open panel never reloaded on `projectRead`; it now reloads the new project's layers, source layer and favorites.
+- **GeoPackage / Spatialite buffers**: the static buffer is applied once in QGIS and simplified with a tolerance bounded by the buffer; no more convex hull fallback (a 20 m buffer around 7 000 road segments returned everything inside the hull). The source read in SUBSET mode is retried when the attribute-less request comes back empty.
+- **OGR**: the buffered source is computed once per task instead of once per target layer, and the primary keys of the selected features are fetched in one request.
+- **Repair**: 48 SQL templates in 16 modules had lost their `f` prefix since the 2026-02-10 clean-up (PostgreSQL materialized view, subset history, Spatialite temp tables, progressive strategies); restored, with a test that fails the build if it happens again.
+- Exploring: identical feature-list populations deduplicated, single-selection picker bounded to `feature_picker_limit`, `⏱ picker_populate` and `⏱ layer_change_*` timing lines; the per-layer expression trace is DEBUG.
+
+See the [4.8.10 changelog](CHANGELOG.md#4810---2026-09-13) for details.
+
+### What's new in 4.8.9
 
 - **GeoPackage cascades use the spatial index**: the Spatialite expression starts with the R-tree candidate clause GDAL uses for its own spatial filter. Filtering 37 BD TOPO layers by the commune of Toulouse took 371 s; it now takes 1.6 to 3 s. No second full scan after a filter (`reload()` removed on PostgreSQL/OGR).
 - **PostgreSQL with the centroid option keeps its GiST index**: `"t"."geom" && source` is tested before `ST_Intersects(ST_PointOnSurface("t"."geom"), source)`. A five-commune cascade went from 49.6 s to under 4 s, and the worker no longer counts each target twice.

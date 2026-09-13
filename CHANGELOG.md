@@ -2,8 +2,7 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
-
+## [4.8.10] - 2026-09-13
 ### Fixed
 
 - **PostgreSQL buffer filters hung** (`filtermate.log`, 2026-09-13: a 20 m buffer around 1 661 road segments never finished on the first of 17 target layers). `ST_Intersects(target, ST_Buffer(__source.geom, d))` makes PostgreSQL compute a buffer per (source, target) pair whenever it drives the join from the target side. For the intersects predicate and a positive round buffer the expression is now the exact equivalent `ST_DWithin(target, __source.geom, d)` (no buffer geometry, index-friendly on both sides; with the centroid option a `target.geom && ST_Expand(__source.geom, d)` bbox test brings the GiST index back). Other predicates, negative buffers and flat/square caps keep `ST_Buffer()`.
