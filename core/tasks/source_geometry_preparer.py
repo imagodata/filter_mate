@@ -154,6 +154,9 @@ class SourceGeometryPreparer:
         geometry_to_wkt_fn=None,
         simplify_geometry_adaptive_fn=None,
         get_optimization_thresholds_fn=None,
+        param_buffer_segments=5,
+        param_buffer_type=0,
+        param_buffer_expression=None,
     ):
         """Prepare source geometry for Spatialite filtering.
 
@@ -199,6 +202,9 @@ class SourceGeometryPreparer:
             expression=expression,
             param_source_new_subset=param_source_new_subset,
             param_buffer_value=param_buffer_value,
+            param_buffer_segments=param_buffer_segments,
+            param_buffer_type=param_buffer_type,
+            param_buffer_expression=param_buffer_expression,
             has_to_reproject_source_layer=has_to_reproject_source_layer,
             source_layer_crs_authid=source_layer_crs_authid,
             source_crs=source_crs,

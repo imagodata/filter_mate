@@ -403,7 +403,7 @@ class TwoPhaseFilter:
         xmin, ymin, xmax, ymax = bbox
 
         # Build efficient bbox query using && operator
-        query = """
+        query = f"""
             SELECT "{self.layer_props.primary_key}"
             FROM "{self.layer_props.schema}"."{self.layer_props.table}"
             WHERE "{self.layer_props.geometry_column}" &&
@@ -447,9 +447,9 @@ class TwoPhaseFilter:
 
         for i in range(0, len(candidate_ids), chunk_size):
             chunk = candidate_ids[i:i + chunk_size]
-            ','.join(str(id) for id in chunk)
+            ids_list = ','.join(str(id) for id in chunk)
 
-            query = """
+            query = f"""
                 SELECT "{self.layer_props.primary_key}"
                 FROM "{self.layer_props.schema}"."{self.layer_props.table}"
                 WHERE "{self.layer_props.primary_key}" IN ({ids_list})
@@ -507,7 +507,7 @@ class TwoPhaseFilter:
         """Execute single-phase filter (fallback when two-phase not possible)."""
         start_time = time.time()
 
-        query = """
+        query = f"""
             SELECT "{self.layer_props.primary_key}"
             FROM "{self.layer_props.schema}"."{self.layer_props.table}"
             WHERE {expression}
@@ -734,7 +734,7 @@ class ProgressiveFilterExecutor:
         """Execute with progressive chunked result retrieval."""
         start_time = time.time()
 
-        query = """
+        query = f"""
             SELECT "{self.layer_props.primary_key}"
             FROM "{self.layer_props.schema}"."{self.layer_props.table}"
             WHERE {expression}
@@ -794,7 +794,7 @@ class ProgressiveFilterExecutor:
         """Execute with direct fetchall (for small datasets)."""
         start_time = time.time()
 
-        query = """
+        query = f"""
             SELECT "{self.layer_props.primary_key}"
             FROM "{self.layer_props.schema}"."{self.layer_props.table}"
             WHERE {expression}

@@ -28,6 +28,7 @@ except ImportError:
     QColor = None
 
 from .base_controller import BaseController
+from ..widgets.custom_widgets import apply_feature_picker_fetch_limit
 from ...infrastructure.signal_utils import SignalBlocker
 from .mixins.layer_selection_mixin import LayerSelectionMixin
 
@@ -797,6 +798,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                         # The _sync_multiple_selection_from_qgis will handle widget population
                         is_syncing = getattr(dw, '_syncing_from_qgis', False)
                         if mode == 'single_selection':
+                            apply_feature_picker_fetch_limit(feat_widget)
                             feat_widget.setLayer(target_layer)
                             if layer_props:
                                 expr = layer_props.get("exploring", {}).get(config['expression_key'], "")
@@ -2700,6 +2702,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
                 picker_widget = self._dockwidget.widgets["EXPLORING"]["SINGLE_SELECTION_FEATURES"]["WIDGET"]
                 picker_widget.setLayer(None)
+                apply_feature_picker_fetch_limit(picker_widget)
                 picker_widget.setLayer(layer)
                 # FIX 2026-01-19: Connect willBeDeleted to prevent crash on layer deletion
                 if hasattr(self._dockwidget, '_connect_feature_picker_layer_deletion'):

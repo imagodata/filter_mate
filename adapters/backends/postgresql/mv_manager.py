@@ -310,8 +310,8 @@ class MaterializedViewManager(MaterializedViewPort):
             cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{safe_schema}"')
 
             # Create MV
-            "WITH DATA" if self._mv_config.with_data else "WITH NO DATA"
-            create_sql = """
+            with_data = "WITH DATA" if self._mv_config.with_data else "WITH NO DATA"
+            create_sql = f"""
                 CREATE MATERIALIZED VIEW {full_name} AS
                 {query}
                 {with_data}
@@ -733,10 +733,10 @@ class MaterializedViewManager(MaterializedViewPort):
         """Create spatial index on MV geometry column."""
         # Clean table name for index naming
         clean_name = table_name.replace('"', '').replace('.', '_')
-        f"idx_{clean_name}_geom"
+        index_name = f"idx_{clean_name}_geom"
 
         try:
-            cursor.execute("""
+            cursor.execute(f"""
                 CREATE INDEX IF NOT EXISTS "{index_name}"
                 ON {table_name} USING GIST ("{geometry_column}")
             """)
@@ -751,10 +751,10 @@ class MaterializedViewManager(MaterializedViewPort):
     ) -> None:
         """Create btree index on column."""
         clean_name = table_name.replace('"', '').replace('.', '_')
-        f"idx_{clean_name}_{column}"
+        index_name = f"idx_{clean_name}_{column}"
 
         try:
-            cursor.execute("""
+            cursor.execute(f"""
                 CREATE INDEX IF NOT EXISTS "{index_name}"
                 ON {table_name} ("{column}")
             """)

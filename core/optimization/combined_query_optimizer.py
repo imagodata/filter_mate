@@ -339,7 +339,6 @@ class CombinedQueryOptimizer:
             )
 
         # Build original combined expression for reference
-        f"({old_subset}) {combine_operator} ({new_expression})"
 
         # Extract layer info from props
         if layer_props:
@@ -664,7 +663,7 @@ class CombinedQueryOptimizer:
             source_mv_info is None if FID count < SOURCE_FID_MV_THRESHOLD
         """
         fid_count = len(fid_list)
-        ', '.join(str(fid) for fid in fid_list)
+        fid_list_str = ', '.join(str(fid) for fid in fid_list)
         source_mv_info = None
 
         # v2.8.8: Use FilterMate temp schema for all MVs instead of source schema
@@ -678,7 +677,7 @@ class CombinedQueryOptimizer:
 
             # Build CREATE MATERIALIZED VIEW SQL for source selection
             # v2.8.8: Use filtermate temp schema instead of source schema
-            create_sql = '''CREATE MATERIALIZED VIEW IF NOT EXISTS "{mv_schema}"."{src_mv_name}" AS
+            create_sql = f'''CREATE MATERIALIZED VIEW IF NOT EXISTS "{mv_schema}"."{src_mv_name}" AS
     SELECT "{fid_column}",
            "{source_geom_col}" AS geom,
            ST_Buffer("{source_geom_col}", {buffer_distance}, '{buffer_style}') AS geom_buffered
@@ -700,7 +699,7 @@ class CombinedQueryOptimizer:
             )
 
             # Build simplified query using the source MV
-            optimized = '''"{primary_key}" IN (
+            optimized = f'''"{primary_key}" IN (
     SELECT mv."pk"
     FROM {mv_info.qualified_name} AS mv
     WHERE EXISTS (
@@ -712,7 +711,7 @@ class CombinedQueryOptimizer:
             logger.info(f"🔧 v2.9.0: Will create source MV '{mv_schema}.{src_mv_name}' for {fid_count} FIDs with pre-computed buffer")
         else:
             # Standard inline subquery for small FID lists
-            optimized = '''"{primary_key}" IN (
+            optimized = f'''"{primary_key}" IN (
     SELECT mv."pk"
     FROM {mv_info.qualified_name} AS mv
     WHERE EXISTS (
@@ -965,16 +964,16 @@ class CombinedQueryOptimizer:
         """
         # Extract geometry column from buffer expression
         buffer_match = self.BUFFER_PATTERN.search(exists_info.buffer_expression or "")
-        buffer_match.group(2) if buffer_match else "geometrie"
+        source_geom_col = buffer_match.group(2) if buffer_match else "geometrie"
 
         # Build buffer expression for subquery
-        exists_info.buffer_distance or 50.0
-        f", '{exists_info.buffer_style}'" if exists_info.buffer_style else ""
+        buffer_distance = exists_info.buffer_distance or 50.0
+        buffer_style = f", '{exists_info.buffer_style}'" if exists_info.buffer_style else ""
 
         # Build FID filter clause
-        ', '.join(str(fid) for fid in (exists_info.source_fid_list or []))
+        fid_list_str = ', '.join(str(fid) for fid in (exists_info.source_fid_list or []))
 
-        optimized = '''"{primary_key}" IN (
+        optimized = f'''"{primary_key}" IN (
     SELECT mv."{primary_key}"
     FROM {mv_info.qualified_name} AS mv
     WHERE EXISTS (
@@ -1005,9 +1004,9 @@ class CombinedQueryOptimizer:
 
         Ensures the FID filter is evaluated BEFORE the spatial predicate.
         """
-        ', '.join(str(fid) for fid in (exists_info.source_fid_list or []))
+        fid_list_str = ', '.join(str(fid) for fid in (exists_info.source_fid_list or []))
 
-        optimized = '''"{primary_key}" IN (
+        optimized = f'''"{primary_key}" IN (
     SELECT mv."{primary_key}"
     FROM {mv_info.qualified_name} AS mv
     WHERE EXISTS (
@@ -1034,7 +1033,7 @@ class CombinedQueryOptimizer:
 
         Uses the MV directly in the EXISTS subquery.
         """
-        optimized = '''"{primary_key}" IN (
+        optimized = f'''"{primary_key}" IN (
     SELECT mv."{primary_key}"
     FROM {mv_info.qualified_name} AS mv
     WHERE EXISTS (

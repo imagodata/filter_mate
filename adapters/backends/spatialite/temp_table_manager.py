@@ -327,7 +327,7 @@ class SpatialiteTempTableManager(MaterializedViewPort):
             # First, register geometry column if config says so
             if self._config.register_geometry:
                 try:
-                    cursor.execute("""
+                    cursor.execute(f"""
                         SELECT RecoverGeometryColumn(
                             '{table_name}',
                             '{geometry_column}',
@@ -340,7 +340,7 @@ class SpatialiteTempTableManager(MaterializedViewPort):
                     logger.debug(f"[Spatialite] RecoverGeometryColumn skipped: {e}")
 
             # Create R-tree spatial index
-            cursor.execute("""
+            cursor.execute(f"""
                 SELECT CreateSpatialIndex('{table_name}', '{geometry_column}')
             """)
 
@@ -613,14 +613,14 @@ class SpatialiteTempTableManager(MaterializedViewPort):
         """
         # Build SELECT query
         if buffer_value:
-            query = """
+            query = f"""
                 SELECT "{primary_key}",
                        ST_Buffer("{geometry_column}", {buffer_value}, {buffer_segments}) AS {geometry_column}
                 FROM "{source_table}"
                 WHERE {where_clause}
             """
         else:
-            query = """
+            query = f"""
                 SELECT * FROM "{source_table}"
                 WHERE {where_clause}
             """
@@ -658,9 +658,9 @@ class SpatialiteTempTableManager(MaterializedViewPort):
         Returns:
             Name of created temp table
         """
-        f"AND {source_where}" if source_where else ""
+        source_filter = f"AND {source_where}" if source_where else ""
 
-        query = """
+        query = f"""
             SELECT DISTINCT t."{target_pk}", t."{target_geom}"
             FROM "{target_table}" t
             WHERE EXISTS (

@@ -109,11 +109,11 @@ class HistoryRepository:
         entry_id = str(uuid.uuid4())
 
         # Escape single quotes in subset string
-        subset_string.replace("'", "''") if subset_string else ''
+        safe_subset = subset_string.replace("'", "''") if subset_string else ''
 
         try:
-            self._cursor.execute(
-                """INSERT INTO fm_subset_history  # nosec B608
+            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+                f"""INSERT INTO fm_subset_history
                     VALUES('{entry_id}', datetime(), '{project_uuid}', '{layer_id}',
                            '{source_layer_id}', {seq_order}, '{safe_subset}');"""
             )
@@ -143,8 +143,8 @@ class HistoryRepository:
             int: Number of deleted rows
         """
         try:
-            self._cursor.execute(
-                """DELETE FROM fm_subset_history  # nosec B608
+            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+                f"""DELETE FROM fm_subset_history
                     WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}';"""
             )
             self._conn.commit()
@@ -176,8 +176,8 @@ class HistoryRepository:
             bool: True if deleted successfully
         """
         try:
-            self._cursor.execute(
-                """DELETE FROM fm_subset_history  # nosec B608
+            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+                f"""DELETE FROM fm_subset_history
                     WHERE fk_project = '{project_uuid}'
                       AND layer_id = '{layer_id}'
                       AND id = '{entry_id}';"""
@@ -208,8 +208,8 @@ class HistoryRepository:
             HistoryEntry or None if no history exists
         """
         try:
-            self._cursor.execute(
-                """SELECT * FROM fm_subset_history  # nosec B608
+            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+                f"""SELECT * FROM fm_subset_history
                     WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}'
                     ORDER BY seq_order DESC LIMIT 1;"""
             )
@@ -264,8 +264,8 @@ class HistoryRepository:
             List of HistoryEntry, ordered by seq_order DESC
         """
         try:
-            self._cursor.execute(
-                """SELECT * FROM fm_subset_history  # nosec B608
+            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+                f"""SELECT * FROM fm_subset_history
                     WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}'
                     ORDER BY seq_order DESC LIMIT {limit};"""
             )
@@ -292,8 +292,8 @@ class HistoryRepository:
             int: Number of history entries
         """
         try:
-            self._cursor.execute(
-                """SELECT COUNT(*) FROM fm_subset_history  # nosec B608
+            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+                f"""SELECT COUNT(*) FROM fm_subset_history
                     WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}';"""
             )
             result = self._cursor.fetchone()

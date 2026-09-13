@@ -339,7 +339,7 @@ class PostgreSQLBackend(BackendPort):
                 logger.error("[PostgreSQL] Could not extract table name from layer")
                 return None
 
-            f'"{schema_name}"."{table_name}"' if schema_name else f'"{table_name}"'
+            full_table = f'"{schema_name}"."{table_name}"' if schema_name else f'"{table_name}"'
 
             # Format FIDs for SQL (handle UUIDs vs integers)
             formatted_fids = self._format_fids_for_sql(fids)
@@ -351,7 +351,7 @@ class PostgreSQLBackend(BackendPort):
             clean_pk_field = pk_field.split('.')[-1].strip('"')
             clean_geom_field = geom_field.split('.')[-1].strip('"')
 
-            query = """
+            query = f"""
                 SELECT "{clean_pk_field}" as pk, "{clean_geom_field}" as geom
                 FROM {full_table}
                 WHERE "{clean_pk_field}" IN ({formatted_fids})
@@ -501,7 +501,7 @@ class PostgreSQLBackend(BackendPort):
             temp_name = f"fm_temp_src_sel_{fid_hash}"
 
             # FIX v4.3.1 (2026-01-22): Clean field names (remove table prefixes if present)
-            pk_field.split('.')[-1].strip('"')
+            clean_pk_field = pk_field.split('.')[-1].strip('"')
             geom_field.split('.')[-1].strip('"')
 
             cursor = conn.cursor()
@@ -514,7 +514,7 @@ class PostgreSQLBackend(BackendPort):
             # Drop existing table first to avoid conflicts
             cursor.execute(f'DROP TABLE IF EXISTS "{DEFAULT_TEMP_SCHEMA}"."{temp_name}"')  # nosec B608
 
-            create_sql = """
+            create_sql = f"""
                 CREATE TABLE "{DEFAULT_TEMP_SCHEMA}"."{temp_name}" AS
                 SELECT "{clean_pk_field}" as pk
                 FROM "{table_name}"

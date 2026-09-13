@@ -1,6 +1,30 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-09-13] Lecture de filtermate.log → branche `claude/perf-log-2026-09-13`
+Décisions à connaître :
+- Le commit `0fb3ce4d` (2026-02-10, « fix plugin checker issues ») avait retiré le préfixe `f` de 48
+  gabarits SQL (16 modules) et supprimé les affectations « inutilisées » qui les alimentaient :
+  la MV PostgreSQL échouait (`syntax error at or near "{"`) → repli lent `IN (...)`. Tout est
+  restauré ; `tests/unit/test_sql_templates_are_formatted.py` bloque toute récidive. Ne jamais
+  appliquer un nettoyage automatique de variables/f-strings sur les gabarits SQL.
+- Buffer statique côté Spatialite/GPKG : appliqué UNE fois dans QGIS
+  (`filter_executor._apply_static_buffer`), drapeau `buffer_state['applied_in_wkt']` lu par
+  `SpatialiteExpressionBuilder.build_expression` (pas de `ST_Buffer` SQL). Simplification :
+  tolérance plafonnée à |buffer|/10, cible 100 KB souple, limite dure 1 MB avant les enveloppes
+  (`SIMPLIFICATION_HARD_LIMIT_FACTOR`). Le hull convexe sur 7 278 tronçons de route était la cause
+  du « pb buffer routes ».
+- Liste d'entités (multiple selection) : dédoublonnage des `_populate_features_sync` identiques
+  sous 3 s (`POPULATE_DEDUPE_SECONDS`) ; ligne `⏱ picker_populate` au-delà de 250 ms.
+- Sélecteur simple (`QgsFeaturePickerWidget`) : `apply_feature_picker_fetch_limit()` (custom_widgets) appelé
+  AVANT chaque `setLayer` → `setFetchLimit(feature_picker_limit)` ; sans limite il chargeait toute la couche.
+- Sous-chronos `⏱ layer_change_sync/_reload/_groupbox` (≥ 250 ms) pour expliquer le
+  `layer_change: 80675 ms` vu dans le log (non expliqué à ce jour ; probablement la population du
+  picker sur PostgreSQL avec sous-requête EXISTS).
+- Reste ouvert : `apply_subsets` ≈ 3,9 s pour 37 couches GPKG (count+extent du provider à chaque
+  `setSubsetString`, inhérent) ; cascade PostgreSQL séquentielle (10 s / 17 couches) ;
+  `pg_ensure_stats` 0,9 s (ANALYZE) à chaque changement de couche source.
+
 ## [2026-09-12] Audit général post-4.8.8 → PR #52 `claude/audit-cleanup`
 Décisions à connaître :
 - `unicode` retiré du visualiseur JSON (`ui/widgets/json_view/datatypes.py`) : il ne marchait que parce

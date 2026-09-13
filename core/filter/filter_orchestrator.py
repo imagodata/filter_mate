@@ -136,14 +136,14 @@ class FilterOrchestrator:
             is_postgresql_fallback = layer_props.get("_postgresql_fallback", False)
 
             # DIAGNOSTIC LOGS 2026-01-15: Trace predicates et backend selection
-            logger.info(f"🔍 orchestrate_geometric_filter: {layer.name()}")
+            logger.debug(f"🔍 orchestrate_geometric_filter: {layer.name()}")
             logger.debug(f"   effective_provider_type: {effective_provider_type}")
-            logger.info(f"   is_postgresql_fallback: {is_postgresql_fallback}")
-            logger.info(f"   source_geometries keys: {list(source_geometries.keys())}")
+            logger.debug(f"   is_postgresql_fallback: {is_postgresql_fallback}")
+            logger.debug(f"   source_geometries keys: {list(source_geometries.keys())}")
 
             # ARCHITECTURE FIX 2026-01-16: Récupérer prédicats dynamiquement via callback
             current_predicates = self._get_predicates_callback()
-            logger.info(f"   current_predicates (fetched via callback): {current_predicates}")
+            logger.debug(f"   current_predicates (fetched via callback): {current_predicates}")
 
             # Validation robuste des prédicats
             if not current_predicates:
@@ -152,10 +152,10 @@ class FilterOrchestrator:
                 logger.error("   Callback returned empty predicates - aborting geometric filtering.")
                 return False
 
-            logger.info(f"✓ Predicates loaded dynamically: {list(current_predicates.keys())}")
+            logger.debug(f"✓ Predicates loaded dynamically: {list(current_predicates.keys())}")
 
             if is_postgresql_fallback:
-                logger.info(f"Executing geometric filtering for {layer.name()} (PostgreSQL → OGR fallback)")
+                logger.debug(f"Executing geometric filtering for {layer.name()} (PostgreSQL → OGR fallback)")
             else:
                 logger.debug(f"Executing geometric filtering for {layer.name()} ({effective_provider_type})")
 
@@ -169,7 +169,7 @@ class FilterOrchestrator:
             # 3. SOURCE GEOMETRY PREPARATION
             # ==========================================
             # FIX v4.1.2: Enhanced logging to diagnose geometry availability issues
-            logger.info(f"📦 SOURCE GEOMETRY CHECK for geometry_provider='{geometry_provider}':")
+            logger.debug(f"📦 SOURCE GEOMETRY CHECK for geometry_provider='{geometry_provider}':")
             for provider_key, geom_value in source_geometries.items():
                 status = "✓ AVAILABLE" if geom_value else "✗ None"
                 geom_info = ""
@@ -180,7 +180,7 @@ class FilterOrchestrator:
                         geom_info = f" (str, len={len(geom_value)}, preview='{geom_value[:50]}...')"
                     else:
                         geom_info = f" ({type(geom_value).__name__})"
-                logger.info(f"   {provider_key}: {status}{geom_info}")
+                logger.debug(f"   {provider_key}: {status}{geom_info}")
 
             source_geom = source_geometries.get(geometry_provider)
             if not source_geom:
@@ -197,7 +197,7 @@ class FilterOrchestrator:
                 )
                 return False
 
-            logger.info(f"  ✓ Source geometry ready: {type(source_geom).__name__}")
+            logger.debug(f"  ✓ Source geometry ready: {type(source_geom).__name__}")
 
             # ==========================================
             # 4. PRE-FILTER CLEANUP
@@ -207,13 +207,13 @@ class FilterOrchestrator:
             # ==========================================
             # 5. EXPRESSION BUILDING
             # ==========================================
-            logger.info("=" * 80)
-            logger.info("🏗️ STEP 5: EXPRESSION BUILDING")
-            logger.info("=" * 80)
-            logger.info("   Calling expression_builder.build_backend_expression()...")
-            logger.info(f"   Backend: {backend_name}")
-            logger.info(f"   Layer: {layer.name()}")
-            logger.info(f"   Source geom type: {type(source_geom).__name__}")
+            logger.debug("=" * 80)
+            logger.debug("🏗️ STEP 5: EXPRESSION BUILDING")
+            logger.debug("=" * 80)
+            logger.debug("   Calling expression_builder.build_backend_expression()...")
+            logger.debug(f"   Backend: {backend_name}")
+            logger.debug(f"   Layer: {layer.name()}")
+            logger.debug(f"   Source geom type: {type(source_geom).__name__}")
 
             expression = expression_builder.build_backend_expression(
                 backend=backend,
@@ -221,9 +221,9 @@ class FilterOrchestrator:
                 source_geom=source_geom
             )
 
-            logger.info("=" * 80)
-            logger.info("✅ EXPRESSION BUILDING COMPLETE")
-            logger.info("=" * 80)
+            logger.debug("=" * 80)
+            logger.debug("✅ EXPRESSION BUILDING COMPLETE")
+            logger.debug("=" * 80)
 
             if not expression:
                 # Try OGR fallback if primary backend failed
@@ -235,8 +235,8 @@ class FilterOrchestrator:
                     expression_builder=expression_builder
                 )
 
-            logger.info(f"  ✓ Expression built: {len(expression)} chars")
-            logger.info(f"  → Expression preview: {expression[:200]}...")
+            logger.debug(f"  ✓ Expression built: {len(expression)} chars")
+            logger.debug(f"  → Expression preview: {expression[:200]}...")
 
             # DIAGNOSTIC 2026-01-19: Print expression for console visibility
 
@@ -249,29 +249,29 @@ class FilterOrchestrator:
             # 7. BACKEND EXECUTION
             # ==========================================
             # FIX v4.2.13: Enhanced logging before apply_filter for debugging PostgreSQL failures
-            logger.info("=" * 80)
-            logger.info("🎯 STEP 7: BACKEND EXECUTION")
-            logger.info("=" * 80)
-            logger.info(f"   Backend: {backend_name.upper()}")
-            logger.info(f"   Layer: {layer.name()}")
-            logger.info(f"   Expression length: {len(expression)} chars")
-            logger.info(f"   Old subset: {bool(old_subset)}")
-            logger.info(f"   Combine operator: {combine_operator}")
+            logger.debug("=" * 80)
+            logger.debug("🎯 STEP 7: BACKEND EXECUTION")
+            logger.debug("=" * 80)
+            logger.debug(f"   Backend: {backend_name.upper()}")
+            logger.debug(f"   Layer: {layer.name()}")
+            logger.debug(f"   Expression length: {len(expression)} chars")
+            logger.debug(f"   Old subset: {bool(old_subset)}")
+            logger.debug(f"   Combine operator: {combine_operator}")
 
             # Log full expression for PostgreSQL debugging
             if backend_name == PROVIDER_POSTGRES:
-                logger.info("   📝 Full PostgreSQL expression:")
-                logger.info(f"   {expression}")
+                logger.debug("   📝 Full PostgreSQL expression:")
+                logger.debug(f"   {expression}")
 
             result = backend.apply_filter(layer, expression, old_subset, combine_operator)
 
-            logger.info(f"   → apply_filter() result: {result}")
+            logger.debug(f"   → apply_filter() result: {result}")
             if not result:
                 logger.warning(f"   ❌ Backend {backend_name.upper()} FAILED for {layer.name()}")
             else:
-                logger.info(f"   ✓ Backend {backend_name.upper()} succeeded for {layer.name()}")
+                logger.debug(f"   ✓ Backend {backend_name.upper()} succeeded for {layer.name()}")
 
-            logger.info("=" * 80)
+            logger.debug("=" * 80)
 
             # Collect warnings from backend
             self._collect_backend_warnings(backend)
@@ -391,16 +391,16 @@ class FilterOrchestrator:
         # Determine geometry provider based on backend type
         if backend_name == PROVIDER_SPATIALITE:
             geometry_provider = PROVIDER_SPATIALITE
-            logger.info("  → Backend is Spatialite - using WKT geometry format")
+            logger.debug("  → Backend is Spatialite - using WKT geometry format")
         elif backend_name == PROVIDER_OGR:
             geometry_provider = PROVIDER_OGR
             if effective_provider_type == PROVIDER_POSTGRES:
-                logger.info("  → Backend is OGR but provider is PostgreSQL - using OGR geometry format (fallback)")
+                logger.debug("  → Backend is OGR but provider is PostgreSQL - using OGR geometry format (fallback)")
             else:
-                logger.info("  → Backend is OGR - using QgsVectorLayer geometry format")
+                logger.debug("  → Backend is OGR - using QgsVectorLayer geometry format")
         elif backend_name == PROVIDER_POSTGRES:
             geometry_provider = PROVIDER_POSTGRES
-            logger.info("  → Backend is PostgreSQL - using SQL expression geometry format")
+            logger.debug("  → Backend is PostgreSQL - using SQL expression geometry format")
         elif backend_name == PROVIDER_MEMORY:
             geometry_provider = PROVIDER_OGR
             logger.debug("  → Backend is Memory - using OGR geometry format (QgsVectorLayer)")
@@ -447,7 +447,7 @@ class FilterOrchestrator:
 
         # Queue subset clear for main thread application
         self.subset_queue_callback(layer, "")
-        logger.info(f"  ✓ Queued subset clear for {layer.name()} - ready for fresh filter")
+        logger.debug(f"  ✓ Queued subset clear for {layer.name()} - ready for fresh filter")
 
     def _determine_subset_strategy(
         self,
@@ -514,28 +514,28 @@ class FilterOrchestrator:
 
         # Apply strategy
         if is_geometric_filter:
-            logger.info(f"🔄 Existing subset on {layer.name()} contains GEOMETRIC filter - will be REPLACED")
-            logger.info(f"  → Existing: '{old_subset[:100]}...'")
-            logger.info("  → Reason: Cannot nest geometric filters (EXISTS, ST_*, __source)")
+            logger.debug(f"🔄 Existing subset on {layer.name()} contains GEOMETRIC filter - will be REPLACED")
+            logger.debug(f"  → Existing: '{old_subset[:100]}...'")
+            logger.debug("  → Reason: Cannot nest geometric filters (EXISTS, ST_*, __source)")
             return None, None
 
         elif is_fid_only_filter:
-            logger.info(f"🔄 Existing subset on {layer.name()} is FID filter from PREVIOUS spatial step")
-            logger.info(f"  → Existing: '{old_subset[:100]}...'")
-            logger.info("  → Strategy: Keep for cache intersection, but DON'T combine in SQL")
+            logger.debug(f"🔄 Existing subset on {layer.name()} is FID filter from PREVIOUS spatial step")
+            logger.debug(f"  → Existing: '{old_subset[:100]}...'")
+            logger.debug("  → Strategy: Keep for cache intersection, but DON'T combine in SQL")
             return old_subset, None  # combine_operator=None tells backend not to combine
 
         elif is_style_expression:
-            logger.info(f"🔄 Existing subset on {layer.name()} contains STYLE expression - will be REPLACED")
-            logger.info(f"  → Existing: '{old_subset[:100]}...'")
-            logger.info("  → Reason: Style expressions cause type mismatch errors")
+            logger.debug(f"🔄 Existing subset on {layer.name()} contains STYLE expression - will be REPLACED")
+            logger.debug(f"  → Existing: '{old_subset[:100]}...'")
+            logger.debug("  → Reason: Style expressions cause type mismatch errors")
             return None, None
 
         else:
             # Simple attribute filter - combine with new geometric filter
-            logger.info(f"✅ Existing subset on {layer.name()} is ATTRIBUTE filter - will be COMBINED")
-            logger.info(f"  → Existing: '{old_subset[:100]}...'")
-            logger.info("  → Reason: Preserving user's attribute filter with geometric filter")
+            logger.debug(f"✅ Existing subset on {layer.name()} is ATTRIBUTE filter - will be COMBINED")
+            logger.debug(f"  → Existing: '{old_subset[:100]}...'")
+            logger.debug("  → Reason: Preserving user's attribute filter with geometric filter")
             return old_subset, combine_operator
 
     def _get_combine_operator(self) -> Optional[str]:
@@ -604,7 +604,7 @@ class FilterOrchestrator:
                     f"{layer.name()}: {backend_name} expression failed, OGR fallback could not build expression"
                 )
 
-            logger.info(f"  → OGR expression built: {ogr_expression[:100]}...")
+            logger.debug(f"  → OGR expression built: {ogr_expression[:100]}...")
 
             # Get subset strategy
             old_subset, combine_operator = self._determine_subset_strategy(layer)
@@ -615,7 +615,7 @@ class FilterOrchestrator:
             self._collect_backend_warnings(ogr_backend)
 
             if result:
-                logger.info(f"✓ OGR fallback SUCCEEDED for {layer.name()}")
+                logger.debug(f"✓ OGR fallback SUCCEEDED for {layer.name()}")
                 self.task_parameters['actual_backends'][layer.id()] = 'ogr'
                 return True
             else:
@@ -726,9 +726,9 @@ class FilterOrchestrator:
             # so the subsequent setSubsetString() call in the OGR fallback can succeed.
             if layer.providerType() == QGIS_PROVIDER_POSTGRES:
                 try:
-                    logger.info(f"🔄 Reloading PostgreSQL layer '{layer.name()}' to reset connection state...")
+                    logger.debug(f"🔄 Reloading PostgreSQL layer '{layer.name()}' to reset connection state...")
                     layer.dataProvider().reloadData()
-                    logger.info("  ✓ Layer connection reset")
+                    logger.debug("  ✓ Layer connection reset")
                 except Exception as _reload_err:
                     logger.warning(f"  ⚠️ Could not reload layer (non-fatal): {_reload_err}")
 
@@ -755,7 +755,7 @@ class FilterOrchestrator:
                     f"{layer.name()}: {backend_name} failed, OGR fallback could not build expression"
                 )
 
-            logger.info(f"  → OGR expression built: {ogr_expression[:100]}...")
+            logger.debug(f"  → OGR expression built: {ogr_expression[:100]}...")
 
             # Apply OGR filter
             ogr_backend._is_ogr_fallback = True  # Skip spurious cancellation checks
@@ -764,7 +764,7 @@ class FilterOrchestrator:
             self._collect_backend_warnings(ogr_backend)
 
             if result:
-                logger.info(f"✓ OGR fallback SUCCEEDED for {layer.name()}")
+                logger.debug(f"✓ OGR fallback SUCCEEDED for {layer.name()}")
                 QgsMessageLog.logMessage(
                     f"✓ OGR fallback SUCCEEDED for {layer.name()}",
                     "FilterMate", Qgis.MessageLevel.Info
@@ -824,10 +824,10 @@ class FilterOrchestrator:
         # the real counts once the subsets are applied. No triggerRepaint()
         # from the worker either: the canvas is refreshed once at the end.
         logger.debug(f"✓ orchestrate_geometric_filter: {layer.name()} → backend returned SUCCESS")
-        logger.info(f"  - Subset string applied: {final_expression[:200] if final_expression else '(empty)'}")
-        logger.info(f"  - Layer is valid: {layer.isValid()}")
-        logger.info(f"  - Provider: {layer.providerType()}")
-        logger.info(f"  - CRS: {layer.crs().authid()}")
+        logger.debug(f"  - Subset string applied: {final_expression[:200] if final_expression else '(empty)'}")
+        logger.debug(f"  - Layer is valid: {layer.isValid()}")
+        logger.debug(f"  - Provider: {layer.providerType()}")
+        logger.debug(f"  - CRS: {layer.crs().authid()}")
 
         # Warn if no features after filtering. Only meaningful when the subset
         # is already applied (PostgreSQL applies it in this worker); a LIMIT 1
@@ -842,7 +842,7 @@ class FilterOrchestrator:
                 "FilterMate", Qgis.MessageLevel.Warning
             )
 
-        logger.info(f"✓ Successfully filtered {layer.name()} (counts are reported once the subsets are applied)")
+        logger.debug(f"✓ Successfully filtered {layer.name()} (counts are reported once the subsets are applied)")
 
     @staticmethod
     def _has_any_feature(layer: QgsVectorLayer) -> bool:

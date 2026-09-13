@@ -409,13 +409,13 @@ class SpatialiteBackend(BackendPort):
         layer_info: LayerInfo
     ) -> List[int]:
         """Execute filter query and return feature IDs."""
-        self._get_table_name(layer_info)
-        self._get_pk_column(layer_info)
+        table_name = self._get_table_name(layer_info)
+        pk_column = self._get_pk_column(layer_info)
 
         # Convert expression to Spatialite SQL if needed
-        self._convert_to_spatialite(expression.sql)
+        sql = self._convert_to_spatialite(expression.sql)
 
-        query = """
+        query = f"""
             SELECT "{pk_column}" FROM "{table_name}"
             WHERE {sql}
         """

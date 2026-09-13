@@ -615,8 +615,8 @@ class SpatialiteQueryBuilder:
 
         # R-tree bbox pre-filter
         if use_bbox_prefilter:
-            f"idx_{table_name}_geometry"
-            bbox_filter = """
+            rtree_table = f"idx_{table_name}_geometry"
+            bbox_filter = f"""
                 rowid IN (
                     SELECT pkid FROM {rtree_table}
                     WHERE xmin <= MbrMaxX({geom_expr})

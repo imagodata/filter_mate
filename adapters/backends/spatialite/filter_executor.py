@@ -57,6 +57,13 @@ class SpatialiteSourceContext:
     # Buffer value (None = no buffer, float = buffer distance in meters)
     param_buffer_value: Optional[float] = None
 
+    # 2026-09-13: static buffers are applied once here (QGIS) instead of
+    # ST_Buffer() in every subset string; these describe that buffer.
+    param_buffer_segments: int = 5
+    param_buffer_type: int = 0  # 0=Round, 1=Flat, 2=Square
+    param_buffer_expression: Optional[str] = None
+    buffer_applied_in_wkt: bool = False  # set by process_spatialite_geometries()
+
     # Reprojection settings
     has_to_reproject_source_layer: bool = False
     source_layer_crs_authid: Optional[str] = None
@@ -232,11 +239,73 @@ def _geometry_only_features(layer) -> List:
     :func:`process_spatialite_geometries` (geometry) and the geometry cache key
     (feature ids). Loading attributes for every row of a filtered source layer
     doubled the memory footprint for nothing.
+
+    2026-09-13: an empty result is retried with a plain request and logged
+    with the layer state (a filtered road layer came back empty from the
+    worker thread with ``featureCount() == -1`` while the canvas showed it).
     """
     from qgis.core import QgsFeatureRequest
     request = QgsFeatureRequest()
     request.setNoAttributes()
-    return list(layer.getFeatures(request))
+    features = list(layer.getFeatures(request))
+    if features:
+        return features
+    try:
+        state = (
+            f"valid={layer.isValid()}, featureCount={layer.featureCount()}, "
+            f"subset={len(layer.subsetString() or '')} chars"
+        )
+    except Exception as exc:  # pragma: no cover - diagnostics only
+        state = f"state unavailable: {exc}"
+    logger.warning(f"[Spatialite] No feature returned without attributes ({state}) - retrying with a plain request")
+    features = list(layer.getFeatures(QgsFeatureRequest()))
+    logger.warning(f"[Spatialite]   plain request returned {len(features)} feature(s)")
+    return features
+
+
+def _apply_static_buffer(geometry: Any, context: 'SpatialiteSourceContext') -> Optional[Any]:
+    """Buffer the dissolved source geometry once, in QGIS.
+
+    2026-09-13: ``ST_Buffer(ST_GeomFromText(<wkt>), d)`` in the subset string
+    is re-evaluated by every statement on every filtered layer (count, extent,
+    each canvas refresh). For a few thousand road segments that is several
+    hundred milliseconds per statement, times 36 layers. Buffering here costs
+    it once, and the polygon then simplifies far better than the lines (a
+    multi-line string cannot drop below two vertices per part).
+
+    Returns the buffered geometry, or None when no static buffer applies (no
+    value, a dynamic expression, or an empty/invalid result) so the SQL
+    ``ST_Buffer()`` path stays in charge.
+    """
+    distance = context.param_buffer_value
+    if not distance:
+        return None
+    if context.param_buffer_expression and str(context.param_buffer_expression).strip():
+        return None
+    segments = max(int(context.param_buffer_segments or 5), 1)
+    try:
+        buffered = None
+        try:
+            from qgis.core import Qgis
+            cap_styles = {
+                0: Qgis.EndCapStyle.Round, 1: Qgis.EndCapStyle.Flat, 2: Qgis.EndCapStyle.Square,
+                'round': Qgis.EndCapStyle.Round, 'flat': Qgis.EndCapStyle.Flat, 'square': Qgis.EndCapStyle.Square,
+            }
+            cap_key = context.param_buffer_type
+            if isinstance(cap_key, str):
+                cap_key = cap_key.strip().lower()
+            cap = cap_styles.get(cap_key, Qgis.EndCapStyle.Round)
+            buffered = geometry.buffer(float(distance), segments, cap, Qgis.JoinStyle.Round, 2.0)
+        except (ImportError, AttributeError, TypeError):
+            buffered = geometry.buffer(float(distance), segments)
+        if buffered is None or buffered.isEmpty():
+            logger.warning(f"[Spatialite] Buffer of {distance} produced an empty geometry - ST_Buffer() left to SQL")
+            return None
+        logger.info(f"[Spatialite]   ✓ Buffer of {distance} applied once in QGIS ({segments} segments)")
+        return buffered
+    except Exception as exc:
+        logger.warning(f"[Spatialite] Buffer of {distance} failed in QGIS ({exc}) - ST_Buffer() left to SQL")
+        return None
 
 
 def recover_spatialite_features_from_fids(
@@ -530,6 +599,13 @@ def process_spatialite_geometries(
             collected_geometry = QgsGeometry(cloned)
             logger.info(f"[Spatialite]   ✓ Dropped Z/M: {original_type} → {get_geometry_type_name(collected_geometry)}")
 
+    # 2026-09-13: apply the static buffer once here (see _apply_static_buffer)
+    context.buffer_applied_in_wkt = False
+    buffered_geometry = _apply_static_buffer(collected_geometry, context)
+    if buffered_geometry is not None:
+        collected_geometry = buffered_geometry
+        context.buffer_applied_in_wkt = True
+
     # Generate WKT with optimized precision
     crs_authid = context.source_layer_crs_authid
     if context.geometry_to_wkt:
@@ -567,6 +643,36 @@ def process_spatialite_geometries(
 
     # Escape single quotes for SQL
     return wkt.replace("'", "''")
+
+
+def _build_buffer_state(context: SpatialiteSourceContext) -> Dict:
+    """Buffer state stored in ``task_parameters['infos']`` for the expression builders.
+
+    ``applied_in_wkt`` (2026-09-13) tells SpatialiteExpressionBuilder that the
+    static buffer is already part of the source WKT, so no ``ST_Buffer()`` is
+    added to the subset strings.
+    """
+    buffer_value = context.param_buffer_value or 0
+    existing_buffer_state = {}
+    if context.task_parameters and 'infos' in context.task_parameters:
+        existing_buffer_state = context.task_parameters['infos'].get('buffer_state', {}) or {}
+
+    is_multi_step = existing_buffer_state.get('is_pre_buffered', False)
+    previous_buffer_value = existing_buffer_state.get('buffer_value', 0)
+    reuse_previous = is_multi_step and previous_buffer_value == buffer_value
+
+    buffer_state = {
+        'has_buffer': buffer_value != 0,
+        'buffer_value': buffer_value,
+        'is_pre_buffered': reuse_previous,
+        'buffer_column': 'geom_buffered' if reuse_previous else 'geom',
+        'previous_buffer_value': previous_buffer_value if is_multi_step else None,
+        'applied_in_wkt': bool(context.buffer_applied_in_wkt),
+    }
+
+    if reuse_previous and buffer_value != 0:
+        logger.info(f"[Spatialite]   ✓ Multi-step: Reusing existing {buffer_value}m buffer")
+    return buffer_state
 
 
 def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> SpatialiteSourceResult:
@@ -674,12 +780,15 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
 
             if cache_is_valid:
                 logger.info("[Spatialite] ✓ Using CACHED source geometry for Spatialite")
+                # 2026-09-13: the cached WKT may already carry the static buffer
+                context.buffer_applied_in_wkt = bool(cached_geom.get('buffer_applied', False))
                 return SpatialiteSourceResult(
                     wkt=cached_wkt,
                     success=True,
                     feature_count=len(features),
                     geometry_type=wkt_type,
-                    from_cache=True
+                    from_cache=True,
+                    buffer_state=_build_buffer_state(context)
                 )
 
     # Step 5: Process geometries
@@ -696,24 +805,7 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
     logger.info("[Spatialite] === prepare_spatialite_source_geom END ===")
 
     # Step 6: Build buffer state for multi-step filters
-    buffer_value = context.param_buffer_value or 0
-    existing_buffer_state = {}
-    if context.task_parameters and 'infos' in context.task_parameters:
-        existing_buffer_state = context.task_parameters['infos'].get('buffer_state', {})
-
-    is_multi_step = existing_buffer_state.get('is_pre_buffered', False)
-    previous_buffer_value = existing_buffer_state.get('buffer_value', 0)
-
-    buffer_state = {
-        'has_buffer': buffer_value != 0,
-        'buffer_value': buffer_value,
-        'is_pre_buffered': is_multi_step and previous_buffer_value == buffer_value,
-        'buffer_column': 'geom_buffered' if (is_multi_step and previous_buffer_value == buffer_value) else 'geom',
-        'previous_buffer_value': previous_buffer_value if is_multi_step else None
-    }
-
-    if is_multi_step and previous_buffer_value == buffer_value and buffer_value != 0:
-        logger.info(f"[Spatialite]   ✓ Multi-step: Reusing existing {buffer_value}m buffer")
+    buffer_state = _build_buffer_state(context)
 
     # Step 7: Store in cache
     if context.geom_cache:
@@ -721,7 +813,7 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
             features,
             context.param_buffer_value,
             context.source_layer_crs_authid,
-            {'wkt': wkt},
+            {'wkt': wkt, 'buffer_applied': context.buffer_applied_in_wkt},
             layer_id=layer_id,
             subset_string=current_subset
         )
@@ -868,8 +960,11 @@ def build_spatialite_query(
         return sql_subset_string
 
     # Complex subset with buffer (adapt from PostgreSQL logic)
-    # NOTE: buffer_expr is referenced in the query template below as {buffer_expr}
-    # but the template is not format()-ed here - it is interpolated by the caller.
+    buffer_expr = (
+        qgis_expression_to_spatialite(buffer_expression)
+        if buffer_expression
+        else str(buffer_value)
+    )
 
     # Build ST_Buffer style parameters (quad_segs for segments, endcap for type)
     buffer_type_mapping = {
@@ -892,7 +987,7 @@ def build_spatialite_query(
 
     # Build Spatialite SELECT (similar to PostgreSQL CREATE MATERIALIZED VIEW)
     # Note: Spatialite uses same ST_Buffer syntax as PostGIS
-    query = """
+    query = f"""
         SELECT
             ST_Buffer({geom_key_name}, {buffer_expr}, '{style_params}') as {geom_key_name},
             {primary_key_name},

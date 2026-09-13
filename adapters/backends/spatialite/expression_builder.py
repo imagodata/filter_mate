@@ -57,7 +57,11 @@ except ImportError:
 USE_OGR_FALLBACK = "__USE_OGR_FALLBACK__"
 
 # Thresholds
-SPATIALITE_WKT_SIMPLIFY_THRESHOLD = 100000  # 100KB - simplify WKT above this
+# 2026-09-13: raised from 100 KB to 1 MB. The executor already runs the
+# buffer-aware adaptive simplification; this extent-based pass (tolerance =
+# extent / 1000, i.e. ~20 m on a 20 km source) is only a safety net for
+# WKTs that would otherwise not fit in a subset string.
+SPATIALITE_WKT_SIMPLIFY_THRESHOLD = 1_000_000
 
 # PERF 2026-09-12: GeoPackage R-tree prefilter. SQLite evaluates the spatial
 # predicate row by row over the whole table: with a 2,000-vertex source polygon
@@ -277,7 +281,6 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             return USE_OGR_FALLBACK
 
         # Extract layer properties
-        layer_props.get("layer_table_name") or layer_props.get("layer_name")
         geom_field = self._detect_geometry_column(layer_props)
         layer = layer_props.get("layer")
 
@@ -299,9 +302,17 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             self.log_warning("GeometryCollection detected - returning OGR fallback")
             return USE_OGR_FALLBACK
 
+        # 2026-09-13: the executor may have applied the static buffer to the
+        # WKT itself (see filter_executor._apply_static_buffer); the SQL must
+        # then not buffer again, and the R-tree bbox needs no extra margin.
+        buffer_state = ((self.task_params or {}).get('infos') or {}).get('buffer_state') or {}
+        if buffer_value and buffer_state.get('applied_in_wkt'):
+            self.log_info(f"Buffer of {buffer_value} already applied to the source WKT - no ST_Buffer() in SQL")
+            buffer_value = None
+
         # Simplify large WKT
         if wkt_length >= SPATIALITE_WKT_SIMPLIFY_THRESHOLD:
-            source_geom = self._simplify_wkt(source_geom)
+            source_geom = self._simplify_wkt(source_geom, buffer_state.get('buffer_value'))
             wkt_length = len(source_geom)
             self.log_info(f"WKT simplified to {wkt_length} chars")
 
@@ -622,8 +633,12 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
 
         return source_geom_sql
 
-    def _simplify_wkt(self, wkt: str) -> str:
-        """Simplify WKT geometry to reduce complexity."""
+    def _simplify_wkt(self, wkt: str, buffer_value: Optional[float] = None) -> str:
+        """Simplify WKT geometry to reduce complexity.
+
+        2026-09-13: with a buffer the tolerance is capped to a tenth of it so
+        the buffer keeps its meaning.
+        """
         try:
             from qgis.core import QgsGeometry
             geom = QgsGeometry.fromWkt(wkt)
@@ -631,6 +646,8 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
                 # Calculate tolerance based on bbox
                 bbox = geom.boundingBox()
                 tolerance = max(bbox.width(), bbox.height()) / 1000
+                if buffer_value:
+                    tolerance = min(tolerance, abs(float(buffer_value)) / 10.0)
 
                 # Simplify
                 simplified = geom.simplify(tolerance)
