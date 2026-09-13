@@ -903,7 +903,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                         WHERE table_schema = '{temp_schema}'
                         AND table_name = '{temp_table_name}'
                     )
-                """)
+                """)  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
                 table_exists = cursor.fetchone()[0]
                 if table_exists:
                     self.log_info(f"♻️ Reusing existing buffer table: {temp_schema}.{temp_table_name}")
@@ -912,7 +912,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
               SELECT 1
               FROM "{temp_schema}"."{temp_table_name}" AS __buffer
               WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
-              )'''
+              )'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
                     self.log_debug(f"Reuse buffer table expression: {exists_expr}")
                     return exists_expr
         except Exception as e:
@@ -937,7 +937,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     WHERE i.indrelid = '"{source_schema}"."{source_table}"'::regclass
                     AND i.indisprimary
                     LIMIT 1
-                """)
+                """)  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
                 result = cursor.fetchone()
                 if result:
                     primary_key_column = result[0]
@@ -1029,7 +1029,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 SELECT 1
                 FROM "{temp_schema}"."{temp_table_name}" AS __buffer
                 WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
-            )"""
+            )"""  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
             return exists_expr
 

@@ -408,7 +408,7 @@ class TwoPhaseFilter:
             FROM "{self.layer_props.schema}"."{self.layer_props.table}"
             WHERE "{self.layer_props.geometry_column}" &&
                   ST_MakeEnvelope({xmin}, {ymin}, {xmax}, {ymax}, {self.layer_props.srid})
-        """
+        """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         # Use lazy iterator for memory efficiency
         candidate_ids = []
@@ -454,7 +454,7 @@ class TwoPhaseFilter:
                 FROM "{self.layer_props.schema}"."{self.layer_props.table}"
                 WHERE "{self.layer_props.primary_key}" IN ({ids_list})
                   AND ({full_expression})
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
             try:
                 with self.connection.cursor() as cursor:
@@ -511,7 +511,7 @@ class TwoPhaseFilter:
             SELECT "{self.layer_props.primary_key}"
             FROM "{self.layer_props.schema}"."{self.layer_props.table}"
             WHERE {expression}
-        """
+        """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         feature_ids = []
 
@@ -738,7 +738,7 @@ class ProgressiveFilterExecutor:
             SELECT "{self.layer_props.primary_key}"
             FROM "{self.layer_props.schema}"."{self.layer_props.table}"
             WHERE {expression}
-        """
+        """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         feature_ids = []
         chunk_count = 0
@@ -798,7 +798,7 @@ class ProgressiveFilterExecutor:
             SELECT "{self.layer_props.primary_key}"
             FROM "{self.layer_props.schema}"."{self.layer_props.table}"
             WHERE {expression}
-        """
+        """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         try:
             with self.connection.cursor() as cursor:

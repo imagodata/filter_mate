@@ -418,7 +418,7 @@ class SpatialiteBackend(BackendPort):
         query = f"""
             SELECT "{pk_column}" FROM "{table_name}"
             WHERE {sql}
-        """
+        """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         cursor = self._conn.cursor()
         cursor.execute(query)

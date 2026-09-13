@@ -618,12 +618,12 @@ class SpatialiteTempTableManager(MaterializedViewPort):
                        ST_Buffer("{geometry_column}", {buffer_value}, {buffer_segments}) AS {geometry_column}
                 FROM "{source_table}"
                 WHERE {where_clause}
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
         else:
             query = f"""
                 SELECT * FROM "{source_table}"
                 WHERE {where_clause}
-            """
+            """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         return self.create_view(
             query=query,
@@ -668,7 +668,7 @@ class SpatialiteTempTableManager(MaterializedViewPort):
                 WHERE {predicate}(t."{target_geom}", s."{source_geom}")
                 {source_filter}
             )
-        """
+        """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
         return self.create_view(
             query=query,

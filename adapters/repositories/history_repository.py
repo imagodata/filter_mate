@@ -112,10 +112,10 @@ class HistoryRepository:
         safe_subset = subset_string.replace("'", "''") if subset_string else ''
 
         try:
-            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+            self._cursor.execute(
                 f"""INSERT INTO fm_subset_history
                     VALUES('{entry_id}', datetime(), '{project_uuid}', '{layer_id}',
-                           '{source_layer_id}', {seq_order}, '{safe_subset}');"""
+                           '{source_layer_id}', {seq_order}, '{safe_subset}');"""  # nosec B608 - values escaped above, ids are UUIDs, local SQLite file
             )
             self._conn.commit()
             logger.debug(f"Inserted history entry {entry_id} for layer {layer_id}")
@@ -143,9 +143,9 @@ class HistoryRepository:
             int: Number of deleted rows
         """
         try:
-            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+            self._cursor.execute(
                 f"""DELETE FROM fm_subset_history
-                    WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}';"""
+                    WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}';"""  # nosec B608 - values escaped above, ids are UUIDs, local SQLite file
             )
             self._conn.commit()
             deleted = self._cursor.rowcount
@@ -176,11 +176,11 @@ class HistoryRepository:
             bool: True if deleted successfully
         """
         try:
-            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+            self._cursor.execute(
                 f"""DELETE FROM fm_subset_history
                     WHERE fk_project = '{project_uuid}'
                       AND layer_id = '{layer_id}'
-                      AND id = '{entry_id}';"""
+                      AND id = '{entry_id}';"""  # nosec B608 - values escaped above, ids are UUIDs, local SQLite file
             )
             self._conn.commit()
             deleted = self._cursor.rowcount > 0
@@ -208,10 +208,10 @@ class HistoryRepository:
             HistoryEntry or None if no history exists
         """
         try:
-            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+            self._cursor.execute(
                 f"""SELECT * FROM fm_subset_history
                     WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}'
-                    ORDER BY seq_order DESC LIMIT 1;"""
+                    ORDER BY seq_order DESC LIMIT 1;"""  # nosec B608 - values escaped above, ids are UUIDs, local SQLite file
             )
             row = self._cursor.fetchone()
 
@@ -264,10 +264,10 @@ class HistoryRepository:
             List of HistoryEntry, ordered by seq_order DESC
         """
         try:
-            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+            self._cursor.execute(
                 f"""SELECT * FROM fm_subset_history
                     WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}'
-                    ORDER BY seq_order DESC LIMIT {limit};"""
+                    ORDER BY seq_order DESC LIMIT {limit};"""  # nosec B608 - values escaped above, ids are UUIDs, local SQLite file
             )
             rows = self._cursor.fetchall()
             return [HistoryEntry.from_row(row) for row in rows]
@@ -292,9 +292,9 @@ class HistoryRepository:
             int: Number of history entries
         """
         try:
-            self._cursor.execute(  # nosec B608 - identifiers/values escaped above, local SQLite file
+            self._cursor.execute(
                 f"""SELECT COUNT(*) FROM fm_subset_history
-                    WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}';"""
+                    WHERE fk_project = '{project_uuid}' AND layer_id = '{layer_id}';"""  # nosec B608 - values escaped above, ids are UUIDs, local SQLite file
             )
             result = self._cursor.fetchone()
             return result[0] if result else 0
