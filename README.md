@@ -6,12 +6,15 @@
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
+[![User Guide](https://img.shields.io/badge/guide-EN%20%7C%20FR-blueviolet)](https://imagodata.github.io/filter_mate/guide.html)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
 [![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#488---2026-09-12)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
 **QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.10 fixes the PostgreSQL buffer filters (a roads + 20 m buffer cascade went from never finishing to 25 s for 16 layers, with `ST_DWithin` and a source envelope prefilter on each target's GiST index), reloads the panel when another project is opened, applies GeoPackage buffers once in QGIS instead of falling back to a convex hull, and restores 48 SQL templates broken since February. See [what's new](#-whats-new-in-4810).
+
+📖 **New to FilterMate?** Follow the step-by-step tutorial: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html)
 
 ---
 
@@ -166,6 +169,7 @@ pip install psycopg2-binary
 ## 📚 Documentation
 
 - **Users**: [Documentation Website](https://imagodata.github.io/filter_mate)
+- **Tutorial**: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html) — installation, first filter, exploring, predicates and buffers, favorites, export, backends, configuration
 - **Developers**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
 
