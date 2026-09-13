@@ -10,6 +10,8 @@
     <meta property="og:description" content="Learn FilterMate in 15 minutes: explore, filter and export vector data in QGIS.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/guide.html">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/guide.html">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/guide.fr.html">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,6 +67,12 @@
             font-size: 0.85rem; font-weight: 500; transition: color 0.2s;
         }
         .navbar-links a:hover, .navbar-links a.active { color: var(--accent-blue); }
+        .lang-switch {
+            display: inline-flex; align-items: center; gap: 0.2rem;
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: 0.15rem 0.3rem;
+        }
+        .lang-switch a { padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; }
+        .lang-switch a.active { background: rgba(79,195,247,0.15); color: var(--accent-blue); }
         .btn-install {
             display: inline-flex; align-items: center; gap: 0.4rem;
             padding: 0.5rem 1.2rem;
@@ -255,6 +263,9 @@
             .navbar-links.open { display: flex; }
             .navbar-links li { width: 100%; }
             .navbar-links a { display: block; padding: 0.8rem 1.5rem; }
+            .navbar-links li.lang-li { padding: 0.6rem 1.5rem; }
+            .lang-switch { border: none; padding: 0; }
+            .lang-switch a { display: inline-block; padding: 0.2rem 0.7rem; }
             .btn-install { display: none; }
             .hamburger { display: flex; }
             .toc ol { columns: 1; }
@@ -274,6 +285,7 @@
         <li><a href="guide.html" class="active">User Guide</a></li>
         <li><a href="roadmap.html" style="color:var(--accent-purple);">Roadmap</a></li>
         <li><a href="https://github.com/imagodata/filter_mate" target="_blank" rel="noopener">GitHub</a></li>
+        <li class="lang-li"><span class="lang-switch" aria-label="Language"><a href="guide.html" class="active" hreflang="en">EN</a><a href="guide.fr.html" data-lang-link hreflang="fr" title="Lire en français">FR</a></span></li>
     </ul>
     <a href="https://plugins.qgis.org/plugins/filter_mate/" class="btn-install" target="_blank" rel="noopener">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -551,18 +563,51 @@
         Goal: show only the <strong>buildings and hedges within 50 m of one road</strong>. The screenshots use a small BD TOPO extract
         (one commune, 373 buildings, 130 road sections) stored in a GeoPackage, but any project with a line layer and a polygon layer will do.
     </p>
+    <p>Each step below shows the whole QGIS window, so you can check the map canvas and the panel against your own screen. The map extent is the same from step 2 to step 6.</p>
     <ol class="steps">
-        <li>Load your layers and open FilterMate. In the Layers panel, click the <strong>road</strong> layer: it becomes the source layer (the <em>auto current layer</em> button is on by default).</li>
-        <li>In the Exploring zone, tick <strong>Single selection</strong> and pick a road in the drop-down. If the drop-down shows identifiers rather than names, change the display field in the row below.</li>
-        <li>Open the <strong>Filtering</strong> tab. Switch on <strong>Layers to filter</strong> (second rail button) and tick <em>batiment</em> and <em>haie</em> in the list.</li>
-        <li>Switch on <strong>Geometric predicates</strong> and make sure <em>Intersect</em> is ticked.</li>
-        <li>Switch on <strong>Buffer value</strong> and type <code>50</code>.</li>
-        <li>Press the <strong>Filter</strong> button (first button of the action bar). The map canvas is frozen for the duration of the task and redrawn once at the end.</li>
+        <li>
+            <strong>Choose the source layer.</strong> Load your layers and open FilterMate. In the Layers panel, click the <strong>road</strong> layer: it becomes the source layer (the <em>auto current layer</em> button is on by default) and the Exploring zone switches to it.
+            <figure>
+                <img src="img/guide/tuto-01.png" alt="Step 1: the road layer is active in the Layers panel and shown as source layer in FilterMate" loading="lazy">
+                <figcaption>Step 1. The road layer is the current layer: its name appears in the first row of the Filtering tab. No feature is picked yet.</figcaption>
+            </figure>
+        </li>
+        <li>
+            <strong>Pick the reference road.</strong> In the Exploring zone, tick <strong>Single selection</strong> and choose a road in the drop-down. The canvas selects it (yellow). If the drop-down shows identifiers rather than names, change the display field in the row below.
+            <figure>
+                <img src="img/guide/tuto-02.png" alt="Step 2: the road is picked in the single-selection drop-down and highlighted in yellow on the map" loading="lazy">
+                <figcaption>Step 2. The selected road is highlighted on the canvas; all buildings and hedges are still visible.</figcaption>
+            </figure>
+        </li>
+        <li>
+            <strong>Choose the target layers.</strong> Open the <strong>Filtering</strong> tab. Switch on <strong>Layers to filter</strong> (second rail button) and tick <em>batiment</em> and <em>haie</em> in the list.
+            <figure>
+                <img src="img/guide/tuto-03.png" alt="Step 3: the Layers to filter row is on and lists batiment and haie" loading="lazy">
+                <figcaption>Step 3. The second row of the Filtering tab now reads the two target layers.</figcaption>
+            </figure>
+        </li>
+        <li>
+            <strong>Choose the predicate.</strong> Switch on <strong>Geometric predicates</strong> and make sure <em>Intersect</em> is ticked.
+            <figure>
+                <img src="img/guide/tuto-04.png" alt="Step 4: the geometric predicates row is on with Intersect selected" loading="lazy">
+                <figcaption>Step 4. Intersect is the predicate: a building is kept when it touches the (buffered) road.</figcaption>
+            </figure>
+        </li>
+        <li>
+            <strong>Add a buffer.</strong> Switch on <strong>Buffer value</strong> and type <code>50</code>. The buffer type row (Round, 5 segments) can stay as it is.
+            <figure>
+                <img src="img/guide/tuto-05.png" alt="Step 5: the buffer value row is on with 50 m" loading="lazy">
+                <figcaption>Step 5. Everything is configured: source road, two targets, Intersect, 50 m buffer. Nothing has changed on the map yet.</figcaption>
+            </figure>
+        </li>
+        <li>
+            <strong>Run the filter.</strong> Press the <strong>Filter</strong> button (first button of the action bar). The map canvas is frozen for the duration of the task and redrawn once at the end.
+            <figure>
+                <img src="img/guide/tuto-06.png" alt="Step 6: only the buildings and hedges within 50 m of the road remain on the map" loading="lazy">
+                <figcaption>Step 6. Same extent as step 5: only the buildings (pink) and hedges (green) within 50 m of the road remain. Undo is now enabled in the action bar.</figcaption>
+            </figure>
+        </li>
     </ol>
-    <figure>
-        <img src="img/guide/filter-result.png" alt="Map showing only the buildings and hedges within 50 m of the selected road" loading="lazy">
-        <figcaption>Result: only buildings (pink) and hedges (green) within 50 m of the selected road remain. The road layer itself is filtered to the selected feature.</figcaption>
-    </figure>
     <p>What FilterMate generated for the GeoPackage buildings layer, as you can read it in <em>Layer Properties &rarr; Source &rarr; Provider Feature Filter</em>:</p>
     <pre><code>ROWID IN (SELECT id FROM "rtree_batiment_geom"
           WHERE minx &lt;= 598540.4 AND maxx &gt;= 598349.4
@@ -809,6 +854,11 @@ processing.run("filtermate:batch_filter", {
 const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+// The language link keeps the current section
+document.querySelectorAll('[data-lang-link]').forEach(a => {
+    a.addEventListener('click', () => { a.href = a.getAttribute('href').split('#')[0] + location.hash; });
+});
 
 // Highlight the current section in the table of contents
 const tocLinks = Array.from(document.querySelectorAll('.toc a'));
