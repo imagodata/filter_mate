@@ -15,8 +15,6 @@ import sys
 import types
 from unittest.mock import MagicMock
 
-import pytest
-
 
 # ---------------------------------------------------------------------------
 # Mock setup
@@ -175,3 +173,125 @@ class TestDetermineSpatialiteSourceMode:
         mode, metadata = determine_spatialite_source_mode(context)
 
         assert mode == SourceMode.FALLBACK
+
+
+# ===========================================================================
+# 2026-09-13: static buffer applied once in QGIS, SUBSET-mode retry
+# ===========================================================================
+
+_apply_static_buffer = _mod._apply_static_buffer
+_build_buffer_state = _mod._build_buffer_state
+_geometry_only_features = _mod._geometry_only_features
+
+
+class _FakeGeometry:
+    def __init__(self, empty=False, raise_on_buffer=False):
+        self.calls = []
+        self._empty = empty
+        self._raise = raise_on_buffer
+
+    def buffer(self, *args):
+        self.calls.append(args)
+        if self._raise:
+            raise RuntimeError("GEOS failure")
+        return _FakeGeometry(empty=self._empty)
+
+    def isEmpty(self):
+        return self._empty
+
+
+class TestApplyStaticBuffer:
+    def test_no_buffer_value_leaves_sql_in_charge(self):
+        geom = _FakeGeometry()
+        ctx = SpatialiteSourceContext(param_buffer_value=None)
+        assert _apply_static_buffer(geom, ctx) is None
+        assert geom.calls == []
+
+    def test_dynamic_expression_leaves_sql_in_charge(self):
+        geom = _FakeGeometry()
+        ctx = SpatialiteSourceContext(param_buffer_value=20.0, param_buffer_expression='"width" * 2')
+        assert _apply_static_buffer(geom, ctx) is None
+        assert geom.calls == []
+
+    def test_static_buffer_is_applied_with_segments(self):
+        geom = _FakeGeometry()
+        ctx = SpatialiteSourceContext(param_buffer_value=20.0, param_buffer_segments=8, param_buffer_type=0)
+        buffered = _apply_static_buffer(geom, ctx)
+        assert buffered is not None and buffered is not geom
+        assert len(geom.calls) == 1
+        assert geom.calls[0][0] == 20.0
+        assert geom.calls[0][1] == 8
+
+    def test_empty_result_falls_back_to_sql(self):
+        geom = _FakeGeometry(empty=True)
+        ctx = SpatialiteSourceContext(param_buffer_value=-500.0)
+        assert _apply_static_buffer(geom, ctx) is None
+
+    def test_failure_falls_back_to_sql(self):
+        geom = _FakeGeometry(raise_on_buffer=True)
+        ctx = SpatialiteSourceContext(param_buffer_value=20.0)
+        assert _apply_static_buffer(geom, ctx) is None
+
+
+class TestBuildBufferState:
+    def test_flag_reports_buffer_applied_in_wkt(self):
+        ctx = SpatialiteSourceContext(param_buffer_value=20.0, task_parameters={"infos": {}})
+        ctx.buffer_applied_in_wkt = True
+        state = _build_buffer_state(ctx)
+        assert state["applied_in_wkt"] is True
+        assert state["has_buffer"] is True
+        assert state["buffer_value"] == 20.0
+        assert state["is_pre_buffered"] is False
+
+    def test_flag_false_without_static_buffer(self):
+        ctx = SpatialiteSourceContext(param_buffer_value=0, task_parameters={})
+        state = _build_buffer_state(ctx)
+        assert state["applied_in_wkt"] is False
+        assert state["has_buffer"] is False
+
+    def test_multi_step_reuse_kept(self):
+        ctx = SpatialiteSourceContext(
+            param_buffer_value=20.0,
+            task_parameters={"infos": {"buffer_state": {"is_pre_buffered": True, "buffer_value": 20.0}}},
+        )
+        state = _build_buffer_state(ctx)
+        assert state["is_pre_buffered"] is True
+        assert state["buffer_column"] == "geom_buffered"
+        assert state["previous_buffer_value"] == 20.0
+
+
+class _FakeSubsetLayer:
+    """getFeatures() returns nothing for the first request, rows afterwards."""
+
+    def __init__(self, rows):
+        self._rows = rows
+        self.requests = 0
+
+    def getFeatures(self, request=None):
+        self.requests += 1
+        return iter([] if self.requests == 1 else self._rows)
+
+    def isValid(self):
+        return True
+
+    def featureCount(self):
+        return len(self._rows)
+
+    def subsetString(self):
+        return "ROWID IN (1, 2)"
+
+
+class TestGeometryOnlyFeaturesRetry:
+    def test_empty_first_answer_is_retried_with_plain_request(self):
+        layer = _FakeSubsetLayer(rows=["f1", "f2"])
+        assert _geometry_only_features(layer) == ["f1", "f2"]
+        assert layer.requests == 2
+
+    def test_non_empty_answer_is_not_retried(self):
+        class _Layer(_FakeSubsetLayer):
+            def getFeatures(self, request=None):
+                self.requests += 1
+                return iter(self._rows)
+        layer = _Layer(rows=["f1"])
+        assert _geometry_only_features(layer) == ["f1"]
+        assert layer.requests == 1

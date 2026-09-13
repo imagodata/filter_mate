@@ -2847,7 +2847,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 # Check signal tuple
                 signals = widget_info.get("SIGNALS", [])
                 for s_tuple in signals:
-                    s_tuple[0] if s_tuple else "?"
                     handler = s_tuple[-1] if s_tuple else None
 
                     if handler:
@@ -5545,10 +5544,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.info("✓ Step 1: Layer validated and expressions reset")
 
             # FIX 2026-01-14: Pass manual_change flag to widget synchronization
+            # PERF 2026-09-13: the three heavy steps get their own span, logged
+            # only when slower than 250 ms, so a slow layer change in
+            # filtermate.log says which step took the time.
+            perf_mark_start("layer_change_sync")
             self._synchronize_layer_widgets(validated_layer, layer_props, manual_change=manual_change)
+            perf_mark_end("layer_change_sync", validated_layer.name(), min_ms=250)
             logger.info("✓ Step 2: Layer widgets synchronized")
 
+            perf_mark_start("layer_change_reload")
             self._reload_exploration_widgets(validated_layer, layer_props)
+            perf_mark_end("layer_change_reload", validated_layer.name(), min_ms=250)
             logger.info("✓ Step 3: Exploration widgets reloaded")
 
             # Force visual update of exploration widgets
@@ -5568,7 +5574,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 # Ensure layer is in PROJECT_LAYERS before initializing
                 if self.current_layer.id() not in self.PROJECT_LAYERS:
                     logger.debug(f"Layer {self.current_layer.name()} not in PROJECT_LAYERS yet - will be added")
+                perf_mark_start("layer_change_groupbox")
                 self.exploring_groupbox_init()
+                perf_mark_end("layer_change_groupbox", validated_layer.name(), min_ms=250)
                 logger.info("✓ Step 4: Exploring groupbox initialized")
 
             self._update_exploring_buttons_state()

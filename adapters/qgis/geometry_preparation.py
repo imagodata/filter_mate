@@ -36,6 +36,17 @@ from qgis.core import (
 
 logger = logging.getLogger('FilterMate.Adapters.GeometryPreparation')
 
+# 2026-09-13: a simplified source WKT may exceed ``max_wkt_length`` by this
+# factor before the envelope fallbacks (convex hull, bounding boxes) are
+# considered. The fallbacks change the meaning of the filter, so they are a
+# last resort for sources that would otherwise not fit in a subset string.
+SIMPLIFICATION_HARD_LIMIT_FACTOR = 10
+
+# 2026-09-13: with a buffer, the simplification tolerance is capped to
+# ``|buffer| / BUFFER_TOLERANCE_DIVISOR`` so the buffer keeps its meaning
+# (a 20 m road buffer simplified with a 78 m tolerance meant nothing).
+BUFFER_TOLERANCE_DIVISOR = 10.0
+
 
 @dataclass
 class GeometryPreparationConfig:
@@ -924,12 +935,24 @@ class GeometryPreparationAdapter:
         tolerance_multiplier = 2.0
 
         # Get tolerance limits
-        0.1 / 111000.0 if is_geographic else 0.1
         max_tolerance = 100.0 / 111000.0 if is_geographic else 100.0
 
         # Increase max tolerance for extreme reductions
         if reduction_ratio < 0.01:
             max_tolerance *= min(1.0 / reduction_ratio, 100)
+
+        # 2026-09-13: never simplify a buffered source beyond a fraction of
+        # its buffer (the buffer is what the user asked for).
+        if buffer_value:
+            buffer_cap = abs(float(buffer_value)) / BUFFER_TOLERANCE_DIVISOR
+            if is_geographic:
+                buffer_cap /= 111000.0
+            max_tolerance = min(max_tolerance, buffer_cap)
+
+        # 2026-09-13: the extent-based first guess could already exceed
+        # ``max_tolerance`` on a wide source, which skipped the loop entirely
+        # and went straight to the convex hull. Start from the cap instead.
+        tolerance = min(tolerance, max_tolerance)
 
         for attempt in range(max_attempts):
             if tolerance > max_tolerance:
@@ -967,16 +990,35 @@ class GeometryPreparationAdapter:
 
             tolerance *= tolerance_multiplier
 
+        # 2026-09-13: keep the best real simplification whenever it stays
+        # under the hard limit. The envelope fallbacks change the meaning of
+        # the filter (a 20 m buffer around 7000 road segments used to become
+        # the convex hull of the whole area), so they only apply to sources
+        # that would otherwise not fit in a subset string at all.
+        hard_limit = int(max_wkt_length * SIMPLIFICATION_HARD_LIMIT_FACTOR)
+        final_wkt = best_simplified.asWkt(wkt_precision)
+        reduction_pct = (1 - len(final_wkt) / original_length) * 100
+        if len(final_wkt) <= hard_limit:
+            logger.warning(
+                f"Target {max_wkt_length} chars not reached, keeping the best "
+                f"simplification: {original_length} → {len(final_wkt)} chars "
+                f"({reduction_pct:.1f}% reduction, hard limit {hard_limit})"
+            )
+            return GeometryPreparationResult(
+                success=True,  # Partial success
+                geometry=best_simplified,
+                wkt=final_wkt.replace("'", "''")
+            )
+
         # Try fallbacks for extreme cases
         fallback_result = self._try_simplification_fallbacks(
             geometry, max_wkt_length, wkt_precision
         )
         if fallback_result and fallback_result.success:
+            self._warn_approximate_filter(len(final_wkt), hard_limit)
             return fallback_result
 
         # Return best result even if not under limit
-        final_wkt = best_simplified.asWkt(wkt_precision)
-        reduction_pct = (1 - len(final_wkt) / original_length) * 100
         logger.warning(
             f"Could not reach target, using best: {original_length} → "
             f"{len(final_wkt)} chars ({reduction_pct:.1f}% reduction)"
@@ -987,6 +1029,22 @@ class GeometryPreparationAdapter:
             geometry=best_simplified,
             wkt=final_wkt.replace("'", "''")
         )
+
+    @staticmethod
+    def _warn_approximate_filter(wkt_length: int, hard_limit: int) -> None:
+        """Tell the user (QGIS message log) that the filter is now approximate."""
+        message = (
+            f"FilterMate: the source geometry is too complex for an exact filter "
+            f"({wkt_length:,} chars after simplification, limit {hard_limit:,}). "
+            "An envelope of the source is used instead: the result is approximate. "
+            "Select fewer features or use the PostgreSQL backend for an exact filter."
+        )
+        logger.warning(message)
+        try:
+            from qgis.core import QgsMessageLog, Qgis
+            QgsMessageLog.logMessage(message, "FilterMate", Qgis.MessageLevel.Warning)
+        except Exception:  # nosec B110 - message log is best effort (tests, headless)
+            pass
 
     def _calculate_simplification_tolerance(
         self,

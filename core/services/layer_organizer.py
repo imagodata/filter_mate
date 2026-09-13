@@ -183,7 +183,7 @@ class LayerOrganizer:
         layer_name = layer_props.get("layer_name", "unknown")
         layer_id = layer_props.get("layer_id", "unknown")
 
-        self._log_qgis(f"📂 Organizing layer: {layer_name} ({provider_type})", "Info")
+        logger.debug(f"📂 Organizing layer: {layer_name} ({provider_type})")
         logger.debug(f"  📋 Layer '{layer_name}' initial provider_type='{provider_type}'")
 
         # Determine effective provider type

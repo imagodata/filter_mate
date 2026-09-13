@@ -2,6 +2,20 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+
+- **SQL templates broken since the plugin-checker clean-up of 2026-02-10** (commit `0fb3ce4d`): 48 SQL/text templates in 16 modules had lost their `f` prefix, and the assignments feeding them had been removed as "unused". `CREATE MATERIALIZED VIEW {full_name} AS` reached PostgreSQL verbatim (`syntax error at or near "{"`), so every large source selection fell back to the inline `IN (…)` clause flagged "may be slow"; the subset-history statements carried a `# nosec` comment inside the SQL; the Spatialite temp tables, the PostgreSQL filter-chain MV and its indexes, the progressive/multi-step strategies and the `ogr_fdw` import were affected too. Restored from the pre-clean-up sources. `tests/unit/test_sql_templates_are_formatted.py` now fails when a placeholder string is never formatted.
+- **Buffer around a line or point source on Spatialite/GeoPackage** (the "20 m around the roads" case): the source WKT (7 278 road segments, 607 KB) can never be simplified under 100 KB — a multi-line string keeps at least two vertices per part — and the adaptive simplification fell back to the convex hull of the whole area, so the filter returned everything inside the hull. The static buffer is now applied once in QGIS (`_apply_static_buffer`), the resulting polygon is simplified with a tolerance capped at a tenth of the buffer, a result above the 100 KB target is kept as long as it stays under a 1 MB hard limit, and the envelope fallbacks (convex hull, bounding boxes) are a last resort reported in the QGIS message log. The first tolerance guess could also exceed the maximum and skip the simplification loop entirely. The subset strings no longer contain `ST_Buffer(ST_GeomFromText(…), d)`, which SQLite re-evaluated for every statement (count, extent, each canvas refresh) on every filtered layer.
+- Spatialite source in SUBSET mode: an empty answer from the attribute-less feature request is retried with a plain request and the layer state is logged. A filtered road layer came back empty from the worker thread (`featureCount() == -1`) and the filter failed with "No features found for geometry preparation".
+
+### Performance
+
+- Exploring feature list: an identical population request (same layer, display expression, subset, sort and mode) within 3 s of a completed one is skipped. `setLayer()` followed by `setDisplayExpression()` during a layer change rebuilt the same list twice — two ordered scans of a filtered PostgreSQL road layer, 6 s each. `⏱ picker_populate` is logged when a population takes 250 ms or more.
+- `⏱ layer_change_sync` / `layer_change_reload` / `layer_change_groupbox` sub-spans (logged above 250 ms) split the layer-change latency (an 80 s `layer_change` was measured without any detail); `perf_mark_end()` accepts `min_ms`.
+- `filtermate.log`: the per-layer expression-building trace (`core/filter/expression_builder.py`, `core/filter/filter_orchestrator.py`) and the per-layer "Organizing layer" lines are DEBUG now. A 36-layer filter wrote about 3 000 INFO lines (900 KB in five minutes) and the `⏱` timing lines were lost in them.
+
 ## [4.8.9] - 2026-09-12
 
 ### Performance (real measurements after 4.8.8)

@@ -24,6 +24,7 @@ Usage:
 """
 
 import logging
+import time
 from functools import partial
 
 from qgis.PyQt import QtGui
@@ -73,6 +74,12 @@ from qgis.core import (
 
 # Import safe iteration utilities for OGR/GeoPackage error handling
 from ...infrastructure.utils import safe_iterate_features, is_layer_valid
+
+# PERF 2026-09-13: an identical feature-list population request (same layer,
+# display expression, subset, sort and mode) issued within this delay of a
+# completed one is skipped. setLayer() followed by setDisplayExpression()
+# during a layer change rebuilt the same list twice.
+POPULATE_DEDUPE_SECONDS = 3.0
 
 logger = logging.getLogger('FilterMate.UI.Widgets.CustomWidgets')
 
@@ -1085,6 +1092,24 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         list_widget = self.list_widgets[self.layer.id()]
 
+        # PERF 2026-09-13: skip a request identical to the one just completed
+        # (two full ordered scans of a filtered PostgreSQL road layer cost
+        # 6 s each during one layer change).
+        _t0 = time.perf_counter()
+        try:
+            subset_signature = self.layer.subsetString() or ''
+        except (RuntimeError, AttributeError):
+            subset_signature = ''
+        signature = (
+            self.layer.id(), str(expression), subset_signature,
+            self._sort_order, bool(force_full), (search_text or '').strip(),
+        )
+        last_signature, last_time = getattr(self, '_last_populate', (None, 0.0))
+        if (signature == last_signature and list_widget.count() > 0
+                and time.monotonic() - last_time < POPULATE_DEDUPE_SECONDS):
+            logger.debug("_populate_features_sync: identical request just completed - skipped")
+            return
+
         # FIX 2026-01-19 v4: Save checked items BEFORE clearing
         saved_checked_fids = []
         if preserve_checked:
@@ -1198,6 +1223,14 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         list_widget.setFeaturesList(features_data)
         list_widget.setTotalFeaturesListCount(len(features_data))
+        self._last_populate = (signature, time.monotonic())
+        _elapsed_ms = (time.perf_counter() - _t0) * 1000.0
+        if _elapsed_ms >= 250:
+            logger.info(
+                f"⏱ picker_populate: {_elapsed_ms:.0f} ms ({self._cached_layer_name}, "
+                f"{len(features_data)} row(s), scanned {scanned}, "
+                f"{'search' if search_text else ('full' if force_full else f'limit {fetch_limit}')})"
+            )
 
         # FIX 2026-01-19: Force visual refresh after population
         # This ensures the list is displayed correctly, especially after layer changes

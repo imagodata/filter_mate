@@ -46,8 +46,14 @@ def perf_elapsed_ms(name: str) -> Optional[float]:
     return (time.perf_counter() - started) * 1000.0
 
 
-def perf_mark_end(name: str, details: Optional[str] = None) -> Optional[float]:
+def perf_mark_end(name: str, details: Optional[str] = None, min_ms: Optional[float] = None) -> Optional[float]:
     """Close the span ``name`` and log its duration at INFO.
+
+    Args:
+        name: Span name given to :func:`perf_mark_start`.
+        details: Free text appended in parentheses.
+        min_ms: When given, spans shorter than this are closed silently
+            (sub-steps that only matter when they are slow).
 
     Returns:
         Elapsed milliseconds, or None when the span was never started.
@@ -57,6 +63,8 @@ def perf_mark_end(name: str, details: Optional[str] = None) -> Optional[float]:
     if started is None:
         return None
     elapsed_ms = (time.perf_counter() - started) * 1000.0
+    if min_ms is not None and elapsed_ms < min_ms:
+        return elapsed_ms
     suffix = f" ({details})" if details else ""
     logger.info(f"⏱ {name}: {elapsed_ms:.0f} ms{suffix}")
     return elapsed_ms

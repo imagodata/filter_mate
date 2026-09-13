@@ -539,3 +539,36 @@ class TestApplyFilterQueueRouting:
 
         assert result is False
         callback.assert_not_called()
+
+
+# ===========================================================================
+# 2026-09-13: buffer already applied to the source WKT by the executor
+# ===========================================================================
+
+class TestBufferAppliedInWkt:
+    def _builder(self, applied):
+        return SpatialiteExpressionBuilder(task_params={
+            "buffer_endcap_style": "round",
+            "source_srid": 2154,
+            "infos": {"buffer_state": {"has_buffer": True, "buffer_value": 20.0, "applied_in_wkt": applied}},
+        })
+
+    def test_no_st_buffer_when_wkt_is_pre_buffered(self):
+        expr = self._builder(True).build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"intersects": True},
+            source_geom="POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))",
+            buffer_value=20.0,
+        )
+        assert "Intersects" in expr
+        assert "ST_Buffer" not in expr
+
+    def test_st_buffer_kept_when_wkt_is_raw(self):
+        expr = self._builder(False).build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"intersects": True},
+            source_geom="POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))",
+            buffer_value=20.0,
+        )
+        assert "ST_Buffer(" in expr
+        assert "20.0" in expr
