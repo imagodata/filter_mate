@@ -572,7 +572,9 @@ class TestIndexAwarePredicate:
             original_source_table="commune",
             raw_geom_expr='"batiment"."geometrie"',
         )
-        assert expr.startswith('EXISTS (SELECT 1 FROM "ign"."commune" AS __source WHERE ')
+        # 2026-09-13: envelope prefilter (GiST on the target) in front of the EXISTS
+        assert expr.startswith('("batiment"."geometrie" && (SELECT ST_SetSRID(ST_Expand(ST_Extent(__source."geometrie")::geometry, 0.0), ')
+        assert 'FROM "ign"."commune" AS __source WHERE (__source."fid" IN (8, 34))) AND EXISTS (SELECT 1 FROM "ign"."commune" AS __source WHERE ' in expr
         assert ('("batiment"."geometrie" && __source."geometrie" AND '
                 'ST_Intersects(ST_PointOnSurface("batiment"."geometrie"), __source."geometrie"))') in expr
         assert '__source."fid" IN (8, 34)' in expr
@@ -639,3 +641,42 @@ class TestIndexAwarePredicate:
         )
         assert expr.startswith('ST_DWithin("b"."geom", ST_MakeValid(ST_GeomFromText(')
         assert expr.endswith(', 20)')
+
+
+class TestSourceEnvelopePrefilter:
+    def _expr(self, builder, **kwargs):
+        params = dict(
+            geom_expr='"b"."geom"',
+            predicate_func="ST_Intersects",
+            source_geom='"s"."commune"."geom"',
+            source_filter='"commune"."fid" IN (1, 2)',
+            buffer_value=None,
+            layer_props={},
+            original_source_table="commune",
+            raw_geom_expr='"b"."geom"',
+        )
+        params.update(kwargs)
+        return builder._build_exists_expression(**params)
+
+    def test_buffer_grows_the_envelope(self, builder):
+        expr = self._expr(builder, buffer_value=20)
+        assert expr.startswith(
+            '("b"."geom" && (SELECT ST_SetSRID(ST_Expand(ST_Extent(__source."geom")::geometry, 20.0), '
+            'MAX(ST_SRID(__source."geom"))) FROM "s"."commune" AS __source WHERE (__source."fid" IN (1, 2))) '
+            'AND EXISTS ('
+        )
+        assert 'ST_DWithin("b"."geom", __source."geom", 20)' in expr
+
+    def test_no_prefilter_without_source_filter(self, builder):
+        expr = self._expr(builder, source_filter=None)
+        assert expr.startswith('EXISTS (')
+        assert 'ST_Extent' not in expr
+
+    def test_no_prefilter_for_disjoint(self, builder):
+        expr = self._expr(builder, predicate_func="ST_Disjoint")
+        assert expr.startswith('EXISTS (')
+
+    def test_no_prefilter_for_combined_exists_filters(self, builder):
+        expr = self._expr(builder, source_filter='EXISTS (SELECT 1 FROM "s"."zone" AS __source WHERE 1=1)')
+        assert expr.startswith('EXISTS (')
+        assert 'ST_Extent' not in expr

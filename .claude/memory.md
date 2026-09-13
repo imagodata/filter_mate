@@ -2,6 +2,8 @@
 _Auto-maintained by project agent_
 
 ## [2026-09-13 soir] PostgreSQL buffer, MV, rechargement projet, OGR → branche `claude/pg-buffer-project-reload`
+- Préfiltre d'emprise PostgreSQL (`_source_envelope_prefilter`) : `target && (SELECT ST_Expand(ST_Extent(src)…) WHERE sélection)`
+  devant chaque EXISTS avec filtre source simple ; sans lui, 456 s pour 16 couches (zone_de_vegetation 322 s).
 - Buffer PostgreSQL : `ST_Intersects(t, ST_Buffer(src, d))` bloquait (buffer recalculé par paire) →
   `_buffered_predicate()` émet `ST_DWithin(t, src, d)` pour intersects + buffer positif rond
   (+ `raw && ST_Expand(src, d)` avec centroïdes). Autres prédicats/caps/buffers négatifs : ST_Buffer.
