@@ -847,10 +847,13 @@ class FilterMate:
         auto_activate_enabled = auto_activate_config.get('value', False)  # Default to False to prevent auto-open
 
         if not auto_activate_enabled:
-            logger.info("FilterMate: Auto-activation disabled in configuration")
-            # CRITICAL: If signals were previously connected, disconnect them
-            self._disconnect_auto_activation_signals()
-            return
+            # 2026-09-13: the project signals stay connected. They also drive
+            # the reload of an ACTIVE plugin when another project is opened
+            # (_handle_project_change); auto-opening the panel is gated
+            # separately in the handlers. Without them the plugin only saw a
+            # project switch through layersAdded/allLayersRemoved and kept the
+            # previous project's layers, favorites and source layer.
+            logger.info("FilterMate: Auto-activation disabled in configuration (project change signals stay connected)")
 
         if not self._auto_activation_signals_connected:
             from qgis.core import QgsProject
@@ -1092,14 +1095,12 @@ class FilterMate:
         auto_activate_config = app_config.get('AUTO_ACTIVATE', app_config.get('auto_activate', {}))
         auto_activate_enabled = auto_activate_config.get('value', False)  # Default to False to prevent auto-open
 
-        if not auto_activate_enabled:
-            logger.debug("FilterMate: Auto-activation disabled, skipping auto-activation")
-            return
-
         from qgis.core import QgsProject, QgsVectorLayer
         from qgis.PyQt.QtCore import QTimer
 
-        # If plugin is already active, handle project change
+        # If plugin is already active, handle project change.
+        # 2026-09-13: this happens whatever the AUTO_ACTIVATE setting, which
+        # only governs auto-opening the panel (checked further below).
         if self.pluginIsActive:
             if self.app and hasattr(self.app, 'dockwidget') and self.app.dockwidget:
                 # CRITICAL: Skip if app is already initializing a project
@@ -1124,6 +1125,10 @@ class FilterMate:
                         strong_self._handle_project_change()
                 QTimer.singleShot(200, safe_handle_project_change)
                 return
+            return
+
+        if not auto_activate_enabled:
+            logger.debug("FilterMate: Auto-activation disabled, skipping auto-activation")
             return
 
         # Plugin not active - check if there are vector layers to activate for
@@ -1190,6 +1195,12 @@ class FilterMate:
         # This prevents stale data from the previous project lingering
         try:
             logger.info("FilterMate: Forcing cleanup of previous project state")
+
+            # 2026-09-13: layersAdded fired during the project read; its
+            # debounced add_layers would register the layers a first time
+            # right before the full reinitialization below does it again.
+            if hasattr(self.app, '_stop_pending_layer_additions'):
+                self.app._stop_pending_layer_additions()
 
             # 1. Cancel any pending tasks
             if hasattr(self.app, '_safe_cancel_all_tasks'):

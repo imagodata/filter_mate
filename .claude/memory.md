@@ -1,6 +1,25 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-09-13 soir] PostgreSQL buffer, MV, rechargement projet, OGR → branche `claude/pg-buffer-project-reload`
+- Buffer PostgreSQL : `ST_Intersects(t, ST_Buffer(src, d))` bloquait (buffer recalculé par paire) →
+  `_buffered_predicate()` émet `ST_DWithin(t, src, d)` pour intersects + buffer positif rond
+  (+ `raw && ST_Expand(src, d)` avec centroïdes). Autres prédicats/caps/buffers négatifs : ST_Buffer.
+- MV de sélection source (`create_source_selection_mv`) : index sur `geom`/`pk` (alias de la vue,
+  pas `geometrie`/`fid`), `_execute_in_savepoint` pour les index, `conn.commit()` après création
+  (la MV doit être visible depuis la connexion QGIS), rollback sur échec. Avant : MV perdue → repli
+  `IN (...)`.
+- Changement de projet : `projectRead`/`newProjectCreated`/`cleared` désormais branchés même avec
+  `APP.AUTO_ACTIVATE=false` (défaut) ; `_auto_activate_plugin` traite le plugin actif AVANT la
+  garde AUTO_ACTIVATE ; `_handle_project_change` stoppe le debounce layersAdded avant la réinit.
+- OGR : buffer du source mis en cache dans `task_params['_ogr_buffered_source_cache']` (1 calcul
+  par tâche au lieu de 1 par couche cible), segments/endcap depuis task_params, PK récupérées en
+  une requête (`_fetch_pk_values`).
+- `MAX_EXPRESSION_FOR_DIRECT_APPLY` 100 KB → 1 MB (task_completion_handler) : les expressions
+  Spatialite bufferisées (~150 KB) passaient par le chemin différé (repaint + count par couche).
+- Non expliqué : `picker_populate: 7986 ms` sur `commune` PostgreSQL (574 lignes) ; les retries de
+  `safe_iterate_features` sont maintenant loggés en INFO pour trancher.
+
 ## [2026-09-13] Lecture de filtermate.log → branche `claude/perf-log-2026-09-13`
 Décisions à connaître :
 - Le commit `0fb3ce4d` (2026-02-10, « fix plugin checker issues ») avait retiré le préfixe `f` de 48

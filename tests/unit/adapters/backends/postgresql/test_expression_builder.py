@@ -587,4 +587,55 @@ class TestIndexAwarePredicate:
             layer_props={},
             raw_geom_expr='"b"."geom"',
         )
-        assert '"b"."geom" && ST_Buffer(__source."geom", 50' in expr
+        # 2026-09-13: intersects + positive round buffer → ST_DWithin (no buffer
+        # geometry), bbox test on the raw column against the expanded source
+        assert '"b"."geom" && ST_Expand(__source."geom", 50)' in expr
+        assert 'ST_DWithin(ST_PointOnSurface("b"."geom"), __source."geom", 50)' in expr
+        assert 'ST_Buffer' not in expr
+
+    def test_exists_path_keeps_st_buffer_for_other_predicates_and_caps(self, builder):
+        expr = builder._build_exists_expression(
+            geom_expr='"b"."geom"',
+            predicate_func="ST_Within",
+            source_geom='"s"."commune"."geom"',
+            source_filter=None,
+            buffer_value=50,
+            layer_props={},
+            raw_geom_expr='"b"."geom"',
+        )
+        assert 'ST_Within("b"."geom", ST_Buffer(__source."geom", 50' in expr
+        builder.task_params["buffer_endcap_style"] = "flat"
+        expr = builder._build_exists_expression(
+            geom_expr='"b"."geom"',
+            predicate_func="ST_Intersects",
+            source_geom='"s"."commune"."geom"',
+            source_filter=None,
+            buffer_value=50,
+            layer_props={},
+            raw_geom_expr='"b"."geom"',
+        )
+        assert 'ST_Buffer(__source."geom", 50' in expr and 'ST_DWithin' not in expr
+
+    def test_negative_buffer_keeps_st_buffer(self, builder):
+        expr = builder._build_exists_expression(
+            geom_expr='"b"."geom"',
+            predicate_func="ST_Intersects",
+            source_geom='"s"."commune"."geom"',
+            source_filter=None,
+            buffer_value=-10,
+            layer_props={},
+            raw_geom_expr='"b"."geom"',
+        )
+        assert 'ST_Buffer(__source."geom", -10' in expr and 'ST_DWithin' not in expr
+
+    def test_simple_wkt_path_uses_dwithin(self, builder):
+        expr = builder._build_simple_wkt_expression(
+            geom_expr='"b"."geom"',
+            predicate_func="ST_Intersects",
+            source_wkt="POINT(0 0)",
+            source_srid=2154,
+            buffer_value=20,
+            raw_geom_expr='"b"."geom"',
+        )
+        assert expr.startswith('ST_DWithin("b"."geom", ST_MakeValid(ST_GeomFromText(')
+        assert expr.endswith(', 20)')

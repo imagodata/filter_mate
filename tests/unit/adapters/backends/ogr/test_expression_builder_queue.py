@@ -22,8 +22,6 @@ import types
 import importlib.util
 from unittest.mock import MagicMock
 
-import pytest
-
 
 # ---------------------------------------------------------------------------
 # Mock setup — load OGR expression_builder.py with QGIS deps stubbed out.
@@ -177,3 +175,61 @@ class TestOGRApplyFilterFallbackPath:
         # synchronous fallback in an else branch — no unconditional removal.
         assert "safe_set_subset_string(layer, \"1 = 0\")" in src
         assert "safe_set_subset_string(layer, final_filter)" in src
+
+
+# ===========================================================================
+# 2026-09-13: buffered source cached per task, PK values fetched in one request
+# ===========================================================================
+
+class TestBufferedSourceCache:
+    def test_cache_lives_in_task_params_shared_by_the_backends(self):
+        task_params = {"buffer_segments": 5}
+        first = OGRExpressionBuilder(task_params=task_params)
+        second = OGRExpressionBuilder(task_params=task_params)
+        first._buffered_source_cache()["k"] = "layer"
+        assert second._buffered_source_cache()["k"] == "layer"
+        assert task_params["_ogr_buffered_source_cache"] == {"k": "layer"}
+
+    def test_static_buffer_computed_once_for_several_targets(self, monkeypatch):
+        task_params = {"buffer_segments": 6, "buffer_endcap_style": "flat"}
+        builder = OGRExpressionBuilder(task_params=task_params)
+        source = MagicMock()
+        source.id.return_value = "src_layer"
+        buffered = MagicMock()
+        buffered.isValid.return_value = True
+        calls = []
+
+        def fake_run(alg, params, feedback=None):
+            calls.append((alg, dict(params)))
+            return {"OUTPUT": buffered}
+
+        processing = types.SimpleNamespace(run=fake_run)
+        monkeypatch.setitem(sys.modules, "qgis.processing", processing)
+        monkeypatch.setattr(_mod, "QgsVectorLayer", MagicMock)
+        monkeypatch.setitem(sys.modules, "qgis", types.SimpleNamespace(processing=processing))
+
+        assert builder._apply_buffer_to_layer(source, 20.0) is buffered
+        assert OGRExpressionBuilder(task_params=task_params)._apply_buffer_to_layer(source, 20.0) is buffered
+        assert len(calls) == 1
+        assert calls[0][1]["SEGMENTS"] == 6
+        assert calls[0][1]["END_CAP_STYLE"] == 1
+        # a different distance is a different buffer
+        builder._apply_buffer_to_layer(source, 30.0)
+        assert len(calls) == 2
+
+
+class TestFetchPkValues:
+    def test_single_request_with_fids_and_no_geometry(self, monkeypatch):
+        request = MagicMock()
+        request.setFilterFids.return_value = request
+        qgis_core = types.SimpleNamespace(QgsFeatureRequest=MagicMock(return_value=request))
+        qgis_core.QgsFeatureRequest.Flag = types.SimpleNamespace(NoGeometry="nogeom")
+        monkeypatch.setitem(sys.modules, "qgis.core", qgis_core)
+        layer = MagicMock()
+        rows = [{"pk": 7}, {"pk": None}, {"pk": 9}]
+        layer.getFeatures.return_value = iter(rows)
+        values = OGRExpressionBuilder._fetch_pk_values(layer, [1, 2, 3], "pk")
+        assert values == [7, 9]
+        request.setFilterFids.assert_called_once_with([1, 2, 3])
+        request.setFlags.assert_called_once_with("nogeom")
+        layer.getFeatures.assert_called_once()

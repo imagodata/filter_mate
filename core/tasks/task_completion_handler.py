@@ -255,7 +255,11 @@ def apply_pending_subset_requests(
 
     # Performance thresholds
     MAX_FEATURES_FOR_UPDATE_EXTENTS = 50000
-    MAX_EXPRESSION_FOR_DIRECT_APPLY = 100000  # 100KB
+    # 2026-09-13: raised from 100 KB to 1 MB. A buffered Spatialite source
+    # now yields ~150 KB subset strings, and the deferred path applied all 36
+    # layers outside the frozen canvas with a repaint and a full count each
+    # (4.6 s of post-filter UI work).
+    MAX_EXPRESSION_FOR_DIRECT_APPLY = 1_000_000  # 1 MB
 
     # 2026-04-29: count layers per shared SQLite file so we can throttle
     # consecutive setSubsetString+reload+featureCount calls. Without the
@@ -493,7 +497,7 @@ def _schedule_deferred_filter_application(
                     if success:
                         lyr.triggerRepaint()
                         QgsMessageLog.logMessage(
-                            f"finished() ✓ Deferred: {lyr.name()} → {lyr.featureCount()} features",
+                            f"finished() ✓ Deferred: {lyr.name()} → (count pending)",
                             "FilterMate", Qgis.MessageLevel.Info
                         )
                     else:

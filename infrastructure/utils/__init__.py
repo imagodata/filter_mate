@@ -286,7 +286,7 @@ def safe_iterate_features(layer_or_source, request=None, max_retries=5, retry_de
 
                 if is_recoverable and attempt < max_retries - 1:
                     layer_name = getattr(layer_or_source, 'name', lambda: 'unknown')()
-                    logger.debug(
+                    logger.info(  # 2026-09-13: INFO so the waits show next to the ⏱ lines
                         f"OGR access retry on '{layer_name}' (attempt {attempt + 1}/{max_retries}): {e}. "
                         f"Waiting {retry_delay:.2f}s..."
                     )

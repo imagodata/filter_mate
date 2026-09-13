@@ -361,11 +361,17 @@ class PostgreSQLBackend(BackendPort):
 
             # Create MV using mv_manager
             try:
+                # 2026-09-13: the MV columns are the aliases of the query
+                # above ("pk", "geom"), not the source columns - indexing
+                # "geometrie"/"fid" failed, aborted the transaction and the
+                # MV vanished with it ("MV creation reported success but MV
+                # not found"), so every large selection fell back to the
+                # inline IN clause.
                 created_name = self._mv_manager.create_mv(
                     query=query,
                     source_table=table_name,
-                    geometry_column=geom_field,
-                    indexes=[pk_field],  # Index on PK for fast lookups
+                    geometry_column="geom",
+                    indexes=["pk"],  # Index on PK for fast lookups
                     session_scoped=True,
                     connection=conn
                 )
@@ -376,6 +382,9 @@ class PostgreSQLBackend(BackendPort):
                     cursor = conn.cursor()
                     cursor.execute(f'SELECT COUNT(*) FROM "filtermate_temp"."{created_name}"')  # nosec B608
                     row_count = cursor.fetchone()[0]
+                    # 2026-09-13: the subset strings run on QGIS's own connection,
+                    # the MV must be committed to be visible there.
+                    conn.commit()
 
                     logger.info(
                         f"[PostgreSQL] ✅ Source selection MV created: {created_name} "  # nosec B608
@@ -386,10 +395,12 @@ class PostgreSQLBackend(BackendPort):
                     return f'"filtermate_temp"."{created_name}"'  # nosec B608
                 else:
                     logger.error("[PostgreSQL] MV creation reported success but MV not found")
+                    self._rollback_quietly(conn)
                     return None
 
             except Exception as mv_error:
                 logger.error(f"[PostgreSQL] MV creation failed: {mv_error}")
+                self._rollback_quietly(conn)
                 logger.error(f"[PostgreSQL] Query was: {query[:300]}...")
                 logger.error(f"[PostgreSQL] pk_field='{pk_field}', geom_field='{geom_field}'")
                 logger.error(f"[PostgreSQL] Cleaned: pk='{clean_pk_field}', geom='{clean_geom_field}'")
@@ -405,6 +416,14 @@ class PostgreSQLBackend(BackendPort):
             import traceback
             logger.debug(traceback.format_exc())
             return None
+
+    @staticmethod
+    def _rollback_quietly(conn) -> None:
+        """Leave the connection usable after a failed statement (aborted transaction)."""
+        try:
+            conn.rollback()
+        except Exception as rollback_error:  # pragma: no cover - diagnostics only
+            logger.debug(f"[PostgreSQL] rollback after MV failure: {rollback_error}")
 
     def _extract_table_info(self, layer) -> Tuple[Optional[str], Optional[str]]:
         """
