@@ -1148,12 +1148,48 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     source_geom_sql, buffer_value, source_srid
                 )
             else:
-                # Direct buffer in native units
-                source_geom_sql = self._build_st_buffer_with_style(
-                    source_geom_sql, buffer_value
+                # 2026-09-13: ST_DWithin for intersects + positive round buffer
+                return self._buffered_predicate(
+                    predicate_func, geom_expr, source_geom_sql, buffer_value, raw_geom_expr
                 )
 
         return self._index_aware_predicate(predicate_func, geom_expr, source_geom_sql, raw_geom_expr)
+
+    def _buffered_predicate(
+        self,
+        predicate_func: str,
+        geom_expr: str,
+        source_expr: str,
+        buffer_value: float,
+        raw_geom_expr: Optional[str] = None
+    ) -> str:
+        """Predicate between the target geometry and a buffered source geometry.
+
+        2026-09-13: ``ST_Intersects(target, ST_Buffer(source, d))`` makes
+        PostgreSQL compute a buffer per (source, target) pair whenever it
+        drives the join from the target side - a 20 m buffer around 1 661 road
+        segments never finished on the first of 17 target layers. For the
+        intersects predicate and a positive round buffer the exact equivalent
+        is ``ST_DWithin(target, source, d)``: no buffer geometry at all, and
+        its support function lets the GiST index of either side serve the
+        join. Other predicates, negative buffers and flat/square caps keep the
+        explicit ``ST_Buffer()``.
+        """
+        use_dwithin = (
+            predicate_func.upper() == 'ST_INTERSECTS'
+            and buffer_value is not None and float(buffer_value) > 0
+            and str(self._get_buffer_endcap_style()).lower() == 'round'
+        )
+        if not use_dwithin:
+            buffered = self._build_st_buffer_with_style(source_expr, buffer_value)
+            return self._index_aware_predicate(predicate_func, geom_expr, buffered, raw_geom_expr)
+        predicate = f"ST_DWithin({geom_expr}, {source_expr}, {buffer_value})"
+        if not raw_geom_expr or raw_geom_expr == geom_expr or 'ST_TRANSFORM(' in geom_expr.upper():
+            return predicate
+        # Centroid optimisation: the predicate runs on ST_PointOnSurface(geom),
+        # which no index covers; the bbox test on the raw column brings the
+        # GiST index back (the point lies inside the feature's own bbox).
+        return f"({raw_geom_expr} && ST_Expand({source_expr}, {buffer_value}) AND {predicate})"
 
     @staticmethod
     def _index_aware_predicate(
@@ -1230,6 +1266,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         # Build source geometry in subquery
         source_geom_in_subquery = f'__source."{source_geom_field}"'
+        static_buffer = None  # 2026-09-13: set when a static buffer applies (see below)
 
         # FIX v4.2.20 (2026-01-21): Calculate buffer table name BEFORE filter chaining check
         # In filter chaining, we need to reference the ORIGINAL buffer table even after clearing buffer_expression
@@ -1371,13 +1408,20 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             )
         # Apply static buffer
         elif buffer_value is not None and buffer_value != 0:
-            source_geom_in_subquery = self._build_st_buffer_with_style(
-                source_geom_in_subquery, buffer_value
-            )
+            # 2026-09-13: the buffer is folded into the predicate below
+            # (ST_DWithin for intersects + positive round buffer, see
+            # _buffered_predicate) instead of ST_Buffer() on the source.
+            static_buffer = buffer_value
 
         # Build WHERE clause
         # CRITICAL: The spatial predicate checks intersection between target and source
-        where_clauses = [self._index_aware_predicate(predicate_func, geom_expr, source_geom_in_subquery, raw_geom_expr)]
+        if static_buffer is not None:
+            first_clause = self._buffered_predicate(
+                predicate_func, geom_expr, source_geom_in_subquery, static_buffer, raw_geom_expr
+            )
+        else:
+            first_clause = self._index_aware_predicate(predicate_func, geom_expr, source_geom_in_subquery, raw_geom_expr)
+        where_clauses = [first_clause]
 
         if source_filter:
             # CRITICAL FIX v4.2.8 (2026-01-21): Handle combined EXISTS filters properly

@@ -389,13 +389,9 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     self.log_info(f"  - PK field '{pk_field}' exists as attribute: fetching actual values")
 
             if use_pk_values:
-                pk_values = []
-                for fid in selected_ids:
-                    feature = layer.getFeature(fid)
-                    if feature.isValid():
-                        pk_value = feature[pk_field]
-                        if pk_value is not None:
-                            pk_values.append(pk_value)
+                # PERF 2026-09-13: one request for all selected rows instead
+                # of one getFeature() (one provider query) per selected id.
+                pk_values = self._fetch_pk_values(layer, selected_ids, pk_field)
 
                 if pk_values:
                     self.log_info(f"  - Retrieved {len(pk_values)} actual PK values")
@@ -642,6 +638,39 @@ class OGRExpressionBuilder(GeometricFilterPort):
         # Always use quoted field name for PostgreSQL
         return f'"{pk_field}" IN ({value_list})'
 
+    @staticmethod
+    def _fetch_pk_values(layer, selected_ids, pk_field) -> list:
+        """Primary-key values of ``selected_ids`` fetched in a single request."""
+        from qgis.core import QgsFeatureRequest
+        pk_values = []
+        request = QgsFeatureRequest().setFilterFids(list(selected_ids))
+        try:
+            request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
+        except AttributeError:  # QGIS < 3.30 enum spelling
+            request.setFlags(QgsFeatureRequest.NoGeometry)
+        try:
+            request.setSubsetOfAttributes([pk_field], layer.fields())
+        except (AttributeError, TypeError):
+            pass
+        for feature in layer.getFeatures(request):
+            pk_value = feature[pk_field]
+            if pk_value is not None:
+                pk_values.append(pk_value)
+        return pk_values
+
+    def _buffered_source_cache(self) -> dict:
+        """Per-task cache of buffered source layers, shared by every target layer.
+
+        PERF 2026-09-13: apply_filter() runs once per target layer and buffered
+        the source layer each time - 36 buffers of the same 4 711 road segments
+        for a 36-layer cascade. task_params is the dict shared by all the
+        backends of one task, so the buffered layer is computed once.
+        """
+        params = self.task_params if isinstance(self.task_params, dict) else None
+        if params is None:
+            return {}
+        return params.setdefault('_ogr_buffered_source_cache', {})
+
     def _apply_buffer_to_layer(
         self,
         layer: 'QgsVectorLayer',
@@ -662,13 +691,30 @@ class OGRExpressionBuilder(GeometricFilterPort):
         try:
             from qgis import processing
 
+            # 2026-09-13: honour the task's buffer segments / end cap style
+            # (they were hard-coded to 8 segments, round) and reuse the
+            # buffered layer across the target layers of the task.
+            params = self.task_params if isinstance(self.task_params, dict) else {}
+            segments = int(params.get('buffer_segments', 5) or 5)
+            cap_styles = {'round': 0, 'flat': 1, 'square': 2}
+            end_cap = cap_styles.get(str(params.get('buffer_endcap_style', 'round')).lower(), 0)
+            cache = self._buffered_source_cache()
+            cache_key = (layer.id(), float(buffer_value), segments, end_cap)
+            cached = cache.get(cache_key)
+            if cached is not None:
+                try:
+                    if cached.isValid():
+                        self.log_info("  - Buffered source reused from the task cache")
+                        return cached
+                except RuntimeError:
+                    pass  # C++ object gone: rebuild below
             result = processing.run(
                 'native:buffer',
                 {
                     'INPUT': layer,
                     'DISTANCE': buffer_value,
-                    'SEGMENTS': 8,
-                    'END_CAP_STYLE': 0,  # Round
+                    'SEGMENTS': segments,
+                    'END_CAP_STYLE': end_cap,
                     'JOIN_STYLE': 0,  # Round
                     'MITER_LIMIT': 2,
                     'DISSOLVE': False,
@@ -680,6 +726,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             buffered_layer = result.get('OUTPUT')
             if buffered_layer and isinstance(buffered_layer, QgsVectorLayer):
                 self._source_layer_keep_alive.append(buffered_layer)
+                cache[cache_key] = buffered_layer
                 return buffered_layer
 
             self.log_error("Buffer processing returned no valid layer")

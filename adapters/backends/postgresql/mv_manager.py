@@ -735,13 +735,14 @@ class MaterializedViewManager(MaterializedViewPort):
         clean_name = table_name.replace('"', '').replace('.', '_')
         index_name = f"idx_{clean_name}_geom"
 
-        try:
-            cursor.execute(f"""
+        self._execute_in_savepoint(
+            cursor,
+            f"""
                 CREATE INDEX IF NOT EXISTS "{index_name}"
                 ON {table_name} USING GIST ("{geometry_column}")
-            """)
-        except Exception as e:
-            logger.warning(f"[PostgreSQL] Failed to create spatial index: {e}")
+            """,
+            "spatial index",
+        )
 
     def _create_index(
         self,
@@ -753,13 +754,41 @@ class MaterializedViewManager(MaterializedViewPort):
         clean_name = table_name.replace('"', '').replace('.', '_')
         index_name = f"idx_{clean_name}_{column}"
 
-        try:
-            cursor.execute(f"""
+        self._execute_in_savepoint(
+            cursor,
+            f"""
                 CREATE INDEX IF NOT EXISTS "{index_name}"
                 ON {table_name} ("{column}")
-            """)
+            """,
+            f"index on {column}",
+        )
+
+    @staticmethod
+    def _execute_in_savepoint(cursor, sql: str, what: str) -> None:
+        """Run an optional statement without poisoning the enclosing transaction.
+
+        2026-09-13: a failed CREATE INDEX put the connection in "current
+        transaction is aborted" state, which rolled back the materialized
+        view created just before. The statement now runs inside a savepoint
+        that is rolled back on failure (and skipped in autocommit mode).
+        """
+        savepoint = "fm_mv_optional"
+        in_transaction = True
+        try:
+            cursor.execute(f"SAVEPOINT {savepoint}")
+        except Exception:
+            in_transaction = False
+        try:
+            cursor.execute(sql)
+            if in_transaction:
+                cursor.execute(f"RELEASE SAVEPOINT {savepoint}")
         except Exception as e:
-            logger.warning(f"[PostgreSQL] Failed to create index on {column}: {e}")
+            logger.warning(f"[PostgreSQL] Failed to create {what}: {e}")
+            if in_transaction:
+                try:
+                    cursor.execute(f"ROLLBACK TO SAVEPOINT {savepoint}")
+                except Exception as rollback_error:
+                    logger.debug(f"[PostgreSQL] ROLLBACK TO SAVEPOINT failed: {rollback_error}")
 
 
 def create_mv_manager(
