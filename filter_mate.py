@@ -1348,6 +1348,22 @@ class FilterMate:
             except Exception as e:
                 logger.debug(f"FilterMate: Error clearing FeaturePickerWidget during unload: {e}")
 
+        # 2026-09-14: remove and delete the panel on unload. It used to stay
+        # alive (hidden) after a plugin reload; a feature-picker gather still
+        # running on a PostgreSQL layer then finished after the project was
+        # cleared and crashed QGIS (access violation in
+        # QgsFeaturePickerModelBase::endUpdate).
+        if self.app and self.app.dockwidget:
+            try:
+                self.iface.removeDockWidget(self.app.dockwidget)
+            except Exception as e:
+                logger.debug(f"FilterMate: removeDockWidget skipped: {e}")
+            try:
+                self.app.dockwidget.deleteLater()
+                logger.debug("FilterMate: dock widget scheduled for deletion")
+            except Exception as e:
+                logger.debug(f"FilterMate: dock widget deletion skipped: {e}")
+
         # v5.0: Teardown extensions before core cleanup
         self._teardown_extensions()
 

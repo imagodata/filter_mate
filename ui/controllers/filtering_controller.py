@@ -284,10 +284,18 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Args:
             layer: New source layer or None
         """
-        if layer == self._source_layer:
-            return
-
         old_layer = self._source_layer
+        # 2026-09-14: after a project switch the previous source layer's C++
+        # object is gone; comparing it raised RuntimeError ("wrapped C/C++
+        # object ... has been deleted") from every filtering delegate.
+        try:
+            from ...infrastructure.utils import is_layer_valid
+            if old_layer is not None and not is_layer_valid(old_layer):
+                old_layer = None
+        except ImportError:  # standalone test harness
+            pass
+        if old_layer is not None and layer == old_layer:
+            return
         self._source_layer = layer
 
         # Clear dependent state when source changes

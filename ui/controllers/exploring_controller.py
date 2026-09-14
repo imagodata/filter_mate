@@ -176,6 +176,12 @@ class ExploringController(BaseController, LayerSelectionMixin):
         # FIX 2026-01-15 v7: Invalidate cache for OLD layer when switching
         # This ensures fresh data is loaded when returning to this layer
         old_layer = self._current_layer
+        # 2026-09-14: after a project switch the previous layer's C++ object is
+        # gone; comparing it raised "wrapped C/C++ object of type QgsVectorLayer
+        # has been deleted" up to the QGIS error dialog. Nothing to invalidate
+        # then: the cache entry of a deleted layer can never be reached again.
+        if old_layer is not None and not self.is_layer_valid(old_layer):
+            old_layer = None
         if old_layer and old_layer != layer:
             dw = getattr(self, '_dockwidget', None) or getattr(self, 'dockwidget', None)
             if dw and hasattr(dw, '_exploring_cache'):

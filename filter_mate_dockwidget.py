@@ -5605,9 +5605,15 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         perf_mark_start("layer_change")
         self._reset_selection_tracking_for_layer(layer)
         try:
+            # PERF 2026-09-14: a 20 s layer change on a PostgreSQL layer at
+            # project open sat entirely before Step 1 (no timed span there).
+            perf_mark_start("layer_change_validate")
             should_continue, validated_layer, layer_props = self._validate_and_prepare_layer(layer)
+            perf_mark_end("layer_change_validate", layer.name() if layer is not None else "", min_ms=250)
             if not should_continue: return
+            perf_mark_start("layer_change_reset")
             self._reset_layer_expressions(layer_props); widgets = self._disconnect_layer_signals()
+            perf_mark_end("layer_change_reset", validated_layer.name(), min_ms=250)
             logger.info("✓ Step 1: Layer validated and expressions reset")
 
             # FIX 2026-01-14: Pass manual_change flag to widget synchronization
