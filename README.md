@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.9.1** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.9.2** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -12,7 +12,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.9.1 fixes two regressions of the new project switch with the panel open: a Python error when the previous layer is gone, and a QGIS crash after a plugin reload followed by a project close (the panel is now removed and deleted on unload). v4.9.0 brought the project switch itself, one FilterMate project row per project, a PostgreSQL feature list without server-side sort nor freeze, type-to-find in the layer combo, plain-language error messages and accessible names.
+**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.9.2 fixes the GeoPackage layer that came back empty when it was re-filtered as a source after being filtered as a target (a parenthesis lost while combining with the R-tree subset), and makes a new source filter replace the previous one when the combine option is off. v4.9.1 fixed two regressions of the new project switch with the panel open: a Python error when the previous layer is gone, and a QGIS crash after a plugin reload followed by a project close (the panel is now removed and deleted on unload). v4.9.0 brought the project switch itself, one FilterMate project row per project, a PostgreSQL feature list without server-side sort nor freeze, type-to-find in the layer combo, plain-language error messages and accessible names.
 
 📖 **New to FilterMate?** Follow the step-by-step tutorial: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html)
 
@@ -34,7 +34,14 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.9.1
+### 🆕 What's new in 4.9.2
+
+- **GeoPackage layer empty after a second filter**: a layer filtered as a target (R-tree prefilter) and then used as the source with an attribute expression showed 0 features. The subset combiners dropped one closing parenthesis and the SQL was invalid without any error, since OGR accepts the subset string. Verified on the BD TOPO 31 GeoPackage.
+- **Combine option off means replace**: the new source filter replaces the previous subset instead of being ANDed to it, as the target layers already did.
+
+See the [4.9.2 changelog](CHANGELOG.md#492---2026-09-14) for details.
+
+### What's new in 4.9.1
 
 - **PostgreSQL, selections of 100 000 features or more**: the filter was refused on the first click and accepted on the second (the materialized-view path called a facade method that does not exist).
 - **Project switch with the panel open**: no more `RuntimeError: wrapped C/C++ object of type QgsVectorLayer has been deleted` when the previous layer is gone (exploring and filtering controllers).
