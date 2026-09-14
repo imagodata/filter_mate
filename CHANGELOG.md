@@ -4,6 +4,12 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Python error after a project switch** (`RuntimeError: wrapped C/C++ object of type QgsVectorLayer has been deleted` in `ExploringController.set_layer`, QGIS 4.2.2): the previous current layer's C++ object is gone once the project changed; the exploring and filtering controllers no longer compare it.
+- **QGIS crash (access violation in `QgsFeaturePickerModelBase::endUpdate`) after a plugin reload followed by a project close**: the panel stayed alive, hidden, after `unload()`, and a feature-picker gather still running on a PostgreSQL layer finished after the layer was deleted. The dock widget is now removed and deleted on unload.
+- `⏱ layer_change_validate` / `⏱ layer_change_reset` timing lines (a 20 s layer change at project open sat before Step 1, where nothing was timed).
+
 ## [4.9.0] - 2026-09-14
 
 ### Fixed
