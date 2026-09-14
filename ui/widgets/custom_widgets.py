@@ -26,6 +26,7 @@ Usage:
 import logging
 import time
 import traceback
+import weakref
 from functools import partial
 
 from qgis.PyQt import QtGui
@@ -1116,6 +1117,66 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         except (RuntimeError, AttributeError):
             return True
 
+    CANVAS_DEFER_FALLBACK_MS = 8000
+
+    def _canvas_is_drawing(self) -> bool:
+        try:
+            from qgis.utils import iface
+            canvas = iface.mapCanvas() if iface is not None else None
+            return bool(canvas is not None and canvas.isDrawing())
+        except Exception:
+            return False
+
+    def _defer_populate_while_canvas_draws(self, expression, preserve_checked, force_full, search_text) -> bool:
+        """Postpone a PostgreSQL population while the canvas is rendering.
+
+        PERF 2026-09-14, QGIS 4.2: the limited request takes 12 ms on an idle
+        PostgreSQL layer but blocked the main thread for 17.7 s right after a
+        project opened, while the canvas was rendering the 18 PostgreSQL
+        layers (the provider connection pool is busy with the render jobs).
+        The population is run once the canvas has refreshed, or after
+        CANVAS_DEFER_FALLBACK_MS at the latest. Returns True when deferred.
+        """
+        if getattr(self, '_skip_canvas_defer', False) or self._orders_server_side():
+            return False
+        if not self._canvas_is_drawing():
+            return False
+        if getattr(self, '_deferred_populate_armed', False):
+            return True
+        self._deferred_populate_armed = True
+        weak_self = weakref.ref(self)
+        from qgis.utils import iface
+        canvas = iface.mapCanvas()
+
+        def run_deferred():
+            widget = weak_self()
+            if widget is None or not getattr(widget, '_deferred_populate_armed', False):
+                return
+            widget._deferred_populate_armed = False
+            try:
+                canvas.mapCanvasRefreshed.disconnect(run_deferred)
+            except (TypeError, RuntimeError):
+                pass
+            widget._skip_canvas_defer = True
+            try:
+                widget._populate_features_sync(
+                    expression, preserve_checked=preserve_checked,
+                    force_full=force_full, search_text=search_text,
+                )
+            finally:
+                widget._skip_canvas_defer = False
+
+        try:
+            canvas.mapCanvasRefreshed.connect(run_deferred)
+        except (TypeError, RuntimeError, AttributeError) as exc:
+            logger.debug(f"mapCanvasRefreshed unavailable, fallback timer only: {exc}")
+        QTimer.singleShot(self.CANVAS_DEFER_FALLBACK_MS, run_deferred)
+        logger.info(
+            f"_populate_features_sync: {self._cached_layer_name} population deferred until the canvas "
+            f"finishes rendering (PostgreSQL, at most {self.CANVAS_DEFER_FALLBACK_MS} ms)"
+        )
+        return True
+
     def _populate_features_sync(self, expression, preserve_checked=False, force_full=False, search_text=None):
         """Populate features list synchronously.
 
@@ -1158,6 +1219,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         if (signature == last_signature and list_widget.count() > 0
                 and time.monotonic() - last_time < POPULATE_DEDUPE_SECONDS):
             logger.debug("_populate_features_sync: identical request just completed - skipped")
+            return
+        if self._defer_populate_while_canvas_draws(expression, preserve_checked, force_full, search_text):
             return
 
         # FIX 2026-01-19 v4: Save checked items BEFORE clearing
