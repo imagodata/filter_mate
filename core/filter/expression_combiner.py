@@ -610,8 +610,15 @@ def combine_with_old_subset(
         param_old_subset_where = old_subset[index_where:]
         param_source_old_subset = old_subset[:index_where]
 
-        # Remove trailing )) if present (legacy handling for malformed expressions)
-        if param_old_subset_where.endswith('))'):
+        # Legacy handling for malformed expressions: drop one trailing ')'.
+        # 2026-09-14: only when the old subset really has an excess closing
+        # parenthesis. A GeoPackage R-tree prefilter puts a WHERE inside a
+        # balanced expression that ends in ")))"; losing one made the combined
+        # subset invalid SQL and the source layer showed 0 features.
+        if (
+            param_old_subset_where.endswith('))')
+            and old_subset.count(')') > old_subset.count('(')
+        ):
             param_old_subset_where = param_old_subset_where[:-1]
 
         # FIX 2026-01-16: Strip leading "WHERE " from new_expression to prevent "WHERE WHERE" syntax error

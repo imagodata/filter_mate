@@ -256,7 +256,12 @@ class SubsetStringBuilder:
         index_where_clause = old_subset.find('WHERE')
         if index_where_clause > -1:
             param_old_subset_where_clause = old_subset[index_where_clause:]
-            if param_old_subset_where_clause.endswith('))'):
+            # 2026-09-14: drop a trailing ')' only when the old subset really has
+            # an excess closing parenthesis (balanced R-tree prefilters end in ")))").
+            if (
+                param_old_subset_where_clause.endswith('))')
+                and old_subset.count(')') > old_subset.count('(')
+            ):
                 param_old_subset_where_clause = param_old_subset_where_clause[:-1]
             param_source_old_subset = old_subset[:index_where_clause]
 
