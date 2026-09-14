@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.8.10** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.9.0** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -12,7 +12,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.8.10 fixes the PostgreSQL buffer filters (a roads + 20 m buffer cascade went from never finishing to 25 s for 16 layers, with `ST_DWithin` and a source envelope prefilter on each target's GiST index), reloads the panel when another project is opened, applies GeoPackage buffers once in QGIS instead of falling back to a convex hull, and restores 48 SQL templates broken since February. See [what's new](#-whats-new-in-4810).
+**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.9.0 makes a project switch with the panel open work (four causes found and verified in QGIS 4.2), keeps one FilterMate project row per project (no more duplicated favorites), drops the server-side sort of the PostgreSQL feature list that fetched the whole table (13 s → 30 ms on 370 000 rows) and defers it while the canvas renders, and adds type-to-find in the layer combo, a busy cursor and pressed button during tasks, plain-language error messages and accessible names. Tests: 1 766, lint in CI, Qt6 enum guard.
 
 📖 **New to FilterMate?** Follow the step-by-step tutorial: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html)
 
@@ -34,7 +34,17 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.8.10
+### 🆕 What's new in 4.9.0
+
+- **Project switch with the panel open**: the panel follows the new project (a dead weak reference on the deferred `add_layers`, a never-drained orchestrator queue, `clear()` on the layer combo and bare `disconnect()` calls on QGIS signals were each hiding the next).
+- **FilterMate database**: one project row per project (the save no longer renames or empties the row with the next / closed project's name) and duplicate favorites removed.
+- **PostgreSQL feature list**: no server-side ORDER BY (QGIS fetched and sorted the whole table before the limit: 13 s → 30 ms on 370 000 rows) and population deferred while the canvas renders (no 17 s freeze at project open); one population per layer change.
+- **Panel**: type to find a layer in the current-layer combo, busy cursor and pressed button during a task, plain-language error messages, accessible names and tooltips on icon buttons, HiDPI sizes.
+- **Under the hood**: entry-module and app logging reaches `filtermate.log`, stored geometry column verified once, zip without translation sources and internal docs (5.8 → 5.0 MB), flake8 in CI, AST guards (Qt6 enums, `clear()` on map layer combos, bare `disconnect()` on QGIS signals).
+
+See the [4.9.0 changelog](CHANGELOG.md#490---2026-09-14) for details.
+
+### What's new in 4.8.10
 
 - **PostgreSQL buffer filters**: `ST_Intersects(target, ST_Buffer(source, d))` is replaced by `ST_DWithin(target, source, d)` for intersects with a positive round buffer, and every EXISTS is preceded by a bbox test of the target against the envelope of the selected source rows, served by the target's GiST index. A roads + 20 m buffer cascade that never finished now takes 25 s for 16 layers (zone_de_vegetation 322 s to 3 s). The source-selection materialized view is created with the right index columns and committed, and the corrupted-subset cleaner accepts the new expressions.
 - **Project switch**: with `APP.AUTO_ACTIVATE` off (the default) the open panel never reloaded on `projectRead`; it now reloads the new project's layers, source layer and favorites.

@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+## [4.9.0] - 2026-09-14
+
 ### Fixed
 
 - **A new FilterMate project row on every project open, favorites duplicated.** `save_project_variables` copied whatever QgsProject held at that moment into the row of the session's UUID: `fileNameChanged` fires with the next project's name before the UUID is switched, and a closed project has no name, so rows were renamed to another project or emptied, could never be matched again, and every open created a new row and re-migrated the "orphan" favorites (31 unnamed rows and five identical "YONNE" favorites in a real profile). The row keeps its identity: a save is skipped when the QGIS project is no longer the row's project, and an empty name never overwrites a stored one. The orphan migration also drops an orphan identical (name, expression, layer) to a favorite already in the target project instead of moving it.
