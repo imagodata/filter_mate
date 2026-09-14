@@ -632,3 +632,9 @@ Result: Que veux-tu faire dans cette session ?
   plugin (`_connect_layer_store_slots` / `_disconnect_layer_store_slots`). Test AST.
 - `get_logger()` propage désormais vers filtermate.log pour tout nom sous `FilterMate.*` / `filter_mate.*`.
 - Reproduction QGIS : voir la mémoire globale `project-switch-fix-2026-09-14` (schtasks, script fm_project_switch.py).
+- [2026-09-14 après-midi] `_refresh_feature_pickers_for_field_change` ne reconstruit plus les listes pendant
+  `current_layer_changed` (`_updating_current_layer`) : le `setExpression('')` de `_disconnect_layer_signals`
+  déclenchait une population de 17 s sur PostgreSQL. `⏱ picker_populate` nomme sa chaîne d'appel.
+- Colonne géométrique : `_persist_verified_geometry_field` (layer_management_task, chemin « variables existantes »).
+- Cibles PostgreSQL vides : `FilterOrchestrator.empty_target_layers` + `report_empty_target_layers()` dans `finished()`.
+- Garde-fou `tests/test_no_unscoped_qt_enums.py` : ajouter tout nouveau membre d'enum non scopé rencontré.
