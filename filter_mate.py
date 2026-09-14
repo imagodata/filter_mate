@@ -977,8 +977,10 @@ class FilterMate:
                 # Clear combobox safely
                 try:
                     if hasattr(self.app.dockwidget, 'comboBox_filtering_current_layer'):
+                        # No clear(): QComboBox.clear() on a QgsMapLayerComboBox
+                        # empties its proxy model for good (the combo showed 0
+                        # layers after every project switch, 2026-09-14).
                         self.app.dockwidget.comboBox_filtering_current_layer.setLayer(None)
-                        self.app.dockwidget.comboBox_filtering_current_layer.clear()
                 except Exception as e:
                     logger.debug(f"Error clearing layer combobox on project cleared: {e}")
 
@@ -1225,8 +1227,8 @@ class FilterMate:
             if (self.app.dockwidget and
                     hasattr(self.app.dockwidget, 'comboBox_filtering_current_layer')):
                 try:
+                    # No clear(): see _handle_project_cleared
                     self.app.dockwidget.comboBox_filtering_current_layer.setLayer(None)
-                    self.app.dockwidget.comboBox_filtering_current_layer.clear()
                 except Exception as e:
                     logger.debug(f"Error clearing layer combobox: {e}")
 
@@ -1333,8 +1335,7 @@ class FilterMate:
             try:
                 if hasattr(self.app.dockwidget, 'comboBox_filtering_current_layer'):
                     self.app.dockwidget.comboBox_filtering_current_layer.setLayer(None)
-                    self.app.dockwidget.comboBox_filtering_current_layer.clear()
-                    logger.debug("FilterMate: Layer combo box cleared during unload")
+                    logger.debug("FilterMate: Layer combo box reset during unload")
             except Exception as e:
                 logger.debug(f"FilterMate: Error clearing layer combo during unload: {e}")
 
