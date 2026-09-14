@@ -1475,7 +1475,7 @@ class FilterMate:
 
         dlg = QDialog(self.iface.mainWindow())
         dlg.setWindowTitle("FilterMate")
-        dlg.setFixedWidth(420)
+        dlg.setMinimumWidth(420)  # a minimum, not a fixed width: long translations and HiDPI fonts may need more
         layout = QVBoxLayout(dlg)
         layout.setSpacing(12)
         layout.setContentsMargins(24, 20, 24, 20)

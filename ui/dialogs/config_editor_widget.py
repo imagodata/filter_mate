@@ -51,7 +51,9 @@ class ColorPickerWidget(QWidget):
 
         # Color preview label
         self._preview = QLabel()
-        self._preview.setFixedSize(24, 24)
+        # Sized from the font, not in pixels: 24 px is tiny on a HiDPI screen (UX 2026-09-14)
+        swatch = self.fontMetrics().height() + 8
+        self._preview.setFixedSize(swatch, swatch)
         self._preview.setStyleSheet(f"background-color: {initial_color}; border: 1px solid #888;")
         layout.addWidget(self._preview)
 
@@ -63,7 +65,7 @@ class ColorPickerWidget(QWidget):
 
         # Pick button
         self._pick_button = QPushButton("...")
-        self._pick_button.setFixedWidth(30)
+        self._pick_button.setFixedWidth(swatch + 6)
         self._pick_button.clicked.connect(self._pick_color)
         layout.addWidget(self._pick_button)
 
