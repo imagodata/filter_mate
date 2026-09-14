@@ -17,6 +17,7 @@ Date: January 2026
 from typing import List, Dict, Optional, Any, Callable
 from dataclasses import dataclass
 import logging
+import inspect
 import weakref
 import time
 
@@ -39,6 +40,24 @@ except ImportError:  # test harnesses that stub the infrastructure package
         return None
 
 logger = logging.getLogger('FilterMate.LayerLifecycleService')
+
+
+def _hold_callback(callback):
+    """Return a zero-argument resolver that yields ``callback`` when a deferred
+    QTimer fires, or None once its owner is gone.
+
+    A bound method is held through ``weakref.WeakMethod`` so the owner (the
+    app) decides the lifetime. Anything else (the ``lambda layers:
+    app.manage_task('add_layers', layers)`` passed by FilterMateApp) is held
+    strongly: it only exists in the caller's frame, so a plain
+    ``weakref.ref()`` to it was already dead when the timer fired. That is why
+    opening another project with the panel open never registered the new
+    layers (2026-09-14: ``_loading_new_project`` stayed True, empty combo box,
+    Filter button disabled) and why the PostgreSQL retries never ran.
+    """
+    if inspect.ismethod(callback):
+        return weakref.WeakMethod(callback)
+    return lambda: callback
 
 
 @dataclass
@@ -650,11 +669,11 @@ class LayerLifecycleService:
             if has_postgres:
                 delay += stability_constants.get('POSTGRESQL_EXTRA_DELAY_MS', 1500)
 
-            # Use weakref to prevent access violations on plugin unload
-            weak_callback = weakref.ref(manage_task_callback)
+            # The callback must survive until the timer fires (see _hold_callback)
+            resolve_callback = _hold_callback(manage_task_callback)
 
             def safe_add_layers():
-                strong_callback = weak_callback()
+                strong_callback = resolve_callback()
                 if strong_callback is not None and callable(strong_callback):
                     strong_callback(current_layers)
 
@@ -747,7 +766,8 @@ class LayerLifecycleService:
         init_db_callback: Callable,
         manage_task_callback: Callable,
         temp_schema: str,
-        stability_constants: Dict[str, int]
+        stability_constants: Dict[str, int],
+        registered_layer_ids_callback: Optional[Callable[[], set]] = None
     ) -> None:
         """
         Handle project read/new project initialization.
@@ -858,13 +878,31 @@ class LayerLifecycleService:
                 # Schedule add_layers with delay for project load
                 delay = stability_constants.get('PROJECT_LOAD_DELAY_MS', 2500)
 
-                # Use weakref to prevent access violations
-                weak_callback = weakref.ref(manage_task_callback)
+                # The callback must survive until the timer fires (see _hold_callback)
+                resolve_callback = _hold_callback(manage_task_callback)
 
                 def safe_add_layers():
-                    strong_callback = weak_callback()
-                    if strong_callback is not None and callable(strong_callback):
-                        strong_callback(usable_layers)
+                    strong_callback = resolve_callback()
+                    if strong_callback is None or not callable(strong_callback):
+                        return
+                    # 2026-09-14: the layersAdded debounce of the project read
+                    # usually registers the layers before this timer fires;
+                    # registering them a second time cost a second
+                    # LayersManagementEngineTask and UI rebuild per switch.
+                    pending = usable_layers
+                    if registered_layer_ids_callback is not None:
+                        try:
+                            registered = set(registered_layer_ids_callback() or ())
+                        except Exception as exc:  # callback on a torn-down app
+                            logger.debug(f"registered layers unavailable: {exc}")
+                            registered = set()
+                        if registered:
+                            pending = [layer for layer in usable_layers if layer.id() not in registered]
+                    if not pending:
+                        logger.info(f"FilterMate: {task_name} - all {len(usable_layers)} layers already registered")
+                        set_loading_flag_callback(False)
+                        return
+                    strong_callback(pending)
 
                 QTimer.singleShot(delay, safe_add_layers)
             else:
@@ -905,15 +943,14 @@ class LayerLifecycleService:
 
         logger.info(f"FilterMate: {len(pending_layers)} PostgreSQL layers pending - scheduling retry")
 
-        # Use weakref to prevent access violations
-        weak_callback = weakref.ref(manage_task_callback) if hasattr(manage_task_callback, '__self__') else None
+        # The callback must survive until the timer fires (see _hold_callback)
+        resolve_callback = _hold_callback(manage_task_callback)
         captured_pending = list(pending_layers)
         captured_project_layers = project_layers
         delay_ms = stability_constants.get('POSTGRESQL_EXTRA_DELAY_MS', 1500)
 
         def retry_postgres(retry_attempt: int = 1):
-            # Get strong reference to callback
-            callback = weak_callback() if weak_callback else manage_task_callback
+            callback = resolve_callback()
             if callback is None:
                 return
 

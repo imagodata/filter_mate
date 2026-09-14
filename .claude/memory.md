@@ -612,3 +612,35 @@ Result: Que veux-tu faire dans cette session ?
 - `website/guide.html` (13 sections, anglais, charte de `index.html`) + 16 captures `website/img/guide/` prises dans QGIS 4.2 réel via `scripts/guide_screenshots.py` (QGIS Windows piloté depuis WSL, `--lang en --code`). PR #66.
 - Bug corrigé au passage : menu favoris illisible en thème sombre (`ui/styles/favorites_styles.py`, QMenu blanc sans `color`).
 - Restent à regarder : libellés vides dans la liste de sélection multiple (délégué Qt6, capture `exploring-multiple.png`), doc en français si besoin (le site est en anglais).
+
+## [2026-09-14] Audit général → PR #77 `claude/audit-2026-09-14` (après PR #76 enum Qt6)
+- Curseur `Qt.CursorShape.BusyCursor` posé dans `_freeze_canvas_for_task` et retiré dans `_unfreeze_canvas_after_task`
+  (même token ; une tâche qui supplante restaure d'abord le curseur précédent). À valider en QGIS réel.
+- `scripts/prepare_plugin_zip.sh` exclut désormais `docs/`, `i18n/*.ts`, `i18n/*.pro` (5,8 → 5,0 Mo).
+- CI `test.yml` : job `lint` = `flake8 --extend-exclude=tests,scripts,website,docs` (le plugin est à 0 constat ; ne pas
+  ajouter tests/ sans les nettoyer d'abord : 41 constats).
+- Spatialite `index_manager` : `cursor.execute("SELECT CreateSpatialIndex(?, ?)", (table, col))` — plus de f-string.
+- Ne plus créer de `logger = logging.getLogger('FilterMate.X')` dans une méthode : utiliser le logger de module.
+- Restant priorisé et constats écartés : voir la mémoire globale `audit-general-2026-09-14`.
+
+## [2026-09-14] Changement de projet avec le panneau ouvert → 4 correctifs (PR #77)
+- Ne jamais garder une `weakref` sur un rappel passé en argument (lambda ou méthode liée) pour un QTimer : utiliser
+  `_hold_callback()` (layer_lifecycle_service).
+- `manage_task` est la SEULE file add_layers ; `TaskOrchestrator._dispatch_add_layers` ne met plus rien en file.
+- Jamais `clear()` sur `comboBox_filtering_current_layer` (QgsMapLayerComboBox) : `setLayer(None)`. Test AST.
+- Jamais `signal.disconnect()` sans slot sur un signal QGIS (layerStore, QgsProject, iface) : déconnecter le slot du
+  plugin (`_connect_layer_store_slots` / `_disconnect_layer_store_slots`). Test AST.
+- `get_logger()` propage désormais vers filtermate.log pour tout nom sous `FilterMate.*` / `filter_mate.*`.
+- Reproduction QGIS : voir la mémoire globale `project-switch-fix-2026-09-14` (schtasks, script fm_project_switch.py).
+- [2026-09-14 après-midi] `_refresh_feature_pickers_for_field_change` ne reconstruit plus les listes pendant
+  `current_layer_changed` (`_updating_current_layer`) : le `setExpression('')` de `_disconnect_layer_signals`
+  déclenchait une population de 17 s sur PostgreSQL. `⏱ picker_populate` nomme sa chaîne d'appel.
+- Colonne géométrique : `_persist_verified_geometry_field` (layer_management_task, chemin « variables existantes »).
+- Cibles PostgreSQL vides : `FilterOrchestrator.empty_target_layers` + `report_empty_target_layers()` dans `finished()`.
+- Garde-fou `tests/test_no_unscoped_qt_enums.py` : ajouter tout nouveau membre d'enum non scopé rencontré.
+- [2026-09-14 soir] `handle_project_initialization(..., registered_layer_ids_callback=)` : le add_layers différé
+  n'enregistre que les couches absentes de PROJECT_LAYERS (le rebond layersAdded a déjà fait le reste).
+  `FilterMateApp._set_task_button_down` : bouton Filtrer/Défiltrer enfoncé (setDown) du gel au dégel, jamais désactivé.
+- [2026-09-14 soir] Liste d'entités PostgreSQL : pas d'ORDER BY sur la requête limitée (`_orders_server_side`) —
+  QGIS ne pousse pas l'ORDER BY au serveur (table entière rapatriée : 13 s sur 370 k lignes, 24 ms sans tri).
+  Ne pas réintroduire de tri serveur pour postgres sans mesure.

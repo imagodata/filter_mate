@@ -384,7 +384,7 @@ class FilterEngineTask(QgsTask):
         # Store subset string requests to apply on main thread
         # Instead of calling setSubsetString directly from background thread (which causes
         # access violations), we store the requests and emit applySubsetRequest signal
-        # after the task completes. The signal is connected with Qt.QueuedConnection
+        # after the task completes. The signal is connected with Qt.ConnectionType.QueuedConnection
         # to ensure setSubsetString is called on the main thread.
         self._pending_subset_requests = []
 
@@ -2918,6 +2918,12 @@ class FilterEngineTask(QgsTask):
     @main_thread_only
     def finished(self, result: Optional[bool]) -> None:
         """Handle task completion. Delegates to FinishedHandler."""
+        orchestrator = getattr(self, '_filter_orchestrator', None)
+        if orchestrator is not None and hasattr(orchestrator, 'report_empty_target_layers'):
+            try:
+                orchestrator.report_empty_target_layers()
+            except Exception as exc:
+                logger.debug(f"Empty-target report failed: {exc}")
         message_category = MESSAGE_TASKS_CATEGORIES[self.task_action]
 
         cleared_warnings, cleared_pending, cleared_ogr = self._finished_handler.handle_finished(

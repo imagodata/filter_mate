@@ -3063,7 +3063,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
                 # Set protection timestamp - any exploring_features_changed calls within 500ms will be skipped
                 self._dockwidget._sync_protection_until = time.time() + 0.5
-                logger.info(f"  ⏱️ Set sync protection until {self._dockwidget._sync_protection_until}")
+                logger.debug(f"  ⏱️ Set sync protection until {self._dockwidget._sync_protection_until}")
 
                 # Reset _syncing_from_qgis AFTER all sync operations are complete
                 self._dockwidget._syncing_from_qgis = False

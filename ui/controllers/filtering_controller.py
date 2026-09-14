@@ -768,8 +768,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Returns:
             True if execution handled by controller, False to use legacy
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
 
         if not self.can_execute():
             logger.debug("FilteringController: cannot execute - validation failed")
@@ -1146,8 +1144,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Args:
             is_checked: True if layers to filter option is enabled
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
         logger.debug(f"on_layers_to_filter_state_changed: is_checked={is_checked}")
 
         # Store state for configuration
@@ -1163,8 +1159,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Args:
             is_checked: True if combine operator option is enabled
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
         logger.debug(f"on_combine_operator_state_changed: is_checked={is_checked}")
 
         self._has_combine_operator = is_checked
@@ -1179,8 +1173,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Args:
             is_checked: True if geometric predicates option is enabled
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
         logger.debug(f"on_geometric_predicates_state_changed: is_checked={is_checked}")
 
         self._has_geometric_predicates = is_checked
@@ -1195,8 +1187,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Args:
             is_checked: True if buffer type option is enabled
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
         logger.debug(f"on_buffer_type_state_changed: is_checked={is_checked}")
 
         self._has_buffer_type = is_checked
@@ -1211,8 +1201,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Args:
             is_checked: True if buffer value option is enabled
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
         logger.debug(f"on_has_buffer_value_state_changed: is_checked={is_checked}")
 
         self._has_buffer_value = is_checked
@@ -1238,8 +1226,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Args:
             is_active: Whether buffer property override is active
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
         logger.debug(f"set_buffer_property_active: is_active={is_active}")
 
         self._buffer_property_active = is_active
@@ -1265,8 +1251,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Args:
             layer_ids: List of layer IDs to set as targets
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
 
         if layer_ids == self._target_layer_ids:
             return
@@ -1334,8 +1318,6 @@ class FilteringController(BaseController, LayerSelectionMixin):
         Returns:
             bool: True if existing filters were detected and additive mode was enabled
         """
-        import logging
-        logger = logging.getLogger('FilterMate.FilteringController')
 
         try:
             has_existing_filter = False

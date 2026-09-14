@@ -120,7 +120,7 @@ class RTreeIndexManager:
         try:
             # Create the spatial index using Spatialite function
             cursor.execute(
-                f"SELECT CreateSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608
+                "SELECT CreateSpatialIndex(?, ?)", (table_name, geometry_column)
             )
             self._conn.commit()
 
@@ -171,7 +171,7 @@ class RTreeIndexManager:
         try:
             # Disable spatial index using Spatialite function
             cursor.execute(
-                f"SELECT DisableSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608
+                "SELECT DisableSpatialIndex(?, ?)", (table_name, geometry_column)
             )
 
             # Drop the index table
@@ -239,7 +239,7 @@ class RTreeIndexManager:
             # Validate index using Spatialite function
             try:
                 cursor.execute(
-                    f"SELECT CheckSpatialIndex('{table_name}', '{geometry_column}')"  # nosec B608
+                    "SELECT CheckSpatialIndex(?, ?)", (table_name, geometry_column)
                 )
                 check_result = cursor.fetchone()
                 is_valid = check_result[0] == 1 if check_result else False

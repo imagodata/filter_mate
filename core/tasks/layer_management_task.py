@@ -416,6 +416,46 @@ class LayersManagementEngineTask(QgsTask):
 
         return existing_layer_variables
 
+    def _persist_verified_geometry_field(self, infos, layer):
+        """Replace a stored geometry column that no longer matches the layer URI.
+
+        2026-09-14: a dozen PostgreSQL layers carried ``layer_geometry_field =
+        'geom'`` (written by an older version) while their URI says
+        ``geometrie``. LayerOrganizer corrected the value in memory at every
+        task and logged "Geometry column mismatch" each time, but nothing wrote
+        it back. The stored value is fixed here, once, in the layer variables
+        (deferred to the main thread) and in the FilterMate database.
+        """
+        try:
+            if layer.providerType() not in ('postgres', 'spatialite'):
+                return
+            from qgis.core import QgsDataSourceUri
+            detected = QgsDataSourceUri(layer.source()).geometryColumn()
+        except (RuntimeError, AttributeError, TypeError):
+            return
+        stored = infos.get("layer_geometry_field")
+        if not detected or not stored or stored in ('NULL', 'None') or stored == detected:
+            return
+        logger.info(
+            f"Geometry column of layer {layer.name()} corrected once: stored='{stored}', actual='{detected}'"
+        )
+        infos["layer_geometry_field"] = detected
+        self._deferred_layer_variables.append((layer.id(), "filterMate_infos_layer_geometry_field", detected))
+        try:
+            with self._safe_spatialite_connect() as conn:
+                cur = conn.cursor()
+                cur.execute(
+                    """UPDATE fm_project_layers_properties
+                       SET meta_value = ?, _updated_at = datetime()
+                       WHERE fk_project = ? AND layer_id = ?
+                       AND meta_type = 'infos' AND meta_key = 'layer_geometry_field'""",
+                    (detected, str(self.project_uuid), layer.id())
+                )
+                conn.commit()
+                cur.close()
+        except (OSError, RuntimeError) as e:
+            logger.warning(f"Could not persist the geometry column of {layer.name()}: {e}")
+
     def _migrate_legacy_geometry_field(self, layer_variables, layer):
         """
         Migrate legacy properties and ensure all required properties exist.
@@ -439,6 +479,8 @@ class LayersManagementEngineTask(QgsTask):
             infos["layer_geometry_field"] = infos["geometry_field"]
             del infos["geometry_field"]
             logger.info(f"Migrated geometry_field to layer_geometry_field for layer {layer.id()}")
+
+        self._persist_verified_geometry_field(infos, layer)
 
         # Ensure all required exploring boolean flags exist
         exploring_booleans = {

@@ -68,7 +68,7 @@ class GitOpsWorker(QThread):
             the worker thread for diagnostics.
 
     The worker owns no Qt parents that touch the UI — connections from
-    callers are auto-resolved to ``Qt.QueuedConnection`` because the
+    callers are auto-resolved to ``Qt.ConnectionType.QueuedConnection`` because the
     sender lives on the worker thread, so signal handlers fire safely on
     the main thread.
     """

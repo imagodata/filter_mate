@@ -25,6 +25,8 @@ Usage:
 
 import logging
 import time
+import traceback
+import weakref
 from functools import partial
 
 from qgis.PyQt import QtGui
@@ -1097,6 +1099,94 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 except Exception as restore_err:
                     logger.warning(f"Could not restore checked items: {restore_err}")
 
+    def _orders_server_side(self) -> bool:
+        """Whether the limited request may carry an ORDER BY.
+
+        PERF 2026-09-14, measured in QGIS 4.2 on PostgreSQL (LIMIT 1001,
+        NoGeometry): ORDER BY "cleabs" 13.6 s and ORDER BY the primary key
+        11.0 s on troncon_de_route (370 690 rows), 16.8 s / 12.6 s on batiment
+        (681 654 rows), against 24 ms without ORDER BY. The order is not pushed
+        to the server, so the whole table is fetched and sorted client-side
+        before the limit applies; a layer change paid that on every PostgreSQL
+        layer. The rows are sorted by display value client-side anyway, and the
+        text filter searches the whole layer server-side. GeoPackage keeps the
+        server order (batiment, 1.17 M rows: 0.6 s).
+        """
+        try:
+            return self.layer.providerType() != 'postgres'
+        except (RuntimeError, AttributeError):
+            return True
+
+    CANVAS_DEFER_FALLBACK_MS = 15000
+    CANVAS_DEFER_MAX_ROUNDS = 3
+
+    def _canvas_is_drawing(self) -> bool:
+        try:
+            from qgis.utils import iface
+            canvas = iface.mapCanvas() if iface is not None else None
+            return bool(canvas is not None and canvas.isDrawing())
+        except Exception:
+            return False
+
+    def _defer_populate_while_canvas_draws(self, expression, preserve_checked, force_full, search_text) -> bool:
+        """Postpone a PostgreSQL population while the canvas is rendering.
+
+        PERF 2026-09-14, QGIS 4.2: the limited request takes 12 ms on an idle
+        PostgreSQL layer but blocked the main thread for 17.7 s right after a
+        project opened, while the canvas was rendering the 18 PostgreSQL
+        layers (the provider connection pool is busy with the render jobs).
+        The population is run once the canvas has refreshed, or after
+        CANVAS_DEFER_FALLBACK_MS at the latest. Returns True when deferred.
+        """
+        if getattr(self, '_skip_canvas_defer', False) or self._orders_server_side():
+            return False
+        if not self._canvas_is_drawing():
+            return False
+        if getattr(self, '_deferred_populate_armed', False):
+            return True
+        self._deferred_populate_armed = True
+        weak_self = weakref.ref(self)
+        from qgis.utils import iface
+        canvas = iface.mapCanvas()
+        rounds = {'timer': 0}
+
+        def run_deferred(from_timer=False):
+            widget = weak_self()
+            if widget is None or not getattr(widget, '_deferred_populate_armed', False):
+                return
+            if from_timer and widget._canvas_is_drawing() and rounds['timer'] < widget.CANVAS_DEFER_MAX_ROUNDS:
+                # 2026-09-14: an 8 s fallback fired while the canvas was still
+                # rendering and the population blocked 10.8 s anyway; wait
+                # another round (the refresh signal still ends the wait).
+                rounds['timer'] += 1
+                QTimer.singleShot(widget.CANVAS_DEFER_FALLBACK_MS, lambda: run_deferred(True))
+                return
+            widget._deferred_populate_armed = False
+            try:
+                canvas.mapCanvasRefreshed.disconnect(run_deferred)
+            except (TypeError, RuntimeError):
+                pass
+            widget._skip_canvas_defer = True
+            try:
+                widget._populate_features_sync(
+                    expression, preserve_checked=preserve_checked,
+                    force_full=force_full, search_text=search_text,
+                )
+            finally:
+                widget._skip_canvas_defer = False
+
+        try:
+            canvas.mapCanvasRefreshed.connect(run_deferred)
+        except (TypeError, RuntimeError, AttributeError) as exc:
+            logger.debug(f"mapCanvasRefreshed unavailable, fallback timer only: {exc}")
+        QTimer.singleShot(self.CANVAS_DEFER_FALLBACK_MS, lambda: run_deferred(True))
+        logger.info(
+            f"_populate_features_sync: {self._cached_layer_name} population deferred until the canvas "
+            f"finishes rendering (PostgreSQL, fallback {self.CANVAS_DEFER_FALLBACK_MS} ms "
+            f"x{self.CANVAS_DEFER_MAX_ROUNDS + 1})"
+        )
+        return True
+
     def _populate_features_sync(self, expression, preserve_checked=False, force_full=False, search_text=None):
         """Populate features list synchronously.
 
@@ -1140,6 +1230,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 and time.monotonic() - last_time < POPULATE_DEDUPE_SECONDS):
             logger.debug("_populate_features_sync: identical request just completed - skipped")
             return
+        if self._defer_populate_while_canvas_draws(expression, preserve_checked, force_full, search_text):
+            return
 
         # FIX 2026-01-19 v4: Save checked items BEFORE clearing
         saved_checked_fids = []
@@ -1175,16 +1267,20 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             request.setFilterExpression(
                 f"lower(to_string({display_sql})) LIKE {QgsExpression.quotedValue('%' + search_text.lower() + '%')}"
             )
+        server_sorted = False
         if fetch_limit > 0:
             # Sorted by display value so "the first N" is predictable, and one
-            # extra row so truncation is detected exactly.
-            try:
-                order = QgsFeatureRequest.OrderBy([
-                    QgsFeatureRequest.OrderByClause(display_sql, self._sort_order != 'DESC')
-                ])
-                request.setOrderBy(order)
-            except Exception as order_err:
-                logger.debug(f"_populate_features_sync: could not order request: {order_err}")
+            # extra row so truncation is detected exactly. Not on PostgreSQL:
+            # see _orders_server_side (the order is not pushed to the server).
+            if self._orders_server_side():
+                try:
+                    order = QgsFeatureRequest.OrderBy([
+                        QgsFeatureRequest.OrderByClause(display_sql, self._sort_order != 'DESC')
+                    ])
+                    request.setOrderBy(order)
+                    server_sorted = True
+                except Exception as order_err:
+                    logger.debug(f"_populate_features_sync: could not order request: {order_err}")
             request.setLimit(fetch_limit + 1)
 
         features_data = []
@@ -1228,11 +1324,19 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         list_widget.setTruncated(truncated)
         list_widget.setSearchText(search_text)
-        if truncated:
+        if truncated and server_sorted:
             logger.info(f"_populate_features_sync: List limited to the first {fetch_limit} features (feature_picker_limit)")
             tooltip = QCoreApplication.translate(
                 "QgsCheckableComboBoxFeaturesListPickerWidget",
                 "Showing the first {0} features sorted by display value. "
+                "Type in the text filter to search the whole layer; "
+                "\"Select All\" loads the full list."
+            ).format(fetch_limit)
+        elif truncated:
+            logger.info(f"_populate_features_sync: List limited to {fetch_limit} features (feature_picker_limit, unordered sample)")
+            tooltip = QCoreApplication.translate(
+                "QgsCheckableComboBoxFeaturesListPickerWidget",
+                "Showing {0} features of the layer, sorted by display value. "
                 "Type in the text filter to search the whole layer; "
                 "\"Select All\" loads the full list."
             ).format(fetch_limit)
@@ -1257,10 +1361,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self._last_populate = (signature, time.monotonic())
         _elapsed_ms = (time.perf_counter() - _t0) * 1000.0
         if _elapsed_ms >= 250:
+            # The caller chain names the path that asked for this population
+            # (2026-09-13: two identical 700 ms populations per PostgreSQL layer
+            # change, from two different callers; the log could not tell which).
+            callers = " < ".join(
+                frame.name for frame in reversed(traceback.extract_stack(limit=7)[:-1])
+            )
             logger.info(
                 f"⏱ picker_populate: {_elapsed_ms:.0f} ms ({self._cached_layer_name}, "
                 f"{len(features_data)} row(s), scanned {scanned}, "
-                f"{'search' if search_text else ('full' if force_full else f'limit {fetch_limit}')})"
+                f"{'search' if search_text else ('full' if force_full else f'limit {fetch_limit}')}; "
+                f"via {callers})"
             )
 
         # FIX 2026-01-19: Force visual refresh after population
