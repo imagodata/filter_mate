@@ -92,3 +92,8 @@ class TestCombineKeepsBalancedOldSubset:
         assert _is_balanced(combined), combined
         assert '"fid" IN (SELECT id FROM t WHERE a = 1)' in combined
         assert 'a = 1))' not in combined
+
+
+def test_none_operator_replaces_old_subset():
+    # REPLACE mode: the combine option is off, the old subset is dropped.
+    assert combine_with_old_subset(NEW_EXPRESSION, RTREE_OLD_SUBSET, None, 'spatialite') == NEW_EXPRESSION

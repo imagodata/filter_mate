@@ -458,7 +458,11 @@ class FilterEngineTask(QgsTask):
                 primary_key=self.primary_key_name,
                 table_name=self.param_source_table,
                 old_subset=self.param_source_old_subset,
-                combine_operator=self.param_source_layer_combine_operator or 'AND',
+                # 2026-09-14: None when the combine option is off, so the new
+                # source filter REPLACES the old subset (the targets already
+                # behaved that way through get_combine_operator()); the old
+                # `or 'AND'` kept every previous filter on the source layer.
+                combine_operator=self._get_source_combine_operator(),
                 task_bridge=self._task_bridge
             )
         return self._attribute_executor
