@@ -146,17 +146,16 @@ class FavoritesMigrationService:
             # Get orphan favorites
             if source_project_uuid:
                 cursor.execute("""
-                    SELECT f.id, f.name FROM fm_favorites f
+                    SELECT f.id, f.name, f.expression, f.layer_name FROM fm_favorites f
                     WHERE f.project_uuid = ?
                 """, (source_project_uuid,))
             else:
                 cursor.execute("""
-                    SELECT f.id, f.name FROM fm_favorites f
+                    SELECT f.id, f.name, f.expression, f.layer_name FROM fm_favorites f
                     JOIN fm_projects p ON f.project_uuid = p.project_id
                     WHERE (p.project_name = '' OR p.project_name IS NULL)
                       AND (p.project_path = '' OR p.project_path IS NULL)
                 """)
-
             favorites_to_migrate = cursor.fetchall()
 
             if not favorites_to_migrate:
@@ -164,16 +163,41 @@ class FavoritesMigrationService:
                 logger.info("No orphan favorites to migrate")
                 return 0, []
 
-            favorite_ids = [f[0] for f in favorites_to_migrate]
-            favorite_names = [f[1] for f in favorites_to_migrate]
+            # 2026-09-14: every project open that created a new project row
+            # migrated the previous copies again and the .qgz backup restore
+            # added one more (five identical "YONNE" favorites in the live
+            # database). An orphan identical (name, expression, layer) to a
+            # favorite already in the target, or to one migrated in this batch,
+            # is dropped instead of moved.
+            cursor.execute(
+                "SELECT name, expression, layer_name FROM fm_favorites WHERE project_uuid = ?",
+                (target_project_uuid,)
+            )
+            present = {tuple(row) for row in cursor.fetchall()}
+            favorite_ids, favorite_names, duplicate_ids = [], [], []
+            for fav_id, name, expression, layer_name in favorites_to_migrate:
+                key = (name, expression, layer_name)
+                if key in present:
+                    duplicate_ids.append(fav_id)
+                    continue
+                present.add(key)
+                favorite_ids.append(fav_id)
+                favorite_names.append(name)
 
-            # Update favorites to target project
-            placeholders = ','.join('?' * len(favorite_ids))
-            cursor.execute(f"""
-                UPDATE fm_favorites
-                SET project_uuid = ?, updated_at = ?
-                WHERE id IN ({placeholders})
-            """, [target_project_uuid, datetime.now().isoformat()] + favorite_ids)  # nosec B608 - placeholders are '?' only
+            if favorite_ids:
+                placeholders = ','.join('?' * len(favorite_ids))
+                cursor.execute(f"""
+                    UPDATE fm_favorites
+                    SET project_uuid = ?, updated_at = ?
+                    WHERE id IN ({placeholders})
+                """, [target_project_uuid, datetime.now().isoformat()] + favorite_ids)  # nosec B608 - placeholders are '?' only
+            if duplicate_ids:
+                placeholders = ','.join('?' * len(duplicate_ids))
+                cursor.execute(
+                    f"DELETE FROM fm_favorites WHERE id IN ({placeholders})",  # nosec B608 - placeholders only
+                    duplicate_ids
+                )
+                logger.info(f"Dropped {len(duplicate_ids)} orphan favorite(s) identical to an existing one")
 
             conn.commit()
             conn.close()
@@ -200,14 +224,55 @@ class FavoritesMigrationService:
         Returns:
             Tuple of (migrated_count, migrated_names)
         """
+        # 2026-09-14: the unstable project identity of earlier versions left
+        # exact copies of a favorite inside one project (five "YONNE" in a
+        # real profile); drop them once, keeping the most used / oldest copy.
+        self.dedupe_project_favorites(project_uuid)
         orphan_count = self.count_orphan_favorites()
-
         if orphan_count == 0:
             return 0, []
-
         logger.info(f"🔄 Found {orphan_count} orphan favorite(s) - auto-migrating to current project")
-
         return self.migrate_orphan_favorites(project_uuid)
+
+    def dedupe_project_favorites(self, project_uuid: str) -> int:
+        """Delete the exact copies (same name, expression, layer) of a favorite
+        within ``project_uuid``, keeping the most used, then the oldest one.
+
+        Returns:
+            Number of deleted copies
+        """
+        if not self._db_path or not project_uuid:
+            return 0
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self._db_path)
+            cursor = conn.cursor()
+            cursor.execute(
+                """SELECT id, name, expression, layer_name FROM fm_favorites
+                   WHERE project_uuid = ?
+                   ORDER BY use_count DESC, created_at ASC, id ASC""",
+                (project_uuid,)
+            )
+            seen, duplicates = set(), []
+            for fav_id, name, expression, layer_name in cursor.fetchall():
+                key = (name, expression, layer_name)
+                if key in seen:
+                    duplicates.append(fav_id)
+                else:
+                    seen.add(key)
+            if duplicates:
+                placeholders = ','.join('?' * len(duplicates))
+                cursor.execute(
+                    f"DELETE FROM fm_favorites WHERE id IN ({placeholders})",  # nosec B608 - placeholders only
+                    duplicates
+                )
+                conn.commit()
+                logger.info(f"Dropped {len(duplicates)} duplicate favorite(s) of project {project_uuid[:8]}...")
+            conn.close()
+            return len(duplicates)
+        except Exception as e:
+            logger.error(f"Error deduplicating favorites: {e}")
+            return 0
 
     # ─────────────────────────────────────────────────────────────────
     # Global Favorites

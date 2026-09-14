@@ -14,7 +14,7 @@ Responsibilities:
 This replaces the 164-line dockwidget_widgets_configuration() method.
 """
 
-from qgis.PyQt.QtCore import QObject
+from qgis.PyQt.QtCore import QObject, QCoreApplication
 from ...infrastructure.logging import get_app_logger
 
 logger = get_app_logger()
@@ -844,6 +844,35 @@ class ConfigurationManager(QObject):
 
     #         widget.fieldChanged.connect(lambda f, g=groupbox: d._schedule_expression_change(g, f))
 
+    @staticmethod
+    def _enable_layer_search(combo):
+        """Let the user type to find a layer in the current-layer combo box.
+
+        UX 2026-09-14: with a hundred layers the QgsMapLayerComboBox had to be
+        scrolled. The combo becomes editable with a "contains", case-insensitive
+        completer; nothing is inserted into the model, and the text goes back
+        to the current layer's name when the edit loses focus.
+        """
+        try:
+            from qgis.PyQt.QtCore import Qt
+            from qgis.PyQt.QtWidgets import QComboBox, QCompleter
+            combo.setEditable(True)
+            combo.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+            completer = combo.completer()
+            if completer is None:
+                completer = QCompleter(combo.model(), combo)
+                combo.setCompleter(completer)
+            completer.setCompletionMode(QCompleter.CompletionMode.PopupCompletion)
+            completer.setFilterMode(Qt.MatchFlag.MatchContains)
+            completer.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+            line_edit = combo.lineEdit()
+            if line_edit is not None:
+                line_edit.setPlaceholderText(QCoreApplication.translate("FilterMateDockWidget", "Type to find a layer"))
+                line_edit.editingFinished.connect(lambda c=combo: c.setEditText(c.currentText()))
+            logger.info("comboBox_filtering_current_layer: layer search enabled (editable + completer)")
+        except Exception as e:
+            logger.warning(f"Layer search not enabled on the current-layer combo box: {e}")
+
     def setup_filtering_tab_widgets(self):
         """v4.0 Sprint 16: Configure widgets for Filtering tab (migrated from dockwidget)."""
         import os
@@ -866,6 +895,7 @@ class ConfigurationManager(QObject):
             logger.warning(f"Could not set HasGeometry filter: {e}")
             # Fallback to VectorLayer only
             d.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
+        self._enable_layer_search(d.comboBox_filtering_current_layer)
 
         # Apply themed icon to centroids checkbox
         try:

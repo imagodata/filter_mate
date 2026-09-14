@@ -2653,8 +2653,10 @@ class FilterMateApp:
         try:
             # Configure migration service with current database
             self._favorites_migration_service.set_database(self.db_file_path)
-
-            # Count orphan favorites first
+            # 2026-09-14: exact copies left by the unstable project identity of
+            # earlier versions are removed even when there is no orphan left.
+            if hasattr(self._favorites_migration_service, 'dedupe_project_favorites'):
+                self._favorites_migration_service.dedupe_project_favorites(str(self.project_uuid))
             orphan_count = self._favorites_migration_service.count_orphan_favorites()
 
             if orphan_count == 0:

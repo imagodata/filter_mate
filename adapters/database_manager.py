@@ -638,6 +638,28 @@ class DatabaseManager:
                 self._project.absoluteFilePath()
             )
             project_file_path = self._project.absolutePath()
+            # 2026-09-14: this UPDATE used to copy whatever QgsProject held at
+            # that moment into the row of the session's UUID. fileNameChanged
+            # fires with the NEXT project's name before the UUID is switched,
+            # and the closed project has none: rows were renamed to another
+            # project or emptied, could never be matched again, and every open
+            # created a new row and re-migrated the "orphan" favorites (31
+            # unnamed rows, five copies of one favorite in the live database).
+            cur.execute(
+                "SELECT project_name, project_path FROM fm_projects WHERE project_id = ?",
+                (str(self._project_uuid),)
+            )
+            stored = cur.fetchone()
+            stored_name = (stored[0] or '') if stored else ''
+            stored_path = (stored[1] or '') if stored else ''
+            if stored_name and (project_file_name != stored_name or project_file_path != stored_path):
+                logger.debug(
+                    f"save_project_variables: QGIS project is '{project_file_name}' but the row of "
+                    f"{str(self._project_uuid)[:8]} belongs to '{stored_name}' - not saved"
+                )
+                return False
+            project_file_name = project_file_name or stored_name
+            project_file_path = project_file_path or stored_path
             project_settings = config_data.get("CURRENT_PROJECT", {})
 
             # Clean non-serializable objects (e.g., psycopg2 connections) before JSON serialization
