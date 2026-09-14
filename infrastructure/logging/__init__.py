@@ -109,7 +109,19 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
 
 def get_logger(name: str):
     """
-    Get existing logger or create a default one.
+    Get the logger for ``name``.
+
+    A name under one of the two FilterMate roots (``FilterMate.*`` or the
+    package name, e.g. ``filter_mate.filter_mate``) propagates to the root
+    handlers (filtermate.log at INFO, console at WARNING) configured by
+    ``_ensure_root_logger_configured``. Before 2026-09-14 such a name went
+    through ``setup_logger`` instead, which cut propagation and attached only
+    a console handler: ``FilterMate.App`` (filter_mate_app.py), the plugin
+    entry module and every ``get_logger(__name__)`` caller never wrote a
+    single INFO line to the file (0 lines in a 9 000-line log), so the
+    project-change and task-orchestration flow was invisible.
+
+    Any other name keeps the standalone console logger of ``setup_logger``.
 
     Args:
         name: Logger name
@@ -117,6 +129,18 @@ def get_logger(name: str):
     Returns:
         logging.Logger: Logger instance
     """
+    root_name = name.split('.')[0]
+    if root_name in ('FilterMate', _PACKAGE_LOGGER_NAME):
+        _ensure_root_logger_configured()
+        logger = logging.getLogger(name)
+        if name != root_name:
+            # Undo a standalone setup done earlier for this name: drop the
+            # console-only handler and let the record reach the root's file.
+            for handler in list(logger.handlers):
+                if isinstance(handler, SafeStreamHandler):
+                    logger.removeHandler(handler)
+            logger.propagate = True
+        return logger
     logger = logging.getLogger(name)
     if not logger.handlers:
         logger = setup_logger(name)
