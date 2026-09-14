@@ -644,10 +644,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         from qgis.core import QgsFeatureRequest
         pk_values = []
         request = QgsFeatureRequest().setFilterFids(list(selected_ids))
-        try:
-            request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
-        except AttributeError:  # QGIS < 3.30 enum spelling
-            request.setFlags(QgsFeatureRequest.NoGeometry)
+        request.setFlags(QgsFeatureRequest.Flag.NoGeometry)
         try:
             request.setSubsetOfAttributes([pk_field], layer.fields())
         except (AttributeError, TypeError):
