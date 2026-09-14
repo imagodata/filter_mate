@@ -59,6 +59,8 @@ def qgis(monkeypatch):
     monkeypatch.setattr(sys.modules["qgis.PyQt.QtCore"], "QTimer", _FakeTimer)
     qgs_project = MagicMock()
     monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject", qgs_project)
+    # other test modules replace the stub class; isinstance(MagicMock(), MagicMock) must hold here
+    monkeypatch.setattr(sys.modules["qgis.core"], "QgsVectorLayer", MagicMock)
     return qgs_project
 
 
