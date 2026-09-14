@@ -9,11 +9,11 @@ qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 supportsQt6=yes
 description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector data with lightning-fast performance on ANY data source. Full QGIS 4 / Qt6 support.
-version=4.9.0
+version=4.9.1
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🎯 FilterMate 4.9.0 - Your Swiss Army Knife for Spatial Data!
+about=🎯 FilterMate 4.9.1 - Your Swiss Army Knife for Spatial Data!
 
     Stop struggling with complex filters. FilterMate makes spatial queries intuitive, fast, and powerful.
 
@@ -36,6 +36,7 @@ about=🎯 FilterMate 4.9.0 - Your Swiss Army Knife for Spatial Data!
     🎨 Beautiful UI that adapts to your QGIS theme
     ⚡ Filter chaining with dynamic buffer expressions
 
+    💡 v4.9.1: Fix after a project switch with the panel open ("wrapped C/C++ object of type QgsVectorLayer has been deleted" when the previous layer is gone) and a QGIS crash after a plugin reload followed by a project close (the panel is now removed and deleted on unload, so no feature-picker gather can outlive its layer); timing lines for the validate/reset steps of a layer change.
     💡 v4.9.0: Open another project with the panel open and it follows (four causes fixed and verified in QGIS 4.2), one stable FilterMate project row per project and no more duplicated favorites, PostgreSQL feature list without the server-side sort that fetched the whole table (13 s → 30 ms) and deferred while the canvas renders (no more 17 s freeze at project open), type-to-find in the layer combo, busy cursor and pressed button during tasks, plain-language error messages, accessible names, lighter zip, lint in CI, Qt6 enum guard.
     💡 v4.8.10: PostgreSQL buffer filters (ST_DWithin + source envelope prefilter on the target's GiST index: a roads + 20 m buffer cascade went from never finishing to 25 s for 16 layers), source-selection materialized view repaired, panel reloads on project switch whatever APP.AUTO_ACTIVATE, GeoPackage buffers applied once in QGIS (no convex hull), OGR buffer cached per task, 48 SQL templates restored.
     💡 v4.8.9: Measured performance release. GeoPackage spatial cascades use the R-tree of each target table (a 37-layer filter by the commune of Toulouse went from 371 s to under 3 s), PostgreSQL targets keep their GiST index with the centroid option (49.6 s to under 4 s), no double scan after a filter, canvas frozen for the whole task, no more localhost/IPv6 connection stall, fewer counts and repaints. Fix: filter with no target layer.
@@ -61,7 +62,7 @@ repository=https://github.com/imagodata/filter_mate
 
 hasProcessingProvider=yes
 
-changelog=v4.9.0 (2026-09-14): Project switch with the panel open now works (deferred callback kept alive, single add_layers queue, no clear() on the layer combo, plugin-only signal disconnects); one FilterMate project row per project and duplicate favorites removed; PostgreSQL feature list without server-side ORDER BY (13 s → 30 ms on 370 k rows) and deferred while the canvas renders; feature list rebuilt once per layer change; type to find a layer; busy cursor and pressed button during tasks; plain-language error messages; accessible names; HiDPI sizes; stored geometry column verified once; logging of the entry module and the app reaches filtermate.log; zip without .ts/docs (5.8 → 5.0 MB); flake8 in CI; Qt6 enum guard; scoped QgsFeatureRequest.Flag.NoGeometry for the plugin-repository check.
+changelog=v4.9.1 (2026-09-14): Python error after a project switch (RuntimeError on the deleted previous layer in the exploring and filtering controllers) fixed; QGIS access violation after a plugin reload followed by a project close fixed (the dock widget is removed and deleted on unload, no feature-picker gather outlives its layer); layer_change_validate / layer_change_reset timing lines.
 
 # Tags are comma separated with spaces allowed
 tags=python,filter,vector,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export

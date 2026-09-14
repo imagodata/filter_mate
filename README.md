@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.9.0** | QGIS Plugin | **Production-Ready** 🎉
+**Version 4.9.1** | QGIS Plugin | **Production-Ready** 🎉
 
 > 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
 
@@ -12,7 +12,7 @@
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.9.0 makes a project switch with the panel open work (four causes found and verified in QGIS 4.2), keeps one FilterMate project row per project (no more duplicated favorites), drops the server-side sort of the PostgreSQL feature list that fetched the whole table (13 s → 30 ms on 370 000 rows) and defers it while the canvas renders, and adds type-to-find in the layer combo, a busy cursor and pressed button during tasks, plain-language error messages and accessible names. Tests: 1 766, lint in CI, Qt6 enum guard.
+**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.9.1 fixes two regressions of the new project switch with the panel open: a Python error when the previous layer is gone, and a QGIS crash after a plugin reload followed by a project close (the panel is now removed and deleted on unload). v4.9.0 brought the project switch itself, one FilterMate project row per project, a PostgreSQL feature list without server-side sort nor freeze, type-to-find in the layer combo, plain-language error messages and accessible names.
 
 📖 **New to FilterMate?** Follow the step-by-step tutorial: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html)
 
@@ -34,7 +34,15 @@
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
 | 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
 
-### 🆕 What's new in 4.9.0
+### 🆕 What's new in 4.9.1
+
+- **Project switch with the panel open**: no more `RuntimeError: wrapped C/C++ object of type QgsVectorLayer has been deleted` when the previous layer is gone (exploring and filtering controllers).
+- **Plugin reload then project close**: the panel is removed and deleted on unload, so a feature-picker gather can no longer outlive its layer (QGIS access violation in `QgsFeaturePickerModelBase::endUpdate`).
+- `⏱ layer_change_validate` / `⏱ layer_change_reset` timing lines in `filtermate.log`.
+
+See the [4.9.1 changelog](CHANGELOG.md#491---2026-09-14) for details.
+
+### What's new in 4.9.0
 
 - **Project switch with the panel open**: the panel follows the new project (a dead weak reference on the deferred `add_layers`, a never-drained orchestrator queue, `clear()` on the layer combo and bare `disconnect()` calls on QGIS signals were each hiding the next).
 - **FilterMate database**: one project row per project (the save no longer renames or empties the row with the next / closed project's name) and duplicate favorites removed.

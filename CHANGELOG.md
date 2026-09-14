@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+## [4.9.1] - 2026-09-14
+
 ### Fixed
 
 - **Python error after a project switch** (`RuntimeError: wrapped C/C++ object of type QgsVectorLayer has been deleted` in `ExploringController.set_layer`, QGIS 4.2.2): the previous current layer's C++ object is gone once the project changed; the exploring and filtering controllers no longer compare it.
