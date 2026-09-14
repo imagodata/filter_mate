@@ -36,6 +36,7 @@
 
 ### 🆕 What's new in 4.9.1
 
+- **PostgreSQL, selections of 100 000 features or more**: the filter was refused on the first click and accepted on the second (the materialized-view path called a facade method that does not exist).
 - **Project switch with the panel open**: no more `RuntimeError: wrapped C/C++ object of type QgsVectorLayer has been deleted` when the previous layer is gone (exploring and filtering controllers).
 - **Plugin reload then project close**: the panel is removed and deleted on unload, so a feature-picker gather can no longer outlive its layer (QGIS access violation in `QgsFeaturePickerModelBase::endUpdate`).
 - `⏱ layer_change_validate` / `⏱ layer_change_reset` timing lines in `filtermate.log`.
