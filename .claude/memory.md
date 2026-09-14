@@ -641,3 +641,6 @@ Result: Que veux-tu faire dans cette session ?
 - [2026-09-14 soir] `handle_project_initialization(..., registered_layer_ids_callback=)` : le add_layers différé
   n'enregistre que les couches absentes de PROJECT_LAYERS (le rebond layersAdded a déjà fait le reste).
   `FilterMateApp._set_task_button_down` : bouton Filtrer/Défiltrer enfoncé (setDown) du gel au dégel, jamais désactivé.
+- [2026-09-14 soir] Liste d'entités PostgreSQL : pas d'ORDER BY sur la requête limitée (`_orders_server_side`) —
+  QGIS ne pousse pas l'ORDER BY au serveur (table entière rapatriée : 13 s sur 370 k lignes, 24 ms sans tri).
+  Ne pas réintroduire de tri serveur pour postgres sans mesure.
