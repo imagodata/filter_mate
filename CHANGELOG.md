@@ -16,6 +16,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Changed
 
+- **Type to find a layer**: the current-layer combo box of the filtering tab is editable with a "contains", case-insensitive completer (nothing is inserted into the model; the text goes back to the current layer's name when the edit loses focus). Verified in QGIS 4.2: choosing a completion changes the current layer of the panel.
 - HiDPI: the colour swatch and pick button of the configuration editor are sized from the font instead of 24 and 30 px, and the welcome dialog has a minimum width instead of a fixed one.
 - Accessibility: the twenty-five icon-only buttons of the panel get an accessible name (their tooltip when they have one, a translated label otherwise), and a tooltip when they had none.
 - **Stored geometry column verified once against the layer URI** (`_persist_verified_geometry_field`): a dozen PostgreSQL layers carried `layer_geometry_field = 'geom'` from an older version while their URI says `geometrie`; LayerOrganizer corrected it in memory at every task and logged "Geometry column mismatch" each time. The stored value is now fixed once, in the layer variables and in the FilterMate database.
