@@ -680,8 +680,6 @@ class AppInitializer:
             return  # Already connected
 
         dockwidget = self._get_dockwidget() if self._get_dockwidget else None
-        project = self._get_project() if self._get_project else QgsProject.instance()
-
         if not dockwidget:
             logger.warning("Cannot connect dockwidget signals: dockwidget is None")
             return
@@ -710,7 +708,9 @@ class AppInitializer:
         # Connect project variables signal
         if self._save_project_variables:
             dockwidget.settingProjectVariables.connect(self._save_project_variables)
-            project.fileNameChanged.connect(lambda: self._save_project_variables())
+            # fileNameChanged is connected by FilterMateApp._connect_dockwidget_signals
+            # (a remembered slot, disconnected on project switch); a second
+            # anonymous connection here saved twice and could never be removed.
 
         if self._set_dockwidget_signals_connected:
             self._set_dockwidget_signals_connected(True)

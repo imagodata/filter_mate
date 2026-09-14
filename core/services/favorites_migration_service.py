@@ -224,14 +224,55 @@ class FavoritesMigrationService:
         Returns:
             Tuple of (migrated_count, migrated_names)
         """
+        # 2026-09-14: the unstable project identity of earlier versions left
+        # exact copies of a favorite inside one project (five "YONNE" in a
+        # real profile); drop them once, keeping the most used / oldest copy.
+        self.dedupe_project_favorites(project_uuid)
         orphan_count = self.count_orphan_favorites()
-
         if orphan_count == 0:
             return 0, []
-
         logger.info(f"🔄 Found {orphan_count} orphan favorite(s) - auto-migrating to current project")
-
         return self.migrate_orphan_favorites(project_uuid)
+
+    def dedupe_project_favorites(self, project_uuid: str) -> int:
+        """Delete the exact copies (same name, expression, layer) of a favorite
+        within ``project_uuid``, keeping the most used, then the oldest one.
+
+        Returns:
+            Number of deleted copies
+        """
+        if not self._db_path or not project_uuid:
+            return 0
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self._db_path)
+            cursor = conn.cursor()
+            cursor.execute(
+                """SELECT id, name, expression, layer_name FROM fm_favorites
+                   WHERE project_uuid = ?
+                   ORDER BY use_count DESC, created_at ASC, id ASC""",
+                (project_uuid,)
+            )
+            seen, duplicates = set(), []
+            for fav_id, name, expression, layer_name in cursor.fetchall():
+                key = (name, expression, layer_name)
+                if key in seen:
+                    duplicates.append(fav_id)
+                else:
+                    seen.add(key)
+            if duplicates:
+                placeholders = ','.join('?' * len(duplicates))
+                cursor.execute(
+                    f"DELETE FROM fm_favorites WHERE id IN ({placeholders})",  # nosec B608 - placeholders only
+                    duplicates
+                )
+                conn.commit()
+                logger.info(f"Dropped {len(duplicates)} duplicate favorite(s) of project {project_uuid[:8]}...")
+            conn.close()
+            return len(duplicates)
+        except Exception as e:
+            logger.error(f"Error deduplicating favorites: {e}")
+            return 0
 
     # ─────────────────────────────────────────────────────────────────
     # Global Favorites

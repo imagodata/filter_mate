@@ -81,3 +81,31 @@ class TestOrphanMigrationDedupe:
         count, _ = service.migrate_orphan_favorites("target")
         assert count == 1
         assert len(_rows(path)) == 2
+
+
+@pytest.mark.unit
+class TestInProjectDedupe:
+
+    def test_exact_copies_inside_a_project_are_reduced_to_one(self, tmp_path):
+        path = _db(tmp_path)
+        for i in range(5):
+            _add(path, f"f-{i}", "target", "YONNE")
+        _add(path, "f-other", "target", "YONNE", "\"dep\" = '58'")
+        conn = sqlite3.connect(path)
+        conn.execute("UPDATE fm_favorites SET use_count = 3 WHERE id = 'f-3'")
+        conn.commit(); conn.close()
+        service = FavoritesMigrationService(path)
+
+        assert service.dedupe_project_favorites("target") == 4
+        assert _rows(path) == [("f-3", "target", "YONNE"), ("f-other", "target", "YONNE")]
+        assert service.dedupe_project_favorites("target") == 0
+
+    def test_project_load_dedupes_before_migrating(self, tmp_path):
+        path = _db(tmp_path)
+        _add(path, "f-a", "target", "YONNE")
+        _add(path, "f-b", "target", "YONNE")
+        _add(path, "f-o", "orphan1", "50m", "\"w\" > 50", "troncon_de_route")
+        service = FavoritesMigrationService(path)
+        count, names = service.auto_migrate_on_project_load("target")
+        assert (count, names) == (1, ["50m"])
+        assert sorted(r[2] for r in _rows(path)) == ["50m", "YONNE"]
