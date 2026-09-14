@@ -4,6 +4,13 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+## [4.9.2] - 2026-09-14
+
+### Fixed
+
+- **Source layer empty (0 features) after re-filtering a GeoPackage layer that was already filtered as a target.** The layer carried the target subset `ROWID IN (SELECT id FROM "rtree_…" WHERE …) AND ST_Intersects(…, ST_MakeValid(ST_GeomFromText('…', 2154)))`; when it became the source of the next step, the three subset combiners saw the `WHERE` of the R-tree prefilter and dropped one trailing `)` (a legacy fix for malformed subsets), so the combined subset was invalid SQL (`incomplete input`). OGR still returns True from `setSubsetString`, so nothing was logged. The parenthesis is now dropped only when the old subset really has an excess closing one. Verified with GDAL 3.13 on the BD TOPO 31 GeoPackage: the repaired expression returns the 5 139 roads the exploring panel had counted (PR #84).
+- **The source layer's old filter is replaced when the combine option is off.** With the combine-operator button unchecked, the source layer still ANDed its previous subset (`_get_attribute_executor` passed `or 'AND'`), while the target layers already replaced theirs. The new source filter now replaces the old subset; with the button checked, the chosen operator (AND, OR, AND NOT) applies as before (PR #85).
+
 ## [4.9.1] - 2026-09-14
 
 ### Fixed
