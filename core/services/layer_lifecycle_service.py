@@ -766,7 +766,8 @@ class LayerLifecycleService:
         init_db_callback: Callable,
         manage_task_callback: Callable,
         temp_schema: str,
-        stability_constants: Dict[str, int]
+        stability_constants: Dict[str, int],
+        registered_layer_ids_callback: Optional[Callable[[], set]] = None
     ) -> None:
         """
         Handle project read/new project initialization.
@@ -882,8 +883,26 @@ class LayerLifecycleService:
 
                 def safe_add_layers():
                     strong_callback = resolve_callback()
-                    if strong_callback is not None and callable(strong_callback):
-                        strong_callback(usable_layers)
+                    if strong_callback is None or not callable(strong_callback):
+                        return
+                    # 2026-09-14: the layersAdded debounce of the project read
+                    # usually registers the layers before this timer fires;
+                    # registering them a second time cost a second
+                    # LayersManagementEngineTask and UI rebuild per switch.
+                    pending = usable_layers
+                    if registered_layer_ids_callback is not None:
+                        try:
+                            registered = set(registered_layer_ids_callback() or ())
+                        except Exception as exc:  # callback on a torn-down app
+                            logger.debug(f"registered layers unavailable: {exc}")
+                            registered = set()
+                        if registered:
+                            pending = [layer for layer in usable_layers if layer.id() not in registered]
+                    if not pending:
+                        logger.info(f"FilterMate: {task_name} - all {len(usable_layers)} layers already registered")
+                        set_loading_flag_callback(False)
+                        return
+                    strong_callback(pending)
 
                 QTimer.singleShot(delay, safe_add_layers)
             else:

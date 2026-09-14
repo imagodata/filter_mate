@@ -128,7 +128,7 @@ class TestProjectInitializationRegistersTheNewLayers:
         monkeypatch.setattr(lls, "QgsProject", qgs_project)
         monkeypatch.setattr(lls, "perf_mark_start", lambda name: None)
 
-    def _run(self, service, app, callback, layers):
+    def _run(self, service, app, callback, layers, registered=None):
         project = MagicMock()
         project.mapLayers.return_value = {f"id{i}": layer for i, layer in enumerate(layers)}
         flags = {"loading": None, "initializing": []}
@@ -149,6 +149,7 @@ class TestProjectInitializationRegistersTheNewLayers:
             manage_task_callback=callback,
             temp_schema='filtermate_temp',
             stability_constants={'PROJECT_LOAD_DELAY_MS': 2500},
+            registered_layer_ids_callback=registered,
         )
         return flags
 
@@ -177,3 +178,26 @@ class TestProjectInitializationRegistersTheNewLayers:
         assert flags["loading"] is False
         assert _FakeTimer.scheduled == []
         app.manage_task.assert_not_called()
+
+    def test_layers_registered_meanwhile_are_not_registered_again(self):
+        """2026-09-14: the layersAdded debounce of the project read registers the
+        layers before the 2.5 s timer fires; the deferred add_layers only
+        registers what is still missing, or lowers the loading flag."""
+        service = _service()
+        app, callback = _app_and_callback()
+        l1, l2 = MagicMock(), MagicMock()
+        l1.id.return_value = "id-1"
+        l2.id.return_value = "id-2"
+        registered = {"id-1"}
+
+        flags = self._run(service, app, callback, [l1, l2], registered=lambda: registered)
+        _FakeTimer.scheduled[0][1]()
+        assert list(app.manage_task.call_args.args[1]) == [l2]
+        assert flags["loading"] is True
+
+        app.manage_task.reset_mock()
+        registered.add("id-2")
+        flags = self._run(service, app, callback, [l1, l2], registered=lambda: registered)
+        _FakeTimer.scheduled[-1][1]()
+        app.manage_task.assert_not_called()
+        assert flags["loading"] is False

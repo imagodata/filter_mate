@@ -1181,7 +1181,8 @@ class FilterMateApp:
             init_db_callback=self.init_filterMate_db,
             manage_task_callback=lambda layers: self.manage_task('add_layers', layers),
             temp_schema=self.app_postgresql_temp_schema,
-            stability_constants=STABILITY_CONSTANTS
+            stability_constants=STABILITY_CONSTANTS,
+            registered_layer_ids_callback=lambda: set((self.PROJECT_LAYERS or {}).keys())
         )
 
     # ========================================
@@ -1461,6 +1462,7 @@ class FilterMateApp:
                 self._busy_cursor_token = token
             except Exception as exc:
                 logger.debug(f"Busy cursor skipped for {task_name}: {exc}")
+            self._set_task_button_down(task_name, True)
             app_ref = weakref.ref(self)  # the timer must not keep the app alive after unload
             QTimer.singleShot(
                 CANVAS_FREEZE_WATCHDOG_MS,
@@ -1472,6 +1474,26 @@ class FilterMateApp:
             logger.debug(f"Canvas freeze skipped for {task_name}: {exc}")
         return token
 
+    TASK_BUTTONS = {'filter': 'pushButton_action_filter', 'unfilter': 'pushButton_action_unfilter'}
+
+    def _set_task_button_down(self, task_name, down):
+        """Show the Filter / Unfilter button pressed while its task runs.
+
+        UX 2026-09-14: the button stays enabled (a second click cancels the
+        running task and relaunches, see _cancel_conflicting_tasks), so the
+        pressed look is the only cue that the task is in progress.
+        """
+        button_name = self.TASK_BUTTONS.get(task_name)
+        self._busy_task_name = task_name if down else None
+        if button_name is None or self.dockwidget is None:
+            return
+        try:
+            button = getattr(self.dockwidget, button_name, None)
+            if button is not None:
+                button.setDown(bool(down))
+        except Exception as exc:  # widget already deleted
+            logger.debug(f"Task button state skipped: {exc}")
+
     def _unfreeze_canvas_after_task(self, token, watchdog_task=None):
         """Thaw the canvas frozen by _freeze_canvas_for_task, once, and refresh it."""
         if getattr(self, '_canvas_frozen_token', None) != token:
@@ -1482,6 +1504,7 @@ class FilterMateApp:
                 QApplication.restoreOverrideCursor()
             except Exception as exc:
                 logger.debug(f"Busy cursor restore failed: {exc}")
+        self._set_task_button_down(getattr(self, '_busy_task_name', None), False)
         if watchdog_task is not None:
             logger.warning(
                 f"Canvas thawed by the watchdog {CANVAS_FREEZE_WATCHDOG_MS} ms after the {watchdog_task} task started"

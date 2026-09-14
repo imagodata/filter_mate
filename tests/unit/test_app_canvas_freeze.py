@@ -28,6 +28,8 @@ def _extract(names, namespace):
 
 class _App:
     """Weak-referenceable stand-in for FilterMateApp."""
+    TASK_BUTTONS = {'filter': 'pushButton_action_filter', 'unfilter': 'pushButton_action_unfilter'}
+    dockwidget = None
 
 
 def _app():
@@ -37,13 +39,13 @@ def _app():
     canvas.freeze.side_effect = lambda flag: setattr(canvas.isFrozen, "return_value", flag)
     timer = MagicMock()
     namespace = _extract(
-        ["_freeze_canvas_for_task", "_unfreeze_canvas_after_task"],
+        ["_freeze_canvas_for_task", "_unfreeze_canvas_after_task", "_set_task_button_down"],
         {"iface": fake_iface, "QTimer": timer, "logger": MagicMock(), "weakref": weakref,
          "CANVAS_FREEZE_WATCHDOG_MS": 600000},
     )
     app = _App()
-    app._freeze_canvas_for_task = types.MethodType(namespace["_freeze_canvas_for_task"], app)
-    app._unfreeze_canvas_after_task = types.MethodType(namespace["_unfreeze_canvas_after_task"], app)
+    for name in ("_freeze_canvas_for_task", "_unfreeze_canvas_after_task", "_set_task_button_down"):
+        setattr(app, name, types.MethodType(namespace[name], app))
     return app, canvas, timer
 
 
@@ -131,13 +133,13 @@ def _app_with_cursor():
     canvas.freeze.side_effect = lambda flag: setattr(canvas.isFrozen, "return_value", flag)
     qapp = MagicMock()
     namespace = _extract(
-        ["_freeze_canvas_for_task", "_unfreeze_canvas_after_task"],
+        ["_freeze_canvas_for_task", "_unfreeze_canvas_after_task", "_set_task_button_down"],
         {"iface": fake_iface, "QTimer": MagicMock(), "logger": MagicMock(), "weakref": weakref,
          "CANVAS_FREEZE_WATCHDOG_MS": 600000, "QApplication": qapp, "Qt": MagicMock()},
     )
     app = _App()
-    app._freeze_canvas_for_task = types.MethodType(namespace["_freeze_canvas_for_task"], app)
-    app._unfreeze_canvas_after_task = types.MethodType(namespace["_unfreeze_canvas_after_task"], app)
+    for name in ("_freeze_canvas_for_task", "_unfreeze_canvas_after_task", "_set_task_button_down"):
+        setattr(app, name, types.MethodType(namespace[name], app))
     return app, qapp
 
 
@@ -171,3 +173,31 @@ class TestBusyCursorDuringTask:
         restores = qapp.restoreOverrideCursor.call_count
         app._unfreeze_canvas_after_task(first)
         assert qapp.restoreOverrideCursor.call_count == restores
+
+
+@pytest.mark.unit
+class TestTaskButtonPressedDuringTask:
+
+    def test_filter_button_is_down_from_freeze_to_thaw(self):
+        app, qapp = _app_with_cursor()
+        app.dockwidget = MagicMock()
+        token = app._freeze_canvas_for_task("filter")
+        app.dockwidget.pushButton_action_filter.setDown.assert_called_once_with(True)
+        app.dockwidget.pushButton_action_unfilter.setDown.assert_not_called()
+
+        app._unfreeze_canvas_after_task(token)
+        assert app.dockwidget.pushButton_action_filter.setDown.call_args_list[-1].args == (False,)
+
+    def test_reset_task_has_no_button_and_the_watchdog_still_restores(self):
+        app, qapp = _app_with_cursor()
+        app.dockwidget = MagicMock()
+        token = app._freeze_canvas_for_task("reset")
+        app.dockwidget.pushButton_action_filter.setDown.assert_not_called()
+        app._unfreeze_canvas_after_task(token, watchdog_task="reset")
+        app.dockwidget.pushButton_action_filter.setDown.assert_not_called()
+
+    def test_missing_dockwidget_is_harmless(self):
+        app, qapp = _app_with_cursor()
+        app.dockwidget = None
+        token = app._freeze_canvas_for_task("unfilter")
+        app._unfreeze_canvas_after_task(token)
