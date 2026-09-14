@@ -6,6 +6,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Fixed
 
+- **Opening another project with the panel open left it empty** (reproduced in QGIS 4.2: 31.qgz then bdd.qgz, combo box empty, Filter button disabled, `_loading_new_project` stuck at True; the only way out was reloading the plugin). `LayerLifecycleService.handle_project_initialization()` and `force_reload_layers()` scheduled the `add_layers` registration through `weakref.ref(manage_task_callback)`; the callback is the lambda FilterMateApp passes as an argument, so the reference was already dead when the 2.5 s timer fired and nothing registered the new layers, while the loading flag had been raised. The deferred callbacks are now held for the duration of the timer (`WeakMethod` for a bound method, a strong reference otherwise).
+- Logging: `get_logger()` sent every handler-less name through `setup_logger()`, which cut propagation and attached a console-only handler. `FilterMate.App` (filter_mate_app.py), the plugin entry module and the 20 modules using `get_logger(__name__)` never wrote an INFO line to `filtermate.log` (0 lines each in the 9 000-line log of 2026-09-13), which is why the project-change flow above was invisible. Names under the FilterMate roots now propagate to the configured file handler.
 - Qt6 plugin-repository check: the QGIS < 3.30 fallback `QgsFeatureRequest.NoGeometry` in the OGR expression builder is gone; every call site uses the scoped `QgsFeatureRequest.Flag.NoGeometry` (PR #76).
 
 ### Changed
