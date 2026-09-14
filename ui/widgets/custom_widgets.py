@@ -1117,7 +1117,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         except (RuntimeError, AttributeError):
             return True
 
-    CANVAS_DEFER_FALLBACK_MS = 8000
+    CANVAS_DEFER_FALLBACK_MS = 15000
+    CANVAS_DEFER_MAX_ROUNDS = 3
 
     def _canvas_is_drawing(self) -> bool:
         try:
@@ -1147,10 +1148,18 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         weak_self = weakref.ref(self)
         from qgis.utils import iface
         canvas = iface.mapCanvas()
+        rounds = {'timer': 0}
 
-        def run_deferred():
+        def run_deferred(from_timer=False):
             widget = weak_self()
             if widget is None or not getattr(widget, '_deferred_populate_armed', False):
+                return
+            if from_timer and widget._canvas_is_drawing() and rounds['timer'] < widget.CANVAS_DEFER_MAX_ROUNDS:
+                # 2026-09-14: an 8 s fallback fired while the canvas was still
+                # rendering and the population blocked 10.8 s anyway; wait
+                # another round (the refresh signal still ends the wait).
+                rounds['timer'] += 1
+                QTimer.singleShot(widget.CANVAS_DEFER_FALLBACK_MS, lambda: run_deferred(True))
                 return
             widget._deferred_populate_armed = False
             try:
@@ -1170,10 +1179,11 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             canvas.mapCanvasRefreshed.connect(run_deferred)
         except (TypeError, RuntimeError, AttributeError) as exc:
             logger.debug(f"mapCanvasRefreshed unavailable, fallback timer only: {exc}")
-        QTimer.singleShot(self.CANVAS_DEFER_FALLBACK_MS, run_deferred)
+        QTimer.singleShot(self.CANVAS_DEFER_FALLBACK_MS, lambda: run_deferred(True))
         logger.info(
             f"_populate_features_sync: {self._cached_layer_name} population deferred until the canvas "
-            f"finishes rendering (PostgreSQL, at most {self.CANVAS_DEFER_FALLBACK_MS} ms)"
+            f"finishes rendering (PostgreSQL, fallback {self.CANVAS_DEFER_FALLBACK_MS} ms "
+            f"x{self.CANVAS_DEFER_MAX_ROUNDS + 1})"
         )
         return True
 

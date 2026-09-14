@@ -31,7 +31,8 @@ def _methods(timer):
 
 
 class _Widget:
-    CANVAS_DEFER_FALLBACK_MS = 8000
+    CANVAS_DEFER_FALLBACK_MS = 15000
+    CANVAS_DEFER_MAX_ROUNDS = 3
     _cached_layer_name = "troncon_de_route"
 
 
@@ -60,7 +61,7 @@ class TestDeferWhileCanvasDraws:
 
         assert deferred is True
         canvas.mapCanvasRefreshed.connect.assert_called_once()
-        assert timer.singleShot.call_args.args[0] == 8000
+        assert timer.singleShot.call_args.args[0] == 15000
         widget._populate_features_sync.assert_not_called()
 
         # the canvas refresh runs the population once, without deferring again
@@ -98,3 +99,24 @@ class TestDeferWhileCanvasDraws:
         widget._defer_populate_while_canvas_draws("a", False, False, None)
         widget._skip_canvas_defer = True
         assert widget._defer_populate_while_canvas_draws("a", False, False, None) is False
+
+    def test_fallback_while_still_drawing_waits_more_rounds_then_runs(self):
+        timer = MagicMock()
+        widget, canvas = _widget("postgres", True, timer)
+        widget._defer_populate_while_canvas_draws("a", False, False, None)
+
+        for _ in range(3):  # three more rounds while the canvas keeps drawing
+            timer.singleShot.call_args.args[1]()
+            widget._populate_features_sync.assert_not_called()
+        assert timer.singleShot.call_count == 4
+
+        timer.singleShot.call_args.args[1]()  # rounds exhausted: run anyway
+        widget._populate_features_sync.assert_called_once()
+
+    def test_fallback_on_an_idle_canvas_runs_at_once(self):
+        timer = MagicMock()
+        widget, canvas = _widget("postgres", True, timer)
+        widget._defer_populate_while_canvas_draws("a", False, False, None)
+        canvas.isDrawing.return_value = False
+        timer.singleShot.call_args.args[1]()
+        widget._populate_features_sync.assert_called_once()
