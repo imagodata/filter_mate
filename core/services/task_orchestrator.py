@@ -275,21 +275,15 @@ class TaskOrchestrator:
         Returns:
             True if task was dispatched or queued, False otherwise
         """
-        max_queue = StabilityConstants.MAX_ADD_LAYERS_QUEUE
-
-        if self._pending_add_layers_tasks > 0:
-            if len(self._add_layers_queue) >= max_queue:
-                logger.warning(f"⚠️ STABILITY: add_layers queue full ({max_queue}), dropping oldest")
-                self._add_layers_queue.pop(0)
-
-            logger.info(f"Queueing add_layers - {self._pending_add_layers_tasks} task(s) in progress")
-            self._add_layers_queue.append(data)
-            return True
-
-        self._pending_add_layers_tasks += 1
-        logger.debug(f"Starting add_layers task (pending: {self._pending_add_layers_tasks})")
-
-        # Continue with task parameter building and execution
+        # 2026-09-14: no second queue here. FilterMateApp.manage_task already
+        # serializes add_layers (its counter is decremented by
+        # LayerTaskCompletionHandler and its queue drained by
+        # TaskManagementService). The counter kept here was incremented for
+        # every dispatch and decremented by nobody (decrement_pending_tasks
+        # has no caller), so after the first add_layers of a session every
+        # later one (project switch, layer added to the project) was queued
+        # for ever: "Queueing add_layers - 1 task(s) in progress", empty
+        # panel, _loading_new_project stuck at True.
         task_parameters = self._get_task_parameters('add_layers', data)
         if task_parameters:
             self._handle_layer_task('add_layers', task_parameters)
