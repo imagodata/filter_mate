@@ -881,6 +881,33 @@ class FilterMateApp:
     # to ensure reliability and simplify debugging.
     # ========================================
 
+    def _connect_layer_store_slots(self, store):
+        """Connect the plugin's three layer-store slots to ``store`` and remember them."""
+        self._layer_store_slots = {
+            'layersAdded': self._on_layers_added,
+            'layersWillBeRemoved': lambda layers: self.manage_task('remove_layers', layers),
+            'allLayersRemoved': lambda: self.manage_task('remove_all_layers'),
+        }
+        for signal_name, slot in self._layer_store_slots.items():
+            getattr(store, signal_name).connect(slot)
+
+    def _disconnect_layer_store_slots(self, store):
+        """Disconnect only the slots connected by _connect_layer_store_slots.
+
+        2026-09-14: ``store.layersAdded.disconnect()`` (no argument) removed
+        EVERY receiver of the QgsMapLayerStore signal, including QgsProject's
+        own forwarding to ``QgsProject.layersAdded``. From the first project
+        switch on, the QgsMapLayerComboBox of the filtering tab (and anything
+        else listening to the project) never learnt about new layers again:
+        the combo stayed at the previous project's entries.
+        """
+        for signal_name, slot in (getattr(self, '_layer_store_slots', None) or {}).items():
+            try:
+                getattr(store, signal_name).disconnect(slot)
+            except (TypeError, RuntimeError) as e:  # not connected / store deleted
+                logger.debug(f"Layer store slot {signal_name} not disconnected: {e}")
+        self._layer_store_slots = {}
+
     def _connect_layer_store_signals(self):
         """
         Connect layer store signals for layer management.
@@ -896,15 +923,7 @@ class FilterMateApp:
             return
 
         logger.debug("Connecting layer store signals (layersAdded, layersWillBeRemoved...)")
-
-        self.MapLayerStore.layersAdded.connect(self._on_layers_added)
-        self.MapLayerStore.layersWillBeRemoved.connect(
-            lambda layers: self.manage_task('remove_layers', layers)
-        )
-        self.MapLayerStore.allLayersRemoved.connect(
-            lambda: self.manage_task('remove_all_layers')
-        )
-
+        self._connect_layer_store_slots(self.MapLayerStore)
         self._signals_connected = True
         logger.debug("✓ Layer store signals connected")
 
@@ -967,9 +986,8 @@ class FilterMateApp:
         self.dockwidget.settingProjectVariables.connect(
             self.save_project_variables
         )
-        self.PROJECT.fileNameChanged.connect(
-            lambda: self.save_project_variables()
-        )
+        self._project_filename_slot = lambda: self.save_project_variables()
+        self.PROJECT.fileNameChanged.connect(self._project_filename_slot)
 
         # Widget initialization signal - sync state when widgets ready
         self.dockwidget.widgetsInitialized.connect(
@@ -989,9 +1007,7 @@ class FilterMateApp:
         # Disconnect layer store signals
         if self._signals_connected and self.MapLayerStore:
             try:
-                self.MapLayerStore.layersAdded.disconnect()
-                self.MapLayerStore.layersWillBeRemoved.disconnect()
-                self.MapLayerStore.allLayersRemoved.disconnect()
+                self._disconnect_layer_store_slots(self.MapLayerStore)
                 self._signals_connected = False
                 logger.debug("Layer store signals disconnected")
             except (TypeError, RuntimeError) as e:
@@ -1129,18 +1145,11 @@ class FilterMateApp:
 
         if new_layer_store and self._signals_connected:
             logger.debug(f"FilterMate: Disconnecting old layer store signals for {task_name}")
-            try:
-                old_layer_store.layersAdded.disconnect()
-                old_layer_store.layersWillBeRemoved.disconnect()
-                old_layer_store.allLayersRemoved.disconnect()
-                logger.debug("FilterMate: Old layer store signals disconnected")
-            except (TypeError, RuntimeError) as e:
-                logger.debug(f"Could not disconnect old signals (expected): {e}")
+            self._disconnect_layer_store_slots(old_layer_store)
+            logger.debug("FilterMate: Old layer store slots disconnected")
 
             self.MapLayerStore = new_layer_store
-            self.MapLayerStore.layersAdded.connect(self._on_layers_added)
-            self.MapLayerStore.layersWillBeRemoved.connect(lambda layers: self.manage_task('remove_layers', layers))
-            self.MapLayerStore.allLayersRemoved.connect(lambda: self.manage_task('remove_all_layers'))
+            self._connect_layer_store_slots(self.MapLayerStore)
             logger.debug("FilterMate: Layer store signals reconnected to new project")
         elif new_layer_store:
             logger.debug("FilterMate: Updating MapLayerStore reference (signals not yet connected)")
@@ -2792,10 +2801,15 @@ class FilterMateApp:
         # Reconnect PROJECT signals for project load
         if validate_postgres:
             try:
-                try: self.PROJECT.fileNameChanged.disconnect()
-                except TypeError:  # Signal not connected - expected on first project load
-                    pass
-                self.PROJECT.fileNameChanged.connect(lambda: self.save_project_variables())
+                # Only the plugin's slot: a bare disconnect() would also drop
+                # QGIS's own receivers of QgsProject.fileNameChanged.
+                previous_slot = getattr(self, '_project_filename_slot', None)
+                if previous_slot is not None:
+                    try: self.PROJECT.fileNameChanged.disconnect(previous_slot)
+                    except (TypeError, RuntimeError):  # not connected - expected on first project load
+                        pass
+                self._project_filename_slot = lambda: self.save_project_variables()
+                self.PROJECT.fileNameChanged.connect(self._project_filename_slot)
                 logger.debug("PROJECT signals reconnected")
             except Exception as e: logger.warning(f"Error reconnecting signals: {e}")
 
