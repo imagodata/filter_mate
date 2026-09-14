@@ -121,3 +121,53 @@ class TestCanvasFreezeDuringTask:
 
         assert ref() is None
         watchdog()  # nothing to thaw any more, must not raise
+
+
+def _app_with_cursor():
+    """Same stand-in, with QApplication/Qt in the namespace (UX 2026-09-14 busy cursor)."""
+    fake_iface = MagicMock()
+    canvas = fake_iface.mapCanvas.return_value
+    canvas.isFrozen.return_value = False
+    canvas.freeze.side_effect = lambda flag: setattr(canvas.isFrozen, "return_value", flag)
+    qapp = MagicMock()
+    namespace = _extract(
+        ["_freeze_canvas_for_task", "_unfreeze_canvas_after_task"],
+        {"iface": fake_iface, "QTimer": MagicMock(), "logger": MagicMock(), "weakref": weakref,
+         "CANVAS_FREEZE_WATCHDOG_MS": 600000, "QApplication": qapp, "Qt": MagicMock()},
+    )
+    app = _App()
+    app._freeze_canvas_for_task = types.MethodType(namespace["_freeze_canvas_for_task"], app)
+    app._unfreeze_canvas_after_task = types.MethodType(namespace["_unfreeze_canvas_after_task"], app)
+    return app, qapp
+
+
+@pytest.mark.unit
+class TestBusyCursorDuringTask:
+
+    def test_cursor_set_on_freeze_and_restored_once_on_thaw(self):
+        app, qapp = _app_with_cursor()
+        token = app._freeze_canvas_for_task("filter")
+        qapp.setOverrideCursor.assert_called_once()
+
+        app._unfreeze_canvas_after_task(token)
+        app._unfreeze_canvas_after_task(token)
+        qapp.restoreOverrideCursor.assert_called_once()
+
+    def test_superseding_task_restores_the_previous_cursor_first(self):
+        app, qapp = _app_with_cursor()
+        app._freeze_canvas_for_task("filter")
+        second = app._freeze_canvas_for_task("unfilter")
+        # one restore for the superseded freeze, two sets in total, never a stacked override
+        assert qapp.setOverrideCursor.call_count == 2
+        assert qapp.restoreOverrideCursor.call_count == 1
+
+        app._unfreeze_canvas_after_task(second)
+        assert qapp.restoreOverrideCursor.call_count == 2
+
+    def test_stale_token_does_not_restore_the_cursor(self):
+        app, qapp = _app_with_cursor()
+        first = app._freeze_canvas_for_task("filter")
+        app._freeze_canvas_for_task("filter")
+        restores = qapp.restoreOverrideCursor.call_count
+        app._unfreeze_canvas_after_task(first)
+        assert qapp.restoreOverrideCursor.call_count == restores

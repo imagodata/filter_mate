@@ -4,6 +4,18 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Qt6 plugin-repository check: the QGIS < 3.30 fallback `QgsFeatureRequest.NoGeometry` in the OGR expression builder is gone; every call site uses the scoped `QgsFeatureRequest.Flag.NoGeometry` (PR #76).
+
+### Changed
+
+- **Busy cursor while a filter / unfilter / reset task runs**: the canvas was already frozen for the whole task, but nothing on screen said so. The cursor now shows the busy indicator (arrow + spinner, the panel stays usable) from the freeze to the same thaw that refreshes the canvas; a superseding task restores the previous cursor first, and the watchdog restores it with the canvas.
+- Plugin zip: the 34 Qt Linguist sources (`i18n/*.ts`, 4.7 MB uncompressed), `i18n/FilterMate.pro` and the internal `docs/` folder (audits, integration notes) are no longer shipped; only the compiled `.qm` files are needed at runtime. 553 → 505 files, 5.8 → 5.0 MB.
+- CI: a `lint` job runs flake8 on the plugin code (the `.flake8` config, tests/scripts/website excluded) next to the test matrix.
+- Spatialite index manager: `CreateSpatialIndex` / `DisableSpatialIndex` / `CheckSpatialIndex` take their table and column names as bound parameters instead of interpolated strings.
+- Logging: 14 loggers created inside methods under a different name than their module logger (`FilterMate.FilteringController` inside `filter_mate.ui.controllers.filtering_controller`, the PostgreSQL and Spatialite filter executors) now use the module logger, so each file logs under one hierarchy. The per-click `Set sync protection until <epoch>` line of the exploring controller is logged at DEBUG.
+
 ### Performance
 
 - PostgreSQL source-selection materialized view: built once per task and reused by every target layer (17 identical 1 734-row views were created for a 17-layer cascade), and the EXISTS now reads the view itself (`FROM "filtermate_temp"."fm_temp_mv_…" AS __source`, `pk`/`geom` columns, GiST index) instead of joining the whole source table through `"fid" IN (SELECT pk FROM …)`; the envelope prefilter is computed over the view. Measured before: 54.7 s for a roads + 20 m buffer cascade on 17 layers (batiment 18 s) with the view, 25 s with the inline `IN` list.

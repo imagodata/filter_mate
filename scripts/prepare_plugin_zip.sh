@@ -121,6 +121,10 @@ rsync -a --quiet \
     --exclude='diagnose_*.py' \
     --exclude='debug_*.py' \
     --exclude='test_*.py' \
+    --exclude='docs' \
+    --exclude='docs/**' \
+    --exclude='i18n/*.ts' \
+    --exclude='i18n/*.pro' \
     --exclude='CLAUDE.md' \
     --exclude='BACKLOG*.md' \
     "$PLUGIN_DIR/" "$BUILD_DIR/$PLUGIN_NAME/"

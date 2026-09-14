@@ -13,7 +13,7 @@ FilterMate Application Orchestrator
 """
 
 from qgis.PyQt.QtCore import Qt, QTimer, QCoreApplication
-from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.PyQt.QtWidgets import QMessageBox, QApplication
 import weakref
 try:
     import sip
@@ -1441,6 +1441,17 @@ class FilterMateApp:
             canvas.stopRendering()
             canvas.freeze(True)
             self._canvas_frozen_token = token
+            # UX 2026-09-14: the canvas stays still for the whole task, so show a
+            # busy cursor (arrow + spinner: the panel stays usable) until the
+            # same thaw that refreshes the canvas.
+            try:
+                if getattr(self, '_busy_cursor_token', None) is not None:
+                    # a superseded task never thaws: restore its cursor first
+                    QApplication.restoreOverrideCursor()
+                QApplication.setOverrideCursor(Qt.CursorShape.BusyCursor)
+                self._busy_cursor_token = token
+            except Exception as exc:
+                logger.debug(f"Busy cursor skipped for {task_name}: {exc}")
             app_ref = weakref.ref(self)  # the timer must not keep the app alive after unload
             QTimer.singleShot(
                 CANVAS_FREEZE_WATCHDOG_MS,
@@ -1456,6 +1467,12 @@ class FilterMateApp:
         """Thaw the canvas frozen by _freeze_canvas_for_task, once, and refresh it."""
         if getattr(self, '_canvas_frozen_token', None) != token:
             return
+        if getattr(self, '_busy_cursor_token', None) == token:
+            self._busy_cursor_token = None
+            try:
+                QApplication.restoreOverrideCursor()
+            except Exception as exc:
+                logger.debug(f"Busy cursor restore failed: {exc}")
         if watchdog_task is not None:
             logger.warning(
                 f"Canvas thawed by the watchdog {CANVAS_FREEZE_WATCHDOG_MS} ms after the {watchdog_task} task started"

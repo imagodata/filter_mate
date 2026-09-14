@@ -79,8 +79,6 @@ def prepare_postgresql_source_geom(
     import re
     from ....infrastructure.database.sql_utils import sanitize_sql_identifier
 
-    logger = logging.getLogger('FilterMate.Adapters.Backends.PostgreSQL.FilterExecutor')
-
     # CRITICAL FIX: Include schema in geometry reference for PostgreSQL
     # Format: "schema"."table"."geom" to avoid "missing FROM-clause entry" errors
     base_geom = '"{source_schema}"."{source_table}"."{source_geom}"'.format(
@@ -282,9 +280,6 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
         str: PostGIS SQL expression
     """
     import re
-    import logging
-
-    logger = logging.getLogger('FilterMate.Adapters.Backends.PostgreSQL.FilterExecutor')
 
     if not expression:
         return expression
@@ -376,9 +371,6 @@ def build_postgis_predicates(
     Returns:
         tuple: (postgis_sub_expression_array, param_distant_geom_expression)
     """
-    import logging
-
-    logger = logging.getLogger('FilterMate.Adapters.Backends.PostgreSQL.FilterExecutor')
 
     param_distant_table = layer_props["layer_name"]
     param_distant_geometry_field = layer_props.get("layer_geometry_field")
@@ -564,8 +556,6 @@ def build_spatial_join_query(
         str: SELECT query with INNER JOIN for use in IN clause
     """
     from qgis.core import QgsExpression
-
-    logger = logging.getLogger('FilterMate.Adapters.Backends.PostgreSQL.FilterExecutor')
 
     param_distant_primary_key_name = layer_props["primary_key_name"]
     param_distant_schema = layer_props["layer_schema"]

@@ -850,9 +850,6 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
         str: Spatialite SQL expression
     """
     import re
-    import logging
-
-    logger = logging.getLogger('FilterMate.Adapters.Backends.Spatialite.FilterExecutor')
 
     if not expression:
         return expression
