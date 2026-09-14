@@ -612,3 +612,13 @@ Result: Que veux-tu faire dans cette session ?
 - `website/guide.html` (13 sections, anglais, charte de `index.html`) + 16 captures `website/img/guide/` prises dans QGIS 4.2 réel via `scripts/guide_screenshots.py` (QGIS Windows piloté depuis WSL, `--lang en --code`). PR #66.
 - Bug corrigé au passage : menu favoris illisible en thème sombre (`ui/styles/favorites_styles.py`, QMenu blanc sans `color`).
 - Restent à regarder : libellés vides dans la liste de sélection multiple (délégué Qt6, capture `exploring-multiple.png`), doc en français si besoin (le site est en anglais).
+
+## [2026-09-14] Audit général → PR #77 `claude/audit-2026-09-14` (après PR #76 enum Qt6)
+- Curseur `Qt.CursorShape.BusyCursor` posé dans `_freeze_canvas_for_task` et retiré dans `_unfreeze_canvas_after_task`
+  (même token ; une tâche qui supplante restaure d'abord le curseur précédent). À valider en QGIS réel.
+- `scripts/prepare_plugin_zip.sh` exclut désormais `docs/`, `i18n/*.ts`, `i18n/*.pro` (5,8 → 5,0 Mo).
+- CI `test.yml` : job `lint` = `flake8 --extend-exclude=tests,scripts,website,docs` (le plugin est à 0 constat ; ne pas
+  ajouter tests/ sans les nettoyer d'abord : 41 constats).
+- Spatialite `index_manager` : `cursor.execute("SELECT CreateSpatialIndex(?, ?)", (table, col))` — plus de f-string.
+- Ne plus créer de `logger = logging.getLogger('FilterMate.X')` dans une méthode : utiliser le logger de module.
+- Restant priorisé et constats écartés : voir la mémoire globale `audit-general-2026-09-14`.
