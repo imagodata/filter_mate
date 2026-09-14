@@ -6,6 +6,12 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Fixed
 
+- **Filter refused on the first click, accepted on the second** (PostgreSQL, source selection of 100 000 features or more): the materialized-view path called `BackendServices.execute_commands`, which does not exist (`execute_postgresql_commands`), so Step 9 failed with `'BackendServices' object has no attribute 'execute_commands'` after the source subset had already been applied; the second click saw an existing filter and took another path. A static test now checks every `_backend_services.<method>` call of the task handlers against the facade.
+
+## [4.9.1] - 2026-09-14
+
+### Fixed
+
 - **Python error after a project switch** (`RuntimeError: wrapped C/C++ object of type QgsVectorLayer has been deleted` in `ExploringController.set_layer`, QGIS 4.2.2): the previous current layer's C++ object is gone once the project changed; the exploring and filtering controllers no longer compare it.
 - **QGIS crash (access violation in `QgsFeaturePickerModelBase::endUpdate`) after a plugin reload followed by a project close**: the panel stayed alive, hidden, after `unload()`, and a feature-picker gather still running on a PostgreSQL layer finished after the layer was deleted. The dock widget is now removed and deleted on unload.
 - `⏱ layer_change_validate` / `⏱ layer_change_reset` timing lines (a 20 s layer change at project open sat before Step 1, where nothing was timed).

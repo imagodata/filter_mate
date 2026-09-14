@@ -260,7 +260,11 @@ class CleanupHandler:
                 logger.debug(f"PostgreSQL connection test failed, reconnecting: {e}")
                 connexion, _ = get_datasource_connexion_fn(source_layer)
 
-        return self._backend_services.execute_commands(connexion, commands)
+        # 2026-09-14: the facade method is execute_postgresql_commands; the
+        # old name raised AttributeError and every filter that took the
+        # materialized-view path (source selection >= 100 000 features)
+        # failed at Step 9 on its first attempt.
+        return self._backend_services.execute_postgresql_commands(connexion, commands)
 
     def ensure_source_table_stats(
         self,
