@@ -638,3 +638,6 @@ Result: Que veux-tu faire dans cette session ?
 - Colonne géométrique : `_persist_verified_geometry_field` (layer_management_task, chemin « variables existantes »).
 - Cibles PostgreSQL vides : `FilterOrchestrator.empty_target_layers` + `report_empty_target_layers()` dans `finished()`.
 - Garde-fou `tests/test_no_unscoped_qt_enums.py` : ajouter tout nouveau membre d'enum non scopé rencontré.
+- [2026-09-14 soir] `handle_project_initialization(..., registered_layer_ids_callback=)` : le add_layers différé
+  n'enregistre que les couches absentes de PROJECT_LAYERS (le rebond layersAdded a déjà fait le reste).
+  `FilterMateApp._set_task_button_down` : bouton Filtrer/Défiltrer enfoncé (setDown) du gel au dégel, jamais désactivé.
