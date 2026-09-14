@@ -848,6 +848,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                         icon = get_themed_icon(p) if ICON_THEME_AVAILABLE else QtGui.QIcon(p)
                         w.setIcon(icon)
                     w.setIconSize(QtCore.QSize(sz, sz))
+                    self._name_icon_button(w, grp, name)
                     loaded_count += 1
                     logger.info(f"✓ {grp}.{name}: {ico_file}")
 
@@ -856,6 +857,54 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.error(f"_load_all_pushbutton_icons failed: {e}")
             import traceback
             logger.debug(traceback.format_exc())
+
+    def _icon_button_labels(self):
+        """Human labels of the icon-only buttons, by (group, name) of the icon config."""
+        return {
+            ("ACTION", "FILTER"): self.tr("Filter"),
+            ("ACTION", "UNDO_FILTER"): self.tr("Undo the last filter"),
+            ("ACTION", "REDO_FILTER"): self.tr("Redo the last filter"),
+            ("ACTION", "UNFILTER"): self.tr("Remove the filters"),
+            ("ACTION", "EXPORT"): self.tr("Export the layers"),
+            ("ACTION", "ABOUT"): self.tr("About FilterMate"),
+            ("ACTION", "QFIELDCLOUD"): self.tr("QFieldCloud"),
+            ("EXPLORING", "IDENTIFY"): self.tr("Identify the selected features"),
+            ("EXPLORING", "ZOOM"): self.tr("Zoom to the selected features"),
+            ("EXPLORING", "IS_SELECTING"): self.tr("Select the features on the map"),
+            ("EXPLORING", "IS_TRACKING"): self.tr("Follow the features on the map"),
+            ("EXPLORING", "IS_LINKING"): self.tr("Link the three selection modes"),
+            ("EXPLORING", "RESET_ALL_LAYER_PROPERTIES"): self.tr("Reset the layer properties"),
+            ("FILTERING", "AUTO_CURRENT_LAYER"): self.tr("Follow the current layer"),
+            ("FILTERING", "HAS_LAYERS_TO_FILTER"): self.tr("Layers to filter"),
+            ("FILTERING", "HAS_COMBINE_OPERATOR"): self.tr("Combine with the existing filter"),
+            ("FILTERING", "HAS_GEOMETRIC_PREDICATES"): self.tr("Geometric predicates"),
+            ("FILTERING", "HAS_BUFFER_VALUE"): self.tr("Buffer distance"),
+            ("FILTERING", "HAS_BUFFER_TYPE"): self.tr("Buffer type"),
+            ("EXPORTING", "HAS_LAYERS_TO_EXPORT"): self.tr("Layers to export"),
+            ("EXPORTING", "HAS_PROJECTION_TO_EXPORT"): self.tr("Projection of the export"),
+            ("EXPORTING", "HAS_STYLES_TO_EXPORT"): self.tr("Export the styles"),
+            ("EXPORTING", "HAS_DATATYPE_TO_EXPORT"): self.tr("Export format"),
+            ("EXPORTING", "HAS_OUTPUT_FOLDER_TO_EXPORT"): self.tr("Output folder"),
+            ("EXPORTING", "HAS_ZIP_TO_EXPORT"): self.tr("Zip the export"),
+        }
+
+    def _name_icon_button(self, button, group, name):
+        """Give an icon-only button an accessible name (and a tooltip if it has none).
+
+        UX 2026-09-14: no widget of the panel had an accessible name, so a
+        screen reader announced "PushButton"; several buttons had no tooltip.
+        The existing tooltip wins as accessible name when there is one.
+        """
+        try:
+            label = self._icon_button_labels().get((group, name), "")
+            tooltip = (button.toolTip() or "").strip()
+            if not tooltip and label:
+                button.setToolTip(label)
+            accessible = tooltip or label
+            if accessible and not (button.accessibleName() or "").strip():
+                button.setAccessibleName(accessible)
+        except Exception as exc:  # cosmetic
+            logger.debug(f"Accessible name skipped for {group}.{name}: {exc}")
 
     def _get_widget_attr_name(self, widget_group, widget_name):
         """v3.1 Sprint 14: Map config names to widget attribute names."""

@@ -16,6 +16,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Changed
 
+- Accessibility: the twenty-five icon-only buttons of the panel get an accessible name (their tooltip when they have one, a translated label otherwise), and a tooltip when they had none.
 - **Stored geometry column verified once against the layer URI** (`_persist_verified_geometry_field`): a dozen PostgreSQL layers carried `layer_geometry_field = 'geom'` from an older version while their URI says `geometrie`; LayerOrganizer corrected it in memory at every task and logged "Geometry column mismatch" each time. The stored value is now fixed once, in the layer variables and in the FilterMate database.
 - Error messages shown in the QGIS message bar no longer expose the raw exception (`psycopg2.OperationalError…`, `[Errno 13]…`): configuration reset, panel layout, favorites manager, orphan-project clean-up, database statistics and the two optimization dialogs say what failed and point to `filtermate.log`, where the traceback now goes.
 - Qt6 guard in the test suite: `tests/test_no_unscoped_qt_enums.py` fails on unscoped enum members (`Qt.QueuedConnection`, `QgsWkbTypes.Point`, `QMessageBox.Yes`, …) and on `exec_()`, the spellings the plugins.qgis.org check rejects; the three remaining `Qt.QueuedConnection` are scoped.
