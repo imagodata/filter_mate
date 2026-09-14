@@ -1746,6 +1746,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 layer_props["exploring"] = {}
             layer_props["exploring"][expression_key] = field_or_expression
             logger.info(f"  → Updated PROJECT_LAYERS[exploring][{expression_key}] = {field_or_expression}")
+            if getattr(self, '_updating_current_layer', False):
+                # PERF 2026-09-14: during current_layer_changed the expression
+                # widgets are cleared (setExpression('') in _disconnect_layer_signals)
+                # and then set to the layer's expressions; each change reached
+                # here and rebuilt the pickers (a 17 s picker_populate with an
+                # empty expression on a PostgreSQL layer, measured in QGIS 4.2)
+                # right before _reload_exploration_widgets rebuilt them again
+                # with the final expression. Only the reload step populates.
+                logger.debug(f"  → Layer change in progress: picker rebuild for {groupbox} left to the reload step")
+                return
 
             # Update single selection picker (QgsFeaturePickerWidget)
             if groupbox == "single_selection":
