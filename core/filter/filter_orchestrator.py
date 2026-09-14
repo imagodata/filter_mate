@@ -80,6 +80,10 @@ class FilterOrchestrator:
         self.subset_queue_callback = subset_queue_callback
         self.parent_task = parent_task
         self._get_predicates_callback = get_predicates_callback
+        # Target layers found empty after their filter (PostgreSQL only, the
+        # subset is applied in this worker); reported once per task by
+        # report_empty_target_layers() instead of one WARNING per layer.
+        self.empty_target_layers = []
 
         # Inject callbacks into task_parameters for backends to use
         self.task_parameters['_subset_queue_callback'] = subset_queue_callback
@@ -835,16 +839,32 @@ class FilterOrchestrator:
         # is already applied (PostgreSQL applies it in this worker); a LIMIT 1
         # probe stops at the first match instead of counting everything.
         if layer.providerType() == QGIS_PROVIDER_POSTGRES and final_expression and not self._has_any_feature(layer):
-            logger.warning(
-                f"⚠️ WARNING: {layer.name()} has ZERO features after filtering!\n"
-                f"   Provider: {backend_name}, Expression length: {len(final_expression) if final_expression else 0}"
-            )
-            QgsMessageLog.logMessage(
-                f"⚠️ {layer.name()} → 0 features (filter may be too restrictive)",
-                "FilterMate", Qgis.MessageLevel.Warning
+            # 2026-09-14: one INFO line here; the task reports every empty
+            # target in a single WARNING (7 identical warnings per cascade with
+            # the centroid option were noise, the empty result is legitimate).
+            self.empty_target_layers.append(layer.name())
+            logger.info(
+                f"{layer.name()} has no feature after filtering "
+                f"(provider {backend_name}, expression length {len(final_expression)})"
             )
 
         logger.debug(f"✓ Successfully filtered {layer.name()} (counts are reported once the subsets are applied)")
+
+    def report_empty_target_layers(self) -> None:
+        """Log once, on the main thread, the target layers left empty by the filter."""
+        names = list(self.empty_target_layers)
+        self.empty_target_layers = []
+        if not names:
+            return
+        shown = ", ".join(names[:8]) + (f" (+{len(names) - 8} more)" if len(names) > 8 else "")
+        logger.warning(f"{len(names)} target layer(s) empty after filtering: {shown}")
+        try:
+            QgsMessageLog.logMessage(
+                f"{len(names)} layer(s) with no feature after filtering: {shown}",
+                "FilterMate", Qgis.MessageLevel.Warning
+            )
+        except Exception as exc:  # headless contexts
+            logger.debug(f"QgsMessageLog unavailable: {exc}")
 
     @staticmethod
     def _has_any_feature(layer: QgsVectorLayer) -> bool:
