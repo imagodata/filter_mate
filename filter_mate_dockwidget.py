@@ -949,7 +949,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 return
             except Exception as e:
                 logger.error(f"DimensionsManager.apply() FAILED: {e}", exc_info=True)
-                iface.messageBar().pushWarning("FilterMate", self.tr("UI dimension error: {}").format(str(e)))
+                iface.messageBar().pushWarning(
+                    "FilterMate",
+                    self.tr("The panel layout could not be applied; default sizes are used. Details in filtermate.log."))
                 # Fall through to fallback methods
 
         try:
@@ -5274,7 +5276,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 if widget and hasattr(widget, 'setLayer'):
                     widget.setLayer(layer, layer_props, skip_task=True)
                     if hasattr(widget, 'setDisplayExpression'):
-                        widget.setDisplayExpression(multiple_expr)
+                        # PERF 2026-09-14: no population here. _reload_exploration_widgets
+                        # runs right after with the final expression and populates the
+                        # list (a provisional expression here cost a second full
+                        # picker_populate on every PostgreSQL layer change).
+                        widget.setDisplayExpression(multiple_expr, skip_task=True)
 
             # Update expression widgets (QgsFieldExpressionWidget)
             expr_mappings = [

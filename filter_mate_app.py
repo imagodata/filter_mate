@@ -1298,7 +1298,7 @@ class FilterMateApp:
         elif task_name == "remove_layers":
             self.appTasks[task_name].begun.connect(self.on_remove_layer_task_begun)
 
-        # Connect signals with Qt.QueuedConnection
+        # Connect signals with Qt.ConnectionType.QueuedConnection
         self.appTasks[task_name].resultingLayers.connect(
             lambda result_project_layers, tn=task_name:
                 self.layer_management_engine_task_completed(result_project_layers, tn),

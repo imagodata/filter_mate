@@ -235,9 +235,10 @@ class OptimizationManager:
                     dw.tr("Dialog not available: {0}").format(str(e))
                 )
         except Exception as e:
+            logger.error(f"Optimization settings dialog failed: {e}", exc_info=True)
             show_warning(
                 "FilterMate",
-                dw.tr("Error: {0}").format(str(e)[:50])
+                dw.tr("The optimization settings could not be saved. Details in filtermate.log.")
             )
 
     def apply_optimization_dialog_settings(self, all_settings):
@@ -290,9 +291,10 @@ class OptimizationManager:
                 dw.tr("Dialog not available: {0}").format(str(e))
             )
         except Exception as e:
+            logger.error(f"Backend optimization dialog failed: {e}", exc_info=True)
             show_warning(
                 "FilterMate",
-                dw.tr("Error: {0}").format(str(e)[:50])
+                dw.tr("The backend optimizations could not be configured. Details in filtermate.log.")
             )
 
     # ========================================

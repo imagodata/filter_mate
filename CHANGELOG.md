@@ -15,6 +15,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Changed
 
+- **Stored geometry column verified once against the layer URI** (`_persist_verified_geometry_field`): a dozen PostgreSQL layers carried `layer_geometry_field = 'geom'` from an older version while their URI says `geometrie`; LayerOrganizer corrected it in memory at every task and logged "Geometry column mismatch" each time. The stored value is now fixed once, in the layer variables and in the FilterMate database.
+- Error messages shown in the QGIS message bar no longer expose the raw exception (`psycopg2.OperationalError…`, `[Errno 13]…`): configuration reset, panel layout, favorites manager, orphan-project clean-up, database statistics and the two optimization dialogs say what failed and point to `filtermate.log`, where the traceback now goes.
+- Qt6 guard in the test suite: `tests/test_no_unscoped_qt_enums.py` fails on unscoped enum members (`Qt.QueuedConnection`, `QgsWkbTypes.Point`, `QMessageBox.Yes`, …) and on `exec_()`, the spellings the plugins.qgis.org check rejects; the three remaining `Qt.QueuedConnection` are scoped.
+- Layer change: the synchronization step no longer populates the multiple-selection list with a provisional display expression (the reload step that follows populates it with the final one), and the `⏱ picker_populate` log line names its caller chain.
 - **Busy cursor while a filter / unfilter / reset task runs**: the canvas was already frozen for the whole task, but nothing on screen said so. The cursor now shows the busy indicator (arrow + spinner, the panel stays usable) from the freeze to the same thaw that refreshes the canvas; a superseding task restores the previous cursor first, and the watchdog restores it with the canvas.
 - Plugin zip: the 34 Qt Linguist sources (`i18n/*.ts`, 4.7 MB uncompressed), `i18n/FilterMate.pro` and the internal `docs/` folder (audits, integration notes) are no longer shipped; only the compiled `.qm` files are needed at runtime. 553 → 505 files, 5.8 → 5.0 MB.
 - CI: a `lint` job runs flake8 on the plugin code (the `.flake8` config, tests/scripts/website excluded) next to the test matrix.

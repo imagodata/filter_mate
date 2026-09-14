@@ -1458,9 +1458,11 @@ class FilterMate:
             )
 
         except Exception as e:
+            logger.error(f"Configuration reset failed: {e}", exc_info=True)
             self.iface.messageBar().pushCritical(
                 "FilterMate",
-                self.tr(f"Error during reset: {str(e)}")
+                self.tr("The configuration could not be reset. Check that the plugin folder is writable, "
+                        "then try again. Details in filtermate.log.")
             )
 
     def _show_discord_welcome(self):

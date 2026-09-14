@@ -657,8 +657,8 @@ class FavoritesController(BaseController):
             logger.warning(f"FavoritesManagerDialog not available: {e}")
             self._show_warning(self.tr("Favorites manager dialog not available"))
         except Exception as e:
-            logger.error(f"Error showing favorites manager: {e}")
-            self._show_warning(self.tr("Error: {0}").format(e))
+            logger.error(f"Error showing favorites manager: {e}", exc_info=True)
+            self._show_warning(self.tr("The favorites manager could not be opened. Details in filtermate.log."))
 
     # === Private Methods ===
 
@@ -1069,8 +1069,8 @@ class FavoritesController(BaseController):
             else:
                 self._show_success(self.tr("No orphan projects to clean up"))
         except Exception as e:
-            logger.error(f"Error cleaning up orphan projects: {e}")
-            self._show_warning(self.tr("Error: {0}").format(e))
+            logger.error(f"Error cleaning up orphan projects: {e}", exc_info=True)
+            self._show_warning(self.tr("Orphan projects could not be cleaned up. Details in filtermate.log."))
 
     # ─────────────────────────────────────────────────────────────────
     # favorites_sharing extension integration (optional)
@@ -1153,5 +1153,5 @@ class FavoritesController(BaseController):
                 msg
             )
         except Exception as e:
-            logger.error(f"Error showing database stats: {e}")
-            self._show_warning(self.tr("Error: {0}").format(e))
+            logger.error(f"Error showing database stats: {e}", exc_info=True)
+            self._show_warning(self.tr("Database statistics are unavailable. Details in filtermate.log."))

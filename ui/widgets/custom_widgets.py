@@ -25,6 +25,7 @@ Usage:
 
 import logging
 import time
+import traceback
 from functools import partial
 
 from qgis.PyQt import QtGui
@@ -1257,10 +1258,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self._last_populate = (signature, time.monotonic())
         _elapsed_ms = (time.perf_counter() - _t0) * 1000.0
         if _elapsed_ms >= 250:
+            # The caller chain names the path that asked for this population
+            # (2026-09-13: two identical 700 ms populations per PostgreSQL layer
+            # change, from two different callers; the log could not tell which).
+            callers = " < ".join(
+                frame.name for frame in reversed(traceback.extract_stack(limit=7)[:-1])
+            )
             logger.info(
                 f"⏱ picker_populate: {_elapsed_ms:.0f} ms ({self._cached_layer_name}, "
                 f"{len(features_data)} row(s), scanned {scanned}, "
-                f"{'search' if search_text else ('full' if force_full else f'limit {fetch_limit}')})"
+                f"{'search' if search_text else ('full' if force_full else f'limit {fetch_limit}')}; "
+                f"via {callers})"
             )
 
         # FIX 2026-01-19: Force visual refresh after population
