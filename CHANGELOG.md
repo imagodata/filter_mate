@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Filter refused on the first click, accepted on the second** (PostgreSQL, source selection of 100 000 features or more): the materialized-view path called `BackendServices.execute_commands`, which does not exist (`execute_postgresql_commands`), so Step 9 failed with `'BackendServices' object has no attribute 'execute_commands'` after the source subset had already been applied; the second click saw an existing filter and took another path. A static test now checks every `_backend_services.<method>` call of the task handlers against the facade.
+
 ## [4.9.1] - 2026-09-14
 
 ### Fixed

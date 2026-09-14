@@ -382,7 +382,7 @@ class TestCleanupHandler:
 
     def test_execute_postgresql_commands_delegates(self, mock_connexion):
         """execute_postgresql_commands should delegate to backend services."""
-        self.mock_bs.execute_commands.return_value = True
+        self.mock_bs.execute_postgresql_commands.return_value = True
         result = self.handler.execute_postgresql_commands(
             connexion=mock_connexion,
             commands=["CREATE INDEX ..."],
@@ -404,7 +404,7 @@ class TestCleanupHandler:
         mock_get_conn = MagicMock(return_value=(MagicMock(), None))
         mock_source = MagicMock()
 
-        self.mock_bs.execute_commands.return_value = True
+        self.mock_bs.execute_postgresql_commands.return_value = True
         result = self.handler.execute_postgresql_commands(
             connexion=mock_connexion,
             commands=["SELECT 1"],
