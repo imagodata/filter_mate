@@ -622,3 +622,13 @@ Result: Que veux-tu faire dans cette session ?
 - Spatialite `index_manager` : `cursor.execute("SELECT CreateSpatialIndex(?, ?)", (table, col))` — plus de f-string.
 - Ne plus créer de `logger = logging.getLogger('FilterMate.X')` dans une méthode : utiliser le logger de module.
 - Restant priorisé et constats écartés : voir la mémoire globale `audit-general-2026-09-14`.
+
+## [2026-09-14] Changement de projet avec le panneau ouvert → 4 correctifs (PR #77)
+- Ne jamais garder une `weakref` sur un rappel passé en argument (lambda ou méthode liée) pour un QTimer : utiliser
+  `_hold_callback()` (layer_lifecycle_service).
+- `manage_task` est la SEULE file add_layers ; `TaskOrchestrator._dispatch_add_layers` ne met plus rien en file.
+- Jamais `clear()` sur `comboBox_filtering_current_layer` (QgsMapLayerComboBox) : `setLayer(None)`. Test AST.
+- Jamais `signal.disconnect()` sans slot sur un signal QGIS (layerStore, QgsProject, iface) : déconnecter le slot du
+  plugin (`_connect_layer_store_slots` / `_disconnect_layer_store_slots`). Test AST.
+- `get_logger()` propage désormais vers filtermate.log pour tout nom sous `FilterMate.*` / `filter_mate.*`.
+- Reproduction QGIS : voir la mémoire globale `project-switch-fix-2026-09-14` (schtasks, script fm_project_switch.py).
