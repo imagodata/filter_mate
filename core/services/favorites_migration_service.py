@@ -146,17 +146,16 @@ class FavoritesMigrationService:
             # Get orphan favorites
             if source_project_uuid:
                 cursor.execute("""
-                    SELECT f.id, f.name FROM fm_favorites f
+                    SELECT f.id, f.name, f.expression, f.layer_name FROM fm_favorites f
                     WHERE f.project_uuid = ?
                 """, (source_project_uuid,))
             else:
                 cursor.execute("""
-                    SELECT f.id, f.name FROM fm_favorites f
+                    SELECT f.id, f.name, f.expression, f.layer_name FROM fm_favorites f
                     JOIN fm_projects p ON f.project_uuid = p.project_id
                     WHERE (p.project_name = '' OR p.project_name IS NULL)
                       AND (p.project_path = '' OR p.project_path IS NULL)
                 """)
-
             favorites_to_migrate = cursor.fetchall()
 
             if not favorites_to_migrate:
@@ -164,16 +163,41 @@ class FavoritesMigrationService:
                 logger.info("No orphan favorites to migrate")
                 return 0, []
 
-            favorite_ids = [f[0] for f in favorites_to_migrate]
-            favorite_names = [f[1] for f in favorites_to_migrate]
+            # 2026-09-14: every project open that created a new project row
+            # migrated the previous copies again and the .qgz backup restore
+            # added one more (five identical "YONNE" favorites in the live
+            # database). An orphan identical (name, expression, layer) to a
+            # favorite already in the target, or to one migrated in this batch,
+            # is dropped instead of moved.
+            cursor.execute(
+                "SELECT name, expression, layer_name FROM fm_favorites WHERE project_uuid = ?",
+                (target_project_uuid,)
+            )
+            present = {tuple(row) for row in cursor.fetchall()}
+            favorite_ids, favorite_names, duplicate_ids = [], [], []
+            for fav_id, name, expression, layer_name in favorites_to_migrate:
+                key = (name, expression, layer_name)
+                if key in present:
+                    duplicate_ids.append(fav_id)
+                    continue
+                present.add(key)
+                favorite_ids.append(fav_id)
+                favorite_names.append(name)
 
-            # Update favorites to target project
-            placeholders = ','.join('?' * len(favorite_ids))
-            cursor.execute(f"""
-                UPDATE fm_favorites
-                SET project_uuid = ?, updated_at = ?
-                WHERE id IN ({placeholders})
-            """, [target_project_uuid, datetime.now().isoformat()] + favorite_ids)  # nosec B608 - placeholders are '?' only
+            if favorite_ids:
+                placeholders = ','.join('?' * len(favorite_ids))
+                cursor.execute(f"""
+                    UPDATE fm_favorites
+                    SET project_uuid = ?, updated_at = ?
+                    WHERE id IN ({placeholders})
+                """, [target_project_uuid, datetime.now().isoformat()] + favorite_ids)  # nosec B608 - placeholders are '?' only
+            if duplicate_ids:
+                placeholders = ','.join('?' * len(duplicate_ids))
+                cursor.execute(
+                    f"DELETE FROM fm_favorites WHERE id IN ({placeholders})",  # nosec B608 - placeholders only
+                    duplicate_ids
+                )
+                logger.info(f"Dropped {len(duplicate_ids)} orphan favorite(s) identical to an existing one")
 
             conn.commit()
             conn.close()
