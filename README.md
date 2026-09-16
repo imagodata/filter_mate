@@ -195,6 +195,7 @@ pip install psycopg2-binary
 ## 📚 Documentation
 
 - **Users**: [Documentation Website](https://imagodata.github.io/filter_mate)
+- **Use cases**: [Use cases (English)](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage (français)](https://imagodata.github.io/filter_mate/stories.fr.html) — eight business questions answered step by step on a full BD TOPO department (1.17 M buildings): commune dossier, road noise, flood setback, bridges, brush clearing, emergency access, favorites, Processing
 - **Tutorial**: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html) — installation, first filter, exploring, predicates and buffers, favorites, export, backends, configuration
 - **Developers**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **Changelog**: [CHANGELOG.md](CHANGELOG.md)
