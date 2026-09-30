@@ -409,7 +409,10 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .band h1, .band h2 { margin: 0; color: var(--on-ink); max-width: 30ch; }
 .band h2 .num { color: var(--select); }
 .band .watch { position: absolute; top: 14px; right: 14px; background: rgba(22, 35, 43, 0.7); }
-.band .credit { top: 14px; left: 18px; right: auto; bottom: auto; }
+.band .credit {
+    top: 14px; left: 14px; right: auto; bottom: auto;
+    padding: 2px 8px; background: rgba(22, 35, 43, 0.75); text-shadow: none;
+}
 .band.is-watching .sheet-scrim, .band.is-watching h1, .band.is-watching h2 { opacity: 0; }
 .band-hero { aspect-ratio: 16 / 7; }
 
