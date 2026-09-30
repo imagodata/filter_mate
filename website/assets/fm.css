@@ -67,6 +67,10 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+/* scroll snap on the footage: one video per screen on the home page, and the
+   documentation bands catch the scroll when it stops close to them */
+html:has(.sheet) { scroll-snap-type: y mandatory; }
+html:has(.band) { scroll-snap-type: y proximity; }
 body {
     margin: 0;
     font: 400 18px/1.6 var(--body);
@@ -166,6 +170,8 @@ a:hover { text-decoration-thickness: 2px; }
 /* ------------------------------------------------------------------ video sheets (home) */
 .sheet {
     position: relative;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
     min-height: 100vh; min-height: 100svh;
     display: flex; align-items: flex-end;
     padding: calc(var(--nav-h) + 24px) var(--gutter) clamp(24px, 6vh, 64px);
@@ -400,6 +406,8 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 /* a section header on footage: the documentation version of a sheet */
 .band {
     position: relative; overflow: hidden; isolation: isolate;
+    scroll-snap-align: start;
+    scroll-margin-top: calc(var(--nav-h) + 16px);
     aspect-ratio: 2 / 1; margin: 0 0 26px;
     display: flex; align-items: flex-end;
     padding: 20px 22px;
