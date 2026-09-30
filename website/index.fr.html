@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterMate, le filtrage spatial pour QGIS</title>
+    <meta name="description" content="Choisissez un lieu, une entité ou une expression : FilterMate filtre autour toutes les couches de votre projet QGIS, sur PostGIS, GeoPackage, Spatialite ou shapefiles, sans écrire de SQL.">
+    <meta property="og:title" content="FilterMate, le filtrage spatial pour QGIS">
+    <meta property="og:description" content="Choisissez un lieu, une entité ou une expression. FilterMate filtre autour toutes les couches de votre projet QGIS.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.fr.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <link rel="alternate" hreflang="en" href="index.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fm.css">
+    <link rel="preload" as="image" href="video/hero.webp">
+</head>
+<body>
+<a class="skip" href="#main">Aller au contenu</a>
+
+<nav class="nav on-video" aria-label="Navigation principale">
+    <a href="index.fr.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="guide.fr.html">Guide utilisateur</a></li>
+        <li><a href="stories.fr.html">Cas d'usage</a></li>
+        <li><a href="roadmap.html" hreflang="en">Feuille de route</a></li>
+        <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><span class="lang" aria-label="Langue"><a href="index.html" hreflang="en" lang="en" data-lang-link>EN</a><a href="index.fr.html" aria-current="true" hreflang="fr">FR</a></span></li>
+        <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Installer</a></li>
+    </ul>
+</nav>
+
+<main id="main">
+
+<section class="sheet sheet-hero" id="top" aria-labelledby="hero-title">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
+    <div class="sheet-scrim"></div>
+    <div class="cartouche">
+        <h1 class="wordmark" id="hero-title"><img src="logo.png" alt="" width="76" height="76">FilterMate</h1>
+        <p class="lead">Choisissez un lieu, une entité ou une expression. FilterMate filtre autour toutes les couches de votre projet QGIS, sur PostGIS, GeoPackage, Spatialite ou shapefiles, sans une ligne de SQL.</p>
+        <ul class="legend" aria-label="Ce que montre la vidéo">
+            <li><i style="--c:#ffd83d"></i>Saint-Gaudens, choisie parmi 930 communes<span></span></li>
+            <li><i style="--c:#d64545"></i>Bâtiments conservés<b>12 380 sur 1 173 829</b></li>
+            <li><i class="line" style="--c:#3b3b3b"></i>Tronçons de route conservés<b>2 902 sur 383 112</b></li>
+        </ul>
+        <div class="cartouche-actions">
+            <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Installer depuis QGIS</a>
+            <a class="btn btn-ghost" href="guide.fr.html">Lire le guide</a>
+            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        </div>
+        <p class="aside">Libre et gratuit, pour QGIS 3.22 à QGIS 4.</p>
+    </div>
+    <button class="watch close-watch" type="button">Fermer</button>
+    <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne. Enregistré dans QGIS 4.2 avec FilterMate 4.9.2.</p>
+</section>
+
+<section class="sheet" id="explore" aria-labelledby="explore-title">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/explore.webp" data-src="video/explore.mp4" aria-hidden="true"></video>
+    <div class="sheet-scrim"></div>
+    <div class="cartouche">
+        <h2 id="explore-title">Trouver d'abord l'entité</h2>
+        <p>Tapez un nom, cochez quelques entités dans une liste ou écrivez une expression. Avec le suivi activé, la carte suit la sélection : vous voyez ce qui va servir de filtre.</p>
+        <ul class="legend" aria-label="Ce que montre la vidéo">
+            <li><i style="--c:#ffd83d"></i>Sélection simple : Toulouse<span></span></li>
+            <li><i style="--c:#ffd83d"></i>Sélection multiple : quatre voisines<span></span></li>
+            <li><i style="--c:#ffd83d"></i>Expression : plus de 20 000 habitants<b>7 communes</b></li>
+        </ul>
+        <div class="cartouche-actions">
+            <a href="guide.fr.html#exploring">Explorer une couche, dans le guide</a>
+            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        </div>
+    </div>
+    <button class="watch close-watch" type="button">Fermer</button>
+    <p class="credit">BD TOPO® 3.5 © IGN, communes de Haute-Garonne.</p>
+</section>
+
+<section class="sheet" id="filter" aria-labelledby="filter-title">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/buffer.webp" data-src="video/buffer.mp4" aria-hidden="true"></video>
+    <div class="sheet-scrim"></div>
+    <div class="cartouche">
+        <h2 id="filter-title">Puis filtrer tout ce qui l'entoure</h2>
+        <p>Choisissez les couches à filtrer, un prédicat spatial et, si besoin, un tampon. Filter réécrit d'un coup le filtre de chaque couche cible ; Undo rétablit l'état précédent.</p>
+        <ul class="legend" aria-label="Ce que montre la vidéo">
+            <li><i style="--c:#5aa9ff"></i>Surfaces en eau de Grenade, toutes sélectionnées<b>77</b></li>
+            <li><i style="--c:#d64545"></i>Bâtiments à moins de 300 m<b>14 181</b></li>
+            <li><i style="--c:#d64545"></i>Bâtiments à moins de 100 m<b>2 727</b></li>
+        </ul>
+        <div class="cartouche-actions">
+            <a href="stories.fr.html#s3">Histoire : ce que la Garonne peut atteindre</a>
+            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        </div>
+    </div>
+    <button class="watch close-watch" type="button">Fermer</button>
+    <p class="credit">BD TOPO® 3.5 © IGN, Grenade (Haute-Garonne).</p>
+</section>
+
+<section class="sheet" id="scale" aria-labelledby="scale-title">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/bridges.webp" data-src="video/bridges.mp4" aria-hidden="true"></video>
+    <div class="sheet-scrim"></div>
+    <div class="cartouche">
+        <h2 id="scale-title">Un département entier, tel quel</h2>
+        <p>Toutes les vidéos de cette page tournent sur la BD TOPO complète de la Haute-Garonne : un GeoPackage de 2,9 Go, 1,17 million de bâtiments, rien de découpé à l'avance. FilterMate interroge d'abord l'index R-tree de chaque table : les douze couches d'une commune se filtrent en moins d'une seconde. Sur PostgreSQL, le travail reste dans la base.</p>
+        <ul class="legend" aria-label="Ce que montre la vidéo">
+            <li><i style="--c:#6b7280"></i>Toulouse Métropole<b>37 communes</b></li>
+            <li><i class="line" style="--c:#3b3b3b"></i>Tronçons de route qui franchissent un cours d'eau permanent<b>1 112</b></li>
+            <li><i class="line" style="--c:#b03fb0"></i>Ponts et autres ouvrages<b>190</b></li>
+        </ul>
+        <div class="cartouche-actions">
+            <a href="stories.fr.html#s4">Histoire : tous les ponts de la métropole</a>
+            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        </div>
+    </div>
+    <button class="watch close-watch" type="button">Fermer</button>
+    <p class="credit">BD TOPO® 3.5 © IGN, Toulouse Métropole.</p>
+</section>
+
+<section class="sheet" id="keep" aria-labelledby="keep-title">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/favorites.webp" data-src="video/favorites.mp4" aria-hidden="true"></video>
+    <div class="sheet-scrim"></div>
+    <div class="cartouche">
+        <h2 id="keep-title">Garder ce qui marche</h2>
+        <p>Chaque filtre rejoint l'historique du projet, que vous pouvez annuler et rétablir même après un redémarrage de QGIS. Enregistrez un réglage en favori, rejouez-le demain, partagez-le avec l'équipe.</p>
+        <ul class="legend" aria-label="Ce que montre la vidéo">
+            <li><i style="--c:#ffd83d"></i>Enregistré en favori : PPRI Garonne 300 m<span></span></li>
+            <li><i style="--c:#f3f4ef"></i>Tous les filtres retirés<span></span></li>
+            <li><i style="--c:#d64545"></i>Rejoué depuis le menu des favoris<span></span></li>
+        </ul>
+        <div class="cartouche-actions">
+            <a href="stories.fr.html#s7">Histoire : la bibliothèque de requêtes de l'équipe</a>
+            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        </div>
+    </div>
+    <button class="watch close-watch" type="button">Fermer</button>
+    <p class="credit">BD TOPO® 3.5 © IGN, Grenade (Haute-Garonne).</p>
+</section>
+
+<section class="sheet" id="export" aria-labelledby="export-title">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/export.webp" data-src="video/export.mp4" aria-hidden="true"></video>
+    <div class="sheet-scrim"></div>
+    <div class="cartouche">
+        <h2 id="export-title">Emporter le résultat</h2>
+        <p>Exportez les couches filtrées dans un seul GeoPackage avec leurs styles et un projet QGIS embarqué, ou dans tout format que QGIS sait écrire, puis zippez pour livrer. En ouvrant le fichier, toute la carte revient.</p>
+        <ul class="legend" aria-label="Ce que montre la vidéo">
+            <li><i style="--c:#ffd83d"></i>Couches de Saint-Gaudens<b>12</b></li>
+            <li><i style="--c:#589632"></i>GeoPackage, styles, ZIP<span></span></li>
+        </ul>
+        <div class="cartouche-actions">
+            <a href="stories.fr.html#s1">Histoire : le dossier communal en trois minutes</a>
+            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        </div>
+    </div>
+    <button class="watch close-watch" type="button">Fermer</button>
+    <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens (Haute-Garonne).</p>
+</section>
+
+<section class="sheet" id="automate" aria-labelledby="automate-title">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/processing.webp" data-src="video/processing.mp4" aria-hidden="true"></video>
+    <div class="sheet-scrim"></div>
+    <div class="cartouche">
+        <h2 id="automate-title">Ou le lancer depuis Processing</h2>
+        <p>Les algorithmes FilterMate sont dans la boîte à outils Processing. Filtrez un lot de couches par expression depuis un modèle, un script Python ou le mode par lot.</p>
+        <ul class="legend" aria-label="Ce que montre la vidéo">
+            <li><i class="line" style="--c:#3b3b3b"></i>Tronçons de route modifiés depuis le 15 mars 2025<b>173 616</b></li>
+            <li><i style="--c:#d64545"></i>Bâtiments modifiés<b>22 954</b></li>
+        </ul>
+        <div class="cartouche-actions">
+            <a href="stories.fr.html#s8">Histoire : qu'est-ce qui a changé depuis l'édition précédente ?</a>
+            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        </div>
+    </div>
+    <button class="watch close-watch" type="button">Fermer</button>
+    <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
+</section>
+
+<section class="sheet sheet-plain" id="install" aria-labelledby="install-title">
+    <div class="install">
+        <h2 id="install-title">Installer FilterMate</h2>
+        <p>FilterMate est sur le dépôt officiel des extensions QGIS. Il est libre, gratuit et traduit en 34 langues.</p>
+        <ol class="install-steps">
+            <li><strong>Ouvrir le gestionnaire d'extensions</strong><span>Extensions › Installer/Gérer les extensions…</span></li>
+            <li><strong>Chercher FilterMate</strong><span>dans l'onglet Toutes</span></li>
+            <li><strong>Cliquer sur Installer</strong><span>le bouton FilterMate apparaît dans la barre d'outils</span></li>
+        </ol>
+        <dl class="facts">
+            <div><dt>3.22 à 4</dt><dd>versions de QGIS, Qt5 et Qt6</dd></div>
+            <div><dt>4</dt><dd>moteurs : PostgreSQL, Spatialite, OGR, mémoire</dd></div>
+            <div><dt>34</dt><dd>langues d'interface</dd></div>
+            <div><dt>1 780</dt><dd>tests automatiques à chaque modification</dd></div>
+        </dl>
+        <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Ouvrir sur plugins.qgis.org</a>
+        <ul class="links">
+            <li><a href="guide.fr.html">Guide utilisateur</a></li>
+            <li><a href="stories.fr.html">Cas d'usage</a></li>
+            <li><a href="roadmap.html" hreflang="en">Feuille de route : raster et LiDAR (en anglais)</a></li>
+            <li><a href="https://github.com/imagodata/filter_mate">Code source sur GitHub</a></li>
+            <li><a href="https://github.com/imagodata/filter_mate/issues">Signaler un problème</a></li>
+            <li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li>
+            <li><a href="https://www.youtube.com/watch?v=oQq45xZkzDc">Tutoriel vidéo sur YouTube</a></li>
+        </ul>
+        <p class="site-foot">FilterMate 4.9.2, GPL-3.0, par imagodata. Données des vidéos : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
+    </div>
+</section>
+
+</main>
+<script src="assets/fm.js"></script>
+</body>
+</html>

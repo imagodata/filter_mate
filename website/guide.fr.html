@@ -15,286 +15,25 @@
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --bg-dark: #0a0e1a;
-            --bg-mid: #111528;
-            --bg-light: #1a1f3a;
-            --accent-blue: #4fc3f7;
-            --accent-green: #589632;
-            --accent-purple: #b388ff;
-            --accent-orange: #f0b27a;
-            --cta-start: #4fc3f7;
-            --cta-end: #00e676;
-            --text-primary: #f0f0f0;
-            --text-secondary: #a0a8c0;
-            --text-dim: #6b7394;
-            --card-bg: rgba(255, 255, 255, 0.04);
-            --card-border: rgba(79, 195, 247, 0.15);
-            --code-bg: rgba(255, 255, 255, 0.06);
-        }
-
-        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.7;
-        }
-
-        /* ===== NAVBAR (même apparence que index.html) ===== */
-        .navbar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            padding: 0.8rem 2rem;
-            display: flex; align-items: center; justify-content: space-between;
-            background: rgba(10, 14, 26, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(79, 195, 247, 0.08);
-        }
-        .navbar-logo {
-            display: flex; align-items: center; gap: 0.6rem;
-            text-decoration: none; color: var(--text-primary);
-            font-weight: 700; font-size: 1.15rem;
-        }
-        .navbar-logo img { width: 32px; height: 32px; border-radius: 6px; }
-        .navbar-links { display: flex; align-items: center; gap: 1.8rem; list-style: none; }
-        .navbar-links a {
-            color: var(--text-secondary); text-decoration: none;
-            font-size: 0.85rem; font-weight: 500; transition: color 0.2s;
-        }
-        .navbar-links a:hover, .navbar-links a.active { color: var(--accent-blue); }
-        .lang-switch {
-            display: inline-flex; align-items: center; gap: 0.2rem;
-            border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: 0.15rem 0.3rem;
-        }
-        .lang-switch a { padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; }
-        .lang-switch a.active { background: rgba(79,195,247,0.15); color: var(--accent-blue); }
-        .btn-install {
-            display: inline-flex; align-items: center; gap: 0.4rem;
-            padding: 0.5rem 1.2rem;
-            background: linear-gradient(135deg, var(--cta-start), var(--cta-end));
-            color: var(--bg-dark); font-weight: 600; font-size: 0.85rem;
-            border-radius: 8px; text-decoration: none;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn-install:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(79, 195, 247, 0.3); }
-        .hamburger {
-            display: none; flex-direction: column; gap: 5px; cursor: pointer;
-            background: none; border: none; padding: 4px;
-        }
-        .hamburger span { display: block; width: 24px; height: 2px; background: var(--text-primary); border-radius: 2px; }
-
-        /* ===== MISE EN PAGE ===== */
-        .page {
-            display: grid;
-            grid-template-columns: 260px minmax(0, 1fr);
-            gap: 3rem;
-            max-width: 1240px;
-            margin: 0 auto;
-            padding: 6rem 2rem 4rem;
-        }
-        .toc {
-            position: sticky; top: 5.5rem;
-            align-self: start;
-            max-height: calc(100vh - 7rem);
-            overflow-y: auto;
-            padding-right: 1rem;
-            border-right: 1px solid rgba(255,255,255,0.06);
-        }
-        .toc-title {
-            font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
-            text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.8rem;
-        }
-        .toc ol { list-style: none; }
-        .toc li { margin: 0.15rem 0; }
-        .toc a {
-            display: block; padding: 0.3rem 0.6rem; border-radius: 6px;
-            color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;
-            border-left: 2px solid transparent;
-        }
-        .toc a:hover { color: var(--text-primary); background: var(--card-bg); }
-        .toc a.active { color: var(--accent-blue); border-left-color: var(--accent-blue); background: rgba(79,195,247,0.06); }
-        .toc .num { color: var(--text-dim); font-size: 0.75rem; margin-right: 0.4rem; }
-
-        .content { min-width: 0; }
-
-        /* ===== TYPOGRAPHIE ===== */
-        .hero { margin-bottom: 3rem; }
-        .section-label {
-            display: inline-block; font-size: 0.75rem; font-weight: 600;
-            letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent-blue);
-            margin-bottom: 0.6rem;
-        }
-        h1 {
-            font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.15;
-            letter-spacing: -0.02em; margin-bottom: 0.8rem;
-        }
-        h1 span {
-            background: linear-gradient(135deg, var(--cta-start), var(--cta-end));
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .lead { color: var(--text-secondary); font-size: 1.1rem; max-width: 62ch; }
-        section { margin-bottom: 4rem; scroll-margin-top: 90px; }
-        h2 {
-            font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em;
-            margin-bottom: 1rem; padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(79,195,247,0.15);
-        }
-        h2 .num { color: var(--accent-blue); font-weight: 800; margin-right: 0.5rem; }
-        h3 { font-size: 1.15rem; font-weight: 600; margin: 2rem 0 0.6rem; color: var(--text-primary); }
-        h4 { font-size: 0.95rem; font-weight: 600; margin: 1.2rem 0 0.4rem; color: var(--accent-blue); }
-        p { margin-bottom: 1rem; color: var(--text-secondary); max-width: 72ch; }
-        p strong, li strong { color: var(--text-primary); font-weight: 600; }
-        a { color: var(--accent-blue); }
-        ul, ol { margin: 0 0 1rem 1.3rem; color: var(--text-secondary); }
-        li { margin-bottom: 0.35rem; }
-        code, kbd {
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 0.85em; background: var(--code-bg);
-            padding: 0.1em 0.4em; border-radius: 4px; color: var(--text-primary);
-        }
-        kbd { border: 1px solid rgba(255,255,255,0.15); border-bottom-width: 2px; }
-        pre {
-            background: var(--bg-mid); border: 1px solid var(--card-border);
-            border-radius: 8px; padding: 1rem; overflow-x: auto; margin-bottom: 1rem;
-            font-size: 0.85rem; line-height: 1.5;
-        }
-        pre code { background: none; padding: 0; }
-
-        /* ===== FIGURES ===== */
-        figure {
-            margin: 1.2rem 0 1.8rem;
-            background: var(--bg-mid);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 0.8rem;
-        }
-        figure img {
-            display: block; max-width: 100%; height: auto;
-            border-radius: 8px; margin: 0 auto;
-        }
-        figure.narrow img { width: min(100%, 480px); }
-        figure.tiny img { width: min(100%, 320px); }
-        figcaption {
-            margin-top: 0.7rem; font-size: 0.82rem; color: var(--text-dim); text-align: center;
-        }
-        .fig-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 1rem; }
-        .fig-row figure { margin: 0.6rem 0; }
-
-        /* ===== ENCARTS ===== */
-        .callout {
-            border-left: 3px solid var(--accent-blue);
-            background: rgba(79,195,247,0.06);
-            border-radius: 0 8px 8px 0;
-            padding: 0.8rem 1rem; margin: 1rem 0 1.4rem;
-            color: var(--text-secondary); font-size: 0.93rem;
-        }
-        .callout p:last-child { margin-bottom: 0; }
-        .callout strong:first-child { color: var(--accent-blue); }
-        .callout.tip { border-color: #00e676; background: rgba(0,230,118,0.06); }
-        .callout.tip strong:first-child { color: #00e676; }
-        .callout.warn { border-color: var(--accent-orange); background: rgba(240,178,122,0.08); }
-        .callout.warn strong:first-child { color: var(--accent-orange); }
-
-        /* ===== TABLEAUX ===== */
-        .table-wrap { overflow-x: auto; margin-bottom: 1.4rem; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.07); vertical-align: top; }
-        th { color: var(--text-primary); font-weight: 600; background: var(--card-bg); }
-        td { color: var(--text-secondary); }
-
-        /* ===== ÉTAPES / CARTES ===== */
-        .steps { list-style: none; margin: 0 0 1.5rem; counter-reset: step; }
-        .steps li {
-            position: relative; padding: 0.7rem 0 0.7rem 3rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-secondary);
-        }
-        .steps li::before {
-            counter-increment: step; content: counter(step);
-            position: absolute; left: 0; top: 0.7rem;
-            width: 2rem; height: 2rem; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, var(--cta-start), var(--cta-end));
-            color: var(--bg-dark); font-weight: 700; font-size: 0.85rem;
-        }
-        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 12px; padding: 1.1rem 1.2rem;
-        }
-        .card h4 { margin: 0 0 0.4rem; }
-        .card p { font-size: 0.88rem; margin: 0; }
-        .badge {
-            display: inline-block; padding: 0.1em 0.6em; border-radius: 999px;
-            font-size: 0.75rem; font-weight: 600; color: var(--bg-dark); vertical-align: middle;
-        }
-
-        /* ===== PIED DE PAGE ===== */
-        .guide-footer {
-            margin-top: 3rem; padding-top: 2rem;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;
-            justify-content: space-between; color: var(--text-dim); font-size: 0.85rem;
-        }
-        .guide-footer a { color: var(--text-secondary); text-decoration: none; }
-        .guide-footer a:hover { color: var(--accent-blue); }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 960px) {
-            .page { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; padding: 5.5rem 1.2rem 3rem; }
-            .toc {
-                position: static; max-height: none; border-right: none;
-                border: 1px solid var(--card-border); border-radius: 12px;
-                padding: 1rem; background: var(--bg-mid);
-            }
-            .toc ol { columns: 2; column-gap: 1rem; }
-        }
-        @media (max-width: 768px) {
-            .navbar { padding: 0.7rem 1.2rem; }
-            .navbar-links {
-                display: none; position: absolute; top: 100%; left: 0; right: 0;
-                flex-direction: column; gap: 0; padding: 0.5rem 0;
-                background: rgba(10, 14, 26, 0.97); border-bottom: 1px solid rgba(79,195,247,0.1);
-            }
-            .navbar-links.open { display: flex; }
-            .navbar-links li { width: 100%; }
-            .navbar-links a { display: block; padding: 0.8rem 1.5rem; }
-            .navbar-links li.lang-li { padding: 0.6rem 1.5rem; }
-            .lang-switch { border: none; padding: 0; }
-            .lang-switch a { display: inline-block; padding: 0.2rem 0.7rem; }
-            .btn-install { display: none; }
-            .hamburger { display: flex; }
-            .toc ol { columns: 1; }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fm.css">
 </head>
 <body>
+<a class="skip" href="#main">Aller au contenu</a>
 
-<!-- Barre de navigation -->
-<nav class="navbar">
-    <a href="index.html" class="navbar-logo">
-        <img src="logo.png" alt="FilterMate" width="32" height="32">
-        FilterMate
-    </a>
-    <ul class="navbar-links" id="navLinks">
-        <li><a href="index.html">Accueil</a></li>
-        <li><a href="guide.fr.html" class="active">Guide utilisateur</a></li>
-        <li><a href="stories.fr.html">Cas d'usage</a></li>
-        <li><a href="roadmap.html" style="color:var(--accent-purple);">Roadmap</a></li>
-        <li><a href="https://github.com/imagodata/filter_mate" target="_blank" rel="noopener">GitHub</a></li>
-        <li class="lang-li"><span class="lang-switch" aria-label="Langue"><a href="guide.html" data-lang-link hreflang="en" title="Read in English">EN</a><a href="guide.fr.html" class="active" hreflang="fr">FR</a></span></li>
-    </ul>
-    <a href="https://plugins.qgis.org/plugins/filter_mate/" class="btn-install" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Installer
-    </a>
-    <button class="hamburger" id="hamburger" aria-label="Menu">
-        <span></span><span></span><span></span>
+<nav class="nav" aria-label="Navigation principale">
+    <a href="index.fr.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="guide.fr.html" aria-current="page">Guide utilisateur</a></li>
+        <li><a href="stories.fr.html">Cas d'usage</a></li>
+        <li><a href="roadmap.html" hreflang="en">Feuille de route</a></li>
+        <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><span class="lang" aria-label="Langue"><a href="guide.html" hreflang="en" data-lang-link lang="en">EN</a><a href="guide.fr.html" hreflang="fr" aria-current="true">FR</a></span></li>
+        <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Installer</a></li>
+    </ul>
 </nav>
 
 <div class="page">
@@ -320,11 +59,17 @@
 </aside>
 
 <!-- ===== CONTENU ===== -->
-<main class="content">
+<main class="content" id="main">
 
 <header class="hero">
-    <span class="section-label">Guide utilisateur &middot; FilterMate 4.8</span>
-    <h1>Explorer, filtrer et exporter <span>sans écrire de SQL</span></h1>
+    <span class="section-label">Guide utilisateur de FilterMate 4.9</span>
+    <div class="band band-hero">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h1>Explorer, filtrer et exporter sans écrire de SQL</h1>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Explorer, filtrer et exporter sans écrire de SQL"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
+    </div>
     <p class="lead">
         Ce guide passe en revue chaque partie du panneau FilterMate, avec des captures d'écran prises dans
         QGIS 4.2 (interface en anglais). Lisez-le de haut en bas la première fois, puis utilisez le sommaire comme référence.
@@ -443,7 +188,13 @@
 
 <!-- 4 ------------------------------------------------------------------ -->
 <section id="exploring">
-    <h2><span class="num">4</span>Explorer une couche</h2>
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/explore.webp" data-src="video/explore.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">4</span>Explorer une couche</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Explorer une couche"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">BD TOPO® 3.5 © IGN, communes de Haute-Garonne.</p>
+    </div>
     <p>
         La zone Exploring travaille sur la <strong>couche courante</strong>, affichée dans la première ligne de l'onglet Filtering.
         Par défaut elle suit la couche sélectionnée dans le panneau Couches de QGIS (bouton <em>auto current layer</em>, premier de la
@@ -502,7 +253,13 @@
 
 <!-- 5 ------------------------------------------------------------------ -->
 <section id="filtering">
-    <h2><span class="num">5</span>L'onglet Filtering</h2>
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/buffer.webp" data-src="video/buffer.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">5</span>L'onglet Filtering</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: L'onglet Filtering"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
+    </div>
     <figure class="narrow">
         <img src="img/guide/filtering-tab.png" alt="L'onglet Filtering avec couches cibles, prédicat et tampon définis" loading="lazy">
         <figcaption>Onglet Filtering : couche source, deux couches cibles, opérateurs de combinaison, prédicat Intersect, tampon rond de 50 m.</figcaption>
@@ -654,7 +411,13 @@ AND ST_Intersects("geom",
 
 <!-- 8 ------------------------------------------------------------------ -->
 <section id="favorites">
-    <h2><span class="num">8</span>Favoris</h2>
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/favorites.webp" data-src="video/favorites.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">8</span>Favoris</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Favoris"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
+    </div>
     <p>
         Un favori enregistre un filtre complet : couche source, sélection, prédicats, tampon et couches cibles. Le réappliquer prend un clic,
         ce qui fait des favoris le moyen naturel de conserver des requêtes réglementaires ou récurrentes.
@@ -692,7 +455,13 @@ AND ST_Intersects("geom",
 
 <!-- 9 ------------------------------------------------------------------ -->
 <section id="export">
-    <h2><span class="num">9</span>Exporter</h2>
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/export.webp" data-src="video/export.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">9</span>Exporter</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Exporter"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens.</p>
+    </div>
     <figure class="narrow">
         <img src="img/guide/export-tab.png" alt="L'onglet Exporting" loading="lazy">
         <figcaption>Onglet Exporting : couches, CRS, format de style, format de sortie, dossier de sortie avec mode batch, ZIP.</figcaption>
@@ -756,7 +525,13 @@ AND ST_Intersects("geom",
 
 <!-- 11 ----------------------------------------------------------------- -->
 <section id="backends">
-    <h2><span class="num">11</span>Backends et performances</h2>
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/bridges.webp" data-src="video/bridges.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">11</span>Backends et performances</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Backends et performances"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">BD TOPO® 3.5 © IGN, Toulouse Métropole.</p>
+    </div>
     <p>
         FilterMate choisit un <strong>backend</strong> par couche, selon son fournisseur de données, et l'affiche dans le badge d'en-tête. Le backend décide
         où s'exécute le test spatial : dans la base de données chaque fois que c'est possible, dans QGIS sinon.
@@ -788,7 +563,13 @@ AND ST_Intersects("geom",
 
 <!-- 12 ----------------------------------------------------------------- -->
 <section id="processing">
-    <h2><span class="num">12</span>Boîte à outils Processing</h2>
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/processing.webp" data-src="video/processing.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">12</span>Boîte à outils Processing</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Boîte à outils Processing"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
+    </div>
     <figure class="narrow">
         <img src="img/guide/processing-batch-filter.png" alt="Le dialogue de l'algorithme de filtrage batch dans la boîte à outils Processing" loading="lazy">
         <figcaption>L'algorithme <em>Filtrer plusieurs couches (batch)</em> : choisir les couches, saisir une expression, exécuter.</figcaption>
@@ -836,44 +617,19 @@ processing.run("filtermate:batch_filter", {
     </ul>
 </section>
 
-<footer class="guide-footer">
-    <span>FilterMate 4.9.2 &mdash; Réalisé avec soin par imagodata &mdash; Open Source (GPL-3.0)</span>
-    <span>
-        <a href="index.html">Accueil</a> &nbsp;&middot;&nbsp;
-        <a href="stories.fr.html">Cas d'usage</a> &nbsp;&middot;&nbsp;
-        <a href="roadmap.html">Roadmap</a> &nbsp;&middot;&nbsp;
-        <a href="https://github.com/imagodata/filter_mate" target="_blank" rel="noopener">GitHub</a> &nbsp;&middot;&nbsp;
-        <a href="https://plugins.qgis.org/plugins/filter_mate/" target="_blank" rel="noopener">Page du plugin QGIS</a>
-    </span>
+<footer class="doc-foot">
+    <p>FilterMate 4.9.2, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
+    <p><a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d'usage</a>, <a href="roadmap.html">Feuille de route</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
 </footer>
 
 </main>
 </div>
 
-<script>
-// Menu hamburger
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.getElementById('navLinks');
-hamburger.addEventListener('click', () => navLinks.classList.toggle('open'));
-
-// Le lien de langue conserve la section courante
-document.querySelectorAll('[data-lang-link]').forEach(a => {
-    a.addEventListener('click', () => { a.href = a.getAttribute('href').split('#')[0] + location.hash; });
-});
-
-// Met en évidence la section courante dans le sommaire
-const tocLinks = Array.from(document.querySelectorAll('.toc a'));
-const sections = tocLinks.map(a => document.querySelector(a.getAttribute('href')));
-const obs = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-        if (e.isIntersecting) {
-            const id = '#' + e.target.id;
-            tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === id));
-        }
-    });
-}, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
-sections.forEach(s => s && obs.observe(s));
-</script>
+<dialog class="lightbox" id="lightbox" aria-label="Vidéo">
+    <video controls playsinline muted></video>
+    <form method="dialog"><button>Fermer</button></form>
+</dialog>
+<script src="assets/fm.js"></script>
 
 </body>
 </html>
