@@ -1165,7 +1165,10 @@ def s8_run():
 
 
 # processing (story 8): the batch filter of the Processing toolbox, department-wide.
-PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.6) + recorded_scene(1.6) + [
+# Toulouse framed tight and dense layers shown up to 1:200 000: at 1.6 x the commune the
+# canvas was at 1:147 000 and the filtered buildings and roads were not drawn at all.
+PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, dense_scale=200000) \
+    + recorded_scene(1.0) + [
     (0, show_toolbox), (600, cam(lambda: rect_of(toolbox_dock()), dur=1.4, pad=20)),
 ] + act(toolbox_search) + type_into(toolbox_search, 'filtermate', per_char=120) + [
     hold(1200), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(1500),
