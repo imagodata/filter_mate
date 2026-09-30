@@ -365,6 +365,9 @@ def setup(layer_names, focus_layer, focus_expr, scale=1.25, dense_scale=120000):
     """Load layers (bottom to top) and zoom on the focus feature (scale=None: whole layer)."""
     def _s():
         mw = iface.mainWindow()
+        # QGIS saves its window layout on exit, in the user's own profile:
+        # remember it so quit_when_idle() can put it back.
+        STATE['ui'] = (mw.saveGeometry(), mw.saveState(), mw.isMaximized())
         mw.showNormal()
         mw.resize(*WINDOW)
         mw.move(0, 0)
@@ -711,10 +714,23 @@ def stop_recording():
     REC.stop()
 
 
+def restore_ui():
+    """Give the user's window layout back (toolbars, docks, size) before QGIS saves it."""
+    if 'ui' not in STATE:
+        return
+    geometry, state, maximized = STATE.pop('ui')
+    mw = iface.mainWindow()
+    mw.restoreState(state)
+    mw.restoreGeometry(geometry)
+    if maximized:
+        mw.showMaximized()
+
+
 def quit_when_idle():
     """Quit once no task runs: quitting under a running export hangs QGIS."""
     if tasks_running():
         return True
+    restore_ui()
     QgsProject.instance().setDirty(False)
     QgsApplication.instance().quit()
 
