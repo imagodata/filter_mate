@@ -940,6 +940,10 @@ BRIDGES = boot(S4_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', 1.
     + scope('epci') + recorded_scene(1.1) \
     + pick_layer('troncon_hydrographique') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
     + typed_custom('"persistance" = \'Permanent\'') + settle() + [
+    (0, cam('full', dur=1.0)), hold(1200),
+] + act('pushButton_exploring_identify', lambda: dock().pushButton_exploring_identify.click(),
+        lead=700, after=100) + [
+    hold(2600),
     (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['troncon_de_route', 'construction_lineaire']) + predicates(['cross']) + and_targets() + [
     (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
