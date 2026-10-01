@@ -292,9 +292,12 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <li><strong>Keep only permanent watercourses.</strong> Source <em>troncon_hydrographique</em>, Custom selection <code>"persistance" = 'Permanent'</code>: 691 segments.
             <figure><img src="img/stories/s4-04.webp" alt="Step 2: the 691 permanent watercourse segments are highlighted" loading="lazy"><figcaption>Step 2. Ditches and intermittent flows do not count.</figcaption></figure>
         </li>
+        <li><strong>Check the selection on the map.</strong> Click <strong>Identify</strong> in the exploration toolbar: the 691 watercourse segments kept by the custom selection flash red. This visual check confirms the filter source before applying it to the roads.
+            <figure><img src="img/stories/s4-identify.webp" alt="Step 3: after clicking Identify, the selected permanent watercourses flash red on the map" loading="lazy"><figcaption>Step 3. Identify flashes the custom selection in red without changing the filter.</figcaption></figure>
+        </li>
         <li><strong>Cross.</strong> Targets <em>troncon_de_route</em> and <em>construction_lineaire</em>, Cross predicate alone, Buffer row off. Filter.
-            <figure><img src="img/stories/s4-05.webp" alt="Step 3: the Cross predicate is the only one ticked, the Buffer row is off" loading="lazy"><figcaption>Step 3. One predicate, no buffer.</figcaption></figure>
-            <figure><img src="img/stories/s4-06.webp" alt="Step 3b: only the road segments and structures crossing a watercourse remain" loading="lazy"><figcaption>Result at metropolis scale: the crossings draw the river network.</figcaption></figure>
+            <figure><img src="img/stories/s4-05.webp" alt="Step 4: the Cross predicate is the only one ticked, the Buffer row is off" loading="lazy"><figcaption>Step 4. One predicate, no buffer.</figcaption></figure>
+            <figure><img src="img/stories/s4-06.webp" alt="Step 4b: only the road segments and structures crossing a watercourse remain" loading="lazy"><figcaption>Result at metropolis scale: the crossings draw the river network.</figcaption></figure>
             <figure><img src="img/stories/s4-07.webp" alt="Zoom on the north of Toulouse: bridges over the Garonne and the Hers" loading="lazy"><figcaption>Zoom on the north of Toulouse: every remaining segment is a bridge or a crossing.</figcaption></figure>
         </li>
     </ol>
