@@ -12,6 +12,8 @@
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/guide.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/guide.html">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/guide.fr.html">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/guide.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -149,7 +151,7 @@
     <h2><span class="num">3</span>The panel at a glance</h2>
     <p>FilterMate is a dock panel. By default it opens on the right side of the QGIS window and can be moved, floated or resized like any other QGIS panel.</p>
     <figure>
-        <img src="img/guide/qgis-window.png" alt="QGIS 4.2 with a small BD TOPO project and the FilterMate panel docked on the right" loading="lazy">
+        <img src="img/guide/qgis-window.png" alt="QGIS 4.2 with a small BD TOPO project and the FilterMate panel docked on the right" loading="lazy" width="1600" height="945">
         <figcaption>QGIS 4.2 (dark theme) with the FilterMate panel docked on the right. The project holds five GeoPackage layers.</figcaption>
     </figure>
 
@@ -166,16 +168,16 @@
 
     <div class="fig-row">
         <figure class="narrow">
-            <img src="img/guide/dock-overview.png" alt="The whole FilterMate panel with the Filtering tab open" loading="lazy">
+            <img src="img/guide/dock-overview.png" alt="The whole FilterMate panel with the Filtering tab open" loading="lazy" width="620" height="1308">
             <figcaption>The whole panel with the Filtering tab open.</figcaption>
         </figure>
         <div>
             <figure>
-                <img src="img/guide/header-badges.png" alt="Favorites and backend badges in the panel header" loading="lazy">
+                <img src="img/guide/header-badges.png" alt="Favorites and backend badges in the panel header" loading="lazy" width="614" height="42">
                 <figcaption>Header: 4 favorites saved, current layer handled by the Spatialite backend.</figcaption>
             </figure>
             <figure>
-                <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Unfilter, Export and About" loading="lazy">
+                <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Unfilter, Export and About" loading="lazy" width="614" height="119">
                 <figcaption>Action bar after a filter: Undo is enabled, Redo is not yet.</figcaption>
             </figure>
         </div>
@@ -205,7 +207,7 @@
 
     <h3>Single selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy">
+        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="596" height="452">
         <figcaption>Single selection on a road layer: the feature is picked by name, the field below sets which attribute is displayed.</figcaption>
     </figure>
     <p>
@@ -216,7 +218,7 @@
 
     <h3>Multiple selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy">
+        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="596" height="452">
         <figcaption>Multiple selection: four roads are checked. The line above the list summarises the selection; the text box filters the list as you type.</figcaption>
     </figure>
     <p>
@@ -226,7 +228,7 @@
 
     <h3>Custom selection (expression)</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy">
+        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="596" height="452">
         <figcaption>Custom selection: any QGIS expression, here roads whose importance is 3 or 4.</figcaption>
     </figure>
     <p>
@@ -262,7 +264,7 @@
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy">
+        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="590" height="620">
         <figcaption>Filtering tab: source layer, two target layers, combine operators, Intersect predicate, 50 m round buffer.</figcaption>
     </figure>
     <p>
@@ -326,42 +328,42 @@
         <li>
             <strong>Choose the source layer.</strong> Load your layers and open FilterMate. In the Layers panel, click the <strong>road</strong> layer: it becomes the source layer (the <em>auto current layer</em> button is on by default) and the Exploring zone switches to it.
             <figure>
-                <img src="img/guide/tuto-01.png" alt="Step 1: the road layer is active in the Layers panel and shown as source layer in FilterMate" loading="lazy">
+                <img src="img/guide/tuto-01.png" alt="Step 1: the road layer is active in the Layers panel and shown as source layer in FilterMate" loading="lazy" width="1600" height="945">
                 <figcaption>Step 1. The road layer is the current layer: its name appears in the first row of the Filtering tab. No feature is picked yet.</figcaption>
             </figure>
         </li>
         <li>
             <strong>Pick the reference road.</strong> In the Exploring zone, tick <strong>Single selection</strong> and choose a road in the drop-down. The canvas selects it (yellow). If the drop-down shows identifiers rather than names, change the display field in the row below.
             <figure>
-                <img src="img/guide/tuto-02.png" alt="Step 2: the road is picked in the single-selection drop-down and highlighted in yellow on the map" loading="lazy">
+                <img src="img/guide/tuto-02.png" alt="Step 2: the road is picked in the single-selection drop-down and highlighted in yellow on the map" loading="lazy" width="1600" height="945">
                 <figcaption>Step 2. The selected road is highlighted on the canvas; all buildings and hedges are still visible.</figcaption>
             </figure>
         </li>
         <li>
             <strong>Choose the target layers.</strong> Open the <strong>Filtering</strong> tab. Switch on <strong>Layers to filter</strong> (second rail button) and tick <em>batiment</em> and <em>haie</em> in the list.
             <figure>
-                <img src="img/guide/tuto-03.png" alt="Step 3: the Layers to filter row is on and lists batiment and haie" loading="lazy">
+                <img src="img/guide/tuto-03.png" alt="Step 3: the Layers to filter row is on and lists batiment and haie" loading="lazy" width="1600" height="945">
                 <figcaption>Step 3. The second row of the Filtering tab now reads the two target layers.</figcaption>
             </figure>
         </li>
         <li>
             <strong>Choose the predicate.</strong> Switch on <strong>Geometric predicates</strong> and make sure <em>Intersect</em> is ticked.
             <figure>
-                <img src="img/guide/tuto-04.png" alt="Step 4: the geometric predicates row is on with Intersect selected" loading="lazy">
+                <img src="img/guide/tuto-04.png" alt="Step 4: the geometric predicates row is on with Intersect selected" loading="lazy" width="1600" height="945">
                 <figcaption>Step 4. Intersect is the predicate: a building is kept when it touches the (buffered) road.</figcaption>
             </figure>
         </li>
         <li>
             <strong>Add a buffer.</strong> Switch on <strong>Buffer value</strong> and type <code>50</code>. The buffer type row (Round, 5 segments) can stay as it is.
             <figure>
-                <img src="img/guide/tuto-05.png" alt="Step 5: the buffer value row is on with 50 m" loading="lazy">
+                <img src="img/guide/tuto-05.png" alt="Step 5: the buffer value row is on with 50 m" loading="lazy" width="1600" height="945">
                 <figcaption>Step 5. Everything is configured: source road, two targets, Intersect, 50 m buffer. Nothing has changed on the map yet.</figcaption>
             </figure>
         </li>
         <li>
             <strong>Run the filter.</strong> Press the <strong>Filter</strong> button (first button of the action bar). The map canvas is frozen for the duration of the task and redrawn once at the end.
             <figure>
-                <img src="img/guide/tuto-06.png" alt="Step 6: only the buildings and hedges within 50 m of the road remain on the map" loading="lazy">
+                <img src="img/guide/tuto-06.png" alt="Step 6: only the buildings and hedges within 50 m of the road remain on the map" loading="lazy" width="1600" height="945">
                 <figcaption>Step 6. Same extent as step 5: only the buildings (pink) and hedges (green) within 50 m of the road remain. Undo is now enabled in the action bar.</figcaption>
             </figure>
         </li>
@@ -387,7 +389,7 @@ AND ST_Intersects("geom",
 <section id="actions">
     <h2><span class="num">7</span>Action bar, undo and history</h2>
     <figure>
-        <img src="img/guide/action-bar.png" alt="The six action buttons" loading="lazy">
+        <img src="img/guide/action-bar.png" alt="The six action buttons" loading="lazy" width="614" height="119">
         <figcaption>From left to right: Filter, Undo, Redo, Unfilter, Export, About.</figcaption>
     </figure>
     <div class="table-wrap">
@@ -425,7 +427,7 @@ AND ST_Intersects("geom",
     </p>
     <div class="fig-row">
         <figure class="tiny">
-            <img src="img/guide/favorites-menu.png" alt="The favorites menu opened from the star badge" loading="lazy">
+            <img src="img/guide/favorites-menu.png" alt="The favorites menu opened from the star badge" loading="lazy" width="351" height="396">
             <figcaption>Click the &#9733; badge to open the favorites menu.</figcaption>
         </figure>
         <div>
@@ -443,7 +445,7 @@ AND ST_Intersects("geom",
 
     <h3>The favorites manager</h3>
     <figure>
-        <img src="img/guide/favorites-manager.png" alt="The favorites manager dialog with the General tab" loading="lazy">
+        <img src="img/guide/favorites-manager.png" alt="The favorites manager dialog with the General tab" loading="lazy" width="1350" height="900">
         <figcaption>The manager: search and scope filter at the top, favorites on the left, details on the right.</figcaption>
     </figure>
     <ul>
@@ -464,7 +466,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy">
+        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="590" height="620">
         <figcaption>Exporting tab: layers, CRS, style format, output format, output folder with batch mode, ZIP.</figcaption>
     </figure>
     <p>
@@ -497,7 +499,7 @@ AND ST_Intersects("geom",
 <section id="configuration">
     <h2><span class="num">10</span>Configuration</h2>
     <figure class="narrow">
-        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy">
+        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="590" height="620">
         <figcaption>Configuration tab: a tree of settings, edited in place. Changes are saved immediately.</figcaption>
     </figure>
     <p>
@@ -572,7 +574,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/processing-batch-filter.png" alt="The batch filter algorithm dialog in the Processing Toolbox" loading="lazy">
+        <img src="img/guide/processing-batch-filter.png" alt="The batch filter algorithm dialog in the Processing Toolbox" loading="lazy" width="801" height="524">
         <figcaption>The <em>Filter several layers (batch)</em> algorithm: pick layers, type an expression, run.</figcaption>
     </figure>
     <p>

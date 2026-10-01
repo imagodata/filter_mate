@@ -13,6 +13,11 @@
     <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.fr.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
+    <link rel="alternate" hreflang="de" href="https://imagodata.github.io/filter_mate/index.de.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="nl" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="zh-Hant" href="https://imagodata.github.io/filter_mate/index.zh-hant.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
     <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +39,7 @@
         <li><a href="stories.fr.html">Cas d’usage</a></li>
         <li><a href="roadmap.html" hreflang="en">Feuille de route</a></li>
         <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
-        <li><span class="lang" aria-label="Langue"><a href="index.html" hreflang="en" lang="en" data-lang-link>EN</a><a href="index.fr.html" aria-current="true" hreflang="fr">FR</a></span></li>
+        <li><details class="language-menu"><summary>Français</summary><ul><li><a href="index.html" lang="en" hreflang="en" data-lang-link>English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link aria-current="true">Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link>Nederlands</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link>简体中文</a></li></ul></details></li>
         <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Installer</a></li>
     </ul>
 </nav>
@@ -77,6 +82,7 @@
             <li><span class="step-number">03</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 9h28v30H10zM16 17h16M16 24h16M16 31h9"/><path d="m28 30 4 4 7-8"/></svg><h3>Exploiter le résultat</h3><p>Contrôlez les comptes sur la carte, annulez ou enregistrez le filtre, puis exportez les couches utiles.</p></li>
         </ol>
         <a class="inline-cta" href="guide.fr.html#tutorial">Suivre le tutoriel du premier filtre <span aria-hidden="true">→</span></a>
+        <div class="callout demo-download"><strong>Essayez sur un petit jeu de données.</strong><p>Quatre couches autour de Toutens, un projet QGIS stylé, un favori importable et des instructions en français et anglais. Décompressez le ZIP avant d’ouvrir le projet.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Télécharger la démo (ZIP, 203 Ko)</a></div>
     </div>
 </section>
 
@@ -89,16 +95,16 @@
                 <div class="example-body"><p class="example-label">Livraison · Saint-Gaudens</p><h3>Un dossier communal depuis 12 couches départementales</h3><p>Choisissez la commune une fois, filtrez toutes les couches thématiques, puis exportez un GeoPackage stylé avec son projet QGIS.</p><dl class="result-list"><div><dt>12 380</dt><dd>bâtiments conservés</dd></div><div><dt>&lt; 1 s</dt><dd>temps de filtrage relevé</dd></div></dl><a href="stories.fr.html#s1">Lire le cas complet <span aria-hidden="true">→</span></a></div>
             </article>
             <article class="example-card">
-                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="Regarder l’exemple sur le bruit routier"><img src="video/noise.webp" alt="Bâtiments filtrés autour des axes routiers principaux de Muret" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
-                <div class="example-body"><p class="example-label">Urbanisme · Muret</p><h3>Les secteurs de bruit avec un tampon variable</h3><p>Une expression QGIS fixe 300 m ou 250 m selon la catégorie de chaque route.</p><p class="result"><strong>1 999</strong> bâtiments et <strong>74</strong> ERP</p><a href="stories.fr.html#s2">Voir les réglages et le résultat <span aria-hidden="true">→</span></a></div>
+                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="Regarder l’exemple de proximité routière"><img src="video/noise.webp" alt="Bâtiments filtrés autour des axes routiers principaux de Muret" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
+                <div class="example-body"><p class="example-label">Urbanisme · Muret</p><h3>Les bâtiments proches des routes avec un tampon variable</h3><p>Une expression QGIS fixe 300 m ou 250 m selon la catégorie de chaque route.</p><p class="result"><strong>1 999</strong> bâtiments et <strong>74</strong> ERP</p><a href="stories.fr.html#s2">Voir les réglages et le résultat <span aria-hidden="true">→</span></a></div>
             </article>
             <article class="example-card">
-                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Regarder l’exemple d’inventaire des ponts"><img src="video/bridges.webp" alt="Croisements entre routes et cours d’eau dans Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
-                <div class="example-body"><p class="example-label">Ouvrages · Toulouse Métropole</p><h3>Chaque franchissement d’un cours d’eau permanent</h3><p>Le prédicat <em>Cross</em> écarte les routes qui longent simplement le cours d’eau.</p><p class="result"><strong>1 112</strong> tronçons et <strong>190</strong> ouvrages</p><a href="stories.fr.html#s4">Voir les réglages et le résultat <span aria-hidden="true">→</span></a></div>
+                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Regarder l’exemple de détection des franchissements"><img src="video/bridges.webp" alt="Croisements entre routes et cours d’eau dans Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
+                <div class="example-body"><p class="example-label">Ouvrages · Toulouse Métropole</p><h3>Repérer les croisements avec un cours d’eau permanent</h3><p>Le prédicat <em>Cross</em> écarte les routes qui longent simplement le cours d’eau.</p><p class="result"><strong>1 112</strong> tronçons et <strong>190</strong> ouvrages</p><a href="stories.fr.html#s4">Voir les réglages et le résultat <span aria-hidden="true">→</span></a></div>
             </article>
             <article class="example-card">
-                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Regarder l’exemple sur l’accès des secours"><img src="video/hamlets.webp" alt="Hameaux situés à plus de 200 mètres d’une route revêtue à Aspet" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
-                <div class="example-body"><p class="example-label">Secours · Aspet</p><h3>Les hameaux éloignés d’une route revêtue</h3><p>Disjoint associé à un tampon de 200 m trouve ce qui reste hors de la zone desservie.</p><p class="result"><strong>22</strong> hameaux au-delà de 200 m</p><a href="stories.fr.html#s6">Voir les réglages et le résultat <span aria-hidden="true">→</span></a></div>
+                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Regarder l’exemple sur les hameaux éloignés"><img src="video/hamlets.webp" alt="Hameaux situés à plus de 200 mètres d’une route revêtue à Aspet" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
+                <div class="example-body"><p class="example-label">Proximité routière · Aspet</p><h3>Les hameaux éloignés d’une route revêtue</h3><p>Disjoint associé à un tampon de 200 m trouve ce qui reste hors de la zone tampon.</p><p class="result"><strong>22</strong> hameaux au-delà de 200 m</p><a href="stories.fr.html#s6">Voir les réglages et le résultat <span aria-hidden="true">→</span></a></div>
             </article>
         </div>
         <a class="inline-cta" href="stories.fr.html">Parcourir les huit cas d’usage <span aria-hidden="true">→</span></a>

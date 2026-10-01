@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cas d'usage FilterMate — Huit besoins métier traduits en filtres QGIS</title>
-    <meta name="description" content="Huit cas d'usage FilterMate pas à pas sur la BD TOPO complète d'un département : dossier communal, bruit routier, inondation, ponts, débroussaillement, accès des secours, favoris, Processing. Captures QGIS à chaque étape et résultats chiffrés.">
+    <meta name="description" content="Huit cas d'usage FilterMate pas à pas sur la BD TOPO complète d'un département : dossier communal, proximité routière, cours d’eau, franchissements, végétation, hameaux éloignés, favoris, Processing. Captures QGIS à chaque étape et résultats chiffrés.">
     <meta name="keywords" content="QGIS, plugin, FilterMate, cas d'usage, tutoriel, filtre spatial, BD TOPO, GeoPackage, tampon, prédicat, favoris, Processing">
     <meta property="og:title" content="Cas d'usage FilterMate">
     <meta property="og:description" content="Huit besoins métier, huit filtres : FilterMate pas à pas sur 1,17 million de bâtiments.">
@@ -12,6 +12,8 @@
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/stories.fr.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/stories.html">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/stories.fr.html">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/stories.fr.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,13 +46,13 @@
     <ol>
         <li><a href="#data"><span class="num">0</span>Le terrain de jeu</a></li>
         <li><a href="#s1"><span class="num">1</span>Le dossier communal en trois minutes</a></li>
-        <li><a href="#s2"><span class="num">2</span>Qui vit au bord des grands axes ?</a></li>
-        <li><a href="#s3"><span class="num">3</span>Ce que la Garonne peut atteindre</a></li>
-        <li><a href="#s4"><span class="num">4</span>Tous les ponts de la métropole</a></li>
+        <li><a href="#s2"><span class="num">2</span>Quels bâtiments sont proches des grands axes ?</a></li>
+        <li><a href="#s3"><span class="num">3</span>Les bâtiments proches des cours d’eau</a></li>
+        <li><a href="#s4"><span class="num">4</span>Repérer les franchissements à vérifier</a></li>
         <li><a href="#s5"><span class="num">5</span>Débroussailler autour des maisons</a></li>
-        <li><a href="#s6"><span class="num">6</span>Les hameaux que les secours atteignent mal</a></li>
+        <li><a href="#s6"><span class="num">6</span>Les hameaux éloignés des routes revêtues</a></li>
         <li><a href="#s7"><span class="num">7</span>La bibliothèque de requêtes de l'équipe</a></li>
-        <li><a href="#s8"><span class="num">8</span>Qu'est-ce qui a changé depuis l'édition précédente ?</a></li>
+        <li><a href="#s8"><span class="num">8</span>Les objets modifiés depuis une date</a></li>
         <li><a href="#replay"><span class="num">9</span>Rejouer ces histoires chez vous</a></li>
     </ol>
 </aside>
@@ -74,13 +76,13 @@
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtrée et prête à être exportée" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Bureau d'études</span><h4>Le dossier communal en trois minutes</h4><p>Cadrer 12 couches départementales et livrer un GeoPackage stylé.</p><span class="story-outcome">12 couches · <strong>12 380 bâtiments</strong></span></div></a>
-        <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Secteurs de bruit autour des grands axes de Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Urbanisme</span><h4>Qui vit au bord des grands axes ?</h4><p>Un tampon calculé par expression selon chaque catégorie de route.</p><span class="story-outcome"><strong>1 999 bâtiments</strong> · 74 ERP</span></div></a>
-        <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Bâtiments filtrés autour des surfaces en eau de Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risques</span><h4>Ce que la Garonne peut atteindre</h4><p>Une bande de 300 m puis 100 m, avec annulation et rejeu.</p><span class="story-outcome">300 m · <strong>14 181 bâtiments</strong></span></div></a>
-        <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Franchissements des cours d'eau permanents dans Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Ouvrages d'art</span><h4>Tous les ponts de la métropole</h4><p>Cadrer un EPCI de 37 communes, puis appliquer le prédicat Cross.</p><span class="story-outcome"><strong>1 112 routes</strong> · 190 ouvrages</span></div></a>
+        <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Bâtiments proches des grands axes de Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Urbanisme</span><h4>Quels bâtiments sont proches des grands axes ?</h4><p>Un tampon calculé par expression selon chaque catégorie de route.</p><span class="story-outcome"><strong>1 999 bâtiments</strong> · 74 ERP</span></div></a>
+        <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Bâtiments filtrés autour des surfaces en eau de Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risques</span><h4>Les bâtiments proches des cours d’eau</h4><p>Une bande de 300 m puis 100 m, avec annulation et rejeu.</p><span class="story-outcome">300 m · <strong>14 181 bâtiments</strong></span></div></a>
+        <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Franchissements des cours d'eau permanents dans Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Ouvrages d'art</span><h4>Repérer les franchissements à vérifier</h4><p>Cadrer un EPCI de 37 communes, puis appliquer le prédicat Cross.</p><span class="story-outcome"><strong>1 112 routes</strong> · 190 ouvrages</span></div></a>
         <a class="card story-card" href="#s5"><span class="story-card-media"><img src="video/brush.webp" alt="Végétation proche des maisons de Bagnères-de-Luchon" loading="lazy" width="1280" height="720"><b aria-hidden="true">05</b></span><div class="story-card-copy"><span class="badge">Forêt</span><h4>Débroussailler autour des maisons</h4><p>Sélection par expression, tampon de 50 m, puis filtre attributaire.</p><span class="story-outcome"><strong>58 bois et forêts</strong></span></div></a>
-        <a class="card story-card" href="#s6"><span class="story-card-media"><img src="video/hamlets.webp" alt="Hameaux hors de la zone desservie par les routes revêtues à Aspet" loading="lazy" width="1280" height="720"><b aria-hidden="true">06</b></span><div class="story-card-copy"><span class="badge">Secours</span><h4>Les hameaux que les secours atteignent mal</h4><p>Disjoint trouve ce qui reste au-delà d'une zone de 200 m.</p><span class="story-outcome"><strong>22 hameaux</strong> au-delà de 200 m</span></div></a>
+        <a class="card story-card" href="#s6"><span class="story-card-media"><img src="video/hamlets.webp" alt="Hameaux à plus de 200 mètres des routes revêtues à Aspet" loading="lazy" width="1280" height="720"><b aria-hidden="true">06</b></span><div class="story-card-copy"><span class="badge">Secours</span><h4>Les hameaux éloignés des routes revêtues</h4><p>Disjoint trouve ce qui reste au-delà d'une zone de 200 m.</p><span class="story-outcome"><strong>22 hameaux</strong> au-delà de 200 m</span></div></a>
         <a class="card story-card" href="#s7"><span class="story-card-media"><img src="video/favorites.webp" alt="Un filtre enregistré puis rejoué depuis les favoris" loading="lazy" width="1280" height="720"><b aria-hidden="true">07</b></span><div class="story-card-copy"><span class="badge">Équipe</span><h4>La bibliothèque de requêtes</h4><p>Enregistrer, décrire, rejouer et partager un filtre complet.</p><span class="story-outcome">Même résultat · <strong>un clic</strong></span></div></a>
-        <a class="card story-card" href="#s8"><span class="story-card-media"><img src="video/processing.webp" alt="Filtrage par lot depuis la boîte à outils Processing de QGIS" loading="lazy" width="1280" height="720"><b aria-hidden="true">08</b></span><div class="story-card-copy"><span class="badge">Administration SIG</span><h4>Qu'est-ce qui a changé ?</h4><p>Appliquer une expression de date à quatre couches depuis Processing.</p><span class="story-outcome"><strong>4 couches</strong> · 1,6 million d'objets</span></div></a>
+        <a class="card story-card" href="#s8"><span class="story-card-media"><img src="video/processing.webp" alt="Filtrage par lot depuis la boîte à outils Processing de QGIS" loading="lazy" width="1280" height="720"><b aria-hidden="true">08</b></span><div class="story-card-copy"><span class="badge">Administration SIG</span><h4>Les objets modifiés depuis une date</h4><p>Appliquer une expression de date à quatre couches depuis Processing.</p><span class="story-outcome"><strong>4 couches</strong> · 1,6 million d'objets</span></div></a>
     </div>
 </header>
 
@@ -110,7 +112,7 @@
         <strong>Le fil conducteur.</strong> Chaque histoire suit le même mouvement en trois temps : <em>cadrer</em> le territoire avec un premier
         filtre (une commune ou un EPCI comme couche source, toutes les autres couches en cibles), <em>poser la question métier</em> avec un second filtre
         dont la source est une couche déjà cadrée, puis <em>lire le résultat</em> dans le panneau Couches et sur la carte. Les chronos indiqués
-        sont ceux du journal <code>filtermate.log</code> sur un portable ordinaire.
+        proviennent de <code>filtermate.log</code>. Le matériel et les conditions de cache n’ont pas été consignés : ces relevés illustrent une exécution et ne constituent pas un benchmark reproductible.
     </div>
     <div class="callout warn">
         <strong>Une règle à connaître.</strong> Sur GeoPackage, un nouveau filtre spatial appliqué à une couche cible remplace le filtre spatial
@@ -134,22 +136,22 @@
     </div>
     <ol class="steps">
         <li><strong>Charger les 13 couches et ouvrir FilterMate.</strong> Le panneau Couches affiche les effectifs du département entier : 1 173 829 bâtiments, 383 112 tronçons de route. Cliquez sur <em>commune</em> : elle devient la couche source. Dans la zone Exploring, cochez <strong>Single selection</strong>, mettez l'expression d'affichage sur <code>"nom_officiel"</code> et tapez « Saint-Gaudens » dans la liste. Le bouton <strong>Tracking</strong> de la colonne Exploring étant actif, le canevas se recentre tout seul sur la commune.
-            <figure><img src="img/stories/s1-01.webp" alt="Étape 1 : la commune de Saint-Gaudens est choisie dans la sélection simple, le canevas s'est recentré dessus, le panneau Couches affiche les effectifs du département" loading="lazy"><figcaption>Étape 1. La commune est sélectionnée (surbrillance jaune) ; autour d'elle, tout le département reste chargé.</figcaption></figure>
+            <figure><img src="img/stories/s1-01.webp" alt="Étape 1 : la commune de Saint-Gaudens est choisie dans la sélection simple, le canevas s'est recentré dessus, le panneau Couches affiche les effectifs du département" loading="lazy" width="1600" height="973"><figcaption>Étape 1. La commune est sélectionnée (surbrillance jaune) ; autour d'elle, tout le département reste chargé.</figcaption></figure>
         </li>
         <li><strong>Cocher toutes les cibles.</strong> Onglet Filtering, ligne <strong>Layers to filter</strong> : clic droit dans la liste puis <em>Select All</em>. Le prédicat <strong>Intersect</strong> est coché, la ligne Buffer reste désactivée.
-            <figure><img src="img/stories/s1-02.webp" alt="Étape 2 : la ligne Layers to filter liste les 12 couches cibles, Intersect est coché" loading="lazy"><figcaption>Étape 2. Douze couches cibles, un prédicat, pas de tampon.</figcaption></figure>
+            <figure><img src="img/stories/s1-02.webp" alt="Étape 2 : la ligne Layers to filter liste les 12 couches cibles, Intersect est coché" loading="lazy" width="1600" height="973"><figcaption>Étape 2. Douze couches cibles, un prédicat, pas de tampon.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong> Le journal indique moins d'une seconde pour les douze couches : sur GeoPackage, FilterMate interroge d'abord l'index R-tree de chaque table, puis n'évalue <code>ST_Intersects</code> que sur les candidats.
-            <figure><img src="img/stories/s1-03.webp" alt="Étape 3 : seules les entités qui touchent la commune restent affichées sur les douze couches" loading="lazy"><figcaption>Étape 3. Les couches ne montrent plus que le contenu de la commune. Les polygones de végétation qui chevauchent la limite sont conservés entiers : c'est le sens d'Intersect.</figcaption></figure>
-            <figure><img src="img/stories/s1-04.webp" alt="Étape 3 bis : zoom sur le centre de Saint-Gaudens, bâtiments en rouge, ERP en jaune, routes en noir" loading="lazy"><figcaption>Zoom sur le centre-ville : 12 380 bâtiments, 317 ERP, 2 902 tronçons de route.</figcaption></figure>
+            <figure><img src="img/stories/s1-03.webp" alt="Étape 3 : seules les entités qui touchent la commune restent affichées sur les douze couches" loading="lazy" width="1600" height="973"><figcaption>Étape 3. Les couches ne montrent plus que le contenu de la commune. Les polygones de végétation qui chevauchent la limite sont conservés entiers : c'est le sens d'Intersect.</figcaption></figure>
+            <figure><img src="img/stories/s1-04.webp" alt="Étape 3 bis : zoom sur le centre de Saint-Gaudens, bâtiments en rouge, ERP en jaune, routes en noir" loading="lazy" width="1600" height="973"><figcaption>Zoom sur le centre-ville : 12 380 bâtiments, 317 ERP, 2 902 tronçons de route.</figcaption></figure>
         </li>
         <li><strong>Configurer l'export.</strong> Onglet Exporting : les 12 couches, la projection EPSG:2154, les styles en <strong>QML</strong>, le format <strong>GPKG</strong>, le dossier de sortie et une archive <strong>ZIP</strong>.
-            <figure><img src="img/stories/s1-05.webp" alt="Étape 4 : l'onglet Exporting est configuré avec les 12 couches, QML, GPKG, dossier et ZIP" loading="lazy"><figcaption>Étape 4. Tout est réglé, rien n'est encore écrit.</figcaption></figure>
+            <figure><img src="img/stories/s1-05.webp" alt="Étape 4 : l'onglet Exporting est configuré avec les 12 couches, QML, GPKG, dossier et ZIP" loading="lazy" width="1600" height="973"><figcaption>Étape 4. Tout est réglé, rien n'est encore écrit.</figcaption></figure>
         </li>
         <li><strong>Export.</strong> Comme le format est GeoPackage et qu'il y a plusieurs couches, FilterMate affiche un récapitulatif et propose de conserver la hiérarchie des groupes. Validez : le fichier est écrit en 4 secondes avec un projet QGIS embarqué.
             <div class="fig-row">
-                <figure><img src="img/stories/s1-06-recap.png" alt="Dialogue récapitulatif de l'export GeoPackage listant les couches et l'option de conservation des groupes" loading="lazy"><figcaption>Le récapitulatif avant écriture.</figcaption></figure>
-                <figure><img src="img/stories/s1-07.webp" alt="Étape 5 : la barre de messages confirme l'export, la carte est inchangée" loading="lazy"><figcaption>Étape 5. Export terminé ; le client ouvrira le .gpkg et retrouvera la carte telle quelle.</figcaption></figure>
+                <figure><img src="img/stories/s1-06-recap.png" alt="Dialogue récapitulatif de l'export GeoPackage listant les couches et l'option de conservation des groupes" loading="lazy" width="675" height="587"><figcaption>Le récapitulatif avant écriture.</figcaption></figure>
+                <figure><img src="img/stories/s1-07.webp" alt="Étape 5 : la barre de messages confirme l'export, la carte est inchangée" loading="lazy" width="1600" height="973"><figcaption>Étape 5. Export terminé ; le client ouvrira le .gpkg et retrouvera la carte telle quelle.</figcaption></figure>
             </div>
         </li>
     </ol>
@@ -190,37 +192,38 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/noise.webp" data-src="video/noise.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">2</span>Qui vit au bord des grands axes ?</h2>
-        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Qui vit au bord des grands axes ?"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <h2><span class="num">2</span>Quels bâtiments sont proches des grands axes ?</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Quels bâtiments sont proches des grands axes ?"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Muret.</p>
     </div>
+    <div class="callout scope-note"><strong>Ce que mesure ce filtre.</strong> Les distances sont pédagogiques. L’attribut <code>importance</code> n’établit pas un classement sonore ; ce résultat ne mesure ni bruit ni population exposée. Pour une étude sonore, utilisez les secteurs et catégories issus du classement officiel.</div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Nadia instruit le volet bruit du PLU de <strong>Muret</strong>, traversée par l'autoroute A64 et plusieurs départementales. Le classement sonore des infrastructures impose des largeurs de secteur différentes selon la catégorie de la voie. Elle veut la liste des bâtiments et des établissements recevant du public situés dans ces secteurs, avec une largeur qui dépend de chaque route.</p></div>
+        <div><h4>Le besoin</h4><p>Nadia étudie la proximité des bâtiments aux grands axes de <strong>Muret</strong>, traversée par l’A64 et plusieurs départementales. Elle utilise des distances d’étude de 300 m et 250 m selon l’importance des routes pour démontrer un tampon variable. Le résultat dénombre des bâtiments et des ERP, pas des habitants.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Après le cadrage sur Muret, la couche source devient <strong>troncon_de_route</strong>, avec une <strong>sélection personnalisée</strong> <code>"importance" IN ('1', '2')</code>. Le <strong>tampon est une expression</strong> évaluée pour chaque tronçon : 300 m pour l'importance 1, 250 m pour la 2. Le type de tampon <strong>Flat</strong> évite les arrondis en bout de tronçon. Cibles : <em>batiment</em> et <em>erp</em>.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Cadrer Muret.</strong> Même geste qu'à l'histoire 1 : commune en source, Muret en sélection simple, toutes les couches en cibles, Intersect, Filter. Muret compte 19 458 bâtiments, 354 ERP et 5 512 tronçons de route.
-            <figure><img src="img/stories/s2-03.webp" alt="Étape 1 : Muret cadrée, bâtiments, ERP, routes et voie ferrée limités à la commune" loading="lazy"><figcaption>Étape 1. La commune est cadrée ; l'A64 traverse le territoire du nord-est au sud-ouest.</figcaption></figure>
+            <figure><img src="img/stories/s2-03.webp" alt="Étape 1 : Muret cadrée, bâtiments, ERP, routes et voie ferrée limités à la commune" loading="lazy" width="1600" height="973"><figcaption>Étape 1. La commune est cadrée ; l'A64 traverse le territoire du nord-est au sud-ouest.</figcaption></figure>
         </li>
         <li><strong>Choisir les grands axes.</strong> Cliquez sur <em>troncon_de_route</em> dans le panneau Couches : elle devient la source. Cochez <strong>Custom selection</strong> et saisissez <code>"importance" IN ('1', '2')</code>. 102 tronçons sont retenus, sur les 5 512 de la commune.
-            <figure><img src="img/stories/s2-04.webp" alt="Étape 2 : l'expression personnalisée retient les 102 tronçons d'importance 1 et 2, surlignés en jaune" loading="lazy"><figcaption>Étape 2. L'autoroute et les départementales principales sont surlignées.</figcaption></figure>
+            <figure><img src="img/stories/s2-04.webp" alt="Étape 2 : l'expression personnalisée retient les 102 tronçons d'importance 1 et 2, surlignés en jaune" loading="lazy" width="1600" height="973"><figcaption>Étape 2. L'autoroute et les départementales principales sont surlignées.</figcaption></figure>
         </li>
-        <li><strong>Tampon par expression.</strong> Cibles <em>batiment</em> et <em>erp</em>, prédicat Intersect. Sur la ligne Buffer value, cliquez la petite flèche à gauche du champ pour passer en mode expression et saisissez :
+        <li><strong>Tampon par expression.</strong> Cibles <em>batiment</em> et <em>erp</em>, prédicat Intersect. Sur la ligne Buffer value, ouvrez le menu de la propriété définie par les données, choisissez <strong>Edit…</strong>, puis saisissez dans l’éditeur d’expression :
             <pre><code>CASE WHEN "importance" = '1' THEN 300
      WHEN "importance" = '2' THEN 250
      ELSE 100 END</code></pre>
-            Sur la ligne suivante, choisissez le type <strong>Flat</strong>.
-            <figure><img src="img/stories/s2-05.webp" alt="Étape 3 : la ligne Buffer value est en mode expression, le type de tampon est Flat" loading="lazy"><figcaption>Étape 3. La distance n'est plus un nombre mais une expression QGIS évaluée tronçon par tronçon.</figcaption></figure>
+            Validez l’éditeur. Sur la ligne suivante, ouvrez la liste <strong>Round / Flat / Square</strong> et choisissez <strong>Flat</strong>.
+            <figure><img src="img/stories/s2-05.webp" alt="Étape 3 : la ligne Buffer value est en mode expression, le type de tampon est Flat" loading="lazy" width="1600" height="973"><figcaption>Étape 3. La distance n'est plus un nombre mais une expression QGIS évaluée tronçon par tronçon.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s2-06.webp" alt="Étape 4 : seuls les bâtiments et ERP dans les secteurs de bruit restent affichés" loading="lazy"><figcaption>Étape 4. Les bâtiments et ERP hors secteur ont disparu de la carte.</figcaption></figure>
-            <figure><img src="img/stories/s2-07.webp" alt="Étape 4 bis : zoom sur l'A64, la bande de 300 m se lit dans la répartition des bâtiments" loading="lazy"><figcaption>Zoom : la bande de 300 m autour de l'A64 se lit dans la répartition des bâtiments conservés.</figcaption></figure>
+            <figure><img src="img/stories/s2-06.webp" alt="Étape 4 : seuls les bâtiments et ERP dans les zones tampons restent affichés" loading="lazy" width="1600" height="973"><figcaption>Étape 4. Les bâtiments et ERP hors secteur ont disparu de la carte.</figcaption></figure>
+            <figure><img src="img/stories/s2-07.webp" alt="Étape 4 bis : zoom sur l'A64, la bande de 300 m se lit dans la répartition des bâtiments" loading="lazy" width="1600" height="973"><figcaption>Zoom : la bande de 300 m autour de l'A64 se lit dans la répartition des bâtiments conservés.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>1 999 bâtiments</strong> et <strong>74 ERP</strong> de Muret se trouvent dans les secteurs de bruit des 102 tronçons d'importance 1 et 2.</p>
+    <p><strong>1 999 bâtiments</strong> et <strong>74 ERP</strong> de Muret se trouvent dans les zones tampons des 102 tronçons d'importance 1 et 2.</p>
     <div class="callout tip">
-        <strong>Pour aller plus loin.</strong> La même expression peut lire une largeur réglementaire stockée dans un attribut, par exemple <code>"largeur_de_chaussee" * 3</code>.
+        <strong>Pour aller plus loin.</strong> La même expression peut lire une distance d’étude stockée dans un attribut. Autre exemple purement géométrique : <code>"largeur_de_chaussee" * 3</code>.
         Les tronçons dont la largeur est vide demandent un <code>coalesce("largeur_de_chaussee", 3)</code>.
     </div>
 </section>
@@ -230,29 +233,30 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/buffer.webp" data-src="video/buffer.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">3</span>Ce que la Garonne peut atteindre</h2>
-        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Ce que la Garonne peut atteindre"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <h2><span class="num">3</span>Les bâtiments proches des cours d’eau</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les bâtiments proches des cours d’eau"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
+    <div class="callout scope-note"><strong>Proximité, pas aléa.</strong> Un tampon de 100 m ou 300 m ne représente ni une emprise de crue ni sa fréquence. Pour étudier une inondation, utilisez une couche d’aléa documentée comme source du filtre.</div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Julien prépare, pour le service urbanisme de <strong>Grenade</strong>, une réunion sur le plan de prévention des risques d'inondation. La commune est à la confluence de la Garonne et de la Save. Il veut montrer d'abord tout ce qui se trouve à moins de 300 m des surfaces en eau, puis resserrer à 100 m pour la crue fréquente, et pouvoir revenir en arrière devant les élus.</p></div>
+        <div><h4>Le besoin</h4><p>Julien prépare une exploration cartographique à <strong>Grenade</strong>, à la confluence de la Garonne et de la Save. Il compare les bâtiments situés à moins de 300 m puis de 100 m des surfaces en eau et revient au premier résultat avec Undo.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Source : <strong>surface_hydrographique</strong>, cadrée sur Grenade, avec une <strong>sélection multiple</strong> et <em>Select All</em> (77 surfaces). Cibles : bâtiments, ERP et routes, prédicat Intersect, <strong>tampon de 300 m</strong>. Second Filter à 100 m, puis <strong>Undo</strong> dans la barre d'actions.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Cadrer Grenade.</strong> 6 998 bâtiments, 79 ERP, 1 978 tronçons de route et 77 surfaces en eau.
-            <figure><img src="img/stories/s3-03.webp" alt="Étape 1 : Grenade cadrée, la Garonne et la Save en bleu" loading="lazy"><figcaption>Étape 1. Les surfaces en eau (Garonne à l'est, Save au sud) sont désormais les seules de la carte.</figcaption></figure>
+            <figure><img src="img/stories/s3-03.webp" alt="Étape 1 : Grenade cadrée, la Garonne et la Save en bleu" loading="lazy" width="1600" height="973"><figcaption>Étape 1. Les surfaces en eau (Garonne à l'est, Save au sud) sont désormais les seules de la carte.</figcaption></figure>
         </li>
         <li><strong>Sélectionner toutes les surfaces en eau.</strong> Cliquez sur <em>surface_hydrographique</em>, cochez <strong>Multiple selection</strong>, puis clic droit dans la liste et <em>Select All</em>. Le résumé au-dessus de la liste compte 77 entités.
-            <figure><img src="img/stories/s3-04.webp" alt="Étape 2 : les 77 surfaces en eau sont cochées dans la sélection multiple" loading="lazy"><figcaption>Étape 2. La liste affiche la nature et l'identifiant de chaque surface ; toutes sont cochées.</figcaption></figure>
+            <figure><img src="img/stories/s3-04.webp" alt="Étape 2 : les 77 surfaces en eau sont cochées dans la sélection multiple" loading="lazy" width="1600" height="973"><figcaption>Étape 2. La liste affiche la nature et l'identifiant de chaque surface ; toutes sont cochées.</figcaption></figure>
         </li>
         <li><strong>300 m.</strong> Cibles <em>batiment</em>, <em>erp</em> et <em>troncon_de_route</em>, Intersect, Buffer value à 300. Filter.
-            <figure><img src="img/stories/s3-06.webp" alt="Étape 3 : les bâtiments, ERP et routes à moins de 300 m des surfaces en eau" loading="lazy"><figcaption>Étape 3. La bande de 300 m suit la Garonne bien au-delà de Grenade : les polygones du fleuve sont longs, et le filtre spatial des cibles remplace le cadrage communal.</figcaption></figure>
+            <figure><img src="img/stories/s3-06.webp" alt="Étape 3 : les bâtiments, ERP et routes à moins de 300 m des surfaces en eau" loading="lazy" width="1600" height="973"><figcaption>Étape 3. La bande de 300 m suit la Garonne bien au-delà de Grenade : les polygones du fleuve sont longs, et le filtre spatial des cibles remplace le cadrage communal.</figcaption></figure>
         </li>
         <li><strong>100 m.</strong> Changez la valeur du tampon et appuyez à nouveau sur Filter.
-            <figure><img src="img/stories/s3-07.webp" alt="Étape 4 : la bande est resserrée à 100 m" loading="lazy"><figcaption>Étape 4. Le résultat se resserre sur les berges.</figcaption></figure>
+            <figure><img src="img/stories/s3-07.webp" alt="Étape 4 : la bande est resserrée à 100 m" loading="lazy" width="1600" height="973"><figcaption>Étape 4. Le résultat se resserre sur les berges.</figcaption></figure>
         </li>
         <li><strong>Undo.</strong> Le premier bouton après Filter restaure l'état précédent des trois couches, à 300 m. Redo le réappliquerait. L'historique est propre au projet et survit à un redémarrage de QGIS.
-            <figure><img src="img/stories/s3-08.webp" alt="Étape 5 : Undo a restauré la bande de 300 m" loading="lazy"><figcaption>Étape 5. Retour à 300 m d'un clic.</figcaption></figure>
+            <figure><img src="img/stories/s3-08.webp" alt="Étape 5 : Undo a restauré la bande de 300 m" loading="lazy" width="1600" height="973"><figcaption>Étape 5. Retour à 300 m d'un clic.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
@@ -277,28 +281,29 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/bridges.webp" data-src="video/bridges.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">4</span>Tous les ponts de la métropole</h2>
-        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Tous les ponts de la métropole"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <h2><span class="num">4</span>Repérer les franchissements à vérifier</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Repérer les franchissements à vérifier"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Toulouse Métropole.</p>
     </div>
+    <div class="callout scope-note"><strong>Des candidats à vérifier.</strong> Cross repère des intersections géométriques en plan. Les résultats ne constituent pas un inventaire exhaustif de ponts : contrôlez la nature des ouvrages et leur position verticale. Identify fait clignoter ici les cours d’eau sources, avant le filtrage des routes.</div>
     <div class="story-brief">
         <div><h4>Le besoin</h4><p>Karim gère les ouvrages d'art de <strong>Toulouse Métropole</strong> : 37 communes, près de 99 000 tronçons de route. Il veut l'inventaire des endroits où la voirie franchit un cours d'eau permanent, tronçons et ouvrages, pour planifier les inspections.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Le cadrage se fait cette fois sur la couche <strong>epci</strong>. Puis la source devient <strong>troncon_hydrographique</strong> avec la sélection personnalisée <code>"persistance" = 'Permanent'</code>, les cibles <em>troncon_de_route</em> et <em>construction_lineaire</em>, et le prédicat <strong>Cross</strong>, sans tampon : une route qui longe la rivière n'est pas retenue, une route qui la traverse l'est.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Cadrer l'EPCI.</strong> Couche <em>epci</em> en source, « Toulouse Métropole » en sélection simple sur <code>"nom_officiel"</code>, toutes les autres couches en cibles, Intersect. Le filtrage ramène 98 687 tronçons de route, 1 844 tronçons hydrographiques, 1 181 constructions linéaires et 70 communes touchées.
-            <figure><img src="img/stories/s4-03.webp" alt="Étape 1 : Toulouse Métropole cadrée, la Garonne traverse la métropole du sud au nord" loading="lazy"><figcaption>Étape 1. La métropole entière, Garonne, Hers et Touch compris.</figcaption></figure>
+            <figure><img src="img/stories/s4-03.webp" alt="Étape 1 : Toulouse Métropole cadrée, la Garonne traverse la métropole du sud au nord" loading="lazy" width="1600" height="973"><figcaption>Étape 1. La métropole entière, Garonne, Hers et Touch compris.</figcaption></figure>
         </li>
         <li><strong>Ne garder que les cours d'eau permanents.</strong> Source <em>troncon_hydrographique</em>, Custom selection <code>"persistance" = 'Permanent'</code> : 691 tronçons.
-            <figure><img src="img/stories/s4-04.webp" alt="Étape 2 : les 691 tronçons hydrographiques permanents sont surlignés" loading="lazy"><figcaption>Étape 2. Les fossés et écoulements intermittents ne comptent pas.</figcaption></figure>
+            <figure><img src="img/stories/s4-04.webp" alt="Étape 2 : les 691 tronçons hydrographiques permanents sont surlignés" loading="lazy" width="1600" height="973"><figcaption>Étape 2. Les fossés et écoulements intermittents ne comptent pas.</figcaption></figure>
         </li>
         <li><strong>Vérifier la sélection sur la carte.</strong> Cliquez sur <strong>Identify</strong> dans la barre d'exploration : les 691 tronçons hydrographiques retenus par la sélection personnalisée clignotent en rouge. Ce contrôle visuel confirme la source du filtre avant de l'appliquer aux routes.
-            <figure><img src="img/stories/s4-identify.webp" alt="Étape 3 : après un clic sur Identify, les cours d'eau permanents sélectionnés clignotent en rouge sur la carte" loading="lazy"><figcaption>Étape 3. Identify fait clignoter la sélection personnalisée en rouge, sans modifier le filtre.</figcaption></figure>
+            <figure><img src="img/stories/s4-identify.webp" alt="Étape 3 : après un clic sur Identify, les cours d'eau permanents sélectionnés clignotent en rouge sur la carte" loading="lazy" width="1600" height="900"><figcaption>Étape 3. Identify fait clignoter la sélection personnalisée en rouge, sans modifier le filtre.</figcaption></figure>
         </li>
         <li><strong>Cross.</strong> Cibles <em>troncon_de_route</em> et <em>construction_lineaire</em>, prédicat Cross seul, ligne Buffer désactivée. Filter.
-            <figure><img src="img/stories/s4-05.webp" alt="Étape 4 : le prédicat Cross est le seul coché, la ligne Buffer est éteinte" loading="lazy"><figcaption>Étape 4. Un seul prédicat, pas de tampon.</figcaption></figure>
-            <figure><img src="img/stories/s4-06.webp" alt="Étape 4 bis : seuls les tronçons de route et ouvrages qui franchissent un cours d'eau restent" loading="lazy"><figcaption>Résultat à l'échelle de la métropole : les franchissements dessinent le réseau hydrographique.</figcaption></figure>
-            <figure><img src="img/stories/s4-07.webp" alt="Zoom sur le nord de Toulouse : ponts sur la Garonne et l'Hers" loading="lazy"><figcaption>Zoom sur le nord de Toulouse : chaque segment restant est un pont ou une traversée.</figcaption></figure>
+            <figure><img src="img/stories/s4-05.webp" alt="Étape 4 : le prédicat Cross est le seul coché, la ligne Buffer est éteinte" loading="lazy" width="1600" height="973"><figcaption>Étape 4. Un seul prédicat, pas de tampon.</figcaption></figure>
+            <figure><img src="img/stories/s4-06.webp" alt="Étape 4 bis : seuls les tronçons de route et ouvrages qui franchissent un cours d'eau restent" loading="lazy" width="1600" height="973"><figcaption>Résultat à l'échelle de la métropole : les franchissements dessinent le réseau hydrographique.</figcaption></figure>
+            <figure><img src="img/stories/s4-07.webp" alt="Zoom sur le nord de Toulouse : ponts sur la Garonne et l'Hers" loading="lazy" width="1600" height="973"><figcaption>Zoom sur le nord de Toulouse : chaque segment restant est un pont ou une traversée.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
@@ -319,28 +324,28 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <p class="credit">BD TOPO® 3.5 © IGN, Bagnères-de-Luchon.</p>
     </div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Élodie, à la mairie de <strong>Bagnères-de-Luchon</strong>, doit informer les propriétaires soumis aux obligations légales de débroussaillement : la végétation située à moins de 50 m d'une habitation. Elle veut la carte des bois et forêts concernés, sans les haies, qui relèvent d'un autre régime.</p></div>
+        <div><h4>Le besoin</h4><p>Élodie, à la mairie de <strong>Bagnères-de-Luchon</strong>, prépare une carte de la végétation proche des habitations avec une distance d’étude de 50 m. Elle distingue les bois et forêts des haies pour préparer un examen de terrain. Ce filtre ne détermine pas les obligations de débroussaillement des propriétaires.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Source <strong>batiment</strong> avec la sélection personnalisée <code>"usage_1" = 'Résidentiel'</code>, cibles <em>zone_de_vegetation</em> et <em>haie</em>, Intersect, <strong>tampon de 50 m</strong>. Puis un second filtre, <strong>attributaire</strong> cette fois, sur la couche de végétation devenue source, <strong>combiné avec AND</strong> au filtre spatial précédent.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Cadrer Luchon.</strong> 3 699 bâtiments, 269 zones de végétation, 123 haies.
-            <figure><img src="img/stories/s5-03.webp" alt="Étape 1 : Bagnères-de-Luchon cadrée, végétation en vert, bâtiments en rouge" loading="lazy"><figcaption>Étape 1. La vallée habitée et les versants boisés.</figcaption></figure>
+            <figure><img src="img/stories/s5-03.webp" alt="Étape 1 : Bagnères-de-Luchon cadrée, végétation en vert, bâtiments en rouge" loading="lazy" width="1600" height="973"><figcaption>Étape 1. La vallée habitée et les versants boisés.</figcaption></figure>
         </li>
         <li><strong>Ne garder que les habitations.</strong> Source <em>batiment</em>, Custom selection <code>"usage_1" = 'Résidentiel'</code> : 1 619 bâtiments.
-            <figure><img src="img/stories/s5-04.webp" alt="Étape 2 : les bâtiments résidentiels sont surlignés" loading="lazy"><figcaption>Étape 2. Annexes, bâtiments agricoles et industriels sont écartés de la source.</figcaption></figure>
+            <figure><img src="img/stories/s5-04.webp" alt="Étape 2 : les bâtiments résidentiels sont surlignés" loading="lazy" width="1600" height="978"><figcaption>Étape 2. Annexes, bâtiments agricoles et industriels sont écartés de la source.</figcaption></figure>
         </li>
         <li><strong>50 m.</strong> Cibles <em>zone_de_vegetation</em> et <em>haie</em>, Intersect, Buffer 50. Filter : 119 zones de végétation et 48 haies restent.
-            <figure><img src="img/stories/s5-06.webp" alt="Étape 3 : la végétation à moins de 50 m d'une habitation" loading="lazy"><figcaption>Étape 3. Il reste des haies et des bois indifférenciés.</figcaption></figure>
+            <figure><img src="img/stories/s5-06.webp" alt="Étape 3 : la végétation à moins de 50 m d'une habitation" loading="lazy" width="1600" height="978"><figcaption>Étape 3. Il reste des haies et des bois indifférenciés.</figcaption></figure>
         </li>
         <li><strong>Ne garder que les bois et forêts.</strong> Cliquez sur <em>zone_de_vegetation</em> dans le panneau Couches : elle devient la source. Custom selection :
             <pre><code>"nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conifères',
              'Forêt fermée mixte', 'Forêt ouverte')</code></pre>
             Activez la ligne <strong>Combine operator</strong> et laissez <strong>AND</strong> à gauche : le nouveau filtre restreint le filtre spatial déjà appliqué à la couche source au lieu de le remplacer.
-            <figure><img src="img/stories/s5-07.webp" alt="Étape 4 : expression sur la nature de la végétation, opérateur de combinaison AND actif" loading="lazy"><figcaption>Étape 4. Le premier bouton de la ligne Combine operator est actif, l'opérateur de gauche vaut AND.</figcaption></figure>
+            <figure><img src="img/stories/s5-07.webp" alt="Étape 4 : expression sur la nature de la végétation, opérateur de combinaison AND actif" loading="lazy" width="1600" height="978"><figcaption>Étape 4. Le premier bouton de la ligne Combine operator est actif, l'opérateur de gauche vaut AND.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s5-08.webp" alt="Étape 5 : seuls les bois et forêts à moins de 50 m d'une habitation restent" loading="lazy"><figcaption>Étape 5. 58 bois et forêts, à moins de 50 m d'une habitation.</figcaption></figure>
-            <figure><img src="img/stories/s5-09.webp" alt="Zoom sur le centre de Luchon et ses versants boisés" loading="lazy"><figcaption>Zoom : les lisières à débroussailler entourent les quartiers en pente.</figcaption></figure>
+            <figure><img src="img/stories/s5-08.webp" alt="Étape 5 : seuls les bois et forêts à moins de 50 m d'une habitation restent" loading="lazy" width="1600" height="978"><figcaption>Étape 5. 58 bois et forêts, à moins de 50 m d'une habitation.</figcaption></figure>
+            <figure><img src="img/stories/s5-09.webp" alt="Zoom sur le centre de Luchon et ses versants boisés" loading="lazy" width="1600" height="978"><figcaption>Zoom : les lisières proches des habitations entourent les quartiers en pente.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
@@ -357,26 +362,27 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hamlets.webp" data-src="video/hamlets.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">6</span>Les hameaux que les secours atteignent mal</h2>
-        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les hameaux que les secours atteignent mal"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <h2><span class="num">6</span>Les hameaux éloignés des routes revêtues</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les hameaux éloignés des routes revêtues"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Aspet.</p>
     </div>
+    <div class="callout scope-note"><strong>Distance géométrique.</strong> Ce résultat ne mesure ni temps de trajet ni accès des véhicules de secours. La desserte doit être vérifiée avec le réseau, les restrictions de circulation et le terrain.</div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Au centre de secours d'<strong>Aspet</strong>, en pied de Pyrénées, on prépare le plan d'intervention : quels lieux-dits et zones d'activité sont à plus de 200 m d'une route revêtue, donc accessibles seulement par chemin ou sentier ?</p></div>
+        <div><h4>Le besoin</h4><p>Au centre de secours d'<strong>Aspet</strong>, en pied de Pyrénées, on prépare le plan d'intervention : quels lieux-dits et zones d'activité sont à plus de 200 m d'une route revêtue, pour préparer une vérification de terrain ?</p></div>
         <div><h4>La traduction FilterMate</h4><p>C'est le prédicat <strong>Disjoint</strong> avec un <strong>tampon de 200 m</strong> : garder ce qui n'a aucun point commun avec la zone tampon. Comme Disjoint retient tout ce qui est loin, y compris dans le reste du département, les couches cibles sont d'abord cadrées par un <strong>filtre attributaire</strong> sur le code INSEE, appliqué avec l'algorithme Processing de FilterMate. Le second filtre se combine alors avec <strong>AND</strong>.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Cadrer Aspet spatialement</strong> pour les routes, les bâtiments et la végétation (histoire 1), puis <strong>attributairement</strong> pour les deux couches cibles : Boîte à outils → FilterMate → <em>Filtrer plusieurs couches</em>, couches <em>zone_d_habitation</em> et <em>zone_d_activite_ou_d_interet</em>, expression <code>"insee_commune" = '31020'</code>. 87 lieux-dits et 31 zones d'activité.
-            <figure><img src="img/stories/s6-03.webp" alt="Étape 1 : Aspet cadrée, lieux-dits en orange" loading="lazy"><figcaption>Étape 1. Les deux couches cibles portent un filtre attributaire, les autres un filtre spatial.</figcaption></figure>
+            <figure><img src="img/stories/s6-03.webp" alt="Étape 1 : Aspet cadrée, lieux-dits en orange" loading="lazy" width="1600" height="945"><figcaption>Étape 1. Les deux couches cibles portent un filtre attributaire, les autres un filtre spatial.</figcaption></figure>
         </li>
         <li><strong>Ne garder que les routes revêtues.</strong> Source <em>troncon_de_route</em>, Custom selection <code>"nature" NOT IN ('Chemin', 'Sentier', 'Escalier', 'Piste cyclable', 'Route empierrée')</code> : 494 tronçons sur 1 168.
-            <figure><img src="img/stories/s6-04.webp" alt="Étape 2 : les routes revêtues sont surlignées, chemins et sentiers ne le sont pas" loading="lazy"><figcaption>Étape 2. Les chemins et sentiers, nombreux en montagne, sont écartés.</figcaption></figure>
+            <figure><img src="img/stories/s6-04.webp" alt="Étape 2 : les routes revêtues sont surlignées, chemins et sentiers ne le sont pas" loading="lazy" width="1600" height="945"><figcaption>Étape 2. Les chemins et sentiers, nombreux en montagne, sont écartés.</figcaption></figure>
         </li>
         <li><strong>Disjoint, 200 m, AND.</strong> Cibles <em>zone_d_habitation</em> et <em>zone_d_activite_ou_d_interet</em>, prédicat <strong>Disjoint</strong> seul, Buffer 200, ligne Combine operator active avec <strong>AND</strong> à droite (opérateur des couches cibles).
-            <figure><img src="img/stories/s6-05.webp" alt="Étape 3 : Disjoint coché, tampon de 200 m, opérateur AND pour les couches cibles" loading="lazy"><figcaption>Étape 3. Disjoint plus tampon : un anneau d'exclusion.</figcaption></figure>
+            <figure><img src="img/stories/s6-05.webp" alt="Étape 3 : Disjoint coché, tampon de 200 m, opérateur AND pour les couches cibles" loading="lazy" width="1600" height="945"><figcaption>Étape 3. Disjoint plus tampon : un anneau d'exclusion.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s6-06.webp" alt="Étape 4 : seuls les lieux-dits à plus de 200 m d'une route revêtue restent" loading="lazy"><figcaption>Étape 4. Les lieux-dits restants sont ceux qu'aucune route revêtue n'approche à moins de 200 m.</figcaption></figure>
+            <figure><img src="img/stories/s6-06.webp" alt="Étape 4 : seuls les lieux-dits à plus de 200 m d'une route revêtue restent" loading="lazy" width="1600" height="945"><figcaption>Étape 4. Les lieux-dits restants sont ceux qu'aucune route revêtue n'approche à moins de 200 m.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
@@ -395,22 +401,23 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
         <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: La bibliothèque de requêtes de l'équipe"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
+    <div class="callout scope-note"><strong>Nom du favori dans les captures.</strong> « PPRI Garonne 300 m » est le nom historique de l’enregistrement. Préférez « Proximité Garonne — 300 m » : ce favori enregistre un tampon, pas un zonage de risque.</div>
     <div class="story-brief">
         <div><h4>Le besoin</h4><p>Julien (histoire 3) refera la bande des 300 m à chaque mise à jour de la BD TOPO et veut que ses collègues puissent la rejouer sans lui. Le filtre doit exister en dehors de sa tête : nommé, décrit, réapplicable en un clic, exportable.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Un <strong>favori</strong> enregistre le filtre complet : couche source, sélection, prédicats, tampon, couches cibles. Le menu s'ouvre par le badge ★ de l'en-tête ; le <strong>gestionnaire</strong> permet de renommer, décrire, changer la portée (ce projet ou tous les projets) et d'<strong>exporter en JSON</strong>. Avec l'extension de partage, un dépôt git commun sert de bibliothèque d'équipe.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Enregistrer.</strong> Le filtre à 300 m de l'histoire 3 est appliqué. Cliquez sur le badge ★ puis <em>Add filter</em>, nommez-le « PPRI Garonne 300 m ».
-            <figure><img src="img/stories/s7-01.webp" alt="Étape 1 : la barre de messages confirme l'ajout du favori PPRI Garonne 300 m" loading="lazy"><figcaption>Étape 1. La barre de messages confirme l'enregistrement ; le favori apparaît aussitôt dans la section Filtrage rapide du menu ★.</figcaption></figure>
+            <figure><img src="img/stories/s7-01.webp" alt="Étape 1 : la barre de messages confirme l'ajout du favori PPRI Garonne 300 m" loading="lazy" width="1600" height="973"><figcaption>Étape 1. La barre de messages confirme l'enregistrement ; le favori apparaît aussitôt dans la section Filtrage rapide du menu ★.</figcaption></figure>
         </li>
         <li><strong>Unfilter.</strong> Les trois couches retrouvent la totalité du département : 1 173 829 bâtiments.
-            <figure><img src="img/stories/s7-02.webp" alt="Étape 2 : après Unfilter, toutes les entités sont de retour" loading="lazy"><figcaption>Étape 2. Retour à l'état non filtré.</figcaption></figure>
+            <figure><img src="img/stories/s7-02.webp" alt="Étape 2 : après Unfilter, toutes les entités sont de retour" loading="lazy" width="1600" height="973"><figcaption>Étape 2. Retour à l'état non filtré.</figcaption></figure>
         </li>
         <li><strong>Rejouer.</strong> Badge ★ puis « PPRI Garonne 300 m » : le filtre se réapplique, avec les mêmes 14 181 bâtiments, 168 ERP et 6 243 tronçons.
-            <figure><img src="img/stories/s7-03.webp" alt="Étape 3 : le favori réappliqué redonne exactement le résultat de l'histoire 3" loading="lazy"><figcaption>Étape 3. Même résultat, un seul clic.</figcaption></figure>
+            <figure><img src="img/stories/s7-03.webp" alt="Étape 3 : le favori réappliqué redonne exactement le résultat de l'histoire 3" loading="lazy" width="1600" height="978"><figcaption>Étape 3. Même résultat, un seul clic.</figcaption></figure>
         </li>
         <li><strong>Décrire et partager.</strong> <em>Manage favorites…</em> ouvre le gestionnaire : description, tags, portée, expression exacte, onglet Remote pour publier vers un dépôt git. <em>Export…</em> écrit un fichier JSON à envoyer à un collègue, qui l'importera depuis le même menu.
-            <figure><img src="img/stories/s7-04-manager.png" alt="Le gestionnaire de favoris avec le favori PPRI Garonne 300 m sélectionné" loading="lazy"><figcaption>Étape 4. Le gestionnaire : liste à gauche, détails et expression à droite.</figcaption></figure>
+            <figure><img src="img/stories/s7-04-manager.png" alt="Le gestionnaire de favoris avec le favori PPRI Garonne 300 m sélectionné" loading="lazy" width="1440" height="960"><figcaption>Étape 4. Le gestionnaire : liste à gauche, détails et expression à droite.</figcaption></figure>
         </li>
     </ol>
     <div class="callout tip">
@@ -423,23 +430,24 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/processing.webp" data-src="video/processing.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">8</span>Qu'est-ce qui a changé depuis l'édition précédente ?</h2>
-        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Qu'est-ce qui a changé depuis l'édition précédente ?"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <h2><span class="num">8</span>Les objets modifiés depuis une date</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les objets modifiés depuis une date"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
     </div>
+    <div class="callout scope-note"><strong>Portée du résultat.</strong> Le filtre lit le champ <code>date_modification</code> de l’édition courante. Il ne compare pas deux éditions et ne détecte pas les objets supprimés entre elles.</div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Sophie administre le SIG du département et vient de recevoir l'édition de mars 2026 de la BD TOPO. Avant de la diffuser, elle veut isoler les objets modifiés depuis l'édition précédente sur quatre couches, pour un contrôle qualité, et pouvoir refaire ce contrôle dans un modèle Processing à chaque édition.</p></div>
+        <div><h4>Le besoin</h4><p>Sophie administre le SIG du département et vient de recevoir l'édition de mars 2026 de la BD TOPO. Avant de la diffuser, elle veut isoler les objets dont la date de modification est postérieure au 15 mars 2025 sur quatre couches, pour un contrôle qualité, et pouvoir refaire ce contrôle dans un modèle Processing à chaque édition.</p></div>
         <div><h4>La traduction FilterMate</h4><p>Pas de géométrie ici : un seul filtre attributaire à appliquer à plusieurs couches. C'est le rôle de l'algorithme <strong>filtermate:batch_filter</strong> de la boîte à outils Processing, utilisable dans le modeleur graphique, en mode batch ou depuis Python.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Ouvrir la boîte à outils</strong> et chercher « filtermate ».
-            <figure><img src="img/stories/s8-01.webp" alt="Étape 1 : la boîte à outils Processing filtrée sur filtermate montre l'algorithme Filtrer plusieurs couches" loading="lazy"><figcaption>Étape 1. Le fournisseur FilterMate et son algorithme de filtrage par lot.</figcaption></figure>
+            <figure><img src="img/stories/s8-01.webp" alt="Étape 1 : la boîte à outils Processing filtrée sur filtermate montre l'algorithme Filtrer plusieurs couches" loading="lazy" width="1600" height="973"><figcaption>Étape 1. Le fournisseur FilterMate et son algorithme de filtrage par lot.</figcaption></figure>
         </li>
         <li><strong>Choisir les couches et l'expression.</strong> <em>batiment</em>, <em>troncon_de_route</em>, <em>troncon_hydrographique</em>, <em>erp</em> et l'expression <code>"date_modification" &gt;= '2025-03-15'</code>.
-            <figure><img src="img/stories/s8-02-dialog.png" alt="Le dialogue de l'algorithme avec quatre couches et l'expression sur la date de modification" loading="lazy"><figcaption>Étape 2. Un dialogue Processing ordinaire : il s'enchaîne dans un modèle comme n'importe quel autre.</figcaption></figure>
+            <figure><img src="img/stories/s8-02-dialog.png" alt="Le dialogue de l'algorithme avec quatre couches et l'expression sur la date de modification" loading="lazy" width="801" height="524"><figcaption>Étape 2. Un dialogue Processing ordinaire : il s'enchaîne dans un modèle comme n'importe quel autre.</figcaption></figure>
         </li>
         <li><strong>Exécuter.</strong> Les quatre couches reçoivent le filtre en une passe.
-            <figure><img src="img/stories/s8-03.webp" alt="Étape 3 : autour de Toulouse, seuls les objets modifiés depuis mars 2025 restent affichés" loading="lazy"><figcaption>Étape 3. Autour de Toulouse, les objets modifiés depuis un an.</figcaption></figure>
+            <figure><img src="img/stories/s8-03.webp" alt="Étape 3 : autour de Toulouse, seuls les objets modifiés depuis mars 2025 restent affichés" loading="lazy" width="1600" height="973"><figcaption>Étape 3. Autour de Toulouse, les objets modifiés depuis un an.</figcaption></figure>
         </li>
     </ol>
     <h3>Résultat</h3>
@@ -465,6 +473,7 @@ processing.run("filtermate:batch_filter", {
 <!-- 9 ------------------------------------------------------------------ -->
 <section id="replay">
     <h2><span class="num">9</span>Rejouer ces histoires chez vous</h2>
+    <div class="callout demo-download"><strong>Commencez avec un petit projet.</strong><p>La démonstration de Toutens contient quatre couches, un projet QGIS, un favori et des instructions en français et en anglais. Ses effectifs diffèrent des exemples départementaux ci-dessus.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Télécharger la démo (ZIP, 203 Ko)</a></div>
     <ol class="steps">
         <li><strong>Téléchargez la BD TOPO</strong> de votre département sur la Géoplateforme de l'IGN (thème « Tous thèmes », format GeoPackage, projection Lambert-93). Le fichier est livré avec ses index spatiaux : c'est ce qui rend les cascades rapides.</li>
         <li><strong>Chargez les couches</strong> nommées dans chaque histoire. Les styles embarqués dans le GeoPackage cachent les bâtiments au-delà du 1:25 000 : désactivez la visibilité dépendante de l'échelle dans les propriétés de la couche, ou appliquez vos propres styles.</li>

@@ -1,6 +1,9 @@
 // FilterMate website — navigation, background footage, watch mode, table of contents.
 (function () {
     'use strict';
+    const french = document.documentElement.lang === 'fr';
+    const messages = window.FM_I18N || {};
+    const tr = (key, fallback) => messages[key] || fallback;
 
     // ---------------------------------------------------------------- navigation
     const nav = document.querySelector('.nav');
@@ -11,21 +14,21 @@
             const open = links.classList.toggle('open');
             toggle.setAttribute('aria-expanded', String(open));
             toggle.setAttribute('aria-label', open
-                ? (document.documentElement.lang === 'fr' ? 'Fermer le menu' : 'Close menu')
-                : (document.documentElement.lang === 'fr' ? 'Ouvrir le menu' : 'Open menu'));
+                ? tr('closeMenu', french ? 'Fermer le menu' : 'Close menu')
+                : tr('openMenu', french ? 'Ouvrir le menu' : 'Open menu'));
         });
         links.addEventListener('click', (e) => {
             if (e.target.closest('a') && links.classList.contains('open')) {
                 links.classList.remove('open');
                 toggle.setAttribute('aria-expanded', 'false');
-                toggle.setAttribute('aria-label', document.documentElement.lang === 'fr' ? 'Ouvrir le menu' : 'Open menu');
+                toggle.setAttribute('aria-label', tr('openMenu', french ? 'Ouvrir le menu' : 'Open menu'));
             }
         });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && links.classList.contains('open')) {
                 links.classList.remove('open');
                 toggle.setAttribute('aria-expanded', 'false');
-                toggle.setAttribute('aria-label', document.documentElement.lang === 'fr' ? 'Ouvrir le menu' : 'Open menu');
+                toggle.setAttribute('aria-label', tr('openMenu', french ? 'Ouvrir le menu' : 'Open menu'));
                 toggle.focus();
             }
         });
@@ -39,22 +42,38 @@
     document.querySelectorAll('[data-lang-link]').forEach((a) => {
         a.addEventListener('click', () => { a.href = a.getAttribute('href').split('#')[0] + location.hash; });
     });
+    document.querySelectorAll('.language-menu').forEach((menu) => {
+        document.addEventListener('click', (e) => {
+            if (!menu.contains(e.target)) menu.open = false;
+        });
+        menu.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && menu.open) {
+                e.stopPropagation();
+                menu.open = false;
+                menu.querySelector('summary').focus();
+            }
+        });
+    });
 
     // ---------------------------------------------------------------- background footage
     // Videos load only when their sheet comes into view and pause when it leaves.
     // Reduced motion or a data-saving connection keeps the poster; "Watch" still plays.
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const smallScreen = window.matchMedia('(max-width: 760px)');
+    const reduce = motionPreference.matches;
     const conn = navigator.connection || {};
     const frugal = conn.saveData || /(^|-)2g$/.test(conn.effectiveType || '');
-    const autoplay = !reduce && !frugal;
+    const canAutoplay = () => !motionPreference.matches && !smallScreen.matches && !frugal;
     const videos = Array.from(document.querySelectorAll('video[data-src]'));
+    const visibleVideos = new Set();
+    let modalOpen = false;
 
     // ---------------------------------------------------------------- home scroll aids
     // Keep scrolling native: add orientation and shortcuts without intercepting
     // the wheel, trackpad, Page Down or keyboard navigation.
     if (document.body.classList.contains('home')) {
         const french = document.documentElement.lang === 'fr';
-        const sectionData = french
+        const sectionData = messages.sections || (french
             ? [
                 ['top', 'Accueil'],
                 ['workflow', 'Méthode'],
@@ -70,7 +89,7 @@
                 ['capabilities', 'Features'],
                 ['performance', 'Performance'],
                 ['install', 'Install'],
-            ];
+            ]);
         const sections = sectionData
             .map(([id, label]) => ({ id, label, node: document.getElementById(id) }))
             .filter((item) => item.node);
@@ -78,7 +97,7 @@
         const progress = document.createElement('div');
         progress.className = 'scroll-progress';
         progress.setAttribute('role', 'progressbar');
-        progress.setAttribute('aria-label', french ? 'Progression dans la page' : 'Page progress');
+        progress.setAttribute('aria-label', tr('progress', french ? 'Progression dans la page' : 'Page progress'));
         progress.setAttribute('aria-valuemin', '0');
         progress.setAttribute('aria-valuemax', '100');
         progress.setAttribute('aria-valuenow', '0');
@@ -86,7 +105,7 @@
 
         const rail = document.createElement('nav');
         rail.className = 'scroll-rail';
-        rail.setAttribute('aria-label', french ? 'Sections de la page' : 'Page sections');
+        rail.setAttribute('aria-label', tr('pageSections', french ? 'Sections de la page' : 'Page sections'));
         const railLinks = sections.map(({ id, label }) => {
             const a = document.createElement('a');
             a.href = '#' + id;
@@ -103,7 +122,7 @@
         const backToTop = document.createElement('button');
         backToTop.className = 'back-to-top';
         backToTop.type = 'button';
-        backToTop.setAttribute('aria-label', french ? 'Revenir en haut' : 'Back to top');
+        backToTop.setAttribute('aria-label', tr('backTop', french ? 'Revenir en haut' : 'Back to top'));
         backToTop.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
         backToTop.addEventListener('click', () => {
             window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
@@ -185,21 +204,27 @@
         if (p && p.catch) p.catch(() => {});
     }
 
+    function syncVideos() {
+        videos.forEach((v) => {
+            if (!modalOpen && !document.hidden && visibleVideos.has(v)
+                && (canAutoplay() || v.closest('.is-watching'))) play(v);
+            else v.pause();
+        });
+    }
+    motionPreference.addEventListener('change', syncVideos);
+    smallScreen.addEventListener('change', syncVideos);
+    document.addEventListener('visibilitychange', syncVideos);
+
     if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
             entries.forEach((e) => {
                 const v = e.target;
-                const watching = v.closest('.is-watching');
-                if (e.isIntersecting && (autoplay || watching)) {
-                    play(v);
-                } else if (!e.isIntersecting) {
-                    v.pause();
-                }
+                if (e.isIntersecting) visibleVideos.add(v);
+                else visibleVideos.delete(v);
             });
+            syncVideos();
         }, { threshold: 0.25 });
         videos.forEach((v) => io.observe(v));
-    } else if (autoplay) {
-        videos.forEach(play);
     }
 
     // ---------------------------------------------------------------- watch mode
@@ -211,7 +236,17 @@
         const btn = sheet.querySelector('[data-watch]');
         if (btn) btn.focus();
         const v = sheet.querySelector('video');
-        if (v && !autoplay) v.pause();
+        if (v && !canAutoplay()) v.pause();
+    }
+
+    function watchVideo(src, poster) {
+        modalOpen = true;
+        syncVideos();
+        lbVideo.src = src;
+        lbVideo.poster = poster || '';
+        lightbox.showModal();
+        const p = lbVideo.play();
+        if (p && p.catch) p.catch(() => {});
     }
 
     document.querySelectorAll('[data-watch]').forEach((btn) => {
@@ -220,21 +255,13 @@
             const v = holder && holder.querySelector('video');
             const directSrc = btn.dataset.video;
             if (directSrc && lightbox && lbVideo) {
-                lbVideo.src = directSrc;
-                lbVideo.poster = btn.dataset.poster || '';
-                lightbox.showModal();
-                const p = lbVideo.play();
-                if (p && p.catch) p.catch(() => {});
+                watchVideo(directSrc, btn.dataset.poster);
                 return;
             }
             if (!v) return;
             if (holder.classList.contains('band') && lightbox && lbVideo) {
                 // documentation: a larger player with controls
-                lbVideo.src = v.dataset.src;
-                lbVideo.poster = v.poster;
-                lightbox.showModal();
-                const p = lbVideo.play();
-                if (p && p.catch) p.catch(() => {});
+                watchVideo(v.dataset.src, v.poster);
                 return;
             }
             holder.classList.add('is-watching');
@@ -253,11 +280,118 @@
         }
     });
     if (lightbox && lbVideo) {
-        lightbox.addEventListener('close', () => { lbVideo.pause(); lbVideo.removeAttribute('src'); lbVideo.load(); });
-        lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.close(); });
+        lightbox.addEventListener('close', () => {
+            lbVideo.pause(); lbVideo.removeAttribute('src'); lbVideo.load();
+            modalOpen = false;
+            syncVideos();
+        });
+        lightbox.addEventListener('click', (e) => {
+            const r = lightbox.getBoundingClientRect();
+            if (e.target === lightbox && (e.clientX < r.left || e.clientX > r.right
+                || e.clientY < r.top || e.clientY > r.bottom)) lightbox.close();
+        });
     }
 
+    // Screenshots remain readable at their native size; the dialog scrolls on
+    // narrow screens and a separate link opens the original file.
+    const screenshots = Array.from(document.querySelectorAll('figure img'));
+    if (screenshots.length) {
+        const dialog = document.createElement('dialog');
+        dialog.className = 'image-viewer';
+        dialog.setAttribute('aria-label', french ? 'Capture agrandie' : 'Enlarged screenshot');
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.textContent = french ? 'Fermer' : 'Close';
+        const original = document.createElement('a');
+        original.textContent = french ? 'Ouvrir l’image originale' : 'Open original image';
+        original.target = '_blank';
+        original.rel = 'noopener';
+        const toolbar = document.createElement('div');
+        toolbar.className = 'image-viewer-toolbar';
+        toolbar.append(original, close);
+        const viewport = document.createElement('div');
+        viewport.className = 'image-viewer-viewport';
+        viewport.tabIndex = 0;
+        viewport.setAttribute('aria-label', french ? 'Image : faites défiler pour explorer' : 'Image: scroll to explore');
+        const full = document.createElement('img');
+        const caption = document.createElement('p');
+        viewport.append(full);
+        dialog.append(toolbar, viewport, caption);
+        document.body.append(dialog);
+        close.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('close', () => { modalOpen = false; syncVideos(); });
+        screenshots.forEach((img) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'screenshot-zoom';
+            button.setAttribute('aria-label', (french ? 'Agrandir : ' : 'Enlarge: ') + img.alt);
+            img.replaceWith(button);
+            button.append(img);
+            const hint = document.createElement('span');
+            hint.textContent = french ? 'Agrandir' : 'Enlarge';
+            hint.className = 'zoom-hint';
+            button.append(hint);
+            button.addEventListener('click', () => {
+                full.src = img.currentSrc || img.src;
+                full.alt = img.alt;
+                original.href = full.src;
+                caption.textContent = img.closest('figure').querySelector('figcaption')?.textContent || img.alt;
+                modalOpen = true;
+                syncVideos();
+                dialog.showModal();
+                viewport.scrollTo(0, 0);
+                close.focus();
+            });
+        });
+    }
+
+    document.querySelectorAll('pre > code').forEach((code) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'copy-code';
+        button.textContent = french ? 'Copier' : 'Copy';
+        code.parentNode.before(button);
+        button.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(code.textContent);
+                button.textContent = french ? 'Copié !' : 'Copied!';
+            } catch (_) {
+                const range = document.createRange();
+                range.selectNodeContents(code);
+                const selection = window.getSelection();
+                selection.removeAllRanges(); selection.addRange(range);
+                button.textContent = french ? 'Texte sélectionné : copiez-le' : 'Text selected: copy it';
+            }
+        });
+    });
+
     // ---------------------------------------------------------------- table of contents
+    const toc = document.querySelector('.toc');
+    if (toc) {
+        const compact = window.matchMedia('(max-width: 960px)');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'toc-toggle';
+        button.textContent = french ? 'Sommaire' : 'On this page';
+        const list = toc.querySelector('ol');
+        list.id = 'toc-sections';
+        button.setAttribute('aria-controls', list.id);
+        const setOpen = (open) => {
+            toc.classList.toggle('toc-collapsed', !open);
+            button.setAttribute('aria-expanded', String(open));
+        };
+        toc.prepend(button);
+        toc.classList.add('toc-enhanced');
+        setOpen(!compact.matches);
+        compact.addEventListener('change', () => setOpen(!compact.matches));
+        button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+        list.addEventListener('click', (e) => {
+            if (compact.matches && e.target.closest('a')) {
+                setOpen(false);
+                button.focus({ preventScroll: true });
+            }
+        });
+    }
     const tocLinks = Array.from(document.querySelectorAll('.toc a[href^="#"]'));
     if (tocLinks.length && 'IntersectionObserver' in window) {
         const sections = tocLinks.map((a) => document.querySelector(a.getAttribute('href'))).filter(Boolean);

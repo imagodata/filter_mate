@@ -1,0 +1,1 @@
+window.FM_I18N = {"openMenu": "打开菜单", "closeMenu": "关闭菜单", "progress": "页面阅读进度", "pageSections": "页面章节", "backTop": "返回顶部", "sections": [["top", "首页"], ["workflow", "操作流程"], ["examples", "示例"], ["capabilities", "功能"], ["performance", "性能"], ["install", "安装"]]};
