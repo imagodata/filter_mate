@@ -20,6 +20,15 @@ except ImportError:
     QgsVectorLayer = None
 
 
+def _is_point_cloud_layer(layer: Any) -> bool:
+    """Deferred capability lookup so this module stays importable in stubbed harnesses."""
+    try:
+        from ..qgis.point_cloud_capability import is_point_cloud_layer
+    except ImportError:
+        return False
+    return is_point_cloud_layer(layer)
+
+
 class QGISLayerRepository:
     """
     Repository for accessing QGIS layers.
@@ -97,6 +106,50 @@ class QGISLayerRepository:
             ]
         except Exception as e:
             logger.warning(f"Failed to get vector layers: {e}")
+            return []
+
+    def get_point_cloud_layer(self, layer_id: str) -> Optional[Any]:
+        """
+        Get a point cloud layer by ID.
+
+        Args:
+            layer_id: QGIS layer ID
+
+        Returns:
+            QgsPointCloudLayer, or None when absent, not a point cloud
+            or point cloud filtering is not usable
+        """
+        if not QGIS_AVAILABLE:
+            return None
+
+        try:
+            project = QgsProject.instance()
+            layer = project.mapLayer(layer_id)
+            if _is_point_cloud_layer(layer):
+                return layer
+        except Exception as e:
+            logger.warning(f"Failed to get point cloud layer {layer_id}: {e}")
+
+        return None
+
+    def get_all_point_cloud_layers(self) -> List[Any]:
+        """
+        Get all point cloud layers in the project.
+
+        Returns:
+            List of QgsPointCloudLayer (empty when point cloud filtering is not usable)
+        """
+        if not QGIS_AVAILABLE:
+            return []
+
+        try:
+            project = QgsProject.instance()
+            return [
+                layer for layer in project.mapLayers().values()
+                if _is_point_cloud_layer(layer)
+            ]
+        except Exception as e:
+            logger.warning(f"Failed to get point cloud layers: {e}")
             return []
 
     def layer_exists(self, layer_id: str) -> bool:

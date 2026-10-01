@@ -887,10 +887,19 @@ class ConfigurationManager(QObject):
         d = self.dockwidget
         # v4.2: Filter to show only vector layers WITH geometry (exclude non-spatial tables)
         # HasGeometry = PointLayer | LineLayer | PolygonLayer = 4 | 8 | 16 = 28
-        # This excludes tables without geometry (NoGeometry = 2)
+        # This excludes tables without geometry (NoGeometry = 2). The point cloud
+        # capability adds PointCloudLayer (512) when the feature is enabled.
+        flags = None
         try:
-            d.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.Filter.HasGeometry)
-            logger.info("comboBox_filtering_current_layer: Filter set to HasGeometry (exclude non-spatial tables)")
+            from ...adapters.qgis.point_cloud_capability import get_current_layer_combo_filters
+            flags = get_current_layer_combo_filters()
+        except Exception as e:
+            logger.debug(f"Point cloud combo filters unavailable: {e}")
+        try:
+            if flags is None:
+                flags = QgsMapLayerProxyModel.Filter.HasGeometry
+            d.comboBox_filtering_current_layer.setFilters(flags)
+            logger.info(f"comboBox_filtering_current_layer: Filter set to {flags!r} (exclude non-spatial tables)")
         except Exception as e:
             logger.warning(f"Could not set HasGeometry filter: {e}")
             # Fallback to VectorLayer only

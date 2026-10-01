@@ -27,6 +27,7 @@ from .backend_controller import BackendController  # noqa: F401
 from .favorites_controller import FavoritesController  # noqa: F401
 from .layer_sync_controller import LayerSyncController  # noqa: F401
 from .property_controller import PropertyController, PropertyType, PropertyChange  # noqa: F401
+from .point_cloud_ui_controller import PointCloudUIController  # noqa: F401
 from .integration import ControllerIntegration  # noqa: F401
 
 __all__ = [
@@ -52,5 +53,6 @@ __all__ = [
     'PropertyController',
     'PropertyType',
     'PropertyChange',
+    'PointCloudUIController',
     'ControllerIntegration',
 ]

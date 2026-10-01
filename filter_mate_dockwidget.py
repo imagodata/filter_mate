@@ -2431,6 +2431,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             'GeometryType.UnknownGeometry': QgsLayerItem.iconTable,
             'GeometryType.Null': QgsLayerItem.iconTable,
             'GeometryType.Unknown': QgsLayerItem.iconDefault,
+            'GeometryType.PointCloud': getattr(QgsLayerItem, 'iconPointCloud', QgsLayerItem.iconDefault),
             # Short format
             'Line': QgsLayerItem.iconLine,
             'Point': QgsLayerItem.iconPoint,
@@ -5066,7 +5067,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self.current_layer is not None and self.current_layer_selection_connection is not None:
             try:
                 self.current_layer.selectionChanged.disconnect(self.on_layer_selection_changed)
-            except (TypeError, RuntimeError):
+            except (TypeError, RuntimeError, AttributeError):
                 pass
             self.current_layer_selection_connection = None
 
@@ -5598,6 +5599,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try: _ = layer.id()
         except (RuntimeError, AttributeError):
             logger.warning("current_layer_changed: Layer C++ object deleted")
+            return
+        if self._controller_integration and self._controller_integration.delegate_point_cloud_layer_change(layer):
             return
         self._updating_current_layer = True
         # PERF 2026-09-12: "layer change → all widgets reloaded" latency; closed
@@ -6607,6 +6610,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             - Attempts to recover current_layer from saved ID or combobox if None
             - Export task syncs HAS_LAYERS_TO_EXPORT flag before execution
         """
+        if self._controller_integration and self._controller_integration.delegate_point_cloud_task(task_name):
+            return
         # FIX 2026-01-17 v3 + 2026-01-22: Define user action tasks early (needed for recovery logic)
         user_action_tasks = ('undo', 'redo', 'unfilter', 'reset', 'export')
         is_user_action = task_name in user_action_tasks

@@ -92,6 +92,25 @@ def sanitize_sql_identifier(identifier: str) -> str:
     return sanitized
 
 
+def _layer_count_label(layer) -> str:
+    """Return a count label for diagnostics: features (vector) or points (point cloud).
+
+    Args:
+        layer: QgsVectorLayer or QgsPointCloudLayer.
+
+    Returns:
+        str: ``"<n> features"``, ``"<n> points"`` or ``"n/a"`` when no count is available.
+    """
+    try:
+        if hasattr(layer, 'featureCount'):
+            return f"{layer.featureCount()} features"
+        if hasattr(layer, 'pointCount'):
+            return f"{layer.pointCount()} points"
+    except Exception as e:
+        logger.debug(f"[SQL]   Count unavailable: {e}")
+    return "n/a"
+
+
 def safe_set_subset_string(layer, subset_expression: str) -> bool:
     """
     Safely set subset string (filter) on a QGIS layer.
@@ -106,7 +125,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
     when comparing varchar fields to numeric literals.
 
     Args:
-        layer: QgsVectorLayer to filter
+        layer: QgsVectorLayer (or QgsPointCloudLayer) to filter
         subset_expression: SQL WHERE clause (without WHERE keyword)
 
     Returns:
@@ -268,7 +287,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                 # Additional diagnostics for failure
                 logger.warning("[SQL] ❌ FAILED - Diagnostics:")
                 logger.warning(f"[SQL]   Layer source: {layer.source()[:200]}...")
-                logger.warning(f"[SQL]   Feature count before: {layer.featureCount()}")
+                logger.warning(f"[SQL]   Count before: {_layer_count_label(layer)}")
                 logger.warning(f"[SQL]   Current subset: {layer.subsetString()[:200] if layer.subsetString() else 'None'}...")
 
                 # FIX v4.9.0: Improved provider error capture for PostgreSQL layers
@@ -311,7 +330,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                 # Log the full expression to a separate line for easy copy/paste
                 logger.warning(f"[SQL] Full expression that FAILED:\n{subset_expression}")
             else:
-                logger.debug(f"[SQL] ✓ Success - {layer.featureCount()} features after filter")
+                logger.debug(f"[SQL] ✓ Success - {_layer_count_label(layer)} after filter")
 
             return result
         else:

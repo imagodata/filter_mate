@@ -29,6 +29,16 @@ try:
     from qgis.gui import QgsMapLayerProxyModel
 except ImportError:
     from qgis.core import QgsMapLayerProxyModel
+try:
+    from .adapters.qgis.point_cloud_capability import get_filterable_layer_types, get_current_layer_combo_filters
+except ImportError:
+    def get_filterable_layer_types():
+        """Vector-only fallback when the point cloud capability module is unavailable."""
+        return (QgsVectorLayer,)
+
+    def get_current_layer_combo_filters():
+        """No combo filter override when the point cloud capability module is unavailable."""
+        return None
 from qgis.utils import iface
 
 import os.path
@@ -239,7 +249,8 @@ class FilterMateApp:
         service = self._get_layer_lifecycle_service()
         if service: return service.filter_usable_layers(layers, POSTGRESQL_AVAILABLE)
         # Fallback: minimal validation
-        return [layer_item for layer_item in layers if isinstance(layer_item, QgsVectorLayer) and layer_item.isValid() and is_layer_source_available(layer_item)]
+        filterable_types = get_filterable_layer_types() or (QgsVectorLayer,)
+        return [layer_item for layer_item in layers if isinstance(layer_item, filterable_types) and layer_item.isValid() and is_layer_source_available(layer_item)]
 
     def _on_layers_added(self, layers):
         """Signal handler for layersAdded: accumulate layers and process as single batch."""
@@ -788,6 +799,13 @@ class FilterMateApp:
                 success = self._app_initializer.initialize_application(is_first_run)
                 logger.debug(f"AppInitializer returned {success}")
                 if success:
+                    # The point cloud panel reads the app from the dock (filter history,
+                    # undo/redo buttons): expose it under its own name. Setting
+                    # dockwidget.app here would wake vector code paths that the
+                    # AppInitializer path never ran in 4.9.x (automatic add_layers from the
+                    # filtering and exporting controllers, deferred Filter clicks).
+                    if self.dockwidget is not None:
+                        self.dockwidget.filter_mate_app = self
                     # v4.5: Ensure signal connections even after AppInitializer success
                     # This is the simplified direct connection system
                     self._connect_layer_store_signals()
@@ -2847,13 +2865,15 @@ class FilterMateApp:
         try:
             if hasattr(self.dockwidget, 'comboBox_filtering_current_layer'):
                 # v4.2: Filter to show only vector layers WITH geometry (exclude non-spatial tables)
-                # HasGeometry = PointLayer | LineLayer | PolygonLayer (excludes NoGeometry tables)
-                self.dockwidget.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.Filter.HasGeometry)
+                # HasGeometry = PointLayer | LineLayer | PolygonLayer (excludes NoGeometry tables);
+                # the point cloud capability adds PointCloudLayer when the feature is enabled.
+                flags = get_current_layer_combo_filters()
+                self.dockwidget.comboBox_filtering_current_layer.setFilters(flags if flags is not None else QgsMapLayerProxyModel.Filter.HasGeometry)
         except Exception as e: logger.debug(f"ComboBox filter setup (non-critical): {e}")
 
         # Trigger layer change with active or first layer
         active = self.iface.activeLayer()
-        if active and isinstance(active, QgsVectorLayer) and active.id() in self.PROJECT_LAYERS:
+        if active and isinstance(active, get_filterable_layer_types() or (QgsVectorLayer,)) and active.id() in self.PROJECT_LAYERS:
             self.dockwidget.current_layer_changed(active)
             logger.info(f"UI refreshed with active layer: {active.name()}")
         elif self.PROJECT_LAYERS:

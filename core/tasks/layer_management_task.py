@@ -138,6 +138,28 @@ except ImportError:
 # BatchMetadataLoader is optional advanced feature
 BatchMetadataLoader = None
 
+# Point cloud registration (feature-flagged, QGIS >= 3.26). Both modules are
+# optional: without them the task behaves exactly as before (vector only).
+try:
+    from ...adapters.qgis.point_cloud_capability import get_filterable_layer_types, is_point_cloud_layer
+    from ..domain.point_cloud_support import build_point_cloud_layer_properties, ensure_point_cloud_layer_properties
+except ImportError:
+    def get_filterable_layer_types():
+        """Vector layers only when the point cloud capability is unavailable."""
+        return (QgsVectorLayer,)
+
+    def is_point_cloud_layer(layer):
+        """No point cloud support without the capability module."""
+        return False
+
+    def build_point_cloud_layer_properties(layer_id, layer_name, crs_authid, qgis_provider, default_is_linking=False):
+        """No point cloud template without the domain module."""
+        return {}
+
+    def ensure_point_cloud_layer_properties(layer_props, template):
+        """Nothing to complete without the domain module."""
+        return False
+
 
 class LayersManagementEngineTask(QgsTask):
     """
@@ -339,12 +361,13 @@ class LayersManagementEngineTask(QgsTask):
             if self.isCanceled() or result is False:
                 return False
 
+        filterable_types = get_filterable_layer_types() or (QgsVectorLayer,)
         total = len(self.layers)
         for i, layer in enumerate(self.layers):
             if total > 0:
                 self.setProgress((i / total) * 100)
             if self.task_action == 'add_layers':
-                if isinstance(layer, QgsVectorLayer):
+                if isinstance(layer, filterable_types):
                     if layer.id() not in self.project_layers.keys():
                         result = self.add_project_layer(layer)
                         # FIX: Don't stop on False - just skip non-spatial layers
@@ -352,7 +375,7 @@ class LayersManagementEngineTask(QgsTask):
                         if self.isCanceled():
                             return False
             elif self.task_action == 'remove_layers':
-                if isinstance(layer, QgsVectorLayer):
+                if isinstance(layer, filterable_types):
                     if layer.id() in self.project_layers.keys():
                         result = self.remove_project_layer(layer)
                         if self.isCanceled() or result is False:
@@ -971,6 +994,9 @@ class LayersManagementEngineTask(QgsTask):
         Returns:
             bool: True if successful, False otherwise
         """
+        if is_point_cloud_layer(layer):
+            return self._add_point_cloud_layer(layer)
+
         if not isinstance(layer, QgsVectorLayer) or not layer.isSpatial():
             # Log skipped non-spatial layers
             layer_name = layer.name() if hasattr(layer, 'name') else 'unknown'
@@ -1051,23 +1077,90 @@ class LayersManagementEngineTask(QgsTask):
 
         return True
 
+    def _add_point_cloud_layer(self, layer):
+        """Register a point cloud layer using only the QgsMapLayer API.
+
+        A point cloud has no fields, primary key or vector geometry: its
+        properties come from the domain template instead of the vector
+        detection helpers, and no spatial index is scheduled.
+
+        Args:
+            layer: QgsPointCloudLayer to register.
+
+        Returns:
+            bool: True if the layer was added to project_layers.
+        """
+        try:
+            crs_authid = layer.crs().authid()
+        except (RuntimeError, AttributeError):
+            crs_authid = ""
+        try:
+            qgis_provider = layer.providerType()
+        except (RuntimeError, AttributeError):
+            qgis_provider = ""
+
+        template = build_point_cloud_layer_properties(
+            layer.id(),
+            layer.name(),
+            crs_authid,
+            qgis_provider,
+            self._get_default_is_linking(),
+        )
+        if not all(section in template for section in ("infos", "exploring", "filtering")):
+            logger.warning(f"add_project_layer: no point cloud template available, skipping '{layer.name()}'")
+            return False
+
+        layer_variables = self._load_existing_layer_properties(layer)
+        is_new_layer = not layer_variables
+
+        if is_new_layer:
+            layer_variables = template
+            self._set_layer_variables(layer, layer_variables)
+        else:
+            ensure_point_cloud_layer_properties(layer_variables, template)
+
+        if self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == 0:
+            properties_count = (
+                len(layer_variables["infos"]) +
+                len(layer_variables["exploring"]) +
+                len(layer_variables["filtering"])
+            )
+            self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] = properties_count
+
+        layer_props = {
+            "infos": layer_variables["infos"],
+            "exploring": layer_variables["exploring"],
+            "filtering": layer_variables["filtering"]
+        }
+        layer_props["infos"]["layer_id"] = layer.id()
+
+        if is_new_layer:
+            self.insert_properties_to_spatialite(layer.id(), layer_props)
+
+        self.project_layers[layer.id()] = layer_props
+        logger.info(
+            f"add_project_layer: registered point cloud layer '{layer.name()}' "
+            f"(provider={qgis_provider}, crs={crs_authid}, new={is_new_layer})"
+        )
+        return True
+
     def remove_project_layer(self, layer):
         """
         Remove a layer from project tracking.
 
         Args:
-            layer: QgsVectorLayer object or layer ID string to remove
+            layer: Filterable layer object (vector or point cloud) or layer ID string to remove
 
         Returns:
             bool: True if successful, False otherwise
         """
-        # Handle both QgsVectorLayer and str (layer_id) for backwards compatibility
-        if isinstance(layer, QgsVectorLayer):
+        # Handle both layer objects and str (layer_id) for backwards compatibility
+        if isinstance(layer, get_filterable_layer_types() or (QgsVectorLayer,)):
             layer_id = layer.id()
         elif isinstance(layer, str):
             layer_id = layer
         else:
-            logger.warning(f"remove_project_layer: unexpected type {type(layer)}, expected QgsVectorLayer or str")
+            logger.warning(f"remove_project_layer: unexpected type {type(layer)}, expected a filterable layer or str")
             return False
 
         if layer_id not in self.project_layers:
