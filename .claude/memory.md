@@ -644,3 +644,10 @@ Result: Que veux-tu faire dans cette session ?
 - [2026-09-14 soir] Liste d'entités PostgreSQL : pas d'ORDER BY sur la requête limitée (`_orders_server_side`) —
   QGIS ne pousse pas l'ORDER BY au serveur (table entière rapatriée : 13 s sur 370 k lignes, 24 ms sans tri).
   Ne pas réintroduire de tri serveur pour postgres sans mesure.
+- [2026-09-30] Site refondu (branche `claude/website-remaster`, worktree `../filter_mate-site`) : `website/assets/fm.css`
+  + `fm.js` communs, vidéos de fond `website/video/<clip>.mp4|webp` tournées par `scripts/site_videos.py` (QGIS 4.2,
+  BD TOPO 31) et montées par `scripts/site_video_render.py`. Dans un moteur d'étapes « True = ré-armer »,
+  `iface.setActiveLayer()` renvoie True : l'envelopper (sinon 100 s d'attente, pris à tort pour un gel).
+- [2026-10-01] Site publié (PR #88–#92). Vidéos : `website/video/*.mp4|webp` (1280×720, ≈3 Mo). Pour refaire une
+  vidéo : lanceurs `%LOCALAPPDATA%\Temp\fm_video\clip.sh <scène>` puis `render.sh <scène>` (scripts pris sur origin/main).
+  Le QGIS OSGeo4W de l'utilisateur partage le profil QGIS4 : les prises restaurent désormais l'état de sa fenêtre.
