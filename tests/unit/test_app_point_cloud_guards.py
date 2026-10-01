@@ -128,6 +128,15 @@ class TestAppStaticGuards:
     def test_first_class_is_still_the_app(self):
         assert _first_class(_parse(_APP)).name == "FilterMateApp"
 
+    def test_app_initializer_path_does_not_attach_dockwidget_app(self):
+        """Only the legacy fallback sets ``dockwidget.app``. Setting it on the
+        AppInitializer path woke vector code that 4.9.x never ran there
+        (automatic add_layers from the filtering and exporting controllers);
+        the point cloud panel gets the app as ``filter_mate_app`` instead."""
+        source = _APP.read_text(encoding="utf-8")
+        assert source.count("self.dockwidget.app = self") == 1
+        assert source.count("self.dockwidget.filter_mate_app = self") == 1
+
 
 @pytest.mark.unit
 class TestConfigurationManagerStaticGuards:

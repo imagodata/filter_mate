@@ -696,3 +696,21 @@ class TestHandleTask:
         dock.app = None
 
         assert controller.handle_task('undo') is True
+
+
+@pytest.mark.unit
+class TestAppLookup:
+    """The app comes from ``filter_mate_app`` (AppInitializer path), else ``app`` (legacy path)."""
+
+    def test_prefers_filter_mate_app(self, controller, dock):
+        preferred = MagicMock()
+        dock.filter_mate_app = preferred
+        assert controller._app() is preferred
+
+    def test_falls_back_to_dock_app(self, controller, dock):
+        assert getattr(dock, 'filter_mate_app', None) is None
+        assert controller._app() is dock.app
+
+    def test_none_when_no_app_is_attached(self, controller, dock):
+        dock.app = None
+        assert controller._app() is None

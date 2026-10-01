@@ -799,11 +799,13 @@ class FilterMateApp:
                 success = self._app_initializer.initialize_application(is_first_run)
                 logger.debug(f"AppInitializer returned {success}")
                 if success:
-                    # FIX: AppInitializer never set dockwidget.app back (only the legacy
-                    # fallback below did), so any getattr(dockwidget, 'app', None) consumer
-                    # (undo/redo, canvas refresh, property persistence) silently no-op'd.
+                    # The point cloud panel reads the app from the dock (filter history,
+                    # undo/redo buttons): expose it under its own name. Setting
+                    # dockwidget.app here would wake vector code paths that the
+                    # AppInitializer path never ran in 4.9.x (automatic add_layers from the
+                    # filtering and exporting controllers, deferred Filter clicks).
                     if self.dockwidget is not None:
-                        self.dockwidget.app = self
+                        self.dockwidget.filter_mate_app = self
                     # v4.5: Ensure signal connections even after AppInitializer success
                     # This is the simplified direct connection system
                     self._connect_layer_store_signals()

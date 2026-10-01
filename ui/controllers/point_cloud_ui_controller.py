@@ -322,8 +322,13 @@ class PointCloudUIController(BaseController):
             result = service.clear(layer)
         self._after_subset_change(layer, result)
 
+    def _app(self) -> Any:
+        """The FilterMate app: ``filter_mate_app`` (AppInitializer path) or ``app`` (legacy path)."""
+        dw = self.dockwidget
+        return getattr(dw, 'filter_mate_app', None) or getattr(dw, 'app', None)
+
     def _handle_undo_redo(self, task_name: str) -> None:
-        app = getattr(self.dockwidget, 'app', None)
+        app = self._app()
         if app is None:
             logger.warning(f"[PC] {task_name} ignored: app not attached to the dockwidget")
             return
@@ -333,8 +338,7 @@ class PointCloudUIController(BaseController):
         self._refresh_current_subset_label()
 
     def _after_subset_change(self, layer: Any, result: Any) -> None:
-        dw = self.dockwidget
-        app = getattr(dw, 'app', None)
+        app = self._app()
         self._refresh_point_cloud_canvas(layer, app)
         self._mark_subset_state(layer, bool(result.subset_string) if result.success else None)
         self._update_undo_redo_buttons()
@@ -387,7 +391,7 @@ class PointCloudUIController(BaseController):
 
     def _ensure_service(self) -> Any:
         """Create the service once and keep its history bound to ``app.history_manager``."""
-        history = getattr(getattr(self.dockwidget, 'app', None), 'history_manager', None)
+        history = getattr(self._app(), 'history_manager', None)
         if self._service is None:
             try:
                 from ...adapters.qgis.point_cloud_layer_adapter import apply_point_cloud_subset, get_point_cloud_subset
@@ -528,7 +532,7 @@ class PointCloudUIController(BaseController):
             logger.debug(f"[PC] layer combo not synchronized: {e}")
 
     def _update_undo_redo_buttons(self) -> None:
-        self._call(getattr(self.dockwidget, 'app', None), 'update_undo_redo_buttons')
+        self._call(self._app(), 'update_undo_redo_buttons')
 
     # === Layer signal ===
 
