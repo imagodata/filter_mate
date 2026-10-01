@@ -49,6 +49,102 @@
     const autoplay = !reduce && !frugal;
     const videos = Array.from(document.querySelectorAll('video[data-src]'));
 
+    // ---------------------------------------------------------------- home scroll aids
+    // Keep scrolling native: add orientation and shortcuts without intercepting
+    // the wheel, trackpad, Page Down or keyboard navigation.
+    if (document.body.classList.contains('home')) {
+        const french = document.documentElement.lang === 'fr';
+        const sectionData = french
+            ? [
+                ['top', 'Accueil'],
+                ['workflow', 'Méthode'],
+                ['examples', 'Exemples'],
+                ['capabilities', 'Fonctions'],
+                ['performance', 'Mesures'],
+                ['install', 'Installer'],
+            ]
+            : [
+                ['top', 'Top'],
+                ['workflow', 'Workflow'],
+                ['examples', 'Examples'],
+                ['capabilities', 'Features'],
+                ['performance', 'Performance'],
+                ['install', 'Install'],
+            ];
+        const sections = sectionData
+            .map(([id, label]) => ({ id, label, node: document.getElementById(id) }))
+            .filter((item) => item.node);
+
+        const progress = document.createElement('div');
+        progress.className = 'scroll-progress';
+        progress.setAttribute('role', 'progressbar');
+        progress.setAttribute('aria-label', french ? 'Progression dans la page' : 'Page progress');
+        progress.setAttribute('aria-valuemin', '0');
+        progress.setAttribute('aria-valuemax', '100');
+        progress.setAttribute('aria-valuenow', '0');
+        document.body.appendChild(progress);
+
+        const rail = document.createElement('nav');
+        rail.className = 'scroll-rail';
+        rail.setAttribute('aria-label', french ? 'Sections de la page' : 'Page sections');
+        const railLinks = sections.map(({ id, label }) => {
+            const a = document.createElement('a');
+            a.href = '#' + id;
+            a.setAttribute('aria-label', label);
+            const tooltip = document.createElement('span');
+            tooltip.setAttribute('aria-hidden', 'true');
+            tooltip.textContent = label;
+            a.appendChild(tooltip);
+            rail.appendChild(a);
+            return a;
+        });
+        document.body.appendChild(rail);
+
+        const backToTop = document.createElement('button');
+        backToTop.className = 'back-to-top';
+        backToTop.type = 'button';
+        backToTop.setAttribute('aria-label', french ? 'Revenir en haut' : 'Back to top');
+        backToTop.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+        });
+        document.body.appendChild(backToTop);
+
+        let scrollTicking = false;
+        function updateScrollAids() {
+            const root = document.documentElement;
+            const maximum = Math.max(1, root.scrollHeight - window.innerHeight);
+            const ratio = Math.min(1, Math.max(0, window.scrollY / maximum));
+            const percent = Math.round(ratio * 100);
+            progress.style.transform = 'scaleX(' + ratio + ')';
+            progress.setAttribute('aria-valuenow', String(percent));
+            backToTop.classList.toggle('visible', window.scrollY > window.innerHeight * 0.8);
+
+            const marker = window.scrollY + window.innerHeight * 0.42;
+            let activeIndex = 0;
+            sections.forEach((section, index) => {
+                if (section.node.offsetTop <= marker) activeIndex = index;
+            });
+            railLinks.forEach((a, index) => {
+                const active = index === activeIndex;
+                a.classList.toggle('active', active);
+                if (active) a.setAttribute('aria-current', 'location');
+                else a.removeAttribute('aria-current');
+            });
+            scrollTicking = false;
+        }
+        function requestScrollUpdate() {
+            if (!scrollTicking) {
+                scrollTicking = true;
+                window.requestAnimationFrame(updateScrollAids);
+            }
+        }
+        window.addEventListener('scroll', requestScrollUpdate, { passive: true });
+        window.addEventListener('resize', requestScrollUpdate, { passive: true });
+        window.addEventListener('load', requestScrollUpdate, { once: true });
+        updateScrollAids();
+    }
+
     function load(v) {
         if (!v.src) {
             v.src = v.dataset.src;
