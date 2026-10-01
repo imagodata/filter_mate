@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilterMate Roadmap — Raster & LiDAR Filtering</title>
-    <meta name="description" content="FilterMate roadmap: upcoming raster zonal statistics filtering and LiDAR point cloud classification for QGIS.">
+    <title>FilterMate Roadmap — Proposed Raster & LiDAR Filtering</title>
+    <meta name="description" content="Proposed FilterMate roadmap for raster zonal-statistics filtering and LiDAR point-cloud classification in QGIS. Features, targets and schedule may change.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,10 +34,11 @@
     <div class="container">
         <div class="hero-badge fade-in">
             <span class="pulse"></span>
-            Coming in FilterMate 5.0
+            Proposed for FilterMate 5.0
         </div>
         <h1 class="fade-in fade-in-delay-1">Beyond Vectors:<br><span class="gradient">Raster & LiDAR Filtering</span></h1>
-        <p class="fade-in fade-in-delay-2">FilterMate is expanding into raster zonal statistics and point cloud classification filtering. Same simplicity, whole new dimensions.</p>
+        <p class="fade-in fade-in-delay-2">A proposed direction for raster zonal statistics and point-cloud filtering, presented here for discussion and planning.</p>
+        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Planning document.</strong> FilterMate 4.9.2 filters vector layers. The features, performance targets and schedule below are not part of the current release and may change.</p>
         <div class="hero-stats fade-in fade-in-delay-3">
             <div class="hero-stat">
                 <div class="num">8</div>
@@ -64,7 +65,7 @@
                 Raster Filtering
             </div>
             <h2 class="section-title">Filter Vectors by What's Underneath</h2>
-            <p class="section-subtitle">Calculate raster statistics inside your polygons, then filter by the results. No other QGIS plugin does this.</p>
+            <p class="section-subtitle">The proposed workflow calculates raster statistics inside polygons, then uses those values as filter criteria.</p>
         </div>
 
         <div class="features-grid">
@@ -76,7 +77,7 @@
                 </div>
                 <div class="feature-title">Zonal Statistics as Filter</div>
                 <div class="feature-desc">
-                    Compute min, max, mean, standard deviation and median of raster values inside each polygon. Then filter: <em>"show only parcels where average elevation > 500m"</em> or <em>"exclude zones with high NDVI variance"</em>. Background threading keeps the UI responsive, even on 1 GB rasters.
+                    Compute min, max, mean, standard deviation and median of raster values inside each polygon. Then filter: <em>"show only parcels where average elevation &gt; 500 m"</em> or <em>"exclude zones with high NDVI variance"</em>. The design calls for background processing to keep the UI responsive.
                 </div>
                 <div class="feature-tags">
                     <span class="tag must">MUST</span>
@@ -91,7 +92,7 @@
                 </div>
                 <div class="feature-title">Raster Value Sampling</div>
                 <div class="feature-desc">
-                    Sample raster values at the centroid of every vector feature. Multi-band support, automatic CRS reprojection, and NoData handling built in. Under 500ms for 10,000 points.
+                    Sample raster values at the centroid of every vector feature, with multi-band support, CRS reprojection and NoData handling. Design target: under 500 ms for 10,000 points on the reference benchmark.
                 </div>
                 <div class="feature-tags">
                     <span class="tag must">MUST</span>
@@ -106,7 +107,7 @@
                 </div>
                 <div class="feature-title">Dynamic Raster Highlight</div>
                 <div class="feature-desc">
-                    When a zonal filter is active, pixels outside filtered polygons turn transparent in real time. Toggle the visual mask without losing your filter. Interactive performance on 500 MB rasters.
+                    When a zonal filter is active, pixels outside filtered polygons would turn transparent. The proposed visual mask can be toggled without losing the filter; interactive performance is a design target, not a current measurement.
                 </div>
                 <div class="feature-tags">
                     <span class="tag should">SHOULD</span>
@@ -173,7 +174,7 @@
                 LiDAR & Point Cloud
             </div>
             <h2 class="section-title">Filter 3D Point Clouds Natively</h2>
-            <p class="section-subtitle">The first QGIS plugin to bring interactive filtering to point clouds. Classification, elevation, intensity &mdash; all filterable.</p>
+            <p class="section-subtitle">A proposed interface for filtering point clouds by classification, elevation, intensity and other attributes.</p>
         </div>
 
         <div class="features-grid">
@@ -185,7 +186,7 @@
                 </div>
                 <div class="feature-title">ASPRS Classification Filter</div>
                 <div class="feature-desc">
-                    Check and uncheck point classes visually: Ground, Vegetation, Buildings, Water, Noise and more. Standard ASPRS labels (0-18) with human-readable names. Only classes present in your data are shown. Applies instantly via <code>setSubsetString</code>.
+                    Check and uncheck point classes visually: Ground, Vegetation, Buildings, Water, Noise and more. Standard ASPRS labels (0–18) would use readable names, with only the classes found in the data displayed.
                 </div>
                 <div class="feature-tags">
                     <span class="tag should">SHOULD</span>
@@ -252,7 +253,7 @@
                 Roadmap
             </div>
             <h2 class="section-title">Sprint Timeline</h2>
-            <p class="section-subtitle">5 sprints from foundations to FilterMate 5.0. Raster ships first, then point cloud.</p>
+            <p class="section-subtitle">A draft sequence of five estimated sprints, starting with raster foundations and then point-cloud support.</p>
         </div>
 
         <div class="timeline fade-in">
@@ -260,14 +261,14 @@
                 <div class="timeline-dot s0">0</div>
                 <div class="timeline-sprint">Sprint 0 &mdash; Foundations (1.5 weeks)</div>
                 <div class="timeline-title">Raster Foundations & Cherry-Pick</div>
-                <div class="timeline-desc">Merge raster domain layer from development branch. Wire dual-panel UI into refactored dockwidget. All 600+ existing tests pass with zero regressions.</div>
+                <div class="timeline-desc">Merge the raster domain layer from the development branch, wire the dual-panel UI into the refactored dockwidget and keep the existing test suite passing.</div>
             </div>
 
             <div class="timeline-item">
                 <div class="timeline-dot s1">1</div>
                 <div class="timeline-sprint">Sprint 1 &mdash; Raster Sampling (1.5 weeks)</div>
                 <div class="timeline-title">Raster Info + Value Sampling</div>
-                <div class="timeline-desc">Display raster metadata. Sample values at polygon centroids with auto-reprojection. Multi-band selection. < 500ms for 10k features.</div>
+                <div class="timeline-desc">Display raster metadata, sample values at polygon centroids with automatic reprojection and add multi-band selection. Target benchmark: under 500 ms for 10,000 features.</div>
                 <div class="timeline-milestone">Alpha Raster</div>
             </div>
 
@@ -275,7 +276,7 @@
                 <div class="timeline-dot s2">2</div>
                 <div class="timeline-sprint">Sprint 2 &mdash; Zonal Stats (2.5 weeks)</div>
                 <div class="timeline-title">Zonal Statistics + Interactive Histogram</div>
-                <div class="timeline-desc">Background-threaded numpy-based zonal statistics. Filter polygons by stat thresholds. Interactive histogram for threshold picking. 100 polygons / 1 GB raster &lt; 10s.</div>
+                <div class="timeline-desc">Background zonal statistics, polygon filtering by thresholds and an interactive histogram. Target benchmark: 100 polygons on a 1 GB raster in under 10 seconds.</div>
                 <div class="timeline-milestone">Beta Raster</div>
             </div>
 

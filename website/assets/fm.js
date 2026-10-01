@@ -10,6 +10,24 @@
         toggle.addEventListener('click', () => {
             const open = links.classList.toggle('open');
             toggle.setAttribute('aria-expanded', String(open));
+            toggle.setAttribute('aria-label', open
+                ? (document.documentElement.lang === 'fr' ? 'Fermer le menu' : 'Close menu')
+                : (document.documentElement.lang === 'fr' ? 'Ouvrir le menu' : 'Open menu'));
+        });
+        links.addEventListener('click', (e) => {
+            if (e.target.closest('a') && links.classList.contains('open')) {
+                links.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', document.documentElement.lang === 'fr' ? 'Ouvrir le menu' : 'Open menu');
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && links.classList.contains('open')) {
+                links.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', document.documentElement.lang === 'fr' ? 'Ouvrir le menu' : 'Open menu');
+                toggle.focus();
+            }
         });
     }
     if (nav && nav.classList.contains('on-video')) {
@@ -75,6 +93,15 @@
         btn.addEventListener('click', () => {
             const holder = btn.closest('.sheet, .band');
             const v = holder && holder.querySelector('video');
+            const directSrc = btn.dataset.video;
+            if (directSrc && lightbox && lbVideo) {
+                lbVideo.src = directSrc;
+                lbVideo.poster = btn.dataset.poster || '';
+                lightbox.showModal();
+                const p = lbVideo.play();
+                if (p && p.catch) p.catch(() => {});
+                return;
+            }
             if (!v) return;
             if (holder.classList.contains('band') && lightbox && lbVideo) {
                 // documentation: a larger player with controls
