@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilterMate, spatial filtering for QGIS</title>
-    <meta name="description" content="Pick a place, a feature or an expression: FilterMate filters every layer of your QGIS project around it, on PostGIS, GeoPackage, Spatialite or shapefiles, without writing SQL.">
-    <meta property="og:title" content="FilterMate, spatial filtering for QGIS">
-    <meta property="og:description" content="Pick a place, a feature or an expression. FilterMate filters every layer of your QGIS project around it.">
+    <title>FilterMate — Spatial filtering for QGIS</title>
+    <meta name="description" content="Filter every target layer in a QGIS project from one feature, selection or expression. FilterMate works with PostGIS, GeoPackage, SpatiaLite and other vector sources, without writing SQL.">
+    <meta property="og:title" content="FilterMate — Spatial filtering for QGIS">
+    <meta property="og:description" content="Choose a place or an expression, then filter every relevant layer around it — without writing SQL.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/">
     <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
-    <link rel="alternate" hreflang="fr" href="index.fr.html">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
+    <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,13 +21,13 @@
     <link rel="stylesheet" href="assets/fm.css">
     <link rel="preload" as="image" href="video/hero.webp">
 </head>
-<body>
+<body class="home">
 <a class="skip" href="#main">Skip to content</a>
 
 <nav class="nav on-video" aria-label="Main">
-    <a href="index.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
-    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <a href="index.html" class="nav-brand" aria-current="page"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
     <ul class="nav-links" id="navLinks">
         <li><a href="guide.html">User guide</a></li>
@@ -37,181 +40,110 @@
 </nav>
 
 <main id="main">
-
-<section class="sheet sheet-hero" id="top" aria-labelledby="hero-title">
+<header class="home-hero" id="top">
     <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
-    <div class="sheet-scrim"></div>
-    <div class="cartouche">
-        <h1 class="wordmark" id="hero-title"><img src="logo.png" alt="" width="76" height="76">FilterMate</h1>
-        <p class="lead">Pick a place, a feature or an expression. FilterMate filters every layer of your QGIS project around it, on PostGIS, GeoPackage, Spatialite or shapefiles, without a line of SQL.</p>
-        <ul class="legend" aria-label="What the video shows">
-            <li><i style="--c:#ffd83d"></i>Saint-Gaudens, picked among 930 communes<span></span></li>
-            <li><i style="--c:#d64545"></i>Buildings kept<b>12,380 of 1,173,829</b></li>
-            <li><i class="line" style="--c:#3b3b3b"></i>Road segments kept<b>2,902 of 383,112</b></li>
-        </ul>
-        <div class="cartouche-actions">
-            <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                Install from QGIS</a>
-            <a class="btn btn-ghost" href="guide.html">Read the guide</a>
-            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+    <div class="home-hero-scrim"></div>
+    <div class="home-container home-hero-inner">
+        <div class="home-hero-copy">
+            <p class="eyebrow"><span></span>Open-source QGIS plugin</p>
+            <h1>Filter a whole QGIS project from one place.</h1>
+            <p class="home-lead">Choose a feature, a list or a QGIS expression. FilterMate applies the spatial rule to every target layer at once — on GeoPackage, PostGIS, SpatiaLite and other vector sources, without writing SQL.</p>
+            <div class="home-actions">
+                <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Install from QGIS</a>
+                <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Watch the FilterMate overview"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch the overview</button>
+                <a class="home-text-link" href="guide.html">Read the guide <span aria-hidden="true">→</span></a>
+            </div>
+            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 and Qt6</p>
         </div>
-        <p class="aside">Free and open source, for QGIS 3.22 to QGIS 4.</p>
     </div>
-    <button class="watch close-watch" type="button">Close</button>
     <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne. Recorded in QGIS 4.2 with FilterMate 4.9.2.</p>
-</section>
+</header>
 
-<section class="sheet" id="explore" aria-labelledby="explore-title">
-    <video class="sheet-video" muted loop playsinline preload="none" poster="video/explore.webp" data-src="video/explore.mp4" aria-hidden="true"></video>
-    <div class="sheet-scrim"></div>
-    <div class="cartouche">
-        <h2 id="explore-title">Find the feature first</h2>
-        <p>Type a name, tick a few features in a list, or write an expression. With tracking on, the map follows the selection, so you see what you are about to filter with.</p>
-        <ul class="legend" aria-label="What the video shows">
-            <li><i style="--c:#ffd83d"></i>Single selection: Toulouse<span></span></li>
-            <li><i style="--c:#ffd83d"></i>Multiple selection: four neighbours<span></span></li>
-            <li><i style="--c:#ffd83d"></i>Expression: population above 20,000<b>7 communes</b></li>
-        </ul>
-        <div class="cartouche-actions">
-            <a href="guide.html#exploring">Exploring a layer, in the guide</a>
-            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        </div>
+<section class="proof-strip" aria-label="Key benefits">
+    <div class="home-container proof-grid">
+        <div><strong>Filter in place</strong><span>Your source data stays where it is.</span></div>
+        <div><strong>One action, many layers</strong><span>Apply the same geographic scope consistently.</span></div>
+        <div><strong>Undo and replay</strong><span>Keep history and reusable favorites in the project.</span></div>
     </div>
-    <button class="watch close-watch" type="button">Close</button>
-    <p class="credit">BD TOPO® 3.5 © IGN, communes of Haute-Garonne.</p>
 </section>
 
-<section class="sheet" id="filter" aria-labelledby="filter-title">
-    <video class="sheet-video" muted loop playsinline preload="none" poster="video/buffer.webp" data-src="video/buffer.mp4" aria-hidden="true"></video>
-    <div class="sheet-scrim"></div>
-    <div class="cartouche">
-        <h2 id="filter-title">Then filter everything around it</h2>
-        <p>Choose the layers to filter, a spatial predicate and, if you need one, a buffer. Filter rewrites the subset of every target layer at once; Undo brings back the previous state.</p>
-        <ul class="legend" aria-label="What the video shows">
-            <li><i style="--c:#5aa9ff"></i>Water surfaces of Grenade, all selected<b>77</b></li>
-            <li><i style="--c:#d64545"></i>Buildings within 300 m<b>14,181</b></li>
-            <li><i style="--c:#d64545"></i>Buildings within 100 m<b>2,727</b></li>
-        </ul>
-        <div class="cartouche-actions">
-            <a href="stories.html#s3">Story: how far the Garonne can reach</a>
-            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+<section class="home-section workflow" id="workflow" aria-labelledby="workflow-title">
+    <div class="home-container">
+        <div class="section-heading">
+            <p class="section-kicker">The workflow</p>
+            <h2 id="workflow-title">One selection. Every relevant layer.</h2>
+            <p>FilterMate turns a recurring multi-layer GIS operation into three explicit steps. You can inspect the selection and settings before anything changes.</p>
         </div>
-    </div>
-    <button class="watch close-watch" type="button">Close</button>
-    <p class="credit">BD TOPO® 3.5 © IGN, Grenade (Haute-Garonne).</p>
-</section>
-
-<section class="sheet" id="scale" aria-labelledby="scale-title">
-    <video class="sheet-video" muted loop playsinline preload="none" poster="video/bridges.webp" data-src="video/bridges.mp4" aria-hidden="true"></video>
-    <div class="sheet-scrim"></div>
-    <div class="cartouche">
-        <h2 id="scale-title">A whole department, as it comes</h2>
-        <p>Every video on this page runs on the complete BD TOPO of Haute-Garonne: one 2.9 GB GeoPackage, 1.17 million buildings, nothing clipped beforehand. FilterMate asks each table's R-tree index first, so the twelve layers of a commune filter in under a second. On PostgreSQL the work stays in the database.</p>
-        <ul class="legend" aria-label="What the video shows">
-            <li><i style="--c:#6b7280"></i>Toulouse Métropole<b>37 communes</b></li>
-            <li><i class="line" style="--c:#3b3b3b"></i>Road segments crossing a permanent river<b>1,112</b></li>
-            <li><i class="line" style="--c:#b03fb0"></i>Bridges and other structures<b>190</b></li>
-        </ul>
-        <div class="cartouche-actions">
-            <a href="stories.html#s4">Story: every bridge in the metropolis</a>
-            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        </div>
-    </div>
-    <button class="watch close-watch" type="button">Close</button>
-    <p class="credit">BD TOPO® 3.5 © IGN, Toulouse Métropole.</p>
-</section>
-
-<section class="sheet" id="keep" aria-labelledby="keep-title">
-    <video class="sheet-video" muted loop playsinline preload="none" poster="video/favorites.webp" data-src="video/favorites.mp4" aria-hidden="true"></video>
-    <div class="sheet-scrim"></div>
-    <div class="cartouche">
-        <h2 id="keep-title">Keep what works</h2>
-        <p>Each filter goes into a history of the project that you can undo and redo, even after restarting QGIS. Save a configuration as a favorite, replay it tomorrow, share it with your team.</p>
-        <ul class="legend" aria-label="What the video shows">
-            <li><i style="--c:#ffd83d"></i>Saved as a favorite: PPRI Garonne 300 m<span></span></li>
-            <li><i style="--c:#f3f4ef"></i>All filters cleared<span></span></li>
-            <li><i style="--c:#d64545"></i>Replayed from the favorites menu<span></span></li>
-        </ul>
-        <div class="cartouche-actions">
-            <a href="stories.html#s7">Story: the team's query library</a>
-            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        </div>
-    </div>
-    <button class="watch close-watch" type="button">Close</button>
-    <p class="credit">BD TOPO® 3.5 © IGN, Grenade (Haute-Garonne).</p>
-</section>
-
-<section class="sheet" id="export" aria-labelledby="export-title">
-    <video class="sheet-video" muted loop playsinline preload="none" poster="video/export.webp" data-src="video/export.mp4" aria-hidden="true"></video>
-    <div class="sheet-scrim"></div>
-    <div class="cartouche">
-        <h2 id="export-title">Take the result with you</h2>
-        <p>Export the filtered layers to one GeoPackage with their styles and a QGIS project inside, or to any format QGIS writes, and zip it for delivery. Open the file and the whole map comes back.</p>
-        <ul class="legend" aria-label="What the video shows">
-            <li><i style="--c:#ffd83d"></i>Layers of Saint-Gaudens<b>12</b></li>
-            <li><i style="--c:#589632"></i>GeoPackage, styles, ZIP<span></span></li>
-        </ul>
-        <div class="cartouche-actions">
-            <a href="stories.html#s1">Story: the commune dossier in three minutes</a>
-            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        </div>
-    </div>
-    <button class="watch close-watch" type="button">Close</button>
-    <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens (Haute-Garonne).</p>
-</section>
-
-<section class="sheet" id="automate" aria-labelledby="automate-title">
-    <video class="sheet-video" muted loop playsinline preload="none" poster="video/processing.webp" data-src="video/processing.mp4" aria-hidden="true"></video>
-    <div class="sheet-scrim"></div>
-    <div class="cartouche">
-        <h2 id="automate-title">Or run it from Processing</h2>
-        <p>The FilterMate algorithms sit in the Processing toolbox. Filter a batch of layers by expression from a model, a Python script or the batch interface.</p>
-        <ul class="legend" aria-label="What the video shows">
-            <li><i class="line" style="--c:#3b3b3b"></i>Road segments modified since 15 March 2025<b>173,616</b></li>
-            <li><i style="--c:#d64545"></i>Buildings modified<b>22,954</b></li>
-        </ul>
-        <div class="cartouche-actions">
-            <a href="stories.html#s8">Story: what changed since the last edition?</a>
-            <button class="watch" type="button" data-watch><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
-        </div>
-    </div>
-    <button class="watch close-watch" type="button">Close</button>
-    <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
-</section>
-
-<section class="sheet sheet-plain" id="install" aria-labelledby="install-title">
-    <div class="install">
-        <h2 id="install-title">Install FilterMate</h2>
-        <p>FilterMate is on the official QGIS plugin repository. It is free, open source and translated into 34 languages.</p>
-        <ol class="install-steps">
-            <li><strong>Open the plugin manager</strong><span>Plugins › Manage and Install Plugins…</span></li>
-            <li><strong>Search for FilterMate</strong><span>in the All tab</span></li>
-            <li><strong>Click Install</strong><span>the FilterMate button appears in the toolbar</span></li>
+        <ol class="workflow-grid">
+            <li><span class="step-number">01</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="21" cy="21" r="11"/><path d="m29 29 9 9M16 21h10M21 16v10"/></svg><h3>Choose the source</h3><p>Pick one feature, tick several, mirror a map selection or write a QGIS expression.</p></li>
+            <li><span class="step-number">02</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 35c6-14 15-22 32-22M8 35c11-3 20-2 32 0"/><circle cx="13" cy="31" r="3"/><path d="M31 12v24"/></svg><h3>Set the spatial rule</h3><p>Select the target layers, predicate and optional buffer. Preview exactly what drives the filter.</p></li>
+            <li><span class="step-number">03</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 9h28v30H10zM16 17h16M16 24h16M16 31h9"/><path d="m28 30 4 4 7-8"/></svg><h3>Use the result</h3><p>Review counts on the map, undo or save the filter, then export the scoped layers when needed.</p></li>
         </ol>
-        <dl class="facts">
-            <div><dt>3.22 to 4</dt><dd>QGIS versions, Qt5 and Qt6</dd></div>
-            <div><dt>4</dt><dd>backends: PostgreSQL, Spatialite, OGR, memory</dd></div>
-            <div><dt>34</dt><dd>interface languages</dd></div>
-            <div><dt>1,780</dt><dd>automated tests on every change</dd></div>
-        </dl>
-        <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-            Open on plugins.qgis.org</a>
-        <ul class="links">
-            <li><a href="guide.html">User guide</a></li>
-            <li><a href="stories.html">Use cases</a></li>
-            <li><a href="roadmap.html">Roadmap: raster and LiDAR</a></li>
-            <li><a href="https://github.com/imagodata/filter_mate">Source code on GitHub</a></li>
-            <li><a href="https://github.com/imagodata/filter_mate/issues">Report an issue</a></li>
-            <li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li>
-            <li><a href="https://www.youtube.com/watch?v=oQq45xZkzDc">Video tutorial on YouTube</a></li>
-        </ul>
-        <p class="site-foot">FilterMate 4.9.2, GPL-3.0, by imagodata. Map data in the videos: BD TOPO® © IGN, Licence Ouverte 2.0.</p>
+        <a class="inline-cta" href="guide.html#tutorial">Follow the first-filter tutorial <span aria-hidden="true">→</span></a>
     </div>
 </section>
 
+<section class="home-section examples" id="examples" aria-labelledby="examples-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row">
+            <div><p class="section-kicker">Verified examples</p><h2 id="examples-title">Real questions, visible results.</h2></div>
+            <p>These examples use the complete 2.9 GB BD TOPO GeoPackage for Haute-Garonne. The published counts were checked independently on the same data.</p>
+        </div>
+        <div class="example-grid">
+            <article class="example-card example-card-wide">
+                <button class="example-media" type="button" data-watch data-video="video/export.mp4" data-poster="video/export.webp" aria-label="Watch the commune export example"><img src="video/export.webp" alt="QGIS map of Saint-Gaudens filtered from the complete department" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch example</span></button>
+                <div class="example-body"><p class="example-label">Delivery · Saint-Gaudens</p><h3>A commune dossier from 12 department-wide layers</h3><p>Select the commune once, filter every thematic layer, then export one styled GeoPackage with its QGIS project.</p><dl class="result-list"><div><dt>12,380</dt><dd>buildings kept</dd></div><div><dt>&lt; 1 s</dt><dd>recorded filtering time</dd></div></dl><a href="stories.html#s1">Read the complete case <span aria-hidden="true">→</span></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="Watch the road noise example"><img src="video/noise.webp" alt="Buildings filtered around major roads in Muret" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <div class="example-body"><p class="example-label">Planning · Muret</p><h3>Road noise sectors with a variable buffer</h3><p>A QGIS expression sets 300 m or 250 m according to each road category.</p><p class="result"><strong>1,999</strong> buildings and <strong>74</strong> public buildings</p><a href="stories.html#s2">See settings and result <span aria-hidden="true">→</span></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Watch the bridge inventory example"><img src="video/bridges.webp" alt="Road and watercourse crossings in Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <div class="example-body"><p class="example-label">Structures · Toulouse Métropole</p><h3>Every crossing of a permanent watercourse</h3><p>The Cross predicate excludes roads that merely run alongside the water.</p><p class="result"><strong>1,112</strong> road segments and <strong>190</strong> structures</p><a href="stories.html#s4">See settings and result <span aria-hidden="true">→</span></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Watch the emergency access example"><img src="video/hamlets.webp" alt="Hamlets more than 200 metres from a paved road in Aspet" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <div class="example-body"><p class="example-label">Emergency access · Aspet</p><h3>Hamlets far from a paved road</h3><p>Disjoint plus a 200 m buffer finds what lies outside the service area.</p><p class="result"><strong>22</strong> hamlets beyond 200 m</p><a href="stories.html#s6">See settings and result <span aria-hidden="true">→</span></a></div>
+            </article>
+        </div>
+        <a class="inline-cta" href="stories.html">Browse all eight use cases <span aria-hidden="true">→</span></a>
+    </div>
+</section>
+
+<section class="home-section capabilities" id="capabilities" aria-labelledby="capabilities-title">
+    <div class="home-container capability-layout">
+        <div class="product-shot"><img src="img/guide/qgis-window.png" alt="FilterMate dock in QGIS, with layer selection, filtering controls and the map visible together" loading="lazy" width="1600" height="945"><p>The FilterMate dock stays beside the map and the Layers panel, so the source, rule and result remain visible together.</p></div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">Daily QGIS work</p><h2 id="capabilities-title">From exploration to a deliverable.</h2><p>FilterMate keeps the full workflow in one dock instead of scattering it across temporary layers and one-off queries.</p></div>
+            <ul class="capability-list"><li><strong>Explore</strong><span>Search, select on the map, track and zoom to the reference features.</span></li><li><strong>Filter</strong><span>Use eight spatial predicates, numeric or expression-based buffers and attribute filters.</span></li><li><strong>Recover</strong><span>Undo and redo filter states, including after reopening the QGIS project.</span></li><li><strong>Reuse</strong><span>Save complete configurations as favorites and share them with a team.</span></li><li><strong>Export</strong><span>Write filtered layers, styles and an embedded project to GeoPackage, or use other QGIS formats.</span></li><li><strong>Automate</strong><span>Apply one expression to several layers from Processing, a model or Python.</span></li></ul>
+            <a class="inline-cta" href="guide.html">Open the complete user guide <span aria-hidden="true">→</span></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section performance" id="performance" aria-labelledby="performance-title">
+    <div class="home-container performance-layout">
+        <div class="section-heading"><p class="section-kicker">Measured, not implied</p><h2 id="performance-title">Large source data can stay large.</h2><p>FilterMate chooses a backend for each vector layer and uses native spatial indexes where available. These figures describe the documented Haute-Garonne example, not a universal benchmark.</p><div class="backend-list" aria-label="Filtering backends"><span>PostgreSQL</span><span>SpatiaLite</span><span>OGR</span><span>Memory</span></div><a class="inline-cta inline-cta-light" href="guide.html#backends">Read the benchmark context <span aria-hidden="true">→</span></a></div>
+        <dl class="performance-stats"><div><dt>2.9 GB</dt><dd>source GeoPackage used for the examples</dd></div><div><dt>1,173,829</dt><dd>buildings in the source department</dd></div><div><dt>12 layers</dt><dd>filtered to Saint-Gaudens in under one second in the recorded run</dd></div></dl>
+    </div>
+</section>
+
+<section class="home-section install-section" id="install" aria-labelledby="install-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row"><div><p class="section-kicker">Free and open source</p><h2 id="install-title">Install FilterMate in QGIS.</h2></div><p>FilterMate is published in the official QGIS plugin repository under GPL-3.0.</p></div>
+        <ol class="install-steps"><li><strong>Open the plugin manager</strong><span>Plugins › Manage and Install Plugins…</span></li><li><strong>Search for FilterMate</strong><span>in the All tab</span></li><li><strong>Click Install Plugin</strong><span>then open FilterMate from its toolbar button</span></li></ol>
+        <div class="install-bottom"><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Open on plugins.qgis.org</a><dl class="install-facts"><div><dt>3.22–4.x</dt><dd>QGIS compatibility</dd></div><div><dt>34</dt><dd>interface languages</dd></div><div><dt>GPL-3.0</dt><dd>open-source licence</dd></div></dl></div>
+    </div>
+</section>
 </main>
+
+<footer class="home-footer">
+    <div class="home-container footer-grid"><div><a href="index.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Spatial filtering for QGIS, by imagodata.</p></div><ul><li><a href="guide.html">User guide</a></li><li><a href="stories.html">Use cases</a></li><li><a href="roadmap.html">Roadmap</a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Source code</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Report an issue</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
+    <div class="home-container footer-note">FilterMate 4.9.2 · Map data in videos and screenshots: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="Video"><video controls playsinline muted></video><form method="dialog"><button>Close</button></form></dialog>
 <script src="assets/fm.js"></script>
 </body>
 </html>
