@@ -110,6 +110,35 @@
         });
         document.body.appendChild(backToTop);
 
+        // Reveal content once as it enters the viewport. Content remains fully
+        // visible without JavaScript and when reduced motion is requested.
+        if (!reduce && 'IntersectionObserver' in window) {
+            const revealNodes = Array.from(document.querySelectorAll([
+                '.home-section .section-heading',
+                '.workflow-grid > li',
+                '.example-card',
+                '.product-shot',
+                '.capability-list > li',
+                '.performance-stats > div',
+                '.install-steps > li',
+                '.install-bottom',
+            ].join(',')));
+            revealNodes.forEach((node, index) => {
+                node.classList.add('scroll-reveal');
+                node.style.setProperty('--reveal-delay', String((index % 3) * 55) + 'ms');
+            });
+            document.body.classList.add('scroll-reveal-ready');
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+            revealNodes.forEach((node) => revealObserver.observe(node));
+        }
+
         let scrollTicking = false;
         function updateScrollAids() {
             const root = document.documentElement;
