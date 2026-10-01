@@ -150,8 +150,11 @@ a:hover { text-decoration-thickness: 2px; }
 .demo-download { margin-top: 24px; }
 .demo-download p { margin: 8px 0 14px; }
 .home:lang(zh) { --display: 'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif; --body: 'PingFang TC', 'Microsoft JhengHei', 'Microsoft YaHei', sans-serif; }
-.home:lang(zh) .home-hero h1 { max-width: 16em; font-size: clamp(2.6rem, 5.3vw, 5rem); line-height: 1.18; }
-.home:lang(zh) .section-heading h2 { line-height: 1.2; }
+.home:lang(ja) { --display: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif; --body: 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, sans-serif; line-break: strict; }
+.home:lang(ru) { --display: 'Segoe UI', Arial, sans-serif; --body: 'Segoe UI', Arial, sans-serif; }
+.home:lang(ru) .home-hero h1 { max-width: 17ch; font-size: clamp(2.4rem, 5vw, 5.5rem); line-height: 1.12; }
+.home:is(:lang(zh), :lang(ja)) .home-hero h1 { max-width: 16em; font-size: clamp(2.6rem, 5.3vw, 5rem); line-height: 1.18; }
+.home:is(:lang(zh), :lang(ja)) .section-heading h2 { line-height: 1.2; }
 .nav-links small { white-space: nowrap; font-size: .7em; }
 .lang a[aria-current="true"] { background: var(--select); color: var(--ink); }
 .nav .btn { min-height: 38px; padding: 0.4em 0.9em; }

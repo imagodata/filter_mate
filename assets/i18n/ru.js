@@ -1,0 +1,1 @@
+window.FM_I18N = {"openMenu": "Открыть меню", "closeMenu": "Закрыть меню", "progress": "Положение на странице", "pageSections": "Разделы страницы", "backTop": "Наверх", "sections": [["top", "Начало"], ["workflow", "Порядок работы"], ["examples", "Примеры"], ["capabilities", "Возможности"], ["performance", "Измерения"], ["install", "Установка"]]};
