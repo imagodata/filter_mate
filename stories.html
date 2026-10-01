@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FilterMate Use Cases — Eight business questions turned into QGIS filters</title>
-    <meta name="description" content="Eight FilterMate use cases, step by step, on the complete BD TOPO of a French department: commune dossier, road noise, flood setback, bridges, brush clearing, emergency access, favorites, Processing. QGIS screenshots at every step and verified counts.">
+    <meta name="description" content="Eight FilterMate use cases, step by step, on the complete BD TOPO of a French department: commune dossier, road proximity, watercourses, crossings, vegetation, remote hamlets, favorites, Processing. QGIS screenshots at every step and verified counts.">
     <meta name="keywords" content="QGIS, plugin, FilterMate, use cases, tutorial, spatial filter, BD TOPO, GeoPackage, buffer, predicate, favorites, Processing">
     <meta property="og:title" content="FilterMate Use Cases">
     <meta property="og:description" content="Eight business questions, eight filters: FilterMate step by step on 1.17 million buildings.">
@@ -12,6 +12,8 @@
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/stories.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/stories.html">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/stories.fr.html">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/stories.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,13 +46,13 @@
     <ol>
         <li><a href="#data"><span class="num">0</span>The playground</a></li>
         <li><a href="#s1"><span class="num">1</span>The commune dossier in three minutes</a></li>
-        <li><a href="#s2"><span class="num">2</span>Who lives next to the main roads?</a></li>
-        <li><a href="#s3"><span class="num">3</span>How far the Garonne can reach</a></li>
-        <li><a href="#s4"><span class="num">4</span>Every bridge in the metropolis</a></li>
+        <li><a href="#s2"><span class="num">2</span>Which buildings are near the main roads?</a></li>
+        <li><a href="#s3"><span class="num">3</span>Buildings near watercourses</a></li>
+        <li><a href="#s4"><span class="num">4</span>Find crossings to inspect</a></li>
         <li><a href="#s5"><span class="num">5</span>Clearing brush around homes</a></li>
-        <li><a href="#s6"><span class="num">6</span>Hamlets the rescue services reach badly</a></li>
+        <li><a href="#s6"><span class="num">6</span>Hamlets far from paved roads</a></li>
         <li><a href="#s7"><span class="num">7</span>The team's query library</a></li>
-        <li><a href="#s8"><span class="num">8</span>What changed since the last edition?</a></li>
+        <li><a href="#s8"><span class="num">8</span>Objects modified since a date</a></li>
         <li><a href="#replay"><span class="num">9</span>Replaying these stories at home</a></li>
     </ol>
 </aside>
@@ -74,13 +76,13 @@
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtered and ready to export" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Consultancy</span><h4>The commune dossier in three minutes</h4><p>Scope 12 department-wide layers to one commune and deliver a styled GeoPackage.</p><span class="story-outcome">12 layers · <strong>12,380 buildings</strong></span></div></a>
-        <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Noise sectors around the main roads of Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Planning</span><h4>Who lives next to the main roads?</h4><p>A buffer computed by expression from each road category.</p><span class="story-outcome"><strong>1,999 buildings</strong> · 74 public buildings</span></div></a>
-        <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Buildings filtered around the water surfaces of Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risk</span><h4>How far the Garonne can reach</h4><p>A 300 m then 100 m band, with undo and replay.</p><span class="story-outcome">300 m · <strong>14,181 buildings</strong></span></div></a>
-        <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Road crossings over permanent watercourses in Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Structures</span><h4>Every bridge in the metropolis</h4><p>Scope a 37-commune EPCI, then apply the Cross predicate.</p><span class="story-outcome"><strong>1,112 roads</strong> · 190 structures</span></div></a>
+        <a class="card story-card" href="#s2"><span class="story-card-media"><img src="video/noise.webp" alt="Buildings near the main roads of Muret" loading="lazy" width="1280" height="720"><b aria-hidden="true">02</b></span><div class="story-card-copy"><span class="badge">Planning</span><h4>Which buildings are near the main roads?</h4><p>A buffer computed by expression from each road category.</p><span class="story-outcome"><strong>1,999 buildings</strong> · 74 public buildings</span></div></a>
+        <a class="card story-card" href="#s3"><span class="story-card-media"><img src="video/buffer.webp" alt="Buildings filtered around the water surfaces of Grenade" loading="lazy" width="1280" height="720"><b aria-hidden="true">03</b></span><div class="story-card-copy"><span class="badge">Risk</span><h4>Buildings near watercourses</h4><p>A 300 m then 100 m band, with undo and replay.</p><span class="story-outcome">300 m · <strong>14,181 buildings</strong></span></div></a>
+        <a class="card story-card" href="#s4"><span class="story-card-media"><img src="video/bridges.webp" alt="Road crossings over permanent watercourses in Toulouse Métropole" loading="lazy" width="1280" height="720"><b aria-hidden="true">04</b></span><div class="story-card-copy"><span class="badge">Structures</span><h4>Find crossings to inspect</h4><p>Scope a 37-commune EPCI, then apply the Cross predicate.</p><span class="story-outcome"><strong>1,112 roads</strong> · 190 structures</span></div></a>
         <a class="card story-card" href="#s5"><span class="story-card-media"><img src="video/brush.webp" alt="Vegetation near homes in Bagnères-de-Luchon" loading="lazy" width="1280" height="720"><b aria-hidden="true">05</b></span><div class="story-card-copy"><span class="badge">Forestry</span><h4>Clearing brush around homes</h4><p>Expression selection, 50 m buffer, then an attribute filter.</p><span class="story-outcome"><strong>58 woods and forests</strong></span></div></a>
-        <a class="card story-card" href="#s6"><span class="story-card-media"><img src="video/hamlets.webp" alt="Hamlets outside the paved-road service area in Aspet" loading="lazy" width="1280" height="720"><b aria-hidden="true">06</b></span><div class="story-card-copy"><span class="badge">Rescue</span><h4>Hamlets the rescue services reach badly</h4><p>Disjoint finds what lies beyond a 200 m service area.</p><span class="story-outcome"><strong>22 hamlets</strong> beyond 200 m</span></div></a>
+        <a class="card story-card" href="#s6"><span class="story-card-media"><img src="video/hamlets.webp" alt="Hamlets more than 200 metres from paved roads in Aspet" loading="lazy" width="1280" height="720"><b aria-hidden="true">06</b></span><div class="story-card-copy"><span class="badge">Rescue</span><h4>Hamlets far from paved roads</h4><p>Disjoint finds what lies outside a 200 m buffer.</p><span class="story-outcome"><strong>22 hamlets</strong> beyond 200 m</span></div></a>
         <a class="card story-card" href="#s7"><span class="story-card-media"><img src="video/favorites.webp" alt="A saved filter replayed from the favorites menu" loading="lazy" width="1280" height="720"><b aria-hidden="true">07</b></span><div class="story-card-copy"><span class="badge">Team</span><h4>The query library</h4><p>Save, describe, replay and share a complete filter.</p><span class="story-outcome">Same result · <strong>one click</strong></span></div></a>
-        <a class="card story-card" href="#s8"><span class="story-card-media"><img src="video/processing.webp" alt="Batch filtering from the QGIS Processing toolbox" loading="lazy" width="1280" height="720"><b aria-hidden="true">08</b></span><div class="story-card-copy"><span class="badge">GIS administration</span><h4>What changed?</h4><p>Apply one date expression to four layers from Processing.</p><span class="story-outcome"><strong>4 layers</strong> · 1.6 million objects</span></div></a>
+        <a class="card story-card" href="#s8"><span class="story-card-media"><img src="video/processing.webp" alt="Batch filtering from the QGIS Processing toolbox" loading="lazy" width="1280" height="720"><b aria-hidden="true">08</b></span><div class="story-card-copy"><span class="badge">GIS administration</span><h4>Objects modified since a date</h4><p>Apply one date expression to four layers from Processing.</p><span class="story-outcome"><strong>4 layers</strong> · 1.6 million objects</span></div></a>
     </div>
 </header>
 
@@ -110,7 +112,7 @@
         <strong>The common thread.</strong> Every story follows the same three beats: <em>scope</em> the territory with a first filter
         (a commune or an EPCI as source layer, every other layer as target), <em>ask the business question</em> with a second filter whose
         source is an already scoped layer, then <em>read the result</em> in the Layers panel and on the map. The timings quoted come from
-        <code>filtermate.log</code> on an ordinary laptop.
+        <code>filtermate.log</code>. Hardware and cache conditions were not recorded: these observations describe individual runs, not a reproducible benchmark.
     </div>
     <div class="callout warn">
         <strong>One rule to know.</strong> On GeoPackage, a new spatial filter applied to a target layer replaces that layer's previous spatial filter;
@@ -134,22 +136,22 @@
     </div>
     <ol class="steps">
         <li><strong>Load the 13 layers and open FilterMate.</strong> The Layers panel shows the counts of the whole department: 1,173,829 buildings, 383,112 road segments. Click <em>commune</em>: it becomes the source layer. In the Exploring area, tick <strong>Single selection</strong>, set the display expression to <code>"nom_officiel"</code> and type "Saint-Gaudens" in the list. The <strong>Tracking</strong> button of the Exploring column being on, the canvas recentres on the commune by itself.
-            <figure><img src="img/stories/s1-01.webp" alt="Step 1: the commune of Saint-Gaudens is picked in single selection, the canvas has recentred on it, the Layers panel shows department-wide counts" loading="lazy"><figcaption>Step 1. The commune is selected (yellow highlight); around it the whole department is still loaded.</figcaption></figure>
+            <figure><img src="img/stories/s1-01.webp" alt="Step 1: the commune of Saint-Gaudens is picked in single selection, the canvas has recentred on it, the Layers panel shows department-wide counts" loading="lazy" width="1600" height="973"><figcaption>Step 1. The commune is selected (yellow highlight); around it the whole department is still loaded.</figcaption></figure>
         </li>
         <li><strong>Tick every target.</strong> Filtering tab, <strong>Layers to filter</strong> row: right-click in the list, then <em>Select All</em>. The <strong>Intersect</strong> predicate is ticked, the Buffer row stays off.
-            <figure><img src="img/stories/s1-02.webp" alt="Step 2: the Layers to filter row lists the 12 target layers, Intersect is ticked" loading="lazy"><figcaption>Step 2. Twelve target layers, one predicate, no buffer.</figcaption></figure>
+            <figure><img src="img/stories/s1-02.webp" alt="Step 2: the Layers to filter row lists the 12 target layers, Intersect is ticked" loading="lazy" width="1600" height="973"><figcaption>Step 2. Twelve target layers, one predicate, no buffer.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong> The log reports under a second for the twelve layers: on GeoPackage, FilterMate first queries the R-tree index of each table, then evaluates <code>ST_Intersects</code> on the candidates only.
-            <figure><img src="img/stories/s1-03.webp" alt="Step 3: only the features touching the commune remain on the twelve layers" loading="lazy"><figcaption>Step 3. The layers only show the commune's content. Vegetation polygons straddling the boundary are kept whole: that is what Intersect means.</figcaption></figure>
-            <figure><img src="img/stories/s1-04.webp" alt="Step 3b: zoom on the centre of Saint-Gaudens, buildings in red, public buildings in yellow, roads in black" loading="lazy"><figcaption>Zoom on the town centre: 12,380 buildings, 317 public buildings, 2,902 road segments.</figcaption></figure>
+            <figure><img src="img/stories/s1-03.webp" alt="Step 3: only the features touching the commune remain on the twelve layers" loading="lazy" width="1600" height="973"><figcaption>Step 3. The layers only show the commune's content. Vegetation polygons straddling the boundary are kept whole: that is what Intersect means.</figcaption></figure>
+            <figure><img src="img/stories/s1-04.webp" alt="Step 3b: zoom on the centre of Saint-Gaudens, buildings in red, public buildings in yellow, roads in black" loading="lazy" width="1600" height="973"><figcaption>Zoom on the town centre: 12,380 buildings, 317 public buildings, 2,902 road segments.</figcaption></figure>
         </li>
         <li><strong>Configure the export.</strong> Exporting tab: the 12 layers, EPSG:2154, styles as <strong>QML</strong>, <strong>GPKG</strong> format, output folder and a <strong>ZIP</strong> archive.
-            <figure><img src="img/stories/s1-05.webp" alt="Step 4: the Exporting tab is configured with the 12 layers, QML, GPKG, folder and ZIP" loading="lazy"><figcaption>Step 4. Everything is set, nothing is written yet.</figcaption></figure>
+            <figure><img src="img/stories/s1-05.webp" alt="Step 4: the Exporting tab is configured with the 12 layers, QML, GPKG, folder and ZIP" loading="lazy" width="1600" height="973"><figcaption>Step 4. Everything is set, nothing is written yet.</figcaption></figure>
         </li>
         <li><strong>Export.</strong> Because the format is GeoPackage and several layers are exported, FilterMate shows a recap and offers to keep the group hierarchy. Confirm: the file is written in 4 seconds with an embedded QGIS project.
             <div class="fig-row">
-                <figure><img src="img/stories/s1-06-recap.png" alt="GeoPackage export recap dialog listing the layers and the keep-groups option" loading="lazy"><figcaption>The recap before writing.</figcaption></figure>
-                <figure><img src="img/stories/s1-07.webp" alt="Step 5: the message bar confirms the export, the map is unchanged" loading="lazy"><figcaption>Step 5. Export done; the client will open the .gpkg and find the map as is.</figcaption></figure>
+                <figure><img src="img/stories/s1-06-recap.png" alt="GeoPackage export recap dialog listing the layers and the keep-groups option" loading="lazy" width="675" height="587"><figcaption>The recap before writing.</figcaption></figure>
+                <figure><img src="img/stories/s1-07.webp" alt="Step 5: the message bar confirms the export, the map is unchanged" loading="lazy" width="1600" height="973"><figcaption>Step 5. Export done; the client will open the .gpkg and find the map as is.</figcaption></figure>
             </div>
         </li>
     </ol>
@@ -190,37 +192,38 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/noise.webp" data-src="video/noise.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">2</span>Who lives next to the main roads?</h2>
-        <button class="watch" type="button" data-watch aria-label="Watch the video: Who lives next to the main roads?"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+        <h2><span class="num">2</span>Which buildings are near the main roads?</h2>
+        <button class="watch" type="button" data-watch aria-label="Watch the video: Which buildings are near the main roads?"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Muret.</p>
     </div>
+    <div class="callout scope-note"><strong>What this filter measures.</strong> These are teaching distances. The <code>importance</code> attribute does not establish a noise classification; the result measures neither noise nor exposed population. For a noise study, use the areas and categories from the official classification.</div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>Nadia is writing the noise chapter of the local plan of <strong>Muret</strong>, crossed by the A64 motorway and several departmental roads. The noise classification of infrastructures imposes sector widths that depend on the road category. She wants the list of buildings and public buildings located in those sectors, with a width that depends on each road.</p></div>
+        <div><h4>The need</h4><p>Nadia explores buildings near the main roads of <strong>Muret</strong>, crossed by the A64 motorway and several departmental roads. Study distances of 300 m and 250 m, chosen by road importance, demonstrate a variable buffer. The result counts buildings and public-access facilities, not residents.</p></div>
         <div><h4>The FilterMate translation</h4><p>After scoping on Muret, the source layer becomes <strong>troncon_de_route</strong> with the <strong>custom selection</strong> <code>"importance" IN ('1', '2')</code>. The <strong>buffer is an expression</strong> evaluated for each segment: 300 m for importance 1, 250 m for importance 2. The <strong>Flat</strong> buffer type avoids round ends at segment tips. Targets: <em>batiment</em> and <em>erp</em>.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Scope Muret.</strong> Same gesture as in story 1: commune as source, Muret in single selection, every layer as target, Intersect, Filter. Muret has 19,458 buildings, 354 public buildings and 5,512 road segments.
-            <figure><img src="img/stories/s2-03.webp" alt="Step 1: Muret scoped, buildings, public buildings, roads and railway limited to the commune" loading="lazy"><figcaption>Step 1. The commune is scoped; the A64 crosses it from north-east to south-west.</figcaption></figure>
+            <figure><img src="img/stories/s2-03.webp" alt="Step 1: Muret scoped, buildings, public buildings, roads and railway limited to the commune" loading="lazy" width="1600" height="973"><figcaption>Step 1. The commune is scoped; the A64 crosses it from north-east to south-west.</figcaption></figure>
         </li>
         <li><strong>Pick the main roads.</strong> Click <em>troncon_de_route</em> in the Layers panel: it becomes the source. Tick <strong>Custom selection</strong> and type <code>"importance" IN ('1', '2')</code>. 102 segments are kept out of the commune's 5,512.
-            <figure><img src="img/stories/s2-04.webp" alt="Step 2: the custom expression keeps the 102 segments of importance 1 and 2, highlighted in yellow" loading="lazy"><figcaption>Step 2. The motorway and the main departmental roads are highlighted.</figcaption></figure>
+            <figure><img src="img/stories/s2-04.webp" alt="Step 2: the custom expression keeps the 102 segments of importance 1 and 2, highlighted in yellow" loading="lazy" width="1600" height="973"><figcaption>Step 2. The motorway and the main departmental roads are highlighted.</figcaption></figure>
         </li>
-        <li><strong>Buffer by expression.</strong> Targets <em>batiment</em> and <em>erp</em>, Intersect predicate. On the Buffer value row, click the small arrow left of the field to switch to expression mode and type:
+        <li><strong>Buffer by expression.</strong> Targets <em>batiment</em> and <em>erp</em>, Intersect predicate. On the Buffer value row, open the data-defined property menu, choose <strong>Edit…</strong>, then enter the following in the expression editor:
             <pre><code>CASE WHEN "importance" = '1' THEN 300
      WHEN "importance" = '2' THEN 250
      ELSE 100 END</code></pre>
-            On the next row, choose the <strong>Flat</strong> type.
-            <figure><img src="img/stories/s2-05.webp" alt="Step 3: the Buffer value row is in expression mode, the buffer type is Flat" loading="lazy"><figcaption>Step 3. The distance is no longer a number but a QGIS expression evaluated segment by segment.</figcaption></figure>
+            Confirm the editor. On the next row, open the <strong>Round / Flat / Square</strong> list and choose <strong>Flat</strong>.
+            <figure><img src="img/stories/s2-05.webp" alt="Step 3: the Buffer value row is in expression mode, the buffer type is Flat" loading="lazy" width="1600" height="973"><figcaption>Step 3. The distance is no longer a number but a QGIS expression evaluated segment by segment.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s2-06.webp" alt="Step 4: only the buildings and public buildings inside the noise sectors remain" loading="lazy"><figcaption>Step 4. Buildings and public buildings outside the sectors have left the map.</figcaption></figure>
-            <figure><img src="img/stories/s2-07.webp" alt="Step 4b: zoom on the A64, the 300 m band shows in the distribution of buildings" loading="lazy"><figcaption>Zoom: the 300 m band around the A64 shows in the distribution of the remaining buildings.</figcaption></figure>
+            <figure><img src="img/stories/s2-06.webp" alt="Step 4: only the buildings and public buildings inside the buffer zones remain" loading="lazy" width="1600" height="973"><figcaption>Step 4. Buildings and public buildings outside the sectors have left the map.</figcaption></figure>
+            <figure><img src="img/stories/s2-07.webp" alt="Step 4b: zoom on the A64, the 300 m band shows in the distribution of buildings" loading="lazy" width="1600" height="973"><figcaption>Zoom: the 300 m band around the A64 shows in the distribution of the remaining buildings.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>1,999 buildings</strong> and <strong>74 public buildings</strong> of Muret lie in the noise sectors of the 102 segments of importance 1 and 2.</p>
+    <p><strong>1,999 buildings</strong> and <strong>74 public buildings</strong> of Muret lie in the buffer zones of the 102 segments of importance 1 and 2.</p>
     <div class="callout tip">
-        <strong>Going further.</strong> The same expression can read a regulatory width stored in an attribute, for instance <code>"largeur_de_chaussee" * 3</code>.
+        <strong>Going further.</strong> The same expression can read a study distance stored in a verified attribute. A purely geometric alternative is <code>"largeur_de_chaussee" * 3</code>.
         Segments with an empty width need a <code>coalesce("largeur_de_chaussee", 3)</code>.
     </div>
 </section>
@@ -230,29 +233,30 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/buffer.webp" data-src="video/buffer.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">3</span>How far the Garonne can reach</h2>
-        <button class="watch" type="button" data-watch aria-label="Watch the video: How far the Garonne can reach"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+        <h2><span class="num">3</span>Buildings near watercourses</h2>
+        <button class="watch" type="button" data-watch aria-label="Watch the video: Buildings near watercourses"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
+    <div class="callout scope-note"><strong>Proximity, not hazard.</strong> A 100 m or 300 m buffer represents neither flood extent nor flood frequency. To study flooding, use a documented hazard layer as the filter source.</div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>Julien prepares, for the planning department of <strong>Grenade</strong>, a meeting on the flood risk prevention plan. The commune sits at the confluence of the Garonne and the Save. He first wants to show everything within 300 m of the water surfaces, then tighten to 100 m for the frequent flood, and be able to step back in front of the councillors.</p></div>
+        <div><h4>The need</h4><p>Julien explores the surroundings of watercourses in <strong>Grenade</strong>, at the confluence of the Garonne and the Save. He compares buildings within 300 m and 100 m of the water surfaces, then restores the first result with Undo.</p></div>
         <div><h4>The FilterMate translation</h4><p>Source: <strong>surface_hydrographique</strong>, scoped on Grenade, with a <strong>multiple selection</strong> and <em>Select All</em> (77 surfaces). Targets: buildings, public buildings and roads, Intersect predicate, <strong>300 m buffer</strong>. A second Filter at 100 m, then <strong>Undo</strong> in the action bar.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Scope Grenade.</strong> 6,998 buildings, 79 public buildings, 1,978 road segments and 77 water surfaces.
-            <figure><img src="img/stories/s3-03.webp" alt="Step 1: Grenade scoped, the Garonne and the Save in blue" loading="lazy"><figcaption>Step 1. The water surfaces (Garonne to the east, Save to the south) are now the only ones on the map.</figcaption></figure>
+            <figure><img src="img/stories/s3-03.webp" alt="Step 1: Grenade scoped, the Garonne and the Save in blue" loading="lazy" width="1600" height="973"><figcaption>Step 1. The water surfaces (Garonne to the east, Save to the south) are now the only ones on the map.</figcaption></figure>
         </li>
         <li><strong>Select every water surface.</strong> Click <em>surface_hydrographique</em>, tick <strong>Multiple selection</strong>, then right-click in the list and <em>Select All</em>. The summary above the list counts 77 features.
-            <figure><img src="img/stories/s3-04.webp" alt="Step 2: the 77 water surfaces are ticked in the multiple selection" loading="lazy"><figcaption>Step 2. The list shows the nature and id of each surface; all are ticked.</figcaption></figure>
+            <figure><img src="img/stories/s3-04.webp" alt="Step 2: the 77 water surfaces are ticked in the multiple selection" loading="lazy" width="1600" height="973"><figcaption>Step 2. The list shows the nature and id of each surface; all are ticked.</figcaption></figure>
         </li>
         <li><strong>300 m.</strong> Targets <em>batiment</em>, <em>erp</em> and <em>troncon_de_route</em>, Intersect, Buffer value 300. Filter.
-            <figure><img src="img/stories/s3-06.webp" alt="Step 3: buildings, public buildings and roads within 300 m of the water surfaces" loading="lazy"><figcaption>Step 3. The 300 m band follows the Garonne well beyond Grenade: the river polygons are long, and the targets' spatial filter replaces the commune scope.</figcaption></figure>
+            <figure><img src="img/stories/s3-06.webp" alt="Step 3: buildings, public buildings and roads within 300 m of the water surfaces" loading="lazy" width="1600" height="973"><figcaption>Step 3. The 300 m band follows the Garonne well beyond Grenade: the river polygons are long, and the targets' spatial filter replaces the commune scope.</figcaption></figure>
         </li>
         <li><strong>100 m.</strong> Change the buffer value and press Filter again.
-            <figure><img src="img/stories/s3-07.webp" alt="Step 4: the band is tightened to 100 m" loading="lazy"><figcaption>Step 4. The result tightens onto the banks.</figcaption></figure>
+            <figure><img src="img/stories/s3-07.webp" alt="Step 4: the band is tightened to 100 m" loading="lazy" width="1600" height="973"><figcaption>Step 4. The result tightens onto the banks.</figcaption></figure>
         </li>
         <li><strong>Undo.</strong> The first button after Filter restores the previous state of the three layers, at 300 m. Redo would reapply it. The history belongs to the project and survives a QGIS restart.
-            <figure><img src="img/stories/s3-08.webp" alt="Step 5: Undo has restored the 300 m band" loading="lazy"><figcaption>Step 5. Back to 300 m in one click.</figcaption></figure>
+            <figure><img src="img/stories/s3-08.webp" alt="Step 5: Undo has restored the 300 m band" loading="lazy" width="1600" height="973"><figcaption>Step 5. Back to 300 m in one click.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
@@ -277,28 +281,29 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/bridges.webp" data-src="video/bridges.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">4</span>Every bridge in the metropolis</h2>
-        <button class="watch" type="button" data-watch aria-label="Watch the video: Every bridge in the metropolis"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+        <h2><span class="num">4</span>Find crossings to inspect</h2>
+        <button class="watch" type="button" data-watch aria-label="Watch the video: Find crossings to inspect"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Toulouse Métropole.</p>
     </div>
+    <div class="callout scope-note"><strong>Candidates to inspect.</strong> Cross finds geometric intersections in plan view. The results are not a complete bridge inventory: check structure types and vertical position. Identify flashes the source watercourses here, before roads are filtered.</div>
     <div class="story-brief">
         <div><h4>The need</h4><p>Karim manages the engineering structures of <strong>Toulouse Métropole</strong>: 37 communes, close to 99,000 road segments. He wants the inventory of the places where roads cross a permanent watercourse, segments and structures, to plan inspections.</p></div>
         <div><h4>The FilterMate translation</h4><p>Scoping is done this time on the <strong>epci</strong> layer. Then the source becomes <strong>troncon_hydrographique</strong> with the custom selection <code>"persistance" = 'Permanent'</code>, the targets <em>troncon_de_route</em> and <em>construction_lineaire</em>, and the <strong>Cross</strong> predicate, without buffer: a road running along the river is not kept, a road crossing it is.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Scope the EPCI.</strong> <em>epci</em> layer as source, "Toulouse Métropole" in single selection on <code>"nom_officiel"</code>, every other layer as target, Intersect. The filter returns 98,687 road segments, 1,844 watercourse segments, 1,181 linear constructions and 70 touched communes.
-            <figure><img src="img/stories/s4-03.webp" alt="Step 1: Toulouse Métropole scoped, the Garonne crosses the metropolis from south to north" loading="lazy"><figcaption>Step 1. The whole metropolis, Garonne, Hers and Touch included.</figcaption></figure>
+            <figure><img src="img/stories/s4-03.webp" alt="Step 1: Toulouse Métropole scoped, the Garonne crosses the metropolis from south to north" loading="lazy" width="1600" height="973"><figcaption>Step 1. The whole metropolis, Garonne, Hers and Touch included.</figcaption></figure>
         </li>
         <li><strong>Keep only permanent watercourses.</strong> Source <em>troncon_hydrographique</em>, Custom selection <code>"persistance" = 'Permanent'</code>: 691 segments.
-            <figure><img src="img/stories/s4-04.webp" alt="Step 2: the 691 permanent watercourse segments are highlighted" loading="lazy"><figcaption>Step 2. Ditches and intermittent flows do not count.</figcaption></figure>
+            <figure><img src="img/stories/s4-04.webp" alt="Step 2: the 691 permanent watercourse segments are highlighted" loading="lazy" width="1600" height="973"><figcaption>Step 2. Ditches and intermittent flows do not count.</figcaption></figure>
         </li>
         <li><strong>Check the selection on the map.</strong> Click <strong>Identify</strong> in the exploration toolbar: the 691 watercourse segments kept by the custom selection flash red. This visual check confirms the filter source before applying it to the roads.
-            <figure><img src="img/stories/s4-identify.webp" alt="Step 3: after clicking Identify, the selected permanent watercourses flash red on the map" loading="lazy"><figcaption>Step 3. Identify flashes the custom selection in red without changing the filter.</figcaption></figure>
+            <figure><img src="img/stories/s4-identify.webp" alt="Step 3: after clicking Identify, the selected permanent watercourses flash red on the map" loading="lazy" width="1600" height="900"><figcaption>Step 3. Identify flashes the custom selection in red without changing the filter.</figcaption></figure>
         </li>
         <li><strong>Cross.</strong> Targets <em>troncon_de_route</em> and <em>construction_lineaire</em>, Cross predicate alone, Buffer row off. Filter.
-            <figure><img src="img/stories/s4-05.webp" alt="Step 4: the Cross predicate is the only one ticked, the Buffer row is off" loading="lazy"><figcaption>Step 4. One predicate, no buffer.</figcaption></figure>
-            <figure><img src="img/stories/s4-06.webp" alt="Step 4b: only the road segments and structures crossing a watercourse remain" loading="lazy"><figcaption>Result at metropolis scale: the crossings draw the river network.</figcaption></figure>
-            <figure><img src="img/stories/s4-07.webp" alt="Zoom on the north of Toulouse: bridges over the Garonne and the Hers" loading="lazy"><figcaption>Zoom on the north of Toulouse: every remaining segment is a bridge or a crossing.</figcaption></figure>
+            <figure><img src="img/stories/s4-05.webp" alt="Step 4: the Cross predicate is the only one ticked, the Buffer row is off" loading="lazy" width="1600" height="973"><figcaption>Step 4. One predicate, no buffer.</figcaption></figure>
+            <figure><img src="img/stories/s4-06.webp" alt="Step 4b: only the road segments and structures crossing a watercourse remain" loading="lazy" width="1600" height="973"><figcaption>Result at metropolis scale: the crossings draw the river network.</figcaption></figure>
+            <figure><img src="img/stories/s4-07.webp" alt="Zoom on the north of Toulouse: bridges over the Garonne and the Hers" loading="lazy" width="1600" height="973"><figcaption>Zoom on the north of Toulouse: every remaining segment is a bridge or a crossing.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
@@ -319,28 +324,28 @@ AND ST_Intersects("geometrie", ST_MakeValid(ST_GeomFromText('Polygon ((…))', 2
         <p class="credit">BD TOPO® 3.5 © IGN, Bagnères-de-Luchon.</p>
     </div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>Élodie, at the town hall of <strong>Bagnères-de-Luchon</strong>, must inform the owners subject to the legal brush-clearing obligation: vegetation within 50 m of a dwelling. She wants the map of the woods and forests concerned, without the hedges, which fall under another regime.</p></div>
+        <div><h4>The need</h4><p>Élodie, at the town hall of <strong>Bagnères-de-Luchon</strong>, maps vegetation near homes using a study distance of 50 m. She distinguishes woods and forests from hedges to prepare a field review. This filter does not determine owners’ brush-clearing obligations.</p></div>
         <div><h4>The FilterMate translation</h4><p>Source <strong>batiment</strong> with the custom selection <code>"usage_1" = 'Résidentiel'</code>, targets <em>zone_de_vegetation</em> and <em>haie</em>, Intersect, <strong>50 m buffer</strong>. Then a second, <strong>attribute</strong> filter on the vegetation layer turned source, <strong>combined with AND</strong> with the previous spatial filter.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Scope Luchon.</strong> 3,699 buildings, 269 vegetation zones, 123 hedges.
-            <figure><img src="img/stories/s5-03.webp" alt="Step 1: Bagnères-de-Luchon scoped, vegetation in green, buildings in red" loading="lazy"><figcaption>Step 1. The inhabited valley and the wooded slopes.</figcaption></figure>
+            <figure><img src="img/stories/s5-03.webp" alt="Step 1: Bagnères-de-Luchon scoped, vegetation in green, buildings in red" loading="lazy" width="1600" height="973"><figcaption>Step 1. The inhabited valley and the wooded slopes.</figcaption></figure>
         </li>
         <li><strong>Keep only dwellings.</strong> Source <em>batiment</em>, Custom selection <code>"usage_1" = 'Résidentiel'</code>: 1,619 buildings.
-            <figure><img src="img/stories/s5-04.webp" alt="Step 2: residential buildings are highlighted" loading="lazy"><figcaption>Step 2. Outbuildings, farm and industrial buildings are left out of the source.</figcaption></figure>
+            <figure><img src="img/stories/s5-04.webp" alt="Step 2: residential buildings are highlighted" loading="lazy" width="1600" height="978"><figcaption>Step 2. Outbuildings, farm and industrial buildings are left out of the source.</figcaption></figure>
         </li>
         <li><strong>50 m.</strong> Targets <em>zone_de_vegetation</em> and <em>haie</em>, Intersect, Buffer 50. Filter: 119 vegetation zones and 48 hedges remain.
-            <figure><img src="img/stories/s5-06.webp" alt="Step 3: vegetation within 50 m of a dwelling" loading="lazy"><figcaption>Step 3. Hedges and undifferentiated woods are still there.</figcaption></figure>
+            <figure><img src="img/stories/s5-06.webp" alt="Step 3: vegetation within 50 m of a dwelling" loading="lazy" width="1600" height="978"><figcaption>Step 3. Hedges and undifferentiated woods are still there.</figcaption></figure>
         </li>
         <li><strong>Keep only woods and forests.</strong> Click <em>zone_de_vegetation</em> in the Layers panel: it becomes the source. Custom selection:
             <pre><code>"nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conifères',
              'Forêt fermée mixte', 'Forêt ouverte')</code></pre>
             Enable the <strong>Combine operator</strong> row and leave <strong>AND</strong> on the left: the new filter narrows the spatial filter already applied to the source layer instead of replacing it.
-            <figure><img src="img/stories/s5-07.webp" alt="Step 4: expression on the vegetation nature, AND combine operator enabled" loading="lazy"><figcaption>Step 4. The button of the Combine operator row is on, the left operator reads AND.</figcaption></figure>
+            <figure><img src="img/stories/s5-07.webp" alt="Step 4: expression on the vegetation nature, AND combine operator enabled" loading="lazy" width="1600" height="978"><figcaption>Step 4. The button of the Combine operator row is on, the left operator reads AND.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s5-08.webp" alt="Step 5: only woods and forests within 50 m of a dwelling remain" loading="lazy"><figcaption>Step 5. 58 woods and forests within 50 m of a dwelling.</figcaption></figure>
-            <figure><img src="img/stories/s5-09.webp" alt="Zoom on the centre of Luchon and its wooded slopes" loading="lazy"><figcaption>Zoom: the edges to clear surround the hillside neighbourhoods.</figcaption></figure>
+            <figure><img src="img/stories/s5-08.webp" alt="Step 5: only woods and forests within 50 m of a dwelling remain" loading="lazy" width="1600" height="978"><figcaption>Step 5. 58 woods and forests within 50 m of a dwelling.</figcaption></figure>
+            <figure><img src="img/stories/s5-09.webp" alt="Zoom on the centre of Luchon and its wooded slopes" loading="lazy" width="1600" height="978"><figcaption>Zoom: the edges to clear surround the hillside neighbourhoods.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
@@ -357,26 +362,27 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hamlets.webp" data-src="video/hamlets.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">6</span>Hamlets the rescue services reach badly</h2>
-        <button class="watch" type="button" data-watch aria-label="Watch the video: Hamlets the rescue services reach badly"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+        <h2><span class="num">6</span>Hamlets far from paved roads</h2>
+        <button class="watch" type="button" data-watch aria-label="Watch the video: Hamlets far from paved roads"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Aspet.</p>
     </div>
+    <div class="callout scope-note"><strong>Geometric distance.</strong> This result measures neither travel time nor access for emergency vehicles. Check accessibility using the road network, traffic restrictions and field observations.</div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>At the fire station of <strong>Aspet</strong>, in the Pyrenean foothills, the response plan is being prepared: which hamlets and activity zones lie more than 200 m from a paved road, hence reachable only by track or footpath?</p></div>
+        <div><h4>The need</h4><p>At the fire station of <strong>Aspet</strong>, in the Pyrenean foothills, the response plan is being prepared: which hamlets and activity zones lie more than 200 m from a paved road, as candidates for a field check?</p></div>
         <div><h4>The FilterMate translation</h4><p>This is the <strong>Disjoint</strong> predicate with a <strong>200 m buffer</strong>: keep what shares no point with the buffer zone. Since Disjoint keeps everything far away, including the rest of the department, the target layers are first scoped by an <strong>attribute filter</strong> on the INSEE code, applied with FilterMate's Processing algorithm. The second filter then combines with <strong>AND</strong>.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Scope Aspet spatially</strong> for roads, buildings and vegetation (story 1), then <strong>by attribute</strong> for the two target layers: Toolbox → FilterMate → <em>Filter multiple layers</em>, layers <em>zone_d_habitation</em> and <em>zone_d_activite_ou_d_interet</em>, expression <code>"insee_commune" = '31020'</code>. 87 hamlets and 31 activity zones.
-            <figure><img src="img/stories/s6-03.webp" alt="Step 1: Aspet scoped, hamlets in orange" loading="lazy"><figcaption>Step 1. The two target layers carry an attribute filter, the others a spatial one.</figcaption></figure>
+            <figure><img src="img/stories/s6-03.webp" alt="Step 1: Aspet scoped, hamlets in orange" loading="lazy" width="1600" height="945"><figcaption>Step 1. The two target layers carry an attribute filter, the others a spatial one.</figcaption></figure>
         </li>
         <li><strong>Keep only paved roads.</strong> Source <em>troncon_de_route</em>, Custom selection <code>"nature" NOT IN ('Chemin', 'Sentier', 'Escalier', 'Piste cyclable', 'Route empierrée')</code>: 494 segments out of 1,168.
-            <figure><img src="img/stories/s6-04.webp" alt="Step 2: paved roads are highlighted, tracks and footpaths are not" loading="lazy"><figcaption>Step 2. Tracks and footpaths, plentiful in the mountains, are left out.</figcaption></figure>
+            <figure><img src="img/stories/s6-04.webp" alt="Step 2: paved roads are highlighted, tracks and footpaths are not" loading="lazy" width="1600" height="945"><figcaption>Step 2. Tracks and footpaths, plentiful in the mountains, are left out.</figcaption></figure>
         </li>
         <li><strong>Disjoint, 200 m, AND.</strong> Targets <em>zone_d_habitation</em> and <em>zone_d_activite_ou_d_interet</em>, Disjoint predicate alone, Buffer 200, Combine operator row on with <strong>AND</strong> on the right (the target layers' operator).
-            <figure><img src="img/stories/s6-05.webp" alt="Step 3: Disjoint ticked, 200 m buffer, AND operator for the target layers" loading="lazy"><figcaption>Step 3. Disjoint plus buffer: an exclusion ring.</figcaption></figure>
+            <figure><img src="img/stories/s6-05.webp" alt="Step 3: Disjoint ticked, 200 m buffer, AND operator for the target layers" loading="lazy" width="1600" height="945"><figcaption>Step 3. Disjoint plus buffer: an exclusion ring.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
-            <figure><img src="img/stories/s6-06.webp" alt="Step 4: only the hamlets more than 200 m from a paved road remain" loading="lazy"><figcaption>Step 4. The remaining hamlets are those no paved road comes within 200 m of.</figcaption></figure>
+            <figure><img src="img/stories/s6-06.webp" alt="Step 4: only the hamlets more than 200 m from a paved road remain" loading="lazy" width="1600" height="945"><figcaption>Step 4. The remaining hamlets are those no paved road comes within 200 m of.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
@@ -395,22 +401,23 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
         <button class="watch" type="button" data-watch aria-label="Watch the video: The team's query library"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
+    <div class="callout scope-note"><strong>Favorite name in the recordings.</strong> “PPRI Garonne 300 m” is the historical recording label. Prefer “Garonne proximity — 300 m”: this favorite stores a buffer, not a flood hazard zone.</div>
     <div class="story-brief">
         <div><h4>The need</h4><p>Julien (story 3) will redo the 300 m band at every BD TOPO update and wants his colleagues to replay it without him. The filter must exist outside his head: named, described, reapplicable in one click, exportable.</p></div>
         <div><h4>The FilterMate translation</h4><p>A <strong>favorite</strong> records the complete filter: source layer, selection, predicates, buffer, target layers. The menu opens from the ★ badge in the header; the <strong>manager</strong> lets you rename, describe, change the scope (this project or all projects) and <strong>export as JSON</strong>. With the sharing extension, a shared git repository becomes the team library.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Save.</strong> The 300 m filter of story 3 is applied. Click the ★ badge then <em>Add filter</em>, name it "PPRI Garonne 300 m".
-            <figure><img src="img/stories/s7-01.webp" alt="Step 1: the message bar confirms that the PPRI Garonne 300 m favorite was added" loading="lazy"><figcaption>Step 1. The message bar confirms the save; the favorite immediately shows in the Quick filtering section of the ★ menu.</figcaption></figure>
+            <figure><img src="img/stories/s7-01.webp" alt="Step 1: the message bar confirms that the PPRI Garonne 300 m favorite was added" loading="lazy" width="1600" height="973"><figcaption>Step 1. The message bar confirms the save; the favorite immediately shows in the Quick filtering section of the ★ menu.</figcaption></figure>
         </li>
         <li><strong>Unfilter.</strong> The three layers get the whole department back: 1,173,829 buildings.
-            <figure><img src="img/stories/s7-02.webp" alt="Step 2: after Unfilter, every feature is back" loading="lazy"><figcaption>Step 2. Back to the unfiltered state.</figcaption></figure>
+            <figure><img src="img/stories/s7-02.webp" alt="Step 2: after Unfilter, every feature is back" loading="lazy" width="1600" height="973"><figcaption>Step 2. Back to the unfiltered state.</figcaption></figure>
         </li>
         <li><strong>Replay.</strong> ★ badge then "PPRI Garonne 300 m": the filter reapplies, with the same 14,181 buildings, 168 public buildings and 6,243 segments.
-            <figure><img src="img/stories/s7-03.webp" alt="Step 3: the reapplied favorite gives exactly the result of story 3" loading="lazy"><figcaption>Step 3. Same result, one click.</figcaption></figure>
+            <figure><img src="img/stories/s7-03.webp" alt="Step 3: the reapplied favorite gives exactly the result of story 3" loading="lazy" width="1600" height="978"><figcaption>Step 3. Same result, one click.</figcaption></figure>
         </li>
         <li><strong>Describe and share.</strong> <em>Manage favorites…</em> opens the manager: description, tags, scope, exact expression, Remote tab to publish to a git repository. <em>Export…</em> writes a JSON file to send to a colleague, who imports it from the same menu.
-            <figure><img src="img/stories/s7-04-manager.png" alt="The favorites manager with the PPRI Garonne 300 m favorite selected" loading="lazy"><figcaption>Step 4. The manager: list on the left, details and expression on the right.</figcaption></figure>
+            <figure><img src="img/stories/s7-04-manager.png" alt="The favorites manager with the PPRI Garonne 300 m favorite selected" loading="lazy" width="1440" height="960"><figcaption>Step 4. The manager: list on the left, details and expression on the right.</figcaption></figure>
         </li>
     </ol>
     <div class="callout tip">
@@ -423,23 +430,24 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
     <div class="band">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/processing.webp" data-src="video/processing.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h2><span class="num">8</span>What changed since the last edition?</h2>
-        <button class="watch" type="button" data-watch aria-label="Watch the video: What changed since the last edition?"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+        <h2><span class="num">8</span>Objects modified since a date</h2>
+        <button class="watch" type="button" data-watch aria-label="Watch the video: Objects modified since a date"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
     </div>
+    <div class="callout scope-note"><strong>Result scope.</strong> The filter reads <code>date_modification</code> in the current edition. It does not compare two editions or detect objects deleted between them.</div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>Sophie administers the department's GIS and has just received the March 2026 edition of the BD TOPO. Before publishing it, she wants to isolate the objects modified since the previous edition on four layers, for a quality check, and be able to redo that check in a Processing model at every edition.</p></div>
+        <div><h4>The need</h4><p>Sophie administers the department's GIS and has just received the March 2026 edition of the BD TOPO. Before publishing it, she wants to isolate objects whose modification date is on or after 15 March 2025 on four layers, for a quality check, and be able to redo that check in a Processing model at every edition.</p></div>
         <div><h4>The FilterMate translation</h4><p>No geometry here: a single attribute filter to apply to several layers. That is the job of the <strong>filtermate:batch_filter</strong> algorithm of the Processing toolbox, usable in the graphical modeler, in batch mode or from Python.</p></div>
     </div>
     <ol class="steps">
         <li><strong>Open the toolbox</strong> and search for "filtermate".
-            <figure><img src="img/stories/s8-01.webp" alt="Step 1: the Processing toolbox filtered on filtermate shows the Filter multiple layers algorithm" loading="lazy"><figcaption>Step 1. The FilterMate provider and its batch filter algorithm.</figcaption></figure>
+            <figure><img src="img/stories/s8-01.webp" alt="Step 1: the Processing toolbox filtered on filtermate shows the Filter multiple layers algorithm" loading="lazy" width="1600" height="973"><figcaption>Step 1. The FilterMate provider and its batch filter algorithm.</figcaption></figure>
         </li>
         <li><strong>Choose the layers and the expression.</strong> <em>batiment</em>, <em>troncon_de_route</em>, <em>troncon_hydrographique</em>, <em>erp</em> and the expression <code>"date_modification" &gt;= '2025-03-15'</code>.
-            <figure><img src="img/stories/s8-02-dialog.png" alt="The algorithm dialog with four layers and the expression on the modification date" loading="lazy"><figcaption>Step 2. An ordinary Processing dialog: it chains in a model like any other.</figcaption></figure>
+            <figure><img src="img/stories/s8-02-dialog.png" alt="The algorithm dialog with four layers and the expression on the modification date" loading="lazy" width="801" height="524"><figcaption>Step 2. An ordinary Processing dialog: it chains in a model like any other.</figcaption></figure>
         </li>
         <li><strong>Run.</strong> The four layers receive the filter in one pass.
-            <figure><img src="img/stories/s8-03.webp" alt="Step 3: around Toulouse, only objects modified since March 2025 remain" loading="lazy"><figcaption>Step 3. Around Toulouse, the objects modified in the last year.</figcaption></figure>
+            <figure><img src="img/stories/s8-03.webp" alt="Step 3: around Toulouse, only objects modified since March 2025 remain" loading="lazy" width="1600" height="973"><figcaption>Step 3. Around Toulouse, the objects modified in the last year.</figcaption></figure>
         </li>
     </ol>
     <h3>Result</h3>
@@ -465,6 +473,7 @@ processing.run("filtermate:batch_filter", {
 <!-- 9 ------------------------------------------------------------------ -->
 <section id="replay">
     <h2><span class="num">9</span>Replaying these stories at home</h2>
+    <div class="callout demo-download"><strong>Start with a small project.</strong><p>The Toutens demo includes four layers, a QGIS project, a favorite and instructions in English and French. Its counts differ from the department-wide examples above.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Download the demo (ZIP, 203 KB)</a></div>
     <ol class="steps">
         <li><strong>Download the BD TOPO</strong> of your department from the IGN Géoplateforme ("all themes", GeoPackage format, Lambert-93). The file ships with its spatial indexes: that is what makes the cascades fast.</li>
         <li><strong>Load the layers</strong> named in each story. The styles embedded in the GeoPackage hide buildings beyond 1:25,000: disable scale-dependent visibility in the layer properties, or apply your own styles.</li>

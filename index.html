@@ -13,6 +13,11 @@
     <link rel="canonical" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
+    <link rel="alternate" hreflang="de" href="https://imagodata.github.io/filter_mate/index.de.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="nl" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="zh-Hant" href="https://imagodata.github.io/filter_mate/index.zh-hant.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
     <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +39,7 @@
         <li><a href="stories.html">Use cases</a></li>
         <li><a href="roadmap.html">Roadmap</a></li>
         <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
-        <li><span class="lang" aria-label="Language"><a href="index.html" aria-current="true" hreflang="en">EN</a><a href="index.fr.html" hreflang="fr" lang="fr" data-lang-link>FR</a></span></li>
+        <li><details class="language-menu"><summary>English</summary><ul><li><a href="index.html" lang="en" hreflang="en" data-lang-link aria-current="true">English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link>Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link>Nederlands</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link>简体中文</a></li></ul></details></li>
         <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Install</a></li>
     </ul>
 </nav>
@@ -77,10 +82,11 @@
         </div>
         <ol class="workflow-grid">
             <li><span class="step-number">01</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="21" cy="21" r="11"/><path d="m29 29 9 9M16 21h10M21 16v10"/></svg><h3>Choose the source</h3><p>Pick one feature, tick several, mirror a map selection or write a QGIS expression.</p></li>
-            <li><span class="step-number">02</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 35c6-14 15-22 32-22M8 35c11-3 20-2 32 0"/><circle cx="13" cy="31" r="3"/><path d="M31 12v24"/></svg><h3>Set the spatial rule</h3><p>Select the target layers, predicate and optional buffer. Preview exactly what drives the filter.</p></li>
+            <li><span class="step-number">02</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 35c6-14 15-22 32-22M8 35c11-3 20-2 32 0"/><circle cx="13" cy="31" r="3"/><path d="M31 12v24"/></svg><h3>Set the spatial rule</h3><p>Select the target layers, predicate and optional buffer. Check the source selection before applying the filter.</p></li>
             <li><span class="step-number">03</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 9h28v30H10zM16 17h16M16 24h16M16 31h9"/><path d="m28 30 4 4 7-8"/></svg><h3>Use the result</h3><p>Review counts on the map, undo or save the filter, then export the scoped layers when needed.</p></li>
         </ol>
         <a class="inline-cta" href="guide.html#tutorial">Follow the first-filter tutorial <span aria-hidden="true">→</span></a>
+        <div class="callout demo-download"><strong>Try a small dataset.</strong><p>Four layers around Toutens, a styled QGIS project, an importable favorite and instructions in English and French. Extract the ZIP before opening the project.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Download the demo (ZIP, 203 KB)</a></div>
     </div>
 </section>
 
@@ -96,16 +102,16 @@
                 <div class="example-body"><p class="example-label">Delivery · Saint-Gaudens</p><h3>A commune dossier from 12 department-wide layers</h3><p>Select the commune once, filter every thematic layer, then export one styled GeoPackage with its QGIS project.</p><dl class="result-list"><div><dt>12,380</dt><dd>buildings kept</dd></div><div><dt>&lt; 1 s</dt><dd>recorded filtering time</dd></div></dl><a href="stories.html#s1">Read the complete case <span aria-hidden="true">→</span></a></div>
             </article>
             <article class="example-card">
-                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="Watch the road noise example"><img src="video/noise.webp" alt="Buildings filtered around major roads in Muret" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
-                <div class="example-body"><p class="example-label">Planning · Muret</p><h3>Road noise sectors with a variable buffer</h3><p>A QGIS expression sets 300 m or 250 m according to each road category.</p><p class="result"><strong>1,999</strong> buildings and <strong>74</strong> public buildings</p><a href="stories.html#s2">See settings and result <span aria-hidden="true">→</span></a></div>
+                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="Watch the road proximity example"><img src="video/noise.webp" alt="Buildings filtered around major roads in Muret" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <div class="example-body"><p class="example-label">Planning · Muret</p><h3>Buildings near roads with a variable buffer</h3><p>A QGIS expression sets 300 m or 250 m according to each road category.</p><p class="result"><strong>1,999</strong> buildings and <strong>74</strong> public buildings</p><a href="stories.html#s2">See settings and result <span aria-hidden="true">→</span></a></div>
             </article>
             <article class="example-card">
-                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Watch the bridge inventory example"><img src="video/bridges.webp" alt="Road and watercourse crossings in Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
-                <div class="example-body"><p class="example-label">Structures · Toulouse Métropole</p><h3>Every crossing of a permanent watercourse</h3><p>The Cross predicate excludes roads that merely run alongside the water.</p><p class="result"><strong>1,112</strong> road segments and <strong>190</strong> structures</p><a href="stories.html#s4">See settings and result <span aria-hidden="true">→</span></a></div>
+                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Watch the crossing detection example"><img src="video/bridges.webp" alt="Road and watercourse crossings in Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <div class="example-body"><p class="example-label">Structures · Toulouse Métropole</p><h3>Find crossings of permanent watercourses</h3><p>The Cross predicate excludes roads that merely run alongside the water.</p><p class="result"><strong>1,112</strong> road segments and <strong>190</strong> structures</p><a href="stories.html#s4">See settings and result <span aria-hidden="true">→</span></a></div>
             </article>
             <article class="example-card">
-                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Watch the emergency access example"><img src="video/hamlets.webp" alt="Hamlets more than 200 metres from a paved road in Aspet" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
-                <div class="example-body"><p class="example-label">Emergency access · Aspet</p><h3>Hamlets far from a paved road</h3><p>Disjoint plus a 200 m buffer finds what lies outside the service area.</p><p class="result"><strong>22</strong> hamlets beyond 200 m</p><a href="stories.html#s6">See settings and result <span aria-hidden="true">→</span></a></div>
+                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Watch the remote hamlet example"><img src="video/hamlets.webp" alt="Hamlets more than 200 metres from a paved road in Aspet" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <div class="example-body"><p class="example-label">Road proximity · Aspet</p><h3>Hamlets far from a paved road</h3><p>Disjoint plus a 200 m buffer finds what lies outside the buffer.</p><p class="result"><strong>22</strong> hamlets beyond 200 m</p><a href="stories.html#s6">See settings and result <span aria-hidden="true">→</span></a></div>
             </article>
         </div>
         <a class="inline-cta" href="stories.html">Browse all eight use cases <span aria-hidden="true">→</span></a>

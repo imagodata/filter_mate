@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterMate — QGIS 空间筛选</title>
+    <meta name="description" content="通过单个要素、选择集或表达式筛选 QGIS 工程中的所有目标图层。FilterMate 支持 PostGIS、GeoPackage、SpatiaLite 及其他矢量数据源，无需编写 SQL。">
+    <meta property="og:title" content="FilterMate — QGIS 空间筛选">
+    <meta property="og:description" content="选择位置或表达式，即可筛选周边相关图层，无需编写 SQL。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.zh-hans.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
+    <link rel="alternate" hreflang="de" href="https://imagodata.github.io/filter_mate/index.de.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="nl" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="zh-Hant" href="https://imagodata.github.io/filter_mate/index.zh-hant.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
+    <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fm.css">
+    <link rel="preload" as="image" href="video/hero.webp">
+</head>
+<body class="home">
+<a class="skip" href="#main">跳转到内容</a>
+
+<nav class="nav on-video" aria-label="主导航">
+    <a href="index.zh-hans.html" class="nav-brand" aria-current="page"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="打开菜单">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="guide.html" hreflang="en">使用指南 <small lang="en">(EN)</small></a></li>
+        <li><a href="stories.html" hreflang="en">应用案例 <small lang="en">(EN)</small></a></li>
+        <li><a href="roadmap.html" hreflang="en">开发规划 <small lang="en">(EN)</small></a></li>
+        <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><details class="language-menu"><summary>简体中文</summary><ul><li><a href="index.html" lang="en" hreflang="en" data-lang-link>English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link>Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link>Nederlands</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link aria-current="true">简体中文</a></li></ul></details></li>
+        <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">安装</a></li>
+    </ul>
+</nav>
+
+<main id="main">
+<header class="home-hero" id="top">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
+    <div class="home-hero-scrim"></div>
+    <div class="home-container home-hero-inner">
+        <div class="home-hero-copy">
+            <p class="eyebrow"><span></span>开源 QGIS 插件</p>
+            <h1>从一个位置，筛选整个 QGIS 工程。</h1>
+            <p class="home-lead">选择单个要素、多个要素或 QGIS 表达式。FilterMate 会将空间规则一次应用于所有目标图层，支持 GeoPackage、PostGIS、SpatiaLite 及其他矢量数据源，无需编写 SQL。</p>
+            <div class="home-actions">
+                <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>通过 QGIS 安装</a>
+                <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="观看 FilterMate 简介"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看简介</button>
+                <a class="home-text-link" href="guide.html" hreflang="en">阅读指南 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+            </div>
+            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 和 Qt6</p>
+        </div>
+    </div>
+    <a class="hero-scroll" href="#workflow"><span>了解操作流程</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+    <p class="credit">BD TOPO® 3.5 © IGN，上加龙省。使用 QGIS 4.2 和 FilterMate 4.9.2 录制。</p>
+</header>
+
+<section class="proof-strip" aria-label="主要优势">
+    <div class="home-container proof-grid">
+        <div><strong>直接筛选</strong><span>源数据保留在原有位置。</span></div>
+        <div><strong>一次操作，多个图层</strong><span>将相同的地理范围统一应用于各图层。</span></div>
+        <div><strong>撤销与重新应用</strong><span>在工程中保留历史记录和可复用的收藏。</span></div>
+    </div>
+</section>
+
+<section class="home-section workflow" id="workflow" aria-labelledby="workflow-title">
+    <div class="home-container">
+        <div class="section-heading">
+            <p class="section-kicker">操作流程</p>
+            <h2 id="workflow-title">一次选择，覆盖所有相关图层。</h2>
+            <p>FilterMate 将常见的多图层 GIS 操作整理为三个清晰步骤。应用前可先检查选择内容和设置。</p>
+        </div>
+        <ol class="workflow-grid">
+            <li><span class="step-number">01</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="21" cy="21" r="11"/><path d="m29 29 9 9M16 21h10M21 16v10"/></svg><h3>选择数据源</h3><p>选择单个要素、勾选多个要素、使用地图选择结果，或输入 QGIS 表达式。</p></li>
+            <li><span class="step-number">02</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 35c6-14 15-22 32-22M8 35c11-3 20-2 32 0"/><circle cx="13" cy="31" r="3"/><path d="M31 12v24"/></svg><h3>设置空间规则</h3><p>选择目标图层、空间关系及可选的缓冲区。应用筛选前先确认源要素。</p></li>
+            <li><span class="step-number">03</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 9h28v30H10zM16 17h16M16 24h16M16 31h9"/><path d="m28 30 4 4 7-8"/></svg><h3>使用结果</h3><p>在地图上检查数量、撤销或保存筛选条件，再按需导出筛选后的图层。</p></li>
+        </ol>
+        <a class="inline-cta" href="guide.html#tutorial" hreflang="en">跟随教程建立第一个筛选 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <div class="callout demo-download"><strong>用小型数据集试用。</strong><p>包含 Toutens 周边四个图层、已设置样式的 QGIS 工程、可导入的收藏，以及英文和法文说明。打开工程前请先解压 ZIP。</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>下载示例数据（ZIP，203 KB）</a></div>
+    </div>
+</section>
+
+<section class="home-section examples" id="examples" aria-labelledby="examples-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row">
+            <div><p class="section-kicker">已验证的示例</p><h2 id="examples-title">实际问题，看得见的结果。</h2></div>
+            <p>示例使用上加龙省完整的 BD TOPO GeoPackage，大小为 2.9 GB。公布的数量已使用相同数据独立核对。</p>
+        </div>
+        <div class="example-grid">
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/export.mp4" data-poster="video/export.webp" aria-label="观看市镇数据导出示例"><img src="video/export.webp" alt="从完整省级数据筛选出的 Saint-Gaudens QGIS 地图" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">01</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看示例</span></button>
+                <div class="example-body"><p class="example-label">成果交付 · Saint-Gaudens</p><h3>从 12 个省级图层建立市镇数据包</h3><p>选择市镇一次，筛选所有专题图层，再导出包含样式和 QGIS 工程的 GeoPackage。</p><dl class="result-list"><div><dt>12,380</dt><dd>栋保留建筑物</dd></div><div><dt>&lt; 1 s</dt><dd>记录的筛选时间</dd></div></dl><a href="stories.html#s1" hreflang="en">阅读完整案例 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="观看道路周边筛选示例"><img src="video/noise.webp" alt="Muret 主要道路周边筛选出的建筑物" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看</span></button>
+                <div class="example-body"><p class="example-label">城市规划 · Muret</p><h3>通过可变缓冲区找出道路周边建筑物</h3><p>QGIS 表达式按道路类别设置 300 米或 250 米的距离。</p><p class="result"><strong>1,999</strong> 栋建筑物及 <strong>74</strong> 处公众使用设施</p><a href="stories.html#s2" hreflang="en">查看设置和结果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="观看交会位置检测示例"><img src="video/bridges.webp" alt="Toulouse Métropole 的道路与水道交会位置" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看</span></button>
+                <div class="example-body"><p class="example-label">构筑物 · Toulouse Métropole</p><h3>找出与常年水道的交会位置</h3><p>Cross 空间关系会排除仅沿水道延伸的道路。</p><p class="result"><strong>1,112</strong> 个路段及 <strong>190</strong> 个构筑物</p><a href="stories.html#s4" hreflang="en">查看设置和结果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="观看偏远聚落示例"><img src="video/hamlets.webp" alt="Aspet 距铺装道路超过 200 米的聚落" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看</span></button>
+                <div class="example-body"><p class="example-label">道路邻近性 · Aspet</p><h3>远离铺装道路的聚落</h3><p>Disjoint 搭配 200 米缓冲区，可找出缓冲区外的要素。</p><p class="result"><strong>22</strong> 个距离超过 200 米的聚落</p><a href="stories.html#s6" hreflang="en">查看设置和结果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+        </div>
+        <a class="inline-cta" href="stories.html" hreflang="en">浏览全部八个应用案例 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+    </div>
+</section>
+
+<section class="home-section capabilities" id="capabilities" aria-labelledby="capabilities-title">
+    <div class="home-container capability-layout">
+        <div class="product-shot"><img src="img/guide/qgis-window.png" alt="QGIS 中的 FilterMate 面板，同时显示图层选择、筛选设置和地图" loading="lazy" width="1600" height="945"><p>FilterMate 面板位于地图和图层面板旁，让数据源、规则和结果同时保持可见。</p></div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">日常 QGIS 工作</p><h2 id="capabilities-title">从数据探索到成果交付。</h2><p>FilterMate 将从选择到导出的完整流程整合于同一个面板。</p></div>
+            <ul class="capability-list"><li><strong>探索</strong><span>搜索、在地图上选择、跟踪并缩放至参考要素。</span></li><li><strong>筛选</strong><span>使用八种空间关系、固定距离或表达式缓冲区，以及属性筛选。</span></li><li><strong>恢复</strong><span>撤销或重做筛选状态，即使重新打开 QGIS 工程后也可操作。</span></li><li><strong>复用</strong><span>将完整配置保存为收藏，并与团队共享。</span></li><li><strong>导出</strong><span>将筛选后的图层、样式和内嵌工程写入 GeoPackage，或使用其他 QGIS 格式。</span></li><li><strong>自动化</strong><span>通过 Processing、模型或 Python，将同一表达式应用于多个图层。</span></li></ul>
+            <a class="inline-cta" href="guide.html" hreflang="en">打开完整使用指南 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section performance" id="performance" aria-labelledby="performance-title">
+    <div class="home-container performance-layout">
+        <div class="section-heading"><p class="section-kicker">有背景说明的测量</p><h2 id="performance-title">大型源数据，无需事先缩减。</h2><p>FilterMate 会为各矢量图层选择后端，并使用可用的原生空间索引。这些数字来自上加龙省的示例，不代表所有场景的性能。</p><div class="backend-list" aria-label="筛选后端"><span>PostgreSQL</span><span>SpatiaLite</span><span>OGR</span><span>内存</span></div><a class="inline-cta inline-cta-light" href="guide.html#backends" hreflang="en">阅读测量背景 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+        <dl class="performance-stats"><div><dt>2.9 GB</dt><dd>示例使用的源 GeoPackage</dd></div><div><dt>1,173,829</dt><dd>栋省级源数据中的建筑物</dd></div><div><dt>12 个图层</dt><dd>记录的运行中，不到一秒即筛选至 Saint-Gaudens</dd></div></dl>
+    </div>
+</section>
+
+<section class="home-section install-section" id="install" aria-labelledby="install-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row"><div><p class="section-kicker">免费且开源</p><h2 id="install-title">在 QGIS 中安装 FilterMate。</h2></div><p>FilterMate 以 GPL-3.0 许可证发布于 QGIS 官方插件库。</p></div>
+        <ol class="install-steps"><li><strong>打开插件管理器</strong><span>插件 › 管理并安装插件…</span></li><li><strong>搜索 FilterMate</strong><span>在“全部”选项卡中</span></li><li><strong>点击“安装插件”</strong><span>然后通过工具栏按钮打开 FilterMate</span></li></ol>
+        <div class="install-bottom"><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>在 plugins.qgis.org 打开</a><dl class="install-facts"><div><dt>3.22–4.x</dt><dd>兼容 QGIS 版本</dd></div><div><dt>34</dt><dd>种界面语言</dd></div><div><dt>GPL-3.0</dt><dd>开源许可证</dd></div></dl></div>
+    </div>
+</section>
+</main>
+
+<footer class="home-footer">
+    <div class="home-container footer-grid"><div><a href="index.zh-hans.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>imagodata 开发的 QGIS 空间筛选工具。</p></div><ul><li><a href="guide.html" hreflang="en">使用指南 <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">应用案例 <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">开发规划 <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">源代码</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">报告问题</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
+    <div class="home-container footer-note">FilterMate 4.9.2 · 视频和截图地图数据：BD TOPO® © IGN，Licence Ouverte 2.0。</div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="视频"><video controls playsinline muted></video><form method="dialog"><button>关闭</button></form></dialog>
+<script src="assets/i18n/zh-hans.js"></script>
+<script src="assets/fm.js"></script>
+</body>
+</html>

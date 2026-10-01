@@ -1,0 +1,1 @@
+window.FM_I18N = {"openMenu": "Menu openen", "closeMenu": "Menu sluiten", "progress": "Paginavoortgang", "pageSections": "Paginaonderdelen", "backTop": "Naar boven", "sections": [["top", "Bovenaan"], ["workflow", "Werkwijze"], ["examples", "Voorbeelden"], ["capabilities", "Functies"], ["performance", "Metingen"], ["install", "Installeren"]]};

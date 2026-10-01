@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterMate — Ruimtelijk filteren in QGIS</title>
+    <meta name="description" content="Filter alle doellagen van een QGIS-project op basis van één object, selectie of expressie. FilterMate werkt met PostGIS, GeoPackage, SpatiaLite en andere vectorbronnen, zonder SQL te schrijven.">
+    <meta property="og:title" content="FilterMate — Ruimtelijk filteren in QGIS">
+    <meta property="og:description" content="Kies een locatie of expressie en filter alle relevante lagen eromheen — zonder SQL.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.nl.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
+    <link rel="alternate" hreflang="de" href="https://imagodata.github.io/filter_mate/index.de.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="nl" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="zh-Hant" href="https://imagodata.github.io/filter_mate/index.zh-hant.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
+    <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fm.css">
+    <link rel="preload" as="image" href="video/hero.webp">
+</head>
+<body class="home">
+<a class="skip" href="#main">Naar de inhoud</a>
+
+<nav class="nav on-video" aria-label="Hoofdnavigatie">
+    <a href="index.nl.html" class="nav-brand" aria-current="page"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menu openen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="guide.html" hreflang="en">Handleiding <small lang="en">(EN)</small></a></li>
+        <li><a href="stories.html" hreflang="en">Praktijkvoorbeelden <small lang="en">(EN)</small></a></li>
+        <li><a href="roadmap.html" hreflang="en">Ontwikkelplan <small lang="en">(EN)</small></a></li>
+        <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><details class="language-menu"><summary>Nederlands</summary><ul><li><a href="index.html" lang="en" hreflang="en" data-lang-link>English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link>Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link aria-current="true">Nederlands</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link>简体中文</a></li></ul></details></li>
+        <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Installeren</a></li>
+    </ul>
+</nav>
+
+<main id="main">
+<header class="home-hero" id="top">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
+    <div class="home-hero-scrim"></div>
+    <div class="home-container home-hero-inner">
+        <div class="home-hero-copy">
+            <p class="eyebrow"><span></span>Opensourceplug-in voor QGIS</p>
+            <h1>Filter een heel QGIS-project vanuit één locatie.</h1>
+            <p class="home-lead">Kies een object, een lijst of een QGIS-expressie. FilterMate past de ruimtelijke regel tegelijk op alle doellagen toe — in GeoPackage, PostGIS, SpatiaLite en andere vectorbronnen, zonder SQL te schrijven.</p>
+            <div class="home-actions">
+                <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Installeren via QGIS</a>
+                <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Bekijk de FilterMate-introductie"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Bekijk de introductie</button>
+                <a class="home-text-link" href="guide.html" hreflang="en">Lees de handleiding <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+            </div>
+            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 en Qt6</p>
+        </div>
+    </div>
+    <a class="hero-scroll" href="#workflow"><span>Ontdek de werkwijze</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+    <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne. Opgenomen in QGIS 4.2 met FilterMate 4.9.2.</p>
+</header>
+
+<section class="proof-strip" aria-label="Belangrijkste voordelen">
+    <div class="home-container proof-grid">
+        <div><strong>Filter op de bron</strong><span>Uw brongegevens blijven waar ze zijn.</span></div>
+        <div><strong>Eén actie, meerdere lagen</strong><span>Pas overal hetzelfde geografische bereik toe.</span></div>
+        <div><strong>Ongedaan maken en herhalen</strong><span>Bewaar de geschiedenis en herbruikbare favorieten in het project.</span></div>
+    </div>
+</section>
+
+<section class="home-section workflow" id="workflow" aria-labelledby="workflow-title">
+    <div class="home-container">
+        <div class="section-heading">
+            <p class="section-kicker">De werkwijze</p>
+            <h2 id="workflow-title">Eén selectie. Alle relevante lagen.</h2>
+            <p>FilterMate brengt een terugkerende GIS-bewerking op meerdere lagen terug tot drie duidelijke stappen. Controleer de selectie en instellingen voordat u iets wijzigt.</p>
+        </div>
+        <ol class="workflow-grid">
+            <li><span class="step-number">01</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="21" cy="21" r="11"/><path d="m29 29 9 9M16 21h10M21 16v10"/></svg><h3>Kies de bron</h3><p>Kies één object, vink er meerdere aan, neem de kaartselectie over of schrijf een QGIS-expressie.</p></li>
+            <li><span class="step-number">02</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 35c6-14 15-22 32-22M8 35c11-3 20-2 32 0"/><circle cx="13" cy="31" r="3"/><path d="M31 12v24"/></svg><h3>Stel de ruimtelijke regel in</h3><p>Kies de doellagen, het ruimtelijke predicaat en eventueel een buffer. Controleer de bronselectie voordat u het filter toepast.</p></li>
+            <li><span class="step-number">03</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 9h28v30H10zM16 17h16M16 24h16M16 31h9"/><path d="m28 30 4 4 7-8"/></svg><h3>Gebruik het resultaat</h3><p>Controleer de aantallen op de kaart, maak het filter ongedaan of sla het op en exporteer zo nodig de gefilterde lagen.</p></li>
+        </ol>
+        <a class="inline-cta" href="guide.html#tutorial" hreflang="en">Volg de eerste filteroefening <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <div class="callout demo-download"><strong>Probeer een kleine dataset.</strong><p>Vier lagen rond Toutens, een QGIS-project met stijlen, een importeerbare favoriet en instructies in het Engels en Frans. Pak de ZIP uit voordat u het project opent.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Download de demo (ZIP, 203 KB)</a></div>
+    </div>
+</section>
+
+<section class="home-section examples" id="examples" aria-labelledby="examples-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row">
+            <div><p class="section-kicker">Gecontroleerde voorbeelden</p><h2 id="examples-title">Echte vragen, zichtbare resultaten.</h2></div>
+            <p>Deze voorbeelden gebruiken het volledige BD TOPO-GeoPackage van Haute-Garonne van 2,9 GB. De gepubliceerde aantallen zijn onafhankelijk met dezelfde gegevens gecontroleerd.</p>
+        </div>
+        <div class="example-grid">
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/export.mp4" data-poster="video/export.webp" aria-label="Bekijk het voorbeeld van gemeente-export"><img src="video/export.webp" alt="QGIS-kaart van Saint-Gaudens, gefilterd uit het volledige departement" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">01</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Bekijk voorbeeld</span></button>
+                <div class="example-body"><p class="example-label">Oplevering · Saint-Gaudens</p><h3>Een gemeentelijk dossier uit 12 departementale lagen</h3><p>Selecteer de gemeente één keer, filter alle themalagen en exporteer een GeoPackage met stijlen en het QGIS-project.</p><dl class="result-list"><div><dt>12,380</dt><dd>behouden gebouwen</dd></div><div><dt>&lt; 1 s</dt><dd>gemeten filtertijd</dd></div></dl><a href="stories.html#s1" hreflang="en">Lees het volledige voorbeeld <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="Bekijk het voorbeeld over nabijheid van wegen"><img src="video/noise.webp" alt="Gebouwen gefilterd rond hoofdwegen in Muret" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Bekijken</span></button>
+                <div class="example-body"><p class="example-label">Ruimtelijke planning · Muret</p><h3>Gebouwen bij wegen met een variabele buffer</h3><p>Een QGIS-expressie stelt 300 m of 250 m in op basis van de wegcategorie.</p><p class="result"><strong>1,999</strong> gebouwen en <strong>74</strong> publiek toegankelijke voorzieningen</p><a href="stories.html#s2" hreflang="en">Bekijk instellingen en resultaat <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Bekijk het voorbeeld van kruisingen"><img src="video/bridges.webp" alt="Kruisingen van wegen en waterlopen in Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Bekijken</span></button>
+                <div class="example-body"><p class="example-label">Kunstwerken · Toulouse Métropole</p><h3>Vind kruisingen met permanente waterlopen</h3><p>Het predicaat Cross sluit wegen uit die alleen langs het water lopen.</p><p class="result"><strong>1,112</strong> wegsegmenten en <strong>190</strong> kunstwerken</p><a href="stories.html#s4" hreflang="en">Bekijk instellingen en resultaat <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Bekijk het voorbeeld van afgelegen gehuchten"><img src="video/hamlets.webp" alt="Gehuchten in Aspet op meer dan 200 meter van een verharde weg" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Bekijken</span></button>
+                <div class="example-body"><p class="example-label">Nabijheid van wegen · Aspet</p><h3>Gehuchten ver van een verharde weg</h3><p>Disjoint met een buffer van 200 m vindt wat buiten de buffer ligt.</p><p class="result"><strong>22</strong> gehuchten op meer dan 200 m</p><a href="stories.html#s6" hreflang="en">Bekijk instellingen en resultaat <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+        </div>
+        <a class="inline-cta" href="stories.html" hreflang="en">Bekijk alle acht praktijkvoorbeelden <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+    </div>
+</section>
+
+<section class="home-section capabilities" id="capabilities" aria-labelledby="capabilities-title">
+    <div class="home-container capability-layout">
+        <div class="product-shot"><img src="img/guide/qgis-window.png" alt="FilterMate-paneel in QGIS met laagselectie, filterinstellingen en kaart naast elkaar" loading="lazy" width="1600" height="945"><p>Het FilterMate-paneel staat naast de kaart en de lagenlijst, zodat bron, regel en resultaat samen zichtbaar blijven.</p></div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">Dagelijks werken met QGIS</p><h2 id="capabilities-title">Van verkenning tot oplevering.</h2><p>FilterMate houdt de hele werkwijze in één paneel, van selectie tot export.</p></div>
+            <ul class="capability-list"><li><strong>Verkennen</strong><span>Zoek en selecteer referentieobjecten op de kaart, volg ze en zoom erop in.</span></li><li><strong>Filteren</strong><span>Gebruik acht ruimtelijke predicaten, numerieke buffers of buffers op basis van expressies en attribuutfilters.</span></li><li><strong>Herstellen</strong><span>Maak filterstappen ongedaan en voer ze opnieuw uit, ook na het heropenen van het QGIS-project.</span></li><li><strong>Hergebruiken</strong><span>Sla volledige configuraties op als favorieten en deel ze met uw team.</span></li><li><strong>Exporteren</strong><span>Schrijf gefilterde lagen, stijlen en een ingebed project naar GeoPackage of gebruik andere QGIS-formaten.</span></li><li><strong>Automatiseren</strong><span>Pas één expressie op meerdere lagen toe via Processing, een model of Python.</span></li></ul>
+            <a class="inline-cta" href="guide.html" hreflang="en">Open de volledige handleiding <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section performance" id="performance" aria-labelledby="performance-title">
+    <div class="home-container performance-layout">
+        <div class="section-heading"><p class="section-kicker">Metingen in context</p><h2 id="performance-title">Grote bronbestanden mogen groot blijven.</h2><p>FilterMate kiest per vectorlaag een backend en gebruikt beschikbare ruimtelijke indexen. Deze cijfers horen bij het gedocumenteerde voorbeeld van Haute-Garonne en vormen geen algemene benchmark.</p><div class="backend-list" aria-label="Filterbackends"><span>PostgreSQL</span><span>SpatiaLite</span><span>OGR</span><span>Geheugen</span></div><a class="inline-cta inline-cta-light" href="guide.html#backends" hreflang="en">Lees de context van de metingen <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+        <dl class="performance-stats"><div><dt>2,9 GB</dt><dd>GeoPackage-bronbestand van de voorbeelden</dd></div><div><dt>1,173,829</dt><dd>gebouwen in het brondepartement</dd></div><div><dt>12 lagen</dt><dd>in de vastgelegde uitvoering in minder dan een seconde gefilterd op Saint-Gaudens</dd></div></dl>
+    </div>
+</section>
+
+<section class="home-section install-section" id="install" aria-labelledby="install-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row"><div><p class="section-kicker">Gratis en open source</p><h2 id="install-title">Installeer FilterMate in QGIS.</h2></div><p>FilterMate staat in de officiële QGIS-plug-inrepository onder GPL-3.0.</p></div>
+        <ol class="install-steps"><li><strong>Open de plug-inbeheerder</strong><span>Plug-ins › Plug-ins beheren en installeren…</span></li><li><strong>Zoek naar FilterMate</strong><span>op het tabblad Alles</span></li><li><strong>Klik op Plug-in installeren</strong><span>en open FilterMate via de knop op de werkbalk</span></li></ol>
+        <div class="install-bottom"><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Open op plugins.qgis.org</a><dl class="install-facts"><div><dt>3.22–4.x</dt><dd>QGIS-compatibiliteit</dd></div><div><dt>34</dt><dd>interfacetalen</dd></div><div><dt>GPL-3.0</dt><dd>opensourcelicentie</dd></div></dl></div>
+    </div>
+</section>
+</main>
+
+<footer class="home-footer">
+    <div class="home-container footer-grid"><div><a href="index.nl.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Ruimtelijk filteren in QGIS, door imagodata.</p></div><ul><li><a href="guide.html" hreflang="en">Handleiding <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">Praktijkvoorbeelden <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">Ontwikkelplan <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Broncode</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Probleem melden</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
+    <div class="home-container footer-note">FilterMate 4.9.2 · Kaartgegevens in video&#x27;s en schermafbeeldingen: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="Video"><video controls playsinline muted></video><form method="dialog"><button>Sluiten</button></form></dialog>
+<script src="assets/i18n/nl.js"></script>
+<script src="assets/fm.js"></script>
+</body>
+</html>
