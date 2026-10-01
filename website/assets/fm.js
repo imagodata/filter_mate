@@ -55,6 +55,25 @@
         });
     });
 
+    // Pick one existing demonstration per home visit, not a rotating carousel.
+    // Keep the chosen poster and the manual player in sync, including on mobile.
+    const heroVideo = document.querySelector('.home-hero video[data-src]');
+    if (heroVideo) {
+        const choices = ['hero', 'export', 'noise', 'buffer', 'bridges', 'brush', 'hamlets', 'favorites', 'processing'];
+        let previous;
+        try { previous = sessionStorage.getItem('filtermate-home-video'); } catch (_) { /* Storage is optional. */ }
+        const candidates = choices.filter((name) => name !== previous);
+        const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+        heroVideo.dataset.src = 'video/' + chosen + '.mp4';
+        heroVideo.poster = 'video/' + chosen + '.webp';
+        const watch = document.querySelector('.home-actions [data-watch]');
+        if (watch) {
+            watch.dataset.video = heroVideo.dataset.src;
+            watch.dataset.poster = heroVideo.getAttribute('poster');
+        }
+        try { sessionStorage.setItem('filtermate-home-video', chosen); } catch (_) { /* Storage is optional. */ }
+    }
+
     // ---------------------------------------------------------------- background footage
     // Videos load only when their sheet comes into view and pause when it leaves.
     // Reduced motion or a data-saving connection keeps the poster; "Watch" still plays.

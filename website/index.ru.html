@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterMate — Пространственная фильтрация в QGIS</title>
+    <meta name="description" content="Фильтруйте все целевые слои проекта QGIS по объекту, выделению или выражению. FilterMate работает с PostGIS, GeoPackage, SpatiaLite и другими векторными источниками без написания SQL.">
+    <meta property="og:title" content="FilterMate — Пространственная фильтрация в QGIS">
+    <meta property="og:description" content="Выберите место или выражение и отфильтруйте связанные слои — без написания SQL.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.ru.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.ru.html">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
+    <link rel="alternate" hreflang="de" href="https://imagodata.github.io/filter_mate/index.de.html">
+    <link rel="alternate" hreflang="es" href="https://imagodata.github.io/filter_mate/index.es.html">
+    <link rel="alternate" hreflang="it" href="https://imagodata.github.io/filter_mate/index.it.html">
+    <link rel="alternate" hreflang="ja" href="https://imagodata.github.io/filter_mate/index.ja.html">
+    <link rel="alternate" hreflang="nl" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="pl" href="https://imagodata.github.io/filter_mate/index.pl.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="ru" href="https://imagodata.github.io/filter_mate/index.ru.html">
+    <link rel="alternate" hreflang="sv" href="https://imagodata.github.io/filter_mate/index.sv.html">
+    <link rel="alternate" hreflang="zh-Hant" href="https://imagodata.github.io/filter_mate/index.zh-hant.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
+    <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
+    <script src="assets/fm-language.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fm.css">
+</head>
+<body class="home">
+<a class="skip" href="#main">Перейти к содержимому</a>
+
+<nav class="nav on-video" aria-label="Основная навигация">
+    <a href="index.ru.html" class="nav-brand" aria-current="page"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="Открыть меню">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="guide.html" hreflang="en">Руководство <small lang="en">(EN)</small></a></li>
+        <li><a href="stories.html" hreflang="en">Примеры <small lang="en">(EN)</small></a></li>
+        <li><a href="roadmap.html" hreflang="en">План развития <small lang="en">(EN)</small></a></li>
+        <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><details class="language-menu"><summary>Русский</summary><ul><li><a href="index.html?lang=en" lang="en" hreflang="en" data-lang-link>English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link>Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.es.html" lang="es" hreflang="es" data-lang-link>Español</a></li><li><a href="index.it.html" lang="it" hreflang="it" data-lang-link>Italiano</a></li><li><a href="index.ja.html" lang="ja" hreflang="ja" data-lang-link>日本語</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link>Nederlands</a></li><li><a href="index.pl.html" lang="pl" hreflang="pl" data-lang-link>Polski</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.ru.html" lang="ru" hreflang="ru" data-lang-link aria-current="true">Русский</a></li><li><a href="index.sv.html" lang="sv" hreflang="sv" data-lang-link>Svenska</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link>简体中文</a></li></ul></details></li>
+        <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Установить</a></li>
+    </ul>
+</nav>
+
+<main id="main">
+<header class="home-hero" id="top">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
+    <div class="home-hero-scrim"></div>
+    <div class="home-container home-hero-inner">
+        <div class="home-hero-copy">
+            <p class="eyebrow"><span></span>Модуль QGIS с открытым исходным кодом</p>
+            <h1>Одно место. Фильтрация всего проекта QGIS.</h1>
+            <p class="home-lead">Выберите объект, список объектов или выражение QGIS. FilterMate применит пространственное условие ко всем целевым слоям сразу — в GeoPackage, PostGIS, SpatiaLite и других векторных источниках, без написания SQL.</p>
+            <div class="home-actions">
+                <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Установить из QGIS</a>
+                <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Посмотреть выбранное видео"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Посмотреть видео</button>
+                <a class="home-text-link" href="guide.html" hreflang="en">Читать руководство <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+            </div>
+            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 и Qt6</p>
+        </div>
+    </div>
+    <a class="hero-scroll" href="#workflow"><span>Узнать, как это работает</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+    <p class="credit">BD TOPO® 3.5 © IGN, Верхняя Гаронна. Записано в QGIS 4.2 с FilterMate 4.9.2.</p>
+</header>
+
+<section class="proof-strip" aria-label="Основные преимущества">
+    <div class="home-container proof-grid">
+        <div><strong>Фильтрация без переноса данных</strong><span>Исходные данные остаются на своём месте.</span></div>
+        <div><strong>Одно действие, много слоёв</strong><span>Применяйте одну географическую область ко всем слоям.</span></div>
+        <div><strong>Отмена и повторное применение</strong><span>Сохраняйте историю и избранные фильтры в проекте.</span></div>
+    </div>
+</section>
+
+<section class="home-section workflow" id="workflow" aria-labelledby="workflow-title">
+    <div class="home-container">
+        <div class="section-heading">
+            <p class="section-kicker">Порядок работы</p>
+            <h2 id="workflow-title">Одно выделение. Все нужные слои.</h2>
+            <p>FilterMate сводит повторяющуюся ГИС-операцию над несколькими слоями к трём понятным шагам. Вы можете проверить выделение и настройки до внесения изменений.</p>
+        </div>
+        <ol class="workflow-grid">
+            <li><span class="step-number">01</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="21" cy="21" r="11"/><path d="m29 29 9 9M16 21h10M21 16v10"/></svg><h3>Выберите источник</h3><p>Выберите один объект или несколько, используйте выделение на карте или напишите выражение QGIS.</p></li>
+            <li><span class="step-number">02</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 35c6-14 15-22 32-22M8 35c11-3 20-2 32 0"/><circle cx="13" cy="31" r="3"/><path d="M31 12v24"/></svg><h3>Задайте пространственное условие</h3><p>Выберите целевые слои, предикат и, при необходимости, буфер. Проверьте исходное выделение перед применением фильтра.</p></li>
+            <li><span class="step-number">03</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 9h28v30H10zM16 17h16M16 24h16M16 31h9"/><path d="m28 30 4 4 7-8"/></svg><h3>Используйте результат</h3><p>Проверьте количество объектов и карту, отмените или сохраните фильтр, затем при необходимости экспортируйте отфильтрованные слои.</p></li>
+        </ol>
+        <a class="inline-cta" href="guide.html#tutorial" hreflang="en">Пройти урок по первому фильтру <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <div class="callout demo-download"><strong>Попробуйте небольшой набор данных.</strong><p>Четыре слоя в окрестностях Toutens, проект QGIS со стилями, избранный фильтр для импорта и инструкции на английском и французском. Распакуйте ZIP перед открытием проекта.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Скачать демо (ZIP, 203 КБ)</a></div>
+    </div>
+</section>
+
+<section class="home-section examples" id="examples" aria-labelledby="examples-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row">
+            <div><p class="section-kicker">Проверенные примеры</p><h2 id="examples-title">Реальные задачи, наглядные результаты.</h2></div>
+            <p>В примерах используется полный GeoPackage BD TOPO для Верхней Гаронны объёмом 2,9 ГБ. Опубликованные количества объектов проверены независимо на тех же данных.</p>
+        </div>
+        <div class="example-grid">
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/export.mp4" data-poster="video/export.webp" aria-label="Посмотреть пример экспорта данных коммуны"><img src="video/export.webp" alt="Карта Saint-Gaudens в QGIS, полученная фильтрацией данных всего департамента" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">01</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Посмотреть пример</span></button>
+                <div class="example-body"><p class="example-label">Передача данных · Saint-Gaudens</p><h3>Набор данных коммуны из 12 слоёв всего департамента</h3><p>Выберите коммуну один раз, отфильтруйте все тематические слои и экспортируйте один GeoPackage со стилями и проектом QGIS.</p><dl class="result-list"><div><dt>12,380</dt><dd>сохранённых зданий</dd></div><div><dt>&lt; 1 s</dt><dd>измеренное время фильтрации</dd></div></dl><a href="stories.html#s1" hreflang="en">Читать полный пример <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="Посмотреть пример близости к дорогам"><img src="video/noise.webp" alt="Здания, отобранные вблизи основных дорог Muret" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Смотреть</span></button>
+                <div class="example-body"><p class="example-label">Планирование · Muret</p><h3>Здания у дорог с буфером переменной ширины</h3><p>Выражение QGIS задаёт 300 м или 250 м в зависимости от категории дороги.</p><p class="result"><strong>1,999</strong> зданий и <strong>74</strong> объекта с доступом посетителей</p><a href="stories.html#s2" hreflang="en">Настройки и результат <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Посмотреть пример поиска пересечений"><img src="video/bridges.webp" alt="Пересечения дорог и водотоков в Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Смотреть</span></button>
+                <div class="example-body"><p class="example-label">Сооружения · Toulouse Métropole</p><h3>Найдите пересечения с постоянными водотоками</h3><p>Предикат Cross исключает дороги, которые лишь проходят вдоль воды.</p><p class="result"><strong>1,112</strong> дорожных сегментов и <strong>190</strong> сооружений</p><a href="stories.html#s4" hreflang="en">Настройки и результат <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Посмотреть пример удалённых поселений"><img src="video/hamlets.webp" alt="Поселения дальше 200 метров от дороги с покрытием в Aspet" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Смотреть</span></button>
+                <div class="example-body"><p class="example-label">Близость к дорогам · Aspet</p><h3>Поселения вдали от дорог с покрытием</h3><p>Disjoint с буфером 200 м находит объекты за пределами буферной зоны.</p><p class="result"><strong>22</strong> поселения дальше 200 м</p><a href="stories.html#s6" hreflang="en">Настройки и результат <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+        </div>
+        <a class="inline-cta" href="stories.html" hreflang="en">Все восемь примеров использования <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+    </div>
+</section>
+
+<section class="home-section capabilities" id="capabilities" aria-labelledby="capabilities-title">
+    <div class="home-container capability-layout">
+        <div class="product-shot"><img src="img/guide/qgis-window.png" alt="Панель FilterMate в QGIS: выбор слоёв, настройки фильтрации и карта видны одновременно" loading="lazy" width="1600" height="945"><p>Панель FilterMate располагается рядом с картой и панелью слоёв, поэтому источник, условие и результат видны одновременно.</p></div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">Ежедневная работа в QGIS</p><h2 id="capabilities-title">От изучения данных до готового результата.</h2><p>FilterMate объединяет весь процесс в одной панели — от выделения до экспорта.</p></div>
+            <ul class="capability-list"><li><strong>Изучайте</strong><span>Ищите и выбирайте опорные объекты на карте, отслеживайте их и приближайте к ним вид.</span></li><li><strong>Фильтруйте</strong><span>Используйте восемь пространственных предикатов, буферы с числовыми значениями или выражениями и фильтры по атрибутам.</span></li><li><strong>Восстанавливайте</strong><span>Отменяйте и повторяйте состояния фильтров, в том числе после повторного открытия проекта QGIS.</span></li><li><strong>Используйте повторно</strong><span>Сохраняйте полные конфигурации в избранном и делитесь ими с командой.</span></li><li><strong>Экспортируйте</strong><span>Записывайте отфильтрованные слои, стили и встроенный проект в GeoPackage или используйте другие форматы QGIS.</span></li><li><strong>Автоматизируйте</strong><span>Применяйте одно выражение к нескольким слоям через Processing, модель или Python.</span></li></ul>
+            <a class="inline-cta" href="guide.html" hreflang="en">Открыть полное руководство <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section performance" id="performance" aria-labelledby="performance-title">
+    <div class="home-container performance-layout">
+        <div class="section-heading"><p class="section-kicker">Измерения с учётом условий</p><h2 id="performance-title">Большие исходные данные могут оставаться большими.</h2><p>FilterMate выбирает механизм фильтрации для каждого векторного слоя и использует доступные встроенные пространственные индексы. Эти цифры описывают документированный пример Верхней Гаронны, а не универсальный тест производительности.</p><div class="backend-list" aria-label="Механизмы фильтрации"><span>PostgreSQL</span><span>SpatiaLite</span><span>OGR</span><span>Память</span></div><a class="inline-cta inline-cta-light" href="guide.html#backends" hreflang="en">Условия измерений <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+        <dl class="performance-stats"><div><dt>2,9 ГБ</dt><dd>исходный GeoPackage для примеров</dd></div><div><dt>1,173,829</dt><dd>зданий в исходном департаменте</dd></div><div><dt>12 слоёв</dt><dd>отфильтрованы до Saint-Gaudens менее чем за секунду в записанном запуске</dd></div></dl>
+    </div>
+</section>
+
+<section class="home-section install-section" id="install" aria-labelledby="install-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row"><div><p class="section-kicker">Бесплатно и с открытым кодом</p><h2 id="install-title">Установите FilterMate в QGIS.</h2></div><p>FilterMate опубликован в официальном репозитории модулей QGIS под лицензией GPL-3.0.</p></div>
+        <ol class="install-steps"><li><strong>Откройте менеджер модулей</strong><span>Модули › Управление модулями…</span></li><li><strong>Найдите FilterMate</strong><span>на вкладке «Все»</span></li><li><strong>Нажмите «Установить модуль»</strong><span>затем откройте FilterMate кнопкой на панели инструментов</span></li></ol>
+        <div class="install-bottom"><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Открыть на plugins.qgis.org</a><dl class="install-facts"><div><dt>3.22–4.x</dt><dd>Совместимость с QGIS</dd></div><div><dt>34</dt><dd>языков интерфейса</dd></div><div><dt>GPL-3.0</dt><dd>лицензия открытого ПО</dd></div></dl></div>
+    </div>
+</section>
+</main>
+
+<footer class="home-footer">
+    <div class="home-container footer-grid"><div><a href="index.ru.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Пространственная фильтрация в QGIS от imagodata.</p></div><ul><li><a href="guide.html" hreflang="en">Руководство <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">Примеры <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">План развития <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Исходный код</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Сообщить о проблеме</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
+    <div class="home-container footer-note">FilterMate 4.9.2 · Картографические данные в видео и снимках экрана: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="Видео"><video controls playsinline muted></video><form method="dialog"><button>Закрыть</button></form></dialog>
+<script src="assets/i18n/ru.js"></script>
+<script src="assets/fm.js"></script>
+</body>
+</html>

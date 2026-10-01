@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterMate — Filtrado espacial para QGIS</title>
+    <meta name="description" content="Filtra todas las capas de destino de un proyecto QGIS a partir de una entidad, una selección o una expresión. FilterMate funciona con PostGIS, GeoPackage, SpatiaLite y otras fuentes vectoriales, sin escribir SQL.">
+    <meta property="og:title" content="FilterMate — Filtrado espacial para QGIS">
+    <meta property="og:description" content="Elige un lugar o una expresión y filtra las capas relacionadas — sin escribir SQL.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.es.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.es.html">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
+    <link rel="alternate" hreflang="de" href="https://imagodata.github.io/filter_mate/index.de.html">
+    <link rel="alternate" hreflang="es" href="https://imagodata.github.io/filter_mate/index.es.html">
+    <link rel="alternate" hreflang="it" href="https://imagodata.github.io/filter_mate/index.it.html">
+    <link rel="alternate" hreflang="ja" href="https://imagodata.github.io/filter_mate/index.ja.html">
+    <link rel="alternate" hreflang="nl" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="pl" href="https://imagodata.github.io/filter_mate/index.pl.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="ru" href="https://imagodata.github.io/filter_mate/index.ru.html">
+    <link rel="alternate" hreflang="sv" href="https://imagodata.github.io/filter_mate/index.sv.html">
+    <link rel="alternate" hreflang="zh-Hant" href="https://imagodata.github.io/filter_mate/index.zh-hant.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
+    <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
+    <script src="assets/fm-language.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fm.css">
+</head>
+<body class="home">
+<a class="skip" href="#main">Saltar al contenido</a>
+
+<nav class="nav on-video" aria-label="Navegación principal">
+    <a href="index.es.html" class="nav-brand" aria-current="page"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="Abrir menú">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="guide.html" hreflang="en">Guía de usuario <small lang="en">(EN)</small></a></li>
+        <li><a href="stories.html" hreflang="en">Casos de uso <small lang="en">(EN)</small></a></li>
+        <li><a href="roadmap.html" hreflang="en">Hoja de ruta <small lang="en">(EN)</small></a></li>
+        <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><details class="language-menu"><summary>Español</summary><ul><li><a href="index.html?lang=en" lang="en" hreflang="en" data-lang-link>English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link>Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.es.html" lang="es" hreflang="es" data-lang-link aria-current="true">Español</a></li><li><a href="index.it.html" lang="it" hreflang="it" data-lang-link>Italiano</a></li><li><a href="index.ja.html" lang="ja" hreflang="ja" data-lang-link>日本語</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link>Nederlands</a></li><li><a href="index.pl.html" lang="pl" hreflang="pl" data-lang-link>Polski</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.ru.html" lang="ru" hreflang="ru" data-lang-link>Русский</a></li><li><a href="index.sv.html" lang="sv" hreflang="sv" data-lang-link>Svenska</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link>简体中文</a></li></ul></details></li>
+        <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Instalar</a></li>
+    </ul>
+</nav>
+
+<main id="main">
+<header class="home-hero" id="top">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
+    <div class="home-hero-scrim"></div>
+    <div class="home-container home-hero-inner">
+        <div class="home-hero-copy">
+            <p class="eyebrow"><span></span>Complemento de código abierto para QGIS</p>
+            <h1>Filtra todo un proyecto QGIS a partir de un lugar.</h1>
+            <p class="home-lead">Elige una entidad, una lista o una expresión de QGIS. FilterMate aplica la regla espacial a todas las capas de destino a la vez — en GeoPackage, PostGIS, SpatiaLite y otras fuentes vectoriales, sin escribir SQL.</p>
+            <div class="home-actions">
+                <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Instalar desde QGIS</a>
+                <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Ver el vídeo seleccionado"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Ver el vídeo</button>
+                <a class="home-text-link" href="guide.html" hreflang="en">Leer la guía <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+            </div>
+            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 y Qt6</p>
+        </div>
+    </div>
+    <a class="hero-scroll" href="#workflow"><span>Descubre el flujo de trabajo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+    <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne. Grabado en QGIS 4.2 con FilterMate 4.9.2.</p>
+</header>
+
+<section class="proof-strip" aria-label="Ventajas principales">
+    <div class="home-container proof-grid">
+        <div><strong>Filtra sin mover los datos</strong><span>Los datos de origen permanecen donde están.</span></div>
+        <div><strong>Una acción, muchas capas</strong><span>Aplica el mismo ámbito geográfico de forma coherente.</span></div>
+        <div><strong>Deshaz y vuelve a aplicar</strong><span>Conserva el historial y los favoritos reutilizables en el proyecto.</span></div>
+    </div>
+</section>
+
+<section class="home-section workflow" id="workflow" aria-labelledby="workflow-title">
+    <div class="home-container">
+        <div class="section-heading">
+            <p class="section-kicker">El flujo de trabajo</p>
+            <h2 id="workflow-title">Una selección. Todas las capas relevantes.</h2>
+            <p>FilterMate convierte una operación SIG repetitiva con varias capas en tres pasos claros. Puedes comprobar la selección y los ajustes antes de aplicar cambios.</p>
+        </div>
+        <ol class="workflow-grid">
+            <li><span class="step-number">01</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="21" cy="21" r="11"/><path d="m29 29 9 9M16 21h10M21 16v10"/></svg><h3>Elige el origen</h3><p>Elige una entidad, marca varias, usa la selección del mapa o escribe una expresión de QGIS.</p></li>
+            <li><span class="step-number">02</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 35c6-14 15-22 32-22M8 35c11-3 20-2 32 0"/><circle cx="13" cy="31" r="3"/><path d="M31 12v24"/></svg><h3>Define la regla espacial</h3><p>Selecciona las capas de destino, el predicado y, si lo necesitas, un búfer. Comprueba la selección de origen antes de aplicar el filtro.</p></li>
+            <li><span class="step-number">03</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 9h28v30H10zM16 17h16M16 24h16M16 31h9"/><path d="m28 30 4 4 7-8"/></svg><h3>Utiliza el resultado</h3><p>Comprueba los recuentos en el mapa, deshaz o guarda el filtro y exporta las capas filtradas cuando lo necesites.</p></li>
+        </ol>
+        <a class="inline-cta" href="guide.html#tutorial" hreflang="en">Sigue el tutorial del primer filtro <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <div class="callout demo-download"><strong>Prueba con un conjunto de datos pequeño.</strong><p>Cuatro capas de la zona de Toutens, un proyecto QGIS con estilos, un favorito importable e instrucciones en inglés y francés. Descomprime el ZIP antes de abrir el proyecto.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Descargar la demo (ZIP, 203 KB)</a></div>
+    </div>
+</section>
+
+<section class="home-section examples" id="examples" aria-labelledby="examples-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row">
+            <div><p class="section-kicker">Ejemplos verificados</p><h2 id="examples-title">Preguntas reales, resultados visibles.</h2></div>
+            <p>Estos ejemplos utilizan el GeoPackage BD TOPO completo de Haute-Garonne, de 2,9 GB. Los recuentos publicados se comprobaron de forma independiente con los mismos datos.</p>
+        </div>
+        <div class="example-grid">
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/export.mp4" data-poster="video/export.webp" aria-label="Ver el ejemplo de exportación municipal"><img src="video/export.webp" alt="Mapa de Saint-Gaudens en QGIS, filtrado a partir de los datos de todo el departamento" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">01</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Ver ejemplo</span></button>
+                <div class="example-body"><p class="example-label">Entrega · Saint-Gaudens</p><h3>Un dossier municipal a partir de 12 capas departamentales</h3><p>Selecciona el municipio una vez, filtra todas las capas temáticas y exporta un GeoPackage con estilos y su proyecto QGIS.</p><dl class="result-list"><div><dt>12,380</dt><dd>edificios conservados</dd></div><div><dt>&lt; 1 s</dt><dd>tiempo de filtrado registrado</dd></div></dl><a href="stories.html#s1" hreflang="en">Leer el caso completo <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="Ver el ejemplo de proximidad a carreteras"><img src="video/noise.webp" alt="Edificios filtrados cerca de las principales carreteras de Muret" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Ver</span></button>
+                <div class="example-body"><p class="example-label">Planificación · Muret</p><h3>Edificios cerca de carreteras con un búfer variable</h3><p>Una expresión de QGIS establece 300 m o 250 m según la categoría de cada carretera.</p><p class="result"><strong>1,999</strong> edificios y <strong>74</strong> establecimientos abiertos al público</p><a href="stories.html#s2" hreflang="en">Ver ajustes y resultado <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Ver el ejemplo de detección de cruces"><img src="video/bridges.webp" alt="Cruces de carreteras y cursos de agua en Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Ver</span></button>
+                <div class="example-body"><p class="example-label">Infraestructuras · Toulouse Métropole</p><h3>Localiza cruces con cursos de agua permanentes</h3><p>El predicado Cross excluye las carreteras que solo discurren junto al agua.</p><p class="result"><strong>1,112</strong> tramos de carretera y <strong>190</strong> estructuras</p><a href="stories.html#s4" hreflang="en">Ver ajustes y resultado <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Ver el ejemplo de núcleos alejados"><img src="video/hamlets.webp" alt="Núcleos a más de 200 metros de una carretera pavimentada en Aspet" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Ver</span></button>
+                <div class="example-body"><p class="example-label">Proximidad a carreteras · Aspet</p><h3>Núcleos alejados de carreteras pavimentadas</h3><p>Disjoint con un búfer de 200 m encuentra lo que queda fuera de esa zona.</p><p class="result"><strong>22</strong> núcleos a más de 200 m</p><a href="stories.html#s6" hreflang="en">Ver ajustes y resultado <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+        </div>
+        <a class="inline-cta" href="stories.html" hreflang="en">Explora los ocho casos de uso <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+    </div>
+</section>
+
+<section class="home-section capabilities" id="capabilities" aria-labelledby="capabilities-title">
+    <div class="home-container capability-layout">
+        <div class="product-shot"><img src="img/guide/qgis-window.png" alt="Panel FilterMate en QGIS, con la selección de capas, los controles de filtrado y el mapa visibles a la vez" loading="lazy" width="1600" height="945"><p>El panel FilterMate permanece junto al mapa y al panel de capas, para que el origen, la regla y el resultado estén visibles a la vez.</p></div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">El trabajo diario en QGIS</p><h2 id="capabilities-title">De la exploración a la entrega.</h2><p>FilterMate reúne todo el flujo de trabajo en un panel, desde la selección hasta la exportación.</p></div>
+            <ul class="capability-list"><li><strong>Explorar</strong><span>Busca, selecciona en el mapa, sigue y amplía las entidades de referencia.</span></li><li><strong>Filtrar</strong><span>Utiliza ocho predicados espaciales, búferes numéricos o basados en expresiones y filtros de atributos.</span></li><li><strong>Restaurar</strong><span>Deshaz y rehace estados de filtrado, incluso después de volver a abrir el proyecto QGIS.</span></li><li><strong>Reutilizar</strong><span>Guarda configuraciones completas como favoritos y compártelas con tu equipo.</span></li><li><strong>Exportar</strong><span>Exporta las capas filtradas, los estilos y un proyecto integrado a GeoPackage, o utiliza otros formatos de QGIS.</span></li><li><strong>Automatizar</strong><span>Aplica una expresión a varias capas desde Processing, un modelo o Python.</span></li></ul>
+            <a class="inline-cta" href="guide.html" hreflang="en">Abrir la guía completa <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section performance" id="performance" aria-labelledby="performance-title">
+    <div class="home-container performance-layout">
+        <div class="section-heading"><p class="section-kicker">Mediciones con contexto</p><h2 id="performance-title">Los datos de origen pueden seguir siendo grandes.</h2><p>FilterMate elige un motor para cada capa vectorial y utiliza los índices espaciales nativos disponibles. Estas cifras corresponden al ejemplo documentado de Haute-Garonne, no a una prueba de rendimiento universal.</p><div class="backend-list" aria-label="Motores de filtrado"><span>PostgreSQL</span><span>SpatiaLite</span><span>OGR</span><span>Memoria</span></div><a class="inline-cta inline-cta-light" href="guide.html#backends" hreflang="en">Leer el contexto de las mediciones <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+        <dl class="performance-stats"><div><dt>2,9 GB</dt><dd>GeoPackage de origen utilizado en los ejemplos</dd></div><div><dt>1,173,829</dt><dd>edificios en el departamento de origen</dd></div><div><dt>12 capas</dt><dd>filtradas a Saint-Gaudens en menos de un segundo en la ejecución registrada</dd></div></dl>
+    </div>
+</section>
+
+<section class="home-section install-section" id="install" aria-labelledby="install-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row"><div><p class="section-kicker">Libre y de código abierto</p><h2 id="install-title">Instala FilterMate en QGIS.</h2></div><p>FilterMate está publicado en el repositorio oficial de complementos de QGIS bajo la licencia GPL-3.0.</p></div>
+        <ol class="install-steps"><li><strong>Abre el administrador de complementos</strong><span>Complementos › Administrar e instalar complementos…</span></li><li><strong>Busca FilterMate</strong><span>en la pestaña Todos</span></li><li><strong>Haz clic en Instalar complemento</strong><span>y abre FilterMate desde su botón en la barra de herramientas</span></li></ol>
+        <div class="install-bottom"><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Abrir en plugins.qgis.org</a><dl class="install-facts"><div><dt>3.22–4.x</dt><dd>Compatibilidad con QGIS</dd></div><div><dt>34</dt><dd>idiomas de la interfaz</dd></div><div><dt>GPL-3.0</dt><dd>licencia de código abierto</dd></div></dl></div>
+    </div>
+</section>
+</main>
+
+<footer class="home-footer">
+    <div class="home-container footer-grid"><div><a href="index.es.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Filtrado espacial para QGIS, por imagodata.</p></div><ul><li><a href="guide.html" hreflang="en">Guía de usuario <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">Casos de uso <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">Hoja de ruta <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Código fuente</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Informar de un problema</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
+    <div class="home-container footer-note">FilterMate 4.9.2 · Datos cartográficos de vídeos y capturas: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="Vídeo"><video controls playsinline muted></video><form method="dialog"><button>Cerrar</button></form></dialog>
+<script src="assets/i18n/es.js"></script>
+<script src="assets/fm.js"></script>
+</body>
+</html>

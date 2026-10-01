@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterMate — QGIS の空間フィルタリング</title>
+    <meta name="description" content="地物、選択範囲、式をもとに、QGIS プロジェクト内のすべての対象レイヤをフィルタリング。FilterMate は PostGIS、GeoPackage、SpatiaLite などのベクタデータソースに対応し、SQL の記述は不要です。">
+    <meta property="og:title" content="FilterMate — QGIS の空間フィルタリング">
+    <meta property="og:description" content="場所や式を選び、関連するレイヤをまとめてフィルタリング。SQL の記述は不要です。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.ja.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.ja.html">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
+    <link rel="alternate" hreflang="de" href="https://imagodata.github.io/filter_mate/index.de.html">
+    <link rel="alternate" hreflang="es" href="https://imagodata.github.io/filter_mate/index.es.html">
+    <link rel="alternate" hreflang="it" href="https://imagodata.github.io/filter_mate/index.it.html">
+    <link rel="alternate" hreflang="ja" href="https://imagodata.github.io/filter_mate/index.ja.html">
+    <link rel="alternate" hreflang="nl" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="pl" href="https://imagodata.github.io/filter_mate/index.pl.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="ru" href="https://imagodata.github.io/filter_mate/index.ru.html">
+    <link rel="alternate" hreflang="sv" href="https://imagodata.github.io/filter_mate/index.sv.html">
+    <link rel="alternate" hreflang="zh-Hant" href="https://imagodata.github.io/filter_mate/index.zh-hant.html">
+    <link rel="alternate" hreflang="zh-Hans" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
+    <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
+    <script src="assets/fm-language.js"></script>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fm.css">
+</head>
+<body class="home">
+<a class="skip" href="#main">本文へスキップ</a>
+
+<nav class="nav on-video" aria-label="メインナビゲーション">
+    <a href="index.ja.html" class="nav-brand" aria-current="page"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="メニューを開く">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="guide.html" hreflang="en">ユーザーガイド <small lang="en">(EN)</small></a></li>
+        <li><a href="stories.html" hreflang="en">活用例 <small lang="en">(EN)</small></a></li>
+        <li><a href="roadmap.html" hreflang="en">ロードマップ <small lang="en">(EN)</small></a></li>
+        <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><details class="language-menu"><summary>日本語</summary><ul><li><a href="index.html?lang=en" lang="en" hreflang="en" data-lang-link>English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link>Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.es.html" lang="es" hreflang="es" data-lang-link>Español</a></li><li><a href="index.it.html" lang="it" hreflang="it" data-lang-link>Italiano</a></li><li><a href="index.ja.html" lang="ja" hreflang="ja" data-lang-link aria-current="true">日本語</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link>Nederlands</a></li><li><a href="index.pl.html" lang="pl" hreflang="pl" data-lang-link>Polski</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.ru.html" lang="ru" hreflang="ru" data-lang-link>Русский</a></li><li><a href="index.sv.html" lang="sv" hreflang="sv" data-lang-link>Svenska</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link>简体中文</a></li></ul></details></li>
+        <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">インストール</a></li>
+    </ul>
+</nav>
+
+<main id="main">
+<header class="home-hero" id="top">
+    <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
+    <div class="home-hero-scrim"></div>
+    <div class="home-container home-hero-inner">
+        <div class="home-hero-copy">
+            <p class="eyebrow"><span></span>オープンソースの QGIS プラグイン</p>
+            <h1>ひとつの場所から、QGIS プロジェクト全体をフィルタリング。</h1>
+            <p class="home-lead">地物、地物の一覧、QGIS の式を選択。FilterMate がすべての対象レイヤに空間条件を一括適用します。GeoPackage、PostGIS、SpatiaLite などのベクタデータソースに対応し、SQL の記述は不要です。</p>
+            <div class="home-actions">
+                <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>QGIS からインストール</a>
+                <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="選ばれた動画を見る"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>動画を見る</button>
+                <a class="home-text-link" href="guide.html" hreflang="en">ガイドを読む <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+            </div>
+            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5・Qt6</p>
+        </div>
+    </div>
+    <a class="hero-scroll" href="#workflow"><span>操作の流れを見る</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+    <p class="credit">BD TOPO® 3.5 © IGN、オート＝ガロンヌ県。QGIS 4.2 と FilterMate 4.9.2 で収録。</p>
+</header>
+
+<section class="proof-strip" aria-label="主な特長">
+    <div class="home-container proof-grid">
+        <div><strong>データを移動せずにフィルタリング</strong><span>ソースデータは元の場所に保持されます。</span></div>
+        <div><strong>一度の操作で複数レイヤに適用</strong><span>同じ地理的範囲を一貫して適用できます。</span></div>
+        <div><strong>元に戻す・再適用</strong><span>履歴や再利用できるお気に入りをプロジェクトに保存できます。</span></div>
+    </div>
+</section>
+
+<section class="home-section workflow" id="workflow" aria-labelledby="workflow-title">
+    <div class="home-container">
+        <div class="section-heading">
+            <p class="section-kicker">操作の流れ</p>
+            <h2 id="workflow-title">一度の選択で、必要なすべてのレイヤを。</h2>
+            <p>複数レイヤで繰り返す GIS 操作を、明確な 3 ステップに整理。変更を適用する前に、選択内容と設定を確認できます。</p>
+        </div>
+        <ol class="workflow-grid">
+            <li><span class="step-number">01</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="21" cy="21" r="11"/><path d="m29 29 9 9M16 21h10M21 16v10"/></svg><h3>ソースを選択</h3><p>地物を 1 つ選ぶ、複数にチェックを入れる、地図上の選択を使う、QGIS の式を記述する方法があります。</p></li>
+            <li><span class="step-number">02</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 35c6-14 15-22 32-22M8 35c11-3 20-2 32 0"/><circle cx="13" cy="31" r="3"/><path d="M31 12v24"/></svg><h3>空間条件を設定</h3><p>対象レイヤ、空間述語、必要に応じてバッファを設定します。フィルタを適用する前にソースの選択内容を確認してください。</p></li>
+            <li><span class="step-number">03</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 9h28v30H10zM16 17h16M16 24h16M16 31h9"/><path d="m28 30 4 4 7-8"/></svg><h3>結果を活用</h3><p>地図と地物数を確認し、フィルタを取り消すか保存します。必要に応じて、絞り込んだレイヤをエクスポートできます。</p></li>
+        </ol>
+        <a class="inline-cta" href="guide.html#tutorial" hreflang="en">初めてのフィルタのチュートリアルへ <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <div class="callout demo-download"><strong>小さなデータセットで試す。</strong><p>Toutens 周辺の 4 レイヤ、スタイル設定済みの QGIS プロジェクト、インポート可能なお気に入り、英語・フランス語の手順を収録。ZIP を展開してからプロジェクトを開いてください。</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>デモをダウンロード（ZIP、203 KB）</a></div>
+    </div>
+</section>
+
+<section class="home-section examples" id="examples" aria-labelledby="examples-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row">
+            <div><p class="section-kicker">検証済みの例</p><h2 id="examples-title">実際の課題を、目に見える結果へ。</h2></div>
+            <p>これらの例では、オート＝ガロンヌ県の BD TOPO GeoPackage 全体（2.9 GB）を使用しています。掲載している地物数は、同じデータを使って独立に検証しています。</p>
+        </div>
+        <div class="example-grid">
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/export.mp4" data-poster="video/export.webp" aria-label="自治体データのエクスポート例を見る"><img src="video/export.webp" alt="県全体のデータから抽出した Saint-Gaudens の QGIS 地図" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">01</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>例を見る</span></button>
+                <div class="example-body"><p class="example-label">成果物 · Saint-Gaudens</p><h3>県全域の 12 レイヤから自治体の資料を作成</h3><p>自治体を一度選び、すべての主題レイヤをフィルタリング。スタイルと QGIS プロジェクトを含む GeoPackage としてエクスポートします。</p><dl class="result-list"><div><dt>12,380</dt><dd>件の建物を抽出</dd></div><div><dt>&lt; 1 s</dt><dd>収録時のフィルタ処理時間</dd></div></dl><a href="stories.html#s1" hreflang="en">活用例の詳細を読む <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="道路への近接性の例を見る"><img src="video/noise.webp" alt="Muret の主要道路周辺で抽出した建物" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>再生</span></button>
+                <div class="example-body"><p class="example-label">計画 · Muret</p><h3>可変バッファで道路沿いの建物を抽出</h3><p>QGIS の式で、道路の分類ごとに 300 m または 250 m を設定します。</p><p class="result"><strong>1,999</strong> 件の建物と <strong>74</strong> 件の一般利用施設</p><a href="stories.html#s2" hreflang="en">設定と結果を見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="交差箇所の検出例を見る"><img src="video/bridges.webp" alt="Toulouse Métropole の道路と水路の交差箇所" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>再生</span></button>
+                <div class="example-body"><p class="example-label">構造物 · Toulouse Métropole</p><h3>通年の水路との交差箇所を探す</h3><p>Cross 述語は、水路に沿って走るだけの道路を除外します。</p><p class="result"><strong>1,112</strong> 区間の道路と <strong>190</strong> 件の構造物</p><a href="stories.html#s4" hreflang="en">設定と結果を見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+            <article class="example-card">
+                <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="道路から離れた集落の例を見る"><img src="video/hamlets.webp" alt="Aspet の舗装道路から 200 m 以上離れた集落" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>再生</span></button>
+                <div class="example-body"><p class="example-label">道路への近接性 · Aspet</p><h3>舗装道路から離れた集落</h3><p>Disjoint と 200 m のバッファを組み合わせ、バッファ外の地物を抽出します。</p><p class="result"><strong>22</strong> か所の集落が 200 m 超の範囲外</p><a href="stories.html#s6" hreflang="en">設定と結果を見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+            </article>
+        </div>
+        <a class="inline-cta" href="stories.html" hreflang="en">8 つの活用例をすべて見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+    </div>
+</section>
+
+<section class="home-section capabilities" id="capabilities" aria-labelledby="capabilities-title">
+    <div class="home-container capability-layout">
+        <div class="product-shot"><img src="img/guide/qgis-window.png" alt="レイヤ選択、フィルタ設定、地図を同時に表示する QGIS の FilterMate パネル" loading="lazy" width="1600" height="945"><p>FilterMate パネルは地図とレイヤパネルの横に配置され、ソース、条件、結果を同時に確認できます。</p></div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">日々の QGIS 作業に</p><h2 id="capabilities-title">データの探索から成果物の作成まで。</h2><p>FilterMate は、選択からエクスポートまでの作業を 1 つのパネルにまとめます。</p></div>
+            <ul class="capability-list"><li><strong>探索</strong><span>基準となる地物を検索し、地図上で選択・追跡・ズームできます。</span></li><li><strong>フィルタリング</strong><span>8 種類の空間述語、数値や式で指定するバッファ、属性フィルタを利用できます。</span></li><li><strong>復元</strong><span>QGIS プロジェクトを開き直した後でも、フィルタの状態を元に戻したり、やり直したりできます。</span></li><li><strong>再利用</strong><span>設定全体をお気に入りに保存し、チームで共有できます。</span></li><li><strong>エクスポート</strong><span>フィルタ後のレイヤ、スタイル、埋め込みプロジェクトを GeoPackage に保存できます。他の QGIS 対応形式も利用可能です。</span></li><li><strong>自動化</strong><span>Processing、モデル、Python から、1 つの式を複数のレイヤに適用できます。</span></li></ul>
+            <a class="inline-cta" href="guide.html" hreflang="en">ユーザーガイド全体を開く <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
+    </div>
+</section>
+
+<section class="home-section performance" id="performance" aria-labelledby="performance-title">
+    <div class="home-container performance-layout">
+        <div class="section-heading"><p class="section-kicker">条件とともに示す測定値</p><h2 id="performance-title">大きなソースデータを、そのまま扱う。</h2><p>FilterMate はベクタレイヤごとにバックエンドを選び、利用可能なネイティブ空間インデックスを使用します。これらの数値はオート＝ガロンヌ県の記録済みの例を示すもので、一般的な性能保証ではありません。</p><div class="backend-list" aria-label="フィルタ処理のバックエンド"><span>PostgreSQL</span><span>SpatiaLite</span><span>OGR</span><span>メモリ</span></div><a class="inline-cta inline-cta-light" href="guide.html#backends" hreflang="en">測定条件を読む <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+        <dl class="performance-stats"><div><dt>2.9 GB</dt><dd>例で使用したソース GeoPackage</dd></div><div><dt>1,173,829</dt><dd>件の建物を含む県全体のデータ</dd></div><div><dt>12 レイヤ</dt><dd>収録時に 1 秒未満で Saint-Gaudens に絞り込み</dd></div></dl>
+    </div>
+</section>
+
+<section class="home-section install-section" id="install" aria-labelledby="install-title">
+    <div class="home-container">
+        <div class="section-heading section-heading-row"><div><p class="section-kicker">無料・オープンソース</p><h2 id="install-title">QGIS に FilterMate をインストール。</h2></div><p>FilterMate は、QGIS の公式プラグインリポジトリで GPL-3.0 ライセンスのもと公開されています。</p></div>
+        <ol class="install-steps"><li><strong>プラグインマネージャを開く</strong><span>プラグイン › プラグインの管理とインストール…</span></li><li><strong>FilterMate を検索</strong><span>「すべて」タブで検索</span></li><li><strong>「プラグインをインストール」をクリック</strong><span>続いて、ツールバーのボタンから FilterMate を開きます</span></li></ol>
+        <div class="install-bottom"><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>plugins.qgis.org で開く</a><dl class="install-facts"><div><dt>3.22–4.x</dt><dd>対応 QGIS バージョン</dd></div><div><dt>34</dt><dd>言語のインターフェース</dd></div><div><dt>GPL-3.0</dt><dd>オープンソースライセンス</dd></div></dl></div>
+    </div>
+</section>
+</main>
+
+<footer class="home-footer">
+    <div class="home-container footer-grid"><div><a href="index.ja.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>imagodata による QGIS 向け空間フィルタリング。</p></div><ul><li><a href="guide.html" hreflang="en">ユーザーガイド <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">活用例 <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">ロードマップ <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">ソースコード</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">問題を報告</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
+    <div class="home-container footer-note">FilterMate 4.9.2 · 動画とスクリーンショットの地図データ：BD TOPO® © IGN、Licence Ouverte 2.0。</div>
+</footer>
+
+<dialog class="lightbox" id="lightbox" aria-label="動画"><video controls playsinline muted></video><form method="dialog"><button>閉じる</button></form></dialog>
+<script src="assets/i18n/ja.js"></script>
+<script src="assets/fm.js"></script>
+</body>
+</html>

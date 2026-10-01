@@ -1,0 +1,1 @@
+window.FM_I18N = {"openMenu": "Öppna meny", "closeMenu": "Stäng meny", "progress": "Sidans läsposition", "pageSections": "Sidavsnitt", "backTop": "Till toppen", "sections": [["top", "Start"], ["workflow", "Arbetsflöde"], ["examples", "Exempel"], ["capabilities", "Funktioner"], ["performance", "Mätningar"], ["install", "Installera"]]};

@@ -14,17 +14,23 @@
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
     <link rel="alternate" hreflang="de" href="https://imagodata.github.io/filter_mate/index.de.html">
-    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="es" href="https://imagodata.github.io/filter_mate/index.es.html">
+    <link rel="alternate" hreflang="it" href="https://imagodata.github.io/filter_mate/index.it.html">
+    <link rel="alternate" hreflang="ja" href="https://imagodata.github.io/filter_mate/index.ja.html">
     <link rel="alternate" hreflang="nl" href="https://imagodata.github.io/filter_mate/index.nl.html">
+    <link rel="alternate" hreflang="pl" href="https://imagodata.github.io/filter_mate/index.pl.html">
+    <link rel="alternate" hreflang="pt-BR" href="https://imagodata.github.io/filter_mate/index.pt-br.html">
+    <link rel="alternate" hreflang="ru" href="https://imagodata.github.io/filter_mate/index.ru.html">
+    <link rel="alternate" hreflang="sv" href="https://imagodata.github.io/filter_mate/index.sv.html">
     <link rel="alternate" hreflang="zh-Hant" href="https://imagodata.github.io/filter_mate/index.zh-hant.html">
     <link rel="alternate" hreflang="zh-Hans" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
     <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">
+    <script src="assets/fm-language.js"></script>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/fm.css">
-    <link rel="preload" as="image" href="video/hero.webp">
 </head>
 <body class="home">
 <a class="skip" href="#main">跳转到内容</a>
@@ -39,7 +45,7 @@
         <li><a href="stories.html" hreflang="en">应用案例 <small lang="en">(EN)</small></a></li>
         <li><a href="roadmap.html" hreflang="en">开发规划 <small lang="en">(EN)</small></a></li>
         <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
-        <li><details class="language-menu"><summary>简体中文</summary><ul><li><a href="index.html" lang="en" hreflang="en" data-lang-link>English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link>Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link>Nederlands</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link aria-current="true">简体中文</a></li></ul></details></li>
+        <li><details class="language-menu"><summary>简体中文</summary><ul><li><a href="index.html?lang=en" lang="en" hreflang="en" data-lang-link>English</a></li><li><a href="index.fr.html" lang="fr" hreflang="fr" data-lang-link>Français</a></li><li><a href="index.de.html" lang="de" hreflang="de" data-lang-link>Deutsch</a></li><li><a href="index.es.html" lang="es" hreflang="es" data-lang-link>Español</a></li><li><a href="index.it.html" lang="it" hreflang="it" data-lang-link>Italiano</a></li><li><a href="index.ja.html" lang="ja" hreflang="ja" data-lang-link>日本語</a></li><li><a href="index.nl.html" lang="nl" hreflang="nl" data-lang-link>Nederlands</a></li><li><a href="index.pl.html" lang="pl" hreflang="pl" data-lang-link>Polski</a></li><li><a href="index.pt-br.html" lang="pt-BR" hreflang="pt-BR" data-lang-link>Português (Brasil)</a></li><li><a href="index.ru.html" lang="ru" hreflang="ru" data-lang-link>Русский</a></li><li><a href="index.sv.html" lang="sv" hreflang="sv" data-lang-link>Svenska</a></li><li><a href="index.zh-hant.html" lang="zh-Hant" hreflang="zh-Hant" data-lang-link>繁體中文</a></li><li><a href="index.zh-hans.html" lang="zh-Hans" hreflang="zh-Hans" data-lang-link aria-current="true">简体中文</a></li></ul></details></li>
         <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">安装</a></li>
     </ul>
 </nav>
@@ -55,7 +61,7 @@
             <p class="home-lead">选择单个要素、多个要素或 QGIS 表达式。FilterMate 会将空间规则一次应用于所有目标图层，支持 GeoPackage、PostGIS、SpatiaLite 及其他矢量数据源，无需编写 SQL。</p>
             <div class="home-actions">
                 <a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>通过 QGIS 安装</a>
-                <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="观看 FilterMate 简介"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看简介</button>
+                <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="观看所选视频"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看视频</button>
                 <a class="home-text-link" href="guide.html" hreflang="en">阅读指南 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
             </div>
             <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 和 Qt6</p>

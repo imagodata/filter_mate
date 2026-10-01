@@ -12,15 +12,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / 'website'
 LANGUAGES = {
     'en': ('English', 'index.html'), 'fr': ('Français', 'index.fr.html'),
-    'de': ('Deutsch', 'index.de.html'), 'pt-BR': ('Português (Brasil)', 'index.pt-br.html'),
-    'nl': ('Nederlands', 'index.nl.html'), 'zh-Hant': ('繁體中文', 'index.zh-hant.html'),
+    'de': ('Deutsch', 'index.de.html'), 'es': ('Español', 'index.es.html'),
+    'it': ('Italiano', 'index.it.html'), 'ja': ('日本語', 'index.ja.html'),
+    'nl': ('Nederlands', 'index.nl.html'), 'pl': ('Polski', 'index.pl.html'),
+    'pt-BR': ('Português (Brasil)', 'index.pt-br.html'), 'ru': ('Русский', 'index.ru.html'),
+    'sv': ('Svenska', 'index.sv.html'),
+    'zh-Hant': ('繁體中文', 'index.zh-hant.html'),
     'zh-Hans': ('简体中文', 'index.zh-hans.html'),
 }
 
 
 def switcher(lang):
     links = ''.join(
-        f'<li><a href="{filename}" lang="{code}" hreflang="{code}" data-lang-link'
+        f'<li><a href="{filename}{"?lang=en" if code == "en" else ""}" lang="{code}" hreflang="{code}" data-lang-link'
         + (' aria-current="true"' if code == lang else '')
         + f'>{label}</a></li>' for code, (label, filename) in LANGUAGES.items()
     )
@@ -34,9 +38,14 @@ def alternates():
     ) + '\n    <link rel="alternate" hreflang="x-default" href="https://imagodata.github.io/filter_mate/">'
 
 
+def insert_alternates(source):
+    marker = '    <script src="assets/fm-language.js"' if 'src="assets/fm-language.js"' in source else '    <link rel="icon"'
+    return source.replace(marker, alternates() + '\n' + marker, 1)
+
+
 def update_languages(source, lang):
     source = re.sub(r'    <link rel="alternate"[^>]+>\n?', '', source)
-    source = source.replace('    <link rel="icon"', alternates() + '\n    <link rel="icon"', 1)
+    source = insert_alternates(source)
     source = re.sub(r'<span class="lang"[^>]*>.*?</span>', switcher(lang), source)
     source = re.sub(r'<details class="language-menu">.*?</details>', switcher(lang), source)
     return source
@@ -44,6 +53,18 @@ def update_languages(source, lang):
 
 def build(check=False):
     data = json.loads((ROOT / 'i18n/home.json').read_text(encoding='utf-8'))
+    if len(set(data['languages'])) != len(data['languages']):
+        raise ValueError('Duplicate translation languages')
+    if set(data['languages']) != set(LANGUAGES) - {'en', 'fr'}:
+        raise ValueError('Translations must cover every language in the switcher except English and French')
+    required_ui = {'openMenu', 'closeMenu', 'progress', 'pageSections', 'backTop', 'sections'}
+    section_ids = ['top', 'workflow', 'examples', 'capabilities', 'performance', 'install']
+    for lang in data['languages']:
+        ui = data['ui'].get(lang, {})
+        if not required_ui <= ui.keys() or not all(ui.values()):
+            raise ValueError(f'Missing navigation translations: {lang}')
+        if [item[0] for item in ui['sections']] != section_ids or not all(item[1] for item in ui['sections']):
+            raise ValueError(f'Invalid section navigation: {lang}')
     keys = [row[0] for row in data['messages']]
     if len(set(keys)) != len(keys):
         raise ValueError('Duplicate source messages')
@@ -98,7 +119,7 @@ def build(check=False):
         page = page.replace('href="index.html" class="nav-brand"', f'href="{filename}" class="nav-brand"')
         page = page.replace('content="https://imagodata.github.io/filter_mate/"', f'content="https://imagodata.github.io/filter_mate/{filename}"')
         page = page.replace('rel="canonical" href="https://imagodata.github.io/filter_mate/"', f'rel="canonical" href="https://imagodata.github.io/filter_mate/{filename}"')
-        page = page.replace('    <link rel="icon"', alternates() + '\n    <link rel="icon"', 1)
+        page = insert_alternates(page)
         for target in ('guide.html', 'stories.html', 'roadmap.html'):
             page = re.sub(r'(<a\b[^>]*href="' + re.escape(target) + r'(?:#[^"]*)?"[^>]*>)(.*?)(</a>)',
                           lambda m: m[1].replace('>', ' hreflang="en">', 1) + m[2] + ' <small lang="en">(EN)</small>' + m[3], page)
