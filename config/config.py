@@ -1,4 +1,5 @@
 from qgis.core import QgsApplication, QgsProject, QgsMessageLog, Qgis
+import copy
 import os
 import sys
 import json
@@ -181,7 +182,8 @@ def _migrate_config(config_data, default_data):
     dirty = False
 
     # 1) Merge new keys from default into user config (recursive, non-destructive)
-    merge(config_data, default_data)
+    if _merge_missing_keys(config_data, default_data):
+        dirty = True
 
     # 1b) Refresh schema-owned metadata (description, choices, _hidden, …) so
     # the Configuration panel reflects the current template, not whatever
@@ -275,6 +277,32 @@ def get_fallback_config():
     """
     import copy
     return copy.deepcopy(FALLBACK_CONFIG)
+
+
+def _merge_missing_keys(a, b):
+    """Recursively add keys present in ``b`` but missing from ``a``.
+
+    Existing keys in ``a`` are never overwritten; nested dicts are merged
+    in place. Added subtrees are deep-copied so ``a`` never aliases ``b``.
+
+    Args:
+        a: Destination dict (modified in place).
+        b: Reference dict (read-only).
+
+    Returns:
+        bool: True if at least one key was added to ``a``.
+    """
+    if not (isinstance(a, dict) and isinstance(b, dict)):
+        return False
+    added = False
+    for key, ref_val in b.items():
+        if key not in a:
+            a[key] = copy.deepcopy(ref_val)
+            added = True
+        elif isinstance(a[key], dict) and isinstance(ref_val, dict):
+            if _merge_missing_keys(a[key], ref_val):
+                added = True
+    return added
 
 
 def merge(a, b, path=None):

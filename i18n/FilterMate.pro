@@ -27,6 +27,7 @@ SOURCES = \
     ../ui/controllers/config_controller.py \
     ../ui/controllers/favorites_controller.py \
     ../ui/controllers/integration.py \
+    ../ui/controllers/point_cloud_ui_controller.py \
     ../ui/dialogs/config_editor_widget.py \
     ../ui/dialogs/export_group_recap_dialog.py \
     ../ui/dialogs/favorites_manager.py \
@@ -40,7 +41,8 @@ SOURCES = \
     ../ui/widgets/history_widget.py \
     ../ui/widgets/json_view/datatypes.py \
     ../ui/widgets/json_view/model.py \
-    ../ui/widgets/json_view/searchable_view.py
+    ../ui/widgets/json_view/searchable_view.py \
+    ../ui/widgets/point_cloud_filter_widget.py
 
 TRANSLATIONS = \
     FilterMate_am.ts \

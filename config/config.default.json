@@ -729,6 +729,14 @@
           "value": true,
           "description": "Auto-zoom on the union extent of filtered layers (source + cascade targets) after a filter or favorite is applied. Per-layer is_tracking still forces zoom on its own layer."
         }
+      },
+      "POINT_CLOUD": {
+        "description": "Interactive filtering of point cloud layers (LAS/LAZ/COPC): classification, elevation, intensity. Requires QGIS 3.26 or newer",
+        "enabled": {
+          "value": false,
+          "choices": [true, false],
+          "description": "Show point cloud layers in the layer list and enable the point cloud filter panel (experimental)"
+        }
       }
     }
   },

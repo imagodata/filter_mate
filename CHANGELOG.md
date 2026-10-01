@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **Interactive filtering of point cloud layers (LAS/LAZ/COPC, `QgsPointCloudLayer`).** When a point cloud is the current layer, the filtering tab shows a point cloud panel in place of the vector widgets: ASPRS classification checklist (with point counts when the layer statistics are available), elevation (Z) range, intensity range and return number. The dock's Filter, Unfilter, Reset, Undo and Redo buttons drive it; the filter is applied with `setSubsetString` (`QgsPointCloudExpression` syntax, e.g. `Classification IN (2, 6) AND Z >= 10 AND Z <= 150`) and recorded in the filter history, so undo/redo restores the previous subset. Export is not available for point cloud layers yet. Experimental, behind `APP.OPTIONS.POINT_CLOUD.enabled` (off by default); requires QGIS 3.26 or newer.
+
 ## [4.9.2] - 2026-09-14
 
 ### Fixed

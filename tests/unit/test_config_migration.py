@@ -12,10 +12,14 @@ not require pulling in ``filter_mate.core.optimization.config_provider``
 (which transitively imports the QGIS PyQt wrappers).
 """
 import importlib.util
+import json
 import sys
 from pathlib import Path
 
 import pytest
+
+PLUGIN_ROOT = Path(__file__).resolve().parents[2]
+CONFIG_DEFAULT_PATH = PLUGIN_ROOT / "config" / "config.default.json"
 
 
 @pytest.fixture(scope="module")
@@ -233,3 +237,156 @@ class TestMigrateConfigRefreshesMetadata:
         # New keys added by the existing merge() pass
         assert "APP_SQLITE_PATH" in user["APP"]["OPTIONS"]
         assert "FRESH_RELOAD_FLAG" in user["APP"]["OPTIONS"]
+
+
+def _point_cloud_section():
+    return {
+        "description": "Point cloud filtering",
+        "enabled": {
+            "value": False,
+            "choices": [True, False],
+            "description": "Enable the point cloud panel",
+        },
+    }
+
+
+def _migrated_user_config():
+    """A user config already carrying every migration marker except POINT_CLOUD."""
+    return {
+        "_CONFIG_VERSION": "2.0",
+        "_CONFIG_META": {"_hidden": True, "version": "2.0"},
+        "APP": {
+            "_display_name": "Settings",
+            "DOCKWIDGET": {"_display_name": "Interface", "COLORS": {"_display_name": "Appearance"}},
+            "OPTIONS": {
+                "_display_name": "Performance",
+                "APP_SQLITE_PATH": {"_hidden": True, "value": "/tmp", "description": "DB dir"},
+                "FRESH_RELOAD_FLAG": {"_hidden": True, "value": False, "description": "Force reload"},
+                "EXPLORATION": {
+                    "description": "Exploration",
+                    "auto_zoom_on_filter": {"value": False, "description": "Auto zoom"},
+                },
+            },
+        },
+        "EXTENSIONS": {"_display_name": "Extensions"},
+    }
+
+
+def _default_config_with_point_cloud():
+    default = _migrated_user_config()
+    default["APP"]["OPTIONS"]["APP_SQLITE_PATH"]["value"] = ""
+    default["APP"]["OPTIONS"]["EXPLORATION"]["auto_zoom_on_filter"]["value"] = True
+    default["APP"]["OPTIONS"]["POINT_CLOUD"] = _point_cloud_section()
+    return default
+
+
+class TestMergeMissingKeys:
+    """Direct tests for ``_merge_missing_keys`` (the dirty-aware merge)."""
+
+    def test_returns_true_when_top_level_key_added(self, config_helpers):
+        user = {"a": 1}
+        assert config_helpers._merge_missing_keys(user, {"a": 0, "b": 2}) is True
+        assert user == {"a": 1, "b": 2}
+
+    def test_returns_true_when_nested_key_added(self, config_helpers):
+        user = {"APP": {"OPTIONS": {"X": {"value": 1}}}}
+        ref = {"APP": {"OPTIONS": {"X": {"value": 0}, "Y": {"value": 2}}}}
+        assert config_helpers._merge_missing_keys(user, ref) is True
+        assert user["APP"]["OPTIONS"]["X"]["value"] == 1
+        assert user["APP"]["OPTIONS"]["Y"] == {"value": 2}
+
+    def test_returns_false_when_nothing_missing(self, config_helpers):
+        user = {"a": {"b": 1, "c": [1, 2]}, "d": "x"}
+        ref = {"a": {"b": 0, "c": []}, "d": "y"}
+        assert config_helpers._merge_missing_keys(user, ref) is False
+        assert user == {"a": {"b": 1, "c": [1, 2]}, "d": "x"}
+
+    def test_never_overwrites_existing_leaf(self, config_helpers):
+        user = {"a": {"value": "mine"}}
+        config_helpers._merge_missing_keys(user, {"a": {"value": "theirs", "description": "d"}})
+        assert user["a"]["value"] == "mine"
+        assert user["a"]["description"] == "d"
+
+    def test_added_subtree_does_not_alias_reference(self, config_helpers):
+        ref = {"NEW": {"enabled": {"value": False}}}
+        user = {}
+        config_helpers._merge_missing_keys(user, ref)
+        user["NEW"]["enabled"]["value"] = True
+        assert ref["NEW"]["enabled"]["value"] is False
+
+    def test_returns_false_for_non_dict_inputs(self, config_helpers):
+        assert config_helpers._merge_missing_keys(None, {"a": 1}) is False
+        assert config_helpers._merge_missing_keys({}, None) is False
+        assert config_helpers._merge_missing_keys("a", "b") is False
+
+    def test_legacy_merge_still_returns_destination(self, config_helpers):
+        user = {"a": 1}
+        result = config_helpers.merge(user, {"a": 0, "b": 2})
+        assert result is user
+        assert user == {"a": 1, "b": 2}
+
+
+class TestMigrateConfigPersistsNewSections:
+    """A brand-new section in the template must flag the config as dirty so
+    ``init_env_vars`` writes it back to disk (otherwise it only lives in
+    memory and vanishes on the next ``reload_config``)."""
+
+    def test_new_point_cloud_section_marks_config_dirty(self, config_helpers):
+        user = _migrated_user_config()
+        default = _default_config_with_point_cloud()
+        assert "POINT_CLOUD" not in user["APP"]["OPTIONS"]
+
+        dirty = config_helpers._migrate_config(user, default)
+
+        assert dirty is True
+        section = user["APP"]["OPTIONS"]["POINT_CLOUD"]
+        assert section["enabled"]["value"] is False
+        assert section["enabled"]["choices"] == [True, False]
+        assert isinstance(section["enabled"]["description"], str)
+        # Existing user values untouched
+        assert user["APP"]["OPTIONS"]["APP_SQLITE_PATH"]["value"] == "/tmp"
+        assert user["APP"]["OPTIONS"]["EXPLORATION"]["auto_zoom_on_filter"]["value"] is False
+
+    def test_migration_is_idempotent_once_section_present(self, config_helpers):
+        user = _migrated_user_config()
+        default = _default_config_with_point_cloud()
+        assert config_helpers._migrate_config(user, default) is True
+        assert config_helpers._migrate_config(user, default) is False
+
+    def test_user_flag_value_survives_migration(self, config_helpers):
+        user = _migrated_user_config()
+        user["APP"]["OPTIONS"]["POINT_CLOUD"] = _point_cloud_section()
+        user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] = True
+        default = _default_config_with_point_cloud()
+
+        assert config_helpers._migrate_config(user, default) is False
+        assert user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] is True
+
+
+@pytest.fixture(scope="module")
+def default_config():
+    with open(CONFIG_DEFAULT_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+class TestDefaultConfigPointCloudSection:
+    """The shipped template must declare the point cloud feature flag."""
+
+    def test_point_cloud_enabled_is_choices_entry(self, default_config):
+        section = default_config["APP"]["OPTIONS"]["POINT_CLOUD"]
+        enabled = section["enabled"]
+        assert set(enabled.keys()) == {"value", "choices", "description"}
+        assert enabled["value"] is False
+        assert enabled["choices"] == [True, False]
+        assert enabled["value"] in enabled["choices"]
+        assert isinstance(enabled["description"], str) and enabled["description"]
+
+    def test_point_cloud_section_has_description(self, default_config):
+        section = default_config["APP"]["OPTIONS"]["POINT_CLOUD"]
+        assert isinstance(section["description"], str) and section["description"]
+        assert "_hidden" not in section
+
+    def test_point_cloud_is_last_option_section(self, default_config):
+        keys = list(default_config["APP"]["OPTIONS"].keys())
+        assert keys[-1] == "POINT_CLOUD"
+        assert keys[-2] == "EXPLORATION"

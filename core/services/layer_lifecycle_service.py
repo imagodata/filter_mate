@@ -103,7 +103,10 @@ class LayerLifecycleService:
         postgresql_available: bool = False
     ) -> List[QgsVectorLayer]:
         """
-        Return only layers that are valid vector layers with available sources.
+        Return only layers that are valid filterable layers with available sources.
+
+        Filterable layers are vector layers and, when the point cloud feature
+        is enabled on a supported QGIS, point cloud layers.
 
         Args:
             layers: List of layers to filter
@@ -122,6 +125,11 @@ class LayerLifecycleService:
         except ImportError:  # stubbed package in some test suites
             def is_filtermate_temp_layer(_layer):  # noqa: D103 - no-op fallback
                 return False
+        try:
+            from ...adapters.qgis.point_cloud_capability import get_filterable_layer_types
+            filterable_types = get_filterable_layer_types() or (QgsVectorLayer,)
+        except ImportError:  # capability module absent (stubbed package or older tree)
+            filterable_types = (QgsVectorLayer,)
 
         try:
             input_count = len(layers or [])
@@ -136,12 +144,12 @@ class LayerLifecycleService:
                     filtered_reasons.append("unknown: C++ object deleted")
                     continue
 
-                if not isinstance(layer_item, QgsVectorLayer):
+                if not isinstance(layer_item, filterable_types):
                     try:
                         name = layer_item.name() if hasattr(layer_item, 'name') else 'unknown'
                     except RuntimeError:
                         name = 'unknown'
-                    filtered_reasons.append(f"{name}: not a vector layer")
+                    filtered_reasons.append(f"{name}: not a filterable layer")
                     continue
 
                 # PERF 2026-09-12: the plugin's own scratch layers never enter PROJECT_LAYERS

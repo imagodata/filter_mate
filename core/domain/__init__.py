@@ -35,12 +35,35 @@ from .layer_info import (  # noqa: F401
 from .optimization_config import (  # noqa: F401
     OptimizationConfig,
 )
+from .point_cloud_filter_criteria import (  # noqa: F401
+    AttributeRange,
+    PointCloudAttributeSummary,
+    PointCloudFilterCriteria,
+    PointCloudFilterResult,
+    PointCloudLayerSummary,
+)
+from .point_cloud_support import (  # noqa: F401
+    ASPRS_CLASS_NAMES,
+    POINT_CLOUD_GEOMETRY_TYPE,
+    POINT_CLOUD_MIN_QGIS_VERSION_INT,
+    POINT_CLOUD_PROVIDER_TYPE,
+    asprs_class_label,
+    build_point_cloud_layer_properties,
+    ensure_point_cloud_layer_properties,
+    is_point_cloud_layer_props,
+    supports_point_cloud_filtering,
+)
 
 __all__ = [
     # Value Objects
     'FilterExpression',
     'FilterResult',
     'OptimizationConfig',
+    'AttributeRange',
+    'PointCloudFilterCriteria',
+    'PointCloudAttributeSummary',
+    'PointCloudLayerSummary',
+    'PointCloudFilterResult',
     # Entities
     'LayerInfo',
     # Enums
@@ -48,4 +71,14 @@ __all__ = [
     'SpatialPredicate',
     'FilterStatus',
     'GeometryType',
+    # Point cloud support
+    'ASPRS_CLASS_NAMES',
+    'POINT_CLOUD_GEOMETRY_TYPE',
+    'POINT_CLOUD_MIN_QGIS_VERSION_INT',
+    'POINT_CLOUD_PROVIDER_TYPE',
+    'asprs_class_label',
+    'build_point_cloud_layer_properties',
+    'ensure_point_cloud_layer_properties',
+    'is_point_cloud_layer_props',
+    'supports_point_cloud_filtering',
 ]

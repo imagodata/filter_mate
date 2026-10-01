@@ -17,6 +17,7 @@ Ports:
 - HistoryRepositoryPort: Interface for history persistence
 - CachePort: Interface for caching services
 - IFilterMatePublicAPI: Interface for inter-plugin communication
+- PointCloudRepositoryPort / PointCloudFilterPort: Point cloud layer access and subsets
 """
 from .backend_port import (  # noqa: F401
     BackendPort,
@@ -72,6 +73,12 @@ from .public_api_port import (  # noqa: F401
     IFilterMatePublicAPI,
 )
 
+# Point Cloud Ports (LiDAR / QgsPointCloudLayer filtering)
+from .point_cloud_port import (  # noqa: F401
+    PointCloudRepositoryPort,
+    PointCloudFilterPort,
+)
+
 __all__ = [
     # Backend
     'BackendPort',
@@ -110,4 +117,7 @@ __all__ = [
     'ViewConfig',
     # Public API (v4.7.0 - Narractive Integration)
     'IFilterMatePublicAPI',
+    # Point Cloud (LiDAR)
+    'PointCloudRepositoryPort',
+    'PointCloudFilterPort',
 ]

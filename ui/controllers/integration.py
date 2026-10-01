@@ -29,6 +29,7 @@ from .config_controller import ConfigController
 from .favorites_controller import FavoritesController
 from .property_controller import PropertyController
 from .ui_layout_controller import UILayoutController
+from .point_cloud_ui_controller import PointCloudUIController
 
 if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer
@@ -89,6 +90,7 @@ class ControllerIntegration:
         self._favorites_controller: Optional[FavoritesController] = None
         self._property_controller: Optional[PropertyController] = None
         self._ui_layout_controller: Optional[UILayoutController] = None
+        self._point_cloud_ui_controller: Optional[PointCloudUIController] = None
 
         # Connection tracking
         self._connections: list = []
@@ -148,6 +150,11 @@ class ControllerIntegration:
     def ui_layout_controller(self) -> Optional[UILayoutController]:
         """Get the UI layout controller."""
         return self._ui_layout_controller
+
+    @property
+    def point_cloud_ui_controller(self) -> Optional[PointCloudUIController]:
+        """Get the point cloud UI controller."""
+        return self._point_cloud_ui_controller
 
     def setup(self) -> bool:
         """
@@ -225,6 +232,7 @@ class ControllerIntegration:
             self._favorites_controller = None
             self._property_controller = None
             self._ui_layout_controller = None
+            self._point_cloud_ui_controller = None
             self._registry = None
             self._is_setup = False
 
@@ -286,6 +294,13 @@ class ControllerIntegration:
         # v4.0 Sprint 4: Create UILayoutController
         self._ui_layout_controller = UILayoutController(
             dockwidget=self._dockwidget
+        )
+
+        # Point cloud panel: always created, dormant until a point cloud layer is current
+        self._point_cloud_ui_controller = PointCloudUIController(
+            dockwidget=self._dockwidget,
+            filter_service=self._filter_service,
+            signal_manager=self._signal_manager
         )
 
         logger.debug("All controllers created")
@@ -365,6 +380,12 @@ class ControllerIntegration:
             'ui_layout',
             self._ui_layout_controller,
             TabIndex.FILTERING  # UI layout controller active on all tabs
+        )
+
+        safe_register(
+            'point_cloud_ui',
+            self._point_cloud_ui_controller,
+            TabIndex.FILTERING  # Point cloud panel lives in the filtering tab
         )
 
         logger.debug("All controllers registered")
@@ -812,6 +833,7 @@ class ControllerIntegration:
         self._favorites_controller = None
         self._property_controller = None
         self._ui_layout_controller = None
+        self._point_cloud_ui_controller = None
         self._registry = None
         self._connections.clear()
         self._is_setup = False
@@ -871,6 +893,7 @@ class ControllerIntegration:
             ('favorites', self._favorites_controller),
             ('property', self._property_controller),
             ('ui_layout', self._ui_layout_controller),
+            ('point_cloud_ui', self._point_cloud_ui_controller),
         ]
 
         for name, controller in expected_controllers:
@@ -1883,6 +1906,42 @@ class ControllerIntegration:
                 return self._layer_sync_controller.on_current_layer_changed(layer, manual_change=manual_change)
             except Exception as e:
                 logger.warning(f"delegate_current_layer_changed failed: {e}")
+                return False
+        return False
+
+    def delegate_point_cloud_layer_change(self, layer) -> bool:
+        """
+        Let the point cloud controller take over a layer change.
+
+        Args:
+            layer: The new current layer (or None)
+
+        Returns:
+            True if the layer is a point cloud and the panel handled it, False otherwise
+        """
+        if self._point_cloud_ui_controller:
+            try:
+                return self._point_cloud_ui_controller.on_current_layer_changed(layer)
+            except Exception as e:
+                logger.warning(f"delegate_point_cloud_layer_change failed: {e}")
+                return False
+        return False
+
+    def delegate_point_cloud_task(self, task_name: str) -> bool:
+        """
+        Let the point cloud controller run a dock action on its active layer.
+
+        Args:
+            task_name: Task name from launchTaskEvent
+
+        Returns:
+            True if a point cloud layer is active and the task was handled, False otherwise
+        """
+        if self._point_cloud_ui_controller:
+            try:
+                return self._point_cloud_ui_controller.handle_task(task_name)
+            except Exception as e:
+                logger.warning(f"delegate_point_cloud_task failed: {e}")
                 return False
         return False
 
