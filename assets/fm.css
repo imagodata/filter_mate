@@ -459,7 +459,7 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .home-container { width: min(1240px, calc(100% - 2 * var(--gutter))); margin-inline: auto; }
 .home-hero {
     position: relative; isolation: isolate; overflow: hidden;
-    min-height: max(720px, 92svh); display: flex; align-items: center;
+    min-height: 100vh; min-height: 100svh; display: flex; align-items: center;
     padding: calc(var(--nav-h) + 64px) 0 84px;
     color: var(--on-ink); background: var(--ink);
 }
@@ -488,6 +488,18 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .home-text-link:hover { color: var(--select); }
 .home-version { margin: 22px 0 0; color: var(--on-ink-2); font-size: .92rem; }
 .home-hero .credit { max-width: calc(100% - 32px); }
+.hero-scroll {
+    position: absolute; z-index: 2; left: 50%; bottom: 18px;
+    display: grid; justify-items: center; gap: 2px; transform: translateX(-50%);
+    color: var(--on-ink-2); font-size: .74rem; letter-spacing: .06em;
+    text-transform: uppercase; text-decoration: none;
+}
+.hero-scroll:hover { color: var(--select); }
+.hero-scroll svg { width: 22px; height: 22px; animation: scroll-cue 1.8s ease-in-out infinite; }
+@keyframes scroll-cue {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+}
 
 /* Native scrolling stays untouched; these controls only show position and
    provide optional shortcuts on the long landing page. */
@@ -530,6 +542,14 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .back-to-top:hover { color: var(--select); border-color: var(--select); }
 .back-to-top svg { width: 22px; height: 22px; }
+
+.home.scroll-reveal-ready .scroll-reveal {
+    opacity: 0; transform: translateY(24px);
+    transition:
+        opacity .58s cubic-bezier(.2, .7, .2, 1) var(--reveal-delay, 0ms),
+        transform .58s cubic-bezier(.2, .7, .2, 1) var(--reveal-delay, 0ms);
+}
+.home.scroll-reveal-ready .scroll-reveal.is-visible { opacity: 1; transform: translateY(0); }
 
 .proof-strip { background: var(--select); color: var(--ink); border-bottom: 1px solid #d4ad00; }
 .proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
@@ -638,8 +658,11 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .footer-grid a:hover { color: var(--on-ink); }
 .footer-note { margin-top: 42px; padding-top: 20px; border-top: 1px solid #31434d; color: var(--on-ink-2); font-size: .8rem; }
 
-@media (max-width: 980px) {
+@media (max-width: 1280px) {
     .scroll-rail { display: none; }
+}
+
+@media (max-width: 980px) {
     .home-hero-scrim { background: linear-gradient(90deg, rgba(13, 24, 31, .95), rgba(13, 24, 31, .67)); }
     .example-card-wide { grid-template-columns: 1fr; }
     .example-card-wide .example-media { min-height: 0; aspect-ratio: 16 / 9; }
@@ -651,9 +674,10 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 
 @media (max-width: 760px) {
     .home-container { width: min(1240px, calc(100% - 32px)); }
-    .home-hero { min-height: 680px; padding-top: calc(var(--nav-h) + 48px); }
+    .home-hero { min-height: 100svh; padding: calc(var(--nav-h) + 38px) 0 54px; }
     .home-hero-scrim { background: linear-gradient(0deg, rgba(13, 24, 31, .97), rgba(13, 24, 31, .65)); }
-    .home-hero h1 { font-size: clamp(3.3rem, 15vw, 5rem); }
+    .home-hero h1 { max-width: 12ch; font-size: clamp(3rem, 14vw, 5rem); }
+    .home-lead { font-size: 1.04rem; line-height: 1.48; }
     .home-actions { align-items: stretch; }
     .home-actions .btn, .home-actions .watch { justify-content: center; }
     .home-text-link { width: 100%; text-align: center; padding: 5px; }
@@ -674,14 +698,30 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
     .install-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
     .footer-grid > div:first-child { grid-column: 1 / -1; }
+    .hero-scroll { display: none; }
+    .home-hero .credit { right: 10px; bottom: 7px; max-width: calc(100% - 20px); }
 }
 
 @media (max-width: 480px) {
+    .home-section { padding: 58px 0; }
+    .section-heading { margin-bottom: 30px; }
+    .section-heading h2 { font-size: clamp(2.45rem, 12vw, 3.3rem); }
     .home-actions .btn, .home-actions .watch { width: 100%; }
     .install-facts { grid-template-columns: 1fr; }
     .result-list { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr; }
     .footer-grid > div:first-child { grid-column: auto; }
+    .back-to-top { right: 12px; bottom: 12px; width: 42px; height: 42px; }
+}
+
+@media (max-height: 720px) and (min-width: 761px) {
+    .home-hero { padding: calc(var(--nav-h) + 28px) 0 50px; }
+    .home-hero h1 { font-size: clamp(3.2rem, 6.6vw, 5rem); margin-bottom: 16px; }
+    .home-lead { font-size: 1.02rem; }
+    .home-actions { margin-top: 18px; }
+    .home-version { margin-top: 14px; }
+    .hero-scroll span { display: none; }
+    .hero-scroll { bottom: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -689,6 +729,8 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
     .story-index .story-card { transition: none; }
     .story-index .story-card:hover { transform: none; }
     .scroll-rail a, .scroll-rail span, .back-to-top { transition: none; }
+    .hero-scroll svg { animation: none; }
+    .home.scroll-reveal-ready .scroll-reveal { opacity: 1; transform: none; transition: none; }
 }
 
 /* ------------------------------------------------------------------ roadmap */
