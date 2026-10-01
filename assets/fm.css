@@ -79,6 +79,7 @@ body {
     font-variant-numeric: tabular-nums;
 }
 img, video { max-width: 100%; display: block; }
+img { height: auto; }
 a { color: var(--link); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
 a:hover { text-decoration-thickness: 2px; }
 :focus-visible { outline: 3px solid var(--select); outline-offset: 2px; border-radius: 2px; }
