@@ -35,7 +35,9 @@ import traceback
 from qgis.PyQt import sip
 from qgis.PyQt.QtCore import QTimer, Qt, QPoint, QRect
 from qgis.PyQt.QtGui import QColor, QPainter
-from qgis.PyQt.QtWidgets import QApplication, QDockWidget, QLineEdit, QToolBar, QWidget
+from qgis.PyQt.QtWidgets import (
+    QApplication, QDockWidget, QLineEdit, QPushButton, QToolBar, QWidget,
+)
 from qgis.core import (
     QgsApplication, QgsProject, QgsVectorLayer, QgsRectangle, QgsProperty,
     QgsFeatureRequest, QgsExpression, QgsSymbol, QgsSingleSymbolRenderer,
@@ -536,6 +538,42 @@ def combo_check(name, texts, per_item=380):
     return act(name, open_combo(name)) + check_one_by_one(name, texts, per_item) + [(700, hide_popup)]
 
 
+def combo_choose(name, text, keep=1200):
+    """Open an ordinary combo and visibly choose one entry."""
+    def show():
+        combo = getattr(dock(), name)
+        combo.showPopup()
+
+        def place_inside_window():
+            popup = combo.view().window()
+            mw = iface.mainWindow()
+            origin = mw.mapToGlobal(QPoint(0, 0))
+            anchor = combo.mapToGlobal(QPoint(0, 0))
+            x = min(anchor.x(), origin.x() + mw.width() - popup.width())
+            y = max(origin.y(), anchor.y() - popup.height() - 2)
+            popup.move(x, y)
+
+        # QComboBox creates and sizes its private popup during showPopup().
+        QTimer.singleShot(0, place_inside_window)
+
+    def choose():
+        combo = getattr(dock(), name)
+        index = combo.findText(text, Qt.MatchFlag.MatchContains)
+        if index < 0:
+            log(f'combo entry not found: {name} -> {text}')
+            hide_popup()
+            return
+        view = combo.view()
+        model_index = combo.model().index(index, 0)
+        r = to_main(view.viewport(), view.visualRect(model_index))
+        REC.event('point', x=r.center().x(), y=r.center().y())
+        REC.event('click', x=r.center().x(), y=r.center().y())
+        combo.setCurrentIndex(index)
+        hide_popup()
+
+    return act(name, show) + [(keep, choose), hold(350)]
+
+
 def to_main(widget, r):
     """QRect r in widget viewport coordinates -> main window coordinates."""
     return QRect(widget.mapToGlobal(r.topLeft()) - iface.mainWindow().mapToGlobal(QPoint(0, 0)), r.size())
@@ -673,6 +711,103 @@ def buffer_expr(expr, btype=None):
         if btype:
             d.pushButton_checkable_filtering_buffer_type.setChecked(True)
             set_combo_text(d.comboBox_filtering_buffer_type, btype)
+    return _s
+
+
+def buffer_expr_dialog(expr, keep_menu=1500, keep_dialog=3000):
+    """Show the real property menu and expression editor for a buffer expression.
+
+    The expression is installed first so the editor opens pre-filled.  QGIS
+    implements both the property menu and the editor as separate top-level
+    widgets; the recorder composites them over the main-window grab.
+    """
+    def _s():
+        buffer_expr(expr)()
+        button = dock().mPropertyOverrideButton_filtering_buffer_value_property
+        state = {}
+
+        def inspect_menu():
+            menu = QApplication.activePopupWidget()
+            if menu is None:
+                log('buffer property menu not found')
+                return
+            state['menu'] = menu
+            if menu not in REC.windows:
+                REC.windows.append(menu)
+            actions = [a for a in menu.actions() if a.isVisible()]
+            log(f'buffer property menu entries {[a.text() for a in actions]}')
+
+            def label(a):
+                return a.text().replace('&', '').strip().lower().rstrip('.…')
+            action = next(
+                (a for a in actions if a.isEnabled() and label(a) == 'edit'),
+                None,
+            )
+            if action is None:
+                action = next(
+                    (a for a in actions if a.isEnabled() and label(a) == 'expression'),
+                    None,
+                )
+            state['action'] = action
+            if action is not None:
+                ar = to_main(menu, menu.actionGeometry(action))
+                REC.event('point', x=ar.center().x(), y=ar.center().y())
+                menu.setActiveAction(action)
+
+        def inspect_dialog(tries=0):
+            dialog = QApplication.activeModalWidget()
+            if dialog is None or dialog is iface.mainWindow():
+                if tries < 10:
+                    QTimer.singleShot(150, lambda: inspect_dialog(tries + 1))
+                else:
+                    log('buffer expression dialog not found')
+                return
+            state['dialog'] = dialog
+            if dialog not in REC.windows:
+                REC.windows.append(dialog)
+            REC.event('camera', rect=box(rect_of(dialog).adjusted(-25, -25, 25, 25)),
+                      dur=1.0, drift=1.0)
+            buttons = [b for b in dialog.findChildren(QPushButton) if b.isVisible()]
+            ok = next((b for b in buttons if b.isDefault()), None)
+            state['ok'] = ok
+            if ok is not None:
+                r = rect_of(ok)
+                QTimer.singleShot(
+                    keep_dialog - 700,
+                    lambda: REC.event('point', x=r.center().x(), y=r.center().y()),
+                )
+                QTimer.singleShot(
+                    keep_dialog - 200,
+                    lambda: REC.event('click', x=r.center().x(), y=r.center().y()),
+                )
+            QTimer.singleShot(keep_dialog, close_dialog)
+
+        def close_dialog():
+            dialog = state.get('dialog')
+            if dialog is not None and not sip.isdeleted(dialog):
+                dialog.accept()
+            if dialog in REC.windows:
+                REC.windows.remove(dialog)
+
+        def activate_expression():
+            menu = state.get('menu')
+            action = state.get('action')
+            if action is None:
+                if menu is not None:
+                    menu.close()
+                return
+            ar = to_main(menu, menu.actionGeometry(action))
+            REC.event('click', x=ar.center().x(), y=ar.center().y())
+            QTimer.singleShot(150, inspect_dialog)
+            menu.close()
+            action.trigger()  # opens a nested modal loop until close_dialog()
+            if menu in REC.windows:
+                REC.windows.remove(menu)
+
+        QTimer.singleShot(150, inspect_menu)
+        QTimer.singleShot(keep_menu, activate_expression)
+        button.click()  # opens a nested popup loop; timers above continue to run
+
     return _s
 
 
@@ -928,7 +1063,11 @@ NOISE = boot(S2_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.2) + scope('c
     (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['batiment', 'erp']) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) \
-    + act('mPropertyOverrideButton_filtering_buffer_value_property', buffer_expr(NOISE_EXPR, 'Flat')) \
+    + act('mPropertyOverrideButton_filtering_buffer_value_property', buffer_expr_dialog(NOISE_EXPR),
+          lead=900, after=900) \
+    + act('pushButton_checkable_filtering_buffer_type',
+          enable('pushButton_checkable_filtering_buffer_type')) \
+    + combo_choose('comboBox_filtering_buffer_type', 'Flat') \
     + and_targets() + [(400, cam(ACTION_ZONE, dur=1.2, pad=40))] + run_filter() + show_map(3500) + [
     (0, zoom_focus(0.5))] + settle() + show_map(3500, 1.05) + ending(['batiment', 'erp', 'troncon_de_route'])
 
