@@ -2,6 +2,34 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ja_JP" sourcelanguage="en_US">
 <context>
+    <name>@default</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="314"/>
+        <source>Import from Resource Sharing...</source>
+        <translation>Resource Sharing からインポート...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <source>Publish to Resource Sharing...</source>
+        <translation>Resource Sharing に公開...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <source>Publish (no favorites saved)</source>
+        <translation>公開（お気に入りが保存されていません）</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="334"/>
+        <source>Quick publish to default repo</source>
+        <translation>既定のリポジトリにクイック公開</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="339"/>
+        <source>Manage Resource Sharing repos...</source>
+        <translation>Resource Sharing リポジトリを管理...</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="171"/>
@@ -24,7 +52,7 @@
         <translation>データベース検証中のエラー: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="617"/>
+        <location filename="../core/services/app_initializer.py" line="601"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>レイヤーの読み込みに失敗しました。F5で強制再読み込みしてください。</translation>
     </message>
@@ -32,32 +60,32 @@
 <context>
     <name>BackendIndicatorWidget</name>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="183"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="185"/>
         <source>Select Backend:</source>
         <translation>バックエンドを選択:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="202"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="204"/>
         <source>Auto (Default)</source>
         <translation>自動 (デフォルト)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="210"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="212"/>
         <source>Auto-select Optimal for All Layers</source>
         <translation>すべてのレイヤーに最適値を自動選択</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="220"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="222"/>
         <source>Force {0} for All Layers</source>
         <translation>すべてのレイヤーに{0}を強制適用</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="263"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="265"/>
         <source>Click to reload layers</source>
         <translation>クリックしてレイヤーを再読み込み</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="298"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="300"/>
         <source>Click to change backend</source>
         <translation>クリックしてバックエンドを変更</translation>
     </message>
@@ -73,45 +101,258 @@
 <context>
     <name>ControllerIntegration</name>
     <message>
-        <location filename="../ui/controllers/integration.py" line="612"/>
+        <location filename="../ui/controllers/integration.py" line="634"/>
         <source>Property error: {0}</source>
         <translation>プロパティエラー: {0}</translation>
     </message>
 </context>
 <context>
+    <name>CoverageModeController</name>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="164"/>
+        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
+        <translation>{0} 個のラスタ / ポイントクラウドレイヤのフィルタを復元しています…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="378"/>
+        <source>cov. ≥ </source>
+        <translation>被覆率 ≥ </translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="379"/>
+        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
+        <translation>ソースジオメトリ内に含まれる対象ポリゴンの最小割合（0 = 重なりがあれば可）。ソースがラスタまたはポイントクラウドの場合に使用されます。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <source>Raster</source>
+        <translation>ラスタ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <source>Point cloud</source>
+        <translation>ポイントクラウド</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
+        <translation>{0} レイヤ: EXPLORING で選択、FILTERING でリレーション</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="471"/>
+        <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
+        <translation>ピクセルピッカー: 地図をクリックすると全バンドの値を読み取ります（Ctrl+クリックで範囲を拡張）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
+        <source>Zoom to the layer</source>
+        <translation>レイヤにズーム</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="473"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>プレビュー: 選択範囲外のピクセルを非表示にする</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="475"/>
+        <source>Not used for raster layers</source>
+        <translation>ラスタレイヤでは使用されません</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="476"/>
+        <source>Reset the raster selection</source>
+        <translation>ラスタの選択をリセット</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
+        <source>Identify points on the map</source>
+        <translation>地図上のポイントを識別</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="481"/>
+        <source>Live preview: show only the points kept by the selection</source>
+        <translation>ライブプレビュー: 選択で残るポイントのみを表示</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="483"/>
+        <source>Not used for point cloud layers</source>
+        <translation>ポイントクラウドレイヤでは使用されません</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="484"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>ポイントクラウドの条件をリセット</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="641"/>
+        <source>Invalid raster calculator expression</source>
+        <translation>ラスタ計算式が無効です</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="679"/>
+        <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
+        <translation>PDAL が見つかりません: DTM からの高さの計算には pdal 実行ファイルが必要です</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <source>A FilterMate task is still running: wait for it to finish</source>
+        <translation>FilterMate のタスクがまだ実行中です。完了するまでお待ちください</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="984"/>
+        <source>FilterMate task failed: {0}</source>
+        <translation>FilterMate のタスクが失敗しました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <source>Select pixels first: a value range, classes or a raster expression</source>
+        <translation>先にピクセルを選択してください: 値の範囲、クラス、またはラスタ式</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1026"/>
+        <source>Raster filtered: {0}</source>
+        <translation>ラスタをフィルタしました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1039"/>
+        <source>The point cloud expression was rejected: {0}</source>
+        <translation>ポイントクラウドの式が拒否されました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1042"/>
+        <source>Select points first: classes, attribute ranges or an expression</source>
+        <translation>先にポイントを選択してください: クラス、属性の範囲、または式</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1050"/>
+        <source>Point cloud filtered: {0}</source>
+        <translation>ポイントクラウドをフィルタしました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1114"/>
+        <source>Filter not applied: {0}</source>
+        <translation>フィルタは適用されませんでした: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <source>canceled</source>
+        <translation>キャンセルされました</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <source>{0} target(s) filtered</source>
+        <translation>{0} 件の対象をフィルタしました</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1120"/>
+        <source>{0} failed: {1}</source>
+        <translation>{0} が失敗しました: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1129"/>
+        <source>FilterMate: filtering from '{0}'…</source>
+        <translation>FilterMate: '{0}' からフィルタしています…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1185"/>
+        <source>Changed since, left as is: {0}</source>
+        <translation>その後に変更されたため、そのままにしました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1191"/>
+        <source>{0} layer(s) restored</source>
+        <translation>{0} 個のレイヤを復元しました</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1225"/>
+        <source>&apos;{0}&apos; not exported: {1}</source>
+        <translation>'{0}' はエクスポートされませんでした: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1237"/>
+        <source>Exported: {0}</source>
+        <translation>エクスポートしました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1239"/>
+        <source>Export failed: {0}</source>
+        <translation>エクスポートに失敗しました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1246"/>
+        <source>Exporting {0} layer(s)…</source>
+        <translation>{0} 個のレイヤをエクスポートしています…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1252"/>
+        <source>Export folder</source>
+        <translation>エクスポート先フォルダ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1324"/>
+        <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
+        <translation>ラスタ / ポイントクラウドの対象をスキップしました: EXPLORING でソースフィーチャが選択されていません</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <source>Raster / point cloud targets not filtered: {0}</source>
+        <translation>ラスタ / ポイントクラウドの対象はフィルタされませんでした: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1349"/>
+        <source>{0} raster / point cloud target(s) filtered</source>
+        <translation>{0} 件のラスタ / ポイントクラウドの対象をフィルタしました</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1434"/>
+        <source>Choose the DTM raster used for the height above ground</source>
+        <translation>地上高の算出に使用する DTM ラスタを選択してください</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1442"/>
+        <source>Height above ground not computed: {0}</source>
+        <translation>地上高は計算されませんでした: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1454"/>
+        <source>Computing the height above '{0}' with PDAL…</source>
+        <translation>PDAL で '{0}' からの高さを計算しています…</translation>
+    </message>
+</context>
+<context>
     <name>DatabaseManager</name>
     <message>
-        <location filename="../adapters/database_manager.py" line="131"/>
+        <location filename="../adapters/database_manager.py" line="194"/>
         <source>Database file does not exist: {0}</source>
         <translation>データベースファイルが存在しません: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="138"/>
+        <location filename="../adapters/database_manager.py" line="201"/>
         <source>Failed to connect to database {0}: {1}</source>
         <translation>データベース{0}への接続に失敗: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="157"/>
+        <location filename="../adapters/database_manager.py" line="220"/>
         <source>Could not create database directory {0}: {1}</source>
         <translation>データベースディレクトリ{0}を作成できませんでした: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="211"/>
+        <location filename="../adapters/database_manager.py" line="274"/>
         <source>Failed to create database file {0}: {1}</source>
         <translation>データベースファイル{0}の作成に失敗: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="488"/>
+        <location filename="../adapters/database_manager.py" line="551"/>
         <source>Cannot initialize FilterMate database: connection failed</source>
         <translation>FilterMateデータベースを初期化できません: 接続に失敗しました</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="493"/>
+        <location filename="../adapters/database_manager.py" line="556"/>
         <source>Critical error connecting to database: {0}</source>
         <translation>データベース接続の重大エラー: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="527"/>
+        <location filename="../adapters/database_manager.py" line="602"/>
         <source>Error during database initialization: {0}</source>
         <translation>データベース初期化中のエラー: {0}</translation>
     </message>
@@ -119,27 +360,27 @@
 <context>
     <name>DatasourceManager</name>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
+        <location filename="../core/services/datasource_manager.py" line="147"/>
         <source>Database file does not exist: {db_file_path}</source>
         <translation>データベースファイルが存在しません: {db_file_path}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
+        <location filename="../core/services/datasource_manager.py" line="158"/>
         <source>Failed to connect to database {db_file_path}: {error}</source>
         <translation>データベース {db_file_path} への接続に失敗しました: {error}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
+        <location filename="../core/services/datasource_manager.py" line="183"/>
         <source>QGIS processing module not available to create spatial index</source>
         <translation>空間インデックスを作成するための QGIS Processing モジュールが利用できません</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
+        <location filename="../core/services/datasource_manager.py" line="189"/>
         <source>Cannot create spatial index: layer invalid or source not found.</source>
         <translation>空間インデックスを作成できません: レイヤが無効、またはソースが見つかりません。</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
+        <location filename="../core/services/datasource_manager.py" line="399"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL レイヤが検出されましたが psycopg2 がインストールされていません。ローカルの Spatialite バックエンドを使用します。大規模データセットのパフォーマンスを向上させるには psycopg2 をインストールしてください。</translation>
     </message>
@@ -157,7 +398,7 @@
         <translation>レイヤーをエクスポートするフォルダーを選択</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="158"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="159"/>
         <source>Save your exported data to a zip file</source>
         <translation>エクスポートデータをzipファイルに保存</translation>
     </message>
@@ -165,37 +406,37 @@
 <context>
     <name>ExportGroupRecapDialog</name>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="116"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="115"/>
         <source>{0} couche(s)</source>
         <translation>{0}個のレイヤー</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="118"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="117"/>
         <source> dans {0} groupe(s)</source>
         <translation> {0}個のグループ内</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="120"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="119"/>
         <source> + {0} hors groupe</source>
         <translation> + {0} グループ外</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="127"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="126"/>
         <source>Destination : {0}</source>
         <translation>出力先 : {0}</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="147"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="146"/>
         <source>No group detected - all layers are at the root level</source>
         <translation>グループが検出されません - すべてのレイヤーがルートレベルにあります</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="155"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="154"/>
         <source>Annuler</source>
         <translation>キャンセル</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="161"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
         <source>Exporter</source>
         <translation>エクスポーター</translation>
     </message>
@@ -205,50 +446,50 @@
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="228"/>
         <source>No Filter</source>
-        <translation>フィルターなし</translation>
+        <translation type="obsolete">フィルターなし</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="228"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="264"/>
         <source>No active filter to save.</source>
         <translation>保存するアクティブなフィルターがありません。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="236"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
         <source>Add Favorite</source>
         <translation>お気に入りを追加</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="236"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
         <source>Favorite name:</source>
         <translation>お気に入り名:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="254"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="286"/>
         <source>Favorite &apos;{0}&apos; added successfully</source>
-        <translation>お気に入り&apos;{0}&apos;が正常に追加されました</translation>
+        <translation>お気に入り'{0}'が正常に追加されました</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="399"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="505"/>
         <source>Export Favorites</source>
         <translation>お気に入りをエクスポート</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="423"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="529"/>
         <source>Exported {0} favorites</source>
         <translation>{0}個のお気に入りをエクスポートしました</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="425"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="531"/>
         <source>Failed to export favorites</source>
         <translation>お気に入りのエクスポートに失敗</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
         <source>Import Favorites</source>
         <translation>お気に入りをインポート</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
@@ -259,183 +500,183 @@ No = Replace all existing</source>
 いいえ = すべて置換</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="493"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="602"/>
         <source>Imported {0} favorites</source>
         <translation>{0}個のお気に入りをインポートしました</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="495"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="604"/>
         <source>No favorites imported</source>
         <translation>インポートされたお気に入りはありません</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="504"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="613"/>
         <source>Favorites manager not initialized. Please restart FilterMate.</source>
         <translation>お気に入りマネージャーが初期化されていません。FilterMateを再起動してください。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="538"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="658"/>
         <source>Favorites manager dialog not available</source>
         <translation>お気に入りマネージャーダイアログが利用できません</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1801"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1168"/>
         <source>Error: {0}</source>
         <translation>エラー: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="775"/>
         <source>Used {0} times</source>
-        <translation>{0}回使用</translation>
+        <translation type="obsolete">{0}回使用</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="786"/>
         <source>Add current filter to favorites</source>
-        <translation>現在のフィルターをお気に入りに追加</translation>
+        <translation type="obsolete">現在のフィルターをお気に入りに追加</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="790"/>
         <source>Add filter (no active filter)</source>
-        <translation>フィルターを追加 (アクティブなフィルターなし)</translation>
+        <translation type="obsolete">フィルターを追加 (アクティブなフィルターなし)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="795"/>
         <source>Manage favorites...</source>
-        <translation>お気に入りを管理...</translation>
+        <translation type="obsolete">お気に入りを管理...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="798"/>
         <source>Export...</source>
-        <translation>エクスポート...</translation>
+        <translation type="obsolete">エクスポート...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="801"/>
         <source>Import...</source>
-        <translation>インポート...</translation>
+        <translation type="obsolete">インポート...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="822"/>
         <source>Global favorites</source>
-        <translation>グローバルお気に入り</translation>
+        <translation type="obsolete">グローバルお気に入り</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="826"/>
         <source>Copy to global...</source>
-        <translation>グローバルにコピー...</translation>
+        <translation type="obsolete">グローバルにコピー...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="837"/>
         <source>── Available global favorites ──</source>
-        <translation>── 利用可能なグローバルお気に入り ──</translation>
+        <translation type="obsolete">── 利用可能なグローバルお気に入り ──</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="845"/>
         <source>(No global favorites)</source>
-        <translation>(グローバルお気に入りなし)</translation>
+        <translation type="obsolete">(グローバルお気に入りなし)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="849"/>
         <source>Maintenance</source>
-        <translation>メンテナンス</translation>
+        <translation type="obsolete">メンテナンス</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="851"/>
         <source>Save to project (.qgz)</source>
-        <translation>プロジェクトに保存 (.qgz)</translation>
+        <translation type="obsolete">プロジェクトに保存 (.qgz)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="854"/>
         <source>Restore from project</source>
-        <translation>プロジェクトから復元</translation>
+        <translation type="obsolete">プロジェクトから復元</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="859"/>
         <source>Clean up orphan projects</source>
-        <translation>孤立プロジェクトのクリーンアップ</translation>
+        <translation type="obsolete">孤立プロジェクトのクリーンアップ</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="862"/>
         <source>Database statistics</source>
-        <translation>データベース統計</translation>
+        <translation type="obsolete">データベース統計</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Invalid Name</source>
-        <translation>無効な名前</translation>
+        <translation type="obsolete">無効な名前</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="763"/>
         <source>Favorite name cannot be empty.</source>
         <translation>お気に入り名は空にできません。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
         <source>Duplicate Name</source>
         <translation>名前の重複</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
         <source>A favorite named &apos;{0}&apos; already exists.
 Do you want to replace it?</source>
-        <translation>&apos;{0}&apos;という名前のお気に入りが既に存在します。
+        <translation>'{0}'という名前のお気に入りが既に存在します。
 置き換えますか?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1577"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1044"/>
         <source>Favorite copied to global favorites</source>
         <translation>お気に入りがグローバルお気に入りにコピーされました</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1580"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1047"/>
         <source>Failed to copy to global favorites</source>
         <translation>グローバルお気に入りへのコピーに失敗</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>Global Favorites</source>
-        <translation>グローバルお気に入り</translation>
+        <translation type="obsolete">グローバルお気に入り</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
-        <translation>{0}個のグローバルお気に入りが利用可能です。
+        <translation type="obsolete">{0}個のグローバルお気に入りが利用可能です。
 
 グローバルお気に入りはすべてのプロジェクトで共有されます。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1603"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1064"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>プロジェクトファイルに{0}個のお気に入りを保存しました</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1605"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1066"/>
         <source>Save failed</source>
         <translation>保存に失敗</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1617"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1077"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>プロジェクトファイルから{0}個のお気に入りを復元しました</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1619"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1079"/>
         <source>No favorites to restore found in project</source>
         <translation>プロジェクトに復元するお気に入りが見つかりません</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1646"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1110"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>{0}個の孤立プロジェクトをクリーンアップしました</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1648"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1112"/>
         <source>No orphan projects to clean up</source>
         <translation>クリーンアップする孤立プロジェクトはありません</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1773"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1172"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -452,403 +693,473 @@ Total favorites: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1789"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1188"/>
         <source>Top projects by favorites:</source>
         <translation>お気に入り数による上位プロジェクト:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1793"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1192"/>
         <source>FilterMate Statistics</source>
         <translation>FilterMate統計</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="513"/>
         <source>Favorites Manager</source>
-        <translation>お気に入りマネージャー</translation>
+        <translation type="obsolete">お気に入りマネージャー</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="513"/>
         <source>No favorites saved yet.
 
-Apply a filter to a layer, then click the ★ indicator and choose &apos;Add current filter to favorites&apos; to save your first favorite.</source>
-        <translation>まだお気に入りが保存されていません。
+Apply a filter to a layer, then click the ★ indicator and choose 'Add current filter to favorites' to save your first favorite.</source>
+        <translation type="obsolete">まだお気に入りが保存されていません。
 
 レイヤにフィルタを適用し、★ インジケータをクリックして「現在のフィルタをお気に入りに追加」を選択すると、最初のお気に入りが保存されます。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="808"/>
         <source>Import from Resource Sharing...</source>
-        <translation>Resource Sharing からインポート…</translation>
+        <translation type="obsolete">Resource Sharing からインポート…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="811"/>
         <source>Publish to Resource Sharing...</source>
-        <translation>Resource Sharing に公開…</translation>
+        <translation type="obsolete">Resource Sharing に公開…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="816"/>
         <source>Publish (no favorites saved)</source>
-        <translation>公開(保存されたお気に入りなし)</translation>
+        <translation type="obsolete">公開(保存されたお気に入りなし)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1756"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1094"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>FilterMate 設定ディレクトリはまだ初期化されていません — 最初に FilterMate を有効にした QGIS プロジェクトを開いてください。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation>Resource Sharing 拡張機能が有効になっていません。FilterMate 設定で &apos;favorites_sharing&apos; を有効にしてください。</translation>
+        <translation type="obsolete">Resource Sharing 拡張機能が有効になっていません。FilterMate 設定で 'favorites_sharing' を有効にしてください。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
         <source>Shared favorites service is not available.</source>
-        <translation>共有お気に入りサービスが利用できません。</translation>
+        <translation type="obsolete">共有お気に入りサービスが利用できません。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
         <source>Shared picker failed: {0}</source>
-        <translation>共有お気に入り選択に失敗しました: {0}</translation>
+        <translation type="obsolete">共有お気に入り選択に失敗しました: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation>公開できるお気に入りがまだありません。先に ★ メニューからフィルタを保存してください。</translation>
+        <translation type="obsolete">公開できるお気に入りがまだありません。先に ★ メニューからフィルタを保存してください。</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
         <source>Publish dialog failed: {0}</source>
-        <translation>公開ダイアログの起動に失敗しました: {0}</translation>
+        <translation type="obsolete">公開ダイアログの起動に失敗しました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="382"/>
+        <source>Favorites are not ready yet: {0}</source>
+        <translation>お気に入りの準備がまだできていません: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="387"/>
+        <source>Could not remove &apos;{0}&apos;: {1}</source>
+        <translation>'{0}' を削除できませんでした: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="622"/>
+        <source>No favorites saved yet — apply a filter then click the ★ indicator to save your first one.</source>
+        <translation>保存されたお気に入りはまだありません。フィルタを適用し、★ インジケータをクリックして最初のお気に入りを保存してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="661"/>
+        <source>The favorites manager could not be opened. Details in filtermate.log.</source>
+        <translation>お気に入りマネージャを開けませんでした。詳細は filtermate.log を参照してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <source>Could not replace &apos;{0}&apos;: {1}</source>
+        <translation>'{0}' を置換できませんでした: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="897"/>
+        <source>Could not save &apos;{0}&apos;: {1}</source>
+        <translation>'{0}' を保存できませんでした: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1021"/>
+        <source>Could not import global favorite: {0}</source>
+        <translation>グローバルお気に入りをインポートできませんでした: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1039"/>
+        <source>Could not copy to global: {0}</source>
+        <translation>グローバルにコピーできませんでした: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1059"/>
+        <source>Could not save favorites to project file: {0}</source>
+        <translation>お気に入りをプロジェクトファイルに保存できませんでした: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1115"/>
+        <source>Orphan projects could not be cleaned up. Details in filtermate.log.</source>
+        <translation>孤立したプロジェクトをクリーンアップできませんでした。詳細は filtermate.log を参照してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1199"/>
+        <source>Database statistics are unavailable. Details in filtermate.log.</source>
+        <translation>データベースの統計情報を利用できません。詳細は filtermate.log を参照してください。</translation>
     </message>
 </context>
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="156"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="204"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - お気に入りマネージャー</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1243"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1165"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;保存済みお気に入り ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="218"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="266"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>名前、式、タグ、または説明で検索...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="553"/>
         <source>General</source>
         <translation>一般</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Expression</source>
         <translation>式</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="969"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1021"/>
         <source>Remote</source>
         <translation>リモート</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="523"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="575"/>
         <source>Favorite name</source>
         <translation>お気に入り名</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="524"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
         <source>Name:</source>
         <translation>名前:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="528"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="580"/>
         <source>Description (auto-generated, editable)</source>
         <translation>説明 (自動生成、編集可能)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="529"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="581"/>
         <source>Description:</source>
         <translation>説明:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="532"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="584"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>タグをカンマで区切って入力 (例: 都市, 人口, 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="535"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="587"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>タグはお気に入りの整理と検索に役立ちます。
 複数のタグはカンマで区切ってください。</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="538"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="590"/>
         <source>Tags:</source>
         <translation>タグ:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="543"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="595"/>
         <source>Source Layer:</source>
         <translation>ソースレイヤー:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="547"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="599"/>
         <source>Provider:</source>
         <translation>プロバイダー:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="555"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="607"/>
         <source>Used:</source>
         <translation>使用日:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="610"/>
         <source>Created:</source>
         <translation>作成日:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="677"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;ソースレイヤー式:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="629"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
         <source>Filter expression for source layer</source>
         <translation>ソースレイヤーのフィルター式</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="644"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="696"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;フィルター済みリモートレイヤー:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Layer</source>
         <translation>レイヤー</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Features</source>
         <translation>地物</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="656"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="708"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;このお気に入りにリモートレイヤーはありません&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="669"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="721"/>
         <source>Apply</source>
         <translation>適用</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="672"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="724"/>
         <source>Apply this favorite filter to the project</source>
         <translation>このお気に入りフィルターをプロジェクトに適用</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="675"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="727"/>
         <source>Save Changes</source>
         <translation>変更を保存</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="678"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="730"/>
         <source>Save modifications to this favorite</source>
         <translation>このお気に入りの変更を保存</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="733"/>
         <source>Delete</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="684"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="736"/>
         <source>Permanently delete this favorite</source>
         <translation>このお気に入りを完全に削除</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="739"/>
         <source>Close</source>
         <translation>閉じる</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="689"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="741"/>
         <source>Close this dialog</source>
         <translation>このダイアログを閉じる</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="797"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="849"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;お気に入り ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="963"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1015"/>
         <source>Remote ({0})</source>
         <translation>リモート ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1120"/>
         <source>Delete Favorite</source>
         <translation>お気に入りを削除</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1056"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1120"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
-        <translation>お気に入り&apos;{0}&apos;を削除しますか?</translation>
+        <translation>お気に入り'{0}'を削除しますか?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1167"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1232"/>
         <source>Remote Layers</source>
         <translation>リモートレイヤー</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1239"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1303"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;保存済みお気に入り (0)&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>Favorites Manager</source>
-        <translation>お気に入りマネージャー</translation>
+        <translation type="obsolete">お気に入りマネージャー</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>No favorites saved yet.
 
-Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
-        <translation>お気に入りはまだ保存されていません。
+Click the ★ indicator and select 'Add current filter to favorites' to save your first favorite.</source>
+        <translation type="obsolete">お気に入りはまだ保存されていません。
 
 ★インジケーターをクリックし、「現在のフィルターをお気に入りに追加」を選択して最初のお気に入りを保存してください。</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="184"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="232"/>
         <source>Shared...</source>
         <translation>共有…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="186"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="234"/>
         <source>Browse favorites shared via QGIS Resource Sharing collections</source>
         <translation>QGIS Resource Sharing コレクション経由で共有されたお気に入りを参照</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="196"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="244"/>
         <source>Publish...</source>
         <translation>公開…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="198"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="246"/>
         <source>Publish selected favorites into a Resource Sharing collection</source>
         <translation>選択したお気に入りを Resource Sharing コレクションに公開</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
-        <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
-        <translation>「{0}」を削除できませんでした。お気に入りはデータベースに残っています — 詳細は FilterMate ログを確認してください。</translation>
+        <source>Could not delete '{0}'. The favorite is still in the database — check the FilterMate log for details.</source>
+        <translation type="obsolete">「{0}」を削除できませんでした。お気に入りはデータベースに残っています — 詳細は FilterMate ログを確認してください。</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="231"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="279"/>
         <source>Filter favorites by scope (owner × project).</source>
         <translation>範囲(所有者 × プロジェクト)でお気に入りをフィルタ。</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="236"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="284"/>
         <source>All</source>
         <translation>すべて</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="237"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="285"/>
         <source>Shared · All projects</source>
         <translation>共有 · すべてのプロジェクト</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="238"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="286"/>
         <source>Shared · This project</source>
         <translation>共有 · このプロジェクト</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="239"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="287"/>
         <source>Mine · All projects</source>
         <translation>自分 · すべてのプロジェクト</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="240"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="288"/>
         <source>Mine · This project</source>
         <translation>自分 · このプロジェクト</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>Mine</source>
         <translation>自分</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="574"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="626"/>
         <source>Shared</source>
         <translation>共有</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="585"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="637"/>
         <source>This project</source>
         <translation>このプロジェクト</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="586"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="638"/>
         <source>All projects</source>
         <translation>すべてのプロジェクト</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="593"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="645"/>
         <source>Project scope is set when the favorite is created. Move it via the filtering tab (coming soon) to switch projects.</source>
         <translation>プロジェクト範囲はお気に入り作成時に設定されます。プロジェクトを切り替えるには、フィルタリング タブ(近日公開)から移動してください。</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="614"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="666"/>
         <source>Visibility:</source>
         <translation>可視性:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="914"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="966"/>
         <source>— (shared with everyone)</source>
         <translation>— (全員と共有)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="916"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="968"/>
         <source>{0} (you)</source>
         <translation>{0} (あなた)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="920"/>
-        <source>{0} — selecting &apos;Mine&apos; on save will transfer ownership to you</source>
-        <translation>{0} — 保存時に &apos;自分&apos; を選択すると所有権があなたに移ります</translation>
+        <location filename="../ui/dialogs/favorites_manager.py" line="972"/>
+        <source>{0} — selecting 'Mine' on save will transfer ownership to you</source>
+        <translation>{0} — 保存時に '自分' を選択すると所有権があなたに移ります</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
+        <source>Could not save &apos;{0}&apos;: {1}</source>
+        <translation>'{0}' を保存できませんでした: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1139"/>
+        <source>Could not delete &apos;{0}&apos;: {1}</source>
+        <translation>'{0}' を削除できませんでした: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1150"/>
+        <source>'{0}' was not in the database — refresh and try again.</source>
+        <translation>'{0}' はデータベースにありませんでした。更新してからもう一度お試しください。</translation>
     </message>
 </context>
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="588"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="600"/>
         <source>View</source>
         <translation>ビュー</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="590"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="602"/>
         <source>Change</source>
         <translation>変更</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="601"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="613"/>
         <source>Select a folder</source>
         <translation>フォルダーを選択</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="608"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="620"/>
         <source>Select a file</source>
         <translation>ファイルを選択</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="616"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="628"/>
         <source>Save to a file</source>
         <translation>ファイルに保存</translation>
     </message>
@@ -856,17 +1167,17 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="648"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="660"/>
         <source>View</source>
         <translation>ビュー</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="650"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="662"/>
         <source>Change</source>
         <translation>変更</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="659"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="671"/>
         <source>Select an icon</source>
         <translation>アイコンを選択</translation>
     </message>
@@ -882,67 +1193,67 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="190"/>
+        <location filename="../filter_mate.py" line="204"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="314"/>
+        <location filename="../filter_mate.py" line="328"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="314"/>
+        <location filename="../filter_mate.py" line="328"/>
         <source>Open FilterMate panel</source>
         <translation>FilterMateパネルを開く</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="323"/>
+        <location filename="../filter_mate.py" line="337"/>
         <source>Reset configuration and database</source>
         <translation>設定とデータベースをリセット</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="323"/>
+        <location filename="../filter_mate.py" line="337"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>デフォルト設定をリセットしSQLiteデータベースを削除</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1334"/>
+        <location filename="../filter_mate.py" line="1421"/>
         <source>Reset Configuration</source>
         <translation>設定リセット</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1357"/>
+        <location filename="../filter_mate.py" line="1444"/>
         <source>Configuration reset successfully.</source>
         <translation>設定が正常にリセットされました。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1362"/>
+        <location filename="../filter_mate.py" line="1449"/>
         <source>Default configuration file not found.</source>
         <translation>デフォルト設定ファイルが見つかりません。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1383"/>
+        <location filename="../filter_mate.py" line="1470"/>
         <source>Database deleted: {filename}</source>
         <translation>データベース削除済み: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1397"/>
+        <location filename="../filter_mate.py" line="1484"/>
         <source>Restart required</source>
         <translation>再起動が必要</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="403"/>
+        <location filename="../filter_mate.py" line="421"/>
         <source>Obsolete configuration detected</source>
         <translation>廃止された設定が検出されました</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="404"/>
+        <location filename="../filter_mate.py" line="422"/>
         <source>unknown version</source>
         <translation>不明なバージョン</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="405"/>
+        <location filename="../filter_mate.py" line="423"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -957,12 +1268,12 @@ Do you want to reset to default settings?
 • いいえ: 現在の設定を維持 (問題が発生する可能性があります)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="412"/>
+        <location filename="../filter_mate.py" line="430"/>
         <source>Corrupted configuration detected</source>
         <translation>破損した設定が検出されました</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="413"/>
+        <location filename="../filter_mate.py" line="431"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -977,12 +1288,12 @@ Do you want to reset to default settings?
 • いいえ: キャンセル (プラグインが正しく動作しない可能性があります)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="420"/>
+        <location filename="../filter_mate.py" line="438"/>
         <source>Configuration reset</source>
         <translation>設定リセット</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="421"/>
+        <location filename="../filter_mate.py" line="439"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -991,72 +1302,72 @@ Do you want to continue?</source>
 続行しますか?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="469"/>
+        <location filename="../filter_mate.py" line="487"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>設定がリセットされませんでした。一部の機能が正しく動作しない可能性があります。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="480"/>
+        <location filename="../filter_mate.py" line="498"/>
         <source>Configuration created with default values</source>
         <translation>デフォルト値で設定が作成されました</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="483"/>
+        <location filename="../filter_mate.py" line="501"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>破損した設定がリセットされました。デフォルト設定が復元されました。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="504"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>廃止された設定がリセットされました。デフォルト設定が復元されました。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="507"/>
+        <location filename="../filter_mate.py" line="525"/>
         <source>Configuration updated to latest version</source>
         <translation>設定が最新バージョンに更新されました</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="504"/>
+        <location filename="../filter_mate.py" line="522"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>設定更新: 新しい設定が利用可能です ({sections})。オプションメニューからアクセスしてください。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="498"/>
+        <location filename="../filter_mate.py" line="516"/>
         <source>Geometry Simplification</source>
         <translation>ジオメトリ簡略化</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="499"/>
+        <location filename="../filter_mate.py" line="517"/>
         <source>Optimization Thresholds</source>
         <translation>最適化しきい値</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="526"/>
+        <location filename="../filter_mate.py" line="544"/>
         <source>Error during configuration migration: {}</source>
         <translation>設定移行中のエラー: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="644"/>
+        <location filename="../filter_mate.py" line="662"/>
         <source>Geometry validation setting</source>
         <translation>ジオメトリ検証設定</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="646"/>
-        <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
+        <location filename="../filter_mate.py" line="664"/>
+        <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
-FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
+FilterMate recommends disabling this setting (value 'Off') for the following reasons:
 
 • Features with invalid geometries could be silently excluded from exports and filters
 • FilterMate handles geometry validation internally with automatic repair options
-• Some legitimate data may have geometries considered as &apos;invalid&apos; according to strict OGC rules
+• Some legitimate data may have geometries considered as 'invalid' according to strict OGC rules
 
 Do you want to disable this setting now?
 
 • Yes: Disable filtering (recommended for FilterMate)
 • No: Keep current setting</source>
-        <translation>QGIS設定「無効な地物のフィルタリング」が現在&apos;{mode}&apos;に設定されています。
+        <translation>QGIS設定「無効な地物のフィルタリング」が現在'{mode}'に設定されています。
 
-FilterMateは以下の理由からこの設定を無効(&apos;Off&apos;)にすることを推奨します:
+FilterMateは以下の理由からこの設定を無効('Off')にすることを推奨します:
 
 • 無効なジオメトリを持つ地物がエクスポートやフィルターから暗黙的に除外される可能性があります
 • FilterMateはジオメトリ検証を自動修復オプション付きで内部的に処理します
@@ -1068,17 +1379,17 @@ FilterMateは以下の理由からこの設定を無効(&apos;Off&apos;)にす�
 • いいえ: 現在の設定を維持</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="674"/>
+        <location filename="../filter_mate.py" line="692"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>無効なジオメトリフィルタリングが正常に無効化されました。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="681"/>
+        <location filename="../filter_mate.py" line="699"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>無効なジオメトリフィルタリングは変更されませんでした。一部の地物がエクスポートから除外される場合があります。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1334"/>
+        <location filename="../filter_mate.py" line="1421"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1095,7 +1406,7 @@ QGIS must be restarted to apply the changes.</source>
 変更を適用するにはQGISを再起動する必要があります。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1397"/>
+        <location filename="../filter_mate.py" line="1484"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1104,189 +1415,194 @@ Please restart QGIS to apply the changes.</source>
 変更を適用するにはQGISを再起動してください。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="348"/>
+        <location filename="../filter_mate.py" line="366"/>
         <source>Initialization error: {0}</source>
         <translation>初期化エラー: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="585"/>
+        <location filename="../filter_mate.py" line="603"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count}個の参照レイヤーが読み込まれていません ({layers_list})。フォールバック表示を使用します。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1388"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename}を削除できません: {e}</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="1405"/>
         <source>Error during reset: {str(e)}</source>
-        <translation>リセット中のエラー: {str(e)}</translation>
+        <translation type="obsolete">リセット中のエラー: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1438"/>
+        <location filename="../filter_mate.py" line="1527"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate&lt;/b&gt;をご利用いただきありがとうございます!&lt;br&gt;Discordコミュニティに参加しましょう:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;ヘルプとサポートを受ける&lt;/li&gt;&lt;li&gt;バグや問題を報告する&lt;/li&gt;&lt;li&gt;新機能を提案する&lt;/li&gt;&lt;li&gt;他のユーザーとヒントを共有する&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate&lt;/b&gt;をご利用いただきありがとうございます!&lt;br&gt;Discordコミュニティに参加しましょう:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;ヘルプとサポートを受ける&lt;/li&gt;&lt;li&gt;バグや問題を報告する&lt;/li&gt;&lt;li&gt;新機能を提案する&lt;/li&gt;&lt;li&gt;他のユーザーとヒントを共有する&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1454"/>
+        <location filename="../filter_mate.py" line="1543"/>
         <source>  Join us on Discord</source>
         <translation>  Discordに参加する</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1474"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Don&apos;t show this again</source>
         <translation>今後表示しない</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1477"/>
+        <location filename="../filter_mate.py" line="1566"/>
         <source>Close</source>
         <translation>閉じる</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1543"/>
+        <location filename="../filter_mate.py" line="1632"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>プラグインの読み込みエラー: {0}。詳細はQGIS Pythonコンソールを確認してください。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6711"/>
+        <location filename="../filter_mate_dockwidget.py" line="6922"/>
         <source>Current layer: {0}</source>
         <translation>現在のレイヤー: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6713"/>
+        <location filename="../filter_mate_dockwidget.py" line="6924"/>
         <source>No layer selected</source>
         <translation>レイヤーが選択されていません</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>Selected layers:
 {0}</source>
         <translation>選択されたレイヤー:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>No layers selected</source>
         <translation>レイヤーが選択されていません</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6954"/>
         <source>No expression defined</source>
         <translation>式が定義されていません</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6755"/>
+        <location filename="../filter_mate_dockwidget.py" line="6966"/>
         <source>Display expression: {0}</source>
         <translation>表示式: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6770"/>
+        <location filename="../filter_mate_dockwidget.py" line="6981"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>地物ID: {0}
 最初の属性: {1}</translation>
     </message>
+    <message>
+        <location filename="../filter_mate.py" line="1493"/>
+        <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
+        <translation>設定をリセットできませんでした。プラグインのフォルダが書き込み可能か確認してから、もう一度お試しください。詳細は filtermate.log を参照してください。</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="274"/>
+        <location filename="../filter_mate_app.py" line="298"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQLレイヤーが検出されました ({0})がpsycopg2がインストールされていません。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="361"/>
+        <location filename="../filter_mate_app.py" line="390"/>
         <source>Cleared {0} caches</source>
         <translation>{0}個のキャッシュを削除</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="795"/>
+        <location filename="../filter_mate_app.py" line="856"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>ドックウィジェットの作成に失敗: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="805"/>
+        <location filename="../filter_mate_app.py" line="866"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>ドックウィジェットの表示に失敗: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1255"/>
+        <location filename="../filter_mate_app.py" line="1380"/>
         <source>Error executing {0}: {1}</source>
         <translation>{0}の実行エラー: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1267"/>
+        <location filename="../filter_mate_app.py" line="1392"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>プラグインが低下モードで実行中です (ヘキサゴナルサービスが利用不可)。パフォーマンスが低下する可能性があります。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1396"/>
+        <location filename="../filter_mate_app.py" line="1641"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate エラー</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1396"/>
+        <location filename="../filter_mate_app.py" line="1641"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>{0}を実行できません: ウィジェットの初期化に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2167"/>
+        <location filename="../filter_mate_app.py" line="2426"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0}できません: レイヤーが無効またはソースが見つかりません。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2304"/>
+        <location filename="../filter_mate_app.py" line="2563"/>
         <source>All filters cleared - </source>
         <translation>すべてのフィルターを解除 - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2305"/>
+        <location filename="../filter_mate_app.py" line="2564"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>メインレイヤーに{0}{1}個の地物が表示</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2311"/>
+        <location filename="../filter_mate_app.py" line="2572"/>
         <source>Error: result handler missing</source>
         <translation>エラー: 結果ハンドラーがありません</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2324"/>
+        <location filename="../filter_mate_app.py" line="2585"/>
         <source>Error during filtering: {0}</source>
         <translation>フィルタリング中のエラー: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2455"/>
+        <location filename="../filter_mate_app.py" line="2707"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0}個の孤立お気に入りを回復: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2591"/>
+        <location filename="../filter_mate_app.py" line="2844"/>
         <source>Layer loading failed - click to retry</source>
         <translation>レイヤーの読み込みに失敗 - クリックして再試行</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2638"/>
+        <location filename="../filter_mate_app.py" line="2900"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0}個のレイヤーが正常に読み込まれました</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1618"/>
+        <location filename="../filter_mate_app.py" line="1865"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1620"/>
+        <location filename="../filter_mate_app.py" line="1867"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1623"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1625"/>
+        <location filename="../filter_mate_app.py" line="1872"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1299,193 +1615,328 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1635"/>
+        <location filename="../filter_mate_app.py" line="1882"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1642"/>
+        <location filename="../filter_mate_app.py" line="1889"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1649"/>
+        <location filename="../filter_mate_app.py" line="1896"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1673"/>
+        <location filename="../filter_mate_app.py" line="1920"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1228"/>
+        <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
+        <translation>'{0}' を実行する前に、EXPLORING タブでレイヤを選択してください。</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="596"/>
+        <location filename="../filter_mate_dockwidget.py" line="616"/>
         <source>Initialization error: {}</source>
         <translation>初期化エラー: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="925"/>
+        <location filename="../filter_mate_dockwidget.py" line="997"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI設定が不完全です - ログを確認してください</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
-        <translation>UIサイズエラー: {}</translation>
+        <translation type="obsolete">UIサイズエラー: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1355"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>Favorites manager not available</source>
         <translation>お気に入りマネージャーが利用できません</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1374"/>
+        <location filename="../filter_mate_dockwidget.py" line="1450"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0}個のお気に入りが保存済み
 クリックして適用または管理</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1382"/>
+        <location filename="../filter_mate_dockwidget.py" line="1458"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ お気に入りは保存されていません
 クリックして現在のフィルターを追加</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1406"/>
+        <location filename="../filter_mate_dockwidget.py" line="1482"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{1}個のレイヤーに{0}バックエンドを強制適用</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1492"/>
+        <location filename="../filter_mate_dockwidget.py" line="1568"/>
         <source>Backend controller not available</source>
         <translation>バックエンドコントローラーが利用できません</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1430"/>
+        <location filename="../filter_mate_dockwidget.py" line="1506"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL自動クリーンアップ有効</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1431"/>
+        <location filename="../filter_mate_dockwidget.py" line="1507"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL自動クリーンアップ無効</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1437"/>
+        <location filename="../filter_mate_dockwidget.py" line="1513"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQLセッションビューがクリーンアップされました</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1437"/>
+        <location filename="../filter_mate_dockwidget.py" line="1513"/>
         <source>No views to clean or cleanup failed</source>
         <translation>クリーンアップするビューがないか、クリーンアップに失敗しました</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1448"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>No PostgreSQL connection available</source>
         <translation>利用可能なPostgreSQL接続がありません</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1454"/>
+        <location filename="../filter_mate_dockwidget.py" line="1530"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>スキーマに他のセッションからの{0}個のビューがあります。
 それでも削除しますか?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1455"/>
+        <location filename="../filter_mate_dockwidget.py" line="1531"/>
         <source>Other Sessions Active</source>
         <translation>他のセッションがアクティブ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1457"/>
+        <location filename="../filter_mate_dockwidget.py" line="1533"/>
         <source>Schema cleanup cancelled</source>
         <translation>スキーマのクリーンアップがキャンセルされました</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1462"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
-        <translation>スキーマ&apos;{0}&apos;が正常に削除されました</translation>
+        <translation>スキーマ'{0}'が正常に削除されました</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1464"/>
+        <location filename="../filter_mate_dockwidget.py" line="1540"/>
         <source>Schema cleanup failed</source>
         <translation>スキーマのクリーンアップに失敗しました</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1490"/>
+        <location filename="../filter_mate_dockwidget.py" line="1566"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQLセッション情報</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Theme adapted: {0}</source>
         <translation>テーマ適用: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Dark mode</source>
         <translation>ダークモード</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Light mode</source>
         <translation>ライトモード</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3896"/>
+        <location filename="../filter_mate_dockwidget.py" line="4005"/>
         <source>Selected features have no geometry.</source>
         <translation>選択された地物にジオメトリがありません。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3915"/>
+        <location filename="../filter_mate_dockwidget.py" line="4024"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>地物が選択されていません。ドロップダウンリストから地物を選択してください。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4957"/>
+        <location filename="../filter_mate_dockwidget.py" line="5079"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>選択されたレイヤーが無効またはソースが見つかりません。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5667"/>
+        <location filename="../filter_mate_dockwidget.py" line="5816"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>負のバッファ (浸食): ポリゴンを内側に縮小</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5670"/>
+        <location filename="../filter_mate_dockwidget.py" line="5819"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>メートル単位のバッファ値 (正=拡大、負=ポリゴン縮小)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6144"/>
+        <location filename="../filter_mate_dockwidget.py" line="6293"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>{0}個のベクターレイヤーでプラグインが有効化されました</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6227"/>
+        <location filename="../filter_mate_dockwidget.py" line="6376"/>
         <source>Could not reload plugin automatically.</source>
         <translation>プラグインを自動的に再読み込みできませんでした。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6229"/>
+        <location filename="../filter_mate_dockwidget.py" line="6378"/>
         <source>Error reloading plugin: {0}</source>
         <translation>プラグインの再読み込みエラー: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6282"/>
+        <location filename="../filter_mate_dockwidget.py" line="6450"/>
         <source>Layer properties reset to defaults</source>
         <translation>レイヤープロパティがデフォルトにリセットされました</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6283"/>
+        <location filename="../filter_mate_dockwidget.py" line="6451"/>
         <source>Error resetting layer properties: {}</source>
         <translation>レイヤープロパティのリセットエラー: {}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="864"/>
+        <source>Filter</source>
+        <translation>フィルタ</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="865"/>
+        <source>Undo the last filter</source>
+        <translation>最後のフィルタを元に戻す</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="866"/>
+        <source>Redo the last filter</source>
+        <translation>最後のフィルタをやり直す</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <source>Remove the filters</source>
+        <translation>フィルタを解除</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <source>Export the layers</source>
+        <translation>レイヤをエクスポート</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <source>About FilterMate</source>
+        <translation>FilterMate について</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <source>QFieldCloud</source>
+        <translation>QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <source>Identify the selected features</source>
+        <translation>選択したフィーチャを識別</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <source>Zoom to the selected features</source>
+        <translation>選択したフィーチャにズーム</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <source>Select the features on the map</source>
+        <translation>地図上でフィーチャを選択</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <source>Follow the features on the map</source>
+        <translation>地図上でフィーチャを追跡</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <source>Link the three selection modes</source>
+        <translation>3 つの選択モードをリンク</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <source>Reset the layer properties</source>
+        <translation>レイヤのプロパティをリセット</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <source>Follow the current layer</source>
+        <translation>現在のレイヤを追跡</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <source>Layers to filter</source>
+        <translation>フィルタするレイヤ</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <source>Combine with the existing filter</source>
+        <translation>既存のフィルタと組み合わせる</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <source>Geometric predicates</source>
+        <translation>ジオメトリ述語</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <source>Buffer distance</source>
+        <translation>バッファ距離</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <source>Buffer type</source>
+        <translation>バッファタイプ</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <source>Layers to export</source>
+        <translation>エクスポートするレイヤ</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <source>Projection of the export</source>
+        <translation>エクスポートの投影法</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <source>Export the styles</source>
+        <translation>スタイルをエクスポート</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <source>Export format</source>
+        <translation>エクスポート形式</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <source>Output folder</source>
+        <translation>出力フォルダ</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <source>Zip the export</source>
+        <translation>エクスポートを zip 圧縮</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1001"/>
+        <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
+        <translation>パネルのレイアウトを適用できませんでした。既定のサイズを使用します。詳細は filtermate.log を参照してください。</translation>
     </message>
 </context>
 <context>
@@ -1493,183 +1944,183 @@ Drop anyway?</source>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
-        <translation>FilterMate</translation>
+        <translation type="obsolete">FilterMate</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
-        <translation>単一選択</translation>
+        <translation type="obsolete">単一選択</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
         <source>MULTIPLE SELECTION</source>
-        <translation>複数選択</translation>
+        <translation type="obsolete">複数選択</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
         <source>CUSTOM SELECTION</source>
-        <translation>カスタム選択</translation>
+        <translation type="obsolete">カスタム選択</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
         <source>FILTERING</source>
-        <translation>フィルタリング</translation>
+        <translation type="obsolete">フィルタリング</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
         <source>EXPORTING</source>
-        <translation>エクスポート</translation>
+        <translation type="obsolete">エクスポート</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
         <source>CONFIGURATION</source>
-        <translation>設定</translation>
+        <translation type="obsolete">設定</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>Select CRS for export</source>
-        <translation>エクスポート用CRSを選択</translation>
+        <translation type="obsolete">エクスポート用CRSを選択</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
         <source>Export</source>
-        <translation>エクスポート</translation>
+        <translation type="obsolete">エクスポート</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
         <source>AND</source>
-        <translation>AND</translation>
+        <translation type="obsolete">AND</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
         <source>AND NOT</source>
-        <translation>AND NOT</translation>
+        <translation type="obsolete">AND NOT</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
         <source>OR</source>
-        <translation>OR</translation>
+        <translation type="obsolete">OR</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
         <source>QML</source>
-        <translation>QML</translation>
+        <translation type="obsolete">QML</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
         <source>SLD</source>
-        <translation>SLD</translation>
+        <translation type="obsolete">SLD</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
         <source> m</source>
-        <translation> m</translation>
+        <translation type="obsolete"> m</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
         <source>, </source>
-        <translation>, </translation>
+        <translation type="obsolete">, </translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
         <source>Multi-layer filtering</source>
-        <translation>マルチレイヤーフィルタリング</translation>
+        <translation type="obsolete">マルチレイヤーフィルタリング</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
         <source>Additive filtering for the selected layer</source>
-        <translation>選択したレイヤーの追加フィルタリング</translation>
+        <translation type="obsolete">選択したレイヤーの追加フィルタリング</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
         <source>Geospatial filtering</source>
-        <translation>地理空間フィルタリング</translation>
+        <translation type="obsolete">地理空間フィルタリング</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
         <source>Buffer</source>
-        <translation>バッファ</translation>
+        <translation type="obsolete">バッファ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
         <source>Expression layer</source>
-        <translation>式レイヤー</translation>
+        <translation type="obsolete">式レイヤー</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
         <source>Geometric predicate</source>
-        <translation>空間述語</translation>
+        <translation type="obsolete">空間述語</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
         <source>Output format</source>
-        <translation>出力形式</translation>
+        <translation type="obsolete">出力形式</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
         <source>Filter</source>
-        <translation>フィルター</translation>
+        <translation type="obsolete">フィルター</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
         <source>Reset</source>
-        <translation>リセット</translation>
+        <translation type="obsolete">リセット</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
         <source>Layers to export</source>
-        <translation>エクスポートするレイヤー</translation>
+        <translation type="obsolete">エクスポートするレイヤー</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
         <source>Layers projection</source>
-        <translation>レイヤー座標系</translation>
+        <translation type="obsolete">レイヤー座標系</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
         <source>Save styles</source>
-        <translation>スタイルを保存</translation>
+        <translation type="obsolete">スタイルを保存</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
         <source>Datatype export</source>
-        <translation>データ型エクスポート</translation>
+        <translation type="obsolete">データ型エクスポート</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
         <source>Name of file/directory</source>
-        <translation>ファイル/ディレクトリ名</translation>
+        <translation type="obsolete">ファイル/ディレクトリ名</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation>ソースレイヤーに完全なジオメトリの代わりに重心を使用 (複雑なポリゴンに高速)</translation>
+        <translation type="obsolete">ソースレイヤーに完全なジオメトリの代わりに重心を使用 (複雑なポリゴンに高速)</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>メートル単位のバッファ値 (正=拡大、負=ポリゴン縮小)</translation>
+        <translation type="obsolete">メートル単位のバッファ値 (正=拡大、負=ポリゴン縮小)</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
         <source>Number of segments for buffer precision</source>
-        <translation>バッファ精度のセグメント数</translation>
+        <translation type="obsolete">バッファ精度のセグメント数</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
         <source>Mode batch</source>
-        <translation>バッチモード</translation>
+        <translation type="obsolete">バッチモード</translation>
     </message>
 </context>
 <context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="281"/>
+        <location filename="../adapters/filter_result_handler.py" line="318"/>
         <source>{count} features visible in main layer</source>
         <translation>メインレイヤーに{count}個の地物が表示</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="274"/>
+        <location filename="../adapters/filter_result_handler.py" line="311"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>すべてのフィルターを解除 - メインレイヤーに{count}個の地物が表示</translation>
     </message>
@@ -1677,47 +2128,47 @@ Drop anyway?</source>
 <context>
     <name>FinishedHandler</name>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="347"/>
+        <location filename="../core/tasks/finished_handler.py" line="346"/>
         <source>Task failed</source>
         <translation>タスク失敗</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="348"/>
+        <location filename="../core/tasks/finished_handler.py" line="347"/>
         <source>Filter failed for: {0}</source>
         <translation>フィルター失敗: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="352"/>
+        <location filename="../core/tasks/finished_handler.py" line="351"/>
         <source> (+{0} more)</source>
         <translation> (+{0}件追加)</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="399"/>
+        <location filename="../core/tasks/finished_handler.py" line="398"/>
         <source>Layer(s) filtered</source>
         <translation>レイヤーがフィルタリングされました</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="403"/>
+        <location filename="../core/tasks/finished_handler.py" line="402"/>
         <source>Layer(s) filtered to precedent state</source>
         <translation>レイヤーが前の状態にフィルタリングされました</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="407"/>
+        <location filename="../core/tasks/finished_handler.py" line="406"/>
         <source>Layer(s) unfiltered</source>
         <translation>レイヤーのフィルター解除</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="411"/>
+        <location filename="../core/tasks/finished_handler.py" line="410"/>
         <source>Filter task : {0}</source>
         <translation>フィルタータスク : {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="432"/>
+        <location filename="../core/tasks/finished_handler.py" line="431"/>
         <source>Export task : {0}</source>
         <translation>エクスポートタスク : {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="457"/>
+        <location filename="../core/tasks/finished_handler.py" line="456"/>
         <source>Exception: {0}</source>
         <translation>例外: {0}</translation>
     </message>
@@ -1756,7 +2207,7 @@ Drop anyway?</source>
 <context>
     <name>LayerLifecycleService</name>
     <message>
-        <location filename="../core/services/layer_lifecycle_service.py" line="212"/>
+        <location filename="../core/services/layer_lifecycle_service.py" line="255"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed. The plugin cannot use these layers. Install psycopg2 to enable PostgreSQL support.</source>
         <translation>PostgreSQLレイヤーが検出されました ({0})がpsycopg2がインストールされていません。プラグインはこれらのレイヤーを使用できません。PostgreSQLサポートを有効にするにはpsycopg2をインストールしてください。</translation>
     </message>
@@ -1764,7 +2215,7 @@ Drop anyway?</source>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="944"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1034"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -1772,21 +2223,21 @@ This error originates from a previous version of FilterMate.
 
 Solution: Remove this layer from the FilterMate project, then re-add it.
 Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
-        <translation>PostgreSQLレイヤー&apos;{0}&apos;: 破損データが検出されました。
+        <translation>PostgreSQLレイヤー'{0}': 破損データが検出されました。
 
-このレイヤーはPostgreSQLに存在しない&apos;virtual_id&apos;を使用しています。
+このレイヤーはPostgreSQLに存在しない'virtual_id'を使用しています。
 このエラーは以前のバージョンのFilterMateに起因します。
 
 解決方法: このレイヤーをFilterMateプロジェクトから削除し、再度追加してください。
 PostgreSQLテーブルにPRIMARY KEYが定義されていることを確認してください。</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="970"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1060"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
-        <translation>レイヤー&apos;{0}&apos;にPRIMARY KEYがありません。機能制限: マテリアライズドビューが無効です。最適なパフォーマンスのためにPRIMARY KEYを追加することをお勧めします。</translation>
+        <translation>レイヤー'{0}'にPRIMARY KEYがありません。機能制限: マテリアライズドビューが無効です。最適なパフォーマンスのためにPRIMARY KEYを追加することをお勧めします。</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2114"/>
         <source>Exception: {0}</source>
         <translation>例外: {0}</translation>
     </message>
@@ -1922,6 +2373,252 @@ PostgreSQLテーブルにPRIMARY KEYが定義されていることを確認し�
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="395"/>
+        <source>Apply to the other tiles of the dataset</source>
+        <translation>データセットの他のタイルにも適用</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="408"/>
+        <source>CLASSES</source>
+        <translation>クラス</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="413"/>
+        <source>Ground</source>
+        <translation>地面</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="414"/>
+        <source>Vegetation</source>
+        <translation>植生</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="415"/>
+        <source>Buildings</source>
+        <translation>建物</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <source>Above ground</source>
+        <translation>地上物</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="417"/>
+        <source>Water</source>
+        <translation>水域</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="418"/>
+        <source>Without noise</source>
+        <translation>ノイズなし</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <source>Check only these classes</source>
+        <translation>これらのクラスのみチェック</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="432"/>
+        <source>All</source>
+        <translation>すべて</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <source>None</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="443"/>
+        <source>Point classes</source>
+        <translation>ポイントのクラス</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="459"/>
+        <source>ATTRIBUTE RANGES</source>
+        <translation>属性の範囲</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="465"/>
+        <source>Z (m)</source>
+        <translation>Z (m)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="466"/>
+        <source>Lowest elevation kept</source>
+        <translation>残す最低標高</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <source>Highest elevation kept</source>
+        <translation>残す最高標高</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="475"/>
+        <source>Intensity</source>
+        <translation>強度</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="476"/>
+        <source>Lowest intensity kept</source>
+        <translation>残す最低強度</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="477"/>
+        <source>Highest intensity kept</source>
+        <translation>残す最高強度</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <source>Return</source>
+        <translation>リターン</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <source>Echo of the laser pulse kept</source>
+        <translation>残すレーザーパルスのエコー</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="495"/>
+        <source>Height above DTM ≥</source>
+        <translation>DTM からの高さ ≥</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <source>Digital terrain model the height is measured from</source>
+        <translation>高さの基準とする数値地形モデル</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="519"/>
+        <source>Keep the points at least this high above the terrain model</source>
+        <translation>地形モデルからこの高さ以上にあるポイントを残す</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <source>EXPRESSION</source>
+        <translation>式</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="532"/>
+        <source>Point cloud expression</source>
+        <translation>ポイントクラウドの式</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="533"/>
+        <source>Check the group to edit the expression by hand</source>
+        <translation>グループにチェックを入れると式を手動で編集できます</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="560"/>
+        <source>No elevation statistics for this layer</source>
+        <translation>このレイヤには標高の統計がありません</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="601"/>
+        <source>Height above the terrain is unavailable</source>
+        <translation>地形からの高さは利用できません</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="611"/>
+        <source>Kept points: {0}</source>
+        <translation>残るポイント: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <source>Current filter: {0}</source>
+        <translation>現在のフィルタ: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <source>none</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <source>Any</source>
+        <translation>すべて</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <source>First</source>
+        <translation>最初</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Last</source>
+        <translation>最後</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Single</source>
+        <translation>単一</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudFilterWidget</name>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="141"/>
+        <source>Point cloud filter</source>
+        <translation>ポイントクラウドフィルタ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="152"/>
+        <source>Classification</source>
+        <translation>分類</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="157"/>
+        <source>All</source>
+        <translation>すべて</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="158"/>
+        <source>None</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="167"/>
+        <source>Elevation (Z)</source>
+        <translation>標高 (Z)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="169"/>
+        <source>Intensity</source>
+        <translation>強度</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="175"/>
+        <source>Return number</source>
+        <translation>リターン番号</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="199"/>
+        <source>Minimum</source>
+        <translation>最小</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="200"/>
+        <source>Maximum</source>
+        <translation>最大</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
+        <source>Current filter: {0}</source>
+        <translation>現在のフィルタ: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
+        <source>none</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="329"/>
+        <source>Any</source>
+        <translation>すべて</translation>
     </message>
 </context>
 <context>
@@ -2068,202 +2765,202 @@ Continue?</source>
 <context>
     <name>PublishFavoritesDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="161"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="119"/>
         <source>FilterMate — Publish to Resource Sharing</source>
         <translation>FilterMate — Resource Sharing に公開</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="169"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="127"/>
         <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
         <translation>&lt;b&gt;お気に入りを公開&lt;/b&gt; — 共有可能なバンドルを QGIS Resource Sharing コレクションに書き込みます。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="189"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="147"/>
         <source>Overwrite existing bundle</source>
         <translation>既存のバンドルを上書き</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="199"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="157"/>
         <source>Publish</source>
         <translation>公開</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="171"/>
         <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
         <translation>&lt;b&gt;1. 対象コレクション&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="184"/>
         <source>Browse...</source>
         <translation>参照…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="234"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="192"/>
         <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
         <translation>&lt;b&gt;2. バンドルファイル名&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="236"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="194"/>
         <source>e.g. zones_bruxelles</source>
         <translation>例: zones_bruxelles</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="239"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="197"/>
         <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
         <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;対象&amp;gt;/filter_mate/favorites/&amp;lt;名前&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="202"/>
         <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
         <translation>&lt;b&gt;3. コレクションのメタデータ&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
         <source>Collection display name</source>
         <translation>コレクション表示名</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="209"/>
         <source>Name:</source>
         <translation>名前:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="212"/>
         <source>Author / organisation</source>
         <translation>作成者 / 組織</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="255"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
         <source>Author:</source>
         <translation>作成者:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="258"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="216"/>
         <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
         <translation>例: CC-BY-4.0、MIT、独自</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="259"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="217"/>
         <source>License:</source>
         <translation>ライセンス:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="262"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="220"/>
         <source>Comma-separated tags</source>
         <translation>カンマ区切りのタグ</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="263"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="221"/>
         <source>Tags:</source>
         <translation>タグ:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="266"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="224"/>
         <source>https://...</source>
         <translation>https://…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="267"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="225"/>
         <source>Homepage:</source>
         <translation>ホームページ:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="271"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="229"/>
         <source>Short description (optional, supports plain text)</source>
         <translation>短い説明(任意、プレーンテキスト)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="232"/>
         <source>Description:</source>
         <translation>説明:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="286"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
         <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
         <translation>&lt;b&gt;4. 含めるお気に入り&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="248"/>
         <source>Select all</source>
         <translation>すべて選択</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="293"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
         <source>Select none</source>
         <translation>選択を解除</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="332"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
         <source>New collection in Resource Sharing root...</source>
         <translation>Resource Sharing のルートに新しいコレクション…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="336"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="294"/>
         <source>Custom directory...</source>
         <translation>カスタムディレクトリ…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="410"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="368"/>
         <source>Will be created under the Resource Sharing root.</source>
         <translation>Resource Sharing のルート下に作成されます。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="415"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="373"/>
         <source>Click &apos;Browse...&apos; to choose a directory.</source>
-        <translation>&apos;参照…&apos; をクリックしてディレクトリを選択してください。</translation>
+        <translation>'参照…' をクリックしてディレクトリを選択してください。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="421"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="379"/>
         <source>Choose a collection directory</source>
         <translation>コレクションディレクトリを選択</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="472"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="430"/>
         <source>{0} / {1} selected</source>
         <translation>{0} / {1} 個選択</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="480"/>
         <source>Cannot create collection</source>
         <translation>コレクションを作成できません</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="480"/>
         <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
-        <translation>Resource Sharing のルートが見つかりません。代わりに &apos;参照…&apos; を使ってディレクトリを選択してください。</translation>
+        <translation>Resource Sharing のルートが見つかりません。代わりに '参照…' を使ってディレクトリを選択してください。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="497"/>
         <source>Choose a directory</source>
         <translation>ディレクトリを選択</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="497"/>
         <source>Click &apos;Browse...&apos; to pick a target directory.</source>
-        <translation>&apos;参照…&apos; をクリックして対象ディレクトリを選択してください。</translation>
+        <translation>'参照…' をクリックして対象ディレクトリを選択してください。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="696"/>
         <source>No favorites selected</source>
         <translation>お気に入りが選択されていません</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="696"/>
         <source>Select at least one favorite to publish.</source>
         <translation>公開するお気に入りを少なくとも1つ選択してください。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="729"/>
         <source>Publish failed</source>
         <translation>公開に失敗しました</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="729"/>
         <source>Unknown error.</source>
         <translation>不明なエラーです。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="727"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="736"/>
         <source>Published {0} favorite(s) to:
 
 &lt;code&gt;{1}&lt;/code&gt;</source>
@@ -2272,67 +2969,92 @@ Continue?</source>
 &lt;code&gt;{1}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="731"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="740"/>
         <source>Collection manifest updated:
 &lt;code&gt;{0}&lt;/code&gt;</source>
         <translation>コレクションマニフェストを更新しました:
 &lt;code&gt;{0}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="734"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="743"/>
         <source>Publish succeeded</source>
         <translation>公開に成功しました</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Remote repos unavailable</source>
         <translation>リモートリポジトリが利用できません</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Remote repo manager is not initialized.</source>
         <translation>リモートリポジトリマネージャが初期化されていません。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="632"/>
         <source>Publishing to &lt;b&gt;{0}&lt;/b&gt; failed.</source>
         <translation>&lt;b&gt;{0}&lt;/b&gt; への公開に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="642"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
         <source>Open clone...</source>
         <translation>クローンを開く…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="653"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="648"/>
         <source>Wrote bundle to:</source>
         <translation>バンドルの書き込み先:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="651"/>
         <source>Pushed commit &lt;code&gt;{0}&lt;/code&gt; to &lt;b&gt;{1}&lt;/b&gt;.</source>
         <translation>コミット &lt;code&gt;{0}&lt;/code&gt; を &lt;b&gt;{1}&lt;/b&gt; にプッシュしました。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
         <source>No git_url configured — bundle written locally. Push manually via your own tooling.</source>
         <translation>git_url が設定されていません — バンドルはローカルに書き込まれました。独自のツールで手動プッシュしてください。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="666"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
         <source>Nothing to commit — bundle content unchanged.</source>
         <translation>コミットする内容がありません — バンドルの内容に変更なし。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="587"/>
+        <source>Publishing to {0}...</source>
+        <translation>{0} に公開しています...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="587"/>
+        <source>Cancel</source>
+        <translation>キャンセル</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="591"/>
+        <source>Publishing</source>
+        <translation>公開中</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="685"/>
+        <source>Publish in progress</source>
+        <translation>公開を実行中</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="685"/>
+        <source>A publish is still running in the background. Wait for it to finish before starting another one.</source>
+        <translation>公開処理がバックグラウンドでまだ実行中です。完了してから次の公開を開始してください。</translation>
     </message>
 </context>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="179"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="193"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="211"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="225"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -2340,192 +3062,192 @@ Continue?</source>
 <context>
     <name>QFieldCloudPushDialog</name>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="102"/>
         <source>Export to QFieldCloud</source>
         <translation>Export to QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
         <source>Active Filter</source>
         <translation>Active Filter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="120"/>
         <source>No active filter</source>
         <translation>No active filter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="121"/>
         <source>Filter:</source>
         <translation>Filter:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="123"/>
         <source>0 layers</source>
         <translation>0 layers</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
         <source>Layers:</source>
         <translation>Layers:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="130"/>
         <source>QFieldCloud Project</source>
         <translation>QFieldCloud Project</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="135"/>
         <source>Project name:</source>
         <translation>Project name:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="139"/>
         <source>Description:</source>
         <translation>説明:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="143"/>
         <source>Create new</source>
         <translation>Create new</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="144"/>
         <source>Update existing:</source>
         <translation>Update existing:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="148"/>
         <source>Mode:</source>
         <translation>Mode:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="158"/>
         <source>Layer Modes</source>
         <translation>Layer Modes</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="163"/>
         <source>Layer</source>
         <translation>レイヤー</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="163"/>
         <source>Mode</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="184"/>
         <source>Export</source>
         <translation>エクスポート</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="209"/>
         <source>{0} layers ({1} features)</source>
         <translation>{0} layers ({1} features)</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="217"/>
         <source>{0} layers (no filter active)</source>
         <translation>{0} layers (no filter active)</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="290"/>
         <source>Missing Name</source>
         <translation>Missing Name</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="290"/>
         <source>Please enter a project name.</source>
         <translation>Please enter a project name.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="297"/>
         <source>Not Connected</source>
         <translation>Not Connected</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="297"/>
         <source>QFieldCloud is not connected. Please configure credentials first.</source>
         <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="365"/>
         <source>No Layers</source>
         <translation>No Layers</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="365"/>
         <source>No valid layers to export.</source>
         <translation>No valid layers to export.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="403"/>
         <source>Export Error</source>
         <translation>Export Error</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="393"/>
         <source>Failed to export layer &apos;{0}&apos;: {1}</source>
-        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+        <translation>Failed to export layer '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="403"/>
         <source>GPKG export failed: {0}</source>
         <translation>GPKG export failed: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="420"/>
         <source>Push complete!</source>
         <translation>Push complete!</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Project successfully pushed to QFieldCloud!</source>
         <translation>Project successfully pushed to QFieldCloud!</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Project: {0}</source>
         <translation>Project: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Files: {0}</source>
         <translation>Files: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Duration: {0:.1f}s</source>
         <translation>Duration: {0:.1f}s</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>URL: {0}</source>
         <translation>URL: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="438"/>
         <source>Warnings:</source>
         <translation>Warnings:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="440"/>
         <source>Push Complete</source>
         <translation>Push Complete</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="450"/>
         <source>Error: {0}</source>
         <translation>Error: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="461"/>
         <source>Push Failed</source>
         <translation>Push Failed</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="461"/>
         <source>Push failed:
 
 {0}</source>
@@ -2690,82 +3412,248 @@ Continue?</source>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="652"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="711"/>
         <source>Type to filter...</source>
         <translation>フィルター入力...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="720"/>
         <source>Select All</source>
         <translation>すべて選択</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="722"/>
         <source>Select All (non subset)</source>
         <translation>すべて選択 (非サブセット)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="724"/>
         <source>Select All (subset)</source>
         <translation>すべて選択 (サブセット)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="667"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="726"/>
         <source>De-select All</source>
         <translation>すべて選択解除</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="669"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="728"/>
         <source>De-select All (non subset)</source>
         <translation>すべて選択解除 (非サブセット)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="671"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="730"/>
         <source>De-select All (subset)</source>
         <translation>すべて選択解除 (サブセット)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1329"/>
+        <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
+        <translation>表示値順に並べた最初の {0} 件のフィーチャを表示しています。レイヤ全体を検索するにはテキストフィルタに入力してください。「すべて選択」で全リストを読み込みます。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1337"/>
+        <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
+        <translation>レイヤの {0} 件のフィーチャを表示値順に表示しています。レイヤ全体を検索するにはテキストフィルタに入力してください。「すべて選択」で全リストを読み込みます。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1344"/>
+        <source>Search results for &quot;{0}&quot; over the whole layer.</source>
+        <translation>レイヤ全体での「{0}」の検索結果。</translation>
     </message>
 </context>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="261"/>
         <source>Select All</source>
         <translation>すべて選択</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="263"/>
         <source>De-select All</source>
         <translation>すべて選択解除</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="265"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>ジオメトリタイプ別にすべてのレイヤーを選択 (ライン)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="267"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>ジオメトリタイプ別にすべてのレイヤーの選択を解除 (ライン)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="269"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>ジオメトリタイプ別にすべてのレイヤーを選択 (ポイント)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="230"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="271"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>ジオメトリタイプ別にすべてのレイヤーの選択を解除 (ポイント)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="232"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="273"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>ジオメトリタイプ別にすべてのレイヤーを選択 (ポリゴン)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="234"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="275"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>ジオメトリタイプ別にすべてのレイヤーの選択を解除 (ポリゴン)</translation>
+    </message>
+</context>
+<context>
+    <name>RangeHistogramWidget</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="240"/>
+        <source>Value range histogram</source>
+        <translation>値範囲のヒストグラム</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="241"/>
+        <source>Drag the handles, or click, to choose the range of values to keep</source>
+        <translation>ハンドルをドラッグするかクリックして、残す値の範囲を選択します</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="329"/>
+        <source>No histogram</source>
+        <translation>ヒストグラムなし</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="358"/>
+        <source>Kept values from {0} to {1}</source>
+        <translation>{0} から {1} までの値を残します</translation>
+    </message>
+</context>
+<context>
+    <name>RasterExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="288"/>
+        <source>Band</source>
+        <translation>バンド</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="291"/>
+        <source>Band whose values are selected</source>
+        <translation>値を選択するバンド</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="317"/>
+        <source>PIXEL VALUE</source>
+        <translation>ピクセル値</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="324"/>
+        <source>Pixel value of the current band</source>
+        <translation>現在のバンドのピクセル値</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="335"/>
+        <source>Last {0} values picked</source>
+        <translation>最後に取得した {0} 個の値</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="337"/>
+        <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
+        <translation>ピクセルピッカーで地図をクリックします。Ctrl+クリックで範囲をその値まで拡張します。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="346"/>
+        <source>VALUE RANGE</source>
+        <translation>値の範囲</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Min</source>
+        <translation>最小</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Lowest value kept</source>
+        <translation>残す最小値</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Max</source>
+        <translation>最大</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Highest value kept</source>
+        <translation>残す最大値</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <source>Preview on the map (hide the other pixels)</source>
+        <translation>地図上でプレビュー（他のピクセルを非表示）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="378"/>
+        <source>CLASSES</source>
+        <translation>クラス</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
+        <source>Raster classes</source>
+        <translation>ラスタのクラス</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
+        <source>All</source>
+        <translation>すべて</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="387"/>
+        <source>None</source>
+        <translation>なし</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="397"/>
+        <source>RASTER EXPRESSION</source>
+        <translation>ラスタ式</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="401"/>
+        <source>Raster calculator expression; a pixel is kept where it is not 0</source>
+        <translation>ラスタ計算式。値が 0 でないピクセルが残ります</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="402"/>
+        <source>Raster expression</source>
+        <translation>ラスタ式</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="410"/>
+        <source>Use the range</source>
+        <translation>範囲を使用</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="411"/>
+        <source>Write the current value range as an expression</source>
+        <translation>現在の値の範囲を式として書き出す</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="483"/>
+        <source>Selected pixels: {0}</source>
+        <translation>選択されたピクセル: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="730"/>
+        <source>Set a value range first</source>
+        <translation>先に値の範囲を設定してください</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="747"/>
+        <source>NoData</source>
+        <translation>NoData</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="763"/>
+        <source>Last values:</source>
+        <translation>最後の値:</translation>
     </message>
 </context>
 <context>
@@ -2817,140 +3705,160 @@ Continue?</source>
 <context>
     <name>SharedFavoritesPickerDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="55"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="77"/>
         <source>FilterMate — Shared Favorites</source>
         <translation>FilterMate — 共有お気に入り</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="63"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="85"/>
         <source>&lt;b&gt;Shared Favorites&lt;/b&gt; — discovered from QGIS Resource Sharing collections</source>
         <translation>&lt;b&gt;共有お気に入り&lt;/b&gt; — QGIS Resource Sharing コレクションから検出</translation>
     </message>
     <message>
         <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="76"/>
         <source>Search by name, description, collection, or tags...</source>
-        <translation>名前、説明、コレクション、またはタグで検索…</translation>
+        <translation type="obsolete">名前、説明、コレクション、またはタグで検索…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="98"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="129"/>
         <source>Select a shared favorite to preview.</source>
         <translation>プレビューする共有お気に入りを選択してください。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="114"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="145"/>
         <source>Rescan</source>
         <translation>再スキャン</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="118"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="149"/>
         <source>Fork to my project</source>
         <translation>自分のプロジェクトにフォーク</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="124"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="155"/>
         <source>Close</source>
         <translation>閉じる</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="139"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="211"/>
         <source>No shared collections found. Subscribe to a Resource Sharing repository that ships a &lt;code&gt;filter_mate/favorites&lt;/code&gt; folder, or drop a &lt;code&gt;.fmfav.json&lt;/code&gt; bundle in your resource_sharing collections directory.</source>
         <translation>共有コレクションが見つかりませんでした。&lt;code&gt;filter_mate/favorites&lt;/code&gt; フォルダを含む Resource Sharing リポジトリを購読するか、resource_sharing コレクションディレクトリに &lt;code&gt;.fmfav.json&lt;/code&gt; バンドルを配置してください。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="147"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="219"/>
         <source>{0} favorite(s) across {1} collection(s): {2}</source>
         <translation>{1} 個のコレクション内の {0} 個のお気に入り: {2}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="160"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="248"/>
         <source>Collection: {0}</source>
         <translation>コレクション: {0}</translation>
     </message>
     <message>
         <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="172"/>
         <source>No shared favorites match your search.</source>
-        <translation>検索に一致する共有お気に入りがありません。</translation>
+        <translation type="obsolete">検索に一致する共有お気に入りがありません。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="194"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="280"/>
         <source>&lt;b&gt;{0}&lt;/b&gt; — from &lt;i&gt;{1}&lt;/i&gt;</source>
         <translation>&lt;b&gt;{0}&lt;/b&gt; — 出所: &lt;i&gt;{1}&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="208"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="294"/>
         <source>&lt;b&gt;Expression&lt;/b&gt;</source>
         <translation>&lt;b&gt;式&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="213"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="299"/>
         <source>&lt;b&gt;Remote layers&lt;/b&gt;</source>
         <translation>&lt;b&gt;リモートレイヤ&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="313"/>
         <source>&lt;b&gt;Tags:&lt;/b&gt; {0}</source>
         <translation>&lt;b&gt;タグ:&lt;/b&gt; {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="234"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="320"/>
         <source>&lt;b&gt;Provenance&lt;/b&gt;</source>
         <translation>&lt;b&gt;出所&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="236"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="322"/>
         <source>Author: {0}</source>
         <translation>作成者: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="238"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="324"/>
         <source>License: {0}</source>
         <translation>ライセンス: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="340"/>
         <source>Fork shared favorite</source>
         <translation>共有お気に入りをフォーク</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="340"/>
         <source>Name in your project:</source>
         <translation>プロジェクト内の名前:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="354"/>
         <source>Fork successful</source>
         <translation>フォーク成功</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="354"/>
         <source>&apos;{0}&apos; was added to your favorites.</source>
         <translation>「{0}」がお気に入りに追加されました。</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="360"/>
         <source>Fork failed</source>
         <translation>フォークに失敗しました</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="360"/>
         <source>Could not add the shared favorite to your project.</source>
         <translation>共有お気に入りをプロジェクトに追加できませんでした。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="100"/>
+        <source>Search by name, description, collection, author, or tags...</source>
+        <translation>名前、説明、コレクション、作成者、タグで検索...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="107"/>
+        <source>Author:</source>
+        <translation>作成者:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="180"/>
+        <source>All authors</source>
+        <translation>すべての作成者</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="262"/>
+        <source>No shared favorites match your filters.</source>
+        <translation>フィルタに一致する共有お気に入りはありません。</translation>
     </message>
 </context>
 <context>
     <name>SimpleConfigDialog</name>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="468"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
         <source>Reset to Defaults</source>
         <translation>デフォルトにリセット</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="500"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="502"/>
         <source>Validation Error</source>
         <translation>検証エラー</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="500"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="502"/>
         <source>Please fix the following errors:
 
 </source>
@@ -2959,12 +3867,12 @@ Continue?</source>
 </translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="511"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset Configuration</source>
         <translation>設定リセット</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="511"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>すべての値をデフォルトにリセットしますか?</translation>
     </message>
@@ -2972,12 +3880,12 @@ Continue?</source>
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="151"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="208"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - PostgreSQL型警告</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="155"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="212"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>フィルターで型の不一致: {warning_detail}...</translation>
     </message>
@@ -2985,12 +3893,12 @@ Continue?</source>
 <context>
     <name>TabbedConfigDialog</name>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="568"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="570"/>
         <source>Reset to Defaults</source>
         <translation>デフォルトにリセット</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="588"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="590"/>
         <source>General</source>
         <translation>一般</translation>
     </message>
@@ -3010,7 +3918,7 @@ Continue?</source>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="291"/>
         <source>Filter applied to &apos;{layer_name}&apos;: {count} features</source>
-        <translation>&apos;{layer_name}&apos;にフィルター適用: {count}個の地物</translation>
+        <translation>'{layer_name}'にフィルター適用: {count}個の地物</translation>
     </message>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="296"/>
@@ -3020,25 +3928,25 @@ Continue?</source>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="312"/>
         <source>Filter cleared for &apos;{layer_name}&apos;: {count} features visible</source>
-        <translation>&apos;{layer_name}&apos;のフィルター解除: {count}個の地物が表示</translation>
+        <translation>'{layer_name}'のフィルター解除: {count}個の地物が表示</translation>
     </message>
 </context>
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="909"/>
+        <location filename="../adapters/task_builder.py" line="912"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>エンティティが選択されていません! 選択ウィジェットが地物を失いました。エンティティを再選択してください。</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1027"/>
+        <location filename="../adapters/task_builder.py" line="1030"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>選択されたレイヤーが無効またはソースが見つかりません。操作がキャンセルされました。</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1042"/>
+        <location filename="../adapters/task_builder.py" line="1045"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
-        <translation>レイヤー&apos;{0}&apos;はまだ初期化されていません。別のレイヤーを選択してから、このレイヤーに切り替えてみてください。</translation>
+        <translation>レイヤー'{0}'はまだ初期化されていません。別のレイヤーを選択してから、このレイヤーに切り替えてみてください。</translation>
     </message>
 </context>
 <context>
@@ -3057,7 +3965,7 @@ Continue?</source>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="556"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
         <source>Explore ...</source>
         <translation>探索 ...</translation>
     </message>
@@ -3067,7 +3975,7 @@ Continue?</source>
     <message>
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
-        <translation type="obsolete">Language changed to &apos;{0}&apos;.</translation>
+        <translation type="obsolete">Language changed to '{0}'.</translation>
     </message>
 </context>
 </TS>

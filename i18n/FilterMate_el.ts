@@ -2,6 +2,34 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="el_GR" sourcelanguage="en_US">
 <context>
+    <name>@default</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="314"/>
+        <source>Import from Resource Sharing...</source>
+        <translation>Εισαγωγή από το Resource Sharing...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <source>Publish to Resource Sharing...</source>
+        <translation>Δημοσίευση στο Resource Sharing...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <source>Publish (no favorites saved)</source>
+        <translation>Δημοσίευση (δεν υπάρχουν αποθηκευμένα αγαπημένα)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="334"/>
+        <source>Quick publish to default repo</source>
+        <translation>Γρήγορη δημοσίευση στο προεπιλεγμένο αποθετήριο</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="339"/>
+        <source>Manage Resource Sharing repos...</source>
+        <translation>Διαχείριση αποθετηρίων Resource Sharing...</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="171"/>
@@ -24,7 +52,7 @@
         <translation>Σφάλμα κατά τον έλεγχο βάσης δεδομένων: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="617"/>
+        <location filename="../core/services/app_initializer.py" line="601"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Η φόρτωση επιπέδου απέτυχε. Χρησιμοποιήστε F5 για αναγκαστική επαναφόρτωση.</translation>
     </message>
@@ -32,32 +60,32 @@
 <context>
     <name>BackendIndicatorWidget</name>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="183"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="185"/>
         <source>Select Backend:</source>
         <translation>Επιλογή backend:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="202"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="204"/>
         <source>Auto (Default)</source>
         <translation>Αυτόματο (Προεπιλογή)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="210"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="212"/>
         <source>Auto-select Optimal for All Layers</source>
         <translation>Αυτόματη βέλτιστη επιλογή για όλα τα επίπεδα</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="220"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="222"/>
         <source>Force {0} for All Layers</source>
         <translation>Επιβολή {0} για όλα τα επίπεδα</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="263"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="265"/>
         <source>Click to reload layers</source>
         <translation>Κλικ για επαναφόρτωση επιπέδων</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="298"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="300"/>
         <source>Click to change backend</source>
         <translation>Κλικ για αλλαγή backend</translation>
     </message>
@@ -73,45 +101,258 @@
 <context>
     <name>ControllerIntegration</name>
     <message>
-        <location filename="../ui/controllers/integration.py" line="612"/>
+        <location filename="../ui/controllers/integration.py" line="634"/>
         <source>Property error: {0}</source>
         <translation>Σφάλμα ιδιότητας: {0}</translation>
     </message>
 </context>
 <context>
+    <name>CoverageModeController</name>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="164"/>
+        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
+        <translation>Επαναφορά του φίλτρου {0} επιπέδου(ων) ράστερ / νέφους σημείων…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="378"/>
+        <source>cov. ≥ </source>
+        <translation>κάλ. ≥ </translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="379"/>
+        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
+        <translation>Ελάχιστο ποσοστό ενός πολυγωνικού στόχου εντός της γεωμετρίας πηγής (0 = οποιαδήποτε επικάλυψη). Χρησιμοποιείται όταν η πηγή είναι ράστερ ή νέφος σημείων.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <source>Raster</source>
+        <translation>Ράστερ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <source>Point cloud</source>
+        <translation>Νέφος σημείων</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
+        <translation>Επίπεδο {0}: επιλογή στο EXPLORING, σχέση στο FILTERING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="471"/>
+        <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
+        <translation>Επιλογέας εικονοστοιχείων: κάντε κλικ στον χάρτη για να διαβάσετε την τιμή κάθε καναλιού (το Ctrl+κλικ επεκτείνει το εύρος)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
+        <source>Zoom to the layer</source>
+        <translation>Εστίαση στο επίπεδο</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="473"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>Προεπισκόπηση: απόκρυψη των εικονοστοιχείων εκτός της επιλογής</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="475"/>
+        <source>Not used for raster layers</source>
+        <translation>Δεν χρησιμοποιείται για επίπεδα ράστερ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="476"/>
+        <source>Reset the raster selection</source>
+        <translation>Επαναφορά της επιλογής ράστερ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
+        <source>Identify points on the map</source>
+        <translation>Αναγνώριση σημείων στον χάρτη</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="481"/>
+        <source>Live preview: show only the points kept by the selection</source>
+        <translation>Ζωντανή προεπισκόπηση: εμφάνιση μόνο των σημείων που διατηρούνται από την επιλογή</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="483"/>
+        <source>Not used for point cloud layers</source>
+        <translation>Δεν χρησιμοποιείται για επίπεδα νέφους σημείων</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="484"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>Επαναφορά των κριτηρίων του νέφους σημείων</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="641"/>
+        <source>Invalid raster calculator expression</source>
+        <translation>Μη έγκυρη έκφραση υπολογιστή ράστερ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="679"/>
+        <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
+        <translation>Το PDAL δεν βρέθηκε: το ύψος πάνω από ένα DTM απαιτεί το εκτελέσιμο pdal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <source>A FilterMate task is still running: wait for it to finish</source>
+        <translation>Μια εργασία του FilterMate εκτελείται ακόμη: περιμένετε να ολοκληρωθεί</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="984"/>
+        <source>FilterMate task failed: {0}</source>
+        <translation>Η εργασία του FilterMate απέτυχε: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <source>Select pixels first: a value range, classes or a raster expression</source>
+        <translation>Επιλέξτε πρώτα εικονοστοιχεία: ένα εύρος τιμών, κλάσεις ή μια έκφραση ράστερ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1026"/>
+        <source>Raster filtered: {0}</source>
+        <translation>Το ράστερ φιλτραρίστηκε: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1039"/>
+        <source>The point cloud expression was rejected: {0}</source>
+        <translation>Η έκφραση του νέφους σημείων απορρίφθηκε: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1042"/>
+        <source>Select points first: classes, attribute ranges or an expression</source>
+        <translation>Επιλέξτε πρώτα σημεία: κλάσεις, εύρη χαρακτηριστικών ή μια έκφραση</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1050"/>
+        <source>Point cloud filtered: {0}</source>
+        <translation>Το νέφος σημείων φιλτραρίστηκε: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1114"/>
+        <source>Filter not applied: {0}</source>
+        <translation>Το φίλτρο δεν εφαρμόστηκε: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <source>canceled</source>
+        <translation>ακυρώθηκε</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <source>{0} target(s) filtered</source>
+        <translation>{0} στόχος(οι) φιλτραρίστηκε(αν)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1120"/>
+        <source>{0} failed: {1}</source>
+        <translation>{0} απέτυχε: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1129"/>
+        <source>FilterMate: filtering from '{0}'…</source>
+        <translation>FilterMate: φιλτράρισμα από το '{0}'…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1185"/>
+        <source>Changed since, left as is: {0}</source>
+        <translation>Τροποποιήθηκε στο μεταξύ, παραμένει ως έχει: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1191"/>
+        <source>{0} layer(s) restored</source>
+        <translation>{0} επίπεδο(α) επαναφέρθηκε(αν)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1225"/>
+        <source>&apos;{0}&apos; not exported: {1}</source>
+        <translation>Το '{0}' δεν εξήχθη: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1237"/>
+        <source>Exported: {0}</source>
+        <translation>Εξήχθη: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1239"/>
+        <source>Export failed: {0}</source>
+        <translation>Η εξαγωγή απέτυχε: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1246"/>
+        <source>Exporting {0} layer(s)…</source>
+        <translation>Εξαγωγή {0} επιπέδου(ων)…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1252"/>
+        <source>Export folder</source>
+        <translation>Φάκελος εξαγωγής</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1324"/>
+        <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
+        <translation>Παραλείφθηκαν οι στόχοι ράστερ / νέφους σημείων: δεν έχει επιλεγεί οντότητα πηγής στο EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <source>Raster / point cloud targets not filtered: {0}</source>
+        <translation>Οι στόχοι ράστερ / νέφους σημείων δεν φιλτραρίστηκαν: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1349"/>
+        <source>{0} raster / point cloud target(s) filtered</source>
+        <translation>{0} στόχος(οι) ράστερ / νέφους σημείων φιλτραρίστηκε(αν)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1434"/>
+        <source>Choose the DTM raster used for the height above ground</source>
+        <translation>Επιλέξτε το ράστερ DTM που χρησιμοποιείται για το ύψος πάνω από το έδαφος</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1442"/>
+        <source>Height above ground not computed: {0}</source>
+        <translation>Το ύψος πάνω από το έδαφος δεν υπολογίστηκε: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1454"/>
+        <source>Computing the height above '{0}' with PDAL…</source>
+        <translation>Υπολογισμός του ύψους πάνω από το '{0}' με το PDAL…</translation>
+    </message>
+</context>
+<context>
     <name>DatabaseManager</name>
     <message>
-        <location filename="../adapters/database_manager.py" line="131"/>
+        <location filename="../adapters/database_manager.py" line="194"/>
         <source>Database file does not exist: {0}</source>
         <translation>Το αρχείο βάσης δεδομένων δεν υπάρχει: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="138"/>
+        <location filename="../adapters/database_manager.py" line="201"/>
         <source>Failed to connect to database {0}: {1}</source>
         <translation>Η σύνδεση στη βάση δεδομένων {0} απέτυχε: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="157"/>
+        <location filename="../adapters/database_manager.py" line="220"/>
         <source>Could not create database directory {0}: {1}</source>
         <translation>Δεν ήταν δυνατή η δημιουργία του καταλόγου βάσης δεδομένων {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="211"/>
+        <location filename="../adapters/database_manager.py" line="274"/>
         <source>Failed to create database file {0}: {1}</source>
         <translation>Η δημιουργία αρχείου βάσης δεδομένων {0} απέτυχε: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="488"/>
+        <location filename="../adapters/database_manager.py" line="551"/>
         <source>Cannot initialize FilterMate database: connection failed</source>
         <translation>Δεν είναι δυνατή η αρχικοποίηση της βάσης δεδομένων FilterMate: η σύνδεση απέτυχε</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="493"/>
+        <location filename="../adapters/database_manager.py" line="556"/>
         <source>Critical error connecting to database: {0}</source>
         <translation>Κρίσιμο σφάλμα σύνδεσης στη βάση δεδομένων: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="527"/>
+        <location filename="../adapters/database_manager.py" line="602"/>
         <source>Error during database initialization: {0}</source>
         <translation>Σφάλμα κατά την αρχικοποίηση βάσης δεδομένων: {0}</translation>
     </message>
@@ -119,27 +360,27 @@
 <context>
     <name>DatasourceManager</name>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
+        <location filename="../core/services/datasource_manager.py" line="147"/>
         <source>Database file does not exist: {db_file_path}</source>
         <translation>Το αρχείο της βάσης δεδομένων δεν υπάρχει: {db_file_path}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
+        <location filename="../core/services/datasource_manager.py" line="158"/>
         <source>Failed to connect to database {db_file_path}: {error}</source>
         <translation>Αποτυχία σύνδεσης στη βάση δεδομένων {db_file_path}: {error}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
+        <location filename="../core/services/datasource_manager.py" line="183"/>
         <source>QGIS processing module not available to create spatial index</source>
         <translation>Το άρθρωμα QGIS Processing δεν είναι διαθέσιμο για τη δημιουργία χωρικού ευρετηρίου</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
+        <location filename="../core/services/datasource_manager.py" line="189"/>
         <source>Cannot create spatial index: layer invalid or source not found.</source>
         <translation>Αδύνατη η δημιουργία χωρικού ευρετηρίου: μη έγκυρο επίπεδο ή η πηγή δεν βρέθηκε.</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
+        <location filename="../core/services/datasource_manager.py" line="399"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>Εντοπίστηκαν επίπεδα PostgreSQL αλλά το psycopg2 δεν είναι εγκατεστημένο. Χρήση του τοπικού Spatialite. Για καλύτερη απόδοση με μεγάλα σύνολα δεδομένων, εγκαταστήστε το psycopg2.</translation>
     </message>
@@ -157,7 +398,7 @@
         <translation>Επιλέξτε φάκελο για εξαγωγή των επιπέδων σας</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="158"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="159"/>
         <source>Save your exported data to a zip file</source>
         <translation>Αποθηκεύστε τα εξαγόμενα δεδομένα σε αρχείο zip</translation>
     </message>
@@ -165,37 +406,37 @@
 <context>
     <name>ExportGroupRecapDialog</name>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="116"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="115"/>
         <source>{0} couche(s)</source>
         <translation>{0} επίπεδο(-α)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="118"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="117"/>
         <source> dans {0} groupe(s)</source>
         <translation> σε {0} ομάδα(-ες)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="120"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="119"/>
         <source> + {0} hors groupe</source>
         <translation> + {0} εκτός ομάδας</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="127"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="126"/>
         <source>Destination : {0}</source>
         <translation>Προορισμός : {0}</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="147"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="146"/>
         <source>No group detected - all layers are at the root level</source>
         <translation>Δεν εντοπίστηκε ομάδα - όλα τα επίπεδα είναι στο ριζικό επίπεδο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="155"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="154"/>
         <source>Annuler</source>
         <translation>Ακύρωση</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="161"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
         <source>Exporter</source>
         <translation>Εξαγωγέας</translation>
     </message>
@@ -205,50 +446,50 @@
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="228"/>
         <source>No Filter</source>
-        <translation>Χωρίς φίλτρο</translation>
+        <translation type="obsolete">Χωρίς φίλτρο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="228"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="264"/>
         <source>No active filter to save.</source>
         <translation>Κανένα ενεργό φίλτρο για αποθήκευση.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="236"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
         <source>Add Favorite</source>
         <translation>Προσθήκη αγαπημένου</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="236"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
         <source>Favorite name:</source>
         <translation>Όνομα αγαπημένου:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="254"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="286"/>
         <source>Favorite &apos;{0}&apos; added successfully</source>
-        <translation>Το αγαπημένο &apos;{0}&apos; προστέθηκε επιτυχώς</translation>
+        <translation>Το αγαπημένο '{0}' προστέθηκε επιτυχώς</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="399"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="505"/>
         <source>Export Favorites</source>
         <translation>Εξαγωγή αγαπημένων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="423"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="529"/>
         <source>Exported {0} favorites</source>
         <translation>Εξήχθησαν {0} αγαπημένα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="425"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="531"/>
         <source>Failed to export favorites</source>
         <translation>Η εξαγωγή αγαπημένων απέτυχε</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
         <source>Import Favorites</source>
         <translation>Εισαγωγή αγαπημένων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
@@ -259,183 +500,183 @@ No = Replace all existing</source>
 Όχι = Αντικατάσταση όλων</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="493"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="602"/>
         <source>Imported {0} favorites</source>
         <translation>Εισήχθησαν {0} αγαπημένα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="495"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="604"/>
         <source>No favorites imported</source>
         <translation>Δεν εισήχθησαν αγαπημένα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="504"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="613"/>
         <source>Favorites manager not initialized. Please restart FilterMate.</source>
         <translation>Η διαχείριση αγαπημένων δεν αρχικοποιήθηκε. Παρακαλώ επανεκκινήστε το FilterMate.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="538"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="658"/>
         <source>Favorites manager dialog not available</source>
         <translation>Το παράθυρο διαχείρισης αγαπημένων δεν είναι διαθέσιμο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1801"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1168"/>
         <source>Error: {0}</source>
         <translation>Σφάλμα: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="775"/>
         <source>Used {0} times</source>
-        <translation>Χρησιμοποιήθηκε {0} φορές</translation>
+        <translation type="obsolete">Χρησιμοποιήθηκε {0} φορές</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="786"/>
         <source>Add current filter to favorites</source>
-        <translation>Προσθήκη τρέχοντος φίλτρου στα αγαπημένα</translation>
+        <translation type="obsolete">Προσθήκη τρέχοντος φίλτρου στα αγαπημένα</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="790"/>
         <source>Add filter (no active filter)</source>
-        <translation>Προσθήκη φίλτρου (κανένα ενεργό φίλτρο)</translation>
+        <translation type="obsolete">Προσθήκη φίλτρου (κανένα ενεργό φίλτρο)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="795"/>
         <source>Manage favorites...</source>
-        <translation>Διαχείριση αγαπημένων...</translation>
+        <translation type="obsolete">Διαχείριση αγαπημένων...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="798"/>
         <source>Export...</source>
-        <translation>Εξαγωγή...</translation>
+        <translation type="obsolete">Εξαγωγή...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="801"/>
         <source>Import...</source>
-        <translation>Εισαγωγή...</translation>
+        <translation type="obsolete">Εισαγωγή...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="822"/>
         <source>Global favorites</source>
-        <translation>Καθολικά αγαπημένα</translation>
+        <translation type="obsolete">Καθολικά αγαπημένα</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="826"/>
         <source>Copy to global...</source>
-        <translation>Αντιγραφή σε καθολικά...</translation>
+        <translation type="obsolete">Αντιγραφή σε καθολικά...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="837"/>
         <source>── Available global favorites ──</source>
-        <translation>── Διαθέσιμα καθολικά αγαπημένα ──</translation>
+        <translation type="obsolete">── Διαθέσιμα καθολικά αγαπημένα ──</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="845"/>
         <source>(No global favorites)</source>
-        <translation>(Χωρίς καθολικά αγαπημένα)</translation>
+        <translation type="obsolete">(Χωρίς καθολικά αγαπημένα)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="849"/>
         <source>Maintenance</source>
-        <translation>Συντήρηση</translation>
+        <translation type="obsolete">Συντήρηση</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="851"/>
         <source>Save to project (.qgz)</source>
-        <translation>Αποθήκευση σε έργο (.qgz)</translation>
+        <translation type="obsolete">Αποθήκευση σε έργο (.qgz)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="854"/>
         <source>Restore from project</source>
-        <translation>Επαναφορά από έργο</translation>
+        <translation type="obsolete">Επαναφορά από έργο</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="859"/>
         <source>Clean up orphan projects</source>
-        <translation>Καθαρισμός ορφανών έργων</translation>
+        <translation type="obsolete">Καθαρισμός ορφανών έργων</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="862"/>
         <source>Database statistics</source>
-        <translation>Στατιστικά βάσης δεδομένων</translation>
+        <translation type="obsolete">Στατιστικά βάσης δεδομένων</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Invalid Name</source>
-        <translation>Μη έγκυρο όνομα</translation>
+        <translation type="obsolete">Μη έγκυρο όνομα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="763"/>
         <source>Favorite name cannot be empty.</source>
         <translation>Το όνομα αγαπημένου δεν μπορεί να είναι κενό.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
         <source>Duplicate Name</source>
         <translation>Διπλό όνομα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
         <source>A favorite named &apos;{0}&apos; already exists.
 Do you want to replace it?</source>
-        <translation>Ένα αγαπημένο με το όνομα &apos;{0}&apos; υπάρχει ήδη.
+        <translation>Ένα αγαπημένο με το όνομα '{0}' υπάρχει ήδη.
 Θέλετε να το αντικαταστήσετε;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1577"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1044"/>
         <source>Favorite copied to global favorites</source>
         <translation>Το αγαπημένο αντιγράφηκε στα καθολικά αγαπημένα</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1580"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1047"/>
         <source>Failed to copy to global favorites</source>
         <translation>Η αντιγραφή στα καθολικά αγαπημένα απέτυχε</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>Global Favorites</source>
-        <translation>Καθολικά αγαπημένα</translation>
+        <translation type="obsolete">Καθολικά αγαπημένα</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
-        <translation>{0} καθολικό(-ά) αγαπημένο(-α) διαθέσιμο(-α).
+        <translation type="obsolete">{0} καθολικό(-ά) αγαπημένο(-α) διαθέσιμο(-α).
 
 Τα καθολικά αγαπημένα μοιράζονται σε όλα τα έργα.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1603"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1064"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>Αποθηκεύτηκαν {0} αγαπημένο(-α) στο αρχείο έργου</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1605"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1066"/>
         <source>Save failed</source>
         <translation>Η αποθήκευση απέτυχε</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1617"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1077"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>Επαναφέρθηκαν {0} αγαπημένο(-α) από το αρχείο έργου</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1619"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1079"/>
         <source>No favorites to restore found in project</source>
         <translation>Δεν βρέθηκαν αγαπημένα για επαναφορά στο έργο</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1646"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1110"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>Καθαρίστηκαν {0} ορφανό(-ά) έργο(-α)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1648"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1112"/>
         <source>No orphan projects to clean up</source>
         <translation>Δεν υπάρχουν ορφανά έργα για καθαρισμό</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1773"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1172"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -452,403 +693,473 @@ Total favorites: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1789"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1188"/>
         <source>Top projects by favorites:</source>
         <translation>Κορυφαία έργα κατά αγαπημένα:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1793"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1192"/>
         <source>FilterMate Statistics</source>
         <translation>Στατιστικά FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="513"/>
         <source>Favorites Manager</source>
-        <translation>Διαχειριστής αγαπημένων</translation>
+        <translation type="obsolete">Διαχειριστής αγαπημένων</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="513"/>
         <source>No favorites saved yet.
 
-Apply a filter to a layer, then click the ★ indicator and choose &apos;Add current filter to favorites&apos; to save your first favorite.</source>
-        <translation>Δεν υπάρχουν αποθηκευμένα αγαπημένα ακόμη.
+Apply a filter to a layer, then click the ★ indicator and choose 'Add current filter to favorites' to save your first favorite.</source>
+        <translation type="obsolete">Δεν υπάρχουν αποθηκευμένα αγαπημένα ακόμη.
 
 Εφαρμόστε ένα φίλτρο σε ένα επίπεδο, κάντε κλικ στον δείκτη ★ και επιλέξτε «Προσθήκη τρέχοντος φίλτρου στα αγαπημένα» για να αποθηκεύσετε το πρώτο σας αγαπημένο.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="808"/>
         <source>Import from Resource Sharing...</source>
-        <translation>Εισαγωγή από Resource Sharing…</translation>
+        <translation type="obsolete">Εισαγωγή από Resource Sharing…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="811"/>
         <source>Publish to Resource Sharing...</source>
-        <translation>Δημοσίευση στο Resource Sharing…</translation>
+        <translation type="obsolete">Δημοσίευση στο Resource Sharing…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="816"/>
         <source>Publish (no favorites saved)</source>
-        <translation>Δημοσίευση (χωρίς αποθηκευμένα αγαπημένα)</translation>
+        <translation type="obsolete">Δημοσίευση (χωρίς αποθηκευμένα αγαπημένα)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1756"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1094"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>Ο κατάλογος παραμετροποίησης FilterMate δεν έχει αρχικοποιηθεί ακόμη — ανοίξτε πρώτα ένα έργο QGIS με FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation>Η επέκταση Resource Sharing δεν είναι ενεργή. Ενεργοποιήστε το &apos;favorites_sharing&apos; στις ρυθμίσεις του FilterMate.</translation>
+        <translation type="obsolete">Η επέκταση Resource Sharing δεν είναι ενεργή. Ενεργοποιήστε το 'favorites_sharing' στις ρυθμίσεις του FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
         <source>Shared favorites service is not available.</source>
-        <translation>Η υπηρεσία κοινόχρηστων αγαπημένων δεν είναι διαθέσιμη.</translation>
+        <translation type="obsolete">Η υπηρεσία κοινόχρηστων αγαπημένων δεν είναι διαθέσιμη.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
         <source>Shared picker failed: {0}</source>
-        <translation>Αποτυχία επιλογέα κοινόχρηστων αγαπημένων: {0}</translation>
+        <translation type="obsolete">Αποτυχία επιλογέα κοινόχρηστων αγαπημένων: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation>Δεν έχετε αγαπημένα προς δημοσίευση ακόμη. Αποθηκεύστε πρώτα ένα φίλτρο μέσω του μενού ★.</translation>
+        <translation type="obsolete">Δεν έχετε αγαπημένα προς δημοσίευση ακόμη. Αποθηκεύστε πρώτα ένα φίλτρο μέσω του μενού ★.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
         <source>Publish dialog failed: {0}</source>
-        <translation>Αποτυχία ανοίγματος παραθύρου δημοσίευσης: {0}</translation>
+        <translation type="obsolete">Αποτυχία ανοίγματος παραθύρου δημοσίευσης: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="382"/>
+        <source>Favorites are not ready yet: {0}</source>
+        <translation>Τα αγαπημένα δεν είναι ακόμη έτοιμα: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="387"/>
+        <source>Could not remove &apos;{0}&apos;: {1}</source>
+        <translation>Δεν ήταν δυνατή η αφαίρεση του '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="622"/>
+        <source>No favorites saved yet — apply a filter then click the ★ indicator to save your first one.</source>
+        <translation>Δεν υπάρχουν ακόμη αποθηκευμένα αγαπημένα — εφαρμόστε ένα φίλτρο και κάντε κλικ στον δείκτη ★ για να αποθηκεύσετε το πρώτο σας.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="661"/>
+        <source>The favorites manager could not be opened. Details in filtermate.log.</source>
+        <translation>Δεν ήταν δυνατό το άνοιγμα της διαχείρισης αγαπημένων. Λεπτομέρειες στο filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <source>Could not replace &apos;{0}&apos;: {1}</source>
+        <translation>Δεν ήταν δυνατή η αντικατάσταση του '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="897"/>
+        <source>Could not save &apos;{0}&apos;: {1}</source>
+        <translation>Δεν ήταν δυνατή η αποθήκευση του '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1021"/>
+        <source>Could not import global favorite: {0}</source>
+        <translation>Δεν ήταν δυνατή η εισαγωγή του καθολικού αγαπημένου: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1039"/>
+        <source>Could not copy to global: {0}</source>
+        <translation>Δεν ήταν δυνατή η αντιγραφή στα καθολικά: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1059"/>
+        <source>Could not save favorites to project file: {0}</source>
+        <translation>Δεν ήταν δυνατή η αποθήκευση των αγαπημένων στο αρχείο του έργου: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1115"/>
+        <source>Orphan projects could not be cleaned up. Details in filtermate.log.</source>
+        <translation>Δεν ήταν δυνατός ο καθαρισμός των ορφανών έργων. Λεπτομέρειες στο filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1199"/>
+        <source>Database statistics are unavailable. Details in filtermate.log.</source>
+        <translation>Τα στατιστικά της βάσης δεδομένων δεν είναι διαθέσιμα. Λεπτομέρειες στο filtermate.log.</translation>
     </message>
 </context>
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="156"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="204"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - Διαχείριση αγαπημένων</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1243"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1165"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Αποθηκευμένα αγαπημένα ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="218"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="266"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>Αναζήτηση κατά όνομα, έκφραση, ετικέτες ή περιγραφή...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="553"/>
         <source>General</source>
         <translation>Γενικά</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Expression</source>
         <translation>Έκφραση</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="969"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1021"/>
         <source>Remote</source>
         <translation>Απομακρυσμένο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="523"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="575"/>
         <source>Favorite name</source>
         <translation>Όνομα αγαπημένου</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="524"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
         <source>Name:</source>
         <translation>Όνομα:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="528"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="580"/>
         <source>Description (auto-generated, editable)</source>
         <translation>Περιγραφή (αυτόματη, επεξεργάσιμη)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="529"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="581"/>
         <source>Description:</source>
         <translation>Περιγραφή:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="532"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="584"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>Εισάγετε ετικέτες χωρισμένες με κόμμα (π.χ., αστικό, πληθυσμός, 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="535"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="587"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>Οι ετικέτες βοηθούν στην οργάνωση και αναζήτηση αγαπημένων.
 Διαχωρίστε πολλαπλές ετικέτες με κόμμα.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="538"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="590"/>
         <source>Tags:</source>
         <translation>Ετικέτες:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="543"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="595"/>
         <source>Source Layer:</source>
         <translation>Επίπεδο πηγής:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="547"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="599"/>
         <source>Provider:</source>
         <translation>Πάροχος:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="555"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="607"/>
         <source>Used:</source>
         <translation>Χρήση:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="610"/>
         <source>Created:</source>
         <translation>Δημιουργήθηκε:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="677"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Έκφραση επιπέδου πηγής:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="629"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
         <source>Filter expression for source layer</source>
         <translation>Έκφραση φίλτρου για το επίπεδο πηγής</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="644"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="696"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Φιλτραρισμένα απομακρυσμένα επίπεδα:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Layer</source>
         <translation>Επίπεδο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Features</source>
         <translation>Οντότητες</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="656"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="708"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;Χωρίς απομακρυσμένα επίπεδα σε αυτό το αγαπημένο&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="669"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="721"/>
         <source>Apply</source>
         <translation>Εφαρμογή</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="672"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="724"/>
         <source>Apply this favorite filter to the project</source>
         <translation>Εφαρμογή αυτού του αγαπημένου φίλτρου στο έργο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="675"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="727"/>
         <source>Save Changes</source>
         <translation>Αποθήκευση αλλαγών</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="678"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="730"/>
         <source>Save modifications to this favorite</source>
         <translation>Αποθήκευση τροποποιήσεων σε αυτό το αγαπημένο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="733"/>
         <source>Delete</source>
         <translation>Διαγραφή</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="684"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="736"/>
         <source>Permanently delete this favorite</source>
         <translation>Οριστική διαγραφή αυτού του αγαπημένου</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="739"/>
         <source>Close</source>
         <translation>Κλείσιμο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="689"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="741"/>
         <source>Close this dialog</source>
         <translation>Κλείστε αυτό το παράθυρο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="797"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="849"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Αγαπημένα ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="963"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1015"/>
         <source>Remote ({0})</source>
         <translation>Απομακρυσμένο ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1120"/>
         <source>Delete Favorite</source>
         <translation>Διαγραφή αγαπημένου</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1056"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1120"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
-        <translation>Διαγραφή αγαπημένου &apos;{0}&apos;;</translation>
+        <translation>Διαγραφή αγαπημένου '{0}';</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1167"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1232"/>
         <source>Remote Layers</source>
         <translation>Απομακρυσμένα επίπεδα</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1239"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1303"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;Αποθηκευμένα αγαπημένα (0)&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>Favorites Manager</source>
-        <translation>Διαχείριση αγαπημένων</translation>
+        <translation type="obsolete">Διαχείριση αγαπημένων</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>No favorites saved yet.
 
-Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
-        <translation>Δεν υπάρχουν αποθηκευμένα αγαπημένα.
+Click the ★ indicator and select 'Add current filter to favorites' to save your first favorite.</source>
+        <translation type="obsolete">Δεν υπάρχουν αποθηκευμένα αγαπημένα.
 
-Κάντε κλικ στον δείκτη ★ και επιλέξτε &apos;Προσθήκη τρέχοντος φίλτρου στα αγαπημένα&apos; για να αποθηκεύσετε το πρώτο σας αγαπημένο.</translation>
+Κάντε κλικ στον δείκτη ★ και επιλέξτε 'Προσθήκη τρέχοντος φίλτρου στα αγαπημένα' για να αποθηκεύσετε το πρώτο σας αγαπημένο.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="184"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="232"/>
         <source>Shared...</source>
         <translation>Κοινόχρηστα…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="186"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="234"/>
         <source>Browse favorites shared via QGIS Resource Sharing collections</source>
         <translation>Περιήγηση σε αγαπημένα που έχουν μοιραστεί μέσω συλλογών QGIS Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="196"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="244"/>
         <source>Publish...</source>
         <translation>Δημοσίευση…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="198"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="246"/>
         <source>Publish selected favorites into a Resource Sharing collection</source>
         <translation>Δημοσίευση επιλεγμένων αγαπημένων σε μια συλλογή Resource Sharing</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
-        <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
-        <translation>Αδύνατη η διαγραφή του «{0}». Το αγαπημένο βρίσκεται ακόμη στη βάση δεδομένων — ελέγξτε το αρχείο καταγραφής του FilterMate.</translation>
+        <source>Could not delete '{0}'. The favorite is still in the database — check the FilterMate log for details.</source>
+        <translation type="obsolete">Αδύνατη η διαγραφή του «{0}». Το αγαπημένο βρίσκεται ακόμη στη βάση δεδομένων — ελέγξτε το αρχείο καταγραφής του FilterMate.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="231"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="279"/>
         <source>Filter favorites by scope (owner × project).</source>
         <translation>Φιλτράρισμα αγαπημένων κατά εμβέλεια (κάτοχος × έργο).</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="236"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="284"/>
         <source>All</source>
         <translation>Όλα</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="237"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="285"/>
         <source>Shared · All projects</source>
         <translation>Κοινόχρηστα · Όλα τα έργα</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="238"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="286"/>
         <source>Shared · This project</source>
         <translation>Κοινόχρηστα · Αυτό το έργο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="239"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="287"/>
         <source>Mine · All projects</source>
         <translation>Δικά μου · Όλα τα έργα</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="240"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="288"/>
         <source>Mine · This project</source>
         <translation>Δικά μου · Αυτό το έργο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>Mine</source>
         <translation>Δικά μου</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="574"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="626"/>
         <source>Shared</source>
         <translation>Κοινόχρηστα</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="585"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="637"/>
         <source>This project</source>
         <translation>Αυτό το έργο</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="586"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="638"/>
         <source>All projects</source>
         <translation>Όλα τα έργα</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="593"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="645"/>
         <source>Project scope is set when the favorite is created. Move it via the filtering tab (coming soon) to switch projects.</source>
         <translation>Η εμβέλεια έργου ορίζεται κατά τη δημιουργία του αγαπημένου. Μετακινήστε το μέσω της καρτέλας φιλτραρίσματος (σύντομα διαθέσιμη) για αλλαγή έργου.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="614"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="666"/>
         <source>Visibility:</source>
         <translation>Ορατότητα:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="914"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="966"/>
         <source>— (shared with everyone)</source>
         <translation>— (κοινόχρηστο με όλους)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="916"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="968"/>
         <source>{0} (you)</source>
         <translation>{0} (εσείς)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="920"/>
-        <source>{0} — selecting &apos;Mine&apos; on save will transfer ownership to you</source>
-        <translation>{0} — η επιλογή &apos;Δικά μου&apos; κατά την αποθήκευση θα μεταφέρει την κυριότητα σε εσάς</translation>
+        <location filename="../ui/dialogs/favorites_manager.py" line="972"/>
+        <source>{0} — selecting 'Mine' on save will transfer ownership to you</source>
+        <translation>{0} — η επιλογή 'Δικά μου' κατά την αποθήκευση θα μεταφέρει την κυριότητα σε εσάς</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
+        <source>Could not save &apos;{0}&apos;: {1}</source>
+        <translation>Δεν ήταν δυνατή η αποθήκευση του '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1139"/>
+        <source>Could not delete &apos;{0}&apos;: {1}</source>
+        <translation>Δεν ήταν δυνατή η διαγραφή του '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1150"/>
+        <source>'{0}' was not in the database — refresh and try again.</source>
+        <translation>Το '{0}' δεν υπήρχε στη βάση δεδομένων — ανανεώστε και δοκιμάστε ξανά.</translation>
     </message>
 </context>
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="588"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="600"/>
         <source>View</source>
         <translation>Προβολή</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="590"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="602"/>
         <source>Change</source>
         <translation>Αλλαγή</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="601"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="613"/>
         <source>Select a folder</source>
         <translation>Επιλέξτε έναν φάκελο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="608"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="620"/>
         <source>Select a file</source>
         <translation>Επιλέξτε ένα αρχείο</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="616"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="628"/>
         <source>Save to a file</source>
         <translation>Αποθήκευση σε αρχείο</translation>
     </message>
@@ -856,17 +1167,17 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="648"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="660"/>
         <source>View</source>
         <translation>Προβολή</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="650"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="662"/>
         <source>Change</source>
         <translation>Αλλαγή</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="659"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="671"/>
         <source>Select an icon</source>
         <translation>Επιλέξτε ένα εικονίδιο</translation>
     </message>
@@ -882,67 +1193,67 @@ Click the ★ indicator and select &apos;Add current filter to favorites&apos; t
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="190"/>
+        <location filename="../filter_mate.py" line="204"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="314"/>
+        <location filename="../filter_mate.py" line="328"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="314"/>
+        <location filename="../filter_mate.py" line="328"/>
         <source>Open FilterMate panel</source>
         <translation>Άνοιγμα πίνακα FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="323"/>
+        <location filename="../filter_mate.py" line="337"/>
         <source>Reset configuration and database</source>
         <translation>Επαναφορά διαμόρφωσης και βάσης δεδομένων</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="323"/>
+        <location filename="../filter_mate.py" line="337"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Επαναφορά της προεπιλεγμένης διαμόρφωσης και διαγραφή της βάσης δεδομένων SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1334"/>
+        <location filename="../filter_mate.py" line="1421"/>
         <source>Reset Configuration</source>
         <translation>Επαναφορά διαμόρφωσης</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1357"/>
+        <location filename="../filter_mate.py" line="1444"/>
         <source>Configuration reset successfully.</source>
         <translation>Η διαμόρφωση επαναφέρθηκε επιτυχώς.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1362"/>
+        <location filename="../filter_mate.py" line="1449"/>
         <source>Default configuration file not found.</source>
         <translation>Δεν βρέθηκε το προεπιλεγμένο αρχείο διαμόρφωσης.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1383"/>
+        <location filename="../filter_mate.py" line="1470"/>
         <source>Database deleted: {filename}</source>
         <translation>Η βάση δεδομένων διαγράφηκε: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1397"/>
+        <location filename="../filter_mate.py" line="1484"/>
         <source>Restart required</source>
         <translation>Απαιτείται επανεκκίνηση</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="403"/>
+        <location filename="../filter_mate.py" line="421"/>
         <source>Obsolete configuration detected</source>
         <translation>Εντοπίστηκε παρωχημένη διαμόρφωση</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="404"/>
+        <location filename="../filter_mate.py" line="422"/>
         <source>unknown version</source>
         <translation>άγνωστη έκδοση</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="405"/>
+        <location filename="../filter_mate.py" line="423"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -957,12 +1268,12 @@ Do you want to reset to default settings?
 • Όχι: Διατήρηση τρέχουσας διαμόρφωσης (μπορεί να προκαλέσει προβλήματα)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="412"/>
+        <location filename="../filter_mate.py" line="430"/>
         <source>Corrupted configuration detected</source>
         <translation>Εντοπίστηκε κατεστραμμένη διαμόρφωση</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="413"/>
+        <location filename="../filter_mate.py" line="431"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -977,12 +1288,12 @@ Do you want to reset to default settings?
 • Όχι: Ακύρωση (το πρόσθετο μπορεί να μην λειτουργεί σωστά)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="420"/>
+        <location filename="../filter_mate.py" line="438"/>
         <source>Configuration reset</source>
         <translation>Επαναφορά διαμόρφωσης</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="421"/>
+        <location filename="../filter_mate.py" line="439"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -991,76 +1302,76 @@ Do you want to continue?</source>
 Θέλετε να συνεχίσετε;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="469"/>
+        <location filename="../filter_mate.py" line="487"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Η διαμόρφωση δεν επαναφέρθηκε. Ορισμένες λειτουργίες μπορεί να μην λειτουργούν σωστά.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="480"/>
+        <location filename="../filter_mate.py" line="498"/>
         <source>Configuration created with default values</source>
         <translation>Η διαμόρφωση δημιουργήθηκε με προεπιλεγμένες τιμές</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="483"/>
+        <location filename="../filter_mate.py" line="501"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Η κατεστραμμένη διαμόρφωση επαναφέρθηκε. Οι προεπιλεγμένες ρυθμίσεις αποκαταστάθηκαν.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="504"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Η παρωχημένη διαμόρφωση επαναφέρθηκε. Οι προεπιλεγμένες ρυθμίσεις αποκαταστάθηκαν.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="507"/>
+        <location filename="../filter_mate.py" line="525"/>
         <source>Configuration updated to latest version</source>
         <translation>Η διαμόρφωση ενημερώθηκε στην τελευταία έκδοση</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="504"/>
+        <location filename="../filter_mate.py" line="522"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Η διαμόρφωση ενημερώθηκε: νέες ρυθμίσεις διαθέσιμες ({sections}). Πρόσβαση μέσω του μενού Επιλογές.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="498"/>
+        <location filename="../filter_mate.py" line="516"/>
         <source>Geometry Simplification</source>
         <translation>Απλοποίηση γεωμετρίας</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="499"/>
+        <location filename="../filter_mate.py" line="517"/>
         <source>Optimization Thresholds</source>
         <translation>Όρια βελτιστοποίησης</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="526"/>
+        <location filename="../filter_mate.py" line="544"/>
         <source>Error during configuration migration: {}</source>
         <translation>Σφάλμα κατά τη μετεγκατάσταση διαμόρφωσης: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="644"/>
+        <location filename="../filter_mate.py" line="662"/>
         <source>Geometry validation setting</source>
         <translation>Ρύθμιση επικύρωσης γεωμετρίας</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="646"/>
-        <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
+        <location filename="../filter_mate.py" line="664"/>
+        <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
-FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
+FilterMate recommends disabling this setting (value 'Off') for the following reasons:
 
 • Features with invalid geometries could be silently excluded from exports and filters
 • FilterMate handles geometry validation internally with automatic repair options
-• Some legitimate data may have geometries considered as &apos;invalid&apos; according to strict OGC rules
+• Some legitimate data may have geometries considered as 'invalid' according to strict OGC rules
 
 Do you want to disable this setting now?
 
 • Yes: Disable filtering (recommended for FilterMate)
 • No: Keep current setting</source>
-        <translation>Η ρύθμιση QGIS &apos;Φιλτράρισμα μη έγκυρων οντοτήτων&apos; είναι ρυθμισμένη στο &apos;{mode}&apos;.
+        <translation>Η ρύθμιση QGIS 'Φιλτράρισμα μη έγκυρων οντοτήτων' είναι ρυθμισμένη στο '{mode}'.
 
-Το FilterMate συνιστά την απενεργοποίηση αυτής της ρύθμισης (τιμή &apos;Off&apos;) για τους εξής λόγους:
+Το FilterMate συνιστά την απενεργοποίηση αυτής της ρύθμισης (τιμή 'Off') για τους εξής λόγους:
 
 • Οντότητες με μη έγκυρες γεωμετρίες μπορεί να εξαιρεθούν σιωπηλά από εξαγωγές και φίλτρα
 • Το FilterMate διαχειρίζεται την επικύρωση γεωμετρίας εσωτερικά με αυτόματες επιλογές επιδιόρθωσης
-• Ορισμένα νόμιμα δεδομένα μπορεί να έχουν γεωμετρίες που θεωρούνται &apos;μη έγκυρες&apos; σύμφωνα με αυστηρούς κανόνες OGC
+• Ορισμένα νόμιμα δεδομένα μπορεί να έχουν γεωμετρίες που θεωρούνται 'μη έγκυρες' σύμφωνα με αυστηρούς κανόνες OGC
 
 Θέλετε να απενεργοποιήσετε αυτή τη ρύθμιση τώρα;
 
@@ -1068,17 +1379,17 @@ Do you want to disable this setting now?
 • Όχι: Διατήρηση τρέχουσας ρύθμισης</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="674"/>
+        <location filename="../filter_mate.py" line="692"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Το φιλτράρισμα μη έγκυρης γεωμετρίας απενεργοποιήθηκε επιτυχώς.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="681"/>
+        <location filename="../filter_mate.py" line="699"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Το φιλτράρισμα μη έγκυρης γεωμετρίας δεν τροποποιήθηκε. Ορισμένες οντότητες μπορεί να εξαιρεθούν από τις εξαγωγές.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1334"/>
+        <location filename="../filter_mate.py" line="1421"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1095,7 +1406,7 @@ QGIS must be restarted to apply the changes.</source>
 Το QGIS πρέπει να επανεκκινηθεί για να εφαρμοστούν οι αλλαγές.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1397"/>
+        <location filename="../filter_mate.py" line="1484"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1104,189 +1415,194 @@ Please restart QGIS to apply the changes.</source>
 Παρακαλώ επανεκκινήστε το QGIS για να εφαρμοστούν οι αλλαγές.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="348"/>
+        <location filename="../filter_mate.py" line="366"/>
         <source>Initialization error: {0}</source>
         <translation>Σφάλμα αρχικοποίησης: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="585"/>
+        <location filename="../filter_mate.py" line="603"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} αναφερόμενο(-α) επίπεδο(-α) δεν φορτώθηκαν ({layers_list}). Χρήση εναλλακτικής εμφάνισης.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1388"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Αδυναμία διαγραφής {filename}: {e}</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="1405"/>
         <source>Error during reset: {str(e)}</source>
-        <translation>Σφάλμα κατά την επαναφορά: {str(e)}</translation>
+        <translation type="obsolete">Σφάλμα κατά την επαναφορά: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1438"/>
+        <location filename="../filter_mate.py" line="1527"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Ευχαριστούμε που χρησιμοποιείτε το &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Γίνετε μέλος της κοινότητας Discord για να:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Λάβετε βοήθεια και υποστήριξη&lt;/li&gt;&lt;li&gt;Αναφέρετε σφάλματα και προβλήματα&lt;/li&gt;&lt;li&gt;Προτείνετε νέες λειτουργίες&lt;/li&gt;&lt;li&gt;Μοιραστείτε συμβουλές με άλλους χρήστες&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;p style='font-size:13px;'&gt;Ευχαριστούμε που χρησιμοποιείτε το &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Γίνετε μέλος της κοινότητας Discord για να:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Λάβετε βοήθεια και υποστήριξη&lt;/li&gt;&lt;li&gt;Αναφέρετε σφάλματα και προβλήματα&lt;/li&gt;&lt;li&gt;Προτείνετε νέες λειτουργίες&lt;/li&gt;&lt;li&gt;Μοιραστείτε συμβουλές με άλλους χρήστες&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1454"/>
+        <location filename="../filter_mate.py" line="1543"/>
         <source>  Join us on Discord</source>
         <translation>  Ελάτε στο Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1474"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Don&apos;t show this again</source>
         <translation>Να μην εμφανιστεί ξανά</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1477"/>
+        <location filename="../filter_mate.py" line="1566"/>
         <source>Close</source>
         <translation>Κλείσιμο</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1543"/>
+        <location filename="../filter_mate.py" line="1632"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Σφάλμα φόρτωσης πρόσθετου: {0}. Ελέγξτε την κονσόλα Python του QGIS για λεπτομέρειες.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6711"/>
+        <location filename="../filter_mate_dockwidget.py" line="6922"/>
         <source>Current layer: {0}</source>
         <translation>Τρέχον επίπεδο: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6713"/>
+        <location filename="../filter_mate_dockwidget.py" line="6924"/>
         <source>No layer selected</source>
         <translation>Δεν επιλέχθηκε επίπεδο</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>Selected layers:
 {0}</source>
         <translation>Επιλεγμένα επίπεδα:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>No layers selected</source>
         <translation>Δεν επιλέχθηκαν επίπεδα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6954"/>
         <source>No expression defined</source>
         <translation>Δεν έχει οριστεί έκφραση</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6755"/>
+        <location filename="../filter_mate_dockwidget.py" line="6966"/>
         <source>Display expression: {0}</source>
         <translation>Έκφραση εμφάνισης: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6770"/>
+        <location filename="../filter_mate_dockwidget.py" line="6981"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Αναγνωριστικό οντότητας: {0}
 Πρώτο χαρακτηριστικό: {1}</translation>
     </message>
+    <message>
+        <location filename="../filter_mate.py" line="1493"/>
+        <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
+        <translation>Δεν ήταν δυνατή η επαναφορά της διαμόρφωσης. Ελέγξτε ότι ο φάκελος του πρόσθετου είναι εγγράψιμος και δοκιμάστε ξανά. Λεπτομέρειες στο filtermate.log.</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="274"/>
+        <location filename="../filter_mate_app.py" line="298"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Εντοπίστηκαν επίπεδα PostgreSQL ({0}) αλλά το psycopg2 δεν είναι εγκατεστημένο.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="361"/>
+        <location filename="../filter_mate_app.py" line="390"/>
         <source>Cleared {0} caches</source>
         <translation>Διαγράφηκαν {0} μνήμες cache</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="795"/>
+        <location filename="../filter_mate_app.py" line="856"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Η δημιουργία dockwidget απέτυχε: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="805"/>
+        <location filename="../filter_mate_app.py" line="866"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Η εμφάνιση dockwidget απέτυχε: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1255"/>
+        <location filename="../filter_mate_app.py" line="1380"/>
         <source>Error executing {0}: {1}</source>
         <translation>Σφάλμα εκτέλεσης {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1267"/>
+        <location filename="../filter_mate_app.py" line="1392"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Το πρόσθετο εκτελείται σε υποβαθμισμένη λειτουργία (εξαγωνικές υπηρεσίες μη διαθέσιμες). Η απόδοση μπορεί να μειωθεί.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1396"/>
+        <location filename="../filter_mate_app.py" line="1641"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ΣΦΑΛΜΑ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1396"/>
+        <location filename="../filter_mate_app.py" line="1641"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Δεν είναι δυνατή η εκτέλεση {0}: η αρχικοποίηση widget απέτυχε.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2167"/>
+        <location filename="../filter_mate_app.py" line="2426"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Δεν είναι δυνατό {0}: μη έγκυρο επίπεδο ή η πηγή δεν βρέθηκε.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2304"/>
+        <location filename="../filter_mate_app.py" line="2563"/>
         <source>All filters cleared - </source>
         <translation>Όλα τα φίλτρα διαγράφηκαν - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2305"/>
+        <location filename="../filter_mate_app.py" line="2564"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} ορατές οντότητες στο κύριο επίπεδο</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2311"/>
+        <location filename="../filter_mate_app.py" line="2572"/>
         <source>Error: result handler missing</source>
         <translation>Σφάλμα: λείπει ο handler αποτελέσματος</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2324"/>
+        <location filename="../filter_mate_app.py" line="2585"/>
         <source>Error during filtering: {0}</source>
         <translation>Σφάλμα κατά το φιλτράρισμα: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2455"/>
+        <location filename="../filter_mate_app.py" line="2707"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Ανακτήθηκαν {0} ορφανό(-ά) αγαπημένο(-α): {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2591"/>
+        <location filename="../filter_mate_app.py" line="2844"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Η φόρτωση επιπέδου απέτυχε - κλικ για επανάληψη</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2638"/>
+        <location filename="../filter_mate_app.py" line="2900"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} επίπεδο(-α) φορτώθηκαν επιτυχώς</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1618"/>
+        <location filename="../filter_mate_app.py" line="1865"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1620"/>
+        <location filename="../filter_mate_app.py" line="1867"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1623"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1625"/>
+        <location filename="../filter_mate_app.py" line="1872"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1299,193 +1615,328 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1635"/>
+        <location filename="../filter_mate_app.py" line="1882"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1642"/>
+        <location filename="../filter_mate_app.py" line="1889"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1649"/>
+        <location filename="../filter_mate_app.py" line="1896"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1673"/>
+        <location filename="../filter_mate_app.py" line="1920"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1228"/>
+        <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
+        <translation>Επιλέξτε ένα επίπεδο στην καρτέλα EXPLORING πριν εκτελέσετε το '{0}'.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="596"/>
+        <location filename="../filter_mate_dockwidget.py" line="616"/>
         <source>Initialization error: {}</source>
         <translation>Σφάλμα αρχικοποίησης: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="925"/>
+        <location filename="../filter_mate_dockwidget.py" line="997"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Ελλιπής διαμόρφωση UI - ελέγξτε τα αρχεία καταγραφής</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
-        <translation>Σφάλμα διαστάσεων UI: {}</translation>
+        <translation type="obsolete">Σφάλμα διαστάσεων UI: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1355"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>Favorites manager not available</source>
         <translation>Η διαχείριση αγαπημένων δεν είναι διαθέσιμη</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1374"/>
+        <location filename="../filter_mate_dockwidget.py" line="1450"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} Αγαπημένα αποθηκευμένα
 Κλικ για εφαρμογή ή διαχείριση</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1382"/>
+        <location filename="../filter_mate_dockwidget.py" line="1458"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Χωρίς αποθηκευμένα αγαπημένα
 Κλικ για προσθήκη τρέχοντος φίλτρου</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1406"/>
+        <location filename="../filter_mate_dockwidget.py" line="1482"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Επιβλήθηκε backend {0} για {1} επίπεδο(-α)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1492"/>
+        <location filename="../filter_mate_dockwidget.py" line="1568"/>
         <source>Backend controller not available</source>
         <translation>Ο ελεγκτής backend δεν είναι διαθέσιμος</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1430"/>
+        <location filename="../filter_mate_dockwidget.py" line="1506"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Αυτόματος καθαρισμός PostgreSQL ενεργοποιημένος</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1431"/>
+        <location filename="../filter_mate_dockwidget.py" line="1507"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Αυτόματος καθαρισμός PostgreSQL απενεργοποιημένος</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1437"/>
+        <location filename="../filter_mate_dockwidget.py" line="1513"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Οι προβολές συνεδρίας PostgreSQL καθαρίστηκαν</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1437"/>
+        <location filename="../filter_mate_dockwidget.py" line="1513"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Δεν υπάρχουν προβολές για καθαρισμό ή ο καθαρισμός απέτυχε</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1448"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>No PostgreSQL connection available</source>
         <translation>Δεν υπάρχει διαθέσιμη σύνδεση PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1454"/>
+        <location filename="../filter_mate_dockwidget.py" line="1530"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Το σχήμα έχει {0} προβολή(-ές) από άλλες συνεδρίες.
 Διαγραφή ούτως ή άλλως;</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1455"/>
+        <location filename="../filter_mate_dockwidget.py" line="1531"/>
         <source>Other Sessions Active</source>
         <translation>Άλλες ενεργές συνεδρίες</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1457"/>
+        <location filename="../filter_mate_dockwidget.py" line="1533"/>
         <source>Schema cleanup cancelled</source>
         <translation>Ο καθαρισμός σχήματος ακυρώθηκε</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1462"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
-        <translation>Το σχήμα &apos;{0}&apos; διαγράφηκε επιτυχώς</translation>
+        <translation>Το σχήμα '{0}' διαγράφηκε επιτυχώς</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1464"/>
+        <location filename="../filter_mate_dockwidget.py" line="1540"/>
         <source>Schema cleanup failed</source>
         <translation>Ο καθαρισμός σχήματος απέτυχε</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1490"/>
+        <location filename="../filter_mate_dockwidget.py" line="1566"/>
         <source>PostgreSQL Session Info</source>
         <translation>Πληροφορίες συνεδρίας PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Theme adapted: {0}</source>
         <translation>Το θέμα προσαρμόστηκε: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Dark mode</source>
         <translation>Σκούρο θέμα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Light mode</source>
         <translation>Φωτεινό θέμα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3896"/>
+        <location filename="../filter_mate_dockwidget.py" line="4005"/>
         <source>Selected features have no geometry.</source>
         <translation>Οι επιλεγμένες οντότητες δεν έχουν γεωμετρία.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3915"/>
+        <location filename="../filter_mate_dockwidget.py" line="4024"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Δεν επιλέχθηκε οντότητα. Επιλέξτε μια οντότητα από την αναπτυσσόμενη λίστα.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4957"/>
+        <location filename="../filter_mate_dockwidget.py" line="5079"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Το επιλεγμένο επίπεδο δεν είναι έγκυρο ή η πηγή του δεν βρέθηκε.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5667"/>
+        <location filename="../filter_mate_dockwidget.py" line="5816"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Αρνητικό buffer (διάβρωση): συρρικνώνει τα πολύγωνα προς τα μέσα</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5670"/>
+        <location filename="../filter_mate_dockwidget.py" line="5819"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Τιμή buffer σε μέτρα (θετική=επέκταση, αρνητική=σμίκρυνση πολυγώνων)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6144"/>
+        <location filename="../filter_mate_dockwidget.py" line="6293"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Το πρόσθετο ενεργοποιήθηκε με {0} διανυσματικό(-ά) επίπεδο(-α)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6227"/>
+        <location filename="../filter_mate_dockwidget.py" line="6376"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Δεν ήταν δυνατή η αυτόματη επαναφόρτωση του πρόσθετου.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6229"/>
+        <location filename="../filter_mate_dockwidget.py" line="6378"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Σφάλμα επαναφόρτωσης πρόσθετου: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6282"/>
+        <location filename="../filter_mate_dockwidget.py" line="6450"/>
         <source>Layer properties reset to defaults</source>
         <translation>Οι ιδιότητες επιπέδου επαναφέρθηκαν στις προεπιλογές</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6283"/>
+        <location filename="../filter_mate_dockwidget.py" line="6451"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Σφάλμα επαναφοράς ιδιοτήτων επιπέδου: {}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="864"/>
+        <source>Filter</source>
+        <translation>Φίλτρο</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="865"/>
+        <source>Undo the last filter</source>
+        <translation>Αναίρεση του τελευταίου φίλτρου</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="866"/>
+        <source>Redo the last filter</source>
+        <translation>Επανάληψη του τελευταίου φίλτρου</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <source>Remove the filters</source>
+        <translation>Αφαίρεση των φίλτρων</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <source>Export the layers</source>
+        <translation>Εξαγωγή των επιπέδων</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <source>About FilterMate</source>
+        <translation>Σχετικά με το FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <source>QFieldCloud</source>
+        <translation>QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <source>Identify the selected features</source>
+        <translation>Αναγνώριση των επιλεγμένων οντοτήτων</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <source>Zoom to the selected features</source>
+        <translation>Εστίαση στις επιλεγμένες οντότητες</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <source>Select the features on the map</source>
+        <translation>Επιλογή των οντοτήτων στον χάρτη</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <source>Follow the features on the map</source>
+        <translation>Παρακολούθηση των οντοτήτων στον χάρτη</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <source>Link the three selection modes</source>
+        <translation>Σύνδεση των τριών τρόπων επιλογής</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <source>Reset the layer properties</source>
+        <translation>Επαναφορά των ιδιοτήτων του επιπέδου</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <source>Follow the current layer</source>
+        <translation>Παρακολούθηση του τρέχοντος επιπέδου</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <source>Layers to filter</source>
+        <translation>Επίπεδα προς φιλτράρισμα</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <source>Combine with the existing filter</source>
+        <translation>Συνδυασμός με το υπάρχον φίλτρο</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <source>Geometric predicates</source>
+        <translation>Γεωμετρικά κατηγορήματα</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <source>Buffer distance</source>
+        <translation>Απόσταση ζώνης (buffer)</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <source>Buffer type</source>
+        <translation>Τύπος ζώνης (buffer)</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <source>Layers to export</source>
+        <translation>Επίπεδα προς εξαγωγή</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <source>Projection of the export</source>
+        <translation>Προβολή της εξαγωγής</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <source>Export the styles</source>
+        <translation>Εξαγωγή των στυλ</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <source>Export format</source>
+        <translation>Μορφή εξαγωγής</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <source>Output folder</source>
+        <translation>Φάκελος εξόδου</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <source>Zip the export</source>
+        <translation>Συμπίεση της εξαγωγής σε zip</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1001"/>
+        <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
+        <translation>Η διάταξη του πίνακα δεν μπόρεσε να εφαρμοστεί· χρησιμοποιούνται τα προεπιλεγμένα μεγέθη. Λεπτομέρειες στο filtermate.log.</translation>
     </message>
 </context>
 <context>
@@ -1493,183 +1944,183 @@ Drop anyway?</source>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
-        <translation>FilterMate</translation>
+        <translation type="obsolete">FilterMate</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
-        <translation>ΜΟΝΗ ΕΠΙΛΟΓΗ</translation>
+        <translation type="obsolete">ΜΟΝΗ ΕΠΙΛΟΓΗ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
         <source>MULTIPLE SELECTION</source>
-        <translation>ΠΟΛΛΑΠΛΗ ΕΠΙΛΟΓΗ</translation>
+        <translation type="obsolete">ΠΟΛΛΑΠΛΗ ΕΠΙΛΟΓΗ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
         <source>CUSTOM SELECTION</source>
-        <translation>ΠΡΟΣΑΡΜΟΣΜΕΝΗ ΕΠΙΛΟΓΗ</translation>
+        <translation type="obsolete">ΠΡΟΣΑΡΜΟΣΜΕΝΗ ΕΠΙΛΟΓΗ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
         <source>FILTERING</source>
-        <translation>ΦΙΛΤΡΑΡΙΣΜΑ</translation>
+        <translation type="obsolete">ΦΙΛΤΡΑΡΙΣΜΑ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
         <source>EXPORTING</source>
-        <translation>ΕΞΑΓΩΓΗ</translation>
+        <translation type="obsolete">ΕΞΑΓΩΓΗ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
         <source>CONFIGURATION</source>
-        <translation>ΔΙΑΜΟΡΦΩΣΗ</translation>
+        <translation type="obsolete">ΔΙΑΜΟΡΦΩΣΗ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>Select CRS for export</source>
-        <translation>Επιλογή CRS για εξαγωγή</translation>
+        <translation type="obsolete">Επιλογή CRS για εξαγωγή</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
         <source>Export</source>
-        <translation>Εξαγωγή</translation>
+        <translation type="obsolete">Εξαγωγή</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
         <source>AND</source>
-        <translation>ΚΑΙ</translation>
+        <translation type="obsolete">ΚΑΙ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
         <source>AND NOT</source>
-        <translation>ΚΑΙ ΟΧΙ</translation>
+        <translation type="obsolete">ΚΑΙ ΟΧΙ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
         <source>OR</source>
-        <translation>Ή</translation>
+        <translation type="obsolete">Ή</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
         <source>QML</source>
-        <translation>QML</translation>
+        <translation type="obsolete">QML</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
         <source>SLD</source>
-        <translation>SLD</translation>
+        <translation type="obsolete">SLD</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
         <source> m</source>
-        <translation> m</translation>
+        <translation type="obsolete"> m</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
         <source>, </source>
-        <translation>, </translation>
+        <translation type="obsolete">, </translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
         <source>Multi-layer filtering</source>
-        <translation>Φιλτράρισμα πολλαπλών επιπέδων</translation>
+        <translation type="obsolete">Φιλτράρισμα πολλαπλών επιπέδων</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
         <source>Additive filtering for the selected layer</source>
-        <translation>Αθροιστικό φιλτράρισμα για το επιλεγμένο επίπεδο</translation>
+        <translation type="obsolete">Αθροιστικό φιλτράρισμα για το επιλεγμένο επίπεδο</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
         <source>Geospatial filtering</source>
-        <translation>Γεωχωρικό φιλτράρισμα</translation>
+        <translation type="obsolete">Γεωχωρικό φιλτράρισμα</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
         <source>Buffer</source>
-        <translation>Buffer</translation>
+        <translation type="obsolete">Buffer</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
         <source>Expression layer</source>
-        <translation>Επίπεδο έκφρασης</translation>
+        <translation type="obsolete">Επίπεδο έκφρασης</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
         <source>Geometric predicate</source>
-        <translation>Γεωμετρικό κατηγόρημα</translation>
+        <translation type="obsolete">Γεωμετρικό κατηγόρημα</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
         <source>Output format</source>
-        <translation>Μορφή εξόδου</translation>
+        <translation type="obsolete">Μορφή εξόδου</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
         <source>Filter</source>
-        <translation>Φίλτρο</translation>
+        <translation type="obsolete">Φίλτρο</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
         <source>Reset</source>
-        <translation>Επαναφορά</translation>
+        <translation type="obsolete">Επαναφορά</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
         <source>Layers to export</source>
-        <translation>Επίπεδα προς εξαγωγή</translation>
+        <translation type="obsolete">Επίπεδα προς εξαγωγή</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
         <source>Layers projection</source>
-        <translation>Προβολή επιπέδων</translation>
+        <translation type="obsolete">Προβολή επιπέδων</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
         <source>Save styles</source>
-        <translation>Αποθήκευση στυλ</translation>
+        <translation type="obsolete">Αποθήκευση στυλ</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
         <source>Datatype export</source>
-        <translation>Εξαγωγή τύπου δεδομένων</translation>
+        <translation type="obsolete">Εξαγωγή τύπου δεδομένων</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
         <source>Name of file/directory</source>
-        <translation>Όνομα αρχείου/καταλόγου</translation>
+        <translation type="obsolete">Όνομα αρχείου/καταλόγου</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation>Χρήση κεντροειδών αντί πλήρων γεωμετριών για το επίπεδο πηγής (ταχύτερο για σύνθετα πολύγωνα)</translation>
+        <translation type="obsolete">Χρήση κεντροειδών αντί πλήρων γεωμετριών για το επίπεδο πηγής (ταχύτερο για σύνθετα πολύγωνα)</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Τιμή buffer σε μέτρα (θετική=επέκταση, αρνητική=σμίκρυνση πολυγώνων)</translation>
+        <translation type="obsolete">Τιμή buffer σε μέτρα (θετική=επέκταση, αρνητική=σμίκρυνση πολυγώνων)</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
         <source>Number of segments for buffer precision</source>
-        <translation>Αριθμός τμημάτων για ακρίβεια buffer</translation>
+        <translation type="obsolete">Αριθμός τμημάτων για ακρίβεια buffer</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
         <source>Mode batch</source>
-        <translation>Λειτουργία δέσμης</translation>
+        <translation type="obsolete">Λειτουργία δέσμης</translation>
     </message>
 </context>
 <context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="281"/>
+        <location filename="../adapters/filter_result_handler.py" line="318"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} ορατές οντότητες στο κύριο επίπεδο</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="274"/>
+        <location filename="../adapters/filter_result_handler.py" line="311"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Όλα τα φίλτρα διαγράφηκαν - {count} οντότητες ορατές στο κύριο επίπεδο</translation>
     </message>
@@ -1677,47 +2128,47 @@ Drop anyway?</source>
 <context>
     <name>FinishedHandler</name>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="347"/>
+        <location filename="../core/tasks/finished_handler.py" line="346"/>
         <source>Task failed</source>
         <translation>Η εργασία απέτυχε</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="348"/>
+        <location filename="../core/tasks/finished_handler.py" line="347"/>
         <source>Filter failed for: {0}</source>
         <translation>Το φιλτράρισμα απέτυχε για: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="352"/>
+        <location filename="../core/tasks/finished_handler.py" line="351"/>
         <source> (+{0} more)</source>
         <translation> (+{0} ακόμη)</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="399"/>
+        <location filename="../core/tasks/finished_handler.py" line="398"/>
         <source>Layer(s) filtered</source>
         <translation>Επίπεδο(-α) φιλτραρισμένο(-α)</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="403"/>
+        <location filename="../core/tasks/finished_handler.py" line="402"/>
         <source>Layer(s) filtered to precedent state</source>
         <translation>Επίπεδο(-α) φιλτραρισμένο(-α) στην προηγούμενη κατάσταση</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="407"/>
+        <location filename="../core/tasks/finished_handler.py" line="406"/>
         <source>Layer(s) unfiltered</source>
         <translation>Επίπεδο(-α) χωρίς φίλτρο</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="411"/>
+        <location filename="../core/tasks/finished_handler.py" line="410"/>
         <source>Filter task : {0}</source>
         <translation>Εργασία φιλτραρίσματος : {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="432"/>
+        <location filename="../core/tasks/finished_handler.py" line="431"/>
         <source>Export task : {0}</source>
         <translation>Εργασία εξαγωγής : {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="457"/>
+        <location filename="../core/tasks/finished_handler.py" line="456"/>
         <source>Exception: {0}</source>
         <translation>Εξαίρεση: {0}</translation>
     </message>
@@ -1756,7 +2207,7 @@ Drop anyway?</source>
 <context>
     <name>LayerLifecycleService</name>
     <message>
-        <location filename="../core/services/layer_lifecycle_service.py" line="212"/>
+        <location filename="../core/services/layer_lifecycle_service.py" line="255"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed. The plugin cannot use these layers. Install psycopg2 to enable PostgreSQL support.</source>
         <translation>Εντοπίστηκαν επίπεδα PostgreSQL ({0}) αλλά το psycopg2 δεν είναι εγκατεστημένο. Το πρόσθετο δεν μπορεί να χρησιμοποιήσει αυτά τα επίπεδα. Εγκαταστήστε το psycopg2 για να ενεργοποιήσετε την υποστήριξη PostgreSQL.</translation>
     </message>
@@ -1764,7 +2215,7 @@ Drop anyway?</source>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="944"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1034"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -1772,21 +2223,21 @@ This error originates from a previous version of FilterMate.
 
 Solution: Remove this layer from the FilterMate project, then re-add it.
 Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
-        <translation>Επίπεδο PostgreSQL &apos;{0}&apos;: Εντοπίστηκαν κατεστραμμένα δεδομένα.
+        <translation>Επίπεδο PostgreSQL '{0}': Εντοπίστηκαν κατεστραμμένα δεδομένα.
 
-Αυτό το επίπεδο χρησιμοποιεί &apos;virtual_id&apos; που δεν υπάρχει στο PostgreSQL.
+Αυτό το επίπεδο χρησιμοποιεί 'virtual_id' που δεν υπάρχει στο PostgreSQL.
 Αυτό το σφάλμα προέρχεται από προηγούμενη έκδοση του FilterMate.
 
 Λύση: Αφαιρέστε αυτό το επίπεδο από το έργο FilterMate και προσθέστε το ξανά.
 Βεβαιωθείτε ότι ο πίνακας PostgreSQL έχει ορισμένο PRIMARY KEY.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="970"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1060"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
-        <translation>Το επίπεδο &apos;{0}&apos; δεν έχει PRIMARY KEY. Περιορισμένες λειτουργίες: οι υλοποιημένες προβολές είναι απενεργοποιημένες. Σύσταση: προσθέστε ένα PRIMARY KEY για βέλτιστη απόδοση.</translation>
+        <translation>Το επίπεδο '{0}' δεν έχει PRIMARY KEY. Περιορισμένες λειτουργίες: οι υλοποιημένες προβολές είναι απενεργοποιημένες. Σύσταση: προσθέστε ένα PRIMARY KEY για βέλτιστη απόδοση.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2114"/>
         <source>Exception: {0}</source>
         <translation>Εξαίρεση: {0}</translation>
     </message>
@@ -1922,6 +2373,252 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="395"/>
+        <source>Apply to the other tiles of the dataset</source>
+        <translation>Εφαρμογή στα υπόλοιπα πλακίδια του συνόλου δεδομένων</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="408"/>
+        <source>CLASSES</source>
+        <translation>ΚΛΑΣΕΙΣ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="413"/>
+        <source>Ground</source>
+        <translation>Έδαφος</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="414"/>
+        <source>Vegetation</source>
+        <translation>Βλάστηση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="415"/>
+        <source>Buildings</source>
+        <translation>Κτίρια</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <source>Above ground</source>
+        <translation>Πάνω από το έδαφος</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="417"/>
+        <source>Water</source>
+        <translation>Νερό</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="418"/>
+        <source>Without noise</source>
+        <translation>Χωρίς θόρυβο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <source>Check only these classes</source>
+        <translation>Επιλογή μόνο αυτών των κλάσεων</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="432"/>
+        <source>All</source>
+        <translation>Όλες</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <source>None</source>
+        <translation>Καμία</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="443"/>
+        <source>Point classes</source>
+        <translation>Κλάσεις σημείων</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="459"/>
+        <source>ATTRIBUTE RANGES</source>
+        <translation>ΕΥΡΗ ΧΑΡΑΚΤΗΡΙΣΤΙΚΩΝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="465"/>
+        <source>Z (m)</source>
+        <translation>Z (m)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="466"/>
+        <source>Lowest elevation kept</source>
+        <translation>Χαμηλότερο υψόμετρο που διατηρείται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <source>Highest elevation kept</source>
+        <translation>Υψηλότερο υψόμετρο που διατηρείται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="475"/>
+        <source>Intensity</source>
+        <translation>Ένταση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="476"/>
+        <source>Lowest intensity kept</source>
+        <translation>Χαμηλότερη ένταση που διατηρείται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="477"/>
+        <source>Highest intensity kept</source>
+        <translation>Υψηλότερη ένταση που διατηρείται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <source>Return</source>
+        <translation>Επιστροφή</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <source>Echo of the laser pulse kept</source>
+        <translation>Ηχώ του παλμού λέιζερ που διατηρείται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="495"/>
+        <source>Height above DTM ≥</source>
+        <translation>Ύψος πάνω από DTM ≥</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <source>Digital terrain model the height is measured from</source>
+        <translation>Ψηφιακό μοντέλο εδάφους από το οποίο μετράται το ύψος</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="519"/>
+        <source>Keep the points at least this high above the terrain model</source>
+        <translation>Διατήρηση των σημείων που βρίσκονται τουλάχιστον τόσο ψηλά πάνω από το μοντέλο εδάφους</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <source>EXPRESSION</source>
+        <translation>ΕΚΦΡΑΣΗ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="532"/>
+        <source>Point cloud expression</source>
+        <translation>Έκφραση νέφους σημείων</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="533"/>
+        <source>Check the group to edit the expression by hand</source>
+        <translation>Επιλέξτε την ομάδα για να επεξεργαστείτε την έκφραση χειροκίνητα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="560"/>
+        <source>No elevation statistics for this layer</source>
+        <translation>Δεν υπάρχουν στατιστικά υψομέτρου για αυτό το επίπεδο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="601"/>
+        <source>Height above the terrain is unavailable</source>
+        <translation>Το ύψος πάνω από το έδαφος δεν είναι διαθέσιμο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="611"/>
+        <source>Kept points: {0}</source>
+        <translation>Σημεία που διατηρούνται: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <source>Current filter: {0}</source>
+        <translation>Τρέχον φίλτρο: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <source>none</source>
+        <translation>κανένα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <source>Any</source>
+        <translation>Οποιαδήποτε</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <source>First</source>
+        <translation>Πρώτη</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Last</source>
+        <translation>Τελευταία</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Single</source>
+        <translation>Μοναδική</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudFilterWidget</name>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="141"/>
+        <source>Point cloud filter</source>
+        <translation>Φίλτρο νέφους σημείων</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="152"/>
+        <source>Classification</source>
+        <translation>Ταξινόμηση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="157"/>
+        <source>All</source>
+        <translation>Όλες</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="158"/>
+        <source>None</source>
+        <translation>Καμία</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="167"/>
+        <source>Elevation (Z)</source>
+        <translation>Υψόμετρο (Z)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="169"/>
+        <source>Intensity</source>
+        <translation>Ένταση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="175"/>
+        <source>Return number</source>
+        <translation>Αριθμός επιστροφής</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="199"/>
+        <source>Minimum</source>
+        <translation>Ελάχιστο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="200"/>
+        <source>Maximum</source>
+        <translation>Μέγιστο</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
+        <source>Current filter: {0}</source>
+        <translation>Τρέχον φίλτρο: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
+        <source>none</source>
+        <translation>κανένα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="329"/>
+        <source>Any</source>
+        <translation>Οποιαδήποτε</translation>
     </message>
 </context>
 <context>
@@ -2068,202 +2765,202 @@ Continue?</source>
 <context>
     <name>PublishFavoritesDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="161"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="119"/>
         <source>FilterMate — Publish to Resource Sharing</source>
         <translation>FilterMate — Δημοσίευση στο Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="169"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="127"/>
         <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
         <translation>&lt;b&gt;Δημοσίευση αγαπημένων&lt;/b&gt; — εγγραφή κοινόχρηστου πακέτου σε συλλογή QGIS Resource Sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="189"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="147"/>
         <source>Overwrite existing bundle</source>
         <translation>Αντικατάσταση υπάρχοντος πακέτου</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="199"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="157"/>
         <source>Publish</source>
         <translation>Δημοσίευση</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="171"/>
         <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
         <translation>&lt;b&gt;1. Συλλογή προορισμού&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="184"/>
         <source>Browse...</source>
         <translation>Αναζήτηση…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="234"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="192"/>
         <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
         <translation>&lt;b&gt;2. Όνομα αρχείου πακέτου&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="236"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="194"/>
         <source>e.g. zones_bruxelles</source>
         <translation>π.χ. ζωνες_βρυξελλες</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="239"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="197"/>
         <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
         <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;προορισμος&amp;gt;/filter_mate/favorites/&amp;lt;ονομα&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="202"/>
         <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
         <translation>&lt;b&gt;3. Μεταδεδομένα συλλογής&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
         <source>Collection display name</source>
         <translation>Όνομα εμφάνισης συλλογής</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="209"/>
         <source>Name:</source>
         <translation>Όνομα:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="212"/>
         <source>Author / organisation</source>
         <translation>Συντάκτης / οργανισμός</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="255"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
         <source>Author:</source>
         <translation>Συντάκτης:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="258"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="216"/>
         <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
         <translation>π.χ. CC-BY-4.0, MIT, Ιδιοταγής</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="259"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="217"/>
         <source>License:</source>
         <translation>Άδεια:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="262"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="220"/>
         <source>Comma-separated tags</source>
         <translation>Ετικέτες χωρισμένες με κόμμα</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="263"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="221"/>
         <source>Tags:</source>
         <translation>Ετικέτες:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="266"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="224"/>
         <source>https://...</source>
         <translation>https://…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="267"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="225"/>
         <source>Homepage:</source>
         <translation>Αρχική σελίδα:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="271"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="229"/>
         <source>Short description (optional, supports plain text)</source>
         <translation>Σύντομη περιγραφή (προαιρετικό, απλό κείμενο)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="232"/>
         <source>Description:</source>
         <translation>Περιγραφή:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="286"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
         <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
         <translation>&lt;b&gt;4. Αγαπημένα προς συμπερίληψη&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="248"/>
         <source>Select all</source>
         <translation>Επιλογή όλων</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="293"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
         <source>Select none</source>
         <translation>Αποεπιλογή όλων</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="332"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
         <source>New collection in Resource Sharing root...</source>
         <translation>Νέα συλλογή στη ρίζα του Resource Sharing…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="336"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="294"/>
         <source>Custom directory...</source>
         <translation>Προσαρμοσμένος κατάλογος…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="410"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="368"/>
         <source>Will be created under the Resource Sharing root.</source>
         <translation>Θα δημιουργηθεί κάτω από τη ρίζα του Resource Sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="415"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="373"/>
         <source>Click &apos;Browse...&apos; to choose a directory.</source>
-        <translation>Κάντε κλικ στο &apos;Αναζήτηση…&apos; για να επιλέξετε έναν κατάλογο.</translation>
+        <translation>Κάντε κλικ στο 'Αναζήτηση…' για να επιλέξετε έναν κατάλογο.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="421"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="379"/>
         <source>Choose a collection directory</source>
         <translation>Επιλέξτε κατάλογο συλλογής</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="472"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="430"/>
         <source>{0} / {1} selected</source>
         <translation>{0} / {1} επιλεγμένα</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="480"/>
         <source>Cannot create collection</source>
         <translation>Αδύνατη η δημιουργία συλλογής</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="480"/>
         <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
-        <translation>Δεν βρέθηκε η ρίζα του Resource Sharing. Χρησιμοποιήστε &apos;Αναζήτηση…&apos; για να επιλέξετε κατάλογο.</translation>
+        <translation>Δεν βρέθηκε η ρίζα του Resource Sharing. Χρησιμοποιήστε 'Αναζήτηση…' για να επιλέξετε κατάλογο.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="497"/>
         <source>Choose a directory</source>
         <translation>Επιλέξτε κατάλογο</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="497"/>
         <source>Click &apos;Browse...&apos; to pick a target directory.</source>
-        <translation>Κάντε κλικ στο &apos;Αναζήτηση…&apos; για να επιλέξετε κατάλογο προορισμού.</translation>
+        <translation>Κάντε κλικ στο 'Αναζήτηση…' για να επιλέξετε κατάλογο προορισμού.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="696"/>
         <source>No favorites selected</source>
         <translation>Δεν επιλέχθηκαν αγαπημένα</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="696"/>
         <source>Select at least one favorite to publish.</source>
         <translation>Επιλέξτε τουλάχιστον ένα αγαπημένο προς δημοσίευση.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="729"/>
         <source>Publish failed</source>
         <translation>Αποτυχία δημοσίευσης</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="729"/>
         <source>Unknown error.</source>
         <translation>Άγνωστο σφάλμα.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="727"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="736"/>
         <source>Published {0} favorite(s) to:
 
 &lt;code&gt;{1}&lt;/code&gt;</source>
@@ -2272,67 +2969,92 @@ Continue?</source>
 &lt;code&gt;{1}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="731"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="740"/>
         <source>Collection manifest updated:
 &lt;code&gt;{0}&lt;/code&gt;</source>
         <translation>Το μανιφέστο της συλλογής ενημερώθηκε:
 &lt;code&gt;{0}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="734"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="743"/>
         <source>Publish succeeded</source>
         <translation>Η δημοσίευση ολοκληρώθηκε</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Remote repos unavailable</source>
         <translation>Απομακρυσμένα αποθετήρια μη διαθέσιμα</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Remote repo manager is not initialized.</source>
         <translation>Ο διαχειριστής απομακρυσμένων αποθετηρίων δεν έχει αρχικοποιηθεί.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="632"/>
         <source>Publishing to &lt;b&gt;{0}&lt;/b&gt; failed.</source>
         <translation>Η δημοσίευση στο &lt;b&gt;{0}&lt;/b&gt; απέτυχε.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="642"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
         <source>Open clone...</source>
         <translation>Άνοιγμα κλώνου…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="653"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="648"/>
         <source>Wrote bundle to:</source>
         <translation>Πακέτο γράφτηκε στο:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="651"/>
         <source>Pushed commit &lt;code&gt;{0}&lt;/code&gt; to &lt;b&gt;{1}&lt;/b&gt;.</source>
         <translation>Το commit &lt;code&gt;{0}&lt;/code&gt; προωθήθηκε στο &lt;b&gt;{1}&lt;/b&gt;.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
         <source>No git_url configured — bundle written locally. Push manually via your own tooling.</source>
         <translation>Δεν έχει ρυθμιστεί git_url — πακέτο γράφτηκε τοπικά. Προωθήστε χειροκίνητα με τα δικά σας εργαλεία.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="666"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
         <source>Nothing to commit — bundle content unchanged.</source>
         <translation>Τίποτα για commit — το περιεχόμενο του πακέτου είναι αμετάβλητο.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="587"/>
+        <source>Publishing to {0}...</source>
+        <translation>Δημοσίευση στο {0}...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="587"/>
+        <source>Cancel</source>
+        <translation>Ακύρωση</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="591"/>
+        <source>Publishing</source>
+        <translation>Δημοσίευση</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="685"/>
+        <source>Publish in progress</source>
+        <translation>Δημοσίευση σε εξέλιξη</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="685"/>
+        <source>A publish is still running in the background. Wait for it to finish before starting another one.</source>
+        <translation>Μια δημοσίευση εκτελείται ακόμη στο παρασκήνιο. Περιμένετε να ολοκληρωθεί πριν ξεκινήσετε άλλη.</translation>
     </message>
 </context>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="179"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="193"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="211"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="225"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -2340,192 +3062,192 @@ Continue?</source>
 <context>
     <name>QFieldCloudPushDialog</name>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="102"/>
         <source>Export to QFieldCloud</source>
         <translation>Export to QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
         <source>Active Filter</source>
         <translation>Active Filter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="120"/>
         <source>No active filter</source>
         <translation>No active filter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="121"/>
         <source>Filter:</source>
         <translation>Filter:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="123"/>
         <source>0 layers</source>
         <translation>0 layers</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
         <source>Layers:</source>
         <translation>Layers:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="130"/>
         <source>QFieldCloud Project</source>
         <translation>QFieldCloud Project</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="135"/>
         <source>Project name:</source>
         <translation>Project name:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="139"/>
         <source>Description:</source>
         <translation>Περιγραφή:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="143"/>
         <source>Create new</source>
         <translation>Create new</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="144"/>
         <source>Update existing:</source>
         <translation>Update existing:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="148"/>
         <source>Mode:</source>
         <translation>Mode:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="158"/>
         <source>Layer Modes</source>
         <translation>Layer Modes</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="163"/>
         <source>Layer</source>
         <translation>Επίπεδο</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="163"/>
         <source>Mode</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="184"/>
         <source>Export</source>
         <translation>Εξαγωγή</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="209"/>
         <source>{0} layers ({1} features)</source>
         <translation>{0} layers ({1} features)</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="217"/>
         <source>{0} layers (no filter active)</source>
         <translation>{0} layers (no filter active)</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="290"/>
         <source>Missing Name</source>
         <translation>Missing Name</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="290"/>
         <source>Please enter a project name.</source>
         <translation>Please enter a project name.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="297"/>
         <source>Not Connected</source>
         <translation>Not Connected</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="297"/>
         <source>QFieldCloud is not connected. Please configure credentials first.</source>
         <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="365"/>
         <source>No Layers</source>
         <translation>No Layers</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="365"/>
         <source>No valid layers to export.</source>
         <translation>No valid layers to export.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="403"/>
         <source>Export Error</source>
         <translation>Export Error</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="393"/>
         <source>Failed to export layer &apos;{0}&apos;: {1}</source>
-        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+        <translation>Failed to export layer '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="403"/>
         <source>GPKG export failed: {0}</source>
         <translation>GPKG export failed: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="420"/>
         <source>Push complete!</source>
         <translation>Push complete!</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Project successfully pushed to QFieldCloud!</source>
         <translation>Project successfully pushed to QFieldCloud!</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Project: {0}</source>
         <translation>Project: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Files: {0}</source>
         <translation>Files: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Duration: {0:.1f}s</source>
         <translation>Duration: {0:.1f}s</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>URL: {0}</source>
         <translation>URL: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="438"/>
         <source>Warnings:</source>
         <translation>Warnings:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="440"/>
         <source>Push Complete</source>
         <translation>Push Complete</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="450"/>
         <source>Error: {0}</source>
         <translation>Error: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="461"/>
         <source>Push Failed</source>
         <translation>Push Failed</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="461"/>
         <source>Push failed:
 
 {0}</source>
@@ -2690,82 +3412,248 @@ Continue?</source>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="652"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="711"/>
         <source>Type to filter...</source>
         <translation>Πληκτρολογήστε για φιλτράρισμα...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="720"/>
         <source>Select All</source>
         <translation>Επιλογή όλων</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="722"/>
         <source>Select All (non subset)</source>
         <translation>Επιλογή όλων (μη υποσύνολο)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="724"/>
         <source>Select All (subset)</source>
         <translation>Επιλογή όλων (υποσύνολο)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="667"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="726"/>
         <source>De-select All</source>
         <translation>Αποεπιλογή όλων</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="669"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="728"/>
         <source>De-select All (non subset)</source>
         <translation>Αποεπιλογή όλων (μη υποσύνολο)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="671"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="730"/>
         <source>De-select All (subset)</source>
         <translation>Αποεπιλογή όλων (υποσύνολο)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1329"/>
+        <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
+        <translation>Εμφανίζονται οι πρώτες {0} οντότητες ταξινομημένες κατά τιμή εμφάνισης. Πληκτρολογήστε στο φίλτρο κειμένου για αναζήτηση σε όλο το επίπεδο· η «Επιλογή όλων» φορτώνει την πλήρη λίστα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1337"/>
+        <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
+        <translation>Εμφανίζονται {0} οντότητες του επιπέδου, ταξινομημένες κατά τιμή εμφάνισης. Πληκτρολογήστε στο φίλτρο κειμένου για αναζήτηση σε όλο το επίπεδο· η «Επιλογή όλων» φορτώνει την πλήρη λίστα.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1344"/>
+        <source>Search results for &quot;{0}&quot; over the whole layer.</source>
+        <translation>Αποτελέσματα αναζήτησης για «{0}» σε ολόκληρο το επίπεδο.</translation>
     </message>
 </context>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="261"/>
         <source>Select All</source>
         <translation>Επιλογή όλων</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="263"/>
         <source>De-select All</source>
         <translation>Αποεπιλογή όλων</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="265"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Επιλογή όλων των επιπέδων κατά τύπο γεωμετρίας (Γραμμές)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="267"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Αποεπιλογή όλων των επιπέδων κατά τύπο γεωμετρίας (Γραμμές)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="269"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Επιλογή όλων των επιπέδων κατά τύπο γεωμετρίας (Σημεία)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="230"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="271"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Αποεπιλογή όλων των επιπέδων κατά τύπο γεωμετρίας (Σημεία)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="232"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="273"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Επιλογή όλων των επιπέδων κατά τύπο γεωμετρίας (Πολύγωνα)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="234"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="275"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Αποεπιλογή όλων των επιπέδων κατά τύπο γεωμετρίας (Πολύγωνα)</translation>
+    </message>
+</context>
+<context>
+    <name>RangeHistogramWidget</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="240"/>
+        <source>Value range histogram</source>
+        <translation>Ιστόγραμμα εύρους τιμών</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="241"/>
+        <source>Drag the handles, or click, to choose the range of values to keep</source>
+        <translation>Σύρετε τις λαβές ή κάντε κλικ για να επιλέξετε το εύρος τιμών που θα διατηρηθεί</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="329"/>
+        <source>No histogram</source>
+        <translation>Χωρίς ιστόγραμμα</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="358"/>
+        <source>Kept values from {0} to {1}</source>
+        <translation>Τιμές που διατηρούνται από {0} έως {1}</translation>
+    </message>
+</context>
+<context>
+    <name>RasterExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="288"/>
+        <source>Band</source>
+        <translation>Κανάλι</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="291"/>
+        <source>Band whose values are selected</source>
+        <translation>Κανάλι του οποίου οι τιμές επιλέγονται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="317"/>
+        <source>PIXEL VALUE</source>
+        <translation>ΤΙΜΗ ΕΙΚΟΝΟΣΤΟΙΧΕΙΟΥ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="324"/>
+        <source>Pixel value of the current band</source>
+        <translation>Τιμή εικονοστοιχείου του τρέχοντος καναλιού</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="335"/>
+        <source>Last {0} values picked</source>
+        <translation>Τελευταίες {0} τιμές που επιλέχθηκαν</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="337"/>
+        <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
+        <translation>Κάντε κλικ στον χάρτη με τον επιλογέα εικονοστοιχείων. Το Ctrl+κλικ επεκτείνει το εύρος μέχρι την τιμή.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="346"/>
+        <source>VALUE RANGE</source>
+        <translation>ΕΥΡΟΣ ΤΙΜΩΝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Min</source>
+        <translation>Ελάχ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Lowest value kept</source>
+        <translation>Χαμηλότερη τιμή που διατηρείται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Max</source>
+        <translation>Μέγ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Highest value kept</source>
+        <translation>Υψηλότερη τιμή που διατηρείται</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <source>Preview on the map (hide the other pixels)</source>
+        <translation>Προεπισκόπηση στον χάρτη (απόκρυψη των υπόλοιπων εικονοστοιχείων)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="378"/>
+        <source>CLASSES</source>
+        <translation>ΚΛΑΣΕΙΣ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
+        <source>Raster classes</source>
+        <translation>Κλάσεις ράστερ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
+        <source>All</source>
+        <translation>Όλες</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="387"/>
+        <source>None</source>
+        <translation>Καμία</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="397"/>
+        <source>RASTER EXPRESSION</source>
+        <translation>ΕΚΦΡΑΣΗ ΡΑΣΤΕΡ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="401"/>
+        <source>Raster calculator expression; a pixel is kept where it is not 0</source>
+        <translation>Έκφραση υπολογιστή ράστερ· ένα εικονοστοιχείο διατηρείται όπου δεν είναι 0</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="402"/>
+        <source>Raster expression</source>
+        <translation>Έκφραση ράστερ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="410"/>
+        <source>Use the range</source>
+        <translation>Χρήση του εύρους</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="411"/>
+        <source>Write the current value range as an expression</source>
+        <translation>Εγγραφή του τρέχοντος εύρους τιμών ως έκφραση</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="483"/>
+        <source>Selected pixels: {0}</source>
+        <translation>Επιλεγμένα εικονοστοιχεία: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="730"/>
+        <source>Set a value range first</source>
+        <translation>Ορίστε πρώτα ένα εύρος τιμών</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="747"/>
+        <source>NoData</source>
+        <translation>NoData</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="763"/>
+        <source>Last values:</source>
+        <translation>Τελευταίες τιμές:</translation>
     </message>
 </context>
 <context>
@@ -2817,140 +3705,160 @@ Continue?</source>
 <context>
     <name>SharedFavoritesPickerDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="55"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="77"/>
         <source>FilterMate — Shared Favorites</source>
         <translation>FilterMate — Κοινόχρηστα αγαπημένα</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="63"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="85"/>
         <source>&lt;b&gt;Shared Favorites&lt;/b&gt; — discovered from QGIS Resource Sharing collections</source>
         <translation>&lt;b&gt;Κοινόχρηστα αγαπημένα&lt;/b&gt; — εντοπίστηκαν από συλλογές QGIS Resource Sharing</translation>
     </message>
     <message>
         <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="76"/>
         <source>Search by name, description, collection, or tags...</source>
-        <translation>Αναζήτηση με όνομα, περιγραφή, συλλογή ή ετικέτες…</translation>
+        <translation type="obsolete">Αναζήτηση με όνομα, περιγραφή, συλλογή ή ετικέτες…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="98"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="129"/>
         <source>Select a shared favorite to preview.</source>
         <translation>Επιλέξτε ένα κοινόχρηστο αγαπημένο για προεπισκόπηση.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="114"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="145"/>
         <source>Rescan</source>
         <translation>Επανασάρωση</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="118"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="149"/>
         <source>Fork to my project</source>
         <translation>Fork στο έργο μου</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="124"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="155"/>
         <source>Close</source>
         <translation>Κλείσιμο</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="139"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="211"/>
         <source>No shared collections found. Subscribe to a Resource Sharing repository that ships a &lt;code&gt;filter_mate/favorites&lt;/code&gt; folder, or drop a &lt;code&gt;.fmfav.json&lt;/code&gt; bundle in your resource_sharing collections directory.</source>
         <translation>Δεν βρέθηκαν κοινόχρηστες συλλογές. Εγγραφείτε σε αποθετήριο Resource Sharing με φάκελο &lt;code&gt;filter_mate/favorites&lt;/code&gt;, ή τοποθετήστε ένα πακέτο &lt;code&gt;.fmfav.json&lt;/code&gt; στον κατάλογο συλλογών resource_sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="147"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="219"/>
         <source>{0} favorite(s) across {1} collection(s): {2}</source>
         <translation>{0} αγαπημένα σε {1} συλλογές: {2}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="160"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="248"/>
         <source>Collection: {0}</source>
         <translation>Συλλογή: {0}</translation>
     </message>
     <message>
         <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="172"/>
         <source>No shared favorites match your search.</source>
-        <translation>Κανένα κοινόχρηστο αγαπημένο δεν ταιριάζει στην αναζήτησή σας.</translation>
+        <translation type="obsolete">Κανένα κοινόχρηστο αγαπημένο δεν ταιριάζει στην αναζήτησή σας.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="194"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="280"/>
         <source>&lt;b&gt;{0}&lt;/b&gt; — from &lt;i&gt;{1}&lt;/i&gt;</source>
         <translation>&lt;b&gt;{0}&lt;/b&gt; — από &lt;i&gt;{1}&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="208"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="294"/>
         <source>&lt;b&gt;Expression&lt;/b&gt;</source>
         <translation>&lt;b&gt;Έκφραση&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="213"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="299"/>
         <source>&lt;b&gt;Remote layers&lt;/b&gt;</source>
         <translation>&lt;b&gt;Απομακρυσμένα επίπεδα&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="313"/>
         <source>&lt;b&gt;Tags:&lt;/b&gt; {0}</source>
         <translation>&lt;b&gt;Ετικέτες:&lt;/b&gt; {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="234"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="320"/>
         <source>&lt;b&gt;Provenance&lt;/b&gt;</source>
         <translation>&lt;b&gt;Προέλευση&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="236"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="322"/>
         <source>Author: {0}</source>
         <translation>Συντάκτης: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="238"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="324"/>
         <source>License: {0}</source>
         <translation>Άδεια: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="340"/>
         <source>Fork shared favorite</source>
         <translation>Fork κοινόχρηστου αγαπημένου</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="340"/>
         <source>Name in your project:</source>
         <translation>Όνομα στο έργο σας:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="354"/>
         <source>Fork successful</source>
         <translation>Επιτυχές fork</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="354"/>
         <source>&apos;{0}&apos; was added to your favorites.</source>
         <translation>Το «{0}» προστέθηκε στα αγαπημένα σας.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="360"/>
         <source>Fork failed</source>
         <translation>Αποτυχία fork</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="360"/>
         <source>Could not add the shared favorite to your project.</source>
         <translation>Αδύνατη η προσθήκη του κοινόχρηστου αγαπημένου στο έργο σας.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="100"/>
+        <source>Search by name, description, collection, author, or tags...</source>
+        <translation>Αναζήτηση κατά όνομα, περιγραφή, συλλογή, συγγραφέα ή ετικέτες...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="107"/>
+        <source>Author:</source>
+        <translation>Συγγραφέας:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="180"/>
+        <source>All authors</source>
+        <translation>Όλοι οι συγγραφείς</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="262"/>
+        <source>No shared favorites match your filters.</source>
+        <translation>Κανένα κοινόχρηστο αγαπημένο δεν ταιριάζει με τα φίλτρα σας.</translation>
     </message>
 </context>
 <context>
     <name>SimpleConfigDialog</name>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="468"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
         <source>Reset to Defaults</source>
         <translation>Επαναφορά στις προεπιλογές</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="500"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="502"/>
         <source>Validation Error</source>
         <translation>Σφάλμα επικύρωσης</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="500"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="502"/>
         <source>Please fix the following errors:
 
 </source>
@@ -2959,12 +3867,12 @@ Continue?</source>
 </translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="511"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset Configuration</source>
         <translation>Επαναφορά διαμόρφωσης</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="511"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Επαναφορά όλων των τιμών στις προεπιλογές;</translation>
     </message>
@@ -2972,12 +3880,12 @@ Continue?</source>
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="151"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="208"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - Προειδοποίηση τύπου PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="155"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="212"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Αναντιστοιχία τύπου στο φίλτρο: {warning_detail}...</translation>
     </message>
@@ -2985,12 +3893,12 @@ Continue?</source>
 <context>
     <name>TabbedConfigDialog</name>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="568"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="570"/>
         <source>Reset to Defaults</source>
         <translation>Επαναφορά στις προεπιλογές</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="588"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="590"/>
         <source>General</source>
         <translation>Γενικά</translation>
     </message>
@@ -3010,7 +3918,7 @@ Continue?</source>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="291"/>
         <source>Filter applied to &apos;{layer_name}&apos;: {count} features</source>
-        <translation>Φίλτρο εφαρμόστηκε στο &apos;{layer_name}&apos;: {count} οντότητες</translation>
+        <translation>Φίλτρο εφαρμόστηκε στο '{layer_name}': {count} οντότητες</translation>
     </message>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="296"/>
@@ -3020,25 +3928,25 @@ Continue?</source>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="312"/>
         <source>Filter cleared for &apos;{layer_name}&apos;: {count} features visible</source>
-        <translation>Φίλτρο αφαιρέθηκε για &apos;{layer_name}&apos;: {count} ορατές οντότητες</translation>
+        <translation>Φίλτρο αφαιρέθηκε για '{layer_name}': {count} ορατές οντότητες</translation>
     </message>
 </context>
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="909"/>
+        <location filename="../adapters/task_builder.py" line="912"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Δεν επιλέχθηκε οντότητα! Το widget επιλογής έχασε την οντότητα. Επιλέξτε ξανά μια οντότητα.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1027"/>
+        <location filename="../adapters/task_builder.py" line="1030"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Το επιλεγμένο επίπεδο δεν είναι έγκυρο ή η πηγή του δεν βρέθηκε. Η λειτουργία ακυρώθηκε.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1042"/>
+        <location filename="../adapters/task_builder.py" line="1045"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
-        <translation>Το επίπεδο &apos;{0}&apos; δεν έχει αρχικοποιηθεί ακόμη. Δοκιμάστε να επιλέξετε άλλο επίπεδο και μετά επιστρέψτε σε αυτό.</translation>
+        <translation>Το επίπεδο '{0}' δεν έχει αρχικοποιηθεί ακόμη. Δοκιμάστε να επιλέξετε άλλο επίπεδο και μετά επιστρέψτε σε αυτό.</translation>
     </message>
 </context>
 <context>
@@ -3057,7 +3965,7 @@ Continue?</source>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="556"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
         <source>Explore ...</source>
         <translation>Εξερεύνηση ...</translation>
     </message>
@@ -3067,7 +3975,7 @@ Continue?</source>
     <message>
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
-        <translation type="obsolete">Language changed to &apos;{0}&apos;.</translation>
+        <translation type="obsolete">Language changed to '{0}'.</translation>
     </message>
 </context>
 </TS>
