@@ -32,6 +32,7 @@ from qgis.core import (
 
 app = QgsApplication([], False)
 app.initQgis()
+sys.path.append(os.path.join(os.environ.get('QGIS_PREFIX_PATH', ''), 'python', 'plugins'))  # processing
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(os.path.dirname(HERE)))  # parent of the plugin folder
@@ -376,10 +377,37 @@ def s12_refilter_and_operators():
     check('preview cleared', len(cur_mnt.renderer().rasterTransparency().transparentSingleValuePixelList()) == 0)
 
 
+# --- 13. Processing algorithm ---------------------------------------------------
+def s13_processing():
+    import processing  # noqa: F401 - QGIS plugin
+    from processing.core.Processing import Processing
+    from filter_mate.processing.provider import FilterMateProcessingProvider
+    Processing.initialize()
+    registry_ = QgsApplication.processingRegistry()
+    if registry_.providerById('filtermate') is None:
+        registry_.addProvider(FilterMateProcessingProvider())
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    cur_lhd = project.mapLayersByName('lhd')[0]
+    cur_par = project.mapLayersByName('parcelle')[0]
+    cur_bat.selectByIds([f.id() for f in cur_bat.getFeatures(QgsFeatureRequest().setLimit(5))])
+    result = processing.run('filtermate:cross_filter', {
+        'SOURCE': cur_bat, 'SELECTED_ONLY': True, 'TARGETS': [cur_mnt, cur_lhd, cur_par],
+        'PREDICATES': [0], 'BUFFER': 2.0, 'COVERAGE': 0.0, 'OPERATOR': 0})
+    check('processing cross_filter: 3 targets', len(result['LAYERS_FILTERED']) == 3 and not result['LAYERS_FAILED'], str(result))
+    check('processing clipped raster + cloud', cur_mnt.source().endswith('.vrt') and cur_lhd.source().endswith('.copc.laz'))
+    # The 5 buildings may touch no parcel: an empty result (1 = 0) is a valid filter too.
+    check('processing filtered parcels', cur_par.subsetString().startswith('"fid" IN') or cur_par.subsetString() == '1 = 0',
+          cur_par.subsetString()[:50])
+    cur_par.setSubsetString('')
+    cur_bat.removeSelection()
+    registry().restore_all(project)
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
                  s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites,
-                 s12_refilter_and_operators):
+                 s12_refilter_and_operators, s13_processing):
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 
