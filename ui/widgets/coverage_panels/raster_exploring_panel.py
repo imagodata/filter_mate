@@ -356,6 +356,7 @@ class RasterExploringPanel(QWidget):
         self._pixel_history_label.setToolTip(self.tr("Last {0} values picked").format(HISTORY_SIZE))
         group_layout.addWidget(self._pixel_history_label)
         self._hover_label = QLabel("", group)
+        self._hover_label.setWordWrap(True)  # a long value line must not widen the panel past the dock
         self._hover_label.setToolTip(self.tr("Value of the current band under the cursor"))
         self._hover_label.setVisible(False)
         group_layout.addWidget(self._hover_label)

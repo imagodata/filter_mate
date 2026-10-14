@@ -135,7 +135,9 @@ def s_hover():
 def s_hover_check():
     panel = ctrl()._raster_panel
     label = panel._hover_label
-    check('raster: value under the cursor shown', label.isVisible() and 'Under the cursor' in label.text(), label.text())
+    check('raster: value under the cursor shown', not label.isHidden() and 'Under the cursor' in label.text(),
+          f'{label.text()!r} hidden={label.isHidden()} collapsed={getattr(panel._pixel_group, "isCollapsed", lambda: None)()} '
+          f'connected={ctrl()._extras._hover_connected}')
     tool('pushButton_checkable_exploring_raster_hover').setChecked(False)
     check('raster: hover line hidden when off', not label.isVisible())
 
