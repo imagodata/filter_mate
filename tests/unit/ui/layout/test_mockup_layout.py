@@ -73,3 +73,8 @@ def test_mockup_stylesheet_has_no_unknown_spacing_token():
     qss = (_ROOT / "resources" / "styles" / "mockup.qss").read_text(encoding="utf-8")
     left = re.findall(r"\{fm_[a-z_]+\}", design.apply_tokens(qss, dark=False))
     assert left == []
+
+
+def test_expanded_list_group_takes_the_free_height():
+    assert layout.list_group_stretch(True) == (1, 0)
+    assert layout.list_group_stretch(False) == (0, 1)

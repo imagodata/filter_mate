@@ -857,8 +857,21 @@ class CoverageModeController(BaseController):
         if self._pixel_tool is None:
             self._pixel_tool = PixelPickerTool(canvas)
             self._pixel_tool.picked.connect(self._on_pixel_picked)
+            self._pixel_tool.activated.connect(lambda: self._show_picker_state(True))
+            self._pixel_tool.deactivated.connect(lambda: self._show_picker_state(False))
         self._previous_map_tool = canvas.mapTool()
         canvas.setMapTool(self._pixel_tool)
+
+    def _show_picker_state(self, active: bool) -> None:
+        """Pipette button held down and pixel group open while the picker is on the map."""
+        try:
+            button = getattr(self.dockwidget, 'pushButton_exploring_identify', None)
+            if button is not None:
+                button.setDown(bool(active))
+            if self._raster_panel is not None and hasattr(self._raster_panel, 'show_picker_active'):
+                self._raster_panel.show_picker_active(bool(active))
+        except RuntimeError:
+            pass  # deleted (plugin closing)
 
     def _deactivate_pixel_tool(self) -> None:
         iface = self._iface()

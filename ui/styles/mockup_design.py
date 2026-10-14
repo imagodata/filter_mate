@@ -131,6 +131,11 @@ ICON_BODIES: Dict[str, str] = {
     'zip': '<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M12 3v2M12 7v2M12 11v2"/>'
            '<rect x="10" y="13" width="4" height="4"/>',
     'centroid': '<rect x="4" y="4" width="16" height="16" rx="1"/><circle cx="12" cy="12" r="2" fill="currentColor"/>',
+    'pixel_picker': '<rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>'
+                    '<rect x="9" y="9" width="6" height="6" fill="currentColor"/>',
+    'preview': '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    'live_preview': '<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="11.5" cy="11.5" r="3.5"/>'
+                    '<path d="M14 14l2.5 2.5"/>',
     'star': '<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.4 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z" fill="currentColor"/>',
 }
 
@@ -169,6 +174,7 @@ DANGER_ICONS = frozenset({'reset_all'})
 
 FONT_FILES = ('IBMPlexSans-Regular.ttf', 'IBMPlexSans-SemiBold.ttf', 'IBMPlexMono-Regular.ttf')
 _FONTS_REGISTERED: Dict[str, bool] = {}
+_FONTS_APP_PROPERTY = 'filtermate_plex_fonts'
 
 
 def register_fonts() -> bool:
@@ -181,17 +187,49 @@ def register_fonts() -> bool:
         return _FONTS_REGISTERED['done']
     ok = False
     try:
+        from qgis.PyQt.QtCore import QCoreApplication
+        app = QCoreApplication.instance()
+        # Plugin reloads re-import this module: the application keeps the answer, so the
+        # fonts are added once per QGIS session (they are then visible to the whole session).
+        if app is not None and app.property(_FONTS_APP_PROPERTY) is not None:
+            _FONTS_REGISTERED['done'] = bool(app.property(_FONTS_APP_PROPERTY))
+            return _FONTS_REGISTERED['done']
+    except Exception:
+        app = None
+    try:
         import os
         from qgis.PyQt.QtGui import QFontDatabase
         folder = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'resources', 'fonts')
+        from qgis.PyQt.QtCore import QByteArray
         for name in FONT_FILES:
             path = os.path.join(folder, name)
-            if os.path.exists(path) and QFontDatabase.addApplicationFont(path) >= 0 and 'Sans' in name:
+            if not os.path.exists(path):
+                continue
+            # From the bytes: Qt 5 on Windows does not load a font from a network path
+            # (plugin folder under \\wsl.localhost or a shared drive), Qt 6 does.
+            with open(path, 'rb') as handle:
+                font_id = QFontDatabase.addApplicationFontFromData(QByteArray(handle.read()))
+            if font_id >= 0 and 'Sans' in name:
                 ok = True
     except Exception as exc:  # pragma: no cover - depends on the Qt build
         logger.debug(f"IBM Plex fonts not registered: {exc}")
     _FONTS_REGISTERED['done'] = ok
+    if app is not None:
+        app.setProperty(_FONTS_APP_PROPERTY, ok)
     return ok
+
+
+# Shared EXPLORING buttons whose icon changes with the layer kind (mockup rails);
+# a button not listed keeps its vector icon.
+KIND_BUTTON_ICONS: Dict[str, Dict[str, str]] = {
+    'raster': {
+        'pushButton_exploring_identify': 'pixel_picker',
+        'pushButton_checkable_exploring_selecting': 'preview',
+    },
+    'point_cloud': {
+        'pushButton_checkable_exploring_selecting': 'live_preview',
+    },
+}
 
 
 def tokens(dark: bool) -> Dict[str, str]:
