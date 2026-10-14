@@ -42,7 +42,7 @@ def resolve_export_folder(root: Path, subfolder: str) -> Path:
 
 
 @router.post("", response_model=OperationResult)
-async def export_layers(payload: ExportRequestBody, request: Request) -> OperationResult:
+def export_layers(payload: ExportRequestBody, request: Request) -> OperationResult:
     """Write each layer (vector, raster, point cloud) as filtered now, one file per layer."""
     try:
         folder = resolve_export_folder(request.app.state.config.export_root, payload.subfolder)

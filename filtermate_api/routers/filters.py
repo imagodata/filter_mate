@@ -57,7 +57,7 @@ def _accessor(request: Request) -> FilterMateAccessor:
 
 
 @router.post("/apply", response_model=ApplyFilterResponse)
-async def apply_filter(
+def apply_filter(
     payload: ApplyFilterRequest, request: Request
 ) -> ApplyFilterResponse:
     """Apply a QGIS filter expression to the named layer."""
@@ -89,7 +89,7 @@ async def apply_filter(
 
 
 @router.get("/status", response_model=FilterStatus)
-async def get_filter_status(request: Request) -> FilterStatus:
+def get_filter_status(request: Request) -> FilterStatus:
     """Issue #31 — return a snapshot of the session's current filter state."""
     return _accessor(request).get_filter_status()
 
@@ -101,7 +101,7 @@ class HistoryStepResponse(BaseModel):
 
 
 @router.post("/undo", response_model=HistoryStepResponse)
-async def undo_filter(request: Request) -> HistoryStepResponse:
+def undo_filter(request: Request) -> HistoryStepResponse:
     """Issue #33 — pop the last filter step from the undo stack.
 
     Returns the step we just rolled back TO. 409 when there is nothing
@@ -122,7 +122,7 @@ async def undo_filter(request: Request) -> HistoryStepResponse:
 
 
 @router.post("/redo", response_model=HistoryStepResponse)
-async def redo_filter(request: Request) -> HistoryStepResponse:
+def redo_filter(request: Request) -> HistoryStepResponse:
     """Issue #33 — re-apply the most recently undone step."""
     accessor = _accessor(request)
     step = accessor.redo_filter()
@@ -221,7 +221,7 @@ class CrossFilterRequestBody(_RelationBody):
 
 
 @router.post("/cross", response_model=CrossFilterResult)
-async def cross_filter(payload: CrossFilterRequestBody, request: Request) -> CrossFilterResult:
+def cross_filter(payload: CrossFilterRequestBody, request: Request) -> CrossFilterResult:
     """Filter layers of any kind (vector, raster, point cloud) by a source of any kind."""
     _check_relation(payload)
     result = _accessor(request).cross_filter(
@@ -245,7 +245,7 @@ class GeometryFilterRequestBody(_RelationBody):
 
 
 @router.post("/geometry", response_model=CrossFilterResult)
-async def geometry_filter(payload: GeometryFilterRequestBody, request: Request) -> CrossFilterResult:
+def geometry_filter(payload: GeometryFilterRequestBody, request: Request) -> CrossFilterResult:
     """Filter layers of any kind by a WKT geometry (an area drawn by a web client, an extent)."""
     _check_relation(payload)
     result = _accessor(request).cross_filter_by_geometry(
@@ -263,7 +263,7 @@ class PointCloudFilterRequestBody(BaseModel):
 
 
 @router.post("/point-cloud", response_model=OperationResult)
-async def point_cloud_filter(payload: PointCloudFilterRequestBody, request: Request) -> OperationResult:
+def point_cloud_filter(payload: PointCloudFilterRequestBody, request: Request) -> OperationResult:
     """Apply the same criteria to several point cloud layers."""
     if payload.criteria.is_empty():
         raise HTTPException(status_code=422, detail="Empty point cloud criteria")
@@ -281,7 +281,7 @@ class ClearFiltersRequestBody(BaseModel):
 
 
 @router.post("/clear", response_model=OperationResult)
-async def clear_filters(payload: ClearFiltersRequestBody, request: Request) -> OperationResult:
+def clear_filters(payload: ClearFiltersRequestBody, request: Request) -> OperationResult:
     """Put layers of any kind back on their original source, with no filter (undoable in the dock)."""
     result = _accessor(request).clear_filters(layers=payload.layers)
     if result.error:
@@ -290,6 +290,6 @@ async def clear_filters(payload: ClearFiltersRequestBody, request: Request) -> O
 
 
 @router.get("/state", response_model=List[FilteredLayer])
-async def filter_state(request: Request) -> List[FilteredLayer]:
+def filter_state(request: Request) -> List[FilteredLayer]:
     """Every layer FilterMate filters now: subset string and / or clipped source."""
     return _accessor(request).get_filter_state()

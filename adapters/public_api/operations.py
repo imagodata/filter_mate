@@ -521,8 +521,12 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
                 ok, path, message = _export_vector(layer, _unique_path(output_path(folder, name, extension), used),
                                                    driver, crs, project)
             elif kind is LayerKind.RASTER:
-                result = export_raster(layer, _unique_path(output_path(folder, name, '.tif'), used), raster_format,
-                                       crs, feedback=_raster_feedback(feedback))
+                block, release = _raster_feedback(feedback, index, total)
+                try:
+                    result = export_raster(layer, _unique_path(output_path(folder, name, '.tif'), used),
+                                           raster_format, crs, feedback=block)
+                finally:
+                    release()
                 ok, path, message = result.success, result.path, result.message
             elif kind is LayerKind.POINT_CLOUD:
                 path = _unique_path(output_path(folder, name, POINT_CLOUD_FORMATS[point_cloud_format]), used)
@@ -546,10 +550,34 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
     return report
 
 
-def _raster_feedback(feedback):
-    """``QgsRasterFileWriter`` only takes a ``QgsRasterBlockFeedback`` (a Processing feedback is refused)."""
+def _raster_feedback(feedback, index: int, total: int):
+    """``(QgsRasterBlockFeedback, release)`` relaying progress and cancellation to ``feedback``.
+
+    ``QgsRasterFileWriter`` refuses any other feedback type (a Processing
+    feedback raises TypeError): a block feedback forwards the write progress
+    as this layer's share of the export, and a cancel request stops the write.
+    """
     from qgis.core import QgsRasterBlockFeedback
-    return feedback if isinstance(feedback, QgsRasterBlockFeedback) else None
+    if feedback is None or isinstance(feedback, QgsRasterBlockFeedback):
+        return feedback, lambda: None
+    block = QgsRasterBlockFeedback()
+
+    def _progress(value):
+        feedback.setProgress(100.0 * (index + value / 100.0) / max(1, total))
+
+    block.progressChanged.connect(_progress)
+    if feedback.isCanceled():
+        block.cancel()
+    feedback.canceled.connect(block.cancel)
+
+    def _release():
+        for signal, slot in ((feedback.canceled, block.cancel), (block.progressChanged, _progress)):
+            try:
+                signal.disconnect(slot)
+            except (TypeError, RuntimeError):
+                pass
+
+    return block, _release
 
 
 def _export_vector(layer, path: str, driver: str, crs, project) -> Tuple[bool, str, str]:

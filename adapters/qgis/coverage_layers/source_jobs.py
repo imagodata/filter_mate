@@ -46,6 +46,7 @@ class SourceJob:
         started = time.perf_counter()
         raw = self._raw_geometry(is_canceled)
         self.raw_geometry = raw
+        self._computed = True
         self.geometry = self._buffer(raw, request)
         self.elapsed = time.perf_counter() - started
         return self.geometry
@@ -171,6 +172,9 @@ class RasterSourceJob(SourceJob):
     def _apply_clip(self, layer) -> Optional[LayerSnapshot]:
         from .target_appliers import RasterTargetJob
         from ....core.domain.cross_filter import CrossFilterRequest, TargetSpec
+        if not getattr(self, '_computed', False) and self._provider is not None:
+            # No target: the task never ran compute(), the selection is read here (main thread).
+            self.raw_geometry = self._raw_geometry(lambda: False)
         if self.raw_geometry.isEmpty() or self.before.base_provider != 'gdal':
             return None
         job = RasterTargetJob(layer, None)

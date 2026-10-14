@@ -760,13 +760,39 @@ def s22_qgis_process_loading():
           f"started={started} algorithms={count_}")
 
 
+def s23_automation_followups():
+    """Raster source alone in expression mode; raster export progress and cancellation."""
+    import processing  # noqa: F401
+    from qgis.core import QgsProcessingFeedback
+    from filter_mate.adapters.public_api import operations
+    cur_mnt = _layers('mnt')[0]
+    result = processing.run('filtermate:cross_filter_from_raster', {
+        'SOURCE': cur_mnt, 'MODE': 2, 'EXPRESSION': '"mnt@1" > 1300', 'FILTER_SOURCE': True, 'TARGETS': []})
+    check('raster source alone, expression mode: masked', cur_mnt.source().endswith('.vrt')
+          and result['OUTPUT'] == [cur_mnt.id()], cur_mnt.source()[-30:])
+    _clear(cur_mnt)
+
+    feedback = QgsProcessingFeedback()
+    progress = []
+    feedback.progressChanged.connect(progress.append)
+    report = operations.export_layers([cur_mnt], _fresh(os.path.join(EXPORTS, 'progress')), raster_format='GTiff',
+                                      feedback=feedback)
+    check('raster export reports its progress', report.ok and any(0 < p < 100 for p in progress) and progress[-1] == 100,
+          f"{len(progress)} values, last={progress[-1] if progress else None}")
+    feedback = QgsProcessingFeedback()
+    feedback.progressChanged.connect(lambda value: value > 5 and feedback.cancel())
+    report = operations.export_layers([cur_mnt], _fresh(os.path.join(EXPORTS, 'cancel')), raster_format='GTiff',
+                                      feedback=feedback)
+    check('raster export stops on cancel', not report.ok and report.failed.get('mnt') == 'canceled', str(report.failed))
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
                  s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites,
                  s12_refilter_and_operators, s13_processing, s14_raster_selection_replay,
                  s15_rest_api_accessor, s16_undo_keeps_newer_changes, s17_processing_algorithms,
                  s18_apply_favorite_headless, s19_models, s20_public_api, s21_rest_accessor_v5,
-                 s22_qgis_process_loading):
+                 s22_qgis_process_loading, s23_automation_followups):
     only = [name for name in os.environ.get('FM5_ONLY', '').split(',') if name]
     if only and not any(scenario.__name__.startswith(name + '_') for name in only):
         continue  # FM5_ONLY=s13,s16 runs a subset (quick iterations)

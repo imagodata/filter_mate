@@ -21,6 +21,12 @@ All notable changes to FilterMate will be documented in this file.
   - Python API: `cross_filter` (source of any kind), `cross_filter_by_geometry`, `filter_point_clouds`, `clear_filters`, `export_layers`, `list_favorites`, `apply_favorite`, `get_filter_state`, signal `operation_completed`.
   - REST API: `POST /filters/cross` accepts raster (`raster_selection`) and point cloud (`point_cloud_criteria`) sources; new `POST /filters/geometry`, `POST /filters/point-cloud`, `POST /filters/clear`, `GET /filters/state`, `POST /export` (written below a configured export root only); `POST /favorites/{id}/apply` replays raster / point cloud clips.
 
+### Fixed
+
+- A raster source filtered alone (no target layer) in expression mode, or a multiband raster, was not masked: its selection is now read when the source is applied (dock and automation).
+- REST routes no longer block the API while QGIS works: they run in FastAPI's thread pool, so a long export does not freeze the other requests.
+- Raster exports from Processing report their progress and stop when the algorithm is canceled.
+
 ### Changed
 
 - `filtermate:batch_filter` runs on the main thread (`setSubsetString` is not thread-safe).
