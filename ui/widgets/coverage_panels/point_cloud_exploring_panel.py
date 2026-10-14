@@ -70,6 +70,7 @@ MAX_RETURN_NUMBERS = 15
 Z_DECIMALS = 3
 INTENSITY_DECIMALS = 0
 DEFAULT_HAG_MIN = 2.0
+SPIN_MIN_WIDTH = 64
 DEBOUNCE_MS = 250
 
 # Fixed swatch per class: ground brown, vegetation greens, building red,
@@ -403,6 +404,7 @@ class PointCloudExploringPanel(QWidget):
         layout.addWidget(self._current_filter_label)
         layout.addStretch()
         self.set_current_subset("")
+        self._setup_exclusive_groups()  # last: criteria() reads widgets built above
 
     def _build_classes_group(self) -> Any:
         self._classes_group = self._make_group(self.tr("CLASSES"), "mGroupBox_point_cloud_classes", checked=True)
@@ -424,7 +426,8 @@ class PointCloudExploringPanel(QWidget):
             button = QPushButton(preset_titles.get(name, name), self._classes_group)
             button.setToolTip(self.tr("Check only these classes"))
             button.clicked.connect(lambda _checked=False, n=name: self._apply_preset(n))
-            presets.addWidget(button, index // 3, index % 3)
+            # Two columns: three made the panel wider than a 440 px dock (the EXPLORING area scrolled sideways).
+            presets.addWidget(button, index // 2, index % 2)
             self._preset_buttons[name] = button
         group_layout.addLayout(presets)
 
@@ -437,9 +440,13 @@ class PointCloudExploringPanel(QWidget):
         buttons_row.addWidget(button_none)
         buttons_row.addStretch()
         group_layout.addLayout(buttons_row)
+        # FilterMate 5 design: the class list only (the presets stay usable from the code / state).
+        for button in (*self._preset_buttons.values(), button_all, button_none):
+            button.setVisible(False)
+        group_layout.setSpacing(0)
 
         self._classes_list = QListWidget(self._classes_group)
-        self._classes_list.setMaximumHeight(200)
+        self._classes_list.setMaximumHeight(300)  # the whole ASPRS list, as in the mockup
         self._classes_list.setAccessibleName(self.tr("Point classes"))
         self._classes_list.itemChanged.connect(self._changed)
         group_layout.addWidget(self._classes_list)
@@ -453,6 +460,8 @@ class PointCloudExploringPanel(QWidget):
         spin.setToolTip(tip)
         spin.setAccessibleName(tip)
         spin.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        # The size hint covers the widest bound (±1e9): far too wide for a 440 px dock.
+        spin.setMinimumWidth(SPIN_MIN_WIDTH)
         return spin
 
     def _build_ranges_group(self) -> Any:
@@ -513,9 +522,12 @@ class PointCloudExploringPanel(QWidget):
             self._hag_layer_combo = QComboBox(group)
         self._hag_layer_combo.setToolTip(self.tr("Digital terrain model the height is measured from"))
         self._hag_layer_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        grid.addWidget(self._hag_check, 3, 0)
-        grid.addWidget(self._hag_spin, 3, 1)
-        grid.addWidget(self._hag_layer_combo, 3, 2, 1, 2)
+        self._hag_layer_combo.setMinimumWidth(SPIN_MIN_WIDTH)
+        self._hag_spin.setMinimumWidth(SPIN_MIN_WIDTH)
+        # Own row: the long check box label would widen the first column of the grid.
+        grid.addWidget(self._hag_check, 3, 0, 1, 4)
+        grid.addWidget(self._hag_spin, 4, 1)
+        grid.addWidget(self._hag_layer_combo, 4, 2, 1, 2)
         self._hag_tooltip = self.tr("Keep the points at least this high above the terrain model")
         self._hag_check.setToolTip(self._hag_tooltip)
 
@@ -670,6 +682,65 @@ class PointCloudExploringPanel(QWidget):
             self._expression_group.setChecked(parsed["expression_enabled"])
         self._custom_expression = parsed["expression"]
         self._apply_expression_mode(parsed["expression_enabled"])
+        self._enforce_single_group()
+
+    # === One active group (as the vector exploring groups) ===
+
+    def _exclusive_groups(self) -> List[Any]:
+        return [self._classes_group, self._ranges_group, self._expression_group]
+
+    def _setup_exclusive_groups(self) -> None:
+        """Classes, ranges and expression are exclusive: always exactly one active group.
+
+        Connected after the groups' own handlers, so checking EXPRESSION still starts
+        from the criteria of the group that was active.
+        """
+        self._switching_group = False
+        for group in self._exclusive_groups():
+            group.toggled.connect(lambda checked, g=group: self._on_exclusive_toggled(g, checked))
+            if hasattr(group, 'collapsedStateChanged'):
+                group.collapsedStateChanged.connect(lambda collapsed, g=group: self._on_exclusive_collapsed(g, collapsed))
+        self._enforce_single_group()
+
+    def _activate_group(self, active: Any) -> None:
+        self._switching_group = True
+        try:
+            for group in self._exclusive_groups():
+                if group is not active and group.isChecked():
+                    group.setChecked(False)  # their own handlers run (expression text kept, debounce)
+                if hasattr(group, 'setCollapsed'):
+                    group.setCollapsed(group is not active)
+            if not active.isChecked():
+                active.setChecked(True)
+        finally:
+            self._switching_group = False
+
+    def _on_exclusive_toggled(self, group: Any, checked: bool) -> None:
+        if self._switching_group:
+            return
+        if checked:
+            self._activate_group(group)
+            return
+        # Unchecking the active group would leave none: keep it checked.
+        with _signals_blocked(group):
+            group.setChecked(True)
+
+    def _on_exclusive_collapsed(self, group: Any, collapsed: bool) -> None:
+        # Expanding a group makes it the active one.
+        if self._switching_group or collapsed or group.isChecked():
+            return
+        self._activate_group(group)
+
+    def _enforce_single_group(self) -> None:
+        """After a restore: the first checked group in visual order stays, classes when none."""
+        groups = self._exclusive_groups()
+        active = next((group for group in groups if group.isChecked()), groups[0])
+        with _signals_blocked(*groups):
+            for group in groups:
+                group.setChecked(group is active)
+                if hasattr(group, 'setCollapsed'):
+                    group.setCollapsed(group is not active)
+        self._apply_expression_mode(self._expression_group.isChecked())
 
     # === Change notification ===
 

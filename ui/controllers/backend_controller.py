@@ -600,21 +600,11 @@ class BackendController(BaseController):
         if is_forced:
             text = f"{text}⚡"
 
-        self._indicator_label.setText(text)
-
-        # Build stylesheet - v4.0: Soft "mousse" style with smoother appearance
-        stylesheet = (
-            f"QLabel#label_backend_indicator {{"
-            f"  color: {style['color']};"
-            f"  background-color: {style['background']};"
-            f"  font-size: 8pt; font-weight: 500;"
-            f"  padding: 2px 8px; border-radius: 10px; border: none;"
-            f"}}"
-            f"QLabel#label_backend_indicator:hover {{"
-            f"  background-color: {style['background']};"
-            f"}}"
-        )
-        self._indicator_label.setStyleSheet(stylesheet)
+        # FilterMate 5 design: the badge names the layer kind first ("Vector · Spatialite"),
+        # in the vector color of the mockup; the backend stays in the text and the tooltip.
+        from ..styles.mockup_design import KIND_COLORS, badge_stylesheet, vector_badge_text
+        self._indicator_label.setText(vector_badge_text(text, self._tr))
+        self._indicator_label.setStyleSheet(badge_stylesheet('label_backend_indicator', KIND_COLORS['vector']))
 
         # Build tooltip with context
         tooltip = style['tooltip']

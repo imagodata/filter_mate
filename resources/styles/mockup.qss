@@ -1,0 +1,398 @@
+/* FilterMate 5 design - mockup "FilterMate 5.0 — Exploring adaptatif".
+   Appended last to the dock stylesheet: these rules win over the older ones.
+   {fm_*} tokens come from ui/styles/mockup_design.py (dark = the mockup, light = same layout). */
+
+QDockWidget#FilterMateDockWidgetBase {
+    color: {fm_text};
+}
+
+/* IBM Plex (bundled, SIL OFL) like the mockup; numbers in IBM Plex Mono. */
+QDockWidget#FilterMateDockWidgetBase,
+#dockWidgetContents QWidget {
+    font-family: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
+}
+#dockWidgetContents QSpinBox,
+#dockWidgetContents QDoubleSpinBox,
+#dockWidgetContents QgsDoubleSpinBox,
+#dockWidgetContents QgsSpinBox,
+#dockWidgetContents QPlainTextEdit,
+#dockWidgetContents QLabel#label_raster_pixel_value {
+    font-family: "IBM Plex Mono", "Consolas", "DejaVu Sans Mono", monospace;
+}
+#dockWidgetContents QLabel#label_raster_pixel_value {
+    color: {fm_kind_raster};
+    font-size: 20pt;
+    font-weight: 500;
+}
+QDockWidget#FilterMateDockWidgetBase::title {
+    background-color: {fm_header};
+    color: {fm_text};
+    text-align: left;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-bottom: 1px solid {fm_group_border};
+}
+
+/* Every frame of the dock sits on the same flat background (no nested panels). */
+#dockWidgetContents QFrame,
+#dockWidgetContents QSplitter {
+    background-color: {fm_bg};
+    border: none;
+    border-radius: 0px;
+}
+
+QDockWidget#FilterMateDockWidgetBase > QWidget,
+#dockWidgetContents,
+#dockWidgetContents QWidget#scrollAreaWidgetContents,
+#dockWidgetContents QScrollArea,
+#dockWidgetContents QScrollArea > QWidget#qt_scrollarea_viewport,
+#dockWidgetContents QFrame#frame_exploring,
+#dockWidgetContents QFrame#frame_toolset,
+#dockWidgetContents QToolBox#toolBox_tabTools,
+#dockWidgetContents QWidget#FILTERING,
+#dockWidgetContents QWidget#EXPORTING,
+#dockWidgetContents QWidget#CONFIGURATION,
+#dockWidgetContents QWidget#frame_header,
+#dockWidgetContents QStackedWidget#stackedWidget_exploring_coverage,
+#dockWidgetContents QWidget#widget_raster_exploring_panel,
+#dockWidgetContents QWidget#widget_point_cloud_exploring_panel {
+    background-color: {fm_bg};
+    color: {fm_text};
+    border: none;
+}
+
+#dockWidgetContents QLabel {
+    color: {fm_text};
+    background: transparent;
+}
+#dockWidgetContents QLabel:disabled {
+    color: {fm_text_muted};
+}
+
+/* --- Icon rails -------------------------------------------------------- */
+
+#dockWidgetContents QWidget#widget_exploring_keys,
+#dockWidgetContents QWidget#widget_filtering_keys,
+#dockWidgetContents QWidget#widget_exporting_keys {
+    background-color: {fm_rail};
+    border: none;
+    border-radius: 6px;
+}
+
+#dockWidgetContents #widget_exploring_keys QPushButton,
+#dockWidgetContents #widget_filtering_keys QPushButton,
+#dockWidgetContents #widget_exporting_keys QPushButton {
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    color: {fm_icon};
+    /* One rail button everywhere, icon at half its size (mockup: 44 / 22). */
+    min-width: 36px;
+    max-width: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 0px;
+    qproperty-iconSize: 20px 20px;
+}
+#dockWidgetContents #widget_exploring_keys QPushButton:hover,
+#dockWidgetContents #widget_filtering_keys QPushButton:hover,
+#dockWidgetContents #widget_exporting_keys QPushButton:hover {
+    background-color: {fm_hover};
+    border: none;
+}
+#dockWidgetContents #widget_exploring_keys QPushButton:checked,
+#dockWidgetContents #widget_filtering_keys QPushButton:checked,
+#dockWidgetContents #widget_exporting_keys QPushButton:checked,
+#dockWidgetContents #widget_exploring_keys QPushButton:pressed,
+#dockWidgetContents #widget_filtering_keys QPushButton:pressed,
+#dockWidgetContents #widget_exporting_keys QPushButton:pressed {
+    background-color: {fm_active};
+    border: none;
+}
+#dockWidgetContents #widget_exploring_keys QPushButton:disabled,
+#dockWidgetContents #widget_filtering_keys QPushButton:disabled,
+#dockWidgetContents #widget_exporting_keys QPushButton:disabled {
+    background-color: transparent;
+}
+
+/* --- Collapsible groups (EXPLORING and the raster / point cloud panels) - */
+
+#dockWidgetContents QgsCollapsibleGroupBox,
+#dockWidgetContents QGroupBox {
+    background-color: {fm_group};
+    border: 1px solid {fm_group_border};
+    border-radius: 6px;
+    margin-top: 0px;
+    padding: 30px 8px 6px 8px;
+    color: {fm_text};
+    font-weight: 600;
+}
+#dockWidgetContents QgsCollapsibleGroupBox:checked,
+#dockWidgetContents QGroupBox:checked {
+    background-color: {fm_group_on};
+    border-color: {fm_group_border_on};
+}
+#dockWidgetContents QgsCollapsibleGroupBox::title,
+#dockWidgetContents QGroupBox::title {
+    subcontrol-origin: padding;
+    subcontrol-position: top left;
+    left: 30px;
+    top: 7px;
+    padding: 0px 4px;
+    color: {fm_text};
+    background: transparent;
+}
+#dockWidgetContents QgsCollapsibleGroupBox::indicator,
+#dockWidgetContents QGroupBox::indicator {
+    width: 16px;
+    height: 16px;
+}
+#dockWidgetContents QgsCollapsibleGroupBox QToolButton#collapseButton,
+#dockWidgetContents QgsCollapsibleGroupBox > QToolButton {
+    background: transparent;
+    border: none;
+    color: {fm_text_muted};
+}
+#dockWidgetContents QgsCollapsibleGroupBox QWidget {
+    font-weight: normal;
+}
+
+/* Layer card of the raster / point cloud panels. */
+#dockWidgetContents QLabel#label_exploring_coverage_layer {
+    background-color: {fm_header};
+    border: 1px solid {fm_group_border};
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: {fm_text_muted};
+}
+
+/* "Source geometry: ..." caption under the FILTERING source layer. */
+#dockWidgetContents QLabel#label_filtering_source_geometry {
+    color: {fm_text_muted};
+    padding-left: 2px;
+}
+
+/* --- Fields ------------------------------------------------------------- */
+
+#dockWidgetContents QComboBox,
+#dockWidgetContents QgsMapLayerComboBox,
+#dockWidgetContents QgsFieldComboBox,
+#dockWidgetContents QgsCheckableComboBox,
+#dockWidgetContents QgsCheckableComboBoxLayer,
+#dockWidgetContents QLineEdit,
+#dockWidgetContents QPlainTextEdit,
+#dockWidgetContents QSpinBox,
+#dockWidgetContents QDoubleSpinBox,
+#dockWidgetContents QgsDoubleSpinBox,
+#dockWidgetContents QgsSpinBox,
+#dockWidgetContents QgsFeaturePickerWidget QComboBox,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox {
+    background-color: {fm_field};
+    color: {fm_text};
+    border: 1px solid {fm_field_border};
+    border-radius: 4px;
+    selection-background-color: {fm_active};
+    selection-color: {fm_text};
+}
+#dockWidgetContents QComboBox:hover,
+#dockWidgetContents QLineEdit:hover,
+#dockWidgetContents QPlainTextEdit:hover,
+#dockWidgetContents QSpinBox:hover,
+#dockWidgetContents QDoubleSpinBox:hover,
+#dockWidgetContents QgsFeaturePickerWidget QComboBox:hover,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox:hover {
+    border-color: {fm_field_hover};
+}
+#dockWidgetContents QComboBox:focus,
+#dockWidgetContents QLineEdit:focus,
+#dockWidgetContents QPlainTextEdit:focus,
+#dockWidgetContents QSpinBox:focus,
+#dockWidgetContents QDoubleSpinBox:focus {
+    border-color: {fm_accent};
+}
+#dockWidgetContents QComboBox:disabled,
+#dockWidgetContents QLineEdit:disabled,
+#dockWidgetContents QSpinBox:disabled,
+#dockWidgetContents QDoubleSpinBox:disabled {
+    background-color: {fm_group};
+    color: {fm_text_disabled};
+    border-color: {fm_group_border};
+}
+#dockWidgetContents QgsFeaturePickerWidget QComboBox QLineEdit,
+#dockWidgetContents QgsFieldExpressionWidget QComboBox QLineEdit,
+#dockWidgetContents QgsMapLayerComboBox QLineEdit {
+    background: transparent;
+    border: none;
+}
+#dockWidgetContents QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+#dockWidgetContents QComboBox QAbstractItemView,
+#dockWidgetContents QListWidget,
+#dockWidgetContents QListView,
+#dockWidgetContents QTreeView {
+    background-color: {fm_list};
+    color: {fm_text};
+    border: 1px solid {fm_group_border};
+    border-radius: 4px;
+    selection-background-color: {fm_active};
+    selection-color: {fm_text};
+    outline: none;
+}
+
+/* --- Check boxes -------------------------------------------------------- */
+
+#dockWidgetContents QCheckBox {
+    color: {fm_text};
+    spacing: 8px;
+}
+#dockWidgetContents QCheckBox::indicator,
+#dockWidgetContents QListWidget::indicator,
+#dockWidgetContents QgsCollapsibleGroupBox::indicator {
+    width: 15px;
+    height: 15px;
+    border: 1px solid {fm_field_hover};
+    border-radius: 3px;
+    background-color: {fm_field};
+}
+#dockWidgetContents QCheckBox::indicator:checked,
+#dockWidgetContents QListWidget::indicator:checked,
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:checked {
+    background-color: {fm_accent};
+    border-color: {fm_accent};
+    image: url({control_check_icon});
+}
+
+/* --- Plain buttons inside panels (presets, All / None, ...) -------------- */
+
+#dockWidgetContents QWidget#widget_raster_exploring_panel QPushButton,
+#dockWidgetContents QWidget#widget_point_cloud_exploring_panel QPushButton {
+    background-color: {fm_field};
+    color: {fm_text};
+    border: 1px solid {fm_field_border};
+    border-radius: 13px;
+    padding: 4px 11px;
+    min-height: 18px;
+}
+#dockWidgetContents QWidget#widget_raster_exploring_panel QPushButton:hover,
+#dockWidgetContents QWidget#widget_point_cloud_exploring_panel QPushButton:hover {
+    border-color: {fm_active_border};
+}
+#dockWidgetContents QWidget#widget_raster_exploring_panel QPushButton:pressed,
+#dockWidgetContents QWidget#widget_point_cloud_exploring_panel QPushButton:pressed {
+    background-color: {fm_active};
+    border-color: {fm_active_border};
+}
+
+/* --- FILTERING / EXPORTING / CONFIGURATION sections --------------------- */
+
+#dockWidgetContents QToolBox#toolBox_tabTools::tab {
+    background-color: {fm_section};
+    color: {fm_text};
+    border: 1px solid {fm_section_border};
+    border-radius: 6px;
+    padding: 0px 10px 0px 38px;  /* room for the header icon (ui/layout/mockup_layout.py) */
+    margin: 0px;
+    font-weight: 600;
+}
+#dockWidgetContents QToolBox#toolBox_tabTools::tab:selected {
+    border-color: {fm_section_on};
+    color: {fm_text};
+}
+#dockWidgetContents QToolBox#toolBox_tabTools::tab:hover {
+    border-color: {fm_field_hover};
+}
+/* The section headers are QToolBox buttons (not QToolButton), styled by ::tab above.
+   A QToolButton rule here would hit the tool buttons inside the sections. */
+
+/* --- Action bar --------------------------------------------------------- */
+
+#dockWidgetContents QFrame#frame_actions {
+    background-color: {fm_header};
+    border: none;
+    border-top: 1px solid {fm_group_border};
+    border-radius: 0px;
+}
+#dockWidgetContents #frame_actions QPushButton {
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    color: {fm_icon};
+}
+#dockWidgetContents #frame_actions QPushButton:hover {
+    background-color: {fm_hover};
+}
+#dockWidgetContents #frame_actions QPushButton:pressed,
+#dockWidgetContents #frame_actions QPushButton:checked {
+    background-color: {fm_active};
+}
+
+/* --- Splitter and scroll bars ------------------------------------------- */
+
+#dockWidgetContents QSplitter::handle {
+    background-color: {fm_bg};
+}
+#dockWidgetContents QSplitter::handle:hover {
+    background-color: {fm_active};
+}
+#dockWidgetContents QScrollBar:vertical,
+#dockWidgetContents QScrollBar:horizontal {
+    background: transparent;
+    border: none;
+}
+#dockWidgetContents QScrollBar::handle:vertical,
+#dockWidgetContents QScrollBar::handle:horizontal {
+    background-color: {fm_scroll};
+    border-radius: 3px;
+}
+
+#dockWidgetContents QToolTip {
+    background-color: {fm_header};
+    color: {fm_text};
+    border: 1px solid {fm_group_border};
+}
+
+/* --- Spacing between EXPLORING and the sections below (mockup: one small gap) --- */
+
+#dockWidgetContents QFrame#frame_header {
+    padding: 0px;
+    margin: 0px;
+}
+#dockWidgetContents QFrame#frame_exploring {
+    padding: 4px 6px 0px 6px;
+    margin: 0px 2px 0px 2px;
+}
+#dockWidgetContents QFrame#frame_toolset {
+    padding: 0px;
+    margin: 0px;
+}
+#dockWidgetContents QToolBox#toolBox_tabTools {
+    padding: 0px 4px 0px 4px;
+}
+
+/* default.qss pads every QFrame by 6 px, QLabel included: icons and captions need none. */
+#dockWidgetContents QLabel#label_section_icon,
+#dockWidgetContents QLabel#label_filtering_source_geometry {
+    padding: 0px;
+    margin: 0px;
+    border: none;
+}
+
+/* Scroll areas inherit the 6 px QFrame padding of default.qss: content starts at the edge,
+   so the EXPLORING groups top-align with the rail. */
+#dockWidgetContents QScrollArea {
+    padding: 0px;
+}
+
+/* Every field of a row as tall as the combo boxes (same content height, padding and border). */
+#dockWidgetContents QSpinBox,
+#dockWidgetContents QDoubleSpinBox,
+#dockWidgetContents QgsDoubleSpinBox,
+#dockWidgetContents QgsSpinBox,
+#dockWidgetContents QLineEdit#lineEdit_exporting_output_folder,
+#dockWidgetContents QLineEdit#lineEdit_exporting_zip {
+    min-height: {combobox_height};
+    max-height: {combobox_height};
+    padding: 4px 8px;
+}

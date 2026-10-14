@@ -794,6 +794,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._setup_exploring_tab_widgets()
         self._setup_filtering_tab_widgets()
         self._setup_exporting_tab_widgets()
+        # FilterMate 5 design: rows merged as in the mockup, before the spacers are harmonized.
+        from .ui.layout.mockup_layout import apply_mockup_layout
+        apply_mockup_layout(self)
         # Apply dimensions AFTER tab setup so dynamically inserted spacers are processed
         self.apply_dynamic_dimensions()
         if 'CURRENT_PROJECT' in self.CONFIG_DATA:
@@ -1030,6 +1033,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
             self._apply_qgis_widget_dimensions()
             self._align_key_layouts()
+            # FilterMate 5 design: one set of gaps and field heights, after the managers above.
+            from .ui.layout.mockup_layout import harmonize_spacing
+            harmonize_spacing(self)
             logger.info("Successfully applied dynamic dimensions to all widgets")
         except Exception as e:
             logger.error(f"Error applying dynamic dimensions: {e}", exc_info=True)
@@ -1229,14 +1235,26 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 target_h = get_spacer_size(f'verticalSpacer_{section}_keys_field_top' if section != 'exploring' else 'verticalSpacer_exploring_tab_top', is_compact)
                 spacer_sizes[section] = target_h
                 spacer_count = 0
+                # FilterMate 5 design: the EXPLORING rail aligns with nothing, its tools stay
+                # packed at the top (mockup); filtering / exporting spacers keep expanding so
+                # their buttons follow the value rows.
+                packed = section == 'exploring'
                 if hasattr(self, widget_name) and (layout := getattr(self, widget_name).layout()):
                     for i in range(layout.count()):
                         if (item := layout.itemAt(i)) and hasattr(item, 'layout') and item.layout():
                             nested_layout = item.layout()
+                            if packed and nested_layout.property('fm_packed'):
+                                continue  # already packed by ui/layout/mockup_layout.py (keeps its stretch)
                             for j in range(nested_layout.count()):
                                 if (nested := nested_layout.itemAt(j)) and isinstance(nested, QSpacerItem):
-                                    nested.changeSize(20, target_h, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+                                    if packed:
+                                        nested.changeSize(20, 6, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+                                    else:
+                                        nested.changeSize(20, target_h, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
                                     spacer_count += 1
+                            if packed and not nested_layout.property('fm_packed'):
+                                nested_layout.addStretch(1)
+                                nested_layout.setProperty('fm_packed', True)
                             nested_layout.invalidate()
                 if spacer_count > 0:
                     logger.debug(f"Harmonized {spacer_count} spacers in {section} to {target_h}px (Expanding)")
@@ -1379,7 +1397,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S16: Create indicator label with soft "mousse" style."""
         lbl = ClickableLabel(self.frame_header)
         lbl.setObjectName(name); lbl.setText(text); lbl.setStyleSheet(f"QLabel#{name}{{{style}}}QLabel#{name}:hover{{{hover_style}}}")
-        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); lbl.setMinimumWidth(min_width); lbl.setFixedHeight(18)  # v4.0: Fixed height for proper text display with padding
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter); lbl.setMinimumWidth(min_width); lbl.setFixedHeight(24)  # v4.0: Fixed height for proper text display with padding
         lbl.setCursor(Qt.CursorShape.PointingHandCursor); lbl.setToolTip(tooltip)
         # CRITICAL: Enable the widget to receive mouse events
         lbl.setEnabled(True)
@@ -1445,22 +1463,15 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S16: Update favorites badge."""
         if not hasattr(self, 'favorites_indicator_label') or not self.favorites_indicator_label: return
         cnt = getattr(getattr(self, '_favorites_service', None), 'count', 0)
+        from .ui.styles.mockup_design import favorites_badge_stylesheet
+        dark = bool(getattr(getattr(self, '_icon_manager', None), 'is_dark_mode', False))
         if cnt > 0:
             self.favorites_indicator_label.setText(f"★ {cnt}")
             self.favorites_indicator_label.setToolTip(self.tr("★ {0} Favorites saved\nClick to apply or manage").format(cnt))
-            self.favorites_indicator_label.setStyleSheet(
-                "QLabel#label_favorites_indicator{color:white;font-size:8pt;font-weight:500;"
-                "padding:2px 8px;border-radius:10px;border:none;background-color:#f39c12;}"
-                "QLabel#label_favorites_indicator:hover{background-color:#d68910;}"
-            )
         else:
             self.favorites_indicator_label.setText("★")
             self.favorites_indicator_label.setToolTip(self.tr("★ No favorites saved\nClick to add current filter"))
-            self.favorites_indicator_label.setStyleSheet(
-                "QLabel#label_favorites_indicator{color:#95a5a6;font-size:8pt;font-weight:500;"
-                "padding:2px 8px;border-radius:10px;border:none;background-color:#ecf0f1;}"
-                "QLabel#label_favorites_indicator:hover{background-color:#d5dbdb;}"
-            )
+        self.favorites_indicator_label.setStyleSheet(favorites_badge_stylesheet('label_favorites_indicator', cnt, dark))
         self.favorites_indicator_label.adjustSize()
 
     def _get_available_backends_for_layer(self, layer):
@@ -6525,21 +6536,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         }
 
         style = BACKEND_STYLES.get(backend_type, BACKEND_STYLES['unknown'])
-        self.backend_indicator_label.setText(style['text'])
-
-        # v4.0: Soft "mousse" style with smoother colors
-        base_style = (
-            f"QLabel#label_backend_indicator {{"
-            f"  color: {style['color']};"
-            f"  background-color: {style['background']};"
-            f"  font-size: 8pt; font-weight: 500;"
-            f"  padding: 2px 8px; border-radius: 10px; border: none;"
-            f"}}"
-            f"QLabel#label_backend_indicator:hover {{"
-            f"  background-color: {style['background']};"
-            f"}}"
-        )
-        self.backend_indicator_label.setStyleSheet(base_style)
+        # FilterMate 5 design: vector kind badge of the mockup, the backend in the text.
+        from .ui.styles.mockup_design import KIND_COLORS, badge_stylesheet, vector_badge_text
+        self.backend_indicator_label.setText(vector_badge_text(style['text'], self.tr))
+        self.backend_indicator_label.setStyleSheet(badge_stylesheet('label_backend_indicator', KIND_COLORS['vector']))
         self.backend_indicator_label.adjustSize()
 
     def getProjectLayersEvent(self, event):
