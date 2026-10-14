@@ -59,6 +59,10 @@ os.makedirs(OUT, exist_ok=True)
 cache.set_cache_root(os.path.join(DATA, 'out', 'cache'))
 
 results = []
+_PROVIDER = None
+# SQLite (GeoPackage) cannot write through \\wsl.localhost: exports go to the Windows temp folder.
+EXPORTS = (os.path.join(os.environ['LOCALAPPDATA'], 'Temp', 'fm5', 'exports') if os.name == 'nt'
+           else os.path.join(OUT, 'exports'))
 
 
 def check(name, condition, detail=''):
@@ -384,8 +388,14 @@ def s13_processing():
     from filter_mate.processing.provider import FilterMateProcessingProvider
     Processing.initialize()
     registry_ = QgsApplication.processingRegistry()
-    if registry_.providerById('filtermate') is None:
-        registry_.addProvider(FilterMateProcessingProvider())
+    existing = registry_.providerById('filtermate')
+    if existing is not None:  # another FilterMate (installed plugin) must not shadow the tested one
+        registry_.removeProvider(existing)
+    # Keep a Python reference, like the plugin does: otherwise the Python
+    # subclasses are garbage collected and the algorithms lose their methods.
+    global _PROVIDER
+    _PROVIDER = FilterMateProcessingProvider()
+    registry_.addProvider(_PROVIDER)
     cur_bat = project.mapLayersByName('batiment')[0]
     cur_mnt = project.mapLayersByName('mnt')[0]
     cur_lhd = project.mapLayersByName('lhd')[0]
@@ -469,11 +479,297 @@ def s16_undo_keeps_newer_changes():
     registry().restore_all(project)
 
 
+# --- 16. Processing algorithms of FilterMate 5 ------------------------------------
+def _layers(*names):
+    return [project.mapLayersByName(name)[0] for name in names]
+
+
+def _fresh(folder):
+    import shutil
+    shutil.rmtree(folder, ignore_errors=True)
+    return folder
+
+
+def _clear(*layers_):
+    from filter_mate.adapters.public_api import operations
+    operations.clear_filters(list(layers_))
+    registry().restore_all(project)
+
+
+def s17_processing_algorithms():
+    import processing  # noqa: F401 - QGIS plugin
+    cur_bat, cur_mnt, cur_lhd, cur_lhd_b, cur_par, cur_routes = _layers(
+        'batiment', 'mnt', 'lhd', 'lhd_b', 'parcelle', 'troncon_de_route')
+    algorithms = {a.id() for a in QgsApplication.processingRegistry().providerById('filtermate').algorithms()}
+    expected = {'filtermate:cross_filter_from_raster', 'filtermate:cross_filter_from_point_cloud',
+                'filtermate:cross_filter_from_geometry', 'filtermate:filter_point_cloud', 'filtermate:clear_filters',
+                'filtermate:apply_favorite', 'filtermate:export_filtered_layers', 'filtermate:extraction_par_emprise',
+                'filtermate:vegetation_pres_des_lignes', 'filtermate:parcelles_en_pente_faible',
+                'filtermate:batiments_absents_du_lidar'}
+    check('processing: algorithms and models registered', expected <= algorithms, str(sorted(expected - algorithms)))
+    if not expected <= algorithms:  # diagnostics
+        provider = QgsApplication.processingRegistry().providerById('filtermate')
+        print('   provider', provider, type(provider), sorted(algorithms), flush=True)
+        for alg_id in sorted(expected - algorithms)[:3]:
+            found = QgsApplication.processingRegistry().algorithmById(alg_id)
+            print('   ', alg_id, found, type(found), flush=True)
+
+    result = processing.run('filtermate:cross_filter_from_raster', {
+        'SOURCE': cur_mnt, 'BAND': 1, 'MODE': 0, 'MINIMUM': 1240, 'MAXIMUM': 1270,
+        'TARGETS': [cur_par, cur_bat], 'PREDICATES': [0], 'COVERAGE': 50, 'OPERATOR': 0})
+    check('processing R->V: OUTPUT lists the targets', set(result['OUTPUT']) == {cur_par.id(), cur_bat.id()}, str(result))
+    check('processing R->V: parcels filtered, source untouched',
+          (cur_par.subsetString().startswith('"fid" IN') or cur_par.subsetString() == '1 = 0')
+          and cur_mnt.providerType() == 'gdal', cur_par.subsetString()[:40])
+    result = processing.run('filtermate:clear_filters', {'LAYERS': [cur_par, cur_bat, cur_mnt]})
+    check('processing clear_filters', cur_par.subsetString() == '' and cur_bat.subsetString() == ''
+          and set(result['OUTPUT']) == {cur_par.id(), cur_bat.id()}, str(result['OUTPUT']))
+
+    result = processing.run('filtermate:cross_filter_from_raster', {
+        'SOURCE': cur_mnt, 'MODE': 0, 'MINIMUM': 1300, 'FILTER_SOURCE': True, 'TARGETS': [], 'PREDICATES': [0]})
+    check('processing raster source only (FILTER_SOURCE)', cur_mnt.providerType() == 'virtualraster'
+          and result['OUTPUT'] == [cur_mnt.id()], cur_mnt.providerType())
+    _clear(cur_mnt)
+    try:
+        processing.run('filtermate:cross_filter_from_raster', {'SOURCE': cur_mnt, 'MODE': 0, 'TARGETS': [cur_par]})
+        check('processing raster range without bounds is refused', False)
+    except Exception as exc:
+        check('processing raster range without bounds is refused', 'minimum' in str(exc), str(exc)[:80])
+
+    result = processing.run('filtermate:cross_filter_from_point_cloud', {
+        'SOURCE': cur_lhd, 'CLASSES': '6', 'TARGETS': [cur_bat], 'PREDICATES': [2], 'OPERATOR': 0})
+    kept = count(cur_bat)
+    check('processing P->V disjoint (OUTPUT = targets only)', 0 < kept < 134
+          and cur_lhd.subsetString() == 'Classification = 6' and result['OUTPUT'] == [cur_bat.id()],
+          f"{kept} buildings, subset={cur_lhd.subsetString()}")
+    _clear(cur_bat, cur_lhd)
+    check('processing P->V cleared', count(cur_bat) == 134 and cur_lhd.subsetString() == '')
+    from filter_mate.adapters.public_api import operations
+    report = operations.cross_filter(cur_lhd, ['ghost_layer'], point_cloud_criteria='Classification = 6')
+    check('unknown targets are refused, point cloud source untouched',
+          report.error == 'no filterable target layer' and cur_lhd.subsetString() == '', report.error)
+
+    extent = cur_mnt.extent()
+    quarter = (f"{extent.xMinimum()},{extent.xMinimum() + extent.width() / 2},"
+               f"{extent.yMinimum()},{extent.yMinimum() + extent.height() / 2} [EPSG:2154]")
+    result = processing.run('filtermate:cross_filter_from_geometry', {
+        'EXTENT': quarter, 'TARGETS': [cur_mnt, cur_lhd_b, cur_routes], 'PREDICATES': [0]})
+    check('processing geometry -> R+P+V', cur_mnt.source().endswith('.vrt') and cur_lhd_b.source().endswith('.copc.laz')
+          and len(result['OUTPUT']) == 3 and 0 < count(cur_routes), f"{result['LAYERS_FILTERED']} {count(cur_routes)} routes")
+    _clear(cur_mnt, cur_lhd_b, cur_routes)
+
+    result = processing.run('filtermate:filter_point_cloud', {'LAYERS': [cur_lhd, cur_lhd_b], 'CLASSES': '2', 'Z_MIN': 1000})
+    check('processing filter_point_cloud on 2 tiles', cur_lhd.subsetString() == 'Classification = 2 AND Z >= 1000'
+          and cur_lhd_b.subsetString() == cur_lhd.subsetString() and len(result['OUTPUT']) == 2, cur_lhd.subsetString())
+    _clear(cur_lhd, cur_lhd_b)
+
+    cur_bat.selectByIds([f.id() for f in cur_bat.getFeatures(QgsFeatureRequest().setLimit(5))])
+    filtered = processing.run('filtermate:cross_filter', {
+        'SOURCE': cur_bat, 'SELECTED_ONLY': True, 'TARGETS': [cur_mnt, cur_lhd, cur_par], 'PREDICATES': [0],
+        'BUFFER': 2.0, 'COVERAGE': 0.0, 'OPERATOR': 0})
+    check('processing cross_filter OUTPUT', len(filtered['OUTPUT']) == 3, str(filtered['LAYERS_FILTERED']))
+    folder = _fresh(os.path.join(EXPORTS, 'export_processing'))
+    started = time.perf_counter()
+    exported = processing.run('filtermate:export_filtered_layers', {
+        'LAYERS': filtered['OUTPUT'], 'VECTOR_FORMAT': 0, 'RASTER_FORMAT': 0, 'POINT_CLOUD_FORMAT': 0,
+        'OUTPUT_FOLDER': folder})
+    files = exported['OUTPUT_FILES']
+    check('processing export: 3 files written', len(files) == 3 and all(os.path.exists(f) for f in files),
+          f"{[os.path.basename(f) for f in files]} {time.perf_counter() - started:.1f}s")
+    gpkg = [f for f in files if f.endswith('.gpkg')]
+    if gpkg:
+        written = QgsVectorLayer(gpkg[0], 'w', 'ogr')
+        check('processing export: GPKG holds the filtered parcels only', count(written) == count(cur_par),
+              f"{count(written)} vs {count(cur_par)}")
+    laz = [f for f in files if f.endswith('.laz')]
+    if laz:
+        written_pc = QgsPointCloudLayer(laz[0], 'w', 'pdal')
+        check('processing export: LAZ holds the clipped points', written_pc.pointCount() == cur_lhd.pointCount(),
+              f"{written_pc.pointCount()} vs {cur_lhd.pointCount()}")
+    temporary = processing.run('filtermate:export_filtered_layers', {
+        'LAYERS': [cur_par], 'OUTPUT_FOLDER': 'TEMPORARY_OUTPUT'})
+    check('processing export to a temporary folder', os.path.isabs(temporary['OUTPUT_FOLDER'])
+          and 'TEMPORARY_OUTPUT' not in temporary['OUTPUT_FOLDER'] and len(temporary['OUTPUT_FILES']) == 1,
+          temporary['OUTPUT_FOLDER'])
+    cur_bat.removeSelection()
+    cur_par.setSubsetString('')
+    registry().restore_all(project)
+
+
+def s18_apply_favorite_headless():
+    """A favorite saved in the project file is applied without the plugin (qgis_process case)."""
+    import json
+    import processing  # noqa: F401
+    from filter_mate.adapters.qgis.coverage_layers import favorites_bridge
+    cur_bat, cur_mnt, cur_lhd = _layers('batiment', 'mnt', 'lhd')
+    feats = list(cur_bat.getFeatures(QgsFeatureRequest().setLimit(5)))
+    request = CrossFilterRequest(cur_bat.id(), LayerKind.VECTOR, targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),
+                                                                         TargetSpec(cur_lhd.id(), LayerKind.POINT_CLOUD)),
+                                 predicates=('Intersect',), buffer_value=2.0)
+    run('V->R for favorite', request, VectorSourceJob(cur_bat, feats))
+    coverage = favorites_bridge.capture(project)
+    registry().restore_all(project)
+    favorite = {'id': 'fav-fm5-test', 'name': 'Petits identifiants', 'expression': '"fid" < 50',
+                'layer_name': 'batiment', 'spatial_config': {'coverage_layers': coverage}}
+    project.writeEntry('FilterMate', 'favorites_backup', json.dumps({'favorites': [favorite]}))
+    # qgis_process has no dock options: the point cloud option off must not break the favorite.
+    _options['POINT_CLOUD']['enabled'] = {'value': False}
+    try:
+        result = processing.run('filtermate:apply_favorite', {'FAVORITE': 'petits identifiants'})
+    finally:
+        _options['POINT_CLOUD']['enabled'] = {'value': True}
+    check('processing apply_favorite (project backup, point cloud option off)', cur_bat.subsetString() == '"fid" < 50'
+          and cur_mnt.source().endswith('.vrt') and cur_lhd.source().endswith('.copc.laz')
+          and set(result['OUTPUT']) == {cur_bat.id(), cur_mnt.id(), cur_lhd.id()},
+          f"subset={cur_bat.subsetString()} mnt={cur_mnt.source()[-12:]} lhd={cur_lhd.source()[-12:]}")
+    try:
+        processing.run('filtermate:apply_favorite', {'FAVORITE': 'inconnu'})
+        check('processing unknown favorite is refused', False)
+    except Exception as exc:
+        check('processing unknown favorite is refused', 'not found' in str(exc), str(exc)[:60])
+    cur_bat.setSubsetString('')
+    project.removeEntry('FilterMate', 'favorites_backup')
+    registry().restore_all(project)
+
+
+def s19_models():
+    import processing  # noqa: F401
+    cur_bat, cur_mnt, cur_lhd, cur_par, cur_routes = _layers('batiment', 'mnt', 'lhd', 'parcelle', 'troncon_de_route')
+    reg = QgsApplication.processingRegistry()
+
+    def destination(model_id):
+        return reg.algorithmById(model_id).destinationParameterDefinitions()[0].name()
+
+    def files_in(folder):
+        return sorted(f for f in os.listdir(folder) if not f.endswith('.aux.xml')) if os.path.isdir(folder) else []
+
+    cur_bat.selectByIds([f.id() for f in cur_bat.getFeatures(QgsFeatureRequest().setLimit(5))])
+    folder = _fresh(os.path.join(EXPORTS, 'model_extraction'))
+    started = time.perf_counter()
+    processing.run('filtermate:extraction_par_emprise', {
+        'emprise': cur_bat, 'selection_seule': True, 'couches': [cur_mnt, cur_lhd, cur_par], 'tampon': 2.0,
+        destination('filtermate:extraction_par_emprise'): folder})
+    check('model extraction_par_emprise', files_in(folder) == ['lhd.laz', 'mnt.tif', 'parcelle.gpkg'],
+          f"{files_in(folder)} {time.perf_counter() - started:.1f}s")
+    cur_bat.removeSelection()
+    _clear(cur_mnt, cur_lhd, cur_par)
+
+    folder = _fresh(os.path.join(EXPORTS, 'model_pente'))
+    started = time.perf_counter()
+    processing.run('filtermate:parcelles_en_pente_faible', {
+        'mnt': cur_mnt, 'pente_max': 15.0, 'cibles': [cur_par], 'couverture': 50.0,
+        destination('filtermate:parcelles_en_pente_faible'): folder})
+    kept = count(cur_par)
+    check('model parcelles_en_pente_faible', files_in(folder) == ['parcelle.gpkg']
+          and cur_par.subsetString() != '' and cur_mnt.providerType() == 'gdal',
+          f"{kept} parcels {cur_par.subsetString()[:30]} {time.perf_counter() - started:.1f}s")
+    _clear(cur_par)
+
+    folder = _fresh(os.path.join(EXPORTS, 'model_vegetation'))
+    started = time.perf_counter()
+    processing.run('filtermate:vegetation_pres_des_lignes', {
+        'lignes': cur_routes, 'nuages': [cur_lhd], 'classes': '4,5', 'couloir': 10.0,
+        destination('filtermate:vegetation_pres_des_lignes'): folder})
+    check('model vegetation_pres_des_lignes', files_in(folder) == ['lhd.copc.laz'] and cur_lhd.source().endswith('.copc.laz')
+          and cur_lhd.subsetString() == 'Classification IN (4, 5)',
+          f"{files_in(folder)} {cur_lhd.subsetString()} {time.perf_counter() - started:.1f}s")
+    _clear(cur_lhd)
+
+    folder = _fresh(os.path.join(EXPORTS, 'model_batiments'))
+    processing.run('filtermate:batiments_absents_du_lidar', {
+        'nuage': cur_lhd, 'classes': '6', 'batiments': [cur_bat],
+        destination('filtermate:batiments_absents_du_lidar'): folder})
+    written = QgsVectorLayer(os.path.join(folder, 'batiment.gpkg'), 'w', 'ogr')
+    check('model batiments_absents_du_lidar (buildings only, not the cloud)', files_in(folder) == ['batiment.gpkg']
+          and count(written) == count(cur_bat) < 134, f"{files_in(folder)} {count(written)} written, {count(cur_bat)} filtered")
+    _clear(cur_bat, cur_lhd)
+
+
+def s20_public_api():
+    import types
+    from filter_mate.adapters.public_api.filter_mate_public_api import FilterMatePublicAPI
+    api = FilterMatePublicAPI(types.SimpleNamespace(plugin_dir=os.path.dirname(HERE)))
+    events = []
+    api.operation_completed.connect(lambda name, report: events.append((name, report['ok'])))
+    cur_bat, cur_mnt, cur_lhd = _layers('batiment', 'mnt', 'lhd')
+    cur_bat.selectByIds([f.id() for f in cur_bat.getFeatures(QgsFeatureRequest().setLimit(5))])
+    report = api.cross_filter('batiment', ['mnt', 'lhd'], buffer=2.0)
+    check('public API cross_filter', report['ok'] and sorted(report['done']) == ['lhd', 'mnt'], str(report)[:120])
+    from filter_mate.core.services.cross_filter_service import get_cross_filter_service
+    check('public API vector source kept out of the dock history', not get_cross_filter_service().can_undo(cur_bat.id()))
+    report = api.cross_filter('mnt', ['batiment'])
+    check('public API raster source needs a selection', not report['ok'] and 'selection' in report['error'], report['error'])
+    report = api.filter_point_clouds(['lhd'], {'classes': [6]}, operator='AND')
+    check('public API filter_point_clouds (AND on an empty subset)', report['ok']
+          and cur_lhd.subsetString() == 'Classification = 6', cur_lhd.subsetString())
+    state = {row['name']: row['kind'] for row in api.get_filter_state()}
+    check('public API get_filter_state', state.get('mnt') == 'raster' and state.get('lhd') == 'point_cloud', str(state))
+    folder = os.path.join(EXPORTS, 'export_public_api')
+    report = api.export_layers(['mnt'], folder, raster_format='GTiff')
+    check('public API export_layers', report['ok'] and os.path.exists(report['outputs'].get('mnt', '')), str(report['outputs']))
+    report = api.clear_filters(['mnt', 'lhd', 'batiment'])
+    check('public API clear_filters', report['ok'] and sorted(report['done']) == ['lhd', 'mnt']
+          and cur_mnt.source().endswith('mnt_1m.tif') and cur_lhd.subsetString() == '', str(report))
+    extent = cur_mnt.extent()
+    wkt = (f"POLYGON(({extent.xMinimum()} {extent.yMinimum()}, {extent.xMinimum() + 200} {extent.yMinimum()}, "
+           f"{extent.xMinimum() + 200} {extent.yMinimum() + 200}, {extent.xMinimum()} {extent.yMinimum() + 200}, "
+           f"{extent.xMinimum()} {extent.yMinimum()}))")
+    report = api.cross_filter_by_geometry(wkt, 'EPSG:2154', ['mnt'])
+    check('public API cross_filter_by_geometry', report['ok'] and cur_mnt.source().endswith('.vrt'), str(report)[:100])
+    report = api.cross_filter_by_geometry(wkt, 'EPSG:999999', ['mnt'])
+    check('public API invalid CRS is an error report', not report['ok'] and 'CRS' in report['error'], report['error'])
+    check('public API signals', len(events) == 7 and events[1] == ('cross_filter', False), str(events))
+    cur_bat.removeSelection()
+    _clear(cur_mnt)
+
+
+def s21_rest_accessor_v5():
+    import types
+    from filter_mate.filtermate_api.qgis_accessor import QGISFilterMateAccessor
+    accessor = QGISFilterMateAccessor(public_api=types.SimpleNamespace(get_active_filters=lambda: {}), plugin=None)
+    cur_mnt, cur_par, cur_lhd = _layers('mnt', 'parcelle', 'lhd')
+    result = accessor.cross_filter('mnt', ['parcelle', 'ghost'], ['Intersect'], coverage_min=50.0,
+                                   raster_selection={'band': 1, 'mode': 'range', 'minimum': 1240, 'maximum': 1270})
+    check('API raster source -> parcels', result is not None and result.filtered == ['parcelle'] and 'ghost' in result.failed,
+          str(result))
+    result = accessor.filter_point_clouds(['lhd'], {'classes': [6], 'z_min': 1000})
+    check('API filter_point_clouds', result.done == ['lhd'] and cur_lhd.subsetString() == 'Classification = 6 AND Z >= 1000',
+          cur_lhd.subsetString())
+    state = {row.name for row in accessor.get_filter_state()}
+    check('API filter state', {'parcelle', 'lhd'} <= state, str(state))
+    result = accessor.export_layers(['parcelle', 'lhd'], os.path.join(EXPORTS, 'export_rest'), 'GeoJSON', 'COG', 'LAZ')
+    check('API export_layers', sorted(result.done) == ['lhd', 'parcelle']
+          and all(os.path.exists(path) for path in result.outputs.values()), str(result.outputs))
+    result = accessor.clear_filters(['parcelle', 'lhd'])
+    check('API clear_filters', sorted(result.done) == ['lhd', 'parcelle'] and cur_par.subsetString() == '', str(result))
+    registry().restore_all(project)
+
+
+def s22_qgis_process_loading():
+    """qgis_process loads the plugin without iface and only calls initProcessing()."""
+    import qgis.utils
+    reg = QgsApplication.processingRegistry()
+    existing = reg.providerById('filtermate')
+    if existing is not None:
+        reg.removeProvider(existing)
+    package = os.path.basename(os.path.dirname(HERE))
+    started = qgis.utils.startProcessingPlugin(package)
+    provider = reg.providerById('filtermate')
+    count_ = len(provider.algorithms()) if provider is not None else 0
+    check('qgis_process: plugin starts without iface and registers its provider', started and count_ == 13,
+          f"started={started} algorithms={count_}")
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
                  s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites,
                  s12_refilter_and_operators, s13_processing, s14_raster_selection_replay,
-                 s15_rest_api_accessor, s16_undo_keeps_newer_changes):
+                 s15_rest_api_accessor, s16_undo_keeps_newer_changes, s17_processing_algorithms,
+                 s18_apply_favorite_headless, s19_models, s20_public_api, s21_rest_accessor_v5,
+                 s22_qgis_process_loading):
+    only = [name for name in os.environ.get('FM5_ONLY', '').split(',') if name]
+    if only and not any(scenario.__name__.startswith(name + '_') for name in only):
+        continue  # FM5_ONLY=s13,s16 runs a subset (quick iterations)
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 

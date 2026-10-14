@@ -59,10 +59,33 @@ class LayerSummary:
 
 @dataclass(frozen=True)
 class CrossFilterResult:
-    """Outcome of a cross filter (FilterMate 5): targets of any kind clipped by a vector source."""
+    """Outcome of a cross filter (FilterMate 5): targets of any kind filtered by a source of any kind."""
     filtered: List[str] = field(default_factory=list)
     failed: Dict[str, str] = field(default_factory=dict)
     error: Optional[str] = None
+    # Reserved: layers left out on purpose (the QGIS accessor reports them in ``failed``).
+    skipped: Dict[str, str] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class OperationResult:
+    """Outcome of a FilterMate 5 operation on several layers (point clouds, unfilter, export)."""
+    done: List[str] = field(default_factory=list)
+    failed: Dict[str, str] = field(default_factory=dict)
+    skipped: Dict[str, str] = field(default_factory=dict)
+    error: Optional[str] = None
+    # Export: layer name -> file written (server side).
+    outputs: Dict[str, str] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class FilteredLayer:
+    """A layer FilterMate currently filters: subset string and / or derived (clipped) source."""
+    layer_id: str
+    name: str
+    layer_kind: str
+    subset: str = ""
+    derived: bool = False
 
 
 @dataclass(frozen=True)
@@ -151,11 +174,38 @@ class FilterMateAccessor(Protocol):
 
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
-                     selected_only: bool = True) -> Optional[CrossFilterResult]:
-        """Filter vector / raster / point cloud ``target_layers`` by the (selected)
-        features of the vector ``source_layer``. ``None`` when the source
-        does not resolve (route: 404).
+                     selected_only: bool = True, raster_selection: Optional[Dict] = None,
+                     point_cloud_criteria: Optional[Dict] = None,
+                     filter_source: bool = False) -> Optional[CrossFilterResult]:
+        """Filter vector / raster / point cloud ``target_layers`` by a selection on
+        ``source_layer`` of any kind: selected features (vector), pixels of
+        ``raster_selection`` (raster), points of ``point_cloud_criteria`` (point
+        cloud). ``None`` when the source does not resolve (route: 404).
         """
+        ...
+
+    def cross_filter_by_geometry(self, wkt: str, crs: str, target_layers: List[str], predicates: List[str],
+                                 buffer: float = 0.0, coverage_min: float = 0.0,
+                                 operator: Optional[str] = None) -> CrossFilterResult:
+        """Filter ``target_layers`` by a WKT geometry expressed in ``crs`` (``EPSG:2154``)."""
+        ...
+
+    def filter_point_clouds(self, layers: List[str], criteria: Dict,
+                            operator: Optional[str] = None) -> OperationResult:
+        """Apply the same point cloud criteria to several point cloud layers."""
+        ...
+
+    def clear_filters(self, layers: List[str]) -> OperationResult:
+        """Put layers of any kind back on their original source, with no filter."""
+        ...
+
+    def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
+                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
+        """Write the layers as filtered now into ``folder`` (already resolved by the route)."""
+        ...
+
+    def get_filter_state(self) -> List[FilteredLayer]:
+        """Every layer FilterMate currently filters."""
         ...
 
 
@@ -262,16 +312,63 @@ class InMemoryAccessor:
 
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
-                     selected_only: bool = True) -> Optional[CrossFilterResult]:
+                     selected_only: bool = True, raster_selection: Optional[Dict] = None,
+                     point_cloud_criteria: Optional[Dict] = None,
+                     filter_source: bool = False) -> Optional[CrossFilterResult]:
         names = {layer.name: layer for layer in self.layers}
         source = names.get(source_layer)
-        if source is None or source.layer_kind != "vector":
+        if source is None:
             return None
+        if source.layer_kind == "raster" and not raster_selection:
+            return CrossFilterResult(error="a raster source needs a pixel selection")
         filtered = [name for name in target_layers if name in names and name != source_layer]
         failed = {name: "layer not found" for name in target_layers if name not in names}
         for name in filtered:
             self._active[name] = f"cross:{source_layer}"
+        if source.layer_kind == "raster" and filter_source:
+            self._active[source_layer] = "selection"  # the source changes, it is not a target
         return CrossFilterResult(filtered=filtered, failed=failed)
+
+    def cross_filter_by_geometry(self, wkt: str, crs: str, target_layers: List[str], predicates: List[str],
+                                 buffer: float = 0.0, coverage_min: float = 0.0,
+                                 operator: Optional[str] = None) -> CrossFilterResult:
+        names = {layer.name for layer in self.layers}
+        filtered = [name for name in target_layers if name in names]
+        for name in filtered:
+            self._active[name] = "cross:geometry"
+        return CrossFilterResult(filtered=filtered,
+                                 failed={name: "layer not found" for name in target_layers if name not in names},
+                                 error=None if filtered else "no filterable target layer")
+
+    def filter_point_clouds(self, layers: List[str], criteria: Dict,
+                            operator: Optional[str] = None) -> OperationResult:
+        kinds = {layer.name: layer.layer_kind for layer in self.layers}
+        done = [name for name in layers if kinds.get(name) == "point_cloud"]
+        for name in done:
+            self._active[name] = "point_cloud:criteria"
+        skipped = {name: "not a point cloud layer" if name in kinds else "layer not found"
+                   for name in layers if name not in done}
+        return OperationResult(done=done, skipped=skipped, error=None if done else "no point cloud layer to filter")
+
+    def clear_filters(self, layers: List[str]) -> OperationResult:
+        done = [name for name in layers if name in self._active]
+        for name in done:
+            self._active.pop(name, None)
+        return OperationResult(done=done, skipped={name: "not filtered" for name in layers if name not in done})
+
+    def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
+                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
+        extensions = {"vector": ".gpkg", "raster": ".tif", "point_cloud": ".laz"}
+        kinds = {layer.name: layer.layer_kind for layer in self.layers}
+        outputs = {name: f"{folder}/{name}{extensions.get(kinds[name], '')}" for name in layers if name in kinds}
+        return OperationResult(done=list(outputs), outputs=outputs,
+                               skipped={name: "layer not found" for name in layers if name not in kinds})
+
+    def get_filter_state(self) -> List[FilteredLayer]:
+        by_name = {layer.name: layer for layer in self.layers}
+        return [FilteredLayer(layer_id=by_name[name].layer_id, name=name, layer_kind=by_name[name].layer_kind,
+                              subset=expression, derived=by_name[name].layer_kind != "vector")
+                for name, expression in self._active.items() if name in by_name]
 
     def _with_active(self, layer: LayerSummary) -> LayerSummary:
         expr = self._active.get(layer.name, layer.active_filter_expression)

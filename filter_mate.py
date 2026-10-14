@@ -106,8 +106,10 @@ class FilterMate:
         self.menu = self.tr(u'&FilterMate')
         # Note: Menu name is hardcoded. Custom menu names may be added in future.
 
-        self.toolbar = self.iface.addToolBar(u'FilterMate')
-        self.toolbar.setObjectName(u'FilterMate')
+        # No iface under qgis_process (Processing only, see initProcessing).
+        self.toolbar = self.iface.addToolBar(u'FilterMate') if self.iface is not None else None
+        if self.toolbar is not None:
+            self.toolbar.setObjectName(u'FilterMate')
 
         # print "** INITIALIZING FilterMate"
 
@@ -353,7 +355,7 @@ class FilterMate:
 
             # Register FilterMate algorithms in the Processing Toolbox
             logger.debug("FilterMate.initGui: Registering Processing provider")
-            self._register_processing_provider()
+            self.initProcessing()
 
             logger.debug("FilterMate.initGui: Completed successfully")
 
@@ -747,6 +749,16 @@ class FilterMate:
             logger.warning("FilterMate: Extension system error: %s", e)
             # Extension failure must never block core FilterMate
 
+    def initProcessing(self):
+        """Register the Processing provider (called by QGIS for ``qgis_process``, and by initGui).
+
+        ``metadata.txt`` declares ``hasProcessingProvider=yes``: ``qgis_process``
+        loads the plugin without a GUI (``iface`` is None) and calls this method
+        only, so the FilterMate algorithms and models run from the command line.
+        """
+        if self.processing_provider is None:
+            self._register_processing_provider()
+
     def _register_processing_provider(self):
         """Register FilterMate's algorithms in the QGIS Processing Toolbox.
 
@@ -755,6 +767,10 @@ class FilterMate:
         try:
             from qgis.core import QgsApplication
             from .processing.provider import FilterMateProcessingProvider
+
+            if QgsApplication.processingRegistry().providerById("filtermate") is not None:
+                logger.debug("FilterMate: Processing provider already registered")
+                return
 
             self.processing_provider = FilterMateProcessingProvider()
             QgsApplication.processingRegistry().addProvider(self.processing_provider)

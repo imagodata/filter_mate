@@ -14,9 +14,16 @@ All notable changes to FilterMate will be documented in this file.
 - **Export of raster and point cloud layers as they are filtered**: GeoTIFF / COG (`QgsRasterFileWriter` + `gdal.Translate`), LAZ / LAS / COPC / GPKG / CSV (`QgsPointCloudLayerExporter`, `pdal` for COPC), from the EXPORTING list or the Export button of a raster / point cloud source.
 - Options `APP.OPTIONS.RASTER.enabled` and `APP.OPTIONS.CROSS_FILTER.*` (clip mode, max pixels, footprint resolution, cache size, pdal path). Raster and point cloud support are on by default.
 - `scripts/fm5_scenarios.py` (headless, 37 checks on a LiDAR HD tile) and `scripts/fm5_gui_check.py` (drives the real dock).
+- **Automation of FilterMate 5** (one implementation, `adapters/public_api/operations.py`, behind three surfaces — see `docs/AUTOMATION.md`):
+  - Processing: `cross_filter_from_raster`, `cross_filter_from_point_cloud`, `cross_filter_from_geometry`, `filter_point_cloud`, `clear_filters`, `apply_favorite`, `export_filtered_layers`; every filter declares an `OUTPUT` (layers handled) so it chains into the next step of a model.
+  - Four shipped models: extraction by area (any layers → GPKG / COG / LAZ), high vegetation near lines (LiDAR → COPC), parcels on gentle slopes (`native:slope` → raster range → minimum coverage), buildings missing from the LiDAR (class 6, Disjoint). Built by `scripts/build_processing_models.py`.
+  - `qgis_process`: the plugin implements `initProcessing()` and starts without `iface`, so its algorithms and models run from the command line; `apply_favorite` falls back to the favorites saved in the project file.
+  - Python API: `cross_filter` (source of any kind), `cross_filter_by_geometry`, `filter_point_clouds`, `clear_filters`, `export_layers`, `list_favorites`, `apply_favorite`, `get_filter_state`, signal `operation_completed`.
+  - REST API: `POST /filters/cross` accepts raster (`raster_selection`) and point cloud (`point_cloud_criteria`) sources; new `POST /filters/geometry`, `POST /filters/point-cloud`, `POST /filters/clear`, `GET /filters/state`, `POST /export` (written below a configured export root only); `POST /favorites/{id}/apply` replays raster / point cloud clips.
 
 ### Changed
 
+- `filtermate:batch_filter` runs on the main thread (`setSubsetString` is not thread-safe).
 - The experimental point cloud panel (4.10 dev, in FILTERING, which disabled EXPLORING) is replaced by the coverage mode controller; its known defects (input reset on reactivation, Z rounded to 2 decimals, statistics read once, filter never combined, shared history, export refused) are gone with it.
 
 ## [4.9.2] - 2026-09-14
