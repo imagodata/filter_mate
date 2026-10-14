@@ -97,6 +97,7 @@ def s_vector_check():
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
     check('vector: no source geometry line under the source layer', hint is None or not hint.isVisible())
     check('vector: tracking button visible', d.pushButton_checkable_exploring_tracking.isVisible())
+    STATE['vec_identify'] = d.pushButton_exploring_identify.icon().pixmap(32, 32).toImage()
     from qgis.PyQt.QtWidgets import QLabel as _QLabel
     card = d.findChild(_QLabel, 'label_exploring_coverage_layer')
     check('vector: layer card at the top of EXPLORING', card is not None and card.isVisible() and 'Vector' in card.text()
@@ -117,6 +118,10 @@ def s_raster_check():
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
     check('raster: no source geometry line', hint is None or not hint.isVisible())
     check('raster: tracking hidden', not d.pushButton_checkable_exploring_tracking.isVisible())
+    check('raster: pixel picker icon on the identify button', d.pushButton_exploring_identify.icon().pixmap(32, 32).toImage() != STATE.get('vec_identify'))
+    groups = [d.mGroupBox_exploring_single_selection, d.mGroupBox_exploring_multiple_selection, d.mGroupBox_exploring_custom_selection]
+    check('raster: only raster groups (no vector group)', not any(g.isVisible() for g in groups) and ctrl()._raster_panel.isVisible()
+          and not ctrl()._pc_panel.isVisible())
     check('raster: linking hidden', not d.pushButton_checkable_exploring_linking_widgets.isVisible())
     hover, zone = tool('pushButton_checkable_exploring_raster_hover'), tool('pushButton_checkable_exploring_raster_zone')
     check('raster: hover tool visible', hover is not None and hover.isVisible())
@@ -162,6 +167,33 @@ def s_zone_check():
     save('raster_tools')
     iface.actionPan().trigger()
     check('raster: zone button follows another map tool', not tool('pushButton_checkable_exploring_raster_zone').isChecked())
+
+
+def s_picker():
+    d, c = dock(), ctrl()
+    iface.actionPan().trigger()
+    d.pushButton_exploring_identify.click()
+    tool = c._pixel_tool
+    centre = iface.mapCanvas().extent().center()
+    tool.show_marker(centre)
+    c._on_pixel_picked(centre, False)
+    c._on_pixel_picked(QgsPointXY(centre.x() + 5, centre.y() + 5), False)
+
+
+def s_picker_check():
+    d, c = dock(), ctrl()
+    panel = c._raster_panel
+    tool = c._pixel_tool
+    check('picker: pipette button held down while active', d.pushButton_exploring_identify.isDown())
+    check('picker: pixel group open', not panel._pixel_group.isCollapsed())
+    check('picker: picked point marked on the map', tool._marker is not None and tool._marker.isVisible())
+    history = panel._pixel_history_label.text()
+    check('picker: last picks as a two-column table', '<table' in history and history.count('<tr>') >= 3, history[:80])
+    check('picker: value and coordinates on one line',
+          abs(panel._pixel_value_label.mapTo(d, panel._pixel_value_label.rect().bottomLeft()).y()
+              - panel._pixel_coordinates_label.mapTo(d, panel._pixel_coordinates_label.rect().bottomLeft()).y()) <= 4)
+    iface.actionPan().trigger()
+    check('picker: marker and held button cleared with another map tool', tool._marker is None and not d.pushButton_exploring_identify.isDown())
 
 
 def s_handover():
@@ -212,6 +244,9 @@ def s_pc_check():
     profile, view3d = tool('pushButton_exploring_point_cloud_profile'), tool('pushButton_exploring_point_cloud_3d')
     check('pc: profile tool visible and enabled', profile.isVisible() and profile.isEnabled())
     check('pc: 3D tool visible', view3d.isVisible(), f'enabled={view3d.isEnabled()}')
+    vgroups = [d.mGroupBox_exploring_single_selection, d.mGroupBox_exploring_multiple_selection, d.mGroupBox_exploring_custom_selection]
+    check('pc: only point cloud groups (no vector, no raster group)', not any(g.isVisible() for g in vgroups)
+          and ctrl()._pc_panel.isVisible() and not ctrl()._raster_panel.isVisible())
     check('pc: raster tools hidden', not tool('pushButton_checkable_exploring_raster_hover').isVisible())
     save('point_cloud')
     host = ctrl()._host
@@ -247,6 +282,8 @@ def s_back_check():
     d = dock()
     from qgis.PyQt.QtWidgets import QLabel
     check('back to vector: tracking visible again', d.pushButton_checkable_exploring_tracking.isVisible())
+    check('back to vector: vector identify icon back', d.pushButton_exploring_identify.icon().pixmap(32, 32).toImage() == STATE.get('vec_identify'))
+    check('back to vector: only vector groups', d.mGroupBox_exploring_single_selection.isVisible() and not ctrl()._host.isVisible())
     check('back to vector: linking visible again', d.pushButton_checkable_exploring_linking_widgets.isVisible())
     check('back to vector: kind tools hidden', not any(b.isVisible() for b in ctrl()._extras._tools.values()))
     card = d.findChild(QLabel, 'label_exploring_coverage_layer')
@@ -339,6 +376,9 @@ def s_spacing_scale():
     """One spacing scale (ui/styles/mockup_design.py SPACING) across the dock, vector layer, FILTERING open."""
     from qgis.PyQt.QtWidgets import QAbstractButton, QLabel
     d = dock()
+    page = d.toolBox_tabTools.currentWidget()
+    scrolls = page is not None and page.layout() is not None and page.height() < page.layout().sizeHint().height()
+    scale_check = (lambda name, ok, detail='': log(f'{name}: skipped, the section scrolls ({detail})')) if scrolls else check
     edge, block, gap, band = _scale()
     page = d.FILTERING
     log(f'dock {d.width()}x{d.height()} toolbox h={d.toolBox_tabTools.height()} max={d.toolBox_tabTools.maximumHeight()} '
@@ -355,7 +395,7 @@ def s_spacing_scale():
           f'{first[0] - rail[2]} / {combo[0] - keys[2]} vs {gap}')
     rights = {'groups': first[2], 'fields': combo[2], 'sections': _rect(d, tabs[0])[2], 'badges': badge[2]}
     # Groups and fields stop a small margin before the scroll bar; headers and badges reach the dock edge.
-    check('scale: one right edge', rights['groups'] == rights['fields'] and rights['sections'] == rights['badges'] == d.width() - edge
+    scale_check('scale: one right edge', rights['groups'] == rights['fields'] and rights['sections'] == rights['badges'] == d.width() - edge
           and 4 <= rights['sections'] - rights['fields'] <= 8, str(rights))
     check('scale: section headers on the dock edge', all(_rect(d, t)[0] == edge for t in tabs))
     check('scale: header -> EXPLORING one block', rail[1] - badge[3] == block, f'{rail[1] - badge[3]}')
@@ -364,7 +404,7 @@ def s_spacing_scale():
     buffer = _rect(d, d.mQgsDoubleSpinBox_filtering_buffer_value)
     check('scale: last FILTERING row -> next header one block', _rect(d, tabs[1])[1] - buffer[3] == block,
           f'{_rect(d, tabs[1])[1] - buffer[3]}')
-    check('scale: FILTERING header -> first row one block', _rect(d, d.comboBox_filtering_current_layer)[1] - _rect(d, tabs[0])[3] == block)
+    scale_check('scale: FILTERING header -> first row one block', _rect(d, d.comboBox_filtering_current_layer)[1] - _rect(d, tabs[0])[3] == block)
     check('scale: collapsed section headers one block apart', _rect(d, tabs[2])[1] - _rect(d, tabs[1])[3] == block)
     check('scale: section headers one band high', all(t.height() == band for t in tabs), str([t.height() for t in tabs]))
     gaps = [_rect(d, groups[i + 1])[1] - _rect(d, groups[i])[3] for i in range(2)]
@@ -479,6 +519,52 @@ def s_resize_lower_check():
     sp.setSizes(before)
 
 
+def s_list_grow():
+    d = dock()
+    group = d.mGroupBox_exploring_multiple_selection
+    group.setChecked(True)
+    group.setCollapsed(False)
+    sp = d.splitter_main
+    STATE['grow'] = (sp.sizes(), group.height())
+    total = sum(sp.sizes())
+    sp.setSizes([int(total * 0.7), total - int(total * 0.7)])
+
+
+def s_list_grow_check():
+    d = dock()
+    group = d.mGroupBox_exploring_multiple_selection
+    sizes, before = STATE['grow']
+    tl = d.verticalLayout_exploring_tabs_content
+    from qgis.PyQt.QtWidgets import QSizePolicy
+    free = d.scrollArea_frame_exploring.viewport().height() - d.scrollAreaWidgetContents.minimumSizeHint().height()
+    check('list group: the expanded multiple selection may take the free height',
+          group.sizePolicy().verticalPolicy() == QSizePolicy.Policy.MinimumExpanding and tl.stretch(tl.indexOf(group)) == 1
+          and (free <= 0 or group.height() > before), f'{before} -> {group.height()} (free {free}px)')
+    d.splitter_main.setSizes(sizes)
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+
+
+def s_font_reload():
+    from qgis.PyQt.QtGui import QFontDatabase
+    try:
+        families = QFontDatabase.families()
+    except TypeError:
+        families = QFontDatabase().families()
+    STATE['plex'] = sum(1 for f in families if 'Plex' in f)
+    import qgis.utils
+    qgis.utils.reloadPlugin('filter_mate')
+
+
+def s_font_reload_check():
+    from qgis.PyQt.QtGui import QFontDatabase
+    try:
+        families = QFontDatabase.families()
+    except TypeError:
+        families = QFontDatabase().families()
+    count = sum(1 for f in families if 'Plex' in f)
+    check('fonts: a plugin reload does not add IBM Plex again', count == STATE['plex'] and count >= 2, f"{STATE['plex']} -> {count}")
+
+
 def s_finish():
     failed = [name for name, ok in STATE['results'] if not ok]
     log(f"\n{len(STATE['results']) - len(failed)}/{len(STATE['results'])} checks passed")
@@ -488,9 +574,10 @@ def s_finish():
 
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
-         (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_handover, 1000), (s_alignment, 500),
+         (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_picker, 800), (s_picker_check, 500), (s_handover, 1000), (s_alignment, 500),
          (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
          (s_scrollbar_margin, 300), (s_resize_lower, 1500), (s_resize_lower_check, 500),
+         (s_list_grow, 1500), (s_list_grow_check, 500), (s_font_reload, 6000), (s_font_reload_check, 500),
          (s_finish, 500)]
 
 

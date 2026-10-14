@@ -120,6 +120,22 @@ def format_zone_statistics(minimum: Bound, maximum: Bound, mean: Bound, count: O
     return " · ".join(parts)
 
 
+def history_html(rows: Sequence[Tuple[str, str, int]], title: str) -> str:
+    """Last picks as a two-column table (coordinates left, value right), ``""`` without picks.
+
+    A band other than the first is named after the value (``198.400 · b2``).
+    """
+    if not rows:
+        return ""
+    from html import escape
+    lines = [f'<tr><td colspan="2" style="color:#8a8a8a;font-size:small">{escape(title)}</td></tr>']
+    for coordinates, value, band in rows:
+        shown = value if band == 1 else f"{value} · b{band}"
+        lines.append(f'<tr><td style="font-family:monospace">{escape(coordinates)}</td>'
+                     f'<td align="right" style="font-family:monospace">{escape(shown)}</td></tr>')
+    return '<table width="100%" cellspacing="0" cellpadding="1">' + "".join(lines) + "</table>"
+
+
 def extend_range(low: Bound, high: Bound, value: float) -> Tuple[Bound, Bound]:
     """Grow ``[low, high]`` so it contains ``value``.
 
@@ -346,14 +362,22 @@ class RasterExploringPanel(QWidget):
         self._pixel_value_label.setFont(font)
         self._pixel_value_label.setAccessibleName(self.tr("Pixel value of the current band"))
         self._pixel_value_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        group_layout.addWidget(self._pixel_value_label)
+        # Value and coordinates on one line, as in the mockup: big value left, X / Y right.
+        value_row = QHBoxLayout()
+        value_row.setContentsMargins(0, 0, 0, 0)
+        value_row.addWidget(self._pixel_value_label, 0, Qt.AlignmentFlag.AlignBottom)
+        value_row.addStretch(1)
         self._pixel_coordinates_label = QLabel("", group)
+        self._pixel_coordinates_label.setObjectName("label_raster_pixel_coordinates")
         self._pixel_coordinates_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        group_layout.addWidget(self._pixel_coordinates_label)
+        self._pixel_coordinates_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
+        value_row.addWidget(self._pixel_coordinates_label, 0, Qt.AlignmentFlag.AlignBottom)
+        group_layout.addLayout(value_row)
         self._pixel_bands_label = QLabel("", group)
         self._pixel_bands_label.setWordWrap(True)
         group_layout.addWidget(self._pixel_bands_label)
         self._pixel_history_label = QLabel("", group)
+        self._pixel_history_label.setTextFormat(Qt.TextFormat.RichText)
         self._pixel_history_label.setWordWrap(True)
         self._pixel_history_label.setToolTip(self.tr("Last {0} values picked").format(HISTORY_SIZE))
         group_layout.addWidget(self._pixel_history_label)
@@ -369,12 +393,16 @@ class RasterExploringPanel(QWidget):
         self._zone_label.setVisible(False)
         group_layout.addWidget(self._zone_label)
         help_label = QLabel(self.tr("Click on the map with the pixel picker. Ctrl+click extends the range to the value."), group)
+        help_label.setObjectName("label_raster_pixel_help")
         help_label.setWordWrap(True)
-        help_font = help_label.font()
-        help_font.setItalic(True)
-        help_label.setFont(help_font)
-        group_layout.addWidget(help_label)
+        help_label.setEnabled(False)  # muted caption in every theme
+        group_layout.insertWidget(group_layout.indexOf(self._pixel_bands_label), help_label)
         return group
+
+    def show_picker_active(self, active: bool) -> None:
+        """The pixel picker is on the map: the pixel group opens so the next click is seen."""
+        if active and hasattr(self._pixel_group, 'setCollapsed'):
+            self._pixel_group.setCollapsed(False)
 
     def _build_range_group(self) -> Any:
         self._range_group = self._make_group(self.tr("VALUE RANGE"), "mGroupBox_raster_value_range", checkable=True)
@@ -818,7 +846,7 @@ class RasterExploringPanel(QWidget):
         nodata = self.tr("NoData")
         self._pixel_value_label.setText(format_pixel_value(values.get(self.current_band()), self._decimals, nodata))
         digits = self._coordinate_decimals
-        self._pixel_coordinates_label.setText(f"X {x:.{digits}f}   Y {y:.{digits}f}")
+        self._pixel_coordinates_label.setText(f"X {x:.{digits}f} · Y {y:.{digits}f}")
         lines = []
         for band in sorted(values):
             info = self._band_info(band)
@@ -826,9 +854,9 @@ class RasterExploringPanel(QWidget):
             name = f"{band} — {info.name}" if info is not None and info.name else str(band)
             lines.append(f"{name}: {format_pixel_value(values[band], decimals, nodata)}")
         self._pixel_bands_label.setText("\n".join(lines))
-        history = []
+        rows = []
         for hx, hy, value, band in self._history:
             info = self._band_info(band)
             decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
-            history.append(f"{hx:.{digits}f}, {hy:.{digits}f}  →  {format_pixel_value(value, decimals, nodata)} (b{band})")
-        self._pixel_history_label.setText(self.tr("Last values:") + "\n" + "\n".join(history) if history else "")
+            rows.append((f"{hx:.{digits}f} · {hy:.{digits}f}", format_pixel_value(value, decimals, nodata), band))
+        self._pixel_history_label.setText(history_html(rows, self.tr("LAST PICKS")))

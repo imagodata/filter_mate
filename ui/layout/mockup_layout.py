@@ -724,6 +724,66 @@ def even_exploring_groups(dw: Any) -> bool:
     if not layout.property('fm_stretched'):
         layout.addStretch(1)  # without an expanding item, the surplus would widen every gap
         layout.setProperty('fm_stretched', True)
+    let_list_group_grow(dw)
+    return True
+
+
+def list_group_stretch(expanded: bool) -> tuple:
+    """``(group stretch, final spacer stretch)``: the expanded multiple selection takes the free height."""
+    return (1, 0) if expanded else (0, 1)
+
+
+class _ListGroupGrowth(QObject if QObject is not None else object):
+    """Follows the multiple selection group: expanded, it takes the free height of EXPLORING.
+
+    Event filter (Show / Resize / LayoutRequest), not ``collapsedStateChanged``: the dock
+    disconnects every slot of that signal when it rewires the groups.
+    """
+
+    def __init__(self, group: Any, layout: Any) -> None:
+        super().__init__(group)
+        self._group, self._layout = group, layout
+        self._expanded = None
+        group.installEventFilter(self)
+        self.apply()
+
+    def eventFilter(self, watched, event):  # noqa: N802 - Qt override
+        if event.type() in (QEvent.Type.Show, QEvent.Type.Hide, QEvent.Type.Resize, QEvent.Type.LayoutRequest):
+            self.apply()
+        return False
+
+    def apply(self) -> None:
+        try:
+            group, layout = self._group, self._layout
+            collapsed = group.isCollapsed() if hasattr(group, 'isCollapsed') else False
+            expanded = not collapsed and not group.isHidden()
+            if expanded == self._expanded:
+                return
+            self._expanded = expanded
+            from qgis.PyQt.QtWidgets import QSizePolicy
+            policy = QSizePolicy.Policy.MinimumExpanding if expanded else QSizePolicy.Policy.Maximum
+            group.setSizePolicy(group.sizePolicy().horizontalPolicy(), policy)
+            group_stretch, end_stretch = list_group_stretch(expanded)
+            layout.setStretch(layout.indexOf(group), group_stretch)
+            last = layout.count() - 1
+            if last >= 0 and layout.itemAt(last).spacerItem() is not None:
+                layout.setStretch(last, end_stretch)
+        except RuntimeError:
+            pass  # deleted (plugin closing)
+
+
+def let_list_group_grow(dw: Any) -> bool:
+    """The multiple selection group, when expanded, grows with EXPLORING (its feature list can use it).
+
+    The other groups keep their natural height (an empty band otherwise); the final spacer
+    takes the free height when the multiple selection is collapsed.
+    """
+    layout = getattr(dw, 'verticalLayout_exploring_tabs_content', None)
+    group = getattr(dw, 'mGroupBox_exploring_multiple_selection', None)
+    if layout is None or group is None or layout.indexOf(group) < 0 or dw.property('fm_list_group_grows'):
+        return False
+    dw._fm_list_group_growth = _ListGroupGrowth(group, layout)
+    dw.setProperty('fm_list_group_grows', True)
     return True
 
 

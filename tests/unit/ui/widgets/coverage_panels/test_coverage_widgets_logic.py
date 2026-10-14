@@ -413,3 +413,16 @@ class TestModulesImportUnderMocks:
         assert hasattr(hist, "RangeHistogramWidget")
         assert hasattr(raster, "RasterExploringPanel")
         assert hasattr(cloud, "PointCloudExploringPanel")
+
+
+class TestPixelHistory:
+    def test_empty_history(self):
+        assert raster.history_html([], "LAST PICKS") == ""
+
+    def test_two_columns_and_band(self):
+        html = raster.history_html([("572102 · 6278455", "198.400", 1), ("1 · 2", "3", 2)], "LAST PICKS")
+        assert html.count("<tr>") == 3 and 'align="right"' in html
+        assert "198.400</td>" in html and "3 · b2" in html and "LAST PICKS" in html
+
+    def test_escapes(self):
+        assert "&lt;" in raster.history_html([("<x>", "1", 1)], "T")

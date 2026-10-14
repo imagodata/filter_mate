@@ -318,12 +318,14 @@ class CoverageDockExtras(QObject):
         if kind_value == 'point_cloud':
             self._tools_enabled_by_action()
         self._refresh_icons()
+        self._guarded(self._set_kind_icons, kind_value)
 
     def show_vector(self, layer: Any = None) -> None:
         """Vector layer: its card, no kind tool, vector buttons back."""
         self._layer_id = None
         for step in (self.leave, self._hide_coverage_widgets, self._restore_vector_buttons):
             self._guarded(step)
+        self._guarded(self._set_kind_icons, 'vector')
         if layer is not None:
             self._guarded(self.ensure_card)
             self._guarded(self._update_card, layer, 'vector')
@@ -425,6 +427,27 @@ class CoverageDockExtras(QObject):
             return QgsUnitTypes.toAbbreviatedString(layer.crs().mapUnits())
         except Exception:
             return ''
+
+    def _set_kind_icons(self, kind_value: str) -> None:
+        """Icons of the shared EXPLORING buttons for the layer kind (mockup rails); vector icons back otherwise."""
+        from ..styles.mockup_design import KIND_BUTTON_ICONS, render_icon
+        dw = self.dockwidget
+        manager = getattr(dw, '_icon_manager', None)
+        dark = bool(getattr(manager, 'is_dark_mode', False))
+        swapped = set()
+        for names in KIND_BUTTON_ICONS.values():
+            swapped.update(names)
+        wanted = KIND_BUTTON_ICONS.get(kind_value, {})
+        for name in swapped:
+            button = getattr(dw, name, None)
+            if button is None:
+                continue
+            if name in wanted:
+                icon = render_icon(wanted[name], dark)
+                if icon is not None:
+                    button.setIcon(icon)
+            elif manager is not None and button.property('icon_name'):
+                button.setIcon(manager.get_icon(button.property('icon_name')))  # the vector icon
 
     def _hide_vector_buttons(self) -> None:
         dw = self.dockwidget
