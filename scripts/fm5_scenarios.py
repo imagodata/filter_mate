@@ -47,6 +47,12 @@ from filter_mate.core.domain.raster_filter_criteria import RasterSelection, Rast
 from filter_mate.core.services.cross_filter_service import CrossFilterService  # noqa: E402
 
 DATA, GPKG, TILE = sys.argv[1], sys.argv[2], sys.argv[3]
+
+# The plugin config is not loaded headless: turn the FilterMate 5 flags on.
+from filter_mate.config.config import ENV_VARS  # noqa: E402
+_options = ENV_VARS.setdefault('CONFIG_DATA', {}).setdefault('APP', {}).setdefault('OPTIONS', {})
+_options.setdefault('RASTER', {})['enabled'] = {'value': True}
+_options.setdefault('POINT_CLOUD', {})['enabled'] = {'value': True}
 OUT = os.path.join(DATA, 'out', 'scenarios')
 os.makedirs(OUT, exist_ok=True)
 cache.set_cache_root(os.path.join(DATA, 'out', 'cache'))
@@ -301,9 +307,33 @@ def s10_replay_on_reopen():
     registry().restore_all(project)
 
 
+# --- 11. favorites keep raster / point cloud clips --------------------------
+def s11_favorites():
+    from filter_mate.adapters.qgis.coverage_layers import favorites_bridge
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    cur_lhd = project.mapLayersByName('lhd')[0]
+    feats = list(cur_bat.getFeatures(QgsFeatureRequest().setLimit(5)))
+    request = CrossFilterRequest(cur_bat.id(), LayerKind.VECTOR,
+                                 targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER), TargetSpec(cur_lhd.id(), LayerKind.POINT_CLOUD)),
+                                 predicates=('Intersect',), buffer_value=2.0)
+    run('V->R+P for favorite', request, VectorSourceJob(cur_bat, feats))
+    cur_lhd.setSubsetString('Classification = 6')
+    expected = cur_lhd.pointCount()
+    entries = favorites_bridge.capture(project)
+    check('favorite captures raster + point cloud', len(entries) == 2, str([e['layer_name'] for e in entries]))
+    service.unfilter(cur_bat.id(), [cur_mnt.id(), cur_lhd.id()], {cur_mnt.id(): LayerKind.RASTER, cur_lhd.id(): LayerKind.POINT_CLOUD})
+    check('unfiltered before applying the favorite', cur_mnt.source().endswith('mnt_1m.tif') and cur_lhd.source() == TILE)
+    handled = favorites_bridge.apply(entries, service, project, synchronous=True)
+    check('favorite re-applies the clips', handled == 2 and cur_mnt.source().endswith('.vrt') and cur_lhd.source().endswith('.copc.laz')
+          and cur_lhd.subsetString() == 'Classification = 6', f"handled={handled} subset={cur_lhd.subsetString()}")
+    check('favorite point count identical', cur_lhd.pointCount() == expected, f"{cur_lhd.pointCount()} vs {expected}")
+    registry().restore_all(project)
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
-                 s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen):
+                 s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites):
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 
