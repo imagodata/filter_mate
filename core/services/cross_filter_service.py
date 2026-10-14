@@ -35,6 +35,7 @@ class CrossFilterService:
 
     def __init__(self, history: Optional[CrossOperationHistory] = None) -> None:
         self.history = history or CrossOperationHistory()
+        self.last_skipped: List[str] = []
         self._running = []
         self.replaying: set = set()
 
@@ -105,16 +106,28 @@ class CrossFilterService:
     # --- undo / redo / unfilter --------------------------------------------
 
     def _restore(self, pairs: Iterable, use_before: bool, project=None) -> List[str]:
+        """Restore one side of an operation, only on layers still in the other side's state.
+
+        A layer changed since the operation (another source filtered it again,
+        the user edited its subset) is left alone and listed in
+        :attr:`last_skipped`: undoing must never overwrite newer work.
+        """
         from qgis.core import QgsProject
-        from ...adapters.qgis.coverage_layers.snapshots import restore_snapshot
+        from ...adapters.qgis.coverage_layers.snapshots import restore_snapshot, take_snapshot
         project = project or QgsProject.instance()
         restored = []
+        self.last_skipped = []
         for before, after in pairs:
-            snapshot = before if use_before else after
+            snapshot, expected = (before, after) if use_before else (after, before)
             layer = project.mapLayer(snapshot.layer_id)
             if layer is None:
                 continue
             try:
+                current = take_snapshot(layer, LayerKind(snapshot.kind))
+                if not current.same_state(expected) and not current.same_state(snapshot):
+                    self.last_skipped.append(layer.name())
+                    logger.info(f"[FM5] '{layer.name()}' changed since this operation: left as is")
+                    continue
                 if restore_snapshot(layer, snapshot):
                     restored.append(snapshot.layer_id)
             except Exception as exc:

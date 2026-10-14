@@ -301,7 +301,8 @@ def s_back_to_vector_check():
 
 def s_export():
     layer('lhd').setSubsetString('Classification = 9')
-    STATE['export_task'] = controller().export_coverage_layers([layer('mnt').id(), layer('lhd').id()], OUT)
+    STATE['export_task'] = controller().export_coverage_layers([layer('mnt').id(), layer('lhd').id()], OUT, None,
+                                                               os.path.join(OUT, 'export.zip'))
     check('export task started', STATE['export_task'] is not None)
 
 
@@ -320,6 +321,10 @@ def s_export_check():
     results = getattr(controller(), 'last_export_results', None) or []
     check('export raster + point cloud (background task)', len(results) == 2 and all(r.success for r in results),
           str([(r.path, r.message) for r in results]))
+    import zipfile
+    archive = os.path.join(OUT, 'export_raster_lidar.zip')
+    names = zipfile.ZipFile(archive).namelist() if os.path.exists(archive) else []
+    check('export zip of raster + point cloud', sorted(names) == ['lhd.laz', 'mnt.tif'], str(names))
     layer('lhd').setSubsetString('')
 
 

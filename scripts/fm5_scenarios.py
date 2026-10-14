@@ -443,11 +443,37 @@ def s15_rest_api_accessor():
     registry().restore_all(project)
 
 
+# --- 16. undo never overwrites a layer changed by another source ---------------
+def s16_undo_keeps_newer_changes():
+    from filter_mate.adapters.qgis.coverage_layers.snapshots import take_snapshot
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    cur_lhd = project.mapLayersByName('lhd')[0]
+    feats = list(cur_bat.getFeatures(QgsFeatureRequest().setLimit(5)))
+    run('V->R (source batiment)', CrossFilterRequest(cur_bat.id(), LayerKind.VECTOR,
+        targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),), predicates=('Intersect',), buffer_value=2.0),
+        VectorSourceJob(cur_bat, feats))
+    first_clip = cur_mnt.source()
+    before = take_snapshot(cur_lhd, LayerKind.POINT_CLOUD)
+    cur_lhd.setSubsetString('Classification = 5')
+    run('P->R (source lhd)', CrossFilterRequest(cur_lhd.id(), LayerKind.POINT_CLOUD,
+        targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),), predicates=('Intersect',)),
+        PointCloudSourceJob(cur_lhd, 2.0, before=before))
+    second_clip = cur_mnt.source()
+    service.undo(cur_bat.id())
+    check('second source changed the raster', second_clip != first_clip)
+    check('undo of the older source leaves the newer clip', cur_mnt.source() == second_clip and 'mnt' in service.last_skipped,
+          f"skipped={service.last_skipped}")
+    service.undo(cur_lhd.id())
+    check('undo of the newer source goes back to the first clip', cur_mnt.source() == first_clip and cur_lhd.subsetString() == '')
+    registry().restore_all(project)
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
                  s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites,
                  s12_refilter_and_operators, s13_processing, s14_raster_selection_replay,
-                 s15_rest_api_accessor):
+                 s15_rest_api_accessor, s16_undo_keeps_newer_changes):
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 

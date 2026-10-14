@@ -6722,7 +6722,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                         crs = QgsCoordinateReferenceSystem.fromWkt(exporting_props['PROJECTION_TO_EXPORT'])
                     # Started when the vector export really starts (after the
                     # "preserve groups" dialog, which can still be canceled).
-                    self._pending_coverage_export = (coverage_ids, folder or None, crs)
+                    zip_path = exporting_props.get('ZIP_TO_EXPORT', '') if exporting_props.get('HAS_ZIP_TO_EXPORT') else ''
+                    self._pending_coverage_export = (coverage_ids, folder or None, crs, zip_path or None)
                     # The vector export skips raster / point cloud layers itself
                     # (TaskParameterBuilder.build_export_params).
                     layers_to_export = vector_ids

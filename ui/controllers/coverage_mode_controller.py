@@ -1179,7 +1179,11 @@ class CoverageModeController(BaseController):
         self._finish_restore(restored)
 
     def _finish_restore(self, layer_ids: List[str]) -> None:
-        show_info, _ = _feedback()
+        show_info, show_warning = _feedback()
+        skipped = list(getattr(self.service, 'last_skipped', []) or [])
+        if skipped:
+            show_warning(self.tr("Changed since, left as is: {0}").format(', '.join(skipped)))
+            self.service.last_skipped = []
         for layer_id in layer_ids or []:
             self._refresh_canvas(self._map_layer(layer_id))
         self._refresh_counts(self._active_layer)
@@ -1188,7 +1192,8 @@ class CoverageModeController(BaseController):
 
     # === Export ===
 
-    def _run_export(self, layer_ids: List[str], folder: Optional[str] = None, crs: Any = None) -> Any:
+    def _run_export(self, layer_ids: List[str], folder: Optional[str] = None, crs: Any = None,
+                    zip_path: Optional[str] = None) -> Any:
         """Export coverage layers as they are filtered, in a background task.
 
         Returns:
@@ -1224,6 +1229,10 @@ class CoverageModeController(BaseController):
         def done(results):
             written = [r.path for r in results if r.success]
             failed = [f"{r.path}: {r.message}" for r in results if not r.success]
+            if zip_path and written:
+                archive = self._zip_exports(zip_path, written)
+                if archive:
+                    written.append(archive)
             if written:
                 show_info(self.tr("Exported: {0}").format(', '.join(written)))
             if failed:
@@ -1368,9 +1377,32 @@ class CoverageModeController(BaseController):
         request.setLimit(MAX_SOURCE_FEATURES)
         return [f for f in source.getFeatures(request) if f.hasGeometry()]
 
-    def export_coverage_layers(self, layer_ids: List[str], folder: Optional[str], crs: Any = None) -> Any:
+    def export_coverage_layers(self, layer_ids: List[str], folder: Optional[str], crs: Any = None,
+                               zip_path: Optional[str] = None) -> Any:
         """Export the raster / point cloud layers checked in EXPORTING (asks for a folder when None)."""
-        return self._run_export(layer_ids, folder or None, crs)
+        return self._run_export(layer_ids, folder or None, crs, zip_path)
+
+    @staticmethod
+    def _zip_exports(zip_path: str, files: List[str]) -> str:
+        """Archive the exported raster / point cloud files next to the vector zip.
+
+        The vector export writes its own archive in another task: these files
+        go to ``<name>_raster_lidar.zip`` instead of racing for the same file.
+        """
+        import os
+        import zipfile
+        base = zip_path[:-4] if zip_path.lower().endswith('.zip') else zip_path
+        archive = f"{base}_raster_lidar.zip"
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(archive)) or '.', exist_ok=True)
+            with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_STORED) as handle:
+                for path in files:
+                    if os.path.isfile(path):
+                        handle.write(path, os.path.basename(path))
+            return archive
+        except OSError as exc:
+            logger.warning(f"[FM5] raster / point cloud zip not written: {exc}")
+            return ''
 
     # === Undo / redo buttons ===
 
