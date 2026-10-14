@@ -107,214 +107,322 @@
     </message>
 </context>
 <context>
-    <name>CoverageModeController</name>
+    <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="164"/>
-        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
-        <translation>Memulihkan filter {0} layer raster / awan titik…</translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <source>1 band</source>
+        <translation>1 band</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="378"/>
-        <source>cov. ≥ </source>
-        <translation>cak. ≥ </translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="262"/>
+        <source>{0} bands</source>
+        <translation>{0} band</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="379"/>
-        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
-        <translation>Bagian minimum target poligon di dalam geometri sumber (0 = tumpang tindih apa pun). Dipakai saat sumber berupa raster atau awan titik.</translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="263"/>
+        <source>{0} points</source>
+        <translation>{0} titik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="207"/>
+        <source>Source geometry: the selected pixels, vectorized</source>
+        <translation type="obsolete">Geometri sumber: piksel terpilih, divektorkan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="208"/>
+        <source>Source geometry: the footprint of the kept points</source>
+        <translation type="obsolete">Geometri sumber: jejak titik yang dipertahankan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="209"/>
+        <source>Source geometry: the features selected in EXPLORING</source>
+        <translation type="obsolete">Geometri sumber: fitur yang dipilih di EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Value under the cursor: follow the pixel value of the current band while moving over the map</source>
+        <translation>Nilai di bawah kursor: ikuti nilai piksel band saat ini saat bergerak di peta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band</source>
+        <translation>Statistik persegi panjang: seret di peta untuk membaca minimum, maksimum, dan rata-rata band saat ini</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Elevation profile: open the QGIS elevation profile of the map</source>
+        <translation>Profil elevasi: buka profil elevasi QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>3D view: open a new QGIS 3D map view</source>
+        <translation>Tampilan 3D: buka tampilan peta 3D QGIS baru</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="264"/>
+        <source>no feature</source>
+        <translation>tidak ada fitur</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="265"/>
+        <source>{0} feature(s)</source>
+        <translation>{0} fitur</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="266"/>
+        <source>every pixel</source>
+        <translation>semua piksel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="267"/>
+        <source>{0} class(es)</source>
+        <translation>{0} kelas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="268"/>
+        <source>expression</source>
+        <translation>ekspresi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="269"/>
+        <source>{0} features</source>
+        <translation>{0} fitur</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <source>Vector</source>
+        <translation>Vektor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
         <source>Point cloud</source>
         <translation>Awan titik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
+        <source>Kept points</source>
+        <translation>Titik yang dipertahankan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="355"/>
+        <source>Selection → source geometry</source>
+        <translation>Seleksi → geometri sumber</translation>
+    </message>
+</context>
+<context>
+    <name>CoverageModeController</name>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="165"/>
+        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
+        <translation>Memulihkan filter {0} layer raster / awan titik…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="395"/>
+        <source>cov. ≥ </source>
+        <translation>cak. ≥ </translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="396"/>
+        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
+        <translation>Bagian minimum target poligon di dalam geometri sumber (0 = tumpang tindih apa pun). Dipakai saat sumber berupa raster atau awan titik.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <source>Raster</source>
+        <translation>Raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <source>Point cloud</source>
+        <translation>Awan titik</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>Layer {0}: seleksi di EXPLORING, relasi di FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="471"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="502"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Pemilih piksel: klik peta untuk membaca nilai setiap pita (Ctrl+klik memperluas rentang)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
         <source>Zoom to the layer</source>
         <translation>Zoom ke layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="473"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="504"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Pratinjau: sembunyikan piksel di luar seleksi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="475"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="506"/>
         <source>Not used for raster layers</source>
         <translation>Tidak dipakai untuk layer raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="476"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="507"/>
         <source>Reset the raster selection</source>
         <translation>Atur ulang seleksi raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="510"/>
         <source>Identify points on the map</source>
         <translation>Identifikasi titik pada peta</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="481"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="512"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Pratinjau langsung: tampilkan hanya titik yang dipertahankan oleh seleksi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="483"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="514"/>
         <source>Not used for point cloud layers</source>
         <translation>Tidak dipakai untuk layer awan titik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="484"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
         <source>Reset the point cloud criteria</source>
         <translation>Atur ulang kriteria awan titik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="641"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="672"/>
         <source>Invalid raster calculator expression</source>
         <translation>Ekspresi kalkulator raster tidak valid</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="679"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="710"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL tidak ditemukan: tinggi di atas DTM memerlukan berkas eksekusi pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="999"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Tugas FilterMate masih berjalan: tunggu hingga selesai</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="984"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1015"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Tugas FilterMate gagal: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1048"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Pilih piksel terlebih dahulu: rentang nilai, kelas, atau ekspresi raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1026"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1057"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster difilter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1039"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Ekspresi awan titik ditolak: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1042"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1073"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Pilih titik terlebih dahulu: kelas, rentang atribut, atau ekspresi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1050"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1081"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Awan titik difilter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1114"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1145"/>
         <source>Filter not applied: {0}</source>
         <translation>Filter tidak diterapkan: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>canceled</source>
         <translation>dibatalkan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1149"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} target difilter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1120"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1151"/>
         <source>{0} failed: {1}</source>
         <translation>{0} gagal: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1129"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1160"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: memfilter dari '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1185"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1216"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Telah berubah sejak itu, dibiarkan apa adanya: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1191"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1222"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} layer dipulihkan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1225"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1256"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' tidak diekspor: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1237"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
         <source>Exported: {0}</source>
         <translation>Diekspor: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1239"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1270"/>
         <source>Export failed: {0}</source>
         <translation>Ekspor gagal: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1246"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1277"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Mengekspor {0} layer…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1252"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1283"/>
         <source>Export folder</source>
         <translation>Folder ekspor</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1324"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1355"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Target raster / awan titik dilewati: tidak ada fitur sumber yang dipilih di EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Target raster / awan titik tidak difilter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1349"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1380"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} target raster / awan titik difilter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1465"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Pilih raster DTM yang dipakai untuk tinggi di atas tanah</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1442"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1473"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Tinggi di atas tanah tidak dihitung: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1454"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1485"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Menghitung tinggi di atas '{0}' dengan PDAL…</translation>
     </message>
@@ -1218,27 +1326,27 @@ Klik indikator ★ dan pilih 'Tambahkan filter saat ini ke favorit' untuk menyim
         <translation>Kembalikan konfigurasi default dan hapus database SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1421"/>
+        <location filename="../filter_mate.py" line="1413"/>
         <source>Reset Configuration</source>
         <translation>Reset Konfigurasi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1444"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfigurasi berhasil direset.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1449"/>
+        <location filename="../filter_mate.py" line="1441"/>
         <source>Default configuration file not found.</source>
         <translation>File konfigurasi default tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1470"/>
+        <location filename="../filter_mate.py" line="1462"/>
         <source>Database deleted: {filename}</source>
         <translation>Database dihapus: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1484"/>
+        <location filename="../filter_mate.py" line="1476"/>
         <source>Restart required</source>
         <translation>Perlu restart</translation>
     </message>
@@ -1389,7 +1497,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1421"/>
+        <location filename="../filter_mate.py" line="1413"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1406,7 +1514,7 @@ Ini akan:
 QGIS harus dimulai ulang untuk menerapkan perubahan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1484"/>
+        <location filename="../filter_mate.py" line="1476"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1425,7 +1533,7 @@ Silakan mulai ulang QGIS untuk menerapkan perubahan.</translation>
         <translation>{count} lapisan referensi tidak dimuat ({layers_list}). Menggunakan tampilan cadangan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1475"/>
+        <location filename="../filter_mate.py" line="1467"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Tidak dapat menghapus {filename}: {e}</translation>
     </message>
@@ -1435,71 +1543,71 @@ Silakan mulai ulang QGIS untuk menerapkan perubahan.</translation>
         <translation type="obsolete">Kesalahan saat reset: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1527"/>
+        <location filename="../filter_mate.py" line="1519"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Terima kasih telah menggunakan &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Bergabunglah dengan komunitas Discord kami untuk:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Mendapatkan bantuan dan dukungan&lt;/li&gt;&lt;li&gt;Melaporkan bug dan masalah&lt;/li&gt;&lt;li&gt;Menyarankan fitur baru&lt;/li&gt;&lt;li&gt;Berbagi tips dengan pengguna lain&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1543"/>
+        <location filename="../filter_mate.py" line="1535"/>
         <source>  Join us on Discord</source>
         <translation>  Bergabung di Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1563"/>
+        <location filename="../filter_mate.py" line="1555"/>
         <source>Don&apos;t show this again</source>
         <translation>Jangan tampilkan lagi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1566"/>
+        <location filename="../filter_mate.py" line="1558"/>
         <source>Close</source>
         <translation>Tutup</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1632"/>
+        <location filename="../filter_mate.py" line="1624"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Kesalahan memuat plugin: {0}. Periksa konsol Python QGIS untuk detail.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6922"/>
+        <location filename="../filter_mate_dockwidget.py" line="6932"/>
         <source>Current layer: {0}</source>
         <translation>Lapisan saat ini: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6924"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>No layer selected</source>
         <translation>Tidak ada lapisan dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6944"/>
         <source>Selected layers:
 {0}</source>
         <translation>Lapisan terpilih:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6944"/>
         <source>No layers selected</source>
         <translation>Tidak ada lapisan dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6954"/>
+        <location filename="../filter_mate_dockwidget.py" line="6964"/>
         <source>No expression defined</source>
         <translation>Tidak ada ekspresi didefinisikan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6966"/>
+        <location filename="../filter_mate_dockwidget.py" line="6976"/>
         <source>Display expression: {0}</source>
         <translation>Ekspresi tampilan: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6981"/>
+        <location filename="../filter_mate_dockwidget.py" line="6991"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID Fitur: {0}
 Atribut pertama: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1493"/>
+        <location filename="../filter_mate.py" line="1485"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Konfigurasi tidak dapat diatur ulang. Periksa apakah folder plugin dapat ditulisi, lalu coba lagi. Detail ada di filtermate.log.</translation>
     </message>
@@ -1547,62 +1655,62 @@ Atribut pertama: {1}</translation>
         <translation>Tidak dapat menjalankan {0}: inisialisasi widget gagal.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2426"/>
+        <location filename="../filter_mate_app.py" line="2424"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Tidak dapat {0}: lapisan tidak valid atau sumber tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2563"/>
+        <location filename="../filter_mate_app.py" line="2561"/>
         <source>All filters cleared - </source>
         <translation>Semua filter dihapus - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2564"/>
+        <location filename="../filter_mate_app.py" line="2562"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} fitur terlihat di lapisan utama</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2572"/>
+        <location filename="../filter_mate_app.py" line="2570"/>
         <source>Error: result handler missing</source>
         <translation>Kesalahan: penangan hasil hilang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2585"/>
+        <location filename="../filter_mate_app.py" line="2583"/>
         <source>Error during filtering: {0}</source>
         <translation>Kesalahan saat filtering: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2707"/>
+        <location filename="../filter_mate_app.py" line="2705"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} favorit yatim dipulihkan: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2844"/>
+        <location filename="../filter_mate_app.py" line="2840"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Pemuatan lapisan gagal - klik untuk coba lagi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2900"/>
+        <location filename="../filter_mate_app.py" line="2896"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} lapisan berhasil dimuat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1865"/>
+        <location filename="../filter_mate_app.py" line="1863"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1867"/>
+        <location filename="../filter_mate_app.py" line="1865"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1868"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1872"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1615,22 +1723,22 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1882"/>
+        <location filename="../filter_mate_app.py" line="1880"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1889"/>
+        <location filename="../filter_mate_app.py" line="1887"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1896"/>
+        <location filename="../filter_mate_app.py" line="1894"/>
         <source>Cancel</source>
         <translation>Batal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1920"/>
+        <location filename="../filter_mate_app.py" line="1918"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
@@ -1648,7 +1756,7 @@ What would you like to do?</translation>
         <translation>Kesalahan inisialisasi: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="997"/>
+        <location filename="../filter_mate_dockwidget.py" line="1000"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Konfigurasi UI tidak lengkap - periksa log</translation>
     </message>
@@ -1658,458 +1766,463 @@ What would you like to do?</translation>
         <translation type="obsolete">Kesalahan dimensi UI: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1431"/>
+        <location filename="../filter_mate_dockwidget.py" line="1449"/>
         <source>Favorites manager not available</source>
         <translation>Manajer favorit tidak tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1450"/>
+        <location filename="../filter_mate_dockwidget.py" line="1470"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} Favorit tersimpan
 Klik untuk menerapkan atau mengelola</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1458"/>
+        <location filename="../filter_mate_dockwidget.py" line="1473"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Tidak ada favorit tersimpan
 Klik untuk menambah filter saat ini</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1482"/>
+        <location filename="../filter_mate_dockwidget.py" line="1493"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Backend {0} dipaksa untuk {1} lapisan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget.py" line="1579"/>
         <source>Backend controller not available</source>
         <translation>Pengontrol backend tidak tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1506"/>
+        <location filename="../filter_mate_dockwidget.py" line="1517"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Pembersihan otomatis PostgreSQL diaktifkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1507"/>
+        <location filename="../filter_mate_dockwidget.py" line="1518"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Pembersihan otomatis PostgreSQL dinonaktifkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1513"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>View sesi PostgreSQL dibersihkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1513"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Tidak ada view untuk dibersihkan atau pembersihan gagal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>No PostgreSQL connection available</source>
         <translation>Tidak ada koneksi PostgreSQL tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1530"/>
+        <location filename="../filter_mate_dockwidget.py" line="1541"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Skema memiliki {0} view dari sesi lain.
 Tetap hapus?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1531"/>
+        <location filename="../filter_mate_dockwidget.py" line="1542"/>
         <source>Other Sessions Active</source>
         <translation>Sesi Lain Aktif</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1533"/>
+        <location filename="../filter_mate_dockwidget.py" line="1544"/>
         <source>Schema cleanup cancelled</source>
         <translation>Pembersihan skema dibatalkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1538"/>
+        <location filename="../filter_mate_dockwidget.py" line="1549"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Skema '{0}' berhasil dihapus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1540"/>
+        <location filename="../filter_mate_dockwidget.py" line="1551"/>
         <source>Schema cleanup failed</source>
         <translation>Pembersihan skema gagal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget.py" line="1577"/>
         <source>PostgreSQL Session Info</source>
         <translation>Info Sesi PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema disesuaikan: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Dark mode</source>
         <translation>Mode gelap</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Light mode</source>
         <translation>Mode terang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4005"/>
+        <location filename="../filter_mate_dockwidget.py" line="4016"/>
         <source>Selected features have no geometry.</source>
         <translation>Fitur terpilih tidak memiliki geometri.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4024"/>
+        <location filename="../filter_mate_dockwidget.py" line="4035"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Tidak ada fitur dipilih. Pilih fitur dari daftar dropdown.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5079"/>
+        <location filename="../filter_mate_dockwidget.py" line="5100"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Lapisan terpilih tidak valid atau sumbernya tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5816"/>
+        <location filename="../filter_mate_dockwidget.py" line="5837"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Buffer negatif (erosi): menyusutkan poligon ke dalam</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5819"/>
+        <location filename="../filter_mate_dockwidget.py" line="5840"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Nilai buffer dalam meter (positif=perluas, negatif=susutkan poligon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6293"/>
+        <location filename="../filter_mate_dockwidget.py" line="6314"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin diaktifkan dengan {0} lapisan vektor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6376"/>
+        <location filename="../filter_mate_dockwidget.py" line="6395"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Tidak dapat memuat ulang plugin secara otomatis.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6378"/>
+        <location filename="../filter_mate_dockwidget.py" line="6397"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Kesalahan memuat ulang plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6450"/>
+        <location filename="../filter_mate_dockwidget.py" line="6469"/>
         <source>Layer properties reset to defaults</source>
         <translation>Properti lapisan direset ke default</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6451"/>
+        <location filename="../filter_mate_dockwidget.py" line="6470"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Kesalahan mereset properti lapisan: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="864"/>
+        <location filename="../filter_mate_dockwidget.py" line="867"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="865"/>
+        <location filename="../filter_mate_dockwidget.py" line="868"/>
         <source>Undo the last filter</source>
         <translation>Urungkan filter terakhir</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="866"/>
+        <location filename="../filter_mate_dockwidget.py" line="869"/>
         <source>Redo the last filter</source>
         <translation>Ulangi filter terakhir</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
         <source>Remove the filters</source>
         <translation>Hapus filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
         <source>Export the layers</source>
         <translation>Ekspor layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
         <source>About FilterMate</source>
         <translation>Tentang FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
         <source>Identify the selected features</source>
         <translation>Identifikasi fitur terpilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>Zoom to the selected features</source>
         <translation>Zoom ke fitur terpilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>Select the features on the map</source>
         <translation>Pilih fitur pada peta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Follow the features on the map</source>
         <translation>Ikuti fitur pada peta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Link the three selection modes</source>
         <translation>Tautkan ketiga mode seleksi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Reset the layer properties</source>
         <translation>Atur ulang properti layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>Follow the current layer</source>
         <translation>Ikuti layer saat ini</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>Layers to filter</source>
         <translation>Layer yang akan difilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Combine with the existing filter</source>
         <translation>Gabungkan dengan filter yang ada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Geometric predicates</source>
         <translation>Predikat geometri</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Buffer distance</source>
         <translation>Jarak buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Buffer type</source>
         <translation>Tipe buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Layers to export</source>
         <translation>Layer yang akan diekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Projection of the export</source>
         <translation>Proyeksi ekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Export the styles</source>
         <translation>Ekspor gaya</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Export format</source>
         <translation>Format ekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Output folder</source>
         <translation>Folder keluaran</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Zip the export</source>
         <translation>Kompres ekspor ke zip</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1001"/>
+        <location filename="../filter_mate_dockwidget.py" line="1004"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Tata letak panel tidak dapat diterapkan; ukuran default dipakai. Detail ada di filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="6549"/>
+        <source>Vector</source>
+        <translation>Vektor</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="54"/>
         <source>FilterMate</source>
-        <translation type="obsolete">FilterMate</translation>
+        <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="775"/>
         <source>SINGLE SELECTION</source>
-        <translation type="obsolete">SELEKSI TUNGGAL</translation>
+        <translation>SELEKSI TUNGGAL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="950"/>
         <source>MULTIPLE SELECTION</source>
-        <translation type="obsolete">SELEKSI BERGANDA</translation>
+        <translation>SELEKSI BERGANDA</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1109"/>
         <source>CUSTOM SELECTION</source>
-        <translation type="obsolete">SELEKSI KUSTOM</translation>
+        <translation>SELEKSI KUSTOM</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1371"/>
         <source>FILTERING</source>
-        <translation type="obsolete">FILTER</translation>
+        <translation>FILTER</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2644"/>
         <source>EXPORTING</source>
-        <translation type="obsolete">EKSPOR</translation>
+        <translation>EKSPOR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3476"/>
         <source>CONFIGURATION</source>
-        <translation type="obsolete">KONFIGURASI</translation>
+        <translation>KONFIGURASI</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3222"/>
         <source>Select CRS for export</source>
-        <translation type="obsolete">Pilih CRS untuk ekspor</translation>
+        <translation>Pilih CRS untuk ekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3744"/>
         <source>Export</source>
-        <translation type="obsolete">Ekspor</translation>
+        <translation>Ekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2330"/>
         <source>AND</source>
-        <translation type="obsolete">DAN</translation>
+        <translation>DAN</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2335"/>
         <source>AND NOT</source>
-        <translation type="obsolete">DAN BUKAN</translation>
+        <translation>DAN BUKAN</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2340"/>
         <source>OR</source>
-        <translation type="obsolete">ATAU</translation>
+        <translation>ATAU</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3277"/>
         <source>QML</source>
-        <translation type="obsolete">QML</translation>
+        <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3282"/>
         <source>SLD</source>
-        <translation type="obsolete">SLD</translation>
+        <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2533"/>
         <source> m</source>
-        <translation type="obsolete"> m</translation>
+        <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2406"/>
         <source>, </source>
-        <translation type="obsolete">, </translation>
+        <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1571"/>
         <source>Multi-layer filtering</source>
-        <translation type="obsolete">Filter multi-layer</translation>
+        <translation>Filter multi-layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1658"/>
         <source>Additive filtering for the selected layer</source>
-        <translation type="obsolete">Filter aditif untuk layer yang dipilih</translation>
+        <translation>Filter aditif untuk layer yang dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1944"/>
         <source>Geospatial filtering</source>
-        <translation type="obsolete">Filter geospasial</translation>
+        <translation>Filter geospasial</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2034"/>
         <source>Buffer</source>
-        <translation type="obsolete">Buffer</translation>
+        <translation>Buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2279"/>
         <source>Expression layer</source>
-        <translation type="obsolete">Layer ekspresi</translation>
+        <translation>Layer ekspresi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2391"/>
         <source>Geometric predicate</source>
-        <translation type="obsolete">Predikat geometri</translation>
+        <translation>Predikat geometri</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3322"/>
         <source>Output format</source>
-        <translation type="obsolete">Format output</translation>
+        <translation>Format output</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3580"/>
         <source>Filter</source>
-        <translation type="obsolete">Filter</translation>
+        <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3642"/>
         <source>Reset</source>
-        <translation type="obsolete">Reset</translation>
+        <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2748"/>
         <source>Layers to export</source>
-        <translation type="obsolete">Layer untuk diekspor</translation>
+        <translation>Layer untuk diekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2829"/>
         <source>Layers projection</source>
-        <translation type="obsolete">Proyeksi layer</translation>
+        <translation>Proyeksi layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2913"/>
         <source>Save styles</source>
-        <translation type="obsolete">Simpan gaya</translation>
+        <translation>Simpan gaya</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2994"/>
         <source>Datatype export</source>
-        <translation type="obsolete">Ekspor tipe data</translation>
+        <translation>Ekspor tipe data</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3075"/>
         <source>Name of file/directory</source>
-        <translation type="obsolete">Nama file/direktori</translation>
+        <translation>Nama file/direktori</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2202"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">Gunakan sentroid alih-alih geometri penuh untuk lapisan sumber (lebih cepat untuk poligon kompleks)</translation>
+        <translation>Gunakan sentroid alih-alih geometri penuh untuk lapisan sumber (lebih cepat untuk poligon kompleks)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2518"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">Nilai buffer dalam meter (positif=perluas, negatif=susutkan poligon)</translation>
+        <translation>Nilai buffer dalam meter (positif=perluas, negatif=susutkan poligon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2606"/>
         <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">Jumlah segmen untuk presisi buffer</translation>
+        <translation>Jumlah segmen untuk presisi buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
         <source>Mode batch</source>
-        <translation type="obsolete">Mode batch</translation>
+        <translation>Mode batch</translation>
     </message>
 </context>
 <context>
@@ -2378,182 +2491,182 @@ Pastikan tabel PostgreSQL memiliki PRIMARY KEY yang didefinisikan.</translation>
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="402"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Terapkan ke ubin lain dari dataset</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="408"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
         <source>CLASSES</source>
         <translation>KELAS</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="413"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="421"/>
         <source>Ground</source>
         <translation>Tanah</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="414"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="422"/>
         <source>Vegetation</source>
         <translation>Vegetasi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="415"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="423"/>
         <source>Buildings</source>
         <translation>Bangunan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="424"/>
         <source>Above ground</source>
         <translation>Di atas tanah</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="417"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
         <source>Water</source>
         <translation>Air</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="418"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="426"/>
         <source>Without noise</source>
         <translation>Tanpa noise</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
         <source>Check only these classes</source>
         <translation>Centang hanya kelas ini</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="432"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="441"/>
         <source>All</source>
         <translation>Semua</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="442"/>
         <source>None</source>
         <translation>Tidak ada</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="443"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="456"/>
         <source>Point classes</source>
         <translation>Kelas titik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="459"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
         <source>ATTRIBUTE RANGES</source>
         <translation>RENTANG ATRIBUT</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="465"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="480"/>
         <source>Z (m)</source>
         <translation>Z (m)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="466"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
         <source>Lowest elevation kept</source>
         <translation>Elevasi terendah yang dipertahankan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="482"/>
         <source>Highest elevation kept</source>
         <translation>Elevasi tertinggi yang dipertahankan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="475"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
         <source>Intensity</source>
         <translation>Intensitas</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="476"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="491"/>
         <source>Lowest intensity kept</source>
         <translation>Intensitas terendah yang dipertahankan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="477"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="492"/>
         <source>Highest intensity kept</source>
         <translation>Intensitas tertinggi yang dipertahankan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
         <source>Return</source>
         <translation>Pantulan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="505"/>
         <source>Echo of the laser pulse kept</source>
         <translation>Gema pulsa laser yang dipertahankan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="495"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
         <source>Height above DTM ≥</source>
         <translation>Tinggi di atas DTM ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="529"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Model medan digital yang menjadi acuan pengukuran tinggi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="519"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="537"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Pertahankan titik yang setidaknya setinggi ini di atas model medan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="546"/>
         <source>EXPRESSION</source>
         <translation>EKSPRESI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="532"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="550"/>
         <source>Point cloud expression</source>
         <translation>Ekspresi awan titik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="533"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="551"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Centang grup untuk mengedit ekspresi secara manual</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="560"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="578"/>
         <source>No elevation statistics for this layer</source>
         <translation>Tidak ada statistik elevasi untuk layer ini</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="601"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="619"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Tinggi di atas medan tidak tersedia</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="611"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="634"/>
         <source>Kept points: {0}</source>
         <translation>Titik yang dipertahankan: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
         <source>Current filter: {0}</source>
         <translation>Filter saat ini: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
         <source>none</source>
         <translation>tidak ada</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>Any</source>
         <translation>Apa saja</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>First</source>
         <translation>Pertama</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Last</source>
         <translation>Terakhir</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Single</source>
         <translation>Tunggal</translation>
     </message>
@@ -3531,129 +3644,154 @@ Lanjutkan?</translation>
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="288"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="307"/>
         <source>Band</source>
         <translation>Pita</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="291"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="310"/>
         <source>Band whose values are selected</source>
         <translation>Pita yang nilainya dipilih</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="317"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="339"/>
         <source>PIXEL VALUE</source>
         <translation>NILAI PIKSEL</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="324"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="347"/>
         <source>Pixel value of the current band</source>
         <translation>Nilai piksel pita saat ini</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="335"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="358"/>
         <source>Last {0} values picked</source>
         <translation>{0} nilai terakhir yang dipilih</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="337"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>Klik peta dengan pemilih piksel. Ctrl+klik memperluas rentang hingga nilai tersebut.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="346"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="380"/>
         <source>VALUE RANGE</source>
         <translation>RENTANG NILAI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Lowest value kept</source>
         <translation>Nilai terendah yang dipertahankan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Max</source>
         <translation>Maks</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Highest value kept</source>
         <translation>Nilai tertinggi yang dipertahankan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="406"/>
         <source>Preview on the map (hide the other pixels)</source>
         <translation>Pratinjau di peta (sembunyikan piksel lainnya)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="378"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="413"/>
         <source>CLASSES</source>
         <translation>KELAS</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Raster classes</source>
         <translation>Kelas raster</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="421"/>
         <source>All</source>
         <translation>Semua</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="387"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="422"/>
         <source>None</source>
         <translation>Tidak ada</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="397"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="432"/>
         <source>RASTER EXPRESSION</source>
         <translation>EKSPRESI RASTER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="436"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Ekspresi kalkulator raster; piksel dipertahankan jika nilainya bukan 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="402"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="437"/>
         <source>Raster expression</source>
         <translation>Ekspresi raster</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="410"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
         <source>Use the range</source>
         <translation>Gunakan rentang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="446"/>
         <source>Write the current value range as an expression</source>
         <translation>Tulis rentang nilai saat ini sebagai ekspresi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="519"/>
         <source>Selected pixels: {0}</source>
         <translation>Piksel terpilih: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="730"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="801"/>
         <source>Set a value range first</source>
         <translation>Tetapkan rentang nilai terlebih dahulu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="747"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="818"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="763"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="834"/>
         <source>Last values:</source>
         <translation>Nilai terakhir:</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="362"/>
+        <source>Value of the current band under the cursor</source>
+        <translation>Nilai band saat ini di bawah kursor</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="368"/>
+        <source>Statistics of the current band in the last rectangle drawn on the map</source>
+        <translation>Statistik band saat ini pada persegi panjang terakhir yang digambar di peta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="565"/>
+        <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
+        <translation>Di bawah kursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <source>Zone: {0}</source>
+        <translation>Zona: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <source>no pixel</source>
+        <translation>tidak ada piksel</translation>
     </message>
 </context>
 <context>

@@ -3,10 +3,12 @@
 Point Cloud EXPLORING Panel.
 
 Shown in place of the vector exploring groups when the current layer is a
-point cloud. Unlike the raster panel, its checkable groups add up: the
-classes, the attribute ranges (Z, intensity, return, height above the DTM)
-and the free expression all restrict the kept points. The resulting subset
-expression becomes the source of FILTERING.
+point cloud. Like the vector and raster panels, exactly one checkable group
+is active (FilterMate 5 design): the classes, the attribute ranges (Z,
+intensity, return, height above the DTM) or the free expression restrict the
+kept points. Checking EXPRESSION starts from the criteria of the group that
+was active, so classes and ranges can still be combined there. The resulting
+subset expression becomes the source of FILTERING.
 
 The panel only reads a ``PointCloudLayerSummary`` (and the DTM layer combo);
 the state handling - criteria and expression building, presets, count
@@ -258,7 +260,10 @@ def parse_point_cloud_state(state: Any) -> Dict[str, Any]:
 
 
 def build_point_cloud_criteria(state: Any) -> PointCloudFilterCriteria:
-    """Criteria of the checked groups: classes, then Z / intensity / return.
+    """Criteria of the checked group (the panel keeps one): classes, or Z / intensity / return.
+
+    The state format still allows several checked groups (older saved states);
+    they are combined here, the panel narrows them to one on restore.
 
     First, Last and Single returns go through ``extra_clauses``; the height
     above the DTM is not part of the criteria (see :func:`build_point_cloud_expression`).
@@ -343,6 +348,7 @@ class PointCloudExploringPanel(QWidget):
 
     criteriaChanged = pyqtSignal()
     applyToTilesToggled = pyqtSignal(bool)
+    summaryChanged = pyqtSignal()  # point counts updated: the selection strip under EXPLORING follows
 
     def __init__(self, parent=None):
         """Build the panel.
@@ -618,10 +624,26 @@ class PointCloudExploringPanel(QWidget):
         self._refresh_generated_expression()
 
     def set_point_counts(self, kept: Optional[int], total: Optional[int]) -> None:
-        """Show ``Kept points: 9.8 M / 38.4 M (25.5 %)``; hidden without a kept count."""
+        """Show ``Kept points: 9.8 M / 38.4 M (25.5 %)``; hidden without a kept count.
+
+        With :meth:`set_counts_inline` False the counts only go to the selection strip
+        under EXPLORING (``summaryChanged``), as in the FilterMate 5 mockup.
+        """
+        self._counts = (kept, total)
         text = format_point_counts(kept, total)
         self._counts_label.setText(self.tr("Kept points: {0}").format(text) if text else "")
-        self._counts_label.setVisible(bool(text))
+        self._counts_label.setVisible(bool(text) and getattr(self, '_counts_inline', True))
+        self.summaryChanged.emit()
+
+    def point_counts(self) -> Tuple[Optional[int], Optional[int]]:
+        """Last ``(kept, total)`` point counts shown."""
+        return getattr(self, '_counts', (None, None))
+
+    def set_counts_inline(self, inline: bool) -> None:
+        """Whether the panel shows the counts itself (False: the selection strip does)."""
+        self._counts_inline = bool(inline)
+        if not inline:
+            self._counts_label.setVisible(False)
 
     def set_current_subset(self, text: str) -> None:
         """Show the subset string currently applied to the layer."""
@@ -705,13 +727,14 @@ class PointCloudExploringPanel(QWidget):
     def _activate_group(self, active: Any) -> None:
         self._switching_group = True
         try:
+            # The new group first: EXPRESSION then starts from the criteria still checked.
+            if not active.isChecked():
+                active.setChecked(True)
             for group in self._exclusive_groups():
                 if group is not active and group.isChecked():
                     group.setChecked(False)  # their own handlers run (expression text kept, debounce)
                 if hasattr(group, 'setCollapsed'):
                     group.setCollapsed(group is not active)
-            if not active.isChecked():
-                active.setChecked(True)
         finally:
             self._switching_group = False
 
@@ -721,9 +744,13 @@ class PointCloudExploringPanel(QWidget):
         if checked:
             self._activate_group(group)
             return
-        # Unchecking the active group would leave none: keep it checked.
-        with _signals_blocked(group):
+        # Unchecking the active group would leave none: check it again, signals on, so its
+        # own handler restores what the unchecking undid (EXPRESSION back to editable text).
+        self._switching_group = True
+        try:
             group.setChecked(True)
+        finally:
+            self._switching_group = False
 
     def _on_exclusive_collapsed(self, group: Any, collapsed: bool) -> None:
         # Expanding a group makes it the active one.
@@ -734,7 +761,8 @@ class PointCloudExploringPanel(QWidget):
     def _enforce_single_group(self) -> None:
         """After a restore: the first checked group in visual order stays, classes when none."""
         groups = self._exclusive_groups()
-        active = next((group for group in groups if group.isChecked()), groups[0])
+        shown = [group for group in groups if not group.isHidden()] or groups
+        active = next((group for group in shown if group.isChecked()), shown[0])
         with _signals_blocked(*groups):
             for group in groups:
                 group.setChecked(group is active)

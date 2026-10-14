@@ -8,8 +8,7 @@ Dock additions of the raster / point cloud mode (FilterMate 5 mockup).
   buttons and the reset button. Raster: value under the cursor, statistics of
   a rectangle. Point cloud: elevation profile, 3D map view. The tracking and
   linking buttons only make sense for vector layers: they are hidden meanwhile.
-* A "Source geometry: …" line under the source layer of FILTERING, for the
-  three kinds, saying what the EXPLORING selection becomes.
+* The layer card shows vector layers too (geometry type, feature count).
 
 Kept apart from :class:`CoverageModeController`, which calls :meth:`show_for`,
 :meth:`show_vector`, :meth:`leave` and :meth:`teardown`. The text builders are
@@ -31,11 +30,7 @@ HOVER_DELAY_MS = 60
 ZONE_SAMPLE_SIZE = 250000
 TOOL_RAIL_ANCHOR = 'pushButton_checkable_exploring_linking_widgets'
 VECTOR_ONLY_BUTTONS = ('pushButton_checkable_exploring_tracking', 'pushButton_checkable_exploring_linking_widgets')
-SOURCE_HINT_NAME = 'label_filtering_source_geometry'
-SOURCE_HINT_KEYS_SPACER = 'widget_filtering_keys_source_geometry_spacer'
-FILTERING_SOURCE_BUTTON = 'pushButton_checkable_filtering_auto_current_layer'
 LAYER_CARD_NAME = 'label_exploring_coverage_layer'
-
 # Stroke icons of the mockup (24 x 24 view box).
 ICON_HOVER = ('<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="11.5" cy="11.5" r="3.5"/>'
               '<path d="M14 14l2.5 2.5"/>')
@@ -94,7 +89,7 @@ def pixel_size_text(size_x: float, size_y: float, unit: str = "") -> str:
 
 
 def raster_card_text(bands: Sequence[Tuple[str, Optional[float]]], size_x: float, size_y: float,
-                     unit: str = "", tr: Callable[[str], str] = _identity) -> str:
+                     unit: str = "", translate: Callable[[str], str] = _identity) -> str:
     """Second line of the raster card: ``"1 band · Float32 · 1 m · NoData -99999"``.
 
     Args:
@@ -102,10 +97,10 @@ def raster_card_text(bands: Sequence[Tuple[str, Optional[float]]], size_x: float
         size_x: Pixel width in layer units.
         size_y: Pixel height in layer units.
         unit: Abbreviated layer unit (``"m"``, ``"°"``), may be empty.
-        tr: Translation function of the caller.
+        translate: Translation function of the caller (named so pylupdate skips these calls).
     """
     count = len(bands)
-    parts = [tr("1 band") if count == 1 else tr("{0} bands").format(count)]
+    parts = [translate("1 band") if count == 1 else translate("{0} bands").format(count)]
     types = []
     for data_type, _nodata in bands:
         if data_type and data_type not in types:
@@ -122,25 +117,34 @@ def raster_card_text(bands: Sequence[Tuple[str, Optional[float]]], size_x: float
 
 
 def point_cloud_card_text(point_count: Optional[int], z_range: Optional[Tuple[float, float]],
-                          tr: Callable[[str], str] = _identity) -> str:
+                          translate: Callable[[str], str] = _identity) -> str:
     """Second line of the point cloud card: ``"38.4 M points · Z 141.8 → 318.7"``; ``""`` when nothing is known."""
     from ..widgets.coverage_panels.point_cloud_exploring_panel import format_count
     parts = []
     counted = format_count(point_count) if point_count is not None and point_count >= 0 else ""
     if counted:
-        parts.append(tr("{0} points").format(counted))
+        parts.append(translate("{0} points").format(counted))
     if z_range is not None and z_range[0] is not None and z_range[1] is not None:
         parts.append(f"Z {format_number(z_range[0], 2)} → {format_number(z_range[1], 2)}")
     return " · ".join(parts)
 
 
-def source_geometry_text(kind_value: str, tr: Callable[[str], str] = _identity) -> str:
-    """FILTERING line saying what the EXPLORING selection becomes, per layer kind value."""
-    texts = {
-        'raster': tr("Source geometry: the selected pixels, vectorized"),
-        'point_cloud': tr("Source geometry: the footprint of the kept points"),
-    }
-    return texts.get(kind_value, tr("Source geometry: the features selected in EXPLORING"))
+def vector_card_text(geometry_label: str, feature_count: Optional[int],
+                     translate: Callable[[str], str] = _identity) -> str:
+    """Second line of the vector card: ``"Line · 12 438 features"``; ``""`` when nothing is known."""
+    parts = [geometry_label] if geometry_label else []
+    if feature_count is not None and feature_count >= 0:
+        parts.append(translate("{0} features").format(f"{int(feature_count):,}".replace(",", "\u202f")))
+    return " · ".join(parts)
+
+
+def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -> str:
+    """Rich text of the layer card: a kind bullet, the bold name, then ``kind · meta`` (mockup)."""
+    from html import escape
+    bullet = "■" if square else "●"
+    second = " · ".join(part for part in (kind_label, meta) if part)
+    head = f'<span style="color:{color}">{bullet}</span>&nbsp;<b>{escape(name)}</b>'
+    return f"{head}<br>{escape(second)}" if second else head
 
 
 def tools_for(kind_value: str) -> List[str]:
@@ -178,7 +182,6 @@ class CoverageDockExtras(QObject):
         super().__init__(controller if isinstance(controller, QObject) else None)
         self._controller = controller
         self._card = None
-        self._source_hint = None
         self._tools: Dict[str, Any] = {}
         self._hidden_vector_buttons: Dict[str, bool] = {}
         self._hover_connected = False
@@ -186,7 +189,6 @@ class CoverageDockExtras(QObject):
         self._hover_timer = None
         self._zone_tool = None
         self._zone_previous_tool = None
-        self._keys_spacer = None
         self._layer_id: Optional[str] = None
         self._hover_base = None
         self._hover_base_id: Optional[str] = None
@@ -195,81 +197,44 @@ class CoverageDockExtras(QObject):
     def dockwidget(self) -> Any:
         return self._controller.dockwidget
 
+    def _catalog(self) -> None:  # pragma: no cover - never called
+        """Literal tr() calls of the texts built by the module helpers, for pylupdate.
+
+        The helpers receive ``self.tr`` and translate at run time in this class context;
+        pylupdate only extracts literal calls made inside the class.
+        """
+        self.tr("1 band")
+        self.tr("{0} bands")
+        self.tr("{0} points")
+        self.tr("{0} features")
+        self.tr("Vector")
+        self.tr("Raster")
+        self.tr("Point cloud")
+
     # === Building ===
 
     def ensure(self, host: Any) -> None:
-        """Build the card above ``host`` (the coverage panels) and the tool buttons, once."""
-        if self._card is None and host is not None:
-            self._card = self._build_card(host)
+        """Build the layer card and the tool buttons, once."""
+        self.ensure_card()
         if not self._tools:
             self._build_tools()
-        self.ensure_source_hint()
 
-    def _build_card(self, host: Any) -> Any:
-        from qgis.PyQt.QtWidgets import QFrame, QLabel
-        layout = self._controller._find_parent_layout(host)
-        if layout is None or not hasattr(layout, 'insertWidget'):
-            return None
+    def ensure_card(self) -> None:
+        """Layer card at the top of EXPLORING, above the groups of every layer kind (mockup)."""
+        if self._card is not None:
+            return
+        layout = getattr(self.dockwidget, 'verticalLayout_exploring_tabs_content', None)
+        if layout is None:
+            return
+        from qgis.PyQt.QtCore import Qt
+        from qgis.PyQt.QtWidgets import QLabel
         card = QLabel()
         card.setObjectName(LAYER_CARD_NAME)
-        card.setFrameShape(QFrame.Shape.StyledPanel)
         card.setWordWrap(True)
-        card.setMargin(6)
+        card.setTextFormat(Qt.TextFormat.RichText)
         card.setVisible(False)
-        layout.insertWidget(max(0, layout.indexOf(host)), card)
-        return card
-
-    def ensure_source_hint(self) -> None:
-        """Add the "Source geometry" line under the source layer of FILTERING, once."""
-        if self._source_hint is not None:
-            return
-        dw = self.dockwidget
-        layout = getattr(dw, 'verticalLayout_filtering_values', None)
-        row = getattr(dw, 'horizontalLayout_filtering_source_layer', None)
-        if layout is None or row is None:
-            return
-        index = -1
-        for position in range(layout.count()):
-            if layout.itemAt(position).layout() is row:
-                index = position
-                break
-        if index < 0:
-            return
-        from qgis.PyQt.QtWidgets import QLabel
-        from qgis.PyQt.QtWidgets import QSizePolicy, QWidget
-        label = QLabel()
-        label.setObjectName(SOURCE_HINT_NAME)
-        label.setEnabled(False)  # greyed like a caption, in every theme
-        label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
-        font = label.font()
-        if font.pointSizeF() > 0:
-            font.setPointSizeF(max(6.0, font.pointSizeF() - 1.0))
-        label.setFont(font)
-        layout.insertWidget(index + 1, label)
-        self._source_hint = label
-        # FILTERING is two parallel columns (buttons | values) aligned row by row: the
-        # buttons column gets a blank of the same height so the next rows stay aligned.
-        keys = getattr(dw, 'verticalLayout_filtering_keys', None)
-        button = getattr(dw, FILTERING_SOURCE_BUTTON, None)
-        if keys is not None and button is not None and keys.indexOf(button) >= 0:
-            spacer = QWidget()
-            spacer.setObjectName(SOURCE_HINT_KEYS_SPACER)
-            keys.insertWidget(keys.indexOf(button) + 1, spacer)
-            self._keys_spacer = spacer
-        self._sync_keys_spacer()
-
-    def _sync_keys_spacer(self) -> None:
-        label, spacer = self._source_hint, self._keys_spacer
-        if label is None or spacer is None:
-            return
-        dw = self.dockwidget
-        values = getattr(dw, 'verticalLayout_filtering_values', None)
-        keys = getattr(dw, 'verticalLayout_filtering_keys', None)
-        height = label.fontMetrics().height()
-        label.setFixedHeight(height)
-        extra = (values.spacing() if values is not None else 0) - (keys.spacing() if keys is not None else 0)
-        spacer.setFixedHeight(max(0, height + extra))
-        spacer.setVisible(not label.isHidden())
+        layout.insertWidget(0, card)
+        self._card = card
 
     def _build_tools(self) -> None:
         from qgis.PyQt.QtWidgets import QPushButton
@@ -353,14 +318,15 @@ class CoverageDockExtras(QObject):
         if kind_value == 'point_cloud':
             self._tools_enabled_by_action()
         self._refresh_icons()
-        self._set_source_hint(kind_value)
 
-    def show_vector(self) -> None:
-        """Vector layer: no card nor kind tool, vector buttons back, vector source geometry line."""
+    def show_vector(self, layer: Any = None) -> None:
+        """Vector layer: its card, no kind tool, vector buttons back."""
         self._layer_id = None
-        for step in (self.leave, self._hide_coverage_widgets, self._restore_vector_buttons, self.ensure_source_hint):
+        for step in (self.leave, self._hide_coverage_widgets, self._restore_vector_buttons):
             self._guarded(step)
-        self._guarded(self._set_source_hint, 'vector')
+        if layer is not None:
+            self._guarded(self.ensure_card)
+            self._guarded(self._update_card, layer, 'vector')
 
     @staticmethod
     def _safe_id(layer: Any) -> Optional[str]:
@@ -378,8 +344,6 @@ class CoverageDockExtras(QObject):
             logger.debug(f"[FM5] dock addition step {getattr(step, '__name__', step)} skipped: {exc}")
 
     def _hide_coverage_widgets(self) -> None:
-        if self._card is not None:
-            self._card.setVisible(False)
         for button in self._tools.values():
             button.setVisible(False)
 
@@ -402,8 +366,8 @@ class CoverageDockExtras(QObject):
         self.leave()
         self._guarded(self._restore_vector_buttons)
         self._guarded(self._release_zone_tool)
-        widgets = [self._card, self._source_hint, self._keys_spacer, *self._tools.values()]
-        self._card, self._source_hint, self._keys_spacer, self._tools = None, None, None, {}
+        widgets = [self._card, *self._tools.values()]
+        self._card, self._tools = None, {}
         for widget in widgets:
             if widget is None:
                 continue
@@ -416,16 +380,31 @@ class CoverageDockExtras(QObject):
     def _update_card(self, layer: Any, kind_value: str) -> None:
         if self._card is None:
             return
+        builders = {'raster': self._raster_meta, 'point_cloud': self._point_cloud_meta, 'vector': self._vector_meta}
         try:
-            meta = self._raster_meta(layer) if kind_value == 'raster' else self._point_cloud_meta(layer)
+            meta = builders.get(kind_value, self._vector_meta)(layer)
         except Exception as exc:
             logger.debug(f"[FM5] layer card not filled: {exc}")
             meta = ''
-        from html import escape
-        name = escape(layer.name()) if layer is not None else ''
-        self._card.setText(f"<b>{name}</b><br>{escape(meta)}" if meta else f"<b>{name}</b>")
+        from ..styles.mockup_design import KIND_COLORS
+        labels = {'raster': self.tr("Raster"), 'point_cloud': self.tr("Point cloud"), 'vector': self.tr("Vector")}
+        self._card.setText(card_html(layer.name() if layer is not None else '', labels.get(kind_value, ''), meta,
+                                     KIND_COLORS.get(kind_value, KIND_COLORS['vector']), kind_value == 'raster'))
         self._card.setToolTip(layer.publicSource() if layer is not None else '')  # no password
         self._card.setVisible(True)
+
+    def _vector_meta(self, layer: Any) -> str:
+        geometry = ''
+        try:
+            from qgis.core import QgsWkbTypes
+            geometry = QgsWkbTypes.geometryDisplayString(layer.geometryType())
+        except Exception:
+            geometry = ''
+        try:
+            count = layer.featureCount()
+        except Exception:
+            count = None
+        return vector_card_text(geometry, count, self.tr)
 
     def _raster_meta(self, layer: Any) -> str:
         from ...adapters.qgis.coverage_layers.raster_adapter import read_raster_summary
@@ -446,14 +425,6 @@ class CoverageDockExtras(QObject):
             return QgsUnitTypes.toAbbreviatedString(layer.crs().mapUnits())
         except Exception:
             return ''
-
-    def _set_source_hint(self, kind_value: str) -> None:
-        if self._source_hint is not None:
-            text = source_geometry_text(kind_value, self.tr)
-            self._source_hint.setText(text)
-            self._source_hint.setToolTip(text)
-            self._source_hint.setVisible(True)
-            self._sync_keys_spacer()
 
     def _hide_vector_buttons(self) -> None:
         dw = self.dockwidget

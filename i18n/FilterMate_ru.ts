@@ -107,214 +107,322 @@
     </message>
 </context>
 <context>
-    <name>CoverageModeController</name>
+    <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="164"/>
-        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
-        <translation>Восстановление фильтра для {0} растровых слоёв / облаков точек…</translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <source>1 band</source>
+        <translation>1 канал</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="378"/>
-        <source>cov. ≥ </source>
-        <translation>покр. ≥ </translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="262"/>
+        <source>{0} bands</source>
+        <translation>Каналов: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="379"/>
-        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
-        <translation>Минимальная доля целевого полигона внутри геометрии источника (0 = любое пересечение). Используется, если источник — растр или облако точек.</translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="263"/>
+        <source>{0} points</source>
+        <translation>Точек: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="207"/>
+        <source>Source geometry: the selected pixels, vectorized</source>
+        <translation type="obsolete">Исходная геометрия: выбранные пиксели, векторизованные</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="208"/>
+        <source>Source geometry: the footprint of the kept points</source>
+        <translation type="obsolete">Исходная геометрия: область сохранённых точек</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="209"/>
+        <source>Source geometry: the features selected in EXPLORING</source>
+        <translation type="obsolete">Исходная геометрия: объекты, выбранные в EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Value under the cursor: follow the pixel value of the current band while moving over the map</source>
+        <translation>Значение под курсором: следить за значением пикселя текущего канала при перемещении по карте</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band</source>
+        <translation>Статистика прямоугольника: протяните на карте, чтобы узнать минимум, максимум и среднее текущего канала</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Elevation profile: open the QGIS elevation profile of the map</source>
+        <translation>Профиль высот: открыть профиль высот QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>3D view: open a new QGIS 3D map view</source>
+        <translation>3D-вид: открыть новый 3D-вид карты QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="264"/>
+        <source>no feature</source>
+        <translation>нет объектов</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="265"/>
+        <source>{0} feature(s)</source>
+        <translation>Объектов: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="266"/>
+        <source>every pixel</source>
+        <translation>все пиксели</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="267"/>
+        <source>{0} class(es)</source>
+        <translation>Классов: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="268"/>
+        <source>expression</source>
+        <translation>выражение</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="269"/>
+        <source>{0} features</source>
+        <translation>Объектов: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <source>Vector</source>
+        <translation>Вектор</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
         <source>Raster</source>
         <translation>Растр</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
         <source>Point cloud</source>
         <translation>Облако точек</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
+        <source>Kept points</source>
+        <translation>Сохранённые точки</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="355"/>
+        <source>Selection → source geometry</source>
+        <translation>Выбор → исходная геометрия</translation>
+    </message>
+</context>
+<context>
+    <name>CoverageModeController</name>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="165"/>
+        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
+        <translation>Восстановление фильтра для {0} растровых слоёв / облаков точек…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="395"/>
+        <source>cov. ≥ </source>
+        <translation>покр. ≥ </translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="396"/>
+        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
+        <translation>Минимальная доля целевого полигона внутри геометрии источника (0 = любое пересечение). Используется, если источник — растр или облако точек.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <source>Raster</source>
+        <translation>Растр</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <source>Point cloud</source>
+        <translation>Облако точек</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>Слой {0}: выбор на вкладке EXPLORING, отношение на вкладке FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="471"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="502"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Пипетка пикселей: щёлкните по карте, чтобы считать значение каждого канала (Ctrl+клик расширяет диапазон)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
         <source>Zoom to the layer</source>
         <translation>Приблизить к слою</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="473"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="504"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Предпросмотр: скрыть пиксели вне выборки</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="475"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="506"/>
         <source>Not used for raster layers</source>
         <translation>Не используется для растровых слоёв</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="476"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="507"/>
         <source>Reset the raster selection</source>
         <translation>Сбросить выбор растра</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="510"/>
         <source>Identify points on the map</source>
         <translation>Опознать точки на карте</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="481"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="512"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Живой предпросмотр: показывать только точки, оставленные выборкой</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="483"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="514"/>
         <source>Not used for point cloud layers</source>
         <translation>Не используется для слоёв облаков точек</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="484"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
         <source>Reset the point cloud criteria</source>
         <translation>Сбросить критерии облака точек</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="641"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="672"/>
         <source>Invalid raster calculator expression</source>
         <translation>Недопустимое выражение растрового калькулятора</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="679"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="710"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL не найден: для высоты над ЦМР нужен исполняемый файл pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="999"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Задача FilterMate ещё выполняется: дождитесь её завершения</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="984"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1015"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Задача FilterMate завершилась с ошибкой: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1048"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Сначала выберите пиксели: диапазон значений, классы или растровое выражение</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1026"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1057"/>
         <source>Raster filtered: {0}</source>
         <translation>Растр отфильтрован: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1039"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Выражение для облака точек отклонено: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1042"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1073"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Сначала выберите точки: классы, диапазоны атрибутов или выражение</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1050"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1081"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Облако точек отфильтровано: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1114"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1145"/>
         <source>Filter not applied: {0}</source>
         <translation>Фильтр не применён: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>canceled</source>
         <translation>отменено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1149"/>
         <source>{0} target(s) filtered</source>
         <translation>Отфильтровано целей: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1120"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1151"/>
         <source>{0} failed: {1}</source>
         <translation>{0}: ошибка: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1129"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1160"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: фильтрация от «{0}»…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1185"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1216"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Изменено позже, оставлено как есть: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1191"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1222"/>
         <source>{0} layer(s) restored</source>
         <translation>Восстановлено слоёв: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1225"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1256"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>«{0}» не экспортирован: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1237"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
         <source>Exported: {0}</source>
         <translation>Экспортировано: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1239"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1270"/>
         <source>Export failed: {0}</source>
         <translation>Ошибка экспорта: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1246"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1277"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Экспорт слоёв: {0}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1252"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1283"/>
         <source>Export folder</source>
         <translation>Папка экспорта</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1324"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1355"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Растровые цели / цели-облака точек пропущены: в EXPLORING не выбран объект-источник</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Растровые цели / цели-облака точек не отфильтрованы: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1349"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1380"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>Отфильтровано растровых целей / целей-облаков точек: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1465"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Выберите растр ЦМР для расчёта высоты над землёй</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1442"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1473"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Высота над землёй не вычислена: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1454"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1485"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Вычисление высоты над «{0}» с помощью PDAL…</translation>
     </message>
@@ -1218,27 +1326,27 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>Восстановить конфигурацию по умолчанию и удалить базу данных SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1421"/>
+        <location filename="../filter_mate.py" line="1413"/>
         <source>Reset Configuration</source>
         <translation>Сбросить конфигурацию</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1444"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>Configuration reset successfully.</source>
         <translation>Конфигурация успешно сброшена.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1449"/>
+        <location filename="../filter_mate.py" line="1441"/>
         <source>Default configuration file not found.</source>
         <translation>Файл конфигурации по умолчанию не найден.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1470"/>
+        <location filename="../filter_mate.py" line="1462"/>
         <source>Database deleted: {filename}</source>
         <translation>База данных удалена: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1484"/>
+        <location filename="../filter_mate.py" line="1476"/>
         <source>Restart required</source>
         <translation>Требуется перезапуск</translation>
     </message>
@@ -1389,7 +1497,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1421"/>
+        <location filename="../filter_mate.py" line="1413"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1406,7 +1514,7 @@ QGIS must be restarted to apply the changes.</source>
 QGIS должен быть перезапущен для применения изменений.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1484"/>
+        <location filename="../filter_mate.py" line="1476"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1425,7 +1533,7 @@ Please restart QGIS to apply the changes.</source>
         <translation>{count} ссылающихся слоёв не загружено ({layers_list}). Используется резервное отображение.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1475"/>
+        <location filename="../filter_mate.py" line="1467"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Невозможно удалить {filename}: {e}</translation>
     </message>
@@ -1435,71 +1543,71 @@ Please restart QGIS to apply the changes.</source>
         <translation type="obsolete">Ошибка при сбросе: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1527"/>
+        <location filename="../filter_mate.py" line="1519"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Спасибо за использование &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Присоединяйтесь к нашему сообществу Discord, чтобы:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Получить помощь и поддержку&lt;/li&gt;&lt;li&gt;Сообщить об ошибках и проблемах&lt;/li&gt;&lt;li&gt;Предложить новые функции&lt;/li&gt;&lt;li&gt;Поделиться советами с другими пользователями&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1543"/>
+        <location filename="../filter_mate.py" line="1535"/>
         <source>  Join us on Discord</source>
         <translation>  Присоединяйтесь к нам в Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1563"/>
+        <location filename="../filter_mate.py" line="1555"/>
         <source>Don&apos;t show this again</source>
         <translation>Больше не показывать</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1566"/>
+        <location filename="../filter_mate.py" line="1558"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1632"/>
+        <location filename="../filter_mate.py" line="1624"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Ошибка загрузки плагина: {0}. Проверьте консоль Python QGIS для получения подробностей.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6922"/>
+        <location filename="../filter_mate_dockwidget.py" line="6932"/>
         <source>Current layer: {0}</source>
         <translation>Текущий слой: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6924"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>No layer selected</source>
         <translation>Слой не выбран</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6944"/>
         <source>Selected layers:
 {0}</source>
         <translation>Выбранные слои:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6944"/>
         <source>No layers selected</source>
         <translation>Слои не выбраны</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6954"/>
+        <location filename="../filter_mate_dockwidget.py" line="6964"/>
         <source>No expression defined</source>
         <translation>Выражение не задано</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6966"/>
+        <location filename="../filter_mate_dockwidget.py" line="6976"/>
         <source>Display expression: {0}</source>
         <translation>Выражение отображения: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6981"/>
+        <location filename="../filter_mate_dockwidget.py" line="6991"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID объекта: {0}
 Первый атрибут: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1493"/>
+        <location filename="../filter_mate.py" line="1485"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Не удалось сбросить конфигурацию. Убедитесь, что папка плагина доступна для записи, и повторите попытку. Подробности в filtermate.log.</translation>
     </message>
@@ -1547,62 +1655,62 @@ First attribute: {1}</source>
         <translation>Невозможно выполнить {0}: инициализация виджета не удалась.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2426"/>
+        <location filename="../filter_mate_app.py" line="2424"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Невозможно {0}: слой недействителен или источник не найден.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2563"/>
+        <location filename="../filter_mate_app.py" line="2561"/>
         <source>All filters cleared - </source>
         <translation>Все фильтры очищены — </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2564"/>
+        <location filename="../filter_mate_app.py" line="2562"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} объектов видимых в основном слое</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2572"/>
+        <location filename="../filter_mate_app.py" line="2570"/>
         <source>Error: result handler missing</source>
         <translation>Ошибка: отсутствует обработчик результата</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2585"/>
+        <location filename="../filter_mate_app.py" line="2583"/>
         <source>Error during filtering: {0}</source>
         <translation>Ошибка при фильтрации: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2707"/>
+        <location filename="../filter_mate_app.py" line="2705"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Восстановлено {0} осиротевших избранных: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2844"/>
+        <location filename="../filter_mate_app.py" line="2840"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Загрузка слоя не удалась — нажмите для повтора</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2900"/>
+        <location filename="../filter_mate_app.py" line="2896"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} слоёв загружено успешно</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1865"/>
+        <location filename="../filter_mate_app.py" line="1863"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1867"/>
+        <location filename="../filter_mate_app.py" line="1865"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1868"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1872"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1615,22 +1723,22 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1882"/>
+        <location filename="../filter_mate_app.py" line="1880"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1889"/>
+        <location filename="../filter_mate_app.py" line="1887"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1896"/>
+        <location filename="../filter_mate_app.py" line="1894"/>
         <source>Cancel</source>
         <translation>Отмена</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1920"/>
+        <location filename="../filter_mate_app.py" line="1918"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
@@ -1648,7 +1756,7 @@ What would you like to do?</translation>
         <translation>Ошибка инициализации: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="997"/>
+        <location filename="../filter_mate_dockwidget.py" line="1000"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Конфигурация интерфейса не завершена — проверьте логи</translation>
     </message>
@@ -1658,458 +1766,463 @@ What would you like to do?</translation>
         <translation type="obsolete">Ошибка размеров интерфейса: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1431"/>
+        <location filename="../filter_mate_dockwidget.py" line="1449"/>
         <source>Favorites manager not available</source>
         <translation>Менеджер избранного недоступен</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1450"/>
+        <location filename="../filter_mate_dockwidget.py" line="1470"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} избранных сохранено
 Нажмите, чтобы применить или управлять</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1458"/>
+        <location filename="../filter_mate_dockwidget.py" line="1473"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Нет сохранённых избранных
 Нажмите, чтобы добавить текущий фильтр</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1482"/>
+        <location filename="../filter_mate_dockwidget.py" line="1493"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Принудительно установлен бэкенд {0} для {1} слоёв</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget.py" line="1579"/>
         <source>Backend controller not available</source>
         <translation>Контроллер бэкенда недоступен</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1506"/>
+        <location filename="../filter_mate_dockwidget.py" line="1517"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Автоочистка PostgreSQL включена</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1507"/>
+        <location filename="../filter_mate_dockwidget.py" line="1518"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Автоочистка PostgreSQL отключена</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1513"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Представления сессии PostgreSQL очищены</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1513"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Нет представлений для очистки или очистка не удалась</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>No PostgreSQL connection available</source>
         <translation>Нет доступного подключения PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1530"/>
+        <location filename="../filter_mate_dockwidget.py" line="1541"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Схема содержит {0} представлений из других сессий.
 Всё равно удалить?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1531"/>
+        <location filename="../filter_mate_dockwidget.py" line="1542"/>
         <source>Other Sessions Active</source>
         <translation>Другие сессии активны</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1533"/>
+        <location filename="../filter_mate_dockwidget.py" line="1544"/>
         <source>Schema cleanup cancelled</source>
         <translation>Очистка схемы отменена</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1538"/>
+        <location filename="../filter_mate_dockwidget.py" line="1549"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Схема '{0}' успешно удалена</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1540"/>
+        <location filename="../filter_mate_dockwidget.py" line="1551"/>
         <source>Schema cleanup failed</source>
         <translation>Очистка схемы не удалась</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget.py" line="1577"/>
         <source>PostgreSQL Session Info</source>
         <translation>Информация о сессии PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Theme adapted: {0}</source>
         <translation>Тема адаптирована: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Dark mode</source>
         <translation>Тёмный режим</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Light mode</source>
         <translation>Светлый режим</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4005"/>
+        <location filename="../filter_mate_dockwidget.py" line="4016"/>
         <source>Selected features have no geometry.</source>
         <translation>Выбранные объекты не имеют геометрии.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4024"/>
+        <location filename="../filter_mate_dockwidget.py" line="4035"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Объект не выбран. Выберите объект из выпадающего списка.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5079"/>
+        <location filename="../filter_mate_dockwidget.py" line="5100"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Выбранный слой недействителен или его источник не найден.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5816"/>
+        <location filename="../filter_mate_dockwidget.py" line="5837"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Отрицательный буфер (эрозия): сужает полигоны внутрь</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5819"/>
+        <location filename="../filter_mate_dockwidget.py" line="5840"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Значение буфера в метрах (положительное=расширить, отрицательное=сузить полигоны)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6293"/>
+        <location filename="../filter_mate_dockwidget.py" line="6314"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Плагин активирован с {0} векторными слоями</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6376"/>
+        <location filename="../filter_mate_dockwidget.py" line="6395"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Не удалось автоматически перезагрузить плагин.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6378"/>
+        <location filename="../filter_mate_dockwidget.py" line="6397"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Ошибка при перезагрузке плагина: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6450"/>
+        <location filename="../filter_mate_dockwidget.py" line="6469"/>
         <source>Layer properties reset to defaults</source>
         <translation>Свойства слоя сброшены к значениям по умолчанию</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6451"/>
+        <location filename="../filter_mate_dockwidget.py" line="6470"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Ошибка сброса свойств слоя: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="864"/>
+        <location filename="../filter_mate_dockwidget.py" line="867"/>
         <source>Filter</source>
         <translation>Фильтровать</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="865"/>
+        <location filename="../filter_mate_dockwidget.py" line="868"/>
         <source>Undo the last filter</source>
         <translation>Отменить последний фильтр</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="866"/>
+        <location filename="../filter_mate_dockwidget.py" line="869"/>
         <source>Redo the last filter</source>
         <translation>Повторить последний фильтр</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
         <source>Remove the filters</source>
         <translation>Снять фильтры</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
         <source>Export the layers</source>
         <translation>Экспортировать слои</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
         <source>About FilterMate</source>
         <translation>О FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
         <source>Identify the selected features</source>
         <translation>Опознать выбранные объекты</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>Zoom to the selected features</source>
         <translation>Приблизить к выбранным объектам</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>Select the features on the map</source>
         <translation>Выбрать объекты на карте</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Follow the features on the map</source>
         <translation>Следовать за объектами на карте</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Link the three selection modes</source>
         <translation>Связать три режима выбора</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Reset the layer properties</source>
         <translation>Сбросить свойства слоя</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>Follow the current layer</source>
         <translation>Следовать за текущим слоем</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>Layers to filter</source>
         <translation>Слои для фильтрации</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Combine with the existing filter</source>
         <translation>Объединить с существующим фильтром</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Geometric predicates</source>
         <translation>Геометрические предикаты</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Buffer distance</source>
         <translation>Расстояние буфера</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Buffer type</source>
         <translation>Тип буфера</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Layers to export</source>
         <translation>Слои для экспорта</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Projection of the export</source>
         <translation>Проекция экспорта</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Export the styles</source>
         <translation>Экспортировать стили</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Export format</source>
         <translation>Формат экспорта</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Output folder</source>
         <translation>Папка вывода</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Zip the export</source>
         <translation>Сжать экспорт в zip</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1001"/>
+        <location filename="../filter_mate_dockwidget.py" line="1004"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Не удалось применить компоновку панели; используются размеры по умолчанию. Подробности в filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="6549"/>
+        <source>Vector</source>
+        <translation>Вектор</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="54"/>
         <source>FilterMate</source>
-        <translation type="obsolete">FilterMate</translation>
+        <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="775"/>
         <source>SINGLE SELECTION</source>
-        <translation type="obsolete">ОДИНОЧНЫЙ ВЫБОР</translation>
+        <translation>ОДИНОЧНЫЙ ВЫБОР</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="950"/>
         <source>MULTIPLE SELECTION</source>
-        <translation type="obsolete">МНОЖЕСТВЕННЫЙ ВЫБОР</translation>
+        <translation>МНОЖЕСТВЕННЫЙ ВЫБОР</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1109"/>
         <source>CUSTOM SELECTION</source>
-        <translation type="obsolete">ПОЛЬЗОВАТЕЛЬСКИЙ ВЫБОР</translation>
+        <translation>ПОЛЬЗОВАТЕЛЬСКИЙ ВЫБОР</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1371"/>
         <source>FILTERING</source>
-        <translation type="obsolete">ФИЛЬТРАЦИЯ</translation>
+        <translation>ФИЛЬТРАЦИЯ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2644"/>
         <source>EXPORTING</source>
-        <translation type="obsolete">ЭКСПОРТ</translation>
+        <translation>ЭКСПОРТ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3476"/>
         <source>CONFIGURATION</source>
-        <translation type="obsolete">КОНФИГУРАЦИЯ</translation>
+        <translation>КОНФИГУРАЦИЯ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3222"/>
         <source>Select CRS for export</source>
-        <translation type="obsolete">Выбрать систему координат для экспорта</translation>
+        <translation>Выбрать систему координат для экспорта</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3744"/>
         <source>Export</source>
-        <translation type="obsolete">Экспорт</translation>
+        <translation>Экспорт</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2330"/>
         <source>AND</source>
-        <translation type="obsolete">И</translation>
+        <translation>И</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2335"/>
         <source>AND NOT</source>
-        <translation type="obsolete">И НЕ</translation>
+        <translation>И НЕ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2340"/>
         <source>OR</source>
-        <translation type="obsolete">ИЛИ</translation>
+        <translation>ИЛИ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3277"/>
         <source>QML</source>
-        <translation type="obsolete">QML</translation>
+        <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3282"/>
         <source>SLD</source>
-        <translation type="obsolete">SLD</translation>
+        <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2533"/>
         <source> m</source>
-        <translation type="obsolete"> м</translation>
+        <translation> м</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2406"/>
         <source>, </source>
-        <translation type="obsolete">, </translation>
+        <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1571"/>
         <source>Multi-layer filtering</source>
-        <translation type="obsolete">Многослойная фильтрация</translation>
+        <translation>Многослойная фильтрация</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1658"/>
         <source>Additive filtering for the selected layer</source>
-        <translation type="obsolete">Аддитивная фильтрация для выбранного слоя</translation>
+        <translation>Аддитивная фильтрация для выбранного слоя</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1944"/>
         <source>Geospatial filtering</source>
-        <translation type="obsolete">Геопространственная фильтрация</translation>
+        <translation>Геопространственная фильтрация</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2034"/>
         <source>Buffer</source>
-        <translation type="obsolete">Буфер</translation>
+        <translation>Буфер</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2279"/>
         <source>Expression layer</source>
-        <translation type="obsolete">Слой выражения</translation>
+        <translation>Слой выражения</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2391"/>
         <source>Geometric predicate</source>
-        <translation type="obsolete">Геометрический предикат</translation>
+        <translation>Геометрический предикат</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3322"/>
         <source>Output format</source>
-        <translation type="obsolete">Выходной формат</translation>
+        <translation>Выходной формат</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3580"/>
         <source>Filter</source>
-        <translation type="obsolete">Фильтр</translation>
+        <translation>Фильтр</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3642"/>
         <source>Reset</source>
-        <translation type="obsolete">Сбросить</translation>
+        <translation>Сбросить</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2748"/>
         <source>Layers to export</source>
-        <translation type="obsolete">Слои для экспорта</translation>
+        <translation>Слои для экспорта</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2829"/>
         <source>Layers projection</source>
-        <translation type="obsolete">Проекция слоёв</translation>
+        <translation>Проекция слоёв</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2913"/>
         <source>Save styles</source>
-        <translation type="obsolete">Сохранить стили</translation>
+        <translation>Сохранить стили</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2994"/>
         <source>Datatype export</source>
-        <translation type="obsolete">Экспорт типа данных</translation>
+        <translation>Экспорт типа данных</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3075"/>
         <source>Name of file/directory</source>
-        <translation type="obsolete">Имя файла/каталога</translation>
+        <translation>Имя файла/каталога</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2202"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">Использовать центроиды вместо полных геометрий для исходного слоя (быстрее для сложных полигонов)</translation>
+        <translation>Использовать центроиды вместо полных геометрий для исходного слоя (быстрее для сложных полигонов)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2518"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">Значение буфера в метрах (положительное=расширить, отрицательное=сузить полигоны)</translation>
+        <translation>Значение буфера в метрах (положительное=расширить, отрицательное=сузить полигоны)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2606"/>
         <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">Количество сегментов для точности буфера</translation>
+        <translation>Количество сегментов для точности буфера</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
         <source>Mode batch</source>
-        <translation type="obsolete">Пакетный режим</translation>
+        <translation>Пакетный режим</translation>
     </message>
 </context>
 <context>
@@ -2378,182 +2491,182 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="402"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Применить к другим тайлам набора данных</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="408"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
         <source>CLASSES</source>
         <translation>КЛАССЫ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="413"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="421"/>
         <source>Ground</source>
         <translation>Земля</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="414"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="422"/>
         <source>Vegetation</source>
         <translation>Растительность</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="415"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="423"/>
         <source>Buildings</source>
         <translation>Здания</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="424"/>
         <source>Above ground</source>
         <translation>Над землёй</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="417"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
         <source>Water</source>
         <translation>Вода</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="418"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="426"/>
         <source>Without noise</source>
         <translation>Без шума</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
         <source>Check only these classes</source>
         <translation>Отметить только эти классы</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="432"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="441"/>
         <source>All</source>
         <translation>Все</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="442"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="443"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="456"/>
         <source>Point classes</source>
         <translation>Классы точек</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="459"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
         <source>ATTRIBUTE RANGES</source>
         <translation>ДИАПАЗОНЫ АТРИБУТОВ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="465"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="480"/>
         <source>Z (m)</source>
         <translation>Z (м)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="466"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
         <source>Lowest elevation kept</source>
         <translation>Минимальная сохраняемая высота</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="482"/>
         <source>Highest elevation kept</source>
         <translation>Максимальная сохраняемая высота</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="475"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
         <source>Intensity</source>
         <translation>Интенсивность</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="476"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="491"/>
         <source>Lowest intensity kept</source>
         <translation>Минимальная сохраняемая интенсивность</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="477"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="492"/>
         <source>Highest intensity kept</source>
         <translation>Максимальная сохраняемая интенсивность</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
         <source>Return</source>
         <translation>Возврат</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="505"/>
         <source>Echo of the laser pulse kept</source>
         <translation>Сохраняемый эхосигнал лазерного импульса</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="495"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
         <source>Height above DTM ≥</source>
         <translation>Высота над ЦМР ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="529"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Цифровая модель рельефа, от которой измеряется высота</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="519"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="537"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Оставить точки, расположенные над моделью рельефа не ниже этой высоты</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="546"/>
         <source>EXPRESSION</source>
         <translation>ВЫРАЖЕНИЕ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="532"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="550"/>
         <source>Point cloud expression</source>
         <translation>Выражение для облака точек</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="533"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="551"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Отметьте группу, чтобы редактировать выражение вручную</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="560"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="578"/>
         <source>No elevation statistics for this layer</source>
         <translation>Нет статистики высот для этого слоя</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="601"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="619"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Высота над рельефом недоступна</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="611"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="634"/>
         <source>Kept points: {0}</source>
         <translation>Сохранено точек: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
         <source>Current filter: {0}</source>
         <translation>Текущий фильтр: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
         <source>none</source>
         <translation>нет</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>Any</source>
         <translation>Любой</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>First</source>
         <translation>Первый</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Last</source>
         <translation>Последний</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Single</source>
         <translation>Единственный</translation>
     </message>
@@ -3531,129 +3644,154 @@ Continue?</source>
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="288"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="307"/>
         <source>Band</source>
         <translation>Канал</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="291"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="310"/>
         <source>Band whose values are selected</source>
         <translation>Канал, значения которого выбираются</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="317"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="339"/>
         <source>PIXEL VALUE</source>
         <translation>ЗНАЧЕНИЕ ПИКСЕЛЯ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="324"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="347"/>
         <source>Pixel value of the current band</source>
         <translation>Значение пикселя текущего канала</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="335"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="358"/>
         <source>Last {0} values picked</source>
         <translation>Последние выбранные значения: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="337"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>Щёлкните по карте пипеткой пикселей. Ctrl+клик расширяет диапазон до этого значения.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="346"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="380"/>
         <source>VALUE RANGE</source>
         <translation>ДИАПАЗОН ЗНАЧЕНИЙ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Min</source>
         <translation>Мин.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Lowest value kept</source>
         <translation>Минимальное сохраняемое значение</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Max</source>
         <translation>Макс.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Highest value kept</source>
         <translation>Максимальное сохраняемое значение</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="406"/>
         <source>Preview on the map (hide the other pixels)</source>
         <translation>Предпросмотр на карте (скрыть остальные пиксели)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="378"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="413"/>
         <source>CLASSES</source>
         <translation>КЛАССЫ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Raster classes</source>
         <translation>Классы растра</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="421"/>
         <source>All</source>
         <translation>Все</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="387"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="422"/>
         <source>None</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="397"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="432"/>
         <source>RASTER EXPRESSION</source>
         <translation>РАСТРОВОЕ ВЫРАЖЕНИЕ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="436"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Выражение растрового калькулятора; пиксель сохраняется там, где оно не равно 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="402"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="437"/>
         <source>Raster expression</source>
         <translation>Растровое выражение</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="410"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
         <source>Use the range</source>
         <translation>Использовать диапазон</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="446"/>
         <source>Write the current value range as an expression</source>
         <translation>Записать текущий диапазон значений в виде выражения</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="519"/>
         <source>Selected pixels: {0}</source>
         <translation>Выбрано пикселей: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="730"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="801"/>
         <source>Set a value range first</source>
         <translation>Сначала задайте диапазон значений</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="747"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="818"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="763"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="834"/>
         <source>Last values:</source>
         <translation>Последние значения:</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="362"/>
+        <source>Value of the current band under the cursor</source>
+        <translation>Значение текущего канала под курсором</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="368"/>
+        <source>Statistics of the current band in the last rectangle drawn on the map</source>
+        <translation>Статистика текущего канала в последнем нарисованном на карте прямоугольнике</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="565"/>
+        <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
+        <translation>Под курсором: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <source>Zone: {0}</source>
+        <translation>Зона: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <source>no pixel</source>
+        <translation>нет пикселя</translation>
     </message>
 </context>
 <context>

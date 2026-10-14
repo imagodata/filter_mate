@@ -640,17 +640,9 @@ class LayerLifecycleService:
             # Update indicator to show reloading state
             if hasattr(dockwidget, 'backend_indicator_label') and dockwidget.backend_indicator_label:
                 dockwidget.backend_indicator_label.setText("⟳")
-                dockwidget.backend_indicator_label.setStyleSheet("""
-                    QLabel#label_backend_indicator {
-                        color: #3498db;
-                        font-size: 9pt;
-                        font-weight: 600;
-                        padding: 3px 10px;
-                        border-radius: 12px;
-                        border: none;
-                        background-color: #e8f4fc;
-                    }
-                """)
+                dockwidget.backend_indicator_label.setStyleSheet(  # FilterMate 5 design: waiting badge
+                    "QLabel#label_backend_indicator{color:#141414;background-color:#bdbdbd;font-size:8pt;"
+                    "font-weight:600;padding:3px 10px;border-radius:4px;border:none;}")
 
         # 5. Reinitialize database
         try:

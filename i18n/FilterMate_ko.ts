@@ -107,214 +107,322 @@
     </message>
 </context>
 <context>
-    <name>CoverageModeController</name>
+    <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="164"/>
-        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
-        <translation>래스터 / 포인트 클라우드 레이어 {0}개의 필터를 복원하는 중…</translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <source>1 band</source>
+        <translation>1개 밴드</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="378"/>
-        <source>cov. ≥ </source>
-        <translation>포함률 ≥ </translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="262"/>
+        <source>{0} bands</source>
+        <translation>{0}개 밴드</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="379"/>
-        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
-        <translation>소스 지오메트리 안에 들어오는 대상 폴리곤의 최소 비율(0 = 겹침이 있으면 모두). 소스가 래스터 또는 포인트 클라우드일 때 사용됩니다.</translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="263"/>
+        <source>{0} points</source>
+        <translation>{0}개 포인트</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="207"/>
+        <source>Source geometry: the selected pixels, vectorized</source>
+        <translation type="obsolete">소스 지오메트리: 선택한 픽셀(벡터화)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="208"/>
+        <source>Source geometry: the footprint of the kept points</source>
+        <translation type="obsolete">소스 지오메트리: 유지된 포인트의 범위</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="209"/>
+        <source>Source geometry: the features selected in EXPLORING</source>
+        <translation type="obsolete">소스 지오메트리: EXPLORING에서 선택한 피처</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Value under the cursor: follow the pixel value of the current band while moving over the map</source>
+        <translation>커서 위치 값: 지도 위를 이동하면서 현재 밴드의 픽셀 값을 표시</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band</source>
+        <translation>사각형 통계: 지도에서 드래그하여 현재 밴드의 최솟값, 최댓값, 평균을 확인</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Elevation profile: open the QGIS elevation profile of the map</source>
+        <translation>고도 프로파일: QGIS 고도 프로파일 열기</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>3D view: open a new QGIS 3D map view</source>
+        <translation>3D 보기: 새 QGIS 3D 지도 보기 열기</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="264"/>
+        <source>no feature</source>
+        <translation>피처 없음</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="265"/>
+        <source>{0} feature(s)</source>
+        <translation>피처 {0}개</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="266"/>
+        <source>every pixel</source>
+        <translation>모든 픽셀</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="267"/>
+        <source>{0} class(es)</source>
+        <translation>클래스 {0}개</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="268"/>
+        <source>expression</source>
+        <translation>표현식</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="269"/>
+        <source>{0} features</source>
+        <translation>피처 {0}개</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <source>Vector</source>
+        <translation>벡터</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
         <source>Raster</source>
         <translation>래스터</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
         <source>Point cloud</source>
         <translation>포인트 클라우드</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
+        <source>Kept points</source>
+        <translation>유지된 포인트</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="355"/>
+        <source>Selection → source geometry</source>
+        <translation>선택 → 소스 지오메트리</translation>
+    </message>
+</context>
+<context>
+    <name>CoverageModeController</name>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="165"/>
+        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
+        <translation>래스터 / 포인트 클라우드 레이어 {0}개의 필터를 복원하는 중…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="395"/>
+        <source>cov. ≥ </source>
+        <translation>포함률 ≥ </translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="396"/>
+        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
+        <translation>소스 지오메트리 안에 들어오는 대상 폴리곤의 최소 비율(0 = 겹침이 있으면 모두). 소스가 래스터 또는 포인트 클라우드일 때 사용됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <source>Raster</source>
+        <translation>래스터</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <source>Point cloud</source>
+        <translation>포인트 클라우드</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0} 레이어: EXPLORING에서 선택, FILTERING에서 관계 설정</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="471"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="502"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>픽셀 선택기: 지도를 클릭하여 모든 밴드의 값을 읽습니다(Ctrl+클릭으로 범위 확장)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
         <source>Zoom to the layer</source>
         <translation>레이어로 확대</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="473"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="504"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>미리보기: 선택 영역 밖의 픽셀 숨기기</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="475"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="506"/>
         <source>Not used for raster layers</source>
         <translation>래스터 레이어에는 사용되지 않습니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="476"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="507"/>
         <source>Reset the raster selection</source>
         <translation>래스터 선택 초기화</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="510"/>
         <source>Identify points on the map</source>
         <translation>지도에서 포인트 식별</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="481"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="512"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>실시간 미리보기: 선택으로 유지되는 포인트만 표시</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="483"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="514"/>
         <source>Not used for point cloud layers</source>
         <translation>포인트 클라우드 레이어에는 사용되지 않습니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="484"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
         <source>Reset the point cloud criteria</source>
         <translation>포인트 클라우드 조건 초기화</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="641"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="672"/>
         <source>Invalid raster calculator expression</source>
         <translation>잘못된 래스터 계산기 표현식</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="679"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="710"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL을 찾을 수 없습니다: DTM 위의 높이를 계산하려면 pdal 실행 파일이 필요합니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="999"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>FilterMate 작업이 아직 실행 중입니다. 완료될 때까지 기다리세요</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="984"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1015"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate 작업 실패: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1048"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>먼저 픽셀을 선택하세요: 값 범위, 클래스 또는 래스터 표현식</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1026"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1057"/>
         <source>Raster filtered: {0}</source>
         <translation>래스터 필터링 완료: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1039"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>포인트 클라우드 표현식이 거부되었습니다: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1042"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1073"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>먼저 포인트를 선택하세요: 클래스, 속성 범위 또는 표현식</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1050"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1081"/>
         <source>Point cloud filtered: {0}</source>
         <translation>포인트 클라우드 필터링 완료: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1114"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1145"/>
         <source>Filter not applied: {0}</source>
         <translation>필터가 적용되지 않았습니다: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>canceled</source>
         <translation>취소됨</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1149"/>
         <source>{0} target(s) filtered</source>
         <translation>대상 {0}개 필터링됨</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1120"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1151"/>
         <source>{0} failed: {1}</source>
         <translation>{0} 실패: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1129"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1160"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: '{0}'에서 필터링 중…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1185"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1216"/>
         <source>Changed since, left as is: {0}</source>
         <translation>이후에 변경되어 그대로 둠: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1191"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1222"/>
         <source>{0} layer(s) restored</source>
         <translation>레이어 {0}개 복원됨</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1225"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1256"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}'을(를) 내보내지 못했습니다: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1237"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
         <source>Exported: {0}</source>
         <translation>내보냄: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1239"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1270"/>
         <source>Export failed: {0}</source>
         <translation>내보내기 실패: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1246"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1277"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>레이어 {0}개를 내보내는 중…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1252"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1283"/>
         <source>Export folder</source>
         <translation>내보내기 폴더</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1324"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1355"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>래스터 / 포인트 클라우드 대상을 건너뜀: EXPLORING에서 선택된 소스 피처가 없습니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>래스터 / 포인트 클라우드 대상이 필터링되지 않음: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1349"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1380"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>래스터 / 포인트 클라우드 대상 {0}개 필터링됨</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1465"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>지면 위 높이에 사용할 DTM 래스터를 선택하세요</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1442"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1473"/>
         <source>Height above ground not computed: {0}</source>
         <translation>지면 위 높이를 계산하지 못했습니다: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1454"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1485"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>PDAL로 '{0}' 위의 높이를 계산하는 중…</translation>
     </message>
@@ -1218,27 +1326,27 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>기본 설정을 초기화하고 SQLite 데이터베이스를 삭제</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1421"/>
+        <location filename="../filter_mate.py" line="1413"/>
         <source>Reset Configuration</source>
         <translation>설정 초기화</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1444"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>Configuration reset successfully.</source>
         <translation>설정이 성공적으로 초기화되었습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1449"/>
+        <location filename="../filter_mate.py" line="1441"/>
         <source>Default configuration file not found.</source>
         <translation>기본 설정 파일을 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1470"/>
+        <location filename="../filter_mate.py" line="1462"/>
         <source>Database deleted: {filename}</source>
         <translation>데이터베이스 삭제됨: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1484"/>
+        <location filename="../filter_mate.py" line="1476"/>
         <source>Restart required</source>
         <translation>다시 시작 필요</translation>
     </message>
@@ -1389,7 +1497,7 @@ FilterMate는 다음과 같은 이유로 이 설정을 비활성화('Off')하는
         <translation>잘못된 도형 필터링이 변경되지 않았습니다. 일부 객체가 내보내기에서 제외될 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1421"/>
+        <location filename="../filter_mate.py" line="1413"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1406,7 +1514,7 @@ QGIS must be restarted to apply the changes.</source>
 변경 사항을 적용하려면 QGIS를 다시 시작해야 합니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1484"/>
+        <location filename="../filter_mate.py" line="1476"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1425,7 +1533,7 @@ Please restart QGIS to apply the changes.</source>
         <translation>{count}개의 참조 레이어가 로드되지 않음 ({layers_list}). 대체 표시를 사용합니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1475"/>
+        <location filename="../filter_mate.py" line="1467"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename} 삭제 불가: {e}</translation>
     </message>
@@ -1435,71 +1543,71 @@ Please restart QGIS to apply the changes.</source>
         <translation type="obsolete">초기화 중 오류: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1527"/>
+        <location filename="../filter_mate.py" line="1519"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate&lt;/b&gt;를 사용해 주셔서 감사합니다!&lt;br&gt;Discord 커뮤니티에 참여하세요:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;도움 및 지원 받기&lt;/li&gt;&lt;li&gt;버그 및 문제 신고&lt;/li&gt;&lt;li&gt;새로운 기능 제안&lt;/li&gt;&lt;li&gt;다른 사용자와 팁 공유&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1543"/>
+        <location filename="../filter_mate.py" line="1535"/>
         <source>  Join us on Discord</source>
         <translation>  Discord에 참여하기</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1563"/>
+        <location filename="../filter_mate.py" line="1555"/>
         <source>Don&apos;t show this again</source>
         <translation>다시 표시하지 않음</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1566"/>
+        <location filename="../filter_mate.py" line="1558"/>
         <source>Close</source>
         <translation>닫기</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1632"/>
+        <location filename="../filter_mate.py" line="1624"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>플러그인 로드 오류: {0}. 자세한 내용은 QGIS Python 콘솔을 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6922"/>
+        <location filename="../filter_mate_dockwidget.py" line="6932"/>
         <source>Current layer: {0}</source>
         <translation>현재 레이어: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6924"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>No layer selected</source>
         <translation>선택된 레이어 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6944"/>
         <source>Selected layers:
 {0}</source>
         <translation>선택된 레이어:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6944"/>
         <source>No layers selected</source>
         <translation>선택된 레이어 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6954"/>
+        <location filename="../filter_mate_dockwidget.py" line="6964"/>
         <source>No expression defined</source>
         <translation>정의된 표현식 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6966"/>
+        <location filename="../filter_mate_dockwidget.py" line="6976"/>
         <source>Display expression: {0}</source>
         <translation>표시 표현식: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6981"/>
+        <location filename="../filter_mate_dockwidget.py" line="6991"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>객체 ID: {0}
 첫 번째 속성: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1493"/>
+        <location filename="../filter_mate.py" line="1485"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>설정을 초기화할 수 없습니다. 플러그인 폴더에 쓸 수 있는지 확인한 후 다시 시도하세요. 자세한 내용은 filtermate.log를 참조하세요.</translation>
     </message>
@@ -1547,62 +1655,62 @@ First attribute: {1}</source>
         <translation>{0}을(를) 실행할 수 없음: 위젯 초기화 실패.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2426"/>
+        <location filename="../filter_mate_app.py" line="2424"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0}할 수 없음: 레이어가 유효하지 않거나 소스를 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2563"/>
+        <location filename="../filter_mate_app.py" line="2561"/>
         <source>All filters cleared - </source>
         <translation>모든 필터 해제됨 - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2564"/>
+        <location filename="../filter_mate_app.py" line="2562"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>메인 레이어에 {0}{1}개 객체 표시</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2572"/>
+        <location filename="../filter_mate_app.py" line="2570"/>
         <source>Error: result handler missing</source>
         <translation>오류: 결과 핸들러가 없습니다</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2585"/>
+        <location filename="../filter_mate_app.py" line="2583"/>
         <source>Error during filtering: {0}</source>
         <translation>필터링 중 오류: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2707"/>
+        <location filename="../filter_mate_app.py" line="2705"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0}개의 고아 즐겨찾기 복구됨: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2844"/>
+        <location filename="../filter_mate_app.py" line="2840"/>
         <source>Layer loading failed - click to retry</source>
         <translation>레이어 로드 실패 - 재시도하려면 클릭</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2900"/>
+        <location filename="../filter_mate_app.py" line="2896"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0}개 레이어가 성공적으로 로드됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1865"/>
+        <location filename="../filter_mate_app.py" line="1863"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1867"/>
+        <location filename="../filter_mate_app.py" line="1865"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1868"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1872"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1615,22 +1723,22 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1882"/>
+        <location filename="../filter_mate_app.py" line="1880"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1889"/>
+        <location filename="../filter_mate_app.py" line="1887"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1896"/>
+        <location filename="../filter_mate_app.py" line="1894"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1920"/>
+        <location filename="../filter_mate_app.py" line="1918"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
@@ -1648,7 +1756,7 @@ What would you like to do?</translation>
         <translation>초기화 오류: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="997"/>
+        <location filename="../filter_mate_dockwidget.py" line="1000"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI 설정이 불완전합니다 - 로그를 확인하세요</translation>
     </message>
@@ -1658,458 +1766,463 @@ What would you like to do?</translation>
         <translation type="obsolete">UI 크기 오류: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1431"/>
+        <location filename="../filter_mate_dockwidget.py" line="1449"/>
         <source>Favorites manager not available</source>
         <translation>즐겨찾기 관리자를 사용할 수 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1450"/>
+        <location filename="../filter_mate_dockwidget.py" line="1470"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0}개 즐겨찾기 저장됨
 적용 또는 관리하려면 클릭</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1458"/>
+        <location filename="../filter_mate_dockwidget.py" line="1473"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ 저장된 즐겨찾기 없음
 현재 필터를 추가하려면 클릭</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1482"/>
+        <location filename="../filter_mate_dockwidget.py" line="1493"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{1}개 레이어에 {0} 백엔드 강제 적용됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget.py" line="1579"/>
         <source>Backend controller not available</source>
         <translation>백엔드 컨트롤러를 사용할 수 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1506"/>
+        <location filename="../filter_mate_dockwidget.py" line="1517"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL 자동 정리 활성화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1507"/>
+        <location filename="../filter_mate_dockwidget.py" line="1518"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL 자동 정리 비활성화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1513"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL 세션 뷰 정리 완료</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1513"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>No views to clean or cleanup failed</source>
         <translation>정리할 뷰가 없거나 정리 실패</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>No PostgreSQL connection available</source>
         <translation>사용 가능한 PostgreSQL 연결 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1530"/>
+        <location filename="../filter_mate_dockwidget.py" line="1541"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>스키마에 다른 세션의 뷰가 {0}개 있습니다.
 그래도 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1531"/>
+        <location filename="../filter_mate_dockwidget.py" line="1542"/>
         <source>Other Sessions Active</source>
         <translation>다른 세션 활성 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1533"/>
+        <location filename="../filter_mate_dockwidget.py" line="1544"/>
         <source>Schema cleanup cancelled</source>
         <translation>스키마 정리 취소됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1538"/>
+        <location filename="../filter_mate_dockwidget.py" line="1549"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>스키마 '{0}'이(가) 성공적으로 삭제됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1540"/>
+        <location filename="../filter_mate_dockwidget.py" line="1551"/>
         <source>Schema cleanup failed</source>
         <translation>스키마 정리 실패</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget.py" line="1577"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL 세션 정보</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Theme adapted: {0}</source>
         <translation>테마 적용됨: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Dark mode</source>
         <translation>다크 모드</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Light mode</source>
         <translation>라이트 모드</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4005"/>
+        <location filename="../filter_mate_dockwidget.py" line="4016"/>
         <source>Selected features have no geometry.</source>
         <translation>선택된 객체에 도형이 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4024"/>
+        <location filename="../filter_mate_dockwidget.py" line="4035"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>선택된 객체가 없습니다. 드롭다운 목록에서 객체를 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5079"/>
+        <location filename="../filter_mate_dockwidget.py" line="5100"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>선택된 레이어가 유효하지 않거나 소스를 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5816"/>
+        <location filename="../filter_mate_dockwidget.py" line="5837"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>음수 버퍼 (침식): 폴리곤을 안쪽으로 축소</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5819"/>
+        <location filename="../filter_mate_dockwidget.py" line="5840"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>미터 단위 버퍼 값 (양수=확장, 음수=폴리곤 축소)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6293"/>
+        <location filename="../filter_mate_dockwidget.py" line="6314"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>{0}개의 벡터 레이어로 플러그인 활성화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6376"/>
+        <location filename="../filter_mate_dockwidget.py" line="6395"/>
         <source>Could not reload plugin automatically.</source>
         <translation>플러그인을 자동으로 다시 불러올 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6378"/>
+        <location filename="../filter_mate_dockwidget.py" line="6397"/>
         <source>Error reloading plugin: {0}</source>
         <translation>플러그인 다시 불러오기 오류: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6450"/>
+        <location filename="../filter_mate_dockwidget.py" line="6469"/>
         <source>Layer properties reset to defaults</source>
         <translation>레이어 속성이 기본값으로 초기화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6451"/>
+        <location filename="../filter_mate_dockwidget.py" line="6470"/>
         <source>Error resetting layer properties: {}</source>
         <translation>레이어 속성 초기화 오류: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="864"/>
+        <location filename="../filter_mate_dockwidget.py" line="867"/>
         <source>Filter</source>
         <translation>필터</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="865"/>
+        <location filename="../filter_mate_dockwidget.py" line="868"/>
         <source>Undo the last filter</source>
         <translation>마지막 필터 실행 취소</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="866"/>
+        <location filename="../filter_mate_dockwidget.py" line="869"/>
         <source>Redo the last filter</source>
         <translation>마지막 필터 다시 실행</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
         <source>Remove the filters</source>
         <translation>필터 제거</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
         <source>Export the layers</source>
         <translation>레이어 내보내기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
         <source>About FilterMate</source>
         <translation>FilterMate 정보</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
         <source>Identify the selected features</source>
         <translation>선택한 피처 식별</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>Zoom to the selected features</source>
         <translation>선택한 피처로 확대</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>Select the features on the map</source>
         <translation>지도에서 피처 선택</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Follow the features on the map</source>
         <translation>지도에서 피처 따라가기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Link the three selection modes</source>
         <translation>세 가지 선택 모드 연결</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Reset the layer properties</source>
         <translation>레이어 속성 초기화</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>Follow the current layer</source>
         <translation>현재 레이어 따라가기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>Layers to filter</source>
         <translation>필터링할 레이어</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Combine with the existing filter</source>
         <translation>기존 필터와 결합</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Geometric predicates</source>
         <translation>지오메트리 술어</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Buffer distance</source>
         <translation>버퍼 거리</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Buffer type</source>
         <translation>버퍼 유형</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Layers to export</source>
         <translation>내보낼 레이어</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Projection of the export</source>
         <translation>내보내기 투영법</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Export the styles</source>
         <translation>스타일 내보내기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Export format</source>
         <translation>내보내기 형식</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Output folder</source>
         <translation>출력 폴더</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Zip the export</source>
         <translation>내보내기를 zip으로 압축</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1001"/>
+        <location filename="../filter_mate_dockwidget.py" line="1004"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>패널 레이아웃을 적용할 수 없어 기본 크기를 사용합니다. 자세한 내용은 filtermate.log를 참조하세요.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="6549"/>
+        <source>Vector</source>
+        <translation>벡터</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="54"/>
         <source>FilterMate</source>
-        <translation type="obsolete">FilterMate</translation>
+        <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="775"/>
         <source>SINGLE SELECTION</source>
-        <translation type="obsolete">단일 선택</translation>
+        <translation>단일 선택</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="950"/>
         <source>MULTIPLE SELECTION</source>
-        <translation type="obsolete">다중 선택</translation>
+        <translation>다중 선택</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1109"/>
         <source>CUSTOM SELECTION</source>
-        <translation type="obsolete">사용자 정의 선택</translation>
+        <translation>사용자 정의 선택</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1371"/>
         <source>FILTERING</source>
-        <translation type="obsolete">필터링</translation>
+        <translation>필터링</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2644"/>
         <source>EXPORTING</source>
-        <translation type="obsolete">내보내기</translation>
+        <translation>내보내기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3476"/>
         <source>CONFIGURATION</source>
-        <translation type="obsolete">설정</translation>
+        <translation>설정</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3222"/>
         <source>Select CRS for export</source>
-        <translation type="obsolete">내보내기용 CRS 선택</translation>
+        <translation>내보내기용 CRS 선택</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3744"/>
         <source>Export</source>
-        <translation type="obsolete">내보내기</translation>
+        <translation>내보내기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2330"/>
         <source>AND</source>
-        <translation type="obsolete">AND</translation>
+        <translation>AND</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2335"/>
         <source>AND NOT</source>
-        <translation type="obsolete">AND NOT</translation>
+        <translation>AND NOT</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2340"/>
         <source>OR</source>
-        <translation type="obsolete">OR</translation>
+        <translation>OR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3277"/>
         <source>QML</source>
-        <translation type="obsolete">QML</translation>
+        <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3282"/>
         <source>SLD</source>
-        <translation type="obsolete">SLD</translation>
+        <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2533"/>
         <source> m</source>
-        <translation type="obsolete"> m</translation>
+        <translation> m</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2406"/>
         <source>, </source>
-        <translation type="obsolete">, </translation>
+        <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1571"/>
         <source>Multi-layer filtering</source>
-        <translation type="obsolete">다중 레이어 필터링</translation>
+        <translation>다중 레이어 필터링</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1658"/>
         <source>Additive filtering for the selected layer</source>
-        <translation type="obsolete">선택한 레이어에 대한 추가 필터링</translation>
+        <translation>선택한 레이어에 대한 추가 필터링</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1944"/>
         <source>Geospatial filtering</source>
-        <translation type="obsolete">지리공간 필터링</translation>
+        <translation>지리공간 필터링</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2034"/>
         <source>Buffer</source>
-        <translation type="obsolete">버퍼</translation>
+        <translation>버퍼</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2279"/>
         <source>Expression layer</source>
-        <translation type="obsolete">표현식 레이어</translation>
+        <translation>표현식 레이어</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2391"/>
         <source>Geometric predicate</source>
-        <translation type="obsolete">공간 조건자</translation>
+        <translation>공간 조건자</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3322"/>
         <source>Output format</source>
-        <translation type="obsolete">출력 형식</translation>
+        <translation>출력 형식</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3580"/>
         <source>Filter</source>
-        <translation type="obsolete">필터</translation>
+        <translation>필터</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3642"/>
         <source>Reset</source>
-        <translation type="obsolete">초기화</translation>
+        <translation>초기화</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2748"/>
         <source>Layers to export</source>
-        <translation type="obsolete">내보낼 레이어</translation>
+        <translation>내보낼 레이어</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2829"/>
         <source>Layers projection</source>
-        <translation type="obsolete">레이어 좌표계</translation>
+        <translation>레이어 좌표계</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2913"/>
         <source>Save styles</source>
-        <translation type="obsolete">스타일 저장</translation>
+        <translation>스타일 저장</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2994"/>
         <source>Datatype export</source>
-        <translation type="obsolete">데이터 유형 내보내기</translation>
+        <translation>데이터 유형 내보내기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3075"/>
         <source>Name of file/directory</source>
-        <translation type="obsolete">파일/디렉토리 이름</translation>
+        <translation>파일/디렉토리 이름</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2202"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">소스 레이어에 전체 도형 대신 중심점 사용 (복잡한 폴리곤에 더 빠름)</translation>
+        <translation>소스 레이어에 전체 도형 대신 중심점 사용 (복잡한 폴리곤에 더 빠름)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2518"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">미터 단위 버퍼 값 (양수=확장, 음수=폴리곤 축소)</translation>
+        <translation>미터 단위 버퍼 값 (양수=확장, 음수=폴리곤 축소)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2606"/>
         <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">버퍼 정밀도를 위한 세그먼트 수</translation>
+        <translation>버퍼 정밀도를 위한 세그먼트 수</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
         <source>Mode batch</source>
-        <translation type="obsolete">일괄 처리 모드</translation>
+        <translation>일괄 처리 모드</translation>
     </message>
 </context>
 <context>
@@ -2378,182 +2491,182 @@ PostgreSQL 테이블에 PRIMARY KEY가 정의되어 있는지 확인하세요.</
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="402"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>데이터셋의 다른 타일에 적용</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="408"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
         <source>CLASSES</source>
         <translation>클래스</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="413"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="421"/>
         <source>Ground</source>
         <translation>지면</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="414"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="422"/>
         <source>Vegetation</source>
         <translation>식생</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="415"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="423"/>
         <source>Buildings</source>
         <translation>건물</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="424"/>
         <source>Above ground</source>
         <translation>지면 위</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="417"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
         <source>Water</source>
         <translation>물</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="418"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="426"/>
         <source>Without noise</source>
         <translation>노이즈 제외</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
         <source>Check only these classes</source>
         <translation>이 클래스만 선택</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="432"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="441"/>
         <source>All</source>
         <translation>모두</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="442"/>
         <source>None</source>
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="443"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="456"/>
         <source>Point classes</source>
         <translation>포인트 클래스</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="459"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
         <source>ATTRIBUTE RANGES</source>
         <translation>속성 범위</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="465"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="480"/>
         <source>Z (m)</source>
         <translation>Z (m)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="466"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
         <source>Lowest elevation kept</source>
         <translation>유지할 최저 표고</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="482"/>
         <source>Highest elevation kept</source>
         <translation>유지할 최고 표고</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="475"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
         <source>Intensity</source>
         <translation>강도</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="476"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="491"/>
         <source>Lowest intensity kept</source>
         <translation>유지할 최저 강도</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="477"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="492"/>
         <source>Highest intensity kept</source>
         <translation>유지할 최고 강도</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
         <source>Return</source>
         <translation>리턴</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="505"/>
         <source>Echo of the laser pulse kept</source>
         <translation>유지할 레이저 펄스 에코</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="495"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
         <source>Height above DTM ≥</source>
         <translation>DTM 위 높이 ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="529"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>높이를 측정하는 기준이 되는 수치 지형 모델</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="519"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="537"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>지형 모델 위로 이 높이 이상인 포인트 유지</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="546"/>
         <source>EXPRESSION</source>
         <translation>표현식</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="532"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="550"/>
         <source>Point cloud expression</source>
         <translation>포인트 클라우드 표현식</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="533"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="551"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>그룹을 선택하면 표현식을 직접 편집할 수 있습니다</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="560"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="578"/>
         <source>No elevation statistics for this layer</source>
         <translation>이 레이어에는 표고 통계가 없습니다</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="601"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="619"/>
         <source>Height above the terrain is unavailable</source>
         <translation>지형 위 높이를 사용할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="611"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="634"/>
         <source>Kept points: {0}</source>
         <translation>유지된 포인트: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
         <source>Current filter: {0}</source>
         <translation>현재 필터: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
         <source>none</source>
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>Any</source>
         <translation>모든</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>First</source>
         <translation>첫 번째</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Last</source>
         <translation>마지막</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Single</source>
         <translation>단일</translation>
     </message>
@@ -3531,129 +3644,154 @@ Continue?</source>
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="288"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="307"/>
         <source>Band</source>
         <translation>밴드</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="291"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="310"/>
         <source>Band whose values are selected</source>
         <translation>값을 선택할 밴드</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="317"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="339"/>
         <source>PIXEL VALUE</source>
         <translation>픽셀 값</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="324"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="347"/>
         <source>Pixel value of the current band</source>
         <translation>현재 밴드의 픽셀 값</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="335"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="358"/>
         <source>Last {0} values picked</source>
         <translation>최근 선택한 값 {0}개</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="337"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>픽셀 선택기로 지도를 클릭하세요. Ctrl+클릭하면 범위가 해당 값까지 확장됩니다.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="346"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="380"/>
         <source>VALUE RANGE</source>
         <translation>값 범위</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Min</source>
         <translation>최소</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Lowest value kept</source>
         <translation>유지할 최솟값</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Max</source>
         <translation>최대</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Highest value kept</source>
         <translation>유지할 최댓값</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="406"/>
         <source>Preview on the map (hide the other pixels)</source>
         <translation>지도에서 미리보기(다른 픽셀 숨기기)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="378"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="413"/>
         <source>CLASSES</source>
         <translation>클래스</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Raster classes</source>
         <translation>래스터 클래스</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="421"/>
         <source>All</source>
         <translation>모두</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="387"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="422"/>
         <source>None</source>
         <translation>없음</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="397"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="432"/>
         <source>RASTER EXPRESSION</source>
         <translation>래스터 표현식</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="436"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>래스터 계산기 표현식. 값이 0이 아닌 픽셀이 유지됩니다</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="402"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="437"/>
         <source>Raster expression</source>
         <translation>래스터 표현식</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="410"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
         <source>Use the range</source>
         <translation>범위 사용</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="446"/>
         <source>Write the current value range as an expression</source>
         <translation>현재 값 범위를 표현식으로 작성</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="519"/>
         <source>Selected pixels: {0}</source>
         <translation>선택된 픽셀: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="730"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="801"/>
         <source>Set a value range first</source>
         <translation>먼저 값 범위를 설정하세요</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="747"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="818"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="763"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="834"/>
         <source>Last values:</source>
         <translation>최근 값:</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="362"/>
+        <source>Value of the current band under the cursor</source>
+        <translation>커서 위치의 현재 밴드 값</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="368"/>
+        <source>Statistics of the current band in the last rectangle drawn on the map</source>
+        <translation>지도에 마지막으로 그린 사각형의 현재 밴드 통계</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="565"/>
+        <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
+        <translation>커서 위치: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <source>Zone: {0}</source>
+        <translation>영역: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <source>no pixel</source>
+        <translation>픽셀 없음</translation>
     </message>
 </context>
 <context>

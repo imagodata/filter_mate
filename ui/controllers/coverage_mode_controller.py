@@ -240,7 +240,7 @@ class CoverageModeController(BaseController):
             return True
         if self._active_layer is not None:
             self.deactivate()
-        self._extras_call('show_vector')
+        self._extras_call('show_vector', layer)
         return False
 
     def activate(self, layer: Any, kind: Any) -> None:
