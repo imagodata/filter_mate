@@ -17,20 +17,20 @@
 | 4 Filtres croisés | fait : 9 combinaisons, couverture minimale, Disjoint, AND / OR / AND NOT | 08283761, a88af228, 62a84f2d |
 | 5 Sélections avancées | fait | a88af228 |
 | 6 Export | fait : GeoTIFF/COG, LAZ/LAS/COPC/GPKG/CSV, tâche de fond, depuis EXPORTING ou le bouton Export | a88af228, 62a84f2d |
-| 7 Transverse | fait : favoris (758de628), rejeu à la réouverture du projet (54a491fa, sélection raster 89315bc7), Processing `filtermate:cross_filter` (0b1a33b1), API REST `POST /filters/cross` + `layer_kind` (4abdf9cb), traductions françaises (aaf5090e), page roadmap (2b9828d8). **Non fait : traductions des 33 autres langues, guide utilisateur et vidéos** | — |
+| 7 Transverse | fait : favoris (758de628), rejeu à la réouverture du projet (54a491fa, sélection raster 89315bc7), Processing `filtermate:cross_filter` (0b1a33b1), API REST `POST /filters/cross` + `layer_kind` (4abdf9cb), traductions des 34 langues (aaf5090e, c79b1e00), page roadmap (2b9828d8), guide EN/FR (eff40f6e). **Non fait : vidéos du site** | — |
 
 Revue adversariale (Opus) : 33 constats, corrigés dans 62a84f2d sauf les points ouverts ci-dessous.
 
-**Vérifications** : suite unitaire 2266 OK ; tests API 126 OK (fastapi en dossier isolé) ; flake8 (config CI) 0 ; `scripts/fm5_scenarios.py` 59/59 (QGIS 4.2
+**Vérifications** : suite unitaire 2266 OK ; tests API 126 OK (fastapi en dossier isolé) ; flake8 (config CI) 0 ; `scripts/fm5_scenarios.py` 62/62 (QGIS 4.2
 sans interface, dalle LiDAR HD 0616_6153 Cerdagne, MNT 1 m et classes dérivés par PDAL, BD TOPO et parcelles WFS) ;
-`scripts/fm5_gui_check.py` 25/25 sur QGIS 4.2 (Qt6) **et** QGIS 3.44 LTR (Qt5), profil jetable.
+`scripts/fm5_gui_check.py` 26/26 sur QGIS 4.2 (Qt6) et 25/25 sur QGIS 3.44 LTR (Qt5), profil jetable.
 
 **Points ouverts**
 - QGIS 3.44 plante à la fermeture avec ces couches chargées, **même sans FilterMate** (vérifié) : à signaler à QGIS si reproductible hors `\\wsl.localhost`.
 - QGIS 3.22–3.28 non testés (API utilisées : `virtualraster` 3.22, `QgsPointCloudLayerExporter` 3.26, transparence opacité 3.30+ avec repli).
 - PDAL sous Linux / macOS non vérifié (repli : exporteur QGIS, HAG indisponible avec message).
-- Annuler une opération croisée restaure les instantanés de ses couches même si une autre source les a refiltrées depuis.
-- L'option zip d'EXPORTING n'inclut pas les fichiers raster / nuage (écrits à côté).
+- Avec l'option zip, les fichiers raster / nuage vont dans `<nom>_raster_lidar.zip` à côté de l'archive vecteur (pas dans la même archive).
+- Traductions des 32 langues hors fr/en produites par modèle : relecture humaine souhaitable avant la sortie.
 
 ## 1. Objectifs
 
