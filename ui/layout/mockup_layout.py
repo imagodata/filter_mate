@@ -5,7 +5,8 @@ Layout changes of the FilterMate 5 design (mockup), applied once after setupUi.
 * EXPLORING: the tool rail sits beside the scroll area so its grey band takes the
   visible height, and its tools are spread evenly over that height.
 * Section headers (FILTERING, EXPORTING, CONFIGURATION) get the mockup height.
-* One 8 px vertical rhythm: header, EXPLORING, sections; FILTERING / EXPORTING rows grouped at the top.
+* One 8 px vertical rhythm: header, EXPLORING, sections. The lower zone (sections) is
+  resized with the splitter; FILTERING / EXPORTING rows spread over its height.
 * FILTERING, buffer: the buffer type and the segment count join the buffer
   value row (``25,00 m | Round | 5``). The emptied row and its spacer leave the
   values column, the buffer type button and its spacer leave the buttons
@@ -92,6 +93,9 @@ def merge_buffer_rows(dw: Any) -> bool:
     return True
 
 
+RAIL_MIN_GAP = 6
+
+
 def rail_gap(available: int, heights, minimum: int = 6) -> int:
     """Even gap spreading buttons of ``heights`` over ``available`` px (one gap above, between, below)."""
     heights = [int(h) for h in heights if h > 0]
@@ -119,13 +123,25 @@ class _RailSpreader(QObject if QObject is not None else object):
         return False
 
     def spread(self) -> None:
+        try:
+            self._spread()
+        except RuntimeError:
+            pass  # widgets deleted (plugin closing)
+
+    def _spread(self) -> None:
         layout = self._layout
         buttons = [layout.itemAt(i).widget() for i in range(layout.count())]
         heights = [w.height() or w.sizeHint().height() for w in buttons if w is not None and not w.isHidden()]
         outer = self._rail.layout()
         margins = outer.contentsMargins() if outer is not None else None
-        available = self._rail.height() - ((margins.top() + margins.bottom()) if margins is not None else 0)
-        gap = rail_gap(available, heights)
+        vertical_margins = (margins.top() + margins.bottom()) if margins is not None else 0
+        # Explicit minimum = buttons + minimal gaps: the spread gap must not become the rail's
+        # minimum height, or EXPLORING could never shrink back (the splitter would "stick").
+        minimum = sum(heights) + RAIL_MIN_GAP * (len(heights) + 1) + vertical_margins
+        if self._rail.minimumHeight() != minimum:
+            self._rail.setMinimumHeight(minimum)
+        available = self._rail.height() - vertical_margins
+        gap = rail_gap(available, heights, RAIL_MIN_GAP)
         if layout.spacing() != gap:
             layout.setSpacing(gap)
         top = layout.contentsMargins()
@@ -245,7 +261,9 @@ def rail_outside_scroll(dw: Any) -> bool:
 
 
 BLOCK_GAP = 8          # between the header, EXPLORING and each section of the tool box
-HEADER_HEIGHT = 32     # badges are 24 px high: 4 px above and below
+HEADER_HEIGHT = 38     # badges are 24 px high: 4 px above, 10 px below (gap to EXPLORING)
+HEADER_PADDING_TOP = 4
+HEADER_PADDING_BOTTOM = 10
 ROW_GAP = 6            # between two rows of FILTERING / EXPORTING
 
 
@@ -254,11 +272,8 @@ def tighten_vertical_rhythm(dw: Any) -> bool:
 
     * The header was fixed at 13 px while its badges are 24 px high.
     * The tool box laid its section headers edge to edge (stylesheet margins are ignored).
-    * FILTERING and EXPORTING pages took the whole tool box height and their expanding
-      spacers spread the rows apart: the pages now sit at the top at their natural height
-      (both columns keep their spacers, so the buttons stay in front of their rows).
+    * FILTERING and EXPORTING rows: one stretch between two rows (see below).
     """
-    from qgis.PyQt.QtCore import Qt
     header = getattr(dw, 'frame_header', None)
     if header is not None:
         header.setFixedHeight(HEADER_HEIGHT)
@@ -270,11 +285,9 @@ def tighten_vertical_rhythm(dw: Any) -> bool:
         return False
     if toolbox.layout() is not None:
         toolbox.layout().setSpacing(BLOCK_GAP)
-    for index in range(toolbox.count()):
-        page = toolbox.widget(index)
-        if page is not None and page.objectName() in ('FILTERING', 'EXPORTING') and page.layout() is not None:
-            page.layout().setAlignment(Qt.AlignmentFlag.AlignTop)
-    # Rows of the values columns closer together (mockup); the key buttons follow (align_key_columns).
+    # Rows of the values columns: one stretch between two rows, so a taller section (the
+    # splitter lets the user enlarge the lower zone) spreads its rows evenly and a short one
+    # keeps the row gap; the key buttons follow their rows (align_key_columns).
     for name in ('verticalLayout_filtering_values', 'verticalLayout_exporting_values'):
         values = getattr(dw, name, None)
         if values is None:
@@ -282,7 +295,9 @@ def tighten_vertical_rhythm(dw: Any) -> bool:
         values.setSpacing(ROW_GAP)
         for position in reversed(range(values.count())):
             if values.itemAt(position).spacerItem() is not None:
-                values.takeAt(position)  # a 0 px spacer still costs one layout spacing
+                values.takeAt(position)  # the .ui spacers: two of them between some rows
+        for position in reversed(range(1, values.count())):
+            values.insertStretch(position, 1)
     return True
 
 
@@ -387,95 +402,8 @@ def align_key_columns(dw: Any) -> bool:
     return done
 
 
-class _ToolBoxFitter(QObject if QObject is not None else object):
-    """Tool box only as tall as its headers plus the natural height of the open section.
-
-    QToolBox gives the open page all the remaining height; with the FILTERING rows
-    grouped at the top that left a blank before EXPORTING. The surplus now goes below
-    the last header (mockup), and a page that does not fit still scrolls.
-    """
-
-    def __init__(self, toolbox: Any) -> None:
-        super().__init__(toolbox)
-        self._toolbox = toolbox
-        self._pending = False
-        toolbox.currentChanged.connect(self._schedule)
-        for index in range(toolbox.count()):
-            page = toolbox.widget(index)
-            if page is not None:
-                page.installEventFilter(self)
-        toolbox.installEventFilter(self)
-        self._schedule()
-
-    def eventFilter(self, watched, event):  # noqa: N802 - Qt override
-        if event.type() in (QEvent.Type.LayoutRequest, QEvent.Type.Show):
-            self._schedule()
-        return False
-
-    def _schedule(self, *_args) -> None:
-        if not self._pending:
-            self._pending = True
-            from qgis.PyQt.QtCore import QTimer
-            QTimer.singleShot(0, self.fit)
-
-    def fit(self) -> None:
-        self._pending = False
-        try:
-            toolbox = self._toolbox
-            layout = toolbox.layout()
-            page = toolbox.currentWidget()
-            if layout is None or page is None:
-                return
-            from qgis.PyQt.QtWidgets import QAbstractButton
-            headers = [b for b in toolbox.findChildren(QAbstractButton)
-                       if b.objectName() == 'qt_toolbox_toolboxbutton' and not b.isHidden()]
-            natural = page.layout().sizeHint().height() if page.layout() is not None else page.sizeHint().height()
-            margins = layout.contentsMargins()
-            frame = 2 * toolbox.frameWidth() if hasattr(toolbox, 'frameWidth') else 0
-            height = (sum(max(b.height(), b.minimumHeight()) for b in headers) + natural + 4
-                      + layout.spacing() * len(headers) + margins.top() + margins.bottom() + frame)
-            if toolbox.maximumHeight() != height:
-                toolbox.setMaximumHeight(height)
-            self._fit_toolset(height)
-        except RuntimeError:
-            pass
-
-    def _fit_toolset(self, toolbox_height: int) -> None:
-        """The splitter gives the height the sections do not need to EXPLORING (mockup), not to a blank."""
-        toolset = self._toolbox.parentWidget()
-        while toolset is not None and toolset.objectName() != 'frame_toolset':
-            toolset = toolset.parentWidget()
-        if toolset is None:
-            return
-        layout = toolset.layout()
-        extra = 0
-        if layout is not None:
-            margins = layout.contentsMargins()
-            extra = margins.top() + margins.bottom()
-        top = self._toolbox.mapTo(toolset, self._toolbox.rect().topLeft()).y()
-        wanted = toolbox_height + max(extra, top) + 2
-        if toolset.maximumHeight() != wanted:
-            toolset.setMaximumHeight(wanted)
-        splitter = toolset.parentWidget()
-        if splitter is not None:
-            from qgis.PyQt.QtWidgets import QFrame
-            frame = splitter.findChild(QFrame, 'frame_exploring')
-            if frame is not None and frame.maximumHeight() < 16777215:
-                frame.setMaximumHeight(16777215)  # EXPLORING takes the rest
-
-
-def fit_tool_box(dw: Any) -> bool:
-    """See :class:`_ToolBoxFitter`; a stretch under the tool box takes the surplus."""
-    toolbox = getattr(dw, 'toolBox_tabTools', None)
-    container = getattr(dw, 'verticalLayout_filtering_container', None)
-    if toolbox is None or container is None or container.indexOf(toolbox) < 0:
-        return False
-    container.addStretch(1)
-    dw._fm_toolbox_fitter = _ToolBoxFitter(toolbox)
-    return True
-
-
 FIELD_GAP = 4      # between two widgets of one row
+SCROLLBAR_MARGIN = 6  # between the widgets and the scroll bar / right edge
 GROUP_GAP = 6      # between two EXPLORING groups, and between their rows
 EXPLORING_GROUP_LAYOUTS = ('verticalLayout_exploring_single_content', 'verticalLayout_exploring_multiple_selection',
                            'verticalLayout_exploring_custom_selection')
@@ -515,6 +443,25 @@ def harmonize_spacing(dw: Any) -> bool:
             if isinstance(row, QBoxLayout) and row.direction() in (QBoxLayout.Direction.LeftToRight,
                                                                    QBoxLayout.Direction.RightToLeft):
                 row.setSpacing(FIELD_GAP)
+    header = getattr(dw, 'frame_header', None)
+    if header is not None and header.layout() is not None:
+        # Badges (24 px) with room above and below: the source layer badge no longer
+        # touches EXPLORING (the dimension managers set 13 / 24 px before this).
+        header.setFixedHeight(HEADER_HEIGHT)
+        header.layout().setContentsMargins(2, HEADER_PADDING_TOP, 2, HEADER_PADDING_BOTTOM)
+    # A small right margin, like a default Qt layout, between the widgets and the scroll bar
+    # (or the edge) in EXPLORING and in the sections.
+    grid = getattr(dw, 'gridLayout_main_header', None)
+    if grid is not None:
+        m = grid.contentsMargins()
+        grid.setContentsMargins(m.left(), m.top(), SCROLLBAR_MARGIN, m.bottom())
+    toolbox = getattr(dw, 'toolBox_tabTools', None)
+    for index in range(toolbox.count() if toolbox is not None else 0):
+        page = toolbox.widget(index)
+        layout = page.layout() if page is not None else None
+        if layout is not None:
+            m = layout.contentsMargins()
+            layout.setContentsMargins(m.left(), m.top(), SCROLLBAR_MARGIN, m.bottom())
     tabs = getattr(dw, 'verticalLayout_exploring_tabs_content', None)
     if tabs is not None:
         tabs.setSpacing(GROUP_GAP)
@@ -554,7 +501,7 @@ def even_exploring_groups(dw: Any) -> bool:
 def apply_mockup_layout(dw: Any) -> None:
     """Every layout change of the design; each one is skipped on its own if the form differs."""
     for change in (merge_buffer_rows, pack_exploring_rail, size_section_tabs, rail_outside_scroll,
-                   tighten_vertical_rhythm, align_key_columns, fit_tool_box, even_exploring_groups):
+                   tighten_vertical_rhythm, align_key_columns, even_exploring_groups):
         try:
             change(dw)
         except Exception as exc:

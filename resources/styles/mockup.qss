@@ -356,8 +356,12 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
 /* --- Spacing between EXPLORING and the sections below (mockup: one small gap) --- */
 
 #dockWidgetContents QFrame#frame_header {
-    padding: 0px;
+    /* Badges 24 px, 4 px above and 10 px below: room between the source layer badge and
+       EXPLORING (default.qss caps this frame at 28 px, applied after Python sizes). */
+    padding: 4px 2px 10px 2px;
     margin: 0px;
+    min-height: 24px;  /* content height: 4 + 24 + 10 = 38 px in all */
+    max-height: 24px;
 }
 #dockWidgetContents QFrame#frame_exploring {
     padding: 4px 6px 0px 6px;

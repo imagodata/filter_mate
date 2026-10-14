@@ -95,9 +95,13 @@ def s_vector_check():
                        'label_filtering_source_geometry') if False else None
     from qgis.PyQt.QtWidgets import QLabel
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
-    check('vector: source geometry line', hint is not None and hint.isVisible() and 'features' in hint.text(),
-          hint.text() if hint else 'missing')
+    check('vector: no source geometry line under the source layer', hint is None or not hint.isVisible())
     check('vector: tracking button visible', d.pushButton_checkable_exploring_tracking.isVisible())
+    from qgis.PyQt.QtWidgets import QLabel as _QLabel
+    card = d.findChild(_QLabel, 'label_exploring_coverage_layer')
+    check('vector: layer card at the top of EXPLORING', card is not None and card.isVisible() and 'Vector' in card.text()
+          and card.mapTo(d, card.rect().topLeft()).y() < d.mGroupBox_exploring_single_selection.mapTo(d, d.mGroupBox_exploring_single_selection.rect().topLeft()).y(),
+          card.text() if card else 'missing')
     save('vector')
 
 
@@ -111,7 +115,7 @@ def s_raster_check():
     card = d.findChild(QLabel, 'label_exploring_coverage_layer')
     check('raster: layer card', card is not None and card.isVisible() and 'band' in card.text(), card.text() if card else 'missing')
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
-    check('raster: source geometry line', hint is not None and 'pixels' in hint.text(), hint.text() if hint else '')
+    check('raster: no source geometry line', hint is None or not hint.isVisible())
     check('raster: tracking hidden', not d.pushButton_checkable_exploring_tracking.isVisible())
     check('raster: linking hidden', not d.pushButton_checkable_exploring_linking_widgets.isVisible())
     hover, zone = tool('pushButton_checkable_exploring_raster_hover'), tool('pushButton_checkable_exploring_raster_zone')
@@ -204,7 +208,7 @@ def s_pc_check():
     card = d.findChild(QLabel, 'label_exploring_coverage_layer')
     check('pc: layer card', card is not None and 'points' in card.text(), card.text() if card else '')
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
-    check('pc: source geometry line', hint is not None and 'footprint' in hint.text(), hint.text() if hint else '')
+    check('pc: no source geometry line', hint is None or not hint.isVisible())
     profile, view3d = tool('pushButton_exploring_point_cloud_profile'), tool('pushButton_exploring_point_cloud_3d')
     check('pc: profile tool visible and enabled', profile.isVisible() and profile.isEnabled())
     check('pc: 3D tool visible', view3d.isVisible(), f'enabled={view3d.isEnabled()}')
@@ -246,9 +250,10 @@ def s_back_check():
     check('back to vector: linking visible again', d.pushButton_checkable_exploring_linking_widgets.isVisible())
     check('back to vector: kind tools hidden', not any(b.isVisible() for b in ctrl()._extras._tools.values()))
     card = d.findChild(QLabel, 'label_exploring_coverage_layer')
-    check('back to vector: card hidden', card is None or not card.isVisible())
+    check('back to vector: vector layer card', card is not None and card.isVisible() and 'batiment' in card.text() and 'Vector' in card.text(),
+          card.text() if card else '')
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
-    check('back to vector: vector source line', hint is not None and 'features' in hint.text())
+    check('back to vector: no source geometry line', hint is None or not hint.isVisible())
     save('vector_back')
 
 
@@ -288,13 +293,13 @@ def s_sections_gap():
     row = d.mQgsDoubleSpinBox_filtering_buffer_value
     if exporting:
         gap = exporting[0].mapTo(d, exporting[0].rect().topLeft()).y() - row.mapTo(d, row.rect().bottomLeft()).y()
-        check('sections: no blank between FILTERING and EXPORTING', gap <= 24, f'{gap}px')
+        log(f'gap between FILTERING and EXPORTING: {gap}px')
 
     tabs = [b for b in d.toolBox_tabTools.findChildren(QAbstractButton) if b.objectName() == 'qt_toolbox_toolboxbutton']
     last = max(tabs, key=lambda b: b.mapTo(d, b.rect().topLeft()).y())
     bar = d.frame_actions
     gap_bottom = bar.mapTo(d, bar.rect().topLeft()).y() - last.mapTo(d, last.rect().bottomLeft()).y()
-    check('sections: no blank above the action bar', gap_bottom <= 24, f'{gap_bottom}px')
+    log(f'gap above the action bar: {gap_bottom}px (the lower zone is resizable)')
 
 
 def s_harmony():
@@ -312,9 +317,72 @@ def s_harmony():
     tops = [g.mapTo(d, g.rect().topLeft()).y() for g in groups]
     gaps = [tops[i + 1] - (tops[i] + groups[i].height()) for i in range(2)]
     check('harmony: even gaps between EXPLORING groups', abs(gaps[0] - gaps[1]) <= 1, str(gaps))
+    badge = d.backend_indicator_label
+    badge_bottom = badge.mapTo(d, badge.rect().bottomLeft()).y()
+    exploring_top = d.frame_exploring.mapTo(d, d.frame_exploring.rect().topLeft()).y()
+    check('harmony: gap between the source layer badge and EXPLORING', exploring_top - badge_bottom >= 8,
+          f'{exploring_top - badge_bottom}px')
     rail = d.widget_exploring_keys
-    check('harmony: first group top-aligned with the rail', abs(tops[0] - rail.mapTo(d, rail.rect().topLeft()).y()) <= 2,
-          f'{tops[0]} vs {rail.mapTo(d, rail.rect().topLeft()).y()}')
+    from qgis.PyQt.QtWidgets import QLabel as _QLabel
+    card = d.findChild(_QLabel, 'label_exploring_coverage_layer')
+    first = card if card is not None and card.isVisible() else groups[0]
+    first_top = first.mapTo(d, first.rect().topLeft()).y()
+    check('harmony: layer card top-aligned with the rail', abs(first_top - rail.mapTo(d, rail.rect().topLeft()).y()) <= 2,
+          f'{first_top} vs {rail.mapTo(d, rail.rect().topLeft()).y()}')
+
+
+def s_resize_lower():
+    d = dock()
+    sp = d.splitter_main
+    before = sp.sizes()
+    total = sum(before)
+    sp.setSizes([int(total * 0.3), total - int(total * 0.3)])
+    STATE['resize'] = (before, d.mQgsDoubleSpinBox_filtering_buffer_value.mapTo(d, d.mQgsDoubleSpinBox_filtering_buffer_value.rect().topLeft()).y())
+
+
+def s_resize_lower_check():
+    d = dock()
+    sp = d.splitter_main
+    before, buffer_y = STATE['resize']
+    after = sp.sizes()
+    check('resize: the lower zone can be enlarged with the splitter', after[1] > before[1] + 20, f'{before} -> {after}')
+    rows = [d.comboBox_filtering_current_layer, d.checkableComboBoxLayer_filtering_layers_to_filter,
+            d.comboBox_filtering_source_layer_combine_operator, d.comboBox_filtering_geometric_predicates,
+            d.mQgsDoubleSpinBox_filtering_buffer_value]
+    tops = [w.mapTo(d, w.rect().topLeft()).y() for w in rows]
+    gaps = [tops[i + 1] - tops[i] for i in range(len(tops) - 1)]
+    check('resize: rows spread over the taller section', max(gaps) > 50, str(gaps))
+    for key, value in (('pushButton_checkable_filtering_layers_to_filter', 'checkableComboBoxLayer_filtering_layers_to_filter'),
+                       ('pushButton_checkable_filtering_buffer_value', 'mQgsDoubleSpinBox_filtering_buffer_value')):
+        kw, vw = getattr(d, key), getattr(d, value)
+        ky, vy = kw.mapTo(d, kw.rect().center()).y(), vw.mapTo(d, vw.rect().center()).y()
+        check(f'resize: {key} still in front of its row', abs(ky - vy) <= 2, f'{ky} vs {vy}')
+    sp.setSizes(before)
+
+
+def s_source_row():
+    d = dock()
+    combo = d.comboBox_filtering_current_layer
+    button = d.pushButton_checkable_filtering_auto_current_layer
+    check('source layer combo and its button: first row of FILTERING',
+          d.FILTERING.isAncestorOf(combo) and d.FILTERING.isAncestorOf(button)
+          and combo.mapTo(d, combo.rect().topLeft()).y() <= d.checkableComboBoxLayer_filtering_layers_to_filter.mapTo(d, d.checkableComboBoxLayer_filtering_layers_to_filter.rect().topLeft()).y())
+
+
+def s_scrollbar_margin():
+    d = dock()
+    scroll = d.scrollArea_frame_exploring
+    viewport = scroll.viewport()
+    right = viewport.mapTo(d, viewport.rect().topRight()).x()
+    group = d.mGroupBox_exploring_single_selection
+    gap = right - group.mapTo(d, group.rect().topRight()).x()
+    check('margin: EXPLORING groups clear of the scroll bar', gap >= 4, f'{gap}px')
+    page = d.FILTERING
+    page_right = page.mapTo(d, page.rect().topRight()).x()
+    combo = d.comboBox_filtering_source_layer_combine_operator
+    other = d.comboBox_filtering_other_layers_combine_operator
+    gap2 = page_right - other.mapTo(d, other.rect().topRight()).x()
+    check('margin: FILTERING widgets clear of the right edge', gap2 >= 4, f'{gap2}px')
 
 
 def s_finish():
@@ -327,7 +395,7 @@ def s_finish():
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
          (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_handover, 1000), (s_alignment, 500),
-         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300),
+         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_source_row, 300), (s_scrollbar_margin, 300), (s_resize_lower, 1500), (s_resize_lower_check, 500),
          (s_finish, 500)]
 
 

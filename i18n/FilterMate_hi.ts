@@ -107,214 +107,322 @@
     </message>
 </context>
 <context>
-    <name>CoverageModeController</name>
+    <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="164"/>
-        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
-        <translation>{0} रास्टर / पॉइंट क्लाउड परत(ों) का फ़िल्टर पुनर्स्थापित किया जा रहा है…</translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <source>1 band</source>
+        <translation>1 बैंड</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="378"/>
-        <source>cov. ≥ </source>
-        <translation>कवरेज ≥ </translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="262"/>
+        <source>{0} bands</source>
+        <translation>{0} बैंड</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="379"/>
-        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
-        <translation>स्रोत ज्यामिति के भीतर बहुभुज लक्ष्य का न्यूनतम अंश (0 = कोई भी अतिव्यापन)। स्रोत के रास्टर या पॉइंट क्लाउड होने पर उपयोग होता है।</translation>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="263"/>
+        <source>{0} points</source>
+        <translation>{0} बिंदु</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="207"/>
+        <source>Source geometry: the selected pixels, vectorized</source>
+        <translation type="obsolete">स्रोत ज्यामिति: चयनित पिक्सेल, वेक्टरीकृत</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="208"/>
+        <source>Source geometry: the footprint of the kept points</source>
+        <translation type="obsolete">स्रोत ज्यामिति: रखे गए बिंदुओं का क्षेत्र</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="209"/>
+        <source>Source geometry: the features selected in EXPLORING</source>
+        <translation type="obsolete">स्रोत ज्यामिति: EXPLORING में चयनित फ़ीचर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Value under the cursor: follow the pixel value of the current band while moving over the map</source>
+        <translation>कर्सर के नीचे मान: मानचित्र पर घूमते समय वर्तमान बैंड का पिक्सेल मान देखें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band</source>
+        <translation>आयत के आँकड़े: वर्तमान बैंड का न्यूनतम, अधिकतम और औसत पढ़ने के लिए मानचित्र पर खींचें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>Elevation profile: open the QGIS elevation profile of the map</source>
+        <translation>ऊँचाई प्रोफ़ाइल: मानचित्र की QGIS ऊँचाई प्रोफ़ाइल खोलें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <source>3D view: open a new QGIS 3D map view</source>
+        <translation>3D दृश्य: नया QGIS 3D मानचित्र दृश्य खोलें</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="264"/>
+        <source>no feature</source>
+        <translation>कोई फ़ीचर नहीं</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="265"/>
+        <source>{0} feature(s)</source>
+        <translation>{0} फ़ीचर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="266"/>
+        <source>every pixel</source>
+        <translation>सभी पिक्सेल</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="267"/>
+        <source>{0} class(es)</source>
+        <translation>{0} वर्ग</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="268"/>
+        <source>expression</source>
+        <translation>अभिव्यक्ति</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="269"/>
+        <source>{0} features</source>
+        <translation>{0} फ़ीचर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <source>Vector</source>
+        <translation>वेक्टर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
         <source>Raster</source>
         <translation>रास्टर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
         <source>Point cloud</source>
         <translation>पॉइंट क्लाउड</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
+        <source>Kept points</source>
+        <translation>रखे गए बिंदु</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="355"/>
+        <source>Selection → source geometry</source>
+        <translation>चयन → स्रोत ज्यामिति</translation>
+    </message>
+</context>
+<context>
+    <name>CoverageModeController</name>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="165"/>
+        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
+        <translation>{0} रास्टर / पॉइंट क्लाउड परत(ों) का फ़िल्टर पुनर्स्थापित किया जा रहा है…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="395"/>
+        <source>cov. ≥ </source>
+        <translation>कवरेज ≥ </translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="396"/>
+        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
+        <translation>स्रोत ज्यामिति के भीतर बहुभुज लक्ष्य का न्यूनतम अंश (0 = कोई भी अतिव्यापन)। स्रोत के रास्टर या पॉइंट क्लाउड होने पर उपयोग होता है।</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <source>Raster</source>
+        <translation>रास्टर</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <source>Point cloud</source>
+        <translation>पॉइंट क्लाउड</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0} परत: EXPLORING में चयन, FILTERING में संबंध</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="471"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="502"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>पिक्सेल पिकर: हर बैंड का मान पढ़ने के लिए मानचित्र पर क्लिक करें (Ctrl+क्लिक सीमा को बढ़ाता है)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
         <source>Zoom to the layer</source>
         <translation>परत पर ज़ूम करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="473"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="504"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>पूर्वावलोकन: चयन के बाहर के पिक्सेल छिपाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="475"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="506"/>
         <source>Not used for raster layers</source>
         <translation>रास्टर परतों के लिए उपयोग नहीं होता</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="476"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="507"/>
         <source>Reset the raster selection</source>
         <translation>रास्टर चयन रीसेट करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="510"/>
         <source>Identify points on the map</source>
         <translation>मानचित्र पर बिंदु पहचानें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="481"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="512"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>लाइव पूर्वावलोकन: केवल चयन द्वारा रखे गए बिंदु दिखाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="483"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="514"/>
         <source>Not used for point cloud layers</source>
         <translation>पॉइंट क्लाउड परतों के लिए उपयोग नहीं होता</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="484"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
         <source>Reset the point cloud criteria</source>
         <translation>पॉइंट क्लाउड मानदंड रीसेट करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="641"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="672"/>
         <source>Invalid raster calculator expression</source>
         <translation>अमान्य रास्टर कैलकुलेटर व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="679"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="710"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL नहीं मिला: DTM के ऊपर ऊँचाई के लिए pdal निष्पादन योग्य फ़ाइल आवश्यक है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="999"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>FilterMate कार्य अभी चल रहा है: उसके समाप्त होने की प्रतीक्षा करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="984"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1015"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate कार्य विफल: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1048"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>पहले पिक्सेल चुनें: मान सीमा, वर्ग या रास्टर व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1026"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1057"/>
         <source>Raster filtered: {0}</source>
         <translation>रास्टर फ़िल्टर किया गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1039"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>पॉइंट क्लाउड व्यंजक अस्वीकार किया गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1042"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1073"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>पहले बिंदु चुनें: वर्ग, गुण सीमाएँ या व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1050"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1081"/>
         <source>Point cloud filtered: {0}</source>
         <translation>पॉइंट क्लाउड फ़िल्टर किया गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1114"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1145"/>
         <source>Filter not applied: {0}</source>
         <translation>फ़िल्टर लागू नहीं हुआ: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>canceled</source>
         <translation>रद्द किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1149"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} लक्ष्य फ़िल्टर किए गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1120"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1151"/>
         <source>{0} failed: {1}</source>
         <translation>{0} विफल: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1129"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1160"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: '{0}' से फ़िल्टर किया जा रहा है…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1185"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1216"/>
         <source>Changed since, left as is: {0}</source>
         <translation>तब से बदला गया, जैसा है वैसा छोड़ा गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1191"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1222"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} परत(ें) पुनर्स्थापित</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1225"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1256"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' निर्यात नहीं हुआ: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1237"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
         <source>Exported: {0}</source>
         <translation>निर्यात किया गया: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1239"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1270"/>
         <source>Export failed: {0}</source>
         <translation>निर्यात विफल: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1246"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1277"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} परत(ें) निर्यात की जा रही हैं…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1252"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1283"/>
         <source>Export folder</source>
         <translation>निर्यात फ़ोल्डर</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1324"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1355"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>रास्टर / पॉइंट क्लाउड लक्ष्य छोड़े गए: EXPLORING में कोई स्रोत फ़ीचर चयनित नहीं है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>रास्टर / पॉइंट क्लाउड लक्ष्य फ़िल्टर नहीं हुए: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1349"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1380"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} रास्टर / पॉइंट क्लाउड लक्ष्य फ़िल्टर किए गए</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1465"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>भूमि से ऊँचाई के लिए उपयोग किया जाने वाला DTM रास्टर चुनें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1442"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1473"/>
         <source>Height above ground not computed: {0}</source>
         <translation>भूमि से ऊँचाई की गणना नहीं हुई: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1454"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1485"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>PDAL के साथ '{0}' के ऊपर ऊँचाई की गणना हो रही है…</translation>
     </message>
@@ -1218,27 +1326,27 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>डिफ़ॉल्ट कॉन्फ़िगरेशन पुनर्स्थापित करें और SQLite डेटाबेस हटाएं</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1421"/>
+        <location filename="../filter_mate.py" line="1413"/>
         <source>Reset Configuration</source>
         <translation>कॉन्फ़िगरेशन रीसेट करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1444"/>
+        <location filename="../filter_mate.py" line="1436"/>
         <source>Configuration reset successfully.</source>
         <translation>कॉन्फ़िगरेशन सफलतापूर्वक रीसेट हो गया।</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1449"/>
+        <location filename="../filter_mate.py" line="1441"/>
         <source>Default configuration file not found.</source>
         <translation>डिफ़ॉल्ट कॉन्फ़िगरेशन फ़ाइल नहीं मिली।</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1470"/>
+        <location filename="../filter_mate.py" line="1462"/>
         <source>Database deleted: {filename}</source>
         <translation>डेटाबेस हटाया गया: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1484"/>
+        <location filename="../filter_mate.py" line="1476"/>
         <source>Restart required</source>
         <translation>पुनः आरंभ आवश्यक</translation>
     </message>
@@ -1389,7 +1497,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1421"/>
+        <location filename="../filter_mate.py" line="1413"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1406,7 +1514,7 @@ QGIS must be restarted to apply the changes.</source>
 परिवर्तन लागू करने के लिए QGIS को पुनरारंभ करना होगा।</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1484"/>
+        <location filename="../filter_mate.py" line="1476"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1425,7 +1533,7 @@ Please restart QGIS to apply the changes.</source>
         <translation>{count} संदर्भित परत(तें) लोड नहीं हुईं ({layers_list})। फ़ॉलबैक प्रदर्शन का उपयोग हो रहा है।</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1475"/>
+        <location filename="../filter_mate.py" line="1467"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename} हटाने में असमर्थ: {e}</translation>
     </message>
@@ -1435,71 +1543,71 @@ Please restart QGIS to apply the changes.</source>
         <translation type="obsolete">रीसेट के दौरान त्रुटि: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1527"/>
+        <location filename="../filter_mate.py" line="1519"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate&lt;/b&gt; का उपयोग करने के लिए धन्यवाद!&lt;br&gt;हमारे Discord समुदाय से जुड़ें:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;सहायता और समर्थन प्राप्त करें&lt;/li&gt;&lt;li&gt;बग और समस्याएं रिपोर्ट करें&lt;/li&gt;&lt;li&gt;नई सुविधाएं सुझाएं&lt;/li&gt;&lt;li&gt;अन्य उपयोगकर्ताओं के साथ टिप्स साझा करें&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1543"/>
+        <location filename="../filter_mate.py" line="1535"/>
         <source>  Join us on Discord</source>
         <translation>  Discord पर हमसे जुड़ें</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1563"/>
+        <location filename="../filter_mate.py" line="1555"/>
         <source>Don&apos;t show this again</source>
         <translation>यह फिर न दिखाएं</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1566"/>
+        <location filename="../filter_mate.py" line="1558"/>
         <source>Close</source>
         <translation>बंद करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1632"/>
+        <location filename="../filter_mate.py" line="1624"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>प्लगइन लोड करने में त्रुटि: {0}। विवरण के लिए QGIS Python कंसोल जांचें।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6922"/>
+        <location filename="../filter_mate_dockwidget.py" line="6932"/>
         <source>Current layer: {0}</source>
         <translation>वर्तमान परत: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6924"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>No layer selected</source>
         <translation>कोई परत चयनित नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6944"/>
         <source>Selected layers:
 {0}</source>
         <translation>चयनित परतें:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6944"/>
         <source>No layers selected</source>
         <translation>कोई परत चयनित नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6954"/>
+        <location filename="../filter_mate_dockwidget.py" line="6964"/>
         <source>No expression defined</source>
         <translation>कोई व्यंजक परिभाषित नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6966"/>
+        <location filename="../filter_mate_dockwidget.py" line="6976"/>
         <source>Display expression: {0}</source>
         <translation>प्रदर्शन व्यंजक: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6981"/>
+        <location filename="../filter_mate_dockwidget.py" line="6991"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>फ़ीचर ID: {0}
 पहला गुण: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1493"/>
+        <location filename="../filter_mate.py" line="1485"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>कॉन्फ़िगरेशन रीसेट नहीं हो सका। जाँचें कि प्लगइन फ़ोल्डर में लिखा जा सकता है, फिर पुनः प्रयास करें। विवरण filtermate.log में देखें।</translation>
     </message>
@@ -1547,62 +1655,62 @@ First attribute: {1}</source>
         <translation>{0} निष्पादित नहीं किया जा सकता: विजेट प्रारंभीकरण विफल।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2426"/>
+        <location filename="../filter_mate_app.py" line="2424"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0} नहीं किया जा सकता: परत अमान्य या स्रोत नहीं मिला।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2563"/>
+        <location filename="../filter_mate_app.py" line="2561"/>
         <source>All filters cleared - </source>
         <translation>सभी फ़िल्टर साफ़ किए गए - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2564"/>
+        <location filename="../filter_mate_app.py" line="2562"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>मुख्य परत में {0}{1} फ़ीचर दृश्यमान</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2572"/>
+        <location filename="../filter_mate_app.py" line="2570"/>
         <source>Error: result handler missing</source>
         <translation>त्रुटि: परिणाम हैंडलर गायब है</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2585"/>
+        <location filename="../filter_mate_app.py" line="2583"/>
         <source>Error during filtering: {0}</source>
         <translation>फ़िल्टरिंग के दौरान त्रुटि: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2707"/>
+        <location filename="../filter_mate_app.py" line="2705"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} अनाथ पसंदीदा पुनर्प्राप्त किए: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2844"/>
+        <location filename="../filter_mate_app.py" line="2840"/>
         <source>Layer loading failed - click to retry</source>
         <translation>परत लोडिंग विफल - पुनः प्रयास के लिए क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2900"/>
+        <location filename="../filter_mate_app.py" line="2896"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} परत(तें) सफलतापूर्वक लोड हुईं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1865"/>
+        <location filename="../filter_mate_app.py" line="1863"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1867"/>
+        <location filename="../filter_mate_app.py" line="1865"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1868"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1872"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1615,22 +1723,22 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1882"/>
+        <location filename="../filter_mate_app.py" line="1880"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1889"/>
+        <location filename="../filter_mate_app.py" line="1887"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1896"/>
+        <location filename="../filter_mate_app.py" line="1894"/>
         <source>Cancel</source>
         <translation>रद्द करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1920"/>
+        <location filename="../filter_mate_app.py" line="1918"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
@@ -1648,7 +1756,7 @@ What would you like to do?</translation>
         <translation>प्रारंभीकरण त्रुटि: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="997"/>
+        <location filename="../filter_mate_dockwidget.py" line="1000"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI कॉन्फ़िगरेशन अपूर्ण - लॉग जांचें</translation>
     </message>
@@ -1658,458 +1766,463 @@ What would you like to do?</translation>
         <translation type="obsolete">UI आयाम त्रुटि: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1431"/>
+        <location filename="../filter_mate_dockwidget.py" line="1449"/>
         <source>Favorites manager not available</source>
         <translation>पसंदीदा प्रबंधक उपलब्ध नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1450"/>
+        <location filename="../filter_mate_dockwidget.py" line="1470"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} पसंदीदा सहेजे गए
 लागू करने या प्रबंधित करने के लिए क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1458"/>
+        <location filename="../filter_mate_dockwidget.py" line="1473"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ कोई पसंदीदा सहेजा नहीं गया
 वर्तमान फ़िल्टर जोड़ने के लिए क्लिक करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1482"/>
+        <location filename="../filter_mate_dockwidget.py" line="1493"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{1} परत(तों) के लिए {0} बैकएंड बाध्य किया</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget.py" line="1579"/>
         <source>Backend controller not available</source>
         <translation>बैकएंड नियंत्रक उपलब्ध नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1506"/>
+        <location filename="../filter_mate_dockwidget.py" line="1517"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL स्वचालित सफ़ाई सक्षम</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1507"/>
+        <location filename="../filter_mate_dockwidget.py" line="1518"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL स्वचालित सफ़ाई अक्षम</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1513"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL सत्र दृश्य साफ़ किए गए</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1513"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>No views to clean or cleanup failed</source>
         <translation>साफ़ करने के लिए कोई दृश्य नहीं या सफ़ाई विफल</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>No PostgreSQL connection available</source>
         <translation>कोई PostgreSQL कनेक्शन उपलब्ध नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1530"/>
+        <location filename="../filter_mate_dockwidget.py" line="1541"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>स्कीमा में अन्य सत्रों से {0} दृश्य हैं।
 फिर भी हटाएं?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1531"/>
+        <location filename="../filter_mate_dockwidget.py" line="1542"/>
         <source>Other Sessions Active</source>
         <translation>अन्य सत्र सक्रिय</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1533"/>
+        <location filename="../filter_mate_dockwidget.py" line="1544"/>
         <source>Schema cleanup cancelled</source>
         <translation>स्कीमा सफ़ाई रद्द</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1538"/>
+        <location filename="../filter_mate_dockwidget.py" line="1549"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>स्कीमा '{0}' सफलतापूर्वक हटाया गया</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1540"/>
+        <location filename="../filter_mate_dockwidget.py" line="1551"/>
         <source>Schema cleanup failed</source>
         <translation>स्कीमा सफ़ाई विफल</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1566"/>
+        <location filename="../filter_mate_dockwidget.py" line="1577"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL सत्र जानकारी</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Theme adapted: {0}</source>
         <translation>थीम अनुकूलित: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Dark mode</source>
         <translation>डार्क मोड</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2689"/>
+        <location filename="../filter_mate_dockwidget.py" line="2700"/>
         <source>Light mode</source>
         <translation>लाइट मोड</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4005"/>
+        <location filename="../filter_mate_dockwidget.py" line="4016"/>
         <source>Selected features have no geometry.</source>
         <translation>चयनित फ़ीचर में कोई ज्यामिति नहीं है।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4024"/>
+        <location filename="../filter_mate_dockwidget.py" line="4035"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>कोई फ़ीचर चयनित नहीं। ड्रॉपडाउन सूची से एक फ़ीचर चुनें।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5079"/>
+        <location filename="../filter_mate_dockwidget.py" line="5100"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>चयनित परत अमान्य है या उसका स्रोत नहीं मिल सकता।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5816"/>
+        <location filename="../filter_mate_dockwidget.py" line="5837"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>ऋणात्मक बफर (अपरदन): बहुभुजों को अंदर की ओर सिकोड़ता है</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5819"/>
+        <location filename="../filter_mate_dockwidget.py" line="5840"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>मीटर में बफर मान (धनात्मक=विस्तार, ऋणात्मक=बहुभुज सिकोड़ें)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6293"/>
+        <location filename="../filter_mate_dockwidget.py" line="6314"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>प्लगइन {0} वेक्टर परत(तों) के साथ सक्रिय</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6376"/>
+        <location filename="../filter_mate_dockwidget.py" line="6395"/>
         <source>Could not reload plugin automatically.</source>
         <translation>प्लगइन स्वचालित रूप से पुनः लोड नहीं हो सका।</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6378"/>
+        <location filename="../filter_mate_dockwidget.py" line="6397"/>
         <source>Error reloading plugin: {0}</source>
         <translation>प्लगइन पुनः लोड करने में त्रुटि: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6450"/>
+        <location filename="../filter_mate_dockwidget.py" line="6469"/>
         <source>Layer properties reset to defaults</source>
         <translation>परत गुण डिफ़ॉल्ट पर रीसेट</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6451"/>
+        <location filename="../filter_mate_dockwidget.py" line="6470"/>
         <source>Error resetting layer properties: {}</source>
         <translation>परत गुण रीसेट करने में त्रुटि: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="864"/>
+        <location filename="../filter_mate_dockwidget.py" line="867"/>
         <source>Filter</source>
         <translation>फ़िल्टर</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="865"/>
+        <location filename="../filter_mate_dockwidget.py" line="868"/>
         <source>Undo the last filter</source>
         <translation>अंतिम फ़िल्टर पूर्ववत करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="866"/>
+        <location filename="../filter_mate_dockwidget.py" line="869"/>
         <source>Redo the last filter</source>
         <translation>अंतिम फ़िल्टर फिर से लागू करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
         <source>Remove the filters</source>
         <translation>फ़िल्टर हटाएँ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
         <source>Export the layers</source>
         <translation>परतें निर्यात करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
         <source>About FilterMate</source>
         <translation>FilterMate के बारे में</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
         <source>Identify the selected features</source>
         <translation>चयनित फ़ीचर पहचानें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>Zoom to the selected features</source>
         <translation>चयनित फ़ीचर पर ज़ूम करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>Select the features on the map</source>
         <translation>मानचित्र पर फ़ीचर चुनें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Follow the features on the map</source>
         <translation>मानचित्र पर फ़ीचर का अनुसरण करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Link the three selection modes</source>
         <translation>तीनों चयन मोड को जोड़ें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Reset the layer properties</source>
         <translation>परत के गुण रीसेट करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>Follow the current layer</source>
         <translation>वर्तमान परत का अनुसरण करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>Layers to filter</source>
         <translation>फ़िल्टर करने के लिए परतें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Combine with the existing filter</source>
         <translation>मौजूदा फ़िल्टर के साथ संयोजित करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Geometric predicates</source>
         <translation>ज्यामितीय विधेय</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Buffer distance</source>
         <translation>बफ़र दूरी</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Buffer type</source>
         <translation>बफ़र प्रकार</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Layers to export</source>
         <translation>निर्यात करने के लिए परतें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Projection of the export</source>
         <translation>निर्यात का प्रक्षेपण</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Export the styles</source>
         <translation>शैलियाँ निर्यात करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Export format</source>
         <translation>निर्यात प्रारूप</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Output folder</source>
         <translation>आउटपुट फ़ोल्डर</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Zip the export</source>
         <translation>निर्यात को ज़िप करें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1001"/>
+        <location filename="../filter_mate_dockwidget.py" line="1004"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>पैनल लेआउट लागू नहीं हो सका; डिफ़ॉल्ट आकार उपयोग किए जा रहे हैं। विवरण filtermate.log में देखें।</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="6549"/>
+        <source>Vector</source>
+        <translation>वेक्टर</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="54"/>
         <source>FilterMate</source>
-        <translation type="obsolete">FilterMate</translation>
+        <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="775"/>
         <source>SINGLE SELECTION</source>
-        <translation type="obsolete">एकल चयन</translation>
+        <translation>एकल चयन</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="950"/>
         <source>MULTIPLE SELECTION</source>
-        <translation type="obsolete">बहु चयन</translation>
+        <translation>बहु चयन</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1109"/>
         <source>CUSTOM SELECTION</source>
-        <translation type="obsolete">कस्टम चयन</translation>
+        <translation>कस्टम चयन</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1371"/>
         <source>FILTERING</source>
-        <translation type="obsolete">फ़िल्टरिंग</translation>
+        <translation>फ़िल्टरिंग</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2644"/>
         <source>EXPORTING</source>
-        <translation type="obsolete">निर्यात</translation>
+        <translation>निर्यात</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3476"/>
         <source>CONFIGURATION</source>
-        <translation type="obsolete">कॉन्फ़िगरेशन</translation>
+        <translation>कॉन्फ़िगरेशन</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3222"/>
         <source>Select CRS for export</source>
-        <translation type="obsolete">निर्यात के लिए CRS चुनें</translation>
+        <translation>निर्यात के लिए CRS चुनें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3744"/>
         <source>Export</source>
-        <translation type="obsolete">निर्यात</translation>
+        <translation>निर्यात</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2330"/>
         <source>AND</source>
-        <translation type="obsolete">और</translation>
+        <translation>और</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2335"/>
         <source>AND NOT</source>
-        <translation type="obsolete">और नहीं</translation>
+        <translation>और नहीं</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2340"/>
         <source>OR</source>
-        <translation type="obsolete">या</translation>
+        <translation>या</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3277"/>
         <source>QML</source>
-        <translation type="obsolete">QML</translation>
+        <translation>QML</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3282"/>
         <source>SLD</source>
-        <translation type="obsolete">SLD</translation>
+        <translation>SLD</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2533"/>
         <source> m</source>
-        <translation type="obsolete"> मी</translation>
+        <translation> मी</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2406"/>
         <source>, </source>
-        <translation type="obsolete">, </translation>
+        <translation>, </translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1571"/>
         <source>Multi-layer filtering</source>
-        <translation type="obsolete">मल्टी-लेयर फ़िल्टरिंग</translation>
+        <translation>मल्टी-लेयर फ़िल्टरिंग</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1658"/>
         <source>Additive filtering for the selected layer</source>
-        <translation type="obsolete">चयनित लेयर के लिए एडिटिव फ़िल्टरिंग</translation>
+        <translation>चयनित लेयर के लिए एडिटिव फ़िल्टरिंग</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="1944"/>
         <source>Geospatial filtering</source>
-        <translation type="obsolete">भू-स्थानिक फ़िल्टरिंग</translation>
+        <translation>भू-स्थानिक फ़िल्टरिंग</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2034"/>
         <source>Buffer</source>
-        <translation type="obsolete">बफ़र</translation>
+        <translation>बफ़र</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2279"/>
         <source>Expression layer</source>
-        <translation type="obsolete">एक्सप्रेशन लेयर</translation>
+        <translation>एक्सप्रेशन लेयर</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2391"/>
         <source>Geometric predicate</source>
-        <translation type="obsolete">ज्यामितीय प्रेडिकेट</translation>
+        <translation>ज्यामितीय प्रेडिकेट</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3322"/>
         <source>Output format</source>
-        <translation type="obsolete">आउटपुट फ़ॉर्मेट</translation>
+        <translation>आउटपुट फ़ॉर्मेट</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3580"/>
         <source>Filter</source>
-        <translation type="obsolete">फ़िल्टर</translation>
+        <translation>फ़िल्टर</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3642"/>
         <source>Reset</source>
-        <translation type="obsolete">रीसेट</translation>
+        <translation>रीसेट</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2748"/>
         <source>Layers to export</source>
-        <translation type="obsolete">निर्यात के लिए लेयर</translation>
+        <translation>निर्यात के लिए लेयर</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2829"/>
         <source>Layers projection</source>
-        <translation type="obsolete">लेयर प्रोजेक्शन</translation>
+        <translation>लेयर प्रोजेक्शन</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2913"/>
         <source>Save styles</source>
-        <translation type="obsolete">शैलियां सहेजें</translation>
+        <translation>शैलियां सहेजें</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2994"/>
         <source>Datatype export</source>
-        <translation type="obsolete">डेटा प्रकार निर्यात</translation>
+        <translation>डेटा प्रकार निर्यात</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3075"/>
         <source>Name of file/directory</source>
-        <translation type="obsolete">फ़ाइल/डायरेक्टरी का नाम</translation>
+        <translation>फ़ाइल/डायरेक्टरी का नाम</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2202"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation type="obsolete">स्रोत परत के लिए पूर्ण ज्यामिति के बजाय केन्द्रक का उपयोग करें (जटिल बहुभुजों के लिए तेज़)</translation>
+        <translation>स्रोत परत के लिए पूर्ण ज्यामिति के बजाय केन्द्रक का उपयोग करें (जटिल बहुभुजों के लिए तेज़)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2518"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation type="obsolete">मीटर में बफर मान (धनात्मक=विस्तार, ऋणात्मक=बहुभुज सिकोड़ें)</translation>
+        <translation>मीटर में बफर मान (धनात्मक=विस्तार, ऋणात्मक=बहुभुज सिकोड़ें)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="2606"/>
         <source>Number of segments for buffer precision</source>
-        <translation type="obsolete">बफर परिशुद्धता के लिए खंडों की संख्या</translation>
+        <translation>बफर परिशुद्धता के लिए खंडों की संख्या</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
+        <location filename="../filter_mate_dockwidget_base.ui" line="3418"/>
         <source>Mode batch</source>
-        <translation type="obsolete">बैच मोड</translation>
+        <translation>बैच मोड</translation>
     </message>
 </context>
 <context>
@@ -2378,182 +2491,182 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="402"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>डेटासेट की अन्य टाइलों पर लागू करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="408"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
         <source>CLASSES</source>
         <translation>वर्ग</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="413"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="421"/>
         <source>Ground</source>
         <translation>भूमि</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="414"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="422"/>
         <source>Vegetation</source>
         <translation>वनस्पति</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="415"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="423"/>
         <source>Buildings</source>
         <translation>इमारतें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="424"/>
         <source>Above ground</source>
         <translation>भूमि के ऊपर</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="417"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
         <source>Water</source>
         <translation>जल</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="418"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="426"/>
         <source>Without noise</source>
         <translation>शोर रहित</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
         <source>Check only these classes</source>
         <translation>केवल इन वर्गों को चिह्नित करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="432"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="441"/>
         <source>All</source>
         <translation>सभी</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="442"/>
         <source>None</source>
         <translation>कोई नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="443"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="456"/>
         <source>Point classes</source>
         <translation>बिंदु वर्ग</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="459"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
         <source>ATTRIBUTE RANGES</source>
         <translation>गुण सीमाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="465"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="480"/>
         <source>Z (m)</source>
         <translation>Z (m)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="466"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
         <source>Lowest elevation kept</source>
         <translation>रखी जाने वाली न्यूनतम ऊँचाई</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="482"/>
         <source>Highest elevation kept</source>
         <translation>रखी जाने वाली अधिकतम ऊँचाई</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="475"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
         <source>Intensity</source>
         <translation>तीव्रता</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="476"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="491"/>
         <source>Lowest intensity kept</source>
         <translation>रखी जाने वाली न्यूनतम तीव्रता</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="477"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="492"/>
         <source>Highest intensity kept</source>
         <translation>रखी जाने वाली अधिकतम तीव्रता</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
         <source>Return</source>
         <translation>रिटर्न</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="505"/>
         <source>Echo of the laser pulse kept</source>
         <translation>रखी जाने वाली लेज़र पल्स की गूँज</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="495"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
         <source>Height above DTM ≥</source>
         <translation>DTM के ऊपर ऊँचाई ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="529"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>डिजिटल भूभाग मॉडल जिससे ऊँचाई मापी जाती है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="519"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="537"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>भूभाग मॉडल से कम से कम इतनी ऊँचाई पर स्थित बिंदु रखें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="546"/>
         <source>EXPRESSION</source>
         <translation>व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="532"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="550"/>
         <source>Point cloud expression</source>
         <translation>पॉइंट क्लाउड व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="533"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="551"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>व्यंजक को हाथ से संपादित करने के लिए समूह चिह्नित करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="560"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="578"/>
         <source>No elevation statistics for this layer</source>
         <translation>इस परत के लिए कोई ऊँचाई आँकड़े नहीं हैं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="601"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="619"/>
         <source>Height above the terrain is unavailable</source>
         <translation>भूभाग के ऊपर ऊँचाई उपलब्ध नहीं है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="611"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="634"/>
         <source>Kept points: {0}</source>
         <translation>रखे गए बिंदु: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
         <source>Current filter: {0}</source>
         <translation>वर्तमान फ़िल्टर: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
         <source>none</source>
         <translation>कोई नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>Any</source>
         <translation>कोई भी</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>First</source>
         <translation>पहला</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Last</source>
         <translation>अंतिम</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Single</source>
         <translation>एकल</translation>
     </message>
@@ -3531,129 +3644,154 @@ Continue?</source>
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="288"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="307"/>
         <source>Band</source>
         <translation>बैंड</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="291"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="310"/>
         <source>Band whose values are selected</source>
         <translation>वह बैंड जिसके मान चुने जाते हैं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="317"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="339"/>
         <source>PIXEL VALUE</source>
         <translation>पिक्सेल मान</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="324"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="347"/>
         <source>Pixel value of the current band</source>
         <translation>वर्तमान बैंड का पिक्सेल मान</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="335"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="358"/>
         <source>Last {0} values picked</source>
         <translation>चुने गए अंतिम {0} मान</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="337"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>पिक्सेल पिकर से मानचित्र पर क्लिक करें। Ctrl+क्लिक सीमा को उस मान तक बढ़ाता है।</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="346"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="380"/>
         <source>VALUE RANGE</source>
         <translation>मान सीमा</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Min</source>
         <translation>न्यूनतम</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Lowest value kept</source>
         <translation>रखा जाने वाला सबसे कम मान</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Max</source>
         <translation>अधिकतम</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
         <source>Highest value kept</source>
         <translation>रखा जाने वाला सबसे अधिक मान</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="406"/>
         <source>Preview on the map (hide the other pixels)</source>
         <translation>मानचित्र पर पूर्वावलोकन (अन्य पिक्सेल छिपाएँ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="378"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="413"/>
         <source>CLASSES</source>
         <translation>वर्ग</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Raster classes</source>
         <translation>रास्टर वर्ग</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="421"/>
         <source>All</source>
         <translation>सभी</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="387"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="422"/>
         <source>None</source>
         <translation>कोई नहीं</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="397"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="432"/>
         <source>RASTER EXPRESSION</source>
         <translation>रास्टर व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="436"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>रास्टर कैलकुलेटर व्यंजक; जहाँ मान 0 नहीं है वहाँ पिक्सेल रखा जाता है</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="402"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="437"/>
         <source>Raster expression</source>
         <translation>रास्टर व्यंजक</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="410"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
         <source>Use the range</source>
         <translation>सीमा का उपयोग करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="446"/>
         <source>Write the current value range as an expression</source>
         <translation>वर्तमान मान सीमा को व्यंजक के रूप में लिखें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="519"/>
         <source>Selected pixels: {0}</source>
         <translation>चयनित पिक्सेल: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="730"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="801"/>
         <source>Set a value range first</source>
         <translation>पहले मान सीमा निर्धारित करें</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="747"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="818"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="763"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="834"/>
         <source>Last values:</source>
         <translation>अंतिम मान:</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="362"/>
+        <source>Value of the current band under the cursor</source>
+        <translation>कर्सर के नीचे वर्तमान बैंड का मान</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="368"/>
+        <source>Statistics of the current band in the last rectangle drawn on the map</source>
+        <translation>मानचित्र पर अंतिम खींचे गए आयत में वर्तमान बैंड के आँकड़े</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="565"/>
+        <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
+        <translation>कर्सर के नीचे: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <source>Zone: {0}</source>
+        <translation>क्षेत्र: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <source>no pixel</source>
+        <translation>कोई पिक्सेल नहीं</translation>
     </message>
 </context>
 <context>

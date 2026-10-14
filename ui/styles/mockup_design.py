@@ -263,12 +263,16 @@ def favorites_badge_stylesheet(object_name: str, count: int, dark: bool) -> str:
             f"QLabel#{object_name}:hover{{background-color:{hover};}}")
 
 
-def vector_badge_text(backend_text: str, tr=lambda text: text) -> str:
-    """``"Vector · Spatialite"``; the bare text for transient states (``...``, ``⟳``, ``!``)."""
+def vector_badge_text(backend_text: str, vector_label: str = 'Vector') -> str:
+    """``"Vector · Spatialite"``; the bare text for transient states (``...``, ``⟳``, ``!``).
+
+    ``vector_label`` is translated by the caller (a literal ``tr("Vector")`` there, so
+    pylupdate files it under the caller's context).
+    """
     text = (backend_text or '').strip()
     if not text or not any(char.isalpha() for char in text):
         return text
-    return f"{tr('Vector')} · {text}"
+    return f"{vector_label} · {text}"
 
 
 def is_dark_color(hex_color: str) -> bool:

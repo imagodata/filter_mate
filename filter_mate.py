@@ -998,17 +998,9 @@ class FilterMate:
                 # Update indicator to show waiting state
                 if hasattr(self.app.dockwidget, 'backend_indicator_label') and self.app.dockwidget.backend_indicator_label:
                     self.app.dockwidget.backend_indicator_label.setText("...")
-                    self.app.dockwidget.backend_indicator_label.setStyleSheet("""
-                        QLabel#label_backend_indicator {
-                            color: #7f8c8d;
-                            font-size: 9pt;
-                            font-weight: 600;
-                            padding: 3px 10px;
-                            border-radius: 12px;
-                            border: none;
-                            background-color: #ecf0f1;
-                        }
-                    """)
+                    self.app.dockwidget.backend_indicator_label.setStyleSheet(  # FilterMate 5 design: waiting badge
+                        "QLabel#label_backend_indicator{color:#141414;background-color:#bdbdbd;font-size:8pt;"
+                        "font-weight:600;padding:3px 10px;border-radius:4px;border:none;}")
 
                 # Disable UI while waiting for new layers
                 if hasattr(self.app.dockwidget, 'set_widgets_enabled_state'):

@@ -92,7 +92,7 @@ class TestRasterCard:
         assert text == "2 bands · Byte / Float32 · 1"
 
     def test_translation_function_is_used(self):
-        text = extras.raster_card_text([("Byte", None)], 1.0, 1.0, "m", tr=lambda t: t.replace("band", "bande"))
+        text = extras.raster_card_text([("Byte", None)], 1.0, 1.0, "m", translate=lambda t: t.replace("band", "bande"))
         assert text.startswith("1 bande")
 
 
@@ -105,15 +105,6 @@ class TestPointCloudCard:
 
     def test_nothing_known(self):
         assert extras.point_cloud_card_text(None, None) == ""
-
-
-class TestSourceGeometry:
-    @pytest.mark.parametrize("kind, word", [("vector", "features"), ("raster", "pixels"), ("point_cloud", "footprint")])
-    def test_text_per_kind(self, kind, word):
-        assert word in extras.source_geometry_text(kind)
-
-    def test_unknown_kind_reads_as_vector(self):
-        assert extras.source_geometry_text("other") == extras.source_geometry_text("vector")
 
 
 class TestTools:
@@ -172,3 +163,17 @@ def test_float32_nodata_is_short():
 
 def test_nan_nodata_is_left_out():
     assert "NoData" not in extras.raster_card_text([("Float32", float("nan"))], 1.0, 1.0, "m")
+
+
+class TestVectorCard:
+    def test_geometry_and_count(self):
+        assert extras.vector_card_text("Line", 12438) == "Line · 12 438 features"
+
+    def test_unknown_count(self):
+        assert extras.vector_card_text("Polygon", -1) == "Polygon"
+        assert extras.vector_card_text("", None) == ""
+
+    def test_card_html_escapes_and_colors(self):
+        html = extras.card_html("a<b", "Vector", "Line", "#6fb1f0", square=False)
+        assert "a&lt;b" in html and "#6fb1f0" in html and "●" in html and "Vector · Line" in html
+        assert "■" in extras.card_html("mnt", "Raster", "", "#f0b35a", square=True)

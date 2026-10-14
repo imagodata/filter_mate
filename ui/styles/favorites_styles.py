@@ -60,21 +60,9 @@ def build_indicator_stylesheet(state: str) -> str:
     States are looked up in ``FAVORITES_STYLES``; unknown states fall
     back to ``empty`` (matches the pre-extraction behaviour).
     """
-    style_data = FAVORITES_STYLES.get(state, FAVORITES_STYLES["empty"])
-    return (
-        "QLabel#label_favorites_indicator {\n"
-        f"    color: {style_data['color']};\n"
-        "    font-size: 8pt;\n"
-        "    font-weight: 500;\n"
-        "    padding: 2px 8px;\n"
-        "    border-radius: 10px;\n"
-        "    border: none;\n"
-        f"    background-color: {style_data['background']};\n"
-        "}\n"
-        "QLabel#label_favorites_indicator:hover {\n"
-        f"    background-color: {style_data['hover']};\n"
-        "}\n"
-    )
+    # FilterMate 5 design: the square star badge of the mockup (amber once favorites exist).
+    from .mockup_design import favorites_badge_stylesheet
+    return favorites_badge_stylesheet('label_favorites_indicator', 1 if state == 'active' else 0, dark=False) + "\n"
 
 
 # Emoji icons used across the favorites menu, indicator and dialog. Kept

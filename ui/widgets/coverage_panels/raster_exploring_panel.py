@@ -251,6 +251,7 @@ class RasterExploringPanel(QWidget):
     bandChanged = pyqtSignal(int)
     selectionChanged = pyqtSignal()
     previewToggled = pyqtSignal(bool)
+    summaryChanged = pyqtSignal()  # kept ratio updated: the selection strip under EXPLORING follows
 
     def __init__(self, parent=None):
         """Build the panel.
@@ -271,6 +272,7 @@ class RasterExploringPanel(QWidget):
         self._last_pixel: Optional[Tuple[float, float, Dict[int, Optional[float]]]] = None
         self._history: List[Tuple[float, float, Optional[float], int]] = []
         self._switching_mode = False
+        self._kept_ratio: Optional[float] = None
         self.setObjectName("widget_raster_exploring_panel")
         self._debounce = QTimer(self)
         self._debounce.setSingleShot(True)
@@ -513,7 +515,13 @@ class RasterExploringPanel(QWidget):
 
     def set_kept_ratio(self, ratio: Optional[float]) -> None:
         """Show the fraction (0-1) of pixels kept by the selection, None when unknown."""
+        self._kept_ratio = ratio
         self._kept_ratio_label.setText(self.tr("Selected pixels: {0}").format(format_percent(ratio)))
+        self.summaryChanged.emit()
+
+    def kept_ratio(self) -> Optional[float]:
+        """Last fraction (0-1) of kept pixels shown, None when unknown."""
+        return self._kept_ratio
 
     def set_expression_status(self, ok: bool, message: str) -> None:
         """Show the validation result of the raster expression."""

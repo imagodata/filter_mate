@@ -6364,10 +6364,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if self.backend_indicator_label:
                 self.backend_indicator_label.setText("...")
                 # v4.0: Soft "mousse" style for waiting state
-                self.backend_indicator_label.setStyleSheet(
-                    "QLabel#label_backend_indicator { color: #7f8c8d; font-size: 8pt;"
-                    " font-weight: 500; padding: 2px 8px; border-radius: 10px;"
-                    " border: none; background-color: #f4f6f6; }"
+                self.backend_indicator_label.setStyleSheet(  # FilterMate 5 design: waiting badge
+                    "QLabel#label_backend_indicator{color:#141414;background-color:#bdbdbd;font-size:8pt;font-weight:600;padding:3px 10px;border-radius:4px;border:none;}"
                 )
         finally:
             self._updating_layers, self._plugin_busy = False, False
@@ -6538,8 +6536,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         style = BACKEND_STYLES.get(backend_type, BACKEND_STYLES['unknown'])
         # FilterMate 5 design: vector kind badge of the mockup, the backend in the text.
         from .ui.styles.mockup_design import KIND_COLORS, badge_stylesheet, vector_badge_text
-        self.backend_indicator_label.setText(vector_badge_text(style['text'], self.tr))
-        self.backend_indicator_label.setStyleSheet(badge_stylesheet('label_backend_indicator', KIND_COLORS['vector']))
+        self.backend_indicator_label.setText(vector_badge_text(style['text'], self.tr("Vector")))
+        badge_color = (style['background'] if backend_type.endswith('_fallback') or backend_type == 'ogr_fallback'
+                       else '#bdbdbd' if style is BACKEND_STYLES['unknown'] else KIND_COLORS['vector'])
+        self.backend_indicator_label.setStyleSheet(badge_stylesheet('label_backend_indicator', badge_color))
         self.backend_indicator_label.adjustSize()
 
     def getProjectLayersEvent(self, event):
@@ -7085,10 +7085,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """Handle F5 shortcut to reload layers."""
         if hasattr(self, 'backend_indicator_label') and self.backend_indicator_label:
             self.backend_indicator_label.setText("⟳")
-            self.backend_indicator_label.setStyleSheet(
-                "QLabel#label_backend_indicator { color: #3498db; font-size: 9pt;"
-                " font-weight: 600; padding: 3px 10px; border-radius: 12px;"
-                " border: none; background-color: #e8f4fc; }"
+            self.backend_indicator_label.setStyleSheet(  # FilterMate 5 design: waiting badge
+                "QLabel#label_backend_indicator{color:#141414;background-color:#bdbdbd;font-size:8pt;font-weight:600;padding:3px 10px;border-radius:4px;border:none;}"
             )
         self.launchingTask.emit('reload_layers')
 

@@ -603,8 +603,16 @@ class BackendController(BaseController):
         # FilterMate 5 design: the badge names the layer kind first ("Vector · Spatialite"),
         # in the vector color of the mockup; the backend stays in the text and the tooltip.
         from ..styles.mockup_design import KIND_COLORS, badge_stylesheet, vector_badge_text
-        self._indicator_label.setText(vector_badge_text(text, self._tr))
-        self._indicator_label.setStyleSheet(badge_stylesheet('label_backend_indicator', KIND_COLORS['vector']))
+        # Context FilterMateDockWidget (_tr uses the dock): the dock declares tr("Vector").
+        self._indicator_label.setText(vector_badge_text(text, self._tr("Vector")))
+        # A fallback backend keeps its warning color (the "*" alone is easy to miss); "..." is neutral.
+        if backend_type.endswith('_fallback'):
+            badge_color = style['background']
+        elif backend_type == 'unknown':
+            badge_color = '#bdbdbd'
+        else:
+            badge_color = KIND_COLORS['vector']
+        self._indicator_label.setStyleSheet(badge_stylesheet('label_backend_indicator', badge_color))
 
         # Build tooltip with context
         tooltip = style['tooltip']
