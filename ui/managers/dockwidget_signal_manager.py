@@ -544,6 +544,10 @@ class DockwidgetSignalManager:
             """Handle IS_SELECTING toggle."""
             if not self.dockwidget._is_layer_valid():
                 return
+            # FilterMate 5: raster / point cloud preview (no feature selection to sync).
+            coverage_action = getattr(self.dockwidget, '_coverage_action', None)
+            if coverage_action is not None and coverage_action('select' if checked else 'deselect'):
+                return
 
             layer_id = self.dockwidget.current_layer.id()
             if layer_id in self.dockwidget.PROJECT_LAYERS:

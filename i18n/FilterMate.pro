@@ -27,7 +27,7 @@ SOURCES = \
     ../ui/controllers/config_controller.py \
     ../ui/controllers/favorites_controller.py \
     ../ui/controllers/integration.py \
-    ../ui/controllers/point_cloud_ui_controller.py \
+    ../ui/controllers/coverage_mode_controller.py \
     ../ui/dialogs/config_editor_widget.py \
     ../ui/dialogs/export_group_recap_dialog.py \
     ../ui/dialogs/favorites_manager.py \
@@ -42,7 +42,10 @@ SOURCES = \
     ../ui/widgets/json_view/datatypes.py \
     ../ui/widgets/json_view/model.py \
     ../ui/widgets/json_view/searchable_view.py \
-    ../ui/widgets/point_cloud_filter_widget.py
+    ../ui/widgets/point_cloud_filter_widget.py \
+    ../ui/widgets/coverage_panels/histogram_widget.py \
+    ../ui/widgets/coverage_panels/raster_exploring_panel.py \
+    ../ui/widgets/coverage_panels/point_cloud_exploring_panel.py
 
 TRANSLATIONS = \
     FilterMate_am.ts \

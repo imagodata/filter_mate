@@ -2147,7 +2147,7 @@ class FilterMateApp:
         if current_layer.id() in self.PROJECT_LAYERS:
             raw_layers = self.PROJECT_LAYERS[current_layer.id()]["filtering"].get("layers_to_filter", [])
             for key in raw_layers:
-                if key in self.PROJECT_LAYERS:
+                if key in self.PROJECT_LAYERS and self.PROJECT_LAYERS[key]["infos"].get("layer_provider_type") not in ("raster", "pointcloud"):
                     layers_to_filter.append(self.PROJECT_LAYERS[key]["infos"].copy())
         return layers_to_filter
 
@@ -2175,6 +2175,10 @@ class FilterMateApp:
             # Get the actual layer object
             layer = layer_props.get("layer")
             if not layer or not is_valid_layer(layer):
+                continue
+            # FilterMate 5: raster / point cloud layers are restored by the
+            # cross filter service, never by the vector unfilter task.
+            if not isinstance(layer, QgsVectorLayer):
                 continue
 
             # Check if layer has an active filter
@@ -2380,6 +2384,14 @@ class FilterMateApp:
         if tab_index != 0:
             undo_btn.setEnabled(False)
             redo_btn.setEnabled(False)
+            return
+
+        # FilterMate 5: a raster / point cloud source has its own history.
+        integration = getattr(self.dockwidget, '_controller_integration', None)
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is not None and getattr(coverage, 'active_layer', None) is not None:
+            undo_btn.setEnabled(coverage.can_undo())
+            redo_btn.setEnabled(coverage.can_redo())
             return
 
         if self._undo_redo_handler:

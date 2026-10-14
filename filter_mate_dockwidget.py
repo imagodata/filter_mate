@@ -2432,6 +2432,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             'GeometryType.Null': QgsLayerItem.iconTable,
             'GeometryType.Unknown': QgsLayerItem.iconDefault,
             'GeometryType.PointCloud': getattr(QgsLayerItem, 'iconPointCloud', QgsLayerItem.iconDefault),
+            'GeometryType.Raster': getattr(QgsLayerItem, 'iconRaster', QgsLayerItem.iconDefault),
             # Short format
             'Line': QgsLayerItem.iconLine,
             'Point': QgsLayerItem.iconPoint,
@@ -3034,6 +3035,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         def _on_selecting_toggled(checked):
             """Handle IS_SELECTING toggle - activate selection tool + sync features."""
             if not self._is_layer_valid():
+                return
+            # FilterMate 5: raster / point cloud preview (no feature selection).
+            if self._coverage_action('select' if checked else 'deselect'):
                 return
             layer_id = self.current_layer.id()
             if layer_id in self.PROJECT_LAYERS:
@@ -3928,6 +3932,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         3. Flash cached IDs if available
         4. Fallback: get features from widgets
         """
+        if self._coverage_action('identify'):
+            return
         logger.info("🔍 IDENTIFY button clicked!")
         if not self._is_layer_valid():
             logger.warning("IDENTIFY: Invalid layer")
@@ -4312,6 +4318,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         3. Apply padding and CRS transform
         4. Fallback: get features and zoom
         """
+        if self._coverage_action('zoom'):
+            return
         logger.info("🔎 ZOOM button clicked!")
         if not self._is_layer_valid():
             logger.warning("ZOOM: Invalid layer")
@@ -4458,6 +4466,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         This is called when IS_TRACKING or IS_SELECTING are activated to ensure
         the signal remains connected for auto-zoom/sync functionality.
         """
+        if not isinstance(self.current_layer, QgsVectorLayer):
+            return  # raster / point cloud layers have no feature selection
         logger.debug(
             f"_ensure_selection_changed_connected CALLED: "
             f"current_layer={self.current_layer.name() if self.current_layer else 'None'}, "
@@ -4754,6 +4764,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         FIX 2026-01-15: Switch to pan tool when IS_SELECTING is unchecked.
         """
+        if self._coverage_action('deselect'):
+            return
         if not self._is_layer_valid():
             return
 
@@ -4783,6 +4795,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         - Enable the active groupbox for interaction
         - Update button states after selection
         """
+        if self._coverage_action('select'):
+            return
         if not self._is_layer_valid():
             return
 
@@ -6191,7 +6205,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # v4.0.5: When enabling auto sync, immediately sync current layer with active layer
         if state and hasattr(self, 'comboBox_filtering_current_layer'):
             active_layer = self.iface.activeLayer()
-            if active_layer and isinstance(active_layer, QgsVectorLayer):
+            if active_layer and (isinstance(active_layer, QgsVectorLayer) or active_layer.id() in self.PROJECT_LAYERS):
                 logger.debug(f"Auto-sync enabled: Setting current layer to {active_layer.name()}")
                 self.comboBox_filtering_current_layer.setLayer(active_layer)
 
@@ -6361,17 +6375,27 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             fm = plugins['filter_mate']; self.close(); fm.pluginIsActive, fm.app = False, None; QTimer.singleShot(100, fm.run)
         except Exception as e: show_error("FilterMate", self.tr("Error reloading plugin: {0}").format(str(e)))
 
+    def _coverage_action(self, action: str) -> bool:
+        """FilterMate 5: run an EXPLORING button on the active raster / point cloud layer."""
+        integration = getattr(self, '_controller_integration', None)
+        if integration is None or not hasattr(integration, 'delegate_coverage_exploring_action'):
+            return False
+        return integration.delegate_coverage_exploring_action(action)
+
     def setLayerVariableEvent(self, layer=None, properties=None):
         """v4.0 Sprint 18: Emit signal to set layer variables."""
         if not self.widgets_initialized: return
         layer = layer or self.current_layer
-        if is_valid_layer(layer): self.settingLayerVariable.emit(layer, properties if isinstance(properties, list) else [])
+        # The signal is typed QgsVectorLayer: raster / point cloud properties
+        # live in PROJECT_LAYERS only (FilterMate 5).
+        if is_valid_layer(layer) and isinstance(layer, QgsVectorLayer):
+            self.settingLayerVariable.emit(layer, properties if isinstance(properties, list) else [])
 
     def resetLayerVariableOnErrorEvent(self, layer, properties=None):
         """v4.0 Sprint 18: Emit signal to reset layer variables after error."""
         if not self.widgets_initialized: return
         layer = layer or self.current_layer
-        if not self._is_layer_truly_deleted(layer):
+        if not self._is_layer_truly_deleted(layer) and isinstance(layer, QgsVectorLayer):
             try: self.resettingLayerVariableOnError.emit(layer, properties if isinstance(properties, list) else [])
             except RuntimeError:  # Layer or widget may be deleted - expected during cleanup
                 pass
@@ -6380,6 +6404,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 Sprint 18: Reset layer properties to default values."""
         from .config.config import _get_option_value
         if not self.widgets_initialized: return
+        if layer is None and self._coverage_action('reset'):
+            return
         layer = layer or self.current_layer
         if not layer or not is_valid_layer(layer) or layer.id() not in self.PROJECT_LAYERS: return
         try:
@@ -6669,6 +6695,22 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except Exception as e:
                 logger.warning(f"Failed to sync HAS_LAYERS_TO_EXPORT: {e}")
 
+            # FilterMate 5: raster / point cloud layers checked in EXPORTING are
+            # written by their own exporters (GeoTIFF / COG, LAZ / COPC) as they
+            # are filtered; the vector export only receives the vector layers.
+            integration = getattr(self, '_controller_integration', None)
+            if layers_to_export and integration is not None and hasattr(integration, 'delegate_split_coverage_targets'):
+                vector_ids, coverage_ids = integration.delegate_split_coverage_targets(list(layers_to_export))
+                if coverage_ids:
+                    exporting_props = self.project_props.setdefault('EXPORTING', {})
+                    folder = exporting_props.get('OUTPUT_FOLDER_TO_EXPORT', '') if exporting_props.get('HAS_OUTPUT_FOLDER_TO_EXPORT') else ''
+                    integration.delegate_coverage_export(coverage_ids, folder or None)
+                    exporting_props['LAYERS_TO_EXPORT'] = vector_ids
+                    exporting_props['HAS_LAYERS_TO_EXPORT'] = bool(vector_ids)
+                    layers_to_export = vector_ids
+                    if not vector_ids:
+                        return
+
             # FIX 2026-01-22 v4.3.7: Sync ALL export flags JUST-IN-TIME
             # Qt restores widget states without emitting signals - sync all flags to match UI
             try:
@@ -6813,9 +6855,25 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 self._pending_filter_after_init = True
                 return
 
-        self.PROJECT_LAYERS[self.current_layer.id()]["filtering"]["layers_to_filter"] = self.get_layers_to_filter()
+        all_targets = self.get_layers_to_filter()
+        # FilterMate 5: raster / point cloud targets of a vector source are not
+        # sent to the vector engine; they are clipped by the same source geometry
+        # right after the vector task is launched (and follow unfilter / undo).
+        vector_targets, coverage_targets = all_targets, []
+        integration = getattr(self, '_controller_integration', None)
+        if integration is not None and hasattr(integration, 'delegate_split_coverage_targets'):
+            vector_targets, coverage_targets = integration.delegate_split_coverage_targets(all_targets)
+        filtering_props = self.PROJECT_LAYERS[self.current_layer.id()]["filtering"]
+        filtering_props["layers_to_filter"] = vector_targets
         self.setLayerVariableEvent(self.current_layer, [("filtering", "layers_to_filter")])
-        self.launchingTask.emit(task_name)
+        source_layer = self.current_layer
+        try:
+            self.launchingTask.emit(task_name)
+        finally:
+            if coverage_targets:
+                filtering_props["layers_to_filter"] = all_targets
+        if integration is not None and hasattr(integration, 'delegate_vector_source_coverage_task'):
+            integration.delegate_vector_source_coverage_task(task_name, source_layer, coverage_targets)
 
     def _setup_truncation_tooltips(self):
         """v4.0 Sprint 17: Setup tooltips for widgets with truncated text."""

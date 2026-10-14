@@ -35,6 +35,15 @@ from .base_controller import BaseController
 # Module logger
 logger = logging.getLogger(__name__)
 
+
+def _is_coverage_layer(layer) -> bool:
+    """FilterMate 5: raster and point cloud layers are exported by their own writers."""
+    try:
+        from ...adapters.qgis.point_cloud_capability import is_coverage_layer
+        return bool(is_coverage_layer(layer))
+    except Exception:
+        return False
+
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
     from ...core.services.filter_service import FilterService
@@ -360,7 +369,7 @@ class ExportingController(BaseController):
 
                 # Validate layer is usable
                 layer_obj = project.mapLayer(layer_id)
-                if layer_obj and isinstance(layer_obj, QgsVectorLayer) and is_layer_source_available(layer_obj, require_psycopg2=False):
+                if layer_obj and (_is_coverage_layer(layer_obj) or (isinstance(layer_obj, QgsVectorLayer) and is_layer_source_available(layer_obj, require_psycopg2=False))):
                     display_name = f"{layer_name} [{layer_crs_authid}]"
                     item_data = {"layer_id": key, "layer_geometry_type": layer_info["layer_geometry_type"]}
                     layers_widget.addItem(layer_icon, display_name, item_data)

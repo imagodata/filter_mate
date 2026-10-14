@@ -116,7 +116,7 @@ class TestControllerIntegration:
 
     def test_controller_is_created_registered_validated_and_cleared(self):
         created = _method(_INTEGRATION, "ControllerIntegration", "_create_controllers")
-        assert _calls(created, "__call__") == [] and "PointCloudUIController(" in ast.unparse(created)
+        assert _calls(created, "__call__") == [] and "CoverageModeController(" in ast.unparse(created)
         registered = ast.unparse(_method(_INTEGRATION, "ControllerIntegration", "_register_controllers"))
         assert "'point_cloud_ui'" in registered and "self._point_cloud_ui_controller" in registered
         validated = ast.unparse(_method(_INTEGRATION, "ControllerIntegration", "validate_controllers"))
@@ -132,17 +132,19 @@ class TestControllerIntegration:
         exported = next(
             {element.value for element in node.value.elts}
             for node in tree.body if isinstance(node, ast.Assign) and ast.unparse(node.targets[0]) == "__all__")
-        assert "PointCloudUIController" in imported
-        assert "PointCloudUIController" in exported
+        # FilterMate 5: the point cloud panel became the raster / point cloud mode controller.
+        assert "CoverageModeController" in imported
+        assert "CoverageModeController" in exported
 
 
 @pytest.mark.unit
 def test_translation_project_lists_the_new_sources():
     sources = _PRO.read_text(encoding="utf-8")
-    assert "../ui/controllers/point_cloud_ui_controller.py" in sources
+    assert "../ui/controllers/coverage_mode_controller.py" in sources
+    assert "../ui/widgets/coverage_panels/raster_exploring_panel.py" in sources
     assert "../ui/widgets/point_cloud_filter_widget.py" in sources
     for line in sources.splitlines():
         if line.strip().endswith("searchable_view.py \\") or line.strip().endswith("integration.py \\"):
             continue
-    assert (_ROOT / "ui" / "controllers" / "point_cloud_ui_controller.py").exists()
+    assert (_ROOT / "ui" / "controllers" / "coverage_mode_controller.py").exists()
     assert (_ROOT / "ui" / "widgets" / "point_cloud_filter_widget.py").exists()

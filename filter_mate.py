@@ -1310,6 +1310,19 @@ class FilterMate:
         # Disconnect project change signals using dedicated method
         self._disconnect_auto_activation_signals()
 
+        # FilterMate 5: put raster / point cloud layers back on their original
+        # source (derived VRT / COPC live in the session cache) and drop the cache.
+        try:
+            from .adapters.qgis.coverage_layers.snapshots import registry as _coverage_registry
+            from .adapters.qgis.coverage_layers import cache as _coverage_cache
+            restored = _coverage_registry().restore_all()
+            _coverage_registry().uninstall()
+            _coverage_cache.purge_session()
+            if restored:
+                logger.info(f"FilterMate: {restored} raster / point cloud layer(s) restored to their original source")
+        except Exception as e:
+            logger.debug(f"FilterMate: coverage layers not restored on unload: {e}")
+
         # Disconnect project read signal for form dependency warnings
         try:
             from qgis.core import QgsProject

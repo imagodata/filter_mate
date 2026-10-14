@@ -29,7 +29,7 @@ from .config_controller import ConfigController
 from .favorites_controller import FavoritesController
 from .property_controller import PropertyController
 from .ui_layout_controller import UILayoutController
-from .point_cloud_ui_controller import PointCloudUIController
+from .coverage_mode_controller import CoverageModeController
 
 if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer
@@ -90,7 +90,7 @@ class ControllerIntegration:
         self._favorites_controller: Optional[FavoritesController] = None
         self._property_controller: Optional[PropertyController] = None
         self._ui_layout_controller: Optional[UILayoutController] = None
-        self._point_cloud_ui_controller: Optional[PointCloudUIController] = None
+        self._point_cloud_ui_controller: Optional[CoverageModeController] = None
 
         # Connection tracking
         self._connections: list = []
@@ -152,8 +152,8 @@ class ControllerIntegration:
         return self._ui_layout_controller
 
     @property
-    def point_cloud_ui_controller(self) -> Optional[PointCloudUIController]:
-        """Get the point cloud UI controller."""
+    def point_cloud_ui_controller(self) -> Optional[CoverageModeController]:
+        """Get the raster / point cloud (coverage) mode controller (FilterMate 5)."""
         return self._point_cloud_ui_controller
 
     def setup(self) -> bool:
@@ -296,8 +296,9 @@ class ControllerIntegration:
             dockwidget=self._dockwidget
         )
 
-        # Point cloud panel: always created, dormant until a point cloud layer is current
-        self._point_cloud_ui_controller = PointCloudUIController(
+        # FilterMate 5: raster / point cloud mode, dormant until such a layer is
+        # current; also handles the coverage targets of vector sources.
+        self._point_cloud_ui_controller = CoverageModeController(
             dockwidget=self._dockwidget,
             filter_service=self._filter_service,
             signal_manager=self._signal_manager
@@ -385,7 +386,7 @@ class ControllerIntegration:
         safe_register(
             'point_cloud_ui',
             self._point_cloud_ui_controller,
-            TabIndex.FILTERING  # Point cloud panel lives in the filtering tab
+            TabIndex.FILTERING  # Coverage mode spans EXPLORING and FILTERING
         )
 
         logger.debug("All controllers registered")
@@ -1944,6 +1945,55 @@ class ControllerIntegration:
                 logger.warning(f"delegate_point_cloud_task failed: {e}")
                 return False
         return False
+
+    # === FilterMate 5: coverage layers (raster, point cloud) ===
+
+    @property
+    def coverage_controller(self) -> Optional[CoverageModeController]:
+        return self._point_cloud_ui_controller
+
+    def delegate_coverage_exploring_action(self, action: str) -> bool:
+        """Let the coverage controller run an EXPLORING button; True when handled."""
+        controller = self._point_cloud_ui_controller
+        if controller is None or controller.active_layer is None:
+            return False
+        try:
+            return controller.handle_exploring_action(action)
+        except Exception as e:
+            logger.warning(f"delegate_coverage_exploring_action failed: {e}")
+            return False
+
+    def delegate_split_coverage_targets(self, layer_ids: list) -> tuple:
+        """Split target ids into (vector ids, raster / point cloud ids)."""
+        controller = self._point_cloud_ui_controller
+        if controller is None:
+            return list(layer_ids or []), []
+        try:
+            return controller.split_coverage_targets(layer_ids)
+        except Exception as e:
+            logger.warning(f"delegate_split_coverage_targets failed: {e}")
+            return list(layer_ids or []), []
+
+    def delegate_vector_source_coverage_task(self, task_name: str, source, coverage_ids: list) -> None:
+        """Mirror a vector task on the raster / point cloud targets of the vector source."""
+        controller = self._point_cloud_ui_controller
+        if controller is None:
+            return
+        try:
+            controller.run_vector_source_task(task_name, source, coverage_ids)
+        except Exception as e:
+            logger.warning(f"delegate_vector_source_coverage_task failed: {e}")
+
+    def delegate_coverage_export(self, layer_ids: list, folder):
+        """Export raster / point cloud layers checked in EXPORTING (background task)."""
+        controller = self._point_cloud_ui_controller
+        if controller is None or not layer_ids:
+            return None
+        try:
+            return controller.export_coverage_layers(layer_ids, folder)
+        except Exception as e:
+            logger.warning(f"delegate_coverage_export failed: {e}")
+            return None
 
     def delegate_set_filtering_in_progress(self, in_progress: bool) -> bool:
         """Delegate filtering state to layer sync controller."""

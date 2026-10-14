@@ -32,6 +32,18 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _is_coverage_target(layer) -> bool:
+    """FilterMate 5: raster and point cloud layers are valid targets (and sources)."""
+    try:
+        from ...adapters.qgis.point_cloud_capability import is_coverage_layer
+    except ImportError:
+        return False
+    try:
+        return bool(is_coverage_layer(layer))
+    except Exception:
+        return False
+
+
 class ComboboxPopulationManager:
     """
     Manages combobox population for filtering and exporting tabs.
@@ -376,7 +388,7 @@ class ComboboxPopulationManager:
                     layer_obj = project.mapLayer(layer_id)
                     if (
                         layer_obj
-                        and isinstance(layer_obj, QgsVectorLayer)
+                        and (isinstance(layer_obj, QgsVectorLayer) or _is_coverage_target(layer_obj))
                         and is_layer_source_available(
                             layer_obj, require_psycopg2=False
                         )
@@ -466,7 +478,7 @@ class ComboboxPopulationManager:
                     "populate_filtering_direct: PROJECT_LAYERS empty"
                 )
                 return False
-            if not layer or not isinstance(layer, QgsVectorLayer):
+            if not layer or not (isinstance(layer, QgsVectorLayer) or _is_coverage_target(layer)):
                 logger.warning(
                     "populate_filtering_direct: invalid layer"
                 )
@@ -546,15 +558,18 @@ class ComboboxPopulationManager:
 
                     # Validate layer
                     layer_obj = project.mapLayer(layer_id)
-                    if not layer_obj or not isinstance(layer_obj, QgsVectorLayer):
+                    if not layer_obj:
                         continue
-                    # Skip non-spatial tables
-                    if not layer_obj.isSpatial():
-                        continue
-                    if not is_layer_source_available(
-                        layer_obj, require_psycopg2=False
-                    ):
-                        continue
+                    if not _is_coverage_target(layer_obj):
+                        if not isinstance(layer_obj, QgsVectorLayer):
+                            continue
+                        # Skip non-spatial tables
+                        if not layer_obj.isSpatial():
+                            continue
+                        if not is_layer_source_available(
+                            layer_obj, require_psycopg2=False
+                        ):
+                            continue
 
                     # Add to combobox
                     display_name = f"{layer_name} [{layer_crs}]"
