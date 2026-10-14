@@ -56,7 +56,8 @@
         <li><a href="#configuration"><span class="num">10</span>Configuration</a></li>
         <li><a href="#backends"><span class="num">11</span>Backends et performances</a></li>
         <li><a href="#processing"><span class="num">12</span>Boîte à outils Processing</a></li>
-        <li><a href="#troubleshooting"><span class="num">13</span>Dépannage</a></li>
+        <li><a href="#raster-lidar"><span class="num">13</span>Rasters et nuages de points</a></li>
+        <li><a href="#troubleshooting"><span class="num">14</span>Dépannage</a></li>
     </ol>
 </aside>
 
@@ -588,8 +589,56 @@ processing.run("filtermate:batch_filter", {
 </section>
 
 <!-- 13 ----------------------------------------------------------------- -->
+<section id="raster-lidar">
+    <h2><span class="num">13</span>Rasters et nuages de points <small>(5.0, en développement)</small></h2>
+    <div class="callout warn"><p><strong>Pas encore publié.</strong> Cette section décrit la version 5.0 en développement ; la version publiée (4.9.2) filtre les couches vecteur.</p></div>
+    <p>
+        Le principe ne change pas : <strong>EXPLORING sélectionne</strong> sur la couche courante, <strong>FILTERING relie</strong> cette sélection aux couches à filtrer
+        avec ses prédicats géométriques et son tampon. Quand la couche courante est un raster ou un nuage de points, les groupes vecteur d'EXPLORING laissent la place
+        au panneau de ce type ; la sélection devient une <em>géométrie source</em> (pixels retenus vectorisés, ou empreinte des points retenus).
+    </p>
+    <div class="fig-row">
+        <figure class="narrow">
+            <img src="img/guide/raster-panel.png" alt="Le panneau EXPLORING d'un raster : bande, valeur au pixel, plage de valeurs avec histogramme ; FILTERING inchangé avec une couverture minimale" loading="lazy" width="645" height="1248">
+            <figcaption>Raster : plage de valeurs sur l'histogramme, cibles vecteur avec une couverture minimale de 50 %.</figcaption>
+        </figure>
+        <figure class="narrow">
+            <img src="img/guide/pointcloud-panel.png" alt="Le panneau EXPLORING d'un nuage de points : classes ASPRS / LiDAR HD, plages d'attributs" loading="lazy" width="645" height="1248">
+            <figcaption>Nuage de points : classes (ici la classe 6, bâtiment) et plages d'attributs.</figcaption>
+        </figure>
+    </div>
+    <h3>Raster</h3>
+    <ul>
+        <li><strong>Valeur au pixel</strong> : le bouton Identifier devient une pipette ; Ctrl+clic étend la plage à la valeur relevée.</li>
+        <li><strong>Plage de valeurs</strong> : faites glisser les poignées de l'histogramme ; le bouton Sélectionner (ou la case d'aperçu) masque les autres pixels sur la carte.</li>
+        <li><strong>Classes</strong> pour les rasters à palette (occupation du sol), ou <strong>expression</strong> de la calculatrice raster.</li>
+    </ul>
+    <h3>Nuage de points</h3>
+    <ul>
+        <li><strong>Classes</strong> ASPRS et LiDAR HD avec des préréglages (sol, végétation, bâtiments, sursol, eau, sans bruit).</li>
+        <li><strong>Plages</strong> Z (au millimètre), intensité, retour ; <strong>hauteur au-dessus d'un MNT</strong> calculée avec PDAL.</li>
+        <li>Option « appliquer aux autres dalles du jeu » pour les données livrées en dalles (LiDAR HD).</li>
+    </ul>
+    <h3>Ce que deviennent les cibles</h3>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Cible</th><th>Effet du prédicat (Disjoint garde l'extérieur)</th></tr></thead>
+        <tbody>
+            <tr><td>Vecteur</td><td>Sous-ensemble des entités qui vérifient le prédicat ; couverture minimale possible pour les polygones.</td></tr>
+            <tr><td>Raster</td><td>Pixels hors de la géométrie source passés en NoData (fichier VRT découpé) ; la couche garde son style.</td></tr>
+            <tr><td>Nuage de points</td><td>Points hors de la géométrie source retirés (fichier COPC dérivé, écrit par PDAL).</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p>
+        Annuler, Rétablir et Défiltrer remettent les sources d'origine ; le projet est toujours enregistré avec elles et les découpes sont rejouées à son ouverture.
+        L'export écrit les rasters en GeoTIFF / COG et les nuages en LAZ / COPC. L'algorithme Processing <code>filtermate:cross_filter</code> fait la même chose dans un modèle.
+    </p>
+</section>
+
+<!-- 14 ----------------------------------------------------------------- -->
 <section id="troubleshooting">
-    <h2><span class="num">13</span>Dépannage</h2>
+    <h2><span class="num">14</span>Dépannage</h2>
     <h3>Où regarder d'abord</h3>
     <ul>
         <li><strong>Panneau Messages du journal de QGIS</strong>, onglet <em>FilterMate</em> : avertissements et erreurs de la session en cours.</li>

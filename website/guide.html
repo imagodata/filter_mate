@@ -56,7 +56,8 @@
         <li><a href="#configuration"><span class="num">10</span>Configuration</a></li>
         <li><a href="#backends"><span class="num">11</span>Backends and performance</a></li>
         <li><a href="#processing"><span class="num">12</span>Processing Toolbox</a></li>
-        <li><a href="#troubleshooting"><span class="num">13</span>Troubleshooting</a></li>
+        <li><a href="#raster-lidar"><span class="num">13</span>Rasters and point clouds</a></li>
+        <li><a href="#troubleshooting"><span class="num">14</span>Troubleshooting</a></li>
     </ol>
 </aside>
 
@@ -589,8 +590,56 @@ processing.run("filtermate:batch_filter", {
 </section>
 
 <!-- 13 ----------------------------------------------------------------- -->
+<section id="raster-lidar">
+    <h2><span class="num">13</span>Rasters and point clouds <small>(5.0, in development)</small></h2>
+    <div class="callout warn"><p><strong>Not released yet.</strong> This section describes FilterMate 5.0 in development; the released version (4.9.2) filters vector layers.</p></div>
+    <p>
+        The principle stays the same: <strong>EXPLORING selects</strong> on the current layer, <strong>FILTERING relates</strong> that selection to the layers to filter
+        with its geometric predicates and buffer. When the current layer is a raster or a point cloud, the vector groups of EXPLORING make room for the panel of that
+        kind; the selection becomes a <em>source geometry</em> (selected pixels vectorized, or footprint of the kept points).
+    </p>
+    <div class="fig-row">
+        <figure class="narrow">
+            <img src="img/guide/raster-panel.png" alt="The EXPLORING panel of a raster: band, pixel value, value range with histogram; FILTERING unchanged with a minimum coverage" loading="lazy" width="645" height="1248">
+            <figcaption>Raster: value range on the histogram, vector targets with a 50 % minimum coverage.</figcaption>
+        </figure>
+        <figure class="narrow">
+            <img src="img/guide/pointcloud-panel.png" alt="The EXPLORING panel of a point cloud: ASPRS / LiDAR HD classes, attribute ranges" loading="lazy" width="645" height="1248">
+            <figcaption>Point cloud: classes (here class 6, building) and attribute ranges.</figcaption>
+        </figure>
+    </div>
+    <h3>Raster</h3>
+    <ul>
+        <li><strong>Pixel value</strong>: the Identify button becomes a pixel picker; Ctrl+click extends the range to the picked value.</li>
+        <li><strong>Value range</strong>: drag the handles of the histogram; the Select button (or the preview box) hides the other pixels on the map.</li>
+        <li><strong>Classes</strong> for paletted rasters (land cover), or a raster calculator <strong>expression</strong>.</li>
+    </ul>
+    <h3>Point cloud</h3>
+    <ul>
+        <li>ASPRS and LiDAR HD <strong>classes</strong> with presets (ground, vegetation, buildings, above ground, water, without noise).</li>
+        <li>Z (to the millimetre), intensity and return <strong>ranges</strong>; <strong>height above a DTM</strong> computed with PDAL.</li>
+        <li>"Apply to the other tiles of the dataset" for data delivered in tiles (LiDAR HD).</li>
+    </ul>
+    <h3>What happens to the targets</h3>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Target</th><th>Effect of the predicate (Disjoint keeps the outside)</th></tr></thead>
+        <tbody>
+            <tr><td>Vector</td><td>Subset of the features that satisfy the predicate; optional minimum coverage for polygons.</td></tr>
+            <tr><td>Raster</td><td>Pixels outside the source geometry set to NoData (clipped VRT file); the layer keeps its style.</td></tr>
+            <tr><td>Point cloud</td><td>Points outside the source geometry removed (derived COPC file written by PDAL).</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p>
+        Undo, Redo and Unfilter put the original sources back; the project is always saved with them and the clips are replayed when it is opened.
+        Export writes rasters as GeoTIFF / COG and point clouds as LAZ / COPC. The Processing algorithm <code>filtermate:cross_filter</code> does the same in a model.
+    </p>
+</section>
+
+<!-- 14 ----------------------------------------------------------------- -->
 <section id="troubleshooting">
-    <h2><span class="num">13</span>Troubleshooting</h2>
+    <h2><span class="num">14</span>Troubleshooting</h2>
     <h3>Where to look first</h3>
     <ul>
         <li><strong>QGIS Log Messages panel</strong>, <em>FilterMate</em> tab: warnings and errors of the current session.</li>
