@@ -16,13 +16,13 @@ import logging
 import time
 from typing import Iterable, List, Optional
 
-from qgis.core import QgsCoordinateReferenceSystem, QgsDataProvider, QgsGeometry, QgsRectangle
+from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransformContext, QgsGeometry, QgsRectangle
 
 from ....core.domain.filter_state import LayerSnapshot
 from ....core.domain.layer_kind import LayerKind
 from ....core.domain.raster_filter_criteria import RasterSelection, RasterSelectionMode
-from .geometry_tools import buffer_geometry, union_geometries
-from .snapshots import registry, take_snapshot
+from .geometry_tools import buffer_geometry, transform_geometry, union_geometries
+from .snapshots import registry, swap_source, take_snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +36,7 @@ class SourceJob:
         self.crs = QgsCoordinateReferenceSystem(layer.crs())
         self.before: LayerSnapshot = take_snapshot(layer, self.kind)
         self.geometry = QgsGeometry()
+        self.raw_geometry = QgsGeometry()
         self.message = ''
         self.elapsed = 0.0
         self.details: dict = {}
@@ -44,9 +45,22 @@ class SourceJob:
         """Return the buffered source geometry (layer CRS)."""
         started = time.perf_counter()
         raw = self._raw_geometry(is_canceled)
-        self.geometry = buffer_geometry(raw, request.buffer_value, request.buffer_segments, request.buffer_type)
+        self.raw_geometry = raw
+        self.geometry = self._buffer(raw, request)
         self.elapsed = time.perf_counter() - started
         return self.geometry
+
+    def _buffer(self, raw: QgsGeometry, request) -> QgsGeometry:
+        """Buffer in metres like the vector engine, even for a geographic source CRS."""
+        if not request.buffer_value or raw.isEmpty() or not self.crs.isGeographic():
+            return buffer_geometry(raw, request.buffer_value, request.buffer_segments, request.buffer_type)
+        center = raw.centroid().asPoint()
+        zone = min(60, max(1, int((center.x() + 180.0) / 6.0) + 1))
+        metric = QgsCoordinateReferenceSystem(f"EPSG:{(32600 if center.y() >= 0 else 32700) + zone}")
+        context = QgsCoordinateTransformContext()
+        projected = transform_geometry(raw, self.crs, metric, context)
+        buffered = buffer_geometry(projected, request.buffer_value, request.buffer_segments, request.buffer_type)
+        return transform_geometry(buffered, metric, self.crs, context)
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
         raise NotImplementedError
@@ -92,8 +106,9 @@ class RasterSourceJob(SourceJob):
         self._width, self._height = layer.width(), layer.height()
         self._crs_wkt = layer.crs().toWkt()
         self._virtual = None
+        self._band_count = layer.bandCount()
         if selection.mode is RasterSelectionMode.EXPRESSION:
-            self._virtual = selection_virtual_layer(layer, selection)
+            self._virtual = selection_virtual_layer(layer, selection, self.before.base_source, self.before.base_provider)
             provider = self._virtual.dataProvider() if self._virtual is not None else None
         else:
             # Read the original pixels, not a previously masked derived source.
@@ -122,25 +137,43 @@ class RasterSourceJob(SourceJob):
         return result.geometry
 
     def apply(self, layer) -> Optional[LayerSnapshot]:
-        if not self._filter_source or self.selection.mode is RasterSelectionMode.EXPRESSION and self._virtual is None:
+        if not self._filter_source or (self.selection.mode is RasterSelectionMode.EXPRESSION and self._virtual is None):
             return None
+        if self._band_count > 1 or self.selection.mode is RasterSelectionMode.EXPRESSION:
+            # Multiband (RGB...) or expression: keep every band, mask outside the
+            # selected area with a clipped VRT (a virtual raster has one band).
+            return self._apply_clip(layer)
         from .raster_adapter import selection_virtual_uri, set_user_nodata
         nodata = -9999.0
+        base = self._base_layer(layer)
         try:
-            provider = layer.dataProvider()
+            provider = base.dataProvider()
             if provider.sourceHasNoDataValue(self.selection.band):
                 nodata = float(provider.sourceNoDataValue(self.selection.band))
         except Exception:
             pass
-        uri, nodata = selection_virtual_uri(self.before.base_source, self.before.base_provider, layer, self.selection, nodata)
-        layer.setDataSource(uri, layer.name(), 'virtualraster', QgsDataProvider.ProviderOptions(), False)
-        if not layer.isValid():
+        uri, nodata = selection_virtual_uri(self.before.base_source, self.before.base_provider, base, self.selection, nodata)
+        if not swap_source(layer, uri, 'virtualraster'):
             self.message = 'virtual raster of the selection could not be opened'
             return None
-        set_user_nodata(layer, nodata)
-        after = LayerSnapshot(self.layer_id, self.kind.value, source=layer.source(), provider='virtualraster',
+        if nodata is not None:
+            set_user_nodata(layer, nodata)
+        return self._record(layer, 'virtualraster', nodata=nodata)
+
+    def _apply_clip(self, layer) -> Optional[LayerSnapshot]:
+        from .target_appliers import RasterTargetJob
+        from ....core.domain.cross_filter import CrossFilterRequest, TargetSpec
+        if self.raw_geometry.isEmpty() or self.before.base_provider != 'gdal':
+            return None
+        job = RasterTargetJob(layer, None)
+        request = CrossFilterRequest(self.layer_id, LayerKind.RASTER, targets=(TargetSpec(self.layer_id, LayerKind.RASTER),))
+        job.compute(self.raw_geometry, self.crs, QgsCoordinateTransformContext(), request, lambda: False)
+        return job.apply(layer) if job.outcome.success else None
+
+    def _record(self, layer, provider: str, nodata=None) -> LayerSnapshot:
+        after = LayerSnapshot(self.layer_id, self.kind.value, source=layer.source(), provider=provider,
                               derived=True, original_source=self.before.base_source,
-                              original_provider=self.before.base_provider)
+                              original_provider=self.before.base_provider, nodata=nodata)
         registry().record(after, layer)
         layer.triggerRepaint()
         return after
@@ -156,13 +189,25 @@ class PointCloudSourceJob(SourceJob):
         if before is not None:
             # Snapshot taken before the controller applied the selection subset.
             self.before = before
-        self._layer = layer
+        # The task reads its own copy of the layer (same source, same subset):
+        # the live layer may change (preview, removal) while the task runs.
+        from qgis.core import QgsPointCloudLayer
+        copy = QgsPointCloudLayer(layer.source(), f"{layer.name()}_footprint", layer.providerType())
+        if copy.isValid():
+            copy.setSubsetString(layer.subsetString())
+            self._layer = copy
+        else:
+            self._layer = layer
         self._resolution = resolution
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
-        from .point_cloud_footprint import footprint_geometry
+        from .point_cloud_footprint import DEFAULT_POINTS_LIMIT, footprint_geometry
         result = footprint_geometry(self._layer, self._resolution)
         self.details.update(points_read=result.points_read, cell_size=result.cell_size)
+        if result.points_read >= DEFAULT_POINTS_LIMIT:
+            self.details['truncated'] = True
+            logger.warning(f"[FM5] footprint of '{self.layer_name}' read the maximum of {DEFAULT_POINTS_LIMIT} points: "
+                           f"it may miss areas, use a coarser resolution")
         return result.geometry
 
     def apply(self, layer) -> Optional[LayerSnapshot]:

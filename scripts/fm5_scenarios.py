@@ -331,9 +331,55 @@ def s11_favorites():
     registry().restore_all(project)
 
 
+# --- 12. refiltering derived layers, OR operator, preview opacity ------------
+def s12_refilter_and_operators():
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import (
+        apply_selection_preview, band_range, clear_selection_preview, pixel_is_transparent)
+    from filter_mate.core.domain.filter_state import LayerSnapshot  # noqa: F401
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    # (a) raster source filtered twice: the second selection reads the original pixels
+    job = RasterSourceJob(cur_mnt, RasterSelection(band=1, minimum=1240.0, maximum=1270.0))
+    job.apply(cur_mnt)
+    job = RasterSourceJob(cur_mnt, RasterSelection(band=1, minimum=1300.0, maximum=1350.0))
+    job.apply(cur_mnt)
+    low, high, _ = band_range(cur_mnt, 1)
+    check('raster source refiltered from the original', low is not None and low >= 1299.9 and high <= 1350.1,
+          f"range after 2nd filter: {low} - {high}")
+    registry().restore_all(project)
+    # (b) AND of Intersect then Disjoint on a raster target keeps the first clip
+    feats = list(cur_bat.getFeatures(QgsFeatureRequest().setLimit(5)))
+    first = CrossFilterRequest(cur_bat.id(), LayerKind.VECTOR, targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),),
+                               predicates=('Intersect',), buffer_value=2.0)
+    run('V->R intersect', first, VectorSourceJob(cur_bat, feats[:3]))
+    second = CrossFilterRequest(cur_bat.id(), LayerKind.VECTOR, targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),),
+                                predicates=('Disjoint',), buffer_value=2.0, other_layers_combine_operator='AND')
+    run('V->R disjoint AND', second, VectorSourceJob(cur_bat, feats[3:]))
+    centroid = feats[0].geometry().centroid().asPoint()
+    ext = cur_mnt.extent()
+    check('AND keeps the first clip (inside kept)', not nodata_at(cur_mnt, centroid.x(), centroid.y()))
+    check('AND keeps the first clip (outside still NoData)', nodata_at(cur_mnt, ext.xMinimum() + 0.5, ext.yMinimum() + 0.5))
+    registry().restore_all(project)
+    # (c) OR on a vector target tests the features hidden by the previous subset
+    cur_bat.setSubsetString('"fid" = 1')
+    request = CrossFilterRequest(cur_mnt.id(), LayerKind.RASTER, targets=(TargetSpec(cur_bat.id(), LayerKind.VECTOR),),
+                                 predicates=('Intersect',), other_layers_combine_operator='OR')
+    run('R->V OR', request, RasterSourceJob(cur_mnt, RasterSelection(band=1, minimum=1240.0, maximum=1270.0)))
+    check('OR adds the features hidden by the previous subset', count(cur_bat) >= 5, f"{count(cur_bat)} buildings, subset={cur_bat.subsetString()[:60]}")
+    cur_bat.setSubsetString('')
+    registry().restore_all(project)
+    # (d) preview: really transparent, and the user transparency comes back
+    apply_selection_preview(cur_mnt, RasterSelection(band=1, minimum=1240.0, maximum=1270.0), 1189.0, 1359.0)
+    pixels = cur_mnt.renderer().rasterTransparency().transparentSingleValuePixelList()
+    check('preview pixels fully transparent', len(pixels) == 2 and all(pixel_is_transparent(p) for p in pixels))
+    clear_selection_preview(cur_mnt)
+    check('preview cleared', len(cur_mnt.renderer().rasterTransparency().transparentSingleValuePixelList()) == 0)
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
-                 s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites):
+                 s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites,
+                 s12_refilter_and_operators):
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 

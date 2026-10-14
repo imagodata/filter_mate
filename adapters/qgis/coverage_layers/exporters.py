@@ -14,7 +14,7 @@ import logging
 import os
 import shutil
 from dataclasses import dataclass
-from typing import Optional
+
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,6 @@ class RasterExportJob:
     def run(self, feedback=None) -> ExportResult:
         from osgeo import gdal
         from qgis.core import QgsRasterFileWriter
-        gdal.UseExceptions()
         path = self.path
         if not self.pipe_ok:
             return ExportResult(False, path, 'raster pipe rejected the provider')
@@ -70,21 +69,42 @@ class RasterExportJob:
         error = writer.writeRaster(self.pipe, self.columns, self.rows, self.extent, self.layer_crs, self.context, feedback)
         if int(error) != 0:
             return ExportResult(False, path, f'raster writer error {int(error)}')
+        manager = getattr(gdal, 'ExceptionMgr', None)
+        scope = manager(useExceptions=True) if manager is not None else _NoScope()
+        try:
+            with scope:
+                return self._finish(gdal, staging, path)
+        except Exception as exc:
+            return ExportResult(False, path, str(exc))
+
+    def _finish(self, gdal, staging: str, path: str) -> ExportResult:
         try:
             current = staging
             if self.target_crs is not None:
                 warped = path + '.warped.tif'
-                gdal.Warp(warped, current, dstSRS=self.target_crs.toWkt(), creationOptions=[f'COMPRESS={self.compress}', 'TILED=YES'])
+                if gdal.Warp(warped, current, dstSRS=self.target_crs.toWkt(), creationOptions=[f'COMPRESS={self.compress}', 'TILED=YES']) is None:
+                    raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Warp failed')
                 _remove(current)
                 current = warped
             if self.fmt == 'COG':
-                gdal.Translate(path, current, format='COG', creationOptions=[f'COMPRESS={self.compress}'])
+                if gdal.Translate(path, current, format='COG', creationOptions=[f'COMPRESS={self.compress}']) is None:
+                    raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Translate failed')
                 _remove(current)
             elif current != path:
                 shutil.move(current, path)
         except Exception as exc:
             return ExportResult(False, path, str(exc))
         return ExportResult(True, path)
+
+
+class _NoScope:
+    """Stand-in for gdal.ExceptionMgr on GDAL < 3.7 (results are checked instead)."""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
 
 
 def export_raster(layer, path: str, fmt: str = 'GTiff', crs=None, compress: str = 'DEFLATE', feedback=None) -> ExportResult:

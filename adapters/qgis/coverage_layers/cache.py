@@ -55,13 +55,73 @@ def cache_root() -> str:
 
 
 def session_dir() -> str:
-    """Folder of the current session, created on first use."""
+    """Folder of the current session, created on first use (stale sessions are removed then)."""
     global _session_dir
+    created = False
     with _lock:
         if _session_dir is None:
             _session_dir = os.path.join(cache_root(), f"session_{uuid.uuid4().hex[:10]}")
+            created = True
         os.makedirs(_session_dir, exist_ok=True)
-        return _session_dir
+        folder = _session_dir
+    if created:
+        cleanup_stale_sessions(keep=folder)
+    else:
+        _warn_if_too_big(folder)
+    return folder
+
+
+def cleanup_stale_sessions(keep: str = '', max_age_hours: float = 24.0) -> int:
+    """Remove the session folders left by crashed QGIS sessions (older than ``max_age_hours``)."""
+    import time
+    root = cache_root()
+    removed = 0
+    try:
+        entries = os.listdir(root)
+    except OSError:
+        return 0
+    limit = time.time() - max_age_hours * 3600.0
+    for name in entries:
+        path = os.path.join(root, name)
+        if not name.startswith('session_') or os.path.normcase(path) == os.path.normcase(keep or ''):
+            continue
+        try:
+            if os.path.isdir(path) and os.path.getmtime(path) < limit:
+                shutil.rmtree(path, ignore_errors=True)
+                removed += 1
+        except OSError:
+            continue
+    if removed:
+        logger.info(f"[FM5] {removed} stale cache session(s) removed from {root}")
+    return removed
+
+
+def folder_size(path: str) -> int:
+    total = 0
+    for base, _, files in os.walk(path):
+        for name in files:
+            try:
+                total += os.path.getsize(os.path.join(base, name))
+            except OSError:
+                pass
+    return total
+
+
+_warned = False
+
+
+def _warn_if_too_big(folder: str) -> None:
+    global _warned
+    if _warned:
+        return
+    try:
+        limit = float(_config_value('cache_max_gb', 5)) * 1024 ** 3
+    except (TypeError, ValueError):
+        return
+    if limit > 0 and folder_size(folder) > limit:
+        _warned = True
+        logger.warning(f"[FM5] the FilterMate cache {folder} exceeds {limit / 1024 ** 3:.1f} GB: "
+                       f"unfilter layers you no longer need (their derived files are kept until QGIS closes)")
 
 
 def new_path(prefix: str, suffix: str) -> str:

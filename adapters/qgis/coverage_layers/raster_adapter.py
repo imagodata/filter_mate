@@ -265,7 +265,14 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
 
 # --- virtual rasters -------------------------------------------------------
 
-def _virtual_parameters(layer: QgsRasterLayer, formula: str, reference: str):
+def _virtual_parameters(layer: QgsRasterLayer, formula: str, reference: str,
+                        source: Optional[str] = None, provider: Optional[str] = None):
+    """Virtual raster parameters reading ``source`` (default: the layer's current source).
+
+    The input entry is filled BEFORE it is put in ``rInputLayers``: sip returns
+    a copy of that list, so editing ``params.rInputLayers[0]`` afterwards does
+    nothing (verified on QGIS 4.2).
+    """
     params = QgsRasterDataProvider.VirtualRasterParameters()
     params.crs = layer.crs()
     params.extent = layer.extent()
@@ -274,8 +281,8 @@ def _virtual_parameters(layer: QgsRasterLayer, formula: str, reference: str):
     params.formula = formula
     entry = QgsRasterDataProvider.VirtualRasterInputLayers()
     entry.name = reference
-    entry.uri = layer.source()
-    entry.provider = layer.providerType()
+    entry.uri = source if source else layer.source()
+    entry.provider = provider if provider else layer.providerType()
     params.rInputLayers = [entry]
     return params
 
@@ -286,37 +293,41 @@ def raster_reference(layer: QgsRasterLayer) -> str:
     return name
 
 
-def selection_virtual_layer(layer: QgsRasterLayer, selection: RasterSelection) -> Optional[QgsRasterLayer]:
+def selection_virtual_layer(layer: QgsRasterLayer, selection: RasterSelection,
+                            source: Optional[str] = None, provider: Optional[str] = None) -> Optional[QgsRasterLayer]:
     """Virtual raster equal to 1 where ``selection`` keeps the pixel, 0 elsewhere (main thread)."""
     reference = raster_reference(layer)
     formula = selection.to_calc_formula(reference)
-    uri = QgsRasterDataProvider.encodeVirtualRasterProviderUri(_virtual_parameters(layer, formula, reference))
+    uri = QgsRasterDataProvider.encodeVirtualRasterProviderUri(_virtual_parameters(layer, formula, reference, source, provider))
     virtual = QgsRasterLayer(uri, f"{layer.name()}_selection", 'virtualraster')
     return virtual if virtual.isValid() else None
 
 
 def selection_virtual_uri(layer_source: str, layer_provider: str, layer: QgsRasterLayer, selection: RasterSelection,
-                          nodata: float = DEFAULT_NODATA) -> Tuple[str, float]:
-    """URI of a virtual raster keeping the selected pixels of band ``selection.band`` (others = ``nodata``).
+                          nodata: float = DEFAULT_NODATA) -> Tuple[str, Optional[float]]:
+    """URI of a virtual raster keeping the selected pixels of band ``selection.band``.
+
+    The formula is ``value / (condition)``: a pixel outside the selection is a
+    division by zero, i.e. NaN, which statistics and renderers skip. A value
+    written instead (``if(cond, value, -9999)``) is NOT seen as NoData by the
+    virtual raster provider, even with a user NoData range (verified on QGIS 4.2).
 
     Args:
         layer_source: Source to read (the original one when the layer is already derived).
         layer_provider: Provider of ``layer_source``.
         layer: Layer giving CRS, extent and size.
         selection: Pixels to keep.
-        nodata: Value written elsewhere (set as user NoData on the derived layer).
+        nodata: Unused, kept for compatibility.
 
     Returns:
-        ``(uri, nodata)``.
+        ``(uri, None)``: no NoData value to declare.
     """
     reference = raster_reference(layer)
     condition = selection.to_calc_formula(reference)
     value = f'"{reference}@{selection.band}"'
-    formula = f"if ( {condition}, {value}, {nodata} )"
-    params = _virtual_parameters(layer, formula, reference)
-    params.rInputLayers[0].uri = layer_source
-    params.rInputLayers[0].provider = layer_provider
-    return QgsRasterDataProvider.encodeVirtualRasterProviderUri(params), nodata
+    formula = f"{value} / ( {condition} )"
+    params = _virtual_parameters(layer, formula, reference, layer_source, layer_provider)
+    return QgsRasterDataProvider.encodeVirtualRasterProviderUri(params), None
 
 
 def set_user_nodata(layer: QgsRasterLayer, nodata: Optional[float]) -> None:
@@ -332,37 +343,68 @@ def set_user_nodata(layer: QgsRasterLayer, nodata: Optional[float]) -> None:
 _PREVIEW_PROPERTY = 'filtermate/preview_transparency'
 
 
+def _transparent_pixel(low: float, high: float, include_min: bool, include_max: bool):
+    """A fully transparent value range, for both TransparentSingleValuePixel APIs.
+
+    QGIS >= 3.30 takes an *opacity* in [0, 1]; older versions a *percent
+    transparent* in [0, 100] (set as an attribute, the old struct has no
+    5-argument constructor).
+    """
+    from qgis.core import QgsRasterTransparency
+    pixel_cls = QgsRasterTransparency.TransparentSingleValuePixel
+    try:
+        pixel = pixel_cls(float(low), float(high), 0.0, bool(include_min), bool(include_max))
+        if hasattr(pixel, 'opacity'):
+            return pixel
+    except TypeError:
+        pixel = pixel_cls()
+    pixel.min = float(low)
+    pixel.max = float(high)
+    if hasattr(pixel, 'opacity'):
+        pixel.opacity = 0.0
+    else:
+        pixel.percentTransparent = 100.0
+    if hasattr(pixel, 'includeMinimum'):
+        pixel.includeMinimum = bool(include_min)
+        pixel.includeMaximum = bool(include_max)
+    return pixel
+
+
+def pixel_is_transparent(pixel) -> bool:
+    """True for a fully transparent range (either API)."""
+    if hasattr(pixel, 'opacity'):
+        return float(pixel.opacity) <= 0.0
+    return float(getattr(pixel, 'percentTransparent', 0.0)) >= 100.0
+
+
 def apply_selection_preview(layer: QgsRasterLayer, selection: RasterSelection,
                             data_min: Optional[float], data_max: Optional[float]) -> bool:
     """Make the pixels outside a RANGE / CLASSES selection transparent in the renderer.
 
     The previous transparency settings are kept on the layer and restored by
-    :func:`clear_selection_preview`. Only single band renderers are touched.
+    :func:`clear_selection_preview`.
     """
     from qgis.core import QgsRasterTransparency
     renderer = layer.renderer()
     if renderer is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION:
         return False
     if layer.customProperty(_PREVIEW_PROPERTY) is None:
-        previous = renderer.rasterTransparency()
-        layer.setCustomProperty(_PREVIEW_PROPERTY, _transparency_to_list(previous))
+        layer.setCustomProperty(_PREVIEW_PROPERTY, _transparency_to_list(renderer.rasterTransparency()))
     transparency = QgsRasterTransparency()
     pixels = []
-    pixel_cls = QgsRasterTransparency.TransparentSingleValuePixel
     low = -1e300 if data_min is None else data_min - 1
     high = 1e300 if data_max is None else data_max + 1
     if selection.mode is RasterSelectionMode.RANGE:
         if selection.minimum is not None:
-            pixels.append(pixel_cls(low, selection.minimum, 100.0, True, False))
+            pixels.append(_transparent_pixel(low, selection.minimum, True, False))
         if selection.maximum is not None:
-            pixels.append(pixel_cls(selection.maximum, high, 100.0, False, True))
+            pixels.append(_transparent_pixel(selection.maximum, high, False, True))
     else:
-        kept = sorted(selection.classes)
         previous_value = low
-        for value in kept:
-            pixels.append(pixel_cls(previous_value, value, 100.0, True, False))
+        for value in sorted(selection.classes):
+            pixels.append(_transparent_pixel(previous_value, value, True, False))
             previous_value = value
-        pixels.append(pixel_cls(previous_value, high, 100.0, False, True))
+        pixels.append(_transparent_pixel(previous_value, high, False, True))
     transparency.setTransparentSingleValuePixelList(pixels)
     renderer.setRasterTransparency(transparency)
     layer.triggerRepaint()
@@ -370,13 +412,20 @@ def apply_selection_preview(layer: QgsRasterLayer, selection: RasterSelection,
 
 
 def _transparency_to_list(transparency) -> list:
+    """Serializable copy of the single value pixel list (both APIs)."""
     if transparency is None:
         return []
     items = []
     try:
         for pixel in transparency.transparentSingleValuePixelList():
-            items.append([pixel.min, pixel.max, pixel.percentTransparent, pixel.includeMinimum, pixel.includeMaximum])
-    except Exception:
+            if hasattr(pixel, 'opacity'):
+                level = ['opacity', float(pixel.opacity)]
+            else:
+                level = ['percent', float(pixel.percentTransparent)]
+            items.append([float(pixel.min), float(pixel.max), level[0], level[1],
+                          bool(getattr(pixel, 'includeMinimum', True)), bool(getattr(pixel, 'includeMaximum', True))])
+    except Exception as exc:
+        logger.debug(f"[FM5] raster transparency not saved: {exc}")
         return []
     return items
 
@@ -390,12 +439,17 @@ def clear_selection_preview(layer: QgsRasterLayer) -> bool:
     renderer = layer.renderer()
     if renderer is not None:
         transparency = QgsRasterTransparency()
-        pixel_cls = QgsRasterTransparency.TransparentSingleValuePixel
         pixels = []
         for item in saved or []:
             try:
-                pixels.append(pixel_cls(float(item[0]), float(item[1]), float(item[2]), bool(item[3]), bool(item[4])))
-            except (TypeError, ValueError, IndexError):
+                low, high, kind, level, include_min, include_max = item
+                pixel = _transparent_pixel(low, high, include_min, include_max)
+                if hasattr(pixel, 'opacity'):
+                    pixel.opacity = float(level) if kind == 'opacity' else 1.0 - float(level) / 100.0
+                else:
+                    pixel.percentTransparent = float(level) if kind == 'percent' else (1.0 - float(level)) * 100.0
+                pixels.append(pixel)
+            except (TypeError, ValueError):
                 continue
         transparency.setTransparentSingleValuePixelList(pixels)
         renderer.setRasterTransparency(transparency)

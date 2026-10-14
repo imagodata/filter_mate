@@ -142,16 +142,24 @@ def get_raster_layer_type() -> Optional[type]:
     return layer_type
 
 
+# Raster providers whose pixels can be read for analysis. Web services (WMS,
+# XYZ, WCS, ArcGIS) are rendered images or remote coverages: never sources or
+# targets, their statistics would be fetched over the network.
+ANALYSIS_RASTER_PROVIDERS = ('gdal', 'virtualraster', 'postgresraster')
+
+
 def is_raster_layer(layer: Any) -> bool:
-    """True when ``layer`` is a ``QgsRasterLayer`` and raster filtering is usable."""
+    """True when ``layer`` is an analysable ``QgsRasterLayer`` and raster filtering is usable."""
     if layer is None:
         return False
     layer_type = get_raster_layer_type()
     if layer_type is None:
         return False
     try:
-        return isinstance(layer, layer_type)
-    except TypeError:
+        if not isinstance(layer, layer_type):
+            return False
+        return layer.providerType() in ANALYSIS_RASTER_PROVIDERS
+    except (TypeError, RuntimeError, AttributeError):
         return False
 
 

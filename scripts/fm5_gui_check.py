@@ -213,9 +213,11 @@ def s_raster_preview():
 
 
 def s_raster_preview_check():
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import pixel_is_transparent
     renderer = layer('mnt').renderer()
     pixels = renderer.rasterTransparency().transparentSingleValuePixelList() if renderer.rasterTransparency() else []
-    check('raster preview hides pixels outside the range', len(pixels) == 2, str(len(pixels)))
+    check('raster preview hides pixels outside the range', len(pixels) == 2 and all(pixel_is_transparent(p) for p in pixels),
+          str([(p.min, p.max, getattr(p, 'opacity', None)) for p in pixels]))
     save(iface.mainWindow(), '04-raster-preview')
     dock().pushButton_checkable_exploring_selecting.setChecked(False)
 
