@@ -1,0 +1,696 @@
+# -*- coding: utf-8 -*-
+"""
+Dock additions of the raster / point cloud mode (FilterMate 5 mockup).
+
+* A layer card at the top of the coverage panels: name, then
+  ``1 band · Float32 · 1 m · NoData -99999`` or ``38.4 M points · Z 141.8 → 318.7``.
+* Tools of the layer kind in the EXPLORING tool rail, between the vector
+  buttons and the reset button. Raster: value under the cursor, statistics of
+  a rectangle. Point cloud: elevation profile, 3D map view. The tracking and
+  linking buttons only make sense for vector layers: they are hidden meanwhile.
+* A "Source geometry: …" line under the source layer of FILTERING, for the
+  three kinds, saying what the EXPLORING selection becomes.
+
+Kept apart from :class:`CoverageModeController`, which calls :meth:`show_for`,
+:meth:`show_vector`, :meth:`leave` and :meth:`teardown`. The text builders are
+pure functions, testable without Qt.
+"""
+import logging
+import math
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+
+try:
+    from qgis.PyQt.QtCore import QObject, QTimer
+except ImportError:  # pragma: no cover - unit tests without Qt
+    QObject = object
+    QTimer = None
+
+logger = logging.getLogger(__name__)
+
+HOVER_DELAY_MS = 60
+ZONE_SAMPLE_SIZE = 250000
+TOOL_RAIL_ANCHOR = 'pushButton_checkable_exploring_linking_widgets'
+VECTOR_ONLY_BUTTONS = ('pushButton_checkable_exploring_tracking', 'pushButton_checkable_exploring_linking_widgets')
+SOURCE_HINT_NAME = 'label_filtering_source_geometry'
+SOURCE_HINT_KEYS_SPACER = 'widget_filtering_keys_source_geometry_spacer'
+FILTERING_SOURCE_BUTTON = 'pushButton_checkable_filtering_auto_current_layer'
+LAYER_CARD_NAME = 'label_exploring_coverage_layer'
+
+# Stroke icons of the mockup (24 x 24 view box).
+ICON_HOVER = ('<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="11.5" cy="11.5" r="3.5"/>'
+              '<path d="M14 14l2.5 2.5"/>')
+ICON_ZONE = '<rect x="3" y="4" width="18" height="14" stroke-dasharray="2.5 2"/><path d="M8 15v-3M12 15V8M16 15v-5"/>'
+ICON_PROFILE = '<path d="M2 18l5-7 4 4 4-8 7 11M2 21h20"/>'
+ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 12v10"/>'
+
+# QGIS main window actions run by the point cloud tools, first name found wins
+# (the 3D action is ``mActionNew3DMapCanvas`` in QGIS 4.2, ``mActionNew3DMapView`` in older builds).
+ACTION_ELEVATION_PROFILE = ('mActionElevationProfile',)
+ACTION_NEW_3D_VIEW = ('mActionNew3DMapCanvas', 'mActionNew3DMapView')
+
+
+def _identity(text: str) -> str:
+    return text
+
+
+# ---------------------------------------------------------------------------
+# Pure helpers (no Qt)
+# ---------------------------------------------------------------------------
+
+def format_number(value: float, max_decimals: int = 2) -> str:
+    """``1.0`` -> ``"1"``, ``0.5`` -> ``"0.5"``, ``141.84`` -> ``"141.84"``; ``""`` when not finite."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return ""
+    if not math.isfinite(number):
+        return ""
+    if abs(number) >= 1e7:
+        return f"{number:.6g}"  # Float32 NoData (-3.4e38) must not print 39 digits
+    text = f"{number:.{max(0, int(max_decimals))}f}"
+    if '.' in text:
+        text = text.rstrip('0').rstrip('.')
+    return "0" if text in ("-0", "") else text
+
+
+def pixel_size_text(size_x: float, size_y: float, unit: str = "") -> str:
+    """``"1 m"``, ``"0.5 × 0.25 m"``; ``""`` when unknown.
+
+    Sizes below 0.01 (geographic CRS) keep 6 decimals.
+    """
+    sizes = []
+    for size in (size_x, size_y):
+        try:
+            size = abs(float(size))
+        except (TypeError, ValueError):
+            return ""
+        if not math.isfinite(size) or size <= 0:
+            return ""
+        sizes.append(size)
+    decimals = 6 if min(sizes) < 0.01 else 3
+    first, second = (format_number(size, decimals) for size in sizes)
+    text = first if first == second else f"{first} × {second}"
+    return f"{text} {unit}".strip()
+
+
+def raster_card_text(bands: Sequence[Tuple[str, Optional[float]]], size_x: float, size_y: float,
+                     unit: str = "", tr: Callable[[str], str] = _identity) -> str:
+    """Second line of the raster card: ``"1 band · Float32 · 1 m · NoData -99999"``.
+
+    Args:
+        bands: ``(data_type, nodata)`` per band, in band order.
+        size_x: Pixel width in layer units.
+        size_y: Pixel height in layer units.
+        unit: Abbreviated layer unit (``"m"``, ``"°"``), may be empty.
+        tr: Translation function of the caller.
+    """
+    count = len(bands)
+    parts = [tr("1 band") if count == 1 else tr("{0} bands").format(count)]
+    types = []
+    for data_type, _nodata in bands:
+        if data_type and data_type not in types:
+            types.append(data_type)
+    if types:
+        parts.append(types[0] if len(types) == 1 else " / ".join(types))
+    size = pixel_size_text(size_x, size_y, unit)
+    if size:
+        parts.append(size)
+    nodata = format_number(bands[0][1], 3) if bands and bands[0][1] is not None else ""
+    if nodata:
+        parts.append(f"NoData {nodata}")
+    return " · ".join(parts)
+
+
+def point_cloud_card_text(point_count: Optional[int], z_range: Optional[Tuple[float, float]],
+                          tr: Callable[[str], str] = _identity) -> str:
+    """Second line of the point cloud card: ``"38.4 M points · Z 141.8 → 318.7"``; ``""`` when nothing is known."""
+    from ..widgets.coverage_panels.point_cloud_exploring_panel import format_count
+    parts = []
+    counted = format_count(point_count) if point_count is not None and point_count >= 0 else ""
+    if counted:
+        parts.append(tr("{0} points").format(counted))
+    if z_range is not None and z_range[0] is not None and z_range[1] is not None:
+        parts.append(f"Z {format_number(z_range[0], 2)} → {format_number(z_range[1], 2)}")
+    return " · ".join(parts)
+
+
+def source_geometry_text(kind_value: str, tr: Callable[[str], str] = _identity) -> str:
+    """FILTERING line saying what the EXPLORING selection becomes, per layer kind value."""
+    texts = {
+        'raster': tr("Source geometry: the selected pixels, vectorized"),
+        'point_cloud': tr("Source geometry: the footprint of the kept points"),
+    }
+    return texts.get(kind_value, tr("Source geometry: the features selected in EXPLORING"))
+
+
+def tools_for(kind_value: str) -> List[str]:
+    """Object names of the extra tool buttons shown for a layer kind value."""
+    if kind_value == 'raster':
+        return ['pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone']
+    if kind_value == 'point_cloud':
+        return ['pushButton_exploring_point_cloud_profile', 'pushButton_exploring_point_cloud_3d']
+    return []
+
+
+def zone_pixel_estimate(width: float, height: float, size_x: float, size_y: float) -> Optional[int]:
+    """Pixels covered by a rectangle, None when the pixel size is unknown."""
+    try:
+        if size_x <= 0 or size_y <= 0:
+            return None
+        return int(round(abs(width) / size_x)) * int(round(abs(height) / size_y))
+    except (TypeError, ValueError, ZeroDivisionError):
+        return None
+
+
+def _svg_document(body: str, color: str) -> str:
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" '
+            f'stroke="{color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{body}</svg>')
+
+
+# ---------------------------------------------------------------------------
+# Dock additions
+# ---------------------------------------------------------------------------
+
+class CoverageDockExtras(QObject):
+    """Layer card, kind tools and source geometry line of the coverage mode."""
+
+    def __init__(self, controller: Any) -> None:
+        super().__init__(controller if isinstance(controller, QObject) else None)
+        self._controller = controller
+        self._card = None
+        self._source_hint = None
+        self._tools: Dict[str, Any] = {}
+        self._hidden_vector_buttons: Dict[str, bool] = {}
+        self._hover_connected = False
+        self._hover_point = None
+        self._hover_timer = None
+        self._zone_tool = None
+        self._zone_previous_tool = None
+        self._keys_spacer = None
+        self._layer_id: Optional[str] = None
+        self._hover_base = None
+        self._hover_base_id: Optional[str] = None
+
+    @property
+    def dockwidget(self) -> Any:
+        return self._controller.dockwidget
+
+    # === Building ===
+
+    def ensure(self, host: Any) -> None:
+        """Build the card above ``host`` (the coverage panels) and the tool buttons, once."""
+        if self._card is None and host is not None:
+            self._card = self._build_card(host)
+        if not self._tools:
+            self._build_tools()
+        self.ensure_source_hint()
+
+    def _build_card(self, host: Any) -> Any:
+        from qgis.PyQt.QtWidgets import QFrame, QLabel
+        layout = self._controller._find_parent_layout(host)
+        if layout is None or not hasattr(layout, 'insertWidget'):
+            return None
+        card = QLabel()
+        card.setObjectName(LAYER_CARD_NAME)
+        card.setFrameShape(QFrame.Shape.StyledPanel)
+        card.setWordWrap(True)
+        card.setMargin(6)
+        card.setVisible(False)
+        layout.insertWidget(max(0, layout.indexOf(host)), card)
+        return card
+
+    def ensure_source_hint(self) -> None:
+        """Add the "Source geometry" line under the source layer of FILTERING, once."""
+        if self._source_hint is not None:
+            return
+        dw = self.dockwidget
+        layout = getattr(dw, 'verticalLayout_filtering_values', None)
+        row = getattr(dw, 'horizontalLayout_filtering_source_layer', None)
+        if layout is None or row is None:
+            return
+        index = -1
+        for position in range(layout.count()):
+            if layout.itemAt(position).layout() is row:
+                index = position
+                break
+        if index < 0:
+            return
+        from qgis.PyQt.QtWidgets import QLabel
+        from qgis.PyQt.QtWidgets import QSizePolicy, QWidget
+        label = QLabel()
+        label.setObjectName(SOURCE_HINT_NAME)
+        label.setEnabled(False)  # greyed like a caption, in every theme
+        label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        font = label.font()
+        if font.pointSizeF() > 0:
+            font.setPointSizeF(max(6.0, font.pointSizeF() - 1.0))
+        label.setFont(font)
+        layout.insertWidget(index + 1, label)
+        self._source_hint = label
+        # FILTERING is two parallel columns (buttons | values) aligned row by row: the
+        # buttons column gets a blank of the same height so the next rows stay aligned.
+        keys = getattr(dw, 'verticalLayout_filtering_keys', None)
+        button = getattr(dw, FILTERING_SOURCE_BUTTON, None)
+        if keys is not None and button is not None and keys.indexOf(button) >= 0:
+            spacer = QWidget()
+            spacer.setObjectName(SOURCE_HINT_KEYS_SPACER)
+            keys.insertWidget(keys.indexOf(button) + 1, spacer)
+            self._keys_spacer = spacer
+        self._sync_keys_spacer()
+
+    def _sync_keys_spacer(self) -> None:
+        label, spacer = self._source_hint, self._keys_spacer
+        if label is None or spacer is None:
+            return
+        dw = self.dockwidget
+        values = getattr(dw, 'verticalLayout_filtering_values', None)
+        keys = getattr(dw, 'verticalLayout_filtering_keys', None)
+        height = label.fontMetrics().height()
+        label.setFixedHeight(height)
+        extra = (values.spacing() if values is not None else 0) - (keys.spacing() if keys is not None else 0)
+        spacer.setFixedHeight(max(0, height + extra))
+        spacer.setVisible(not label.isHidden())
+
+    def _build_tools(self) -> None:
+        from qgis.PyQt.QtWidgets import QPushButton
+        dw = self.dockwidget
+        anchor = getattr(dw, TOOL_RAIL_ANCHOR, None)
+        layout = self._controller._find_parent_layout(anchor) if anchor is not None else None
+        if layout is None or not hasattr(layout, 'insertWidget'):
+            logger.debug("[FM5] EXPLORING tool rail not found, kind tools not added")
+            return
+        specs = (
+            ('pushButton_checkable_exploring_raster_hover', True,
+             self.tr("Value under the cursor: follow the pixel value of the current band while moving over the map"),
+             self._on_hover_toggled),
+            ('pushButton_checkable_exploring_raster_zone', True,
+             self.tr("Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band"),
+             self._on_zone_toggled),
+            ('pushButton_exploring_point_cloud_profile', False,
+             self.tr("Elevation profile: open the QGIS elevation profile of the map"), self._open_elevation_profile),
+            ('pushButton_exploring_point_cloud_3d', False,
+             self.tr("3D view: open a new QGIS 3D map view"), self._open_3d_view),
+        )
+        index = layout.indexOf(anchor) + 1
+        for offset, (name, checkable, tip, slot) in enumerate(specs):
+            button = QPushButton(anchor.parentWidget())
+            button.setObjectName(name)
+            button.setCheckable(checkable)
+            button.setToolTip(tip)
+            button.setAccessibleName(tip.split(':')[0])
+            button.setSizePolicy(anchor.sizePolicy())
+            button.setMinimumSize(anchor.minimumSize())
+            button.setMaximumSize(anchor.maximumSize())
+            button.setIconSize(anchor.iconSize())
+            button.setCursor(anchor.cursor())
+            button.setFlat(anchor.isFlat())
+            button.setVisible(False)
+            if checkable:
+                button.toggled.connect(slot)
+            else:
+                button.clicked.connect(slot)
+            layout.insertWidget(index + offset, button, 0, layout.itemAt(layout.indexOf(anchor)).alignment())
+            self._tools[name] = button
+
+    def _refresh_icons(self) -> None:
+        """Draw the tool icons in the text color of the current theme."""
+        try:
+            from qgis.PyQt.QtCore import QByteArray, Qt
+            from qgis.PyQt.QtGui import QIcon, QPainter, QPalette, QPixmap
+            from qgis.PyQt.QtSvg import QSvgRenderer
+        except ImportError:
+            return
+        bodies = {
+            'pushButton_checkable_exploring_raster_hover': ICON_HOVER,
+            'pushButton_checkable_exploring_raster_zone': ICON_ZONE,
+            'pushButton_exploring_point_cloud_profile': ICON_PROFILE,
+            'pushButton_exploring_point_cloud_3d': ICON_3D,
+        }
+        for name, button in self._tools.items():
+            color = button.palette().color(QPalette.ColorRole.ButtonText).name()
+            renderer = QSvgRenderer(QByteArray(_svg_document(bodies[name], color).encode('utf-8')))
+            pixmap = QPixmap(48, 48)
+            pixmap.fill(Qt.GlobalColor.transparent)
+            painter = QPainter(pixmap)
+            renderer.render(painter)
+            painter.end()
+            button.setIcon(QIcon(pixmap))
+
+    # === Showing ===
+
+    def show_for(self, layer: Any, kind: Any) -> None:
+        """Adapt the card, the tool rail and the source geometry line to a raster / point cloud layer."""
+        kind_value = getattr(kind, 'value', str(kind))
+        layer_id = self._safe_id(layer)
+        if layer_id != self._layer_id:
+            self.leave()
+        self._layer_id = layer_id
+        self._update_card(layer, kind_value)
+        self._hide_vector_buttons()
+        visible = set(tools_for(kind_value))
+        for name, button in self._tools.items():
+            button.setVisible(name in visible)
+        if kind_value == 'point_cloud':
+            self._tools_enabled_by_action()
+        self._refresh_icons()
+        self._set_source_hint(kind_value)
+
+    def show_vector(self) -> None:
+        """Vector layer: no card nor kind tool, vector buttons back, vector source geometry line."""
+        self._layer_id = None
+        for step in (self.leave, self._hide_coverage_widgets, self._restore_vector_buttons, self.ensure_source_hint):
+            self._guarded(step)
+        self._guarded(self._set_source_hint, 'vector')
+
+    @staticmethod
+    def _safe_id(layer: Any) -> Optional[str]:
+        try:
+            return layer.id() if layer is not None else None
+        except RuntimeError:
+            return None
+
+    @staticmethod
+    def _guarded(step: Callable, *args) -> None:
+        """Run one step; a deleted Qt object must not stop the following ones."""
+        try:
+            step(*args)
+        except (RuntimeError, AttributeError, TypeError) as exc:
+            logger.debug(f"[FM5] dock addition step {getattr(step, '__name__', step)} skipped: {exc}")
+
+    def _hide_coverage_widgets(self) -> None:
+        if self._card is not None:
+            self._card.setVisible(False)
+        for button in self._tools.values():
+            button.setVisible(False)
+
+    def leave(self) -> None:
+        """Stop the map interactions of the outgoing layer (hover, rectangle tool)."""
+        for name in ('pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone'):
+            button = self._tools.get(name)
+            if button is not None:
+                self._guarded(self._uncheck, button)
+        self._guarded(self._stop_hover)
+        self._guarded(self._stop_zone_tool)
+        self._hover_base, self._hover_base_id = None, None
+
+    @staticmethod
+    def _uncheck(button: Any) -> None:
+        if button.isChecked():
+            button.setChecked(False)  # runs the toggled slot, which disconnects
+
+    def teardown(self) -> None:
+        self.leave()
+        self._guarded(self._restore_vector_buttons)
+        self._guarded(self._release_zone_tool)
+        widgets = [self._card, self._source_hint, self._keys_spacer, *self._tools.values()]
+        self._card, self._source_hint, self._keys_spacer, self._tools = None, None, None, {}
+        for widget in widgets:
+            if widget is None:
+                continue
+            try:
+                widget.setParent(None)
+                widget.deleteLater()
+            except RuntimeError:
+                pass
+
+    def _update_card(self, layer: Any, kind_value: str) -> None:
+        if self._card is None:
+            return
+        try:
+            meta = self._raster_meta(layer) if kind_value == 'raster' else self._point_cloud_meta(layer)
+        except Exception as exc:
+            logger.debug(f"[FM5] layer card not filled: {exc}")
+            meta = ''
+        from html import escape
+        name = escape(layer.name()) if layer is not None else ''
+        self._card.setText(f"<b>{name}</b><br>{escape(meta)}" if meta else f"<b>{name}</b>")
+        self._card.setToolTip(layer.publicSource() if layer is not None else '')  # no password
+        self._card.setVisible(True)
+
+    def _raster_meta(self, layer: Any) -> str:
+        from ...adapters.qgis.coverage_layers.raster_adapter import read_raster_summary
+        summary = read_raster_summary(layer)
+        bands = [(info.data_type, info.nodata) for info in summary.bands]
+        return raster_card_text(bands, summary.pixel_size_x, summary.pixel_size_y, self._unit(layer), self.tr)
+
+    def _point_cloud_meta(self, layer: Any) -> str:
+        from ...adapters.qgis.point_cloud_layer_adapter import read_point_cloud_summary
+        from ..widgets.coverage_panels.point_cloud_exploring_panel import summary_bounds
+        summary = read_point_cloud_summary(layer)
+        return point_cloud_card_text(summary.point_count, summary_bounds(summary, 'Z'), self.tr)
+
+    @staticmethod
+    def _unit(layer: Any) -> str:
+        try:
+            from qgis.core import QgsUnitTypes
+            return QgsUnitTypes.toAbbreviatedString(layer.crs().mapUnits())
+        except Exception:
+            return ''
+
+    def _set_source_hint(self, kind_value: str) -> None:
+        if self._source_hint is not None:
+            text = source_geometry_text(kind_value, self.tr)
+            self._source_hint.setText(text)
+            self._source_hint.setToolTip(text)
+            self._source_hint.setVisible(True)
+            self._sync_keys_spacer()
+
+    def _hide_vector_buttons(self) -> None:
+        dw = self.dockwidget
+        for name in VECTOR_ONLY_BUTTONS:
+            button = getattr(dw, name, None)
+            if button is None:
+                continue
+            if name not in self._hidden_vector_buttons:
+                self._hidden_vector_buttons[name] = not button.isHidden()
+            button.setVisible(False)
+
+    def _restore_vector_buttons(self) -> None:
+        dw = self.dockwidget
+        for name, visible in self._hidden_vector_buttons.items():
+            button = getattr(dw, name, None)
+            if button is not None:
+                try:
+                    button.setVisible(visible)
+                except RuntimeError:
+                    pass
+        self._hidden_vector_buttons = {}
+
+    # === Raster: value under the cursor ===
+
+    def _canvas(self):
+        iface = self._controller._iface()
+        return iface.mapCanvas() if iface is not None else None
+
+    def _on_hover_toggled(self, checked: bool) -> None:
+        if checked:
+            self._start_hover()
+        else:
+            self._stop_hover()
+
+    def _start_hover(self) -> None:
+        canvas = self._canvas()
+        if canvas is None or self._hover_connected:
+            return
+        if self._hover_timer is None:
+            self._hover_timer = QTimer(self)
+            self._hover_timer.setSingleShot(True)
+            self._hover_timer.setInterval(HOVER_DELAY_MS)
+            self._hover_timer.timeout.connect(self._read_hover_value)
+        canvas.xyCoordinates.connect(self._on_canvas_moved)
+        self._hover_connected = True
+
+    def _stop_hover(self) -> None:
+        if self._hover_timer is not None:
+            self._hover_timer.stop()
+        self._hover_point = None
+        if self._hover_connected:
+            canvas = self._canvas()
+            try:
+                if canvas is not None:
+                    canvas.xyCoordinates.disconnect(self._on_canvas_moved)
+            except (TypeError, RuntimeError):
+                pass
+            self._hover_connected = False
+        panel = self._controller._raster_panel
+        if panel is not None:
+            try:
+                panel.set_hover_value(None, None)
+            except RuntimeError:
+                pass
+
+    def _on_canvas_moved(self, point: Any) -> None:
+        self._hover_point = point
+        if self._hover_timer is not None and not self._hover_timer.isActive():
+            self._hover_timer.start()
+
+    def _layer_point(self, point: Any) -> Any:
+        from qgis.core import QgsCoordinateTransform, QgsProject
+        layer, canvas = self._controller.active_layer, self._canvas()
+        try:
+            transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), layer.crs(), QgsProject.instance())
+            return transform.transform(point)
+        except Exception:
+            return point
+
+    def _read_hover_value(self) -> None:
+        controller, point = self._controller, self._hover_point
+        layer, panel = controller.active_layer, controller._raster_panel
+        if layer is None or panel is None or point is None:
+            return
+        from ...adapters.qgis.coverage_layers.raster_adapter import identify_values
+        layer_point = self._layer_point(point)
+        try:
+            if self._hover_base_id != layer.id():
+                # FilterMate derived source: the original raster is opened once, not every 60 ms.
+                self._hover_base, self._hover_base_id = controller._base_raster(layer), layer.id()
+            values = identify_values(self._hover_base, layer_point)
+        except Exception as exc:
+            logger.debug(f"[FM5] value under the cursor unreadable: {exc}")
+            return
+        panel.set_hover_value(layer_point.x(), layer_point.y(), values.get(panel.current_band()))
+
+    # === Raster: statistics of a rectangle ===
+
+    def _on_zone_toggled(self, checked: bool) -> None:
+        if checked:
+            self._start_zone_tool()
+        else:
+            self._stop_zone_tool()
+
+    def _start_zone_tool(self) -> None:
+        canvas = self._canvas()
+        if canvas is None:
+            return
+        try:
+            from qgis.gui import QgsMapToolExtent
+        except ImportError:
+            return
+        if self._zone_tool is None:
+            self._zone_tool = QgsMapToolExtent(canvas)
+            self._zone_tool.extentChanged.connect(self._on_zone_drawn)
+            self._zone_tool.deactivated.connect(self._on_zone_tool_deactivated)
+        current = canvas.mapTool()
+        if current is self._zone_tool:
+            return
+        controller = self._controller
+        if current is not None and current is getattr(controller, '_pixel_tool', None):
+            # Take over the tool the pixel picker would have restored: never restore the picker itself.
+            current, controller._previous_map_tool = controller._previous_map_tool, None
+        self._zone_previous_tool = current
+        canvas.setMapTool(self._zone_tool)
+
+    def _stop_zone_tool(self) -> None:
+        canvas = self._canvas()
+        if canvas is None or self._zone_tool is None or canvas.mapTool() is not self._zone_tool:
+            self._zone_previous_tool = None
+            return
+        previous, self._zone_previous_tool = self._zone_previous_tool, None
+        try:
+            if previous is not None and previous is not self._zone_tool:
+                canvas.setMapTool(previous)
+                return
+        except RuntimeError:
+            pass  # the previous tool was deleted (plugin unloaded)
+        canvas.unsetMapTool(self._zone_tool)
+
+    def _release_zone_tool(self) -> None:
+        tool, self._zone_tool = self._zone_tool, None
+        if tool is None:
+            return
+        canvas = self._canvas()
+        if canvas is not None and canvas.mapTool() is tool:
+            canvas.unsetMapTool(tool)
+        for signal, slot in ((tool.extentChanged, self._on_zone_drawn), (tool.deactivated, self._on_zone_tool_deactivated)):
+            try:
+                signal.disconnect(slot)
+            except (TypeError, RuntimeError):
+                pass
+        tool.deleteLater()
+
+    def _on_zone_tool_deactivated(self) -> None:
+        """Another map tool took over: the button follows, and that tool inherits ours."""
+        controller = self._controller
+        if getattr(controller, '_previous_map_tool', None) is self._zone_tool:
+            # The pixel picker just remembered the rectangle tool: hand it the tool before ours.
+            controller._previous_map_tool = self._zone_previous_tool
+        self._zone_previous_tool = None
+        button = self._tools.get('pushButton_checkable_exploring_raster_zone')
+        if button is not None and button.isChecked():
+            button.blockSignals(True)
+            button.setChecked(False)
+            button.blockSignals(False)
+
+    def _on_zone_drawn(self, extent: Any) -> None:
+        controller = self._controller
+        layer, panel = controller.active_layer, controller._raster_panel
+        if layer is None or panel is None or extent is None or extent.isEmpty():
+            return
+        try:
+            from qgis.core import QgsCoordinateTransform, QgsProject
+            from ...adapters.qgis.coverage_layers.raster_adapter import _all_stats
+            canvas = self._canvas()
+            transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), layer.crs(), QgsProject.instance())
+            rect = transform.transformBoundingBox(extent).intersect(layer.extent())
+            if rect.isEmpty():
+                panel.set_zone_statistics(None, None)
+                return
+            base = controller._base_raster(layer)
+            band = panel.current_band()
+            stats = base.dataProvider().bandStatistics(band, _all_stats(), rect, ZONE_SAMPLE_SIZE)
+        except Exception as exc:
+            logger.debug(f"[FM5] statistics of the rectangle unreadable: {exc}")
+            return
+        if stats.minimumValue > stats.maximumValue:
+            panel.set_zone_statistics(None, None)
+            return
+        width = layer.width() or 0
+        height = layer.height() or 0
+        size_x = layer.extent().width() / width if width else 0.0
+        size_y = layer.extent().height() / height if height else 0.0
+        pixels = zone_pixel_estimate(rect.width(), rect.height(), size_x, size_y)
+        count = int(stats.elementCount) if pixels is not None and pixels <= ZONE_SAMPLE_SIZE else None
+        panel.set_zone_statistics(float(stats.minimumValue), float(stats.maximumValue), float(stats.mean), count)
+
+    # === Point cloud: profile and 3D view ===
+
+    def _main_window_action(self, names: Sequence[str]) -> Any:
+        iface = self._controller._iface()
+        if iface is None:
+            return None
+        from qgis.PyQt.QtGui import QAction
+        for name in names:
+            try:
+                action = iface.mainWindow().findChild(QAction, name)
+            except Exception:
+                action = None
+            if action is not None:
+                return action
+        return None
+
+    def _tools_enabled_by_action(self) -> None:
+        for name, action_name in (('pushButton_exploring_point_cloud_profile', ACTION_ELEVATION_PROFILE),
+                                  ('pushButton_exploring_point_cloud_3d', ACTION_NEW_3D_VIEW)):
+            button = self._tools.get(name)
+            if button is not None:
+                button.setEnabled(self._main_window_action(action_name) is not None)
+
+    def _trigger(self, action_names: Sequence[str]) -> None:
+        action = self._main_window_action(action_names)
+        if action is None:
+            logger.info(f"[FM5] QGIS action {' / '.join(action_names)} not available in this version")
+            return
+        layer = self._controller.active_layer
+        iface = self._controller._iface()
+        try:
+            if layer is not None and iface is not None:
+                iface.setActiveLayer(layer)
+            action.trigger()
+        except Exception as exc:
+            logger.debug(f"[FM5] QGIS action {action.objectName()} failed: {exc}")
+
+    def _open_elevation_profile(self, *_args) -> None:
+        self._trigger(ACTION_ELEVATION_PROFILE)
+
+    def _open_3d_view(self, *_args) -> None:
+        self._trigger(ACTION_NEW_3D_VIEW)

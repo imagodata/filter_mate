@@ -70,6 +70,7 @@ MAX_RETURN_NUMBERS = 15
 Z_DECIMALS = 3
 INTENSITY_DECIMALS = 0
 DEFAULT_HAG_MIN = 2.0
+SPIN_MIN_WIDTH = 64
 DEBOUNCE_MS = 250
 
 # Fixed swatch per class: ground brown, vegetation greens, building red,
@@ -424,7 +425,8 @@ class PointCloudExploringPanel(QWidget):
             button = QPushButton(preset_titles.get(name, name), self._classes_group)
             button.setToolTip(self.tr("Check only these classes"))
             button.clicked.connect(lambda _checked=False, n=name: self._apply_preset(n))
-            presets.addWidget(button, index // 3, index % 3)
+            # Two columns: three made the panel wider than a 440 px dock (the EXPLORING area scrolled sideways).
+            presets.addWidget(button, index // 2, index % 2)
             self._preset_buttons[name] = button
         group_layout.addLayout(presets)
 
@@ -453,6 +455,8 @@ class PointCloudExploringPanel(QWidget):
         spin.setToolTip(tip)
         spin.setAccessibleName(tip)
         spin.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        # The size hint covers the widest bound (±1e9): far too wide for a 440 px dock.
+        spin.setMinimumWidth(SPIN_MIN_WIDTH)
         return spin
 
     def _build_ranges_group(self) -> Any:
@@ -513,9 +517,12 @@ class PointCloudExploringPanel(QWidget):
             self._hag_layer_combo = QComboBox(group)
         self._hag_layer_combo.setToolTip(self.tr("Digital terrain model the height is measured from"))
         self._hag_layer_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        grid.addWidget(self._hag_check, 3, 0)
-        grid.addWidget(self._hag_spin, 3, 1)
-        grid.addWidget(self._hag_layer_combo, 3, 2, 1, 2)
+        self._hag_layer_combo.setMinimumWidth(SPIN_MIN_WIDTH)
+        self._hag_spin.setMinimumWidth(SPIN_MIN_WIDTH)
+        # Own row: the long check box label would widen the first column of the grid.
+        grid.addWidget(self._hag_check, 3, 0, 1, 4)
+        grid.addWidget(self._hag_spin, 4, 1)
+        grid.addWidget(self._hag_layer_combo, 4, 2, 1, 2)
         self._hag_tooltip = self.tr("Keep the points at least this high above the terrain model")
         self._hag_check.setToolTip(self._hag_tooltip)
 

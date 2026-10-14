@@ -109,6 +109,7 @@ class CoverageModeController(BaseController):
         self._linked_runs: Dict[str, List[bool]] = {}
         self._linked_redo: Dict[str, List[bool]] = {}
         self._running_task: Any = None
+        self._extras: Any = None  # CoverageDockExtras: layer card, kind tools, source geometry line
 
     # === Lifecycle ===
 
@@ -146,6 +147,9 @@ class CoverageModeController(BaseController):
 
     def teardown(self) -> None:
         self.deactivate()
+        if self._extras is not None:
+            self._extras_call('teardown')
+            self._extras = None
         if getattr(self, '_project_signal_connected', False):
             try:
                 from qgis.core import QgsProject
@@ -199,6 +203,7 @@ class CoverageModeController(BaseController):
             return True
         if self._active_layer is not None:
             self.deactivate()
+        self._extras_call('show_vector')
         return False
 
     def activate(self, layer: Any, kind: Any) -> None:
@@ -218,6 +223,7 @@ class CoverageModeController(BaseController):
             self._save_dock_state()
         self._apply_layout(kind)
         self._show_kind_badge(layer, kind)
+        self._extras_call('show_for', layer, kind)
         if kind is LayerKind.RASTER:
             self._populate_raster(layer)
         else:
@@ -321,7 +327,18 @@ class CoverageModeController(BaseController):
         self._host = host
         self._connect_panels()
         self._ensure_coverage_spin()
+        self._extras_call('ensure', host)
         return True
+
+    def _extras_call(self, method: str, *args) -> None:
+        """Run a :class:`CoverageDockExtras` method; the dock additions never break the mode."""
+        try:
+            if self._extras is None:
+                from .coverage_dock_extras import CoverageDockExtras
+                self._extras = CoverageDockExtras(self)
+            getattr(self._extras, method)(*args)
+        except Exception as exc:
+            logger.debug(f"[FM5] dock additions '{method}' failed: {exc}")
 
     def _ensure_coverage_spin(self) -> None:
         """Add the "minimum coverage" box next to the geometric predicates combo."""
@@ -344,7 +361,20 @@ class CoverageModeController(BaseController):
         spin.valueChanged.connect(self._on_coverage_min_changed)
         parent_layout = self._find_parent_layout(combo)
         if parent_layout is not None:
-            parent_layout.insertWidget(parent_layout.indexOf(combo) + 1, spin)
+            index = parent_layout.indexOf(combo)
+            from qgis.PyQt.QtWidgets import QBoxLayout, QHBoxLayout
+            if isinstance(parent_layout, QBoxLayout) and parent_layout.direction() in (
+                    QBoxLayout.Direction.TopToBottom, QBoxLayout.Direction.BottomToTop):
+                # Same row as the predicates (mockup): a row below would shift FILTERING's
+                # values column away from its buttons column.
+                parent_layout.removeWidget(combo)
+                row = QHBoxLayout()
+                row.setSpacing(parent_layout.spacing())
+                row.addWidget(combo, 1)
+                row.addWidget(spin, 0)
+                parent_layout.insertLayout(index, row)
+            else:
+                parent_layout.insertWidget(index + 1, spin)
         self._coverage_spin = spin
 
     @staticmethod

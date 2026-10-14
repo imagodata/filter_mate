@@ -50,6 +50,7 @@ INTEGER_DATA_TYPES = frozenset({"Byte", "Int8", "UInt16", "Int16", "UInt32", "In
 FLOAT_DECIMALS = 3
 HISTORY_SIZE = 5
 DEBOUNCE_MS = 250
+SPIN_MIN_WIDTH = 64
 DEFAULT_REFERENCE = "raster"
 _STATUS_OK_COLOR = "#2e7d32"
 _STATUS_ERROR_COLOR = "#c62828"
@@ -101,6 +102,22 @@ def format_percent(ratio: Optional[float]) -> str:
     if ratio is None:
         return "–"
     return f"{float(ratio) * 100:.1f} %"
+
+
+def format_zone_statistics(minimum: Bound, maximum: Bound, mean: Bound, count: Optional[int],
+                           decimals: int) -> str:
+    """Statistics of a drawn rectangle, ``"min 198.400 · max 251.070 · mean 221.300 · 12450 px"``.
+
+    Returns ``""`` when the zone holds no valid pixel (no minimum or maximum).
+    """
+    if minimum is None or maximum is None:
+        return ""
+    parts = [f"min {format_pixel_value(minimum, decimals)}", f"max {format_pixel_value(maximum, decimals)}"]
+    if mean is not None:
+        parts.append(f"mean {format_pixel_value(mean, max(decimals, 1))}")
+    if count is not None and count > 0:
+        parts.append(f"{int(count)} px")
+    return " · ".join(parts)
 
 
 def extend_range(low: Bound, high: Bound, value: float) -> Tuple[Bound, Bound]:
@@ -289,6 +306,9 @@ class RasterExploringPanel(QWidget):
         self._band_combo = QComboBox(self)
         self._band_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self._band_combo.setToolTip(self.tr("Band whose values are selected"))
+        # Long band names must not widen the panel past a narrow dock.
+        self._band_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self._band_combo.setMinimumContentsLength(8)
         self._band_combo.currentIndexChanged.connect(self._on_band_index_changed)
         band_row.addWidget(self._band_combo)
         layout.addLayout(band_row)
@@ -334,6 +354,16 @@ class RasterExploringPanel(QWidget):
         self._pixel_history_label.setWordWrap(True)
         self._pixel_history_label.setToolTip(self.tr("Last {0} values picked").format(HISTORY_SIZE))
         group_layout.addWidget(self._pixel_history_label)
+        self._hover_label = QLabel("", group)
+        self._hover_label.setToolTip(self.tr("Value of the current band under the cursor"))
+        self._hover_label.setVisible(False)
+        group_layout.addWidget(self._hover_label)
+        self._zone_label = QLabel("", group)
+        self._zone_label.setWordWrap(True)
+        self._zone_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self._zone_label.setToolTip(self.tr("Statistics of the current band in the last rectangle drawn on the map"))
+        self._zone_label.setVisible(False)
+        group_layout.addWidget(self._zone_label)
         help_label = QLabel(self.tr("Click on the map with the pixel picker. Ctrl+click extends the range to the value."), group)
         help_label.setWordWrap(True)
         help_font = help_label.font()
@@ -360,6 +390,7 @@ class RasterExploringPanel(QWidget):
             spin.setToolTip(tip)
             spin.setAccessibleName(tip)
             spin.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+            spin.setMinimumWidth(SPIN_MIN_WIDTH)  # the size hint covers ±1e9
             spins_row.addWidget(QLabel(label, self._range_group))
             spins_row.addWidget(spin)
         self._min_spin.valueChanged.connect(self._on_min_spin_changed)
@@ -510,9 +541,38 @@ class RasterExploringPanel(QWidget):
             self._set_range(*extend_range(self._low, self._high, value))
             self._emit_now()
 
+    def set_hover_value(self, x: Optional[float], y: Optional[float], value: Optional[float] = None) -> None:
+        """Show the current band value under the cursor; ``x`` None hides the line.
+
+        Unlike :meth:`set_pixel_values`, nothing is added to the history.
+        """
+        if x is None or y is None:
+            self._hover_label.setVisible(False)
+            self._hover_label.setText("")
+            return
+        digits = self._coordinate_decimals
+        text = format_pixel_value(value, self._decimals, self.tr("NoData"))
+        self._hover_label.setText(self.tr("Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})").format(text, x, y, digits))
+        if self._hover_label.isHidden():
+            self._hover_label.setVisible(True)
+            if hasattr(self._pixel_group, 'setCollapsed'):
+                self._pixel_group.setCollapsed(False)  # once per hover session: the user may fold it again
+
+    def set_zone_statistics(self, minimum: Bound, maximum: Bound, mean: Bound = None,
+                            count: Optional[int] = None) -> None:
+        """Show the statistics of a drawn rectangle; ``minimum`` None says the zone holds no pixel."""
+        text = format_zone_statistics(minimum, maximum, mean, count, self._decimals)
+        self._zone_label.setText(self.tr("Zone: {0}").format(text or self.tr("no pixel")))
+        self._zone_label.setVisible(True)
+        if hasattr(self._pixel_group, 'setCollapsed'):
+            self._pixel_group.setCollapsed(False)
+
     def reset(self) -> None:
         """Back to the defaults: first band, no range, no class, no expression. Does not emit."""
         self._debounce.stop()
+        self.set_hover_value(None, None)
+        self._zone_label.setVisible(False)
+        self._zone_label.setText("")
         if self._band_combo.count():
             with _signals_blocked(self._band_combo):
                 self._band_combo.setCurrentIndex(0)
@@ -658,6 +718,7 @@ class RasterExploringPanel(QWidget):
         self._apply_band()
         self._set_range(None, None)
         self._refresh_pixel_display()
+        self._zone_label.setVisible(False)  # its statistics were those of the previous band
         self.bandChanged.emit(self.current_band())
         self._emit_now()
 
