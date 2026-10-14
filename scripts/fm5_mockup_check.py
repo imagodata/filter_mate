@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""FilterMate 5 mockup check in a real QGIS (GUI): layer card, kind tools, source geometry line,
+r"""FilterMate 5 mockup check in a real QGIS (GUI): layer card, kind tools, source geometry line,
 map tool handover, FILTERING alignment. Same launch as scripts/fm5_gui_check.py; log in
 %LOCALAPPDATA%\Temp\fm5gaps\out\gaps.log."""
 import os
