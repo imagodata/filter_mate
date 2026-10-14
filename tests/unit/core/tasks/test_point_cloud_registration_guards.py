@@ -560,7 +560,10 @@ class TestRegistrationGuardsAst:
         assert not any(assignments[0] in ast.walk(loop) for loop in loops)
 
     def test_add_point_cloud_layer_never_references_the_vector_api(self):
-        method = _method("_add_point_cloud_layer")
+        # FilterMate 5: the body moved to `_add_coverage_layer`, shared with rasters.
+        wrapper = _method("_add_point_cloud_layer")
+        assert "_add_coverage_layer" in {n.attr for n in ast.walk(wrapper) if isinstance(n, ast.Attribute)}
+        method = _method("_add_coverage_layer")
         attributes = {n.attr for n in ast.walk(method) if isinstance(n, ast.Attribute)}
         assert not attributes & VECTOR_ONLY_API
         assert not attributes & VECTOR_ONLY_HELPERS
@@ -569,7 +572,7 @@ class TestRegistrationGuardsAst:
         for reused in ("_load_existing_layer_properties", "_set_layer_variables",
                        "insert_properties_to_spatialite", "_get_default_is_linking"):
             assert reused in attributes
-        names = {n.id for n in ast.walk(method) if isinstance(n, ast.Name)}
+        names = {n.id for n in ast.walk(wrapper) if isinstance(n, ast.Name)}
         assert {"build_point_cloud_layer_properties", "ensure_point_cloud_layer_properties"} <= names
 
     def test_remove_project_layer_accepts_every_filterable_type(self):

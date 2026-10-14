@@ -376,7 +376,8 @@ class TestDefaultConfigPointCloudSection:
         section = default_config["APP"]["OPTIONS"]["POINT_CLOUD"]
         enabled = section["enabled"]
         assert set(enabled.keys()) == {"value", "choices", "description"}
-        assert enabled["value"] is False
+        # FilterMate 5: point clouds are a first-class layer kind, on by default.
+        assert enabled["value"] is True
         assert enabled["choices"] == [True, False]
         assert enabled["value"] in enabled["choices"]
         assert isinstance(enabled["description"], str) and enabled["description"]
@@ -386,7 +387,28 @@ class TestDefaultConfigPointCloudSection:
         assert isinstance(section["description"], str) and section["description"]
         assert "_hidden" not in section
 
-    def test_point_cloud_is_last_option_section(self, default_config):
+    def test_point_cloud_follows_exploration(self, default_config):
         keys = list(default_config["APP"]["OPTIONS"].keys())
-        assert keys[-1] == "POINT_CLOUD"
-        assert keys[-2] == "EXPLORATION"
+        assert keys.index("POINT_CLOUD") == keys.index("EXPLORATION") + 1
+
+
+class TestDefaultConfigRasterAndCrossFilterSections:
+    """FilterMate 5 sections: raster flag and cross-kind filtering options."""
+
+    def test_raster_enabled_is_choices_entry(self, default_config):
+        enabled = default_config["APP"]["OPTIONS"]["RASTER"]["enabled"]
+        assert set(enabled.keys()) == {"value", "choices", "description"}
+        assert enabled["value"] is True
+        assert enabled["choices"] == [True, False]
+
+    def test_cross_filter_options(self, default_config):
+        section = default_config["APP"]["OPTIONS"]["CROSS_FILTER"]
+        assert section["point_cloud_clip"]["value"] in section["point_cloud_clip"]["choices"]
+        assert section["raster_selection_max_pixels"]["value"] > 0
+        assert section["point_cloud_footprint_resolution"]["value"] > 0
+        assert section["cache_max_gb"]["value"] > 0
+        assert section["pdal_path"]["value"] == ""
+
+    def test_sections_order(self, default_config):
+        keys = list(default_config["APP"]["OPTIONS"].keys())
+        assert keys[-3:] == ["POINT_CLOUD", "RASTER", "CROSS_FILTER"]

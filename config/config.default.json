@@ -731,11 +731,43 @@
         }
       },
       "POINT_CLOUD": {
-        "description": "Interactive filtering of point cloud layers (LAS/LAZ/COPC): classification, elevation, intensity. Requires QGIS 3.26 or newer",
+        "description": "Exploring and filtering of point cloud layers (LAS/LAZ/COPC): classification, elevation, intensity, height above a DTM. Requires QGIS 3.26 or newer",
         "enabled": {
-          "value": false,
+          "value": true,
           "choices": [true, false],
-          "description": "Show point cloud layers in the layer list and enable the point cloud filter panel (experimental)"
+          "description": "Show point cloud layers in the layer lists, as source (EXPLORING selection) and as target (clipped by the source geometry)"
+        }
+      },
+      "RASTER": {
+        "description": "Exploring and filtering of raster layers: pixel value, value range, classes, raster expression. Requires QGIS 3.22 or newer",
+        "enabled": {
+          "value": true,
+          "choices": [true, false],
+          "description": "Show raster layers in the layer lists, as source (EXPLORING selection) and as target (pixels outside the source geometry set to NoData)"
+        }
+      },
+      "CROSS_FILTER": {
+        "description": "Filtering between layers of different kinds (vector, raster, point cloud)",
+        "point_cloud_clip": {
+          "value": "exact",
+          "choices": ["exact", "bbox"],
+          "description": "How a point cloud target is clipped: exact (derived file, background task) or bbox (instant X/Y expression, approximate)"
+        },
+        "raster_selection_max_pixels": {
+          "value": 4000000,
+          "description": "Above this pixel count, a raster selection is vectorized on a coarser grid"
+        },
+        "point_cloud_footprint_resolution": {
+          "value": 2.0,
+          "description": "Cell size (map units) of the footprint of the points kept by a point cloud selection"
+        },
+        "cache_max_gb": {
+          "value": 5,
+          "description": "Maximum size of the FilterMate cache of derived rasters and point clouds"
+        },
+        "pdal_path": {
+          "value": "",
+          "description": "Path to the pdal executable (empty: detected next to QGIS or on PATH)"
         }
       }
     }

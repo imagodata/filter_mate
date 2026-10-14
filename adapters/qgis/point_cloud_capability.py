@@ -11,6 +11,10 @@ instance rather than a type and ``Qgis.QGIS_VERSION_INT`` is not an int.
 
 The flag and the version are re-read on every call (the flag can change
 live); only the class resolution is cached, see :func:`reset_capability_cache`.
+Since FilterMate 5 it also knows about ``QgsRasterLayer`` (flag
+``APP.OPTIONS.RASTER.enabled``) and classifies any layer into a
+:class:`~core.domain.layer_kind.LayerKind`; the module keeps its historical
+name because every caller already imports it.
 """
 import functools
 import logging
@@ -28,6 +32,21 @@ def is_point_cloud_filtering_enabled() -> bool:
             .get('APP', {})
             .get('OPTIONS', {})
             .get('POINT_CLOUD', {})
+        )
+        return bool(_get_option_value(cfg.get('enabled'), False))
+    except (ImportError, AttributeError, TypeError):
+        return False
+
+
+def is_raster_filtering_enabled() -> bool:
+    """Return the live value of ``APP.OPTIONS.RASTER.enabled`` (False when unset)."""
+    try:
+        from ...config.config import ENV_VARS, _get_option_value
+        cfg = (
+            ENV_VARS.get('CONFIG_DATA', {})
+            .get('APP', {})
+            .get('OPTIONS', {})
+            .get('RASTER', {})
         )
         return bool(_get_option_value(cfg.get('enabled'), False))
     except (ImportError, AttributeError, TypeError):
@@ -85,11 +104,89 @@ def get_point_cloud_layer_type() -> Optional[type]:
     return layer_type
 
 
+@functools.lru_cache(maxsize=1)
+def _resolve_raster_class() -> Optional[type]:
+    """Import ``QgsRasterLayer`` once; None when absent or not a real type."""
+    try:
+        from qgis.core import QgsRasterLayer
+    except Exception:
+        return None
+    if not isinstance(QgsRasterLayer, type):
+        return None
+    return QgsRasterLayer
+
+
+def _supports_raster_filtering(qgis_version_int: int, feature_enabled: bool, has_raster_type: bool) -> bool:
+    try:
+        from ...core.domain.raster_support import supports_raster_filtering
+    except Exception as exc:
+        logger.debug(f"raster_support unavailable, raster filtering disabled: {exc}")
+        return False
+    return bool(supports_raster_filtering(qgis_version_int, feature_enabled, has_raster_type))
+
+
+def get_raster_layer_type() -> Optional[type]:
+    """Return ``QgsRasterLayer`` when raster exploring/filtering is usable, else None."""
+    enabled = is_raster_filtering_enabled()
+    if not enabled:
+        return None
+    layer_type = _resolve_raster_class()
+    if not _supports_raster_filtering(get_qgis_version_int(), enabled, layer_type is not None):
+        return None
+    try:
+        from qgis.core import QgsVectorLayer
+        if layer_type is QgsVectorLayer:
+            return None
+    except Exception:
+        return None
+    return layer_type
+
+
+def is_raster_layer(layer: Any) -> bool:
+    """True when ``layer`` is a ``QgsRasterLayer`` and raster filtering is usable."""
+    if layer is None:
+        return False
+    layer_type = get_raster_layer_type()
+    if layer_type is None:
+        return False
+    try:
+        return isinstance(layer, layer_type)
+    except TypeError:
+        return False
+
+
+def get_layer_kind(layer: Any) -> Any:
+    """Classify ``layer`` as a :class:`LayerKind` (VECTOR, RASTER, POINT_CLOUD or OTHER).
+
+    Raster and point cloud layers are only recognized when their feature flag
+    is on; otherwise they are OTHER, which callers treat as "not handled".
+    """
+    from ...core.domain.layer_kind import LayerKind
+    if layer is None:
+        return LayerKind.OTHER
+    try:
+        from qgis.core import QgsVectorLayer
+        if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
+            return LayerKind.VECTOR
+    except Exception:
+        pass
+    if is_point_cloud_layer(layer):
+        return LayerKind.POINT_CLOUD
+    if is_raster_layer(layer):
+        return LayerKind.RASTER
+    return LayerKind.OTHER
+
+
+def is_coverage_layer(layer: Any) -> bool:
+    """True for a usable raster or point cloud layer (non-vector FilterMate layer)."""
+    return is_point_cloud_layer(layer) or is_raster_layer(layer)
+
+
 def get_filterable_layer_types() -> Tuple[type, ...]:
     """Return the layer classes FilterMate can filter, as real types only.
 
-    ``(QgsVectorLayer,)`` by default, ``(QgsVectorLayer, QgsPointCloudLayer)``
-    when point cloud filtering is usable, ``()`` when ``qgis.core`` cannot
+    ``(QgsVectorLayer,)`` by default, plus ``QgsPointCloudLayer`` and
+    ``QgsRasterLayer`` when their filtering is usable, ``()`` when ``qgis.core`` cannot
     provide a real ``QgsVectorLayer`` type.
     """
     try:
@@ -98,10 +195,14 @@ def get_filterable_layer_types() -> Tuple[type, ...]:
         return ()
     if not isinstance(QgsVectorLayer, type):
         return ()
+    types = [QgsVectorLayer]
     point_cloud_type = get_point_cloud_layer_type()
-    if point_cloud_type is None or point_cloud_type is QgsVectorLayer:
-        return (QgsVectorLayer,)
-    return (QgsVectorLayer, point_cloud_type)
+    if point_cloud_type is not None and point_cloud_type is not QgsVectorLayer:
+        types.append(point_cloud_type)
+    raster_type = get_raster_layer_type()
+    if raster_type is not None and raster_type is not QgsVectorLayer:
+        types.append(raster_type)
+    return tuple(types)
 
 
 def is_point_cloud_layer(layer: Any) -> bool:
@@ -131,6 +232,8 @@ def get_current_layer_combo_filters() -> Optional[Any]:
         flags = QgsMapLayerProxyModel.Filter.HasGeometry
         if get_point_cloud_layer_type() is not None:
             flags = flags | QgsMapLayerProxyModel.Filter.PointCloudLayer
+        if get_raster_layer_type() is not None:
+            flags = flags | QgsMapLayerProxyModel.Filter.RasterLayer
         return flags
     except (ImportError, AttributeError, TypeError):
         return None
@@ -139,3 +242,4 @@ def get_current_layer_combo_filters() -> Optional[Any]:
 def reset_capability_cache() -> None:
     """Clear the cached class resolution (tests, plugin reload)."""
     _resolve_point_cloud_class.cache_clear()
+    _resolve_raster_class.cache_clear()
