@@ -6,6 +6,7 @@ from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 
 from .algorithms.batch_filter_algorithm import BatchFilterAlgorithm
+from .algorithms.cross_filter_algorithm import CrossFilterAlgorithm
 
 
 class FilterMateProcessingProvider(QgsProcessingProvider):
@@ -14,6 +15,7 @@ class FilterMateProcessingProvider(QgsProcessingProvider):
     def loadAlgorithms(self):
         """Enregistre les algorithmes FilterMate auprès de Processing."""
         self.addAlgorithm(BatchFilterAlgorithm())
+        self.addAlgorithm(CrossFilterAlgorithm())
 
     def id(self):
         """Retourne l'identifiant technique du fournisseur."""

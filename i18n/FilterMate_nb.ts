@@ -2,6 +2,34 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="nb_NO" sourcelanguage="en_US">
 <context>
+    <name>@default</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="314"/>
+        <source>Import from Resource Sharing...</source>
+        <translation>Importer fra Resource Sharing...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <source>Publish to Resource Sharing...</source>
+        <translation>Publiser til Resource Sharing...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <source>Publish (no favorites saved)</source>
+        <translation>Publiser (ingen favoritter lagret)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="334"/>
+        <source>Quick publish to default repo</source>
+        <translation>Hurtigpubliser til standardarkivet</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="339"/>
+        <source>Manage Resource Sharing repos...</source>
+        <translation>Administrer Resource Sharing-arkiver...</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="171"/>
@@ -24,7 +52,7 @@
         <translation>Feil under databaseverifisering: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="617"/>
+        <location filename="../core/services/app_initializer.py" line="601"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Lasting av lag mislyktes. Bruk F5 for aa tvinge innlasting paa nytt.</translation>
     </message>
@@ -32,32 +60,32 @@
 <context>
     <name>BackendIndicatorWidget</name>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="183"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="185"/>
         <source>Select Backend:</source>
         <translation>Velg backend:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="202"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="204"/>
         <source>Auto (Default)</source>
         <translation>Auto (Standard)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="210"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="212"/>
         <source>Auto-select Optimal for All Layers</source>
         <translation>Velg automatisk optimalt for alle lag</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="220"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="222"/>
         <source>Force {0} for All Layers</source>
         <translation>Tving {0} for alle lag</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="263"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="265"/>
         <source>Click to reload layers</source>
         <translation>Klikk for aa laste inn lag paa nytt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="298"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="300"/>
         <source>Click to change backend</source>
         <translation>Klikk for aa endre backend</translation>
     </message>
@@ -73,45 +101,258 @@
 <context>
     <name>ControllerIntegration</name>
     <message>
-        <location filename="../ui/controllers/integration.py" line="612"/>
+        <location filename="../ui/controllers/integration.py" line="634"/>
         <source>Property error: {0}</source>
         <translation>Egenskapsfeil: {0}</translation>
     </message>
 </context>
 <context>
+    <name>CoverageModeController</name>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="164"/>
+        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
+        <translation>Gjenoppretter filteret for {0} raster-/punktskylag…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="378"/>
+        <source>cov. ≥ </source>
+        <translation>dekn. ≥ </translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="379"/>
+        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
+        <translation>Minste andel av et polygonmål innenfor kildegeometrien (0 = enhver overlapping). Brukes når kilden er et raster eller en punktsky.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <source>Raster</source>
+        <translation>Raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <source>Point cloud</source>
+        <translation>Punktsky</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
+        <translation>{0}-lag: utvalg i EXPLORING, relasjon i FILTERING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="471"/>
+        <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
+        <translation>Pikselvelger: klikk på kartet for å lese verdien til hvert bånd (Ctrl+klikk utvider området)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
+        <source>Zoom to the layer</source>
+        <translation>Zoom til laget</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="473"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>Forhåndsvisning: skjul pikslene utenfor utvalget</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="475"/>
+        <source>Not used for raster layers</source>
+        <translation>Ikke brukt for rasterlag</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="476"/>
+        <source>Reset the raster selection</source>
+        <translation>Tilbakestill rasterutvalget</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
+        <source>Identify points on the map</source>
+        <translation>Identifiser punkter på kartet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="481"/>
+        <source>Live preview: show only the points kept by the selection</source>
+        <translation>Direkteforhåndsvisning: vis bare punktene som beholdes av utvalget</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="483"/>
+        <source>Not used for point cloud layers</source>
+        <translation>Ikke brukt for punktskylag</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="484"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>Tilbakestill punktskykriteriene</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="641"/>
+        <source>Invalid raster calculator expression</source>
+        <translation>Ugyldig uttrykk for rasterkalkulator</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="679"/>
+        <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
+        <translation>PDAL ble ikke funnet: høyde over en DTM krever den kjørbare filen pdal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <source>A FilterMate task is still running: wait for it to finish</source>
+        <translation>En FilterMate-oppgave kjører fortsatt: vent til den er ferdig</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="984"/>
+        <source>FilterMate task failed: {0}</source>
+        <translation>FilterMate-oppgaven mislyktes: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <source>Select pixels first: a value range, classes or a raster expression</source>
+        <translation>Velg piksler først: et verdiområde, klasser eller et rasteruttrykk</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1026"/>
+        <source>Raster filtered: {0}</source>
+        <translation>Raster filtrert: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1039"/>
+        <source>The point cloud expression was rejected: {0}</source>
+        <translation>Punktskyuttrykket ble avvist: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1042"/>
+        <source>Select points first: classes, attribute ranges or an expression</source>
+        <translation>Velg punkter først: klasser, attributtområder eller et uttrykk</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1050"/>
+        <source>Point cloud filtered: {0}</source>
+        <translation>Punktsky filtrert: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1114"/>
+        <source>Filter not applied: {0}</source>
+        <translation>Filteret ble ikke brukt: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <source>canceled</source>
+        <translation>avbrutt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <source>{0} target(s) filtered</source>
+        <translation>{0} mål filtrert</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1120"/>
+        <source>{0} failed: {1}</source>
+        <translation>{0} mislyktes: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1129"/>
+        <source>FilterMate: filtering from '{0}'…</source>
+        <translation>FilterMate: filtrerer fra '{0}'…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1185"/>
+        <source>Changed since, left as is: {0}</source>
+        <translation>Endret siden, latt være: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1191"/>
+        <source>{0} layer(s) restored</source>
+        <translation>{0} lag gjenopprettet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1225"/>
+        <source>&apos;{0}&apos; not exported: {1}</source>
+        <translation>'{0}' ble ikke eksportert: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1237"/>
+        <source>Exported: {0}</source>
+        <translation>Eksportert: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1239"/>
+        <source>Export failed: {0}</source>
+        <translation>Eksporten mislyktes: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1246"/>
+        <source>Exporting {0} layer(s)…</source>
+        <translation>Eksporterer {0} lag…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1252"/>
+        <source>Export folder</source>
+        <translation>Eksportmappe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1324"/>
+        <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
+        <translation>Raster-/punktskymål hoppet over: ingen kildeobjekt valgt i EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <source>Raster / point cloud targets not filtered: {0}</source>
+        <translation>Raster-/punktskymål ikke filtrert: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1349"/>
+        <source>{0} raster / point cloud target(s) filtered</source>
+        <translation>{0} raster-/punktskymål filtrert</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1434"/>
+        <source>Choose the DTM raster used for the height above ground</source>
+        <translation>Velg DTM-rasteret som brukes for høyde over bakken</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1442"/>
+        <source>Height above ground not computed: {0}</source>
+        <translation>Høyde over bakken ble ikke beregnet: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1454"/>
+        <source>Computing the height above '{0}' with PDAL…</source>
+        <translation>Beregner høyden over '{0}' med PDAL…</translation>
+    </message>
+</context>
+<context>
     <name>DatabaseManager</name>
     <message>
-        <location filename="../adapters/database_manager.py" line="131"/>
+        <location filename="../adapters/database_manager.py" line="194"/>
         <source>Database file does not exist: {0}</source>
         <translation>Databasefil eksisterer ikke: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="138"/>
+        <location filename="../adapters/database_manager.py" line="201"/>
         <source>Failed to connect to database {0}: {1}</source>
         <translation>Kunne ikke koble til database {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="157"/>
+        <location filename="../adapters/database_manager.py" line="220"/>
         <source>Could not create database directory {0}: {1}</source>
         <translation>Kunne ikke opprette databasekatalog {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="211"/>
+        <location filename="../adapters/database_manager.py" line="274"/>
         <source>Failed to create database file {0}: {1}</source>
         <translation>Kunne ikke opprette databasefil {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="488"/>
+        <location filename="../adapters/database_manager.py" line="551"/>
         <source>Cannot initialize FilterMate database: connection failed</source>
         <translation>Kan ikke initialisere FilterMate-databasen: tilkobling mislyktes</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="493"/>
+        <location filename="../adapters/database_manager.py" line="556"/>
         <source>Critical error connecting to database: {0}</source>
         <translation>Kritisk feil ved tilkobling til database: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="527"/>
+        <location filename="../adapters/database_manager.py" line="602"/>
         <source>Error during database initialization: {0}</source>
         <translation>Feil under databaseinitialisering: {0}</translation>
     </message>
@@ -119,27 +360,27 @@
 <context>
     <name>DatasourceManager</name>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
+        <location filename="../core/services/datasource_manager.py" line="147"/>
         <source>Database file does not exist: {db_file_path}</source>
         <translation>Databasefilen finnes ikke: {db_file_path}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
+        <location filename="../core/services/datasource_manager.py" line="158"/>
         <source>Failed to connect to database {db_file_path}: {error}</source>
         <translation>Kunne ikke koble til databasen {db_file_path}: {error}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
+        <location filename="../core/services/datasource_manager.py" line="183"/>
         <source>QGIS processing module not available to create spatial index</source>
         <translation>QGIS Processing-modulen er ikke tilgjengelig for å opprette romlig indeks</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
+        <location filename="../core/services/datasource_manager.py" line="189"/>
         <source>Cannot create spatial index: layer invalid or source not found.</source>
         <translation>Kan ikke opprette romlig indeks: lag ugyldig eller kilde ikke funnet.</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
+        <location filename="../core/services/datasource_manager.py" line="399"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL-lag oppdaget, men psycopg2 er ikke installert. Bruker lokal Spatialite-backend. Installer psycopg2 for bedre ytelse med store datasett.</translation>
     </message>
@@ -157,7 +398,7 @@
         <translation>Velg en mappe for eksport av lagene dine</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="158"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="159"/>
         <source>Save your exported data to a zip file</source>
         <translation>Lagre eksporterte data i en ZIP-fil</translation>
     </message>
@@ -165,37 +406,37 @@
 <context>
     <name>ExportGroupRecapDialog</name>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="116"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="115"/>
         <source>{0} couche(s)</source>
         <translation>{0} lag</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="118"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="117"/>
         <source> dans {0} groupe(s)</source>
         <translation> i {0} gruppe(r)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="120"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="119"/>
         <source> + {0} hors groupe</source>
         <translation> + {0} utenfor gruppe</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="127"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="126"/>
         <source>Destination : {0}</source>
         <translation>Destinasjon: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="147"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="146"/>
         <source>No group detected - all layers are at the root level</source>
         <translation>Ingen gruppe oppdaget - alle lag er paa rotnivaa</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="155"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="154"/>
         <source>Annuler</source>
         <translation>Avbryt</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="161"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
         <source>Exporter</source>
         <translation>Eksporter</translation>
     </message>
@@ -205,50 +446,50 @@
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="228"/>
         <source>No Filter</source>
-        <translation>Inget filter</translation>
+        <translation type="obsolete">Inget filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="228"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="264"/>
         <source>No active filter to save.</source>
         <translation>Ingen aktive filtre aa lagre.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="236"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
         <source>Add Favorite</source>
         <translation>Legg til favoritt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="236"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
         <source>Favorite name:</source>
         <translation>Favorittnavn:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="254"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="286"/>
         <source>Favorite &apos;{0}&apos; added successfully</source>
-        <translation>Favoritt &apos;{0}&apos; lagt til</translation>
+        <translation>Favoritt '{0}' lagt til</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="399"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="505"/>
         <source>Export Favorites</source>
         <translation>Eksporter favoritter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="423"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="529"/>
         <source>Exported {0} favorites</source>
         <translation>{0} favoritter eksportert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="425"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="531"/>
         <source>Failed to export favorites</source>
         <translation>Eksport av favoritter mislyktes</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
         <source>Import Favorites</source>
         <translation>Importer favoritter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
@@ -259,183 +500,183 @@ Ja = Legg til eksisterende
 Nei = Erstatt alle eksisterende</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="493"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="602"/>
         <source>Imported {0} favorites</source>
         <translation>{0} favoritter importert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="495"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="604"/>
         <source>No favorites imported</source>
         <translation>Ingen favoritter importert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="504"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="613"/>
         <source>Favorites manager not initialized. Please restart FilterMate.</source>
         <translation>Favorittbehandler ikke initialisert. Start FilterMate paa nytt.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="538"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="658"/>
         <source>Favorites manager dialog not available</source>
         <translation>Favorittbehandler-dialog ikke tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1801"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1168"/>
         <source>Error: {0}</source>
         <translation>Feil: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="775"/>
         <source>Used {0} times</source>
-        <translation>Brukt {0} ganger</translation>
+        <translation type="obsolete">Brukt {0} ganger</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="786"/>
         <source>Add current filter to favorites</source>
-        <translation>Legg til gjeldende filter i favoritter</translation>
+        <translation type="obsolete">Legg til gjeldende filter i favoritter</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="790"/>
         <source>Add filter (no active filter)</source>
-        <translation>Legg til filter (ingen aktivt filter)</translation>
+        <translation type="obsolete">Legg til filter (ingen aktivt filter)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="795"/>
         <source>Manage favorites...</source>
-        <translation>Behandle favoritter...</translation>
+        <translation type="obsolete">Behandle favoritter...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="798"/>
         <source>Export...</source>
-        <translation>Eksporter...</translation>
+        <translation type="obsolete">Eksporter...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="801"/>
         <source>Import...</source>
-        <translation>Importer...</translation>
+        <translation type="obsolete">Importer...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="822"/>
         <source>Global favorites</source>
-        <translation>Globale favoritter</translation>
+        <translation type="obsolete">Globale favoritter</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="826"/>
         <source>Copy to global...</source>
-        <translation>Kopier til global...</translation>
+        <translation type="obsolete">Kopier til global...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="837"/>
         <source>── Available global favorites ──</source>
-        <translation>── Tilgjengelige globale favoritter ──</translation>
+        <translation type="obsolete">── Tilgjengelige globale favoritter ──</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="845"/>
         <source>(No global favorites)</source>
-        <translation>(Ingen globale favoritter)</translation>
+        <translation type="obsolete">(Ingen globale favoritter)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="849"/>
         <source>Maintenance</source>
-        <translation>Vedlikehold</translation>
+        <translation type="obsolete">Vedlikehold</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="851"/>
         <source>Save to project (.qgz)</source>
-        <translation>Lagre i prosjekt (.qgz)</translation>
+        <translation type="obsolete">Lagre i prosjekt (.qgz)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="854"/>
         <source>Restore from project</source>
-        <translation>Gjenopprett fra prosjekt</translation>
+        <translation type="obsolete">Gjenopprett fra prosjekt</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="859"/>
         <source>Clean up orphan projects</source>
-        <translation>Rydd opp i foreldreloese prosjekter</translation>
+        <translation type="obsolete">Rydd opp i foreldreloese prosjekter</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="862"/>
         <source>Database statistics</source>
-        <translation>Databasestatistikk</translation>
+        <translation type="obsolete">Databasestatistikk</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Invalid Name</source>
-        <translation>Ugyldig navn</translation>
+        <translation type="obsolete">Ugyldig navn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="763"/>
         <source>Favorite name cannot be empty.</source>
         <translation>Favorittnavn kan ikke vaere tomt.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
         <source>Duplicate Name</source>
         <translation>Duplisert navn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
         <source>A favorite named &apos;{0}&apos; already exists.
 Do you want to replace it?</source>
-        <translation>En favoritt med navnet &apos;{0}&apos; eksisterer allerede.
+        <translation>En favoritt med navnet '{0}' eksisterer allerede.
 Vil du erstatte den?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1577"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1044"/>
         <source>Favorite copied to global favorites</source>
         <translation>Favoritt kopiert til globale favoritter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1580"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1047"/>
         <source>Failed to copy to global favorites</source>
         <translation>Kopiering til globale favoritter mislyktes</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>Global Favorites</source>
-        <translation>Globale favoritter</translation>
+        <translation type="obsolete">Globale favoritter</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
-        <translation>{0} global(e) favoritt(er) tilgjengelig(e).
+        <translation type="obsolete">{0} global(e) favoritt(er) tilgjengelig(e).
 
 Globale favoritter deles paa tvers av alle prosjekter.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1603"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1064"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>{0} favoritt(er) lagret i prosjektfil</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1605"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1066"/>
         <source>Save failed</source>
         <translation>Lagring mislyktes</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1617"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1077"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>{0} favoritt(er) gjenopprettet fra prosjektfil</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1619"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1079"/>
         <source>No favorites to restore found in project</source>
         <translation>Ingen favoritter aa gjenopprette funnet i prosjekt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1646"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1110"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>{0} foreldreloest/e prosjekt(er) ryddet opp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1648"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1112"/>
         <source>No orphan projects to clean up</source>
         <translation>Ingen foreldreloese prosjekter aa rydde opp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1773"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1172"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -452,403 +693,473 @@ Totalt favoritter: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1789"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1188"/>
         <source>Top projects by favorites:</source>
         <translation>Toppprosjekter etter favoritter:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1793"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1192"/>
         <source>FilterMate Statistics</source>
         <translation>FilterMate-statistikk</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="513"/>
         <source>Favorites Manager</source>
-        <translation>Favorittbehandler</translation>
+        <translation type="obsolete">Favorittbehandler</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="513"/>
         <source>No favorites saved yet.
 
-Apply a filter to a layer, then click the ★ indicator and choose &apos;Add current filter to favorites&apos; to save your first favorite.</source>
-        <translation>Ingen favoritter lagret ennå.
+Apply a filter to a layer, then click the ★ indicator and choose 'Add current filter to favorites' to save your first favorite.</source>
+        <translation type="obsolete">Ingen favoritter lagret ennå.
 
 Anvend et filter på et lag, klikk deretter på ★-indikatoren og velg «Legg til gjeldende filter som favoritt» for å lagre din første favoritt.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="808"/>
         <source>Import from Resource Sharing...</source>
-        <translation>Importer fra Resource Sharing…</translation>
+        <translation type="obsolete">Importer fra Resource Sharing…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="811"/>
         <source>Publish to Resource Sharing...</source>
-        <translation>Publiser til Resource Sharing…</translation>
+        <translation type="obsolete">Publiser til Resource Sharing…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="816"/>
         <source>Publish (no favorites saved)</source>
-        <translation>Publiser (ingen favoritter lagret)</translation>
+        <translation type="obsolete">Publiser (ingen favoritter lagret)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1756"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1094"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>FilterMate-konfigurasjonsmappen er ennå ikke initialisert — åpne først et QGIS-prosjekt med FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation>Resource Sharing-utvidelsen er ikke aktiv. Aktiver &apos;favorites_sharing&apos; i FilterMate-innstillingene.</translation>
+        <translation type="obsolete">Resource Sharing-utvidelsen er ikke aktiv. Aktiver 'favorites_sharing' i FilterMate-innstillingene.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
         <source>Shared favorites service is not available.</source>
-        <translation>Tjenesten for delte favoritter er ikke tilgjengelig.</translation>
+        <translation type="obsolete">Tjenesten for delte favoritter er ikke tilgjengelig.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
         <source>Shared picker failed: {0}</source>
-        <translation>Velger for delte favoritter feilet: {0}</translation>
+        <translation type="obsolete">Velger for delte favoritter feilet: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation>Du har ingen favoritter å publisere ennå. Lagre først et filter via ★-menyen.</translation>
+        <translation type="obsolete">Du har ingen favoritter å publisere ennå. Lagre først et filter via ★-menyen.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
         <source>Publish dialog failed: {0}</source>
-        <translation>Åpning av publiseringsdialogen feilet: {0}</translation>
+        <translation type="obsolete">Åpning av publiseringsdialogen feilet: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="382"/>
+        <source>Favorites are not ready yet: {0}</source>
+        <translation>Favorittene er ikke klare ennå: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="387"/>
+        <source>Could not remove &apos;{0}&apos;: {1}</source>
+        <translation>Kunne ikke fjerne '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="622"/>
+        <source>No favorites saved yet — apply a filter then click the ★ indicator to save your first one.</source>
+        <translation>Ingen favoritter lagret ennå — bruk et filter og klikk på ★-indikatoren for å lagre den første.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="661"/>
+        <source>The favorites manager could not be opened. Details in filtermate.log.</source>
+        <translation>Favorittbehandleren kunne ikke åpnes. Detaljer i filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <source>Could not replace &apos;{0}&apos;: {1}</source>
+        <translation>Kunne ikke erstatte '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="897"/>
+        <source>Could not save &apos;{0}&apos;: {1}</source>
+        <translation>Kunne ikke lagre '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1021"/>
+        <source>Could not import global favorite: {0}</source>
+        <translation>Kunne ikke importere global favoritt: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1039"/>
+        <source>Could not copy to global: {0}</source>
+        <translation>Kunne ikke kopiere til global: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1059"/>
+        <source>Could not save favorites to project file: {0}</source>
+        <translation>Kunne ikke lagre favorittene i prosjektfilen: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1115"/>
+        <source>Orphan projects could not be cleaned up. Details in filtermate.log.</source>
+        <translation>Foreldreløse prosjekter kunne ikke ryddes bort. Detaljer i filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1199"/>
+        <source>Database statistics are unavailable. Details in filtermate.log.</source>
+        <translation>Databasestatistikk er utilgjengelig. Detaljer i filtermate.log.</translation>
     </message>
 </context>
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="156"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="204"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - Favorittbehandler</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1243"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1165"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Lagrede favoritter ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="218"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="266"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>Soek etter navn, uttrykk, tagger eller beskrivelse...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="553"/>
         <source>General</source>
         <translation>Generelt</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Expression</source>
         <translation>Uttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="969"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1021"/>
         <source>Remote</source>
         <translation>Ekstern</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="523"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="575"/>
         <source>Favorite name</source>
         <translation>Favorittnavn</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="524"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
         <source>Name:</source>
         <translation>Navn:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="528"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="580"/>
         <source>Description (auto-generated, editable)</source>
         <translation>Beskrivelse (autogenerert, redigerbar)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="529"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="581"/>
         <source>Description:</source>
         <translation>Beskrivelse:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="532"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="584"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>Skriv inn tagger adskilt med komma (f.eks. urban, befolkning, 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="535"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="587"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>Tagger hjelper med aa organisere og soeke i favoritter.
 Skill flere tagger med komma.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="538"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="590"/>
         <source>Tags:</source>
         <translation>Tagger:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="543"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="595"/>
         <source>Source Layer:</source>
         <translation>Kildelag:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="547"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="599"/>
         <source>Provider:</source>
         <translation>Leverandoer:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="555"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="607"/>
         <source>Used:</source>
         <translation>Brukt:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="610"/>
         <source>Created:</source>
         <translation>Opprettet:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="677"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Kildelagsuttrykk:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="629"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
         <source>Filter expression for source layer</source>
         <translation>Filteruttrykk for kildelag</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="644"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="696"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Filtrerte eksterne lag:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Layer</source>
         <translation>Lag</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Features</source>
         <translation>Objekter</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="656"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="708"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;Ingen eksterne lag i denne favoritten&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="669"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="721"/>
         <source>Apply</source>
         <translation>Bruk</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="672"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="724"/>
         <source>Apply this favorite filter to the project</source>
         <translation>Bruk dette favorittfilteret paa prosjektet</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="675"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="727"/>
         <source>Save Changes</source>
         <translation>Lagre endringer</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="678"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="730"/>
         <source>Save modifications to this favorite</source>
         <translation>Lagre endringer paa denne favoritten</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="733"/>
         <source>Delete</source>
         <translation>Slett</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="684"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="736"/>
         <source>Permanently delete this favorite</source>
         <translation>Slett denne favoritten permanent</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="739"/>
         <source>Close</source>
         <translation>Lukk</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="689"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="741"/>
         <source>Close this dialog</source>
         <translation>Lukk denne dialogen</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="797"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="849"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Favoritter ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="963"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1015"/>
         <source>Remote ({0})</source>
         <translation>Ekstern ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1120"/>
         <source>Delete Favorite</source>
         <translation>Slett favoritt</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1056"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1120"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
-        <translation>Slette favoritt &apos;{0}&apos;?</translation>
+        <translation>Slette favoritt '{0}'?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1167"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1232"/>
         <source>Remote Layers</source>
         <translation>Eksterne lag</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1239"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1303"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;Lagrede favoritter (0)&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>Favorites Manager</source>
-        <translation>Favorittbehandler</translation>
+        <translation type="obsolete">Favorittbehandler</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>No favorites saved yet.
 
-Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
-        <translation>Ingen favoritter lagret ennaa.
+Click the ★ indicator and select 'Add current filter to favorites' to save your first favorite.</source>
+        <translation type="obsolete">Ingen favoritter lagret ennaa.
 
-Klikk paa ★-indikatoren og velg &apos;Legg til gjeldende filter i favoritter&apos; for aa lagre din foerste favoritt.</translation>
+Klikk paa ★-indikatoren og velg 'Legg til gjeldende filter i favoritter' for aa lagre din foerste favoritt.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="184"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="232"/>
         <source>Shared...</source>
         <translation>Delte…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="186"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="234"/>
         <source>Browse favorites shared via QGIS Resource Sharing collections</source>
         <translation>Bla gjennom favoritter delt via QGIS Resource Sharing-samlinger</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="196"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="244"/>
         <source>Publish...</source>
         <translation>Publiser…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="198"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="246"/>
         <source>Publish selected favorites into a Resource Sharing collection</source>
         <translation>Publiser valgte favoritter i en Resource Sharing-samling</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
-        <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
-        <translation>Kunne ikke slette «{0}». Favoritten er fortsatt i databasen — se FilterMate-loggen for detaljer.</translation>
+        <source>Could not delete '{0}'. The favorite is still in the database — check the FilterMate log for details.</source>
+        <translation type="obsolete">Kunne ikke slette «{0}». Favoritten er fortsatt i databasen — se FilterMate-loggen for detaljer.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="231"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="279"/>
         <source>Filter favorites by scope (owner × project).</source>
         <translation>Filtrer favoritter etter omfang (eier × prosjekt).</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="236"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="284"/>
         <source>All</source>
         <translation>Alle</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="237"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="285"/>
         <source>Shared · All projects</source>
         <translation>Delte · Alle prosjekter</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="238"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="286"/>
         <source>Shared · This project</source>
         <translation>Delte · Dette prosjektet</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="239"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="287"/>
         <source>Mine · All projects</source>
         <translation>Mine · Alle prosjekter</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="240"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="288"/>
         <source>Mine · This project</source>
         <translation>Mine · Dette prosjektet</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>Mine</source>
         <translation>Mine</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="574"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="626"/>
         <source>Shared</source>
         <translation>Delte</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="585"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="637"/>
         <source>This project</source>
         <translation>Dette prosjektet</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="586"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="638"/>
         <source>All projects</source>
         <translation>Alle prosjekter</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="593"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="645"/>
         <source>Project scope is set when the favorite is created. Move it via the filtering tab (coming soon) to switch projects.</source>
         <translation>Prosjektomfanget angis når favoritten opprettes. Flytt den via filterfanen (kommer snart) for å bytte prosjekt.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="614"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="666"/>
         <source>Visibility:</source>
         <translation>Synlighet:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="914"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="966"/>
         <source>— (shared with everyone)</source>
         <translation>— (delt med alle)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="916"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="968"/>
         <source>{0} (you)</source>
         <translation>{0} (deg)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="920"/>
-        <source>{0} — selecting &apos;Mine&apos; on save will transfer ownership to you</source>
-        <translation>{0} — å velge &apos;Mine&apos; ved lagring overfører eierskapet til deg</translation>
+        <location filename="../ui/dialogs/favorites_manager.py" line="972"/>
+        <source>{0} — selecting 'Mine' on save will transfer ownership to you</source>
+        <translation>{0} — å velge 'Mine' ved lagring overfører eierskapet til deg</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
+        <source>Could not save &apos;{0}&apos;: {1}</source>
+        <translation>Kunne ikke lagre '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1139"/>
+        <source>Could not delete &apos;{0}&apos;: {1}</source>
+        <translation>Kunne ikke slette '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1150"/>
+        <source>'{0}' was not in the database — refresh and try again.</source>
+        <translation>'{0}' fantes ikke i databasen — oppdater og prøv igjen.</translation>
     </message>
 </context>
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="588"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="600"/>
         <source>View</source>
         <translation>Vis</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="590"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="602"/>
         <source>Change</source>
         <translation>Endre</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="601"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="613"/>
         <source>Select a folder</source>
         <translation>Velg en mappe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="608"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="620"/>
         <source>Select a file</source>
         <translation>Velg en fil</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="616"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="628"/>
         <source>Save to a file</source>
         <translation>Lagre til en fil</translation>
     </message>
@@ -856,17 +1167,17 @@ Klikk paa ★-indikatoren og velg &apos;Legg til gjeldende filter i favoritter&a
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="648"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="660"/>
         <source>View</source>
         <translation>Vis</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="650"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="662"/>
         <source>Change</source>
         <translation>Endre</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="659"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="671"/>
         <source>Select an icon</source>
         <translation>Velg et ikon</translation>
     </message>
@@ -882,127 +1193,127 @@ Klikk paa ★-indikatoren og velg &apos;Legg til gjeldende filter i favoritter&a
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="190"/>
+        <location filename="../filter_mate.py" line="204"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="314"/>
+        <location filename="../filter_mate.py" line="328"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="314"/>
+        <location filename="../filter_mate.py" line="328"/>
         <source>Open FilterMate panel</source>
         <translation>Åpne FilterMate-panelet</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="323"/>
+        <location filename="../filter_mate.py" line="337"/>
         <source>Reset configuration and database</source>
         <translation>Tilbakestill konfigurasjon og database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="323"/>
+        <location filename="../filter_mate.py" line="337"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Tilbakestill standardkonfigurasjonen og slett SQLite-databasen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1334"/>
+        <location filename="../filter_mate.py" line="1421"/>
         <source>Reset Configuration</source>
         <translation>Tilbakestill konfigurasjon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1357"/>
+        <location filename="../filter_mate.py" line="1444"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfigurasjonen ble tilbakestilt.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1362"/>
+        <location filename="../filter_mate.py" line="1449"/>
         <source>Default configuration file not found.</source>
         <translation>Standard konfigurasjonsfil ikke funnet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1383"/>
+        <location filename="../filter_mate.py" line="1470"/>
         <source>Database deleted: {filename}</source>
         <translation>Database slettet: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1397"/>
+        <location filename="../filter_mate.py" line="1484"/>
         <source>Restart required</source>
         <translation>Omstart nødvendig</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="403"/>
+        <location filename="../filter_mate.py" line="421"/>
         <source>Obsolete configuration detected</source>
         <translation>Utdatert konfigurasjon oppdaget</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="404"/>
+        <location filename="../filter_mate.py" line="422"/>
         <source>unknown version</source>
         <translation>ukjent versjon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="412"/>
+        <location filename="../filter_mate.py" line="430"/>
         <source>Corrupted configuration detected</source>
         <translation>Skadet konfigurasjon oppdaget</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="469"/>
+        <location filename="../filter_mate.py" line="487"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Konfigurasjon ikke tilbakestilt. Noen funksjoner fungerer kanskje ikke riktig.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="480"/>
+        <location filename="../filter_mate.py" line="498"/>
         <source>Configuration created with default values</source>
         <translation>Konfigurasjon opprettet med standardverdier</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="483"/>
+        <location filename="../filter_mate.py" line="501"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Skadet konfigurasjon tilbakestilt. Standardinnstillinger er gjenopprettet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="504"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Utdatert konfigurasjon tilbakestilt. Standardinnstillinger er gjenopprettet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="507"/>
+        <location filename="../filter_mate.py" line="525"/>
         <source>Configuration updated to latest version</source>
         <translation>Konfigurasjon oppdatert til nyeste versjon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="504"/>
+        <location filename="../filter_mate.py" line="522"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Konfigurasjon oppdatert: nye innstillinger tilgjengelig ({sections}). Tilgang via Alternativer meny.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="498"/>
+        <location filename="../filter_mate.py" line="516"/>
         <source>Geometry Simplification</source>
         <translation>Geometriforenkling</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="499"/>
+        <location filename="../filter_mate.py" line="517"/>
         <source>Optimization Thresholds</source>
         <translation>Optimaliseringsterskler</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="644"/>
+        <location filename="../filter_mate.py" line="662"/>
         <source>Geometry validation setting</source>
         <translation>Geometrivalideringsinnstilling</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="674"/>
+        <location filename="../filter_mate.py" line="692"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filtrering av ugyldige geometrier er deaktivert.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="681"/>
+        <location filename="../filter_mate.py" line="699"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filtrering av ugyldige geometrier ikke endret. Noen objekter kan bli ekskludert fra eksport.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="405"/>
+        <location filename="../filter_mate.py" line="423"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1017,7 +1328,7 @@ Vil du tilbakestille til standardinnstillinger?
 • Nei: Behold nåværende konfigurasjon (kan forårsake problemer)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="413"/>
+        <location filename="../filter_mate.py" line="431"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1032,12 +1343,12 @@ Vil du tilbakestille til standardinnstillinger?
 • Nei: Avbryt (utvidelsen fungerer kanskje ikke riktig)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="420"/>
+        <location filename="../filter_mate.py" line="438"/>
         <source>Configuration reset</source>
         <translation>Konfigurasjonstilbakestilling</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="421"/>
+        <location filename="../filter_mate.py" line="439"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1046,31 +1357,31 @@ Do you want to continue?</source>
 Vil du fortsette?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="526"/>
+        <location filename="../filter_mate.py" line="544"/>
         <source>Error during configuration migration: {}</source>
         <translation>Feil under konfigurasjonsmigrering: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="646"/>
-        <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
+        <location filename="../filter_mate.py" line="664"/>
+        <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
-FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
+FilterMate recommends disabling this setting (value 'Off') for the following reasons:
 
 • Features with invalid geometries could be silently excluded from exports and filters
 • FilterMate handles geometry validation internally with automatic repair options
-• Some legitimate data may have geometries considered as &apos;invalid&apos; according to strict OGC rules
+• Some legitimate data may have geometries considered as 'invalid' according to strict OGC rules
 
 Do you want to disable this setting now?
 
 • Yes: Disable filtering (recommended for FilterMate)
 • No: Keep current setting</source>
-        <translation>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
+        <translation>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
-FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
+FilterMate recommends disabling this setting (value 'Off') for the following reasons:
 
 • Features with invalid geometries could be silently excluded from exports and filters
 • FilterMate handles geometry validation internally with automatic repair options
-• Some legitimate data may have geometries considered as &apos;invalid&apos; according to strict OGC rules
+• Some legitimate data may have geometries considered as 'invalid' according to strict OGC rules
 
 Do you want to disable this setting now?
 
@@ -1078,7 +1389,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1334"/>
+        <location filename="../filter_mate.py" line="1421"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1095,7 +1406,7 @@ Dette vil:
 QGIS må startes på nytt for å bruke endringene.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1397"/>
+        <location filename="../filter_mate.py" line="1484"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1104,189 +1415,194 @@ Please restart QGIS to apply the changes.</source>
 Start QGIS på nytt for å bruke endringene.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="348"/>
+        <location filename="../filter_mate.py" line="366"/>
         <source>Initialization error: {0}</source>
         <translation>Initialiseringsfeil: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="585"/>
+        <location filename="../filter_mate.py" line="603"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} refererte lag ikke lastet ({layers_list}). Bruker reservevisning.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1388"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Kan ikke slette {filename}: {e}</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="1405"/>
         <source>Error during reset: {str(e)}</source>
-        <translation>Feil under tilbakestilling: {str(e)}</translation>
+        <translation type="obsolete">Feil under tilbakestilling: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1438"/>
+        <location filename="../filter_mate.py" line="1527"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Takk for at du bruker &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Bli med i vart Discord-fellesskap for aa:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Faa hjelp og stoette&lt;/li&gt;&lt;li&gt;Rapportere feil og problemer&lt;/li&gt;&lt;li&gt;Foreslaaa nye funksjoner&lt;/li&gt;&lt;li&gt;Dele tips med andre brukere&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;p style='font-size:13px;'&gt;Takk for at du bruker &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Bli med i vart Discord-fellesskap for aa:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Faa hjelp og stoette&lt;/li&gt;&lt;li&gt;Rapportere feil og problemer&lt;/li&gt;&lt;li&gt;Foreslaaa nye funksjoner&lt;/li&gt;&lt;li&gt;Dele tips med andre brukere&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1454"/>
+        <location filename="../filter_mate.py" line="1543"/>
         <source>  Join us on Discord</source>
         <translation>  Foelg oss paa Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1474"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Don&apos;t show this again</source>
         <translation>Ikke vis dette igjen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1477"/>
+        <location filename="../filter_mate.py" line="1566"/>
         <source>Close</source>
         <translation>Lukk</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1543"/>
+        <location filename="../filter_mate.py" line="1632"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Feil ved lasting av utvidelse: {0}. Sjekk QGIS Python-konsollen for detaljer.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6711"/>
+        <location filename="../filter_mate_dockwidget.py" line="6922"/>
         <source>Current layer: {0}</source>
         <translation>Gjeldende lag: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6713"/>
+        <location filename="../filter_mate_dockwidget.py" line="6924"/>
         <source>No layer selected</source>
         <translation>Ingen lag valgt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>Selected layers:
 {0}</source>
         <translation>Valgte lag:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>No layers selected</source>
         <translation>Ingen lag valgt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6954"/>
         <source>No expression defined</source>
         <translation>Ingen uttrykk definert</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6755"/>
+        <location filename="../filter_mate_dockwidget.py" line="6966"/>
         <source>Display expression: {0}</source>
         <translation>Visningsuttrykk: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6770"/>
+        <location filename="../filter_mate_dockwidget.py" line="6981"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Objekt-ID: {0}
 Foerste attributt: {1}</translation>
     </message>
+    <message>
+        <location filename="../filter_mate.py" line="1493"/>
+        <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
+        <translation>Konfigurasjonen kunne ikke tilbakestilles. Kontroller at programtilleggsmappen er skrivbar, og prøv igjen. Detaljer i filtermate.log.</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="274"/>
+        <location filename="../filter_mate_app.py" line="298"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL-lag oppdaget ({0}), men psycopg2 er ikke installert.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="361"/>
+        <location filename="../filter_mate_app.py" line="390"/>
         <source>Cleared {0} caches</source>
         <translation>{0} hurtigbuffere toemt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="795"/>
+        <location filename="../filter_mate_app.py" line="856"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Kunne ikke opprette dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="805"/>
+        <location filename="../filter_mate_app.py" line="866"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Kunne ikke vise dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1255"/>
+        <location filename="../filter_mate_app.py" line="1380"/>
         <source>Error executing {0}: {1}</source>
         <translation>Feil ved kjoering av {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1267"/>
+        <location filename="../filter_mate_app.py" line="1392"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Utvidelse kjoerer i redusert modus (heksagonale tjenester utilgjengelige). Ytelsen kan vaere redusert.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1396"/>
+        <location filename="../filter_mate_app.py" line="1641"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate FEIL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1396"/>
+        <location filename="../filter_mate_app.py" line="1641"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Kan ikke kjoere {0}: widgetinitialisering mislyktes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2167"/>
+        <location filename="../filter_mate_app.py" line="2426"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Kan ikke {0}: lag ugyldig eller kilde ikke funnet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2304"/>
+        <location filename="../filter_mate_app.py" line="2563"/>
         <source>All filters cleared - </source>
         <translation>Alle filtre fjernet - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2305"/>
+        <location filename="../filter_mate_app.py" line="2564"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} objekter synlige i hovedlag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2311"/>
+        <location filename="../filter_mate_app.py" line="2572"/>
         <source>Error: result handler missing</source>
         <translation>Feil: resultatbehandler mangler</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2324"/>
+        <location filename="../filter_mate_app.py" line="2585"/>
         <source>Error during filtering: {0}</source>
         <translation>Feil under filtrering: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2455"/>
+        <location filename="../filter_mate_app.py" line="2707"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} foreldreloese favoritt(er) gjenopprettet: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2591"/>
+        <location filename="../filter_mate_app.py" line="2844"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Lasting av lag mislyktes - klikk for aa proeve igjen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2638"/>
+        <location filename="../filter_mate_app.py" line="2900"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} lag lastet inn</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1618"/>
+        <location filename="../filter_mate_app.py" line="1865"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1620"/>
+        <location filename="../filter_mate_app.py" line="1867"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1623"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1625"/>
+        <location filename="../filter_mate_app.py" line="1872"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1299,193 +1615,328 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1635"/>
+        <location filename="../filter_mate_app.py" line="1882"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1642"/>
+        <location filename="../filter_mate_app.py" line="1889"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1649"/>
+        <location filename="../filter_mate_app.py" line="1896"/>
         <source>Cancel</source>
         <translation>Avbryt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1673"/>
+        <location filename="../filter_mate_app.py" line="1920"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1228"/>
+        <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
+        <translation>Velg et lag i EXPLORING-fanen før du kjører '{0}'.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="596"/>
+        <location filename="../filter_mate_dockwidget.py" line="616"/>
         <source>Initialization error: {}</source>
         <translation>Initialiseringsfeil: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="925"/>
+        <location filename="../filter_mate_dockwidget.py" line="997"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI-konfigurasjon ufullstendig - sjekk logger</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
-        <translation>UI-dimensjonsfeil: {}</translation>
+        <translation type="obsolete">UI-dimensjonsfeil: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1355"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>Favorites manager not available</source>
         <translation>Favorittbehandler ikke tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1374"/>
+        <location filename="../filter_mate_dockwidget.py" line="1450"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} favoritter lagret
 Klikk for aa bruke eller behandle</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1382"/>
+        <location filename="../filter_mate_dockwidget.py" line="1458"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Ingen favoritter lagret
 Klikk for aa legge til gjeldende filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1406"/>
+        <location filename="../filter_mate_dockwidget.py" line="1482"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{0} backend tvunget for {1} lag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1492"/>
+        <location filename="../filter_mate_dockwidget.py" line="1568"/>
         <source>Backend controller not available</source>
         <translation>Backend-kontroller ikke tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1430"/>
+        <location filename="../filter_mate_dockwidget.py" line="1506"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL automatisk opprydding aktivert</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1431"/>
+        <location filename="../filter_mate_dockwidget.py" line="1507"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL automatisk opprydding deaktivert</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1437"/>
+        <location filename="../filter_mate_dockwidget.py" line="1513"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL-sesjonsvisninger ryddet opp</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1437"/>
+        <location filename="../filter_mate_dockwidget.py" line="1513"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Ingen visninger aa rydde opp eller opprydding mislyktes</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1448"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>No PostgreSQL connection available</source>
         <translation>Ingen PostgreSQL-tilkobling tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1454"/>
+        <location filename="../filter_mate_dockwidget.py" line="1530"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Skjema har {0} visning(er) fra andre sesjoner.
 Fjerne likevel?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1455"/>
+        <location filename="../filter_mate_dockwidget.py" line="1531"/>
         <source>Other Sessions Active</source>
         <translation>Andre sesjoner aktive</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1457"/>
+        <location filename="../filter_mate_dockwidget.py" line="1533"/>
         <source>Schema cleanup cancelled</source>
         <translation>Skjemaopprydding avbrutt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1462"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
-        <translation>Skjema &apos;{0}&apos; fjernet</translation>
+        <translation>Skjema '{0}' fjernet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1464"/>
+        <location filename="../filter_mate_dockwidget.py" line="1540"/>
         <source>Schema cleanup failed</source>
         <translation>Skjemaopprydding mislyktes</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1490"/>
+        <location filename="../filter_mate_dockwidget.py" line="1566"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL sesjonsinfo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema tilpasset: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Dark mode</source>
         <translation>Moerk modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Light mode</source>
         <translation>Lys modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3896"/>
+        <location filename="../filter_mate_dockwidget.py" line="4005"/>
         <source>Selected features have no geometry.</source>
         <translation>Valgte objekter har ingen geometri.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3915"/>
+        <location filename="../filter_mate_dockwidget.py" line="4024"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Ingen objekt valgt. Velg et objekt fra nedtrekkslisten.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4957"/>
+        <location filename="../filter_mate_dockwidget.py" line="5079"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Det valgte laget er ugyldig eller kilden kan ikke finnes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5667"/>
+        <location filename="../filter_mate_dockwidget.py" line="5816"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negativ buffer (erosjon): krymper polygoner innover</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5670"/>
+        <location filename="../filter_mate_dockwidget.py" line="5819"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Bufferverdi i meter (positiv=utvid, negativ=krymp polygoner)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6144"/>
+        <location filename="../filter_mate_dockwidget.py" line="6293"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Utvidelse aktivert med {0} vektorlag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6227"/>
+        <location filename="../filter_mate_dockwidget.py" line="6376"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Kunne ikke laste utvidelsen paa nytt automatisk.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6229"/>
+        <location filename="../filter_mate_dockwidget.py" line="6378"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Feil ved ny innlasting av utvidelse: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6282"/>
+        <location filename="../filter_mate_dockwidget.py" line="6450"/>
         <source>Layer properties reset to defaults</source>
         <translation>Lagegenskaper tilbakestilt til standardverdier</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6283"/>
+        <location filename="../filter_mate_dockwidget.py" line="6451"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Feil ved tilbakestilling av lagegenskaper: {}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="864"/>
+        <source>Filter</source>
+        <translation>Filtrer</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="865"/>
+        <source>Undo the last filter</source>
+        <translation>Angre siste filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="866"/>
+        <source>Redo the last filter</source>
+        <translation>Gjør om siste filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <source>Remove the filters</source>
+        <translation>Fjern filtrene</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <source>Export the layers</source>
+        <translation>Eksporter lagene</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <source>About FilterMate</source>
+        <translation>Om FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <source>QFieldCloud</source>
+        <translation>QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <source>Identify the selected features</source>
+        <translation>Identifiser de valgte objektene</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <source>Zoom to the selected features</source>
+        <translation>Zoom til de valgte objektene</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <source>Select the features on the map</source>
+        <translation>Velg objektene på kartet</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <source>Follow the features on the map</source>
+        <translation>Følg objektene på kartet</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <source>Link the three selection modes</source>
+        <translation>Koble de tre valgmodusene</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <source>Reset the layer properties</source>
+        <translation>Tilbakestill lagegenskapene</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <source>Follow the current layer</source>
+        <translation>Følg gjeldende lag</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <source>Layers to filter</source>
+        <translation>Lag som skal filtreres</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <source>Combine with the existing filter</source>
+        <translation>Kombiner med eksisterende filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <source>Geometric predicates</source>
+        <translation>Geometriske predikater</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <source>Buffer distance</source>
+        <translation>Bufferavstand</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <source>Buffer type</source>
+        <translation>Buffertype</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <source>Layers to export</source>
+        <translation>Lag som skal eksporteres</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <source>Projection of the export</source>
+        <translation>Projeksjon for eksporten</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <source>Export the styles</source>
+        <translation>Eksporter stilene</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <source>Export format</source>
+        <translation>Eksportformat</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <source>Output folder</source>
+        <translation>Utdatamappe</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <source>Zip the export</source>
+        <translation>Zip eksporten</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1001"/>
+        <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
+        <translation>Panelutformingen kunne ikke brukes; standardstørrelser brukes. Detaljer i filtermate.log.</translation>
     </message>
 </context>
 <context>
@@ -1493,183 +1944,183 @@ Fjerne likevel?</translation>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
-        <translation>FilterMate</translation>
+        <translation type="obsolete">FilterMate</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
-        <translation>ENKELTVALG</translation>
+        <translation type="obsolete">ENKELTVALG</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
         <source>MULTIPLE SELECTION</source>
-        <translation>FLERVALG</translation>
+        <translation type="obsolete">FLERVALG</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
         <source>CUSTOM SELECTION</source>
-        <translation>TILPASSET VALG</translation>
+        <translation type="obsolete">TILPASSET VALG</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
         <source>FILTERING</source>
-        <translation>FILTRERING</translation>
+        <translation type="obsolete">FILTRERING</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
         <source>EXPORTING</source>
-        <translation>EKSPORT</translation>
+        <translation type="obsolete">EKSPORT</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
         <source>CONFIGURATION</source>
-        <translation>KONFIGURASJON</translation>
+        <translation type="obsolete">KONFIGURASJON</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>Select CRS for export</source>
-        <translation>Velg koordinatsystem for eksport</translation>
+        <translation type="obsolete">Velg koordinatsystem for eksport</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
         <source>Export</source>
-        <translation>Eksporter</translation>
+        <translation type="obsolete">Eksporter</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
         <source>AND</source>
-        <translation>OG</translation>
+        <translation type="obsolete">OG</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
         <source>AND NOT</source>
-        <translation>OG IKKE</translation>
+        <translation type="obsolete">OG IKKE</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
         <source>OR</source>
-        <translation>ELLER</translation>
+        <translation type="obsolete">ELLER</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
         <source>QML</source>
-        <translation>QML</translation>
+        <translation type="obsolete">QML</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
         <source>SLD</source>
-        <translation>SLD</translation>
+        <translation type="obsolete">SLD</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
         <source> m</source>
-        <translation> m</translation>
+        <translation type="obsolete"> m</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
         <source>, </source>
-        <translation>, </translation>
+        <translation type="obsolete">, </translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
         <source>Multi-layer filtering</source>
-        <translation>Flerlagsfiltrering</translation>
+        <translation type="obsolete">Flerlagsfiltrering</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
         <source>Additive filtering for the selected layer</source>
-        <translation>Additiv filtrering for det valgte laget</translation>
+        <translation type="obsolete">Additiv filtrering for det valgte laget</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
         <source>Geospatial filtering</source>
-        <translation>Geospatial filtrering</translation>
+        <translation type="obsolete">Geospatial filtrering</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
         <source>Buffer</source>
-        <translation>Buffer</translation>
+        <translation type="obsolete">Buffer</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
         <source>Expression layer</source>
-        <translation>Uttrykkslag</translation>
+        <translation type="obsolete">Uttrykkslag</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
         <source>Geometric predicate</source>
-        <translation>Geometrisk predikat</translation>
+        <translation type="obsolete">Geometrisk predikat</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
         <source>Output format</source>
-        <translation>Outputformat</translation>
+        <translation type="obsolete">Outputformat</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
         <source>Filter</source>
-        <translation>Filter</translation>
+        <translation type="obsolete">Filter</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
         <source>Reset</source>
-        <translation>Tilbakestill</translation>
+        <translation type="obsolete">Tilbakestill</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
         <source>Layers to export</source>
-        <translation>Lag å eksportere</translation>
+        <translation type="obsolete">Lag å eksportere</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
         <source>Layers projection</source>
-        <translation>Lagprojeksjon</translation>
+        <translation type="obsolete">Lagprojeksjon</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
         <source>Save styles</source>
-        <translation>Lagre stiler</translation>
+        <translation type="obsolete">Lagre stiler</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
         <source>Datatype export</source>
-        <translation>Datatype-eksport</translation>
+        <translation type="obsolete">Datatype-eksport</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
         <source>Name of file/directory</source>
-        <translation>Navn på fil/mappe</translation>
+        <translation type="obsolete">Navn på fil/mappe</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation>Bruk sentroider i stedet for fulle geometrier for kildelag (raskere for komplekse polygoner)</translation>
+        <translation type="obsolete">Bruk sentroider i stedet for fulle geometrier for kildelag (raskere for komplekse polygoner)</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Bufferverdi i meter (positiv=utvid, negativ=krymp polygoner)</translation>
+        <translation type="obsolete">Bufferverdi i meter (positiv=utvid, negativ=krymp polygoner)</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
         <source>Number of segments for buffer precision</source>
-        <translation>Antall segmenter for bufferpresisjon</translation>
+        <translation type="obsolete">Antall segmenter for bufferpresisjon</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
         <source>Mode batch</source>
-        <translation>Batchmodus</translation>
+        <translation type="obsolete">Batchmodus</translation>
     </message>
 </context>
 <context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="281"/>
+        <location filename="../adapters/filter_result_handler.py" line="318"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} objekter synlige i hovedlag</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="274"/>
+        <location filename="../adapters/filter_result_handler.py" line="311"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Alle filtre fjernet - {count} objekter synlige i hovedlag</translation>
     </message>
@@ -1677,47 +2128,47 @@ Fjerne likevel?</translation>
 <context>
     <name>FinishedHandler</name>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="347"/>
+        <location filename="../core/tasks/finished_handler.py" line="346"/>
         <source>Task failed</source>
         <translation>Oppgave mislyktes</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="348"/>
+        <location filename="../core/tasks/finished_handler.py" line="347"/>
         <source>Filter failed for: {0}</source>
         <translation>Filter mislyktes for: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="352"/>
+        <location filename="../core/tasks/finished_handler.py" line="351"/>
         <source> (+{0} more)</source>
         <translation> (+{0} flere)</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="399"/>
+        <location filename="../core/tasks/finished_handler.py" line="398"/>
         <source>Layer(s) filtered</source>
         <translation>Lag filtrert</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="403"/>
+        <location filename="../core/tasks/finished_handler.py" line="402"/>
         <source>Layer(s) filtered to precedent state</source>
         <translation>Lag filtrert til forrige tilstand</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="407"/>
+        <location filename="../core/tasks/finished_handler.py" line="406"/>
         <source>Layer(s) unfiltered</source>
         <translation>Lag ufiltrert</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="411"/>
+        <location filename="../core/tasks/finished_handler.py" line="410"/>
         <source>Filter task : {0}</source>
         <translation>Filteroppgave: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="432"/>
+        <location filename="../core/tasks/finished_handler.py" line="431"/>
         <source>Export task : {0}</source>
         <translation>Eksportoppgave: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="457"/>
+        <location filename="../core/tasks/finished_handler.py" line="456"/>
         <source>Exception: {0}</source>
         <translation>Unntak: {0}</translation>
     </message>
@@ -1756,7 +2207,7 @@ Fjerne likevel?</translation>
 <context>
     <name>LayerLifecycleService</name>
     <message>
-        <location filename="../core/services/layer_lifecycle_service.py" line="212"/>
+        <location filename="../core/services/layer_lifecycle_service.py" line="255"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed. The plugin cannot use these layers. Install psycopg2 to enable PostgreSQL support.</source>
         <translation>PostgreSQL-lag oppdaget ({0}), men psycopg2 er ikke installert. Utvidelsen kan ikke bruke disse lagene. Installer psycopg2 for aa aktivere PostgreSQL-stoette.</translation>
     </message>
@@ -1764,7 +2215,7 @@ Fjerne likevel?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="944"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1034"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -1772,21 +2223,21 @@ This error originates from a previous version of FilterMate.
 
 Solution: Remove this layer from the FilterMate project, then re-add it.
 Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
-        <translation>PostgreSQL-lag &apos;{0}&apos;: Oedelagt data oppdaget.
+        <translation>PostgreSQL-lag '{0}': Oedelagt data oppdaget.
 
-Dette laget bruker &apos;virtual_id&apos; som ikke eksisterer i PostgreSQL.
+Dette laget bruker 'virtual_id' som ikke eksisterer i PostgreSQL.
 Denne feilen stammer fra en tidligere versjon av FilterMate.
 
 Loesning: Fjern dette laget fra FilterMate-prosjektet, og legg det til igjen.
 Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="970"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1060"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
-        <translation>Lag &apos;{0}&apos; har ingen PRIMARY KEY. Begrenset funksjonalitet: materialiserte visninger deaktivert. Anbefaling: legg til en PRIMARY KEY for optimal ytelse.</translation>
+        <translation>Lag '{0}' har ingen PRIMARY KEY. Begrenset funksjonalitet: materialiserte visninger deaktivert. Anbefaling: legg til en PRIMARY KEY for optimal ytelse.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2114"/>
         <source>Exception: {0}</source>
         <translation>Unntak: {0}</translation>
     </message>
@@ -1922,6 +2373,252 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="395"/>
+        <source>Apply to the other tiles of the dataset</source>
+        <translation>Bruk på de andre flisene i datasettet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="408"/>
+        <source>CLASSES</source>
+        <translation>KLASSER</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="413"/>
+        <source>Ground</source>
+        <translation>Bakke</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="414"/>
+        <source>Vegetation</source>
+        <translation>Vegetasjon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="415"/>
+        <source>Buildings</source>
+        <translation>Bygninger</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <source>Above ground</source>
+        <translation>Over bakken</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="417"/>
+        <source>Water</source>
+        <translation>Vann</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="418"/>
+        <source>Without noise</source>
+        <translation>Uten støy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <source>Check only these classes</source>
+        <translation>Kryss av bare for disse klassene</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="432"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <source>None</source>
+        <translation>Ingen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="443"/>
+        <source>Point classes</source>
+        <translation>Punktklasser</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="459"/>
+        <source>ATTRIBUTE RANGES</source>
+        <translation>ATTRIBUTTOMRÅDER</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="465"/>
+        <source>Z (m)</source>
+        <translation>Z (m)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="466"/>
+        <source>Lowest elevation kept</source>
+        <translation>Laveste høyde beholdt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <source>Highest elevation kept</source>
+        <translation>Høyeste høyde beholdt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="475"/>
+        <source>Intensity</source>
+        <translation>Intensitet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="476"/>
+        <source>Lowest intensity kept</source>
+        <translation>Laveste intensitet beholdt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="477"/>
+        <source>Highest intensity kept</source>
+        <translation>Høyeste intensitet beholdt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <source>Return</source>
+        <translation>Retur</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <source>Echo of the laser pulse kept</source>
+        <translation>Ekko av laserpulsen som beholdes</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="495"/>
+        <source>Height above DTM ≥</source>
+        <translation>Høyde over DTM ≥</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <source>Digital terrain model the height is measured from</source>
+        <translation>Digital terrengmodell som høyden måles fra</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="519"/>
+        <source>Keep the points at least this high above the terrain model</source>
+        <translation>Behold punktene som ligger minst så høyt over terrengmodellen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <source>EXPRESSION</source>
+        <translation>UTTRYKK</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="532"/>
+        <source>Point cloud expression</source>
+        <translation>Punktskyuttrykk</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="533"/>
+        <source>Check the group to edit the expression by hand</source>
+        <translation>Kryss av for gruppen for å redigere uttrykket manuelt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="560"/>
+        <source>No elevation statistics for this layer</source>
+        <translation>Ingen høydestatistikk for dette laget</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="601"/>
+        <source>Height above the terrain is unavailable</source>
+        <translation>Høyde over terrenget er utilgjengelig</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="611"/>
+        <source>Kept points: {0}</source>
+        <translation>Beholdte punkter: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <source>Current filter: {0}</source>
+        <translation>Gjeldende filter: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <source>none</source>
+        <translation>ingen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <source>Any</source>
+        <translation>Hvilken som helst</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <source>First</source>
+        <translation>Første</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Last</source>
+        <translation>Siste</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Single</source>
+        <translation>Enkelt</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudFilterWidget</name>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="141"/>
+        <source>Point cloud filter</source>
+        <translation>Punktskyfilter</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="152"/>
+        <source>Classification</source>
+        <translation>Klassifisering</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="157"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="158"/>
+        <source>None</source>
+        <translation>Ingen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="167"/>
+        <source>Elevation (Z)</source>
+        <translation>Høyde (Z)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="169"/>
+        <source>Intensity</source>
+        <translation>Intensitet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="175"/>
+        <source>Return number</source>
+        <translation>Returnummer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="199"/>
+        <source>Minimum</source>
+        <translation>Minimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="200"/>
+        <source>Maximum</source>
+        <translation>Maksimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
+        <source>Current filter: {0}</source>
+        <translation>Gjeldende filter: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
+        <source>none</source>
+        <translation>ingen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="329"/>
+        <source>Any</source>
+        <translation>Hvilken som helst</translation>
     </message>
 </context>
 <context>
@@ -2068,202 +2765,202 @@ Fortsette?</translation>
 <context>
     <name>PublishFavoritesDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="161"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="119"/>
         <source>FilterMate — Publish to Resource Sharing</source>
         <translation>FilterMate — Publiser til Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="169"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="127"/>
         <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
         <translation>&lt;b&gt;Publiser favoritter&lt;/b&gt; — skriv en delbar pakke til en QGIS Resource Sharing-samling.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="189"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="147"/>
         <source>Overwrite existing bundle</source>
         <translation>Overskriv eksisterende pakke</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="199"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="157"/>
         <source>Publish</source>
         <translation>Publiser</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="171"/>
         <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
         <translation>&lt;b&gt;1. Målsamling&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="184"/>
         <source>Browse...</source>
         <translation>Bla gjennom…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="234"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="192"/>
         <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
         <translation>&lt;b&gt;2. Pakkefilnavn&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="236"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="194"/>
         <source>e.g. zones_bruxelles</source>
         <translation>f.eks. soner_bruxelles</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="239"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="197"/>
         <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
         <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;mål&amp;gt;/filter_mate/favorites/&amp;lt;navn&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="202"/>
         <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
         <translation>&lt;b&gt;3. Samlingsmetadata&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
         <source>Collection display name</source>
         <translation>Samlingens visningsnavn</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="209"/>
         <source>Name:</source>
         <translation>Navn:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="212"/>
         <source>Author / organisation</source>
         <translation>Forfatter / organisasjon</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="255"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
         <source>Author:</source>
         <translation>Forfatter:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="258"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="216"/>
         <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
         <translation>f.eks. CC-BY-4.0, MIT, Proprietær</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="259"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="217"/>
         <source>License:</source>
         <translation>Lisens:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="262"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="220"/>
         <source>Comma-separated tags</source>
         <translation>Kommaseparerte tagger</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="263"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="221"/>
         <source>Tags:</source>
         <translation>Tagger:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="266"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="224"/>
         <source>https://...</source>
         <translation>https://…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="267"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="225"/>
         <source>Homepage:</source>
         <translation>Nettside:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="271"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="229"/>
         <source>Short description (optional, supports plain text)</source>
         <translation>Kort beskrivelse (valgfri, ren tekst)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="232"/>
         <source>Description:</source>
         <translation>Beskrivelse:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="286"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
         <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
         <translation>&lt;b&gt;4. Favoritter å inkludere&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="248"/>
         <source>Select all</source>
         <translation>Velg alle</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="293"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
         <source>Select none</source>
         <translation>Velg ingen</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="332"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
         <source>New collection in Resource Sharing root...</source>
         <translation>Ny samling i Resource Sharing-roten…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="336"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="294"/>
         <source>Custom directory...</source>
         <translation>Egendefinert mappe…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="410"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="368"/>
         <source>Will be created under the Resource Sharing root.</source>
         <translation>Opprettes under Resource Sharing-roten.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="415"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="373"/>
         <source>Click &apos;Browse...&apos; to choose a directory.</source>
-        <translation>Klikk &apos;Bla gjennom…&apos; for å velge en mappe.</translation>
+        <translation>Klikk 'Bla gjennom…' for å velge en mappe.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="421"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="379"/>
         <source>Choose a collection directory</source>
         <translation>Velg en samlingsmappe</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="472"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="430"/>
         <source>{0} / {1} selected</source>
         <translation>{0} / {1} valgt</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="480"/>
         <source>Cannot create collection</source>
         <translation>Kan ikke opprette samlingen</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="480"/>
         <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
-        <translation>Resource Sharing-roten ikke funnet. Bruk &apos;Bla gjennom…&apos; for å velge en mappe i stedet.</translation>
+        <translation>Resource Sharing-roten ikke funnet. Bruk 'Bla gjennom…' for å velge en mappe i stedet.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="497"/>
         <source>Choose a directory</source>
         <translation>Velg en mappe</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="497"/>
         <source>Click &apos;Browse...&apos; to pick a target directory.</source>
-        <translation>Klikk &apos;Bla gjennom…&apos; for å velge en målmappe.</translation>
+        <translation>Klikk 'Bla gjennom…' for å velge en målmappe.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="696"/>
         <source>No favorites selected</source>
         <translation>Ingen favoritter valgt</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="696"/>
         <source>Select at least one favorite to publish.</source>
         <translation>Velg minst én favoritt å publisere.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="729"/>
         <source>Publish failed</source>
         <translation>Publisering feilet</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="729"/>
         <source>Unknown error.</source>
         <translation>Ukjent feil.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="727"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="736"/>
         <source>Published {0} favorite(s) to:
 
 &lt;code&gt;{1}&lt;/code&gt;</source>
@@ -2272,67 +2969,92 @@ Fortsette?</translation>
 &lt;code&gt;{1}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="731"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="740"/>
         <source>Collection manifest updated:
 &lt;code&gt;{0}&lt;/code&gt;</source>
         <translation>Samlingsmanifest oppdatert:
 &lt;code&gt;{0}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="734"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="743"/>
         <source>Publish succeeded</source>
         <translation>Publisering vellykket</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Remote repos unavailable</source>
         <translation>Fjernlagre utilgjengelige</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Remote repo manager is not initialized.</source>
         <translation>Fjernlagerhåndteringen er ikke initialisert.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="632"/>
         <source>Publishing to &lt;b&gt;{0}&lt;/b&gt; failed.</source>
         <translation>Publisering til &lt;b&gt;{0}&lt;/b&gt; feilet.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="642"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
         <source>Open clone...</source>
         <translation>Åpne klon…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="653"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="648"/>
         <source>Wrote bundle to:</source>
         <translation>Pakke skrevet til:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="651"/>
         <source>Pushed commit &lt;code&gt;{0}&lt;/code&gt; to &lt;b&gt;{1}&lt;/b&gt;.</source>
         <translation>Commit &lt;code&gt;{0}&lt;/code&gt; pushet til &lt;b&gt;{1}&lt;/b&gt;.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
         <source>No git_url configured — bundle written locally. Push manually via your own tooling.</source>
         <translation>Ingen git_url konfigurert — pakke skrevet lokalt. Push manuelt via egne verktøy.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="666"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
         <source>Nothing to commit — bundle content unchanged.</source>
         <translation>Ingenting å committe — pakkeinnhold uendret.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="587"/>
+        <source>Publishing to {0}...</source>
+        <translation>Publiserer til {0}...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="587"/>
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="591"/>
+        <source>Publishing</source>
+        <translation>Publiserer</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="685"/>
+        <source>Publish in progress</source>
+        <translation>Publisering pågår</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="685"/>
+        <source>A publish is still running in the background. Wait for it to finish before starting another one.</source>
+        <translation>En publisering kjører fortsatt i bakgrunnen. Vent til den er ferdig før du starter en ny.</translation>
     </message>
 </context>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="179"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="193"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="211"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="225"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -2340,192 +3062,192 @@ Fortsette?</translation>
 <context>
     <name>QFieldCloudPushDialog</name>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="102"/>
         <source>Export to QFieldCloud</source>
         <translation>Export to QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
         <source>Active Filter</source>
         <translation>Active Filter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="120"/>
         <source>No active filter</source>
         <translation>No active filter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="121"/>
         <source>Filter:</source>
         <translation>Filter:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="123"/>
         <source>0 layers</source>
         <translation>0 layers</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
         <source>Layers:</source>
         <translation>Layers:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="130"/>
         <source>QFieldCloud Project</source>
         <translation>QFieldCloud Project</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="135"/>
         <source>Project name:</source>
         <translation>Project name:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="139"/>
         <source>Description:</source>
         <translation>Beskrivelse:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="143"/>
         <source>Create new</source>
         <translation>Create new</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="144"/>
         <source>Update existing:</source>
         <translation>Update existing:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="148"/>
         <source>Mode:</source>
         <translation>Mode:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="158"/>
         <source>Layer Modes</source>
         <translation>Layer Modes</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="163"/>
         <source>Layer</source>
         <translation>Lag</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="163"/>
         <source>Mode</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="184"/>
         <source>Export</source>
         <translation>Eksporter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="209"/>
         <source>{0} layers ({1} features)</source>
         <translation>{0} layers ({1} features)</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="217"/>
         <source>{0} layers (no filter active)</source>
         <translation>{0} layers (no filter active)</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="290"/>
         <source>Missing Name</source>
         <translation>Missing Name</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="290"/>
         <source>Please enter a project name.</source>
         <translation>Please enter a project name.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="297"/>
         <source>Not Connected</source>
         <translation>Not Connected</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="297"/>
         <source>QFieldCloud is not connected. Please configure credentials first.</source>
         <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="365"/>
         <source>No Layers</source>
         <translation>No Layers</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="365"/>
         <source>No valid layers to export.</source>
         <translation>No valid layers to export.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="403"/>
         <source>Export Error</source>
         <translation>Export Error</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="393"/>
         <source>Failed to export layer &apos;{0}&apos;: {1}</source>
-        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+        <translation>Failed to export layer '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="403"/>
         <source>GPKG export failed: {0}</source>
         <translation>GPKG export failed: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="420"/>
         <source>Push complete!</source>
         <translation>Push complete!</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Project successfully pushed to QFieldCloud!</source>
         <translation>Project successfully pushed to QFieldCloud!</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Project: {0}</source>
         <translation>Project: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Files: {0}</source>
         <translation>Files: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Duration: {0:.1f}s</source>
         <translation>Duration: {0:.1f}s</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>URL: {0}</source>
         <translation>URL: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="438"/>
         <source>Warnings:</source>
         <translation>Warnings:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="440"/>
         <source>Push Complete</source>
         <translation>Push Complete</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="450"/>
         <source>Error: {0}</source>
         <translation>Feil: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="461"/>
         <source>Push Failed</source>
         <translation>Push Failed</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="461"/>
         <source>Push failed:
 
 {0}</source>
@@ -2690,82 +3412,248 @@ Fortsette?</translation>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="652"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="711"/>
         <source>Type to filter...</source>
         <translation>Skriv for aa filtrere...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="720"/>
         <source>Select All</source>
         <translation>Velg alle</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="722"/>
         <source>Select All (non subset)</source>
         <translation>Velg alle (ikke delmengde)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="724"/>
         <source>Select All (subset)</source>
         <translation>Velg alle (delmengde)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="667"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="726"/>
         <source>De-select All</source>
         <translation>Fjern alle valg</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="669"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="728"/>
         <source>De-select All (non subset)</source>
         <translation>Fjern alle valg (ikke delmengde)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="671"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="730"/>
         <source>De-select All (subset)</source>
         <translation>Fjern alle valg (delmengde)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1329"/>
+        <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
+        <translation>Viser de første {0} objektene sortert etter visningsverdi. Skriv i tekstfilteret for å søke i hele laget; &quot;Velg alle&quot; laster hele listen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1337"/>
+        <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
+        <translation>Viser {0} objekter fra laget, sortert etter visningsverdi. Skriv i tekstfilteret for å søke i hele laget; &quot;Velg alle&quot; laster hele listen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1344"/>
+        <source>Search results for &quot;{0}&quot; over the whole layer.</source>
+        <translation>Søkeresultater for &quot;{0}&quot; i hele laget.</translation>
     </message>
 </context>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="261"/>
         <source>Select All</source>
         <translation>Velg alle</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="263"/>
         <source>De-select All</source>
         <translation>Fjern alle valg</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="265"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Velg alle lag etter geometritype (Linjer)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="267"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Fjern valg av alle lag etter geometritype (Linjer)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="269"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Velg alle lag etter geometritype (Punkter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="230"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="271"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Fjern valg av alle lag etter geometritype (Punkter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="232"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="273"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Velg alle lag etter geometritype (Polygoner)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="234"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="275"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Fjern valg av alle lag etter geometritype (Polygoner)</translation>
+    </message>
+</context>
+<context>
+    <name>RangeHistogramWidget</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="240"/>
+        <source>Value range histogram</source>
+        <translation>Histogram over verdiområdet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="241"/>
+        <source>Drag the handles, or click, to choose the range of values to keep</source>
+        <translation>Dra i håndtakene, eller klikk, for å velge verdiområdet som skal beholdes</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="329"/>
+        <source>No histogram</source>
+        <translation>Ingen histogram</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="358"/>
+        <source>Kept values from {0} to {1}</source>
+        <translation>Beholdte verdier fra {0} til {1}</translation>
+    </message>
+</context>
+<context>
+    <name>RasterExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="288"/>
+        <source>Band</source>
+        <translation>Bånd</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="291"/>
+        <source>Band whose values are selected</source>
+        <translation>Bånd som verdiene velges fra</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="317"/>
+        <source>PIXEL VALUE</source>
+        <translation>PIKSELVERDI</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="324"/>
+        <source>Pixel value of the current band</source>
+        <translation>Pikselverdi for gjeldende bånd</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="335"/>
+        <source>Last {0} values picked</source>
+        <translation>Siste {0} valgte verdier</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="337"/>
+        <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
+        <translation>Klikk på kartet med pikselvelgeren. Ctrl+klikk utvider området til verdien.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="346"/>
+        <source>VALUE RANGE</source>
+        <translation>VERDIOMRÅDE</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Min</source>
+        <translation>Min</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Lowest value kept</source>
+        <translation>Laveste verdi beholdt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Max</source>
+        <translation>Maks</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Highest value kept</source>
+        <translation>Høyeste verdi beholdt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <source>Preview on the map (hide the other pixels)</source>
+        <translation>Forhåndsvis på kartet (skjul de andre pikslene)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="378"/>
+        <source>CLASSES</source>
+        <translation>KLASSER</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
+        <source>Raster classes</source>
+        <translation>Rasterklasser</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="387"/>
+        <source>None</source>
+        <translation>Ingen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="397"/>
+        <source>RASTER EXPRESSION</source>
+        <translation>RASTERUTTRYKK</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="401"/>
+        <source>Raster calculator expression; a pixel is kept where it is not 0</source>
+        <translation>Uttrykk for rasterkalkulator; en piksel beholdes der den ikke er 0</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="402"/>
+        <source>Raster expression</source>
+        <translation>Rasteruttrykk</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="410"/>
+        <source>Use the range</source>
+        <translation>Bruk området</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="411"/>
+        <source>Write the current value range as an expression</source>
+        <translation>Skriv gjeldende verdiområde som et uttrykk</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="483"/>
+        <source>Selected pixels: {0}</source>
+        <translation>Valgte piksler: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="730"/>
+        <source>Set a value range first</source>
+        <translation>Angi et verdiområde først</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="747"/>
+        <source>NoData</source>
+        <translation>NoData</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="763"/>
+        <source>Last values:</source>
+        <translation>Siste verdier:</translation>
     </message>
 </context>
 <context>
@@ -2817,140 +3705,160 @@ Fortsette?</translation>
 <context>
     <name>SharedFavoritesPickerDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="55"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="77"/>
         <source>FilterMate — Shared Favorites</source>
         <translation>FilterMate — Delte favoritter</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="63"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="85"/>
         <source>&lt;b&gt;Shared Favorites&lt;/b&gt; — discovered from QGIS Resource Sharing collections</source>
         <translation>&lt;b&gt;Delte favoritter&lt;/b&gt; — oppdaget fra QGIS Resource Sharing-samlinger</translation>
     </message>
     <message>
         <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="76"/>
         <source>Search by name, description, collection, or tags...</source>
-        <translation>Søk etter navn, beskrivelse, samling eller tagger…</translation>
+        <translation type="obsolete">Søk etter navn, beskrivelse, samling eller tagger…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="98"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="129"/>
         <source>Select a shared favorite to preview.</source>
         <translation>Velg en delt favoritt for forhåndsvisning.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="114"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="145"/>
         <source>Rescan</source>
         <translation>Skann på nytt</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="118"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="149"/>
         <source>Fork to my project</source>
         <translation>Fork til prosjektet mitt</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="124"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="155"/>
         <source>Close</source>
         <translation>Lukk</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="139"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="211"/>
         <source>No shared collections found. Subscribe to a Resource Sharing repository that ships a &lt;code&gt;filter_mate/favorites&lt;/code&gt; folder, or drop a &lt;code&gt;.fmfav.json&lt;/code&gt; bundle in your resource_sharing collections directory.</source>
         <translation>Ingen delte samlinger funnet. Abonner på et Resource Sharing-repositorium med en &lt;code&gt;filter_mate/favorites&lt;/code&gt;-mappe, eller legg en &lt;code&gt;.fmfav.json&lt;/code&gt;-pakke i samlingsmappen resource_sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="147"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="219"/>
         <source>{0} favorite(s) across {1} collection(s): {2}</source>
         <translation>{0} favoritt(er) i {1} samling(er): {2}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="160"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="248"/>
         <source>Collection: {0}</source>
         <translation>Samling: {0}</translation>
     </message>
     <message>
         <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="172"/>
         <source>No shared favorites match your search.</source>
-        <translation>Ingen delte favoritter samsvarer med søket.</translation>
+        <translation type="obsolete">Ingen delte favoritter samsvarer med søket.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="194"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="280"/>
         <source>&lt;b&gt;{0}&lt;/b&gt; — from &lt;i&gt;{1}&lt;/i&gt;</source>
         <translation>&lt;b&gt;{0}&lt;/b&gt; — fra &lt;i&gt;{1}&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="208"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="294"/>
         <source>&lt;b&gt;Expression&lt;/b&gt;</source>
         <translation>&lt;b&gt;Uttrykk&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="213"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="299"/>
         <source>&lt;b&gt;Remote layers&lt;/b&gt;</source>
         <translation>&lt;b&gt;Eksterne lag&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="313"/>
         <source>&lt;b&gt;Tags:&lt;/b&gt; {0}</source>
         <translation>&lt;b&gt;Tagger:&lt;/b&gt; {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="234"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="320"/>
         <source>&lt;b&gt;Provenance&lt;/b&gt;</source>
         <translation>&lt;b&gt;Opphav&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="236"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="322"/>
         <source>Author: {0}</source>
         <translation>Forfatter: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="238"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="324"/>
         <source>License: {0}</source>
         <translation>Lisens: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="340"/>
         <source>Fork shared favorite</source>
         <translation>Fork delt favoritt</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="340"/>
         <source>Name in your project:</source>
         <translation>Navn i prosjektet:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="354"/>
         <source>Fork successful</source>
         <translation>Fork vellykket</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="354"/>
         <source>&apos;{0}&apos; was added to your favorites.</source>
         <translation>«{0}» ble lagt til i favorittene dine.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="360"/>
         <source>Fork failed</source>
         <translation>Fork feilet</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="360"/>
         <source>Could not add the shared favorite to your project.</source>
         <translation>Kunne ikke legge den delte favoritten til prosjektet.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="100"/>
+        <source>Search by name, description, collection, author, or tags...</source>
+        <translation>Søk etter navn, beskrivelse, samling, forfatter eller tagger...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="107"/>
+        <source>Author:</source>
+        <translation>Forfatter:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="180"/>
+        <source>All authors</source>
+        <translation>Alle forfattere</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="262"/>
+        <source>No shared favorites match your filters.</source>
+        <translation>Ingen delte favoritter samsvarer med filtrene dine.</translation>
     </message>
 </context>
 <context>
     <name>SimpleConfigDialog</name>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="468"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
         <source>Reset to Defaults</source>
         <translation>Tilbakestill til standardverdier</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="500"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="502"/>
         <source>Validation Error</source>
         <translation>Valideringsfeil</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="500"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="502"/>
         <source>Please fix the following errors:
 
 </source>
@@ -2959,12 +3867,12 @@ Fortsette?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="511"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset Configuration</source>
         <translation>Tilbakestill konfigurasjon</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="511"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>Tilbakestill alle verdier til standardverdier?</translation>
     </message>
@@ -2972,12 +3880,12 @@ Fortsette?</translation>
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="151"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="208"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - PostgreSQL typeadvarsel</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="155"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="212"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Typefeil i filter: {warning_detail}...</translation>
     </message>
@@ -2985,12 +3893,12 @@ Fortsette?</translation>
 <context>
     <name>TabbedConfigDialog</name>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="568"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="570"/>
         <source>Reset to Defaults</source>
         <translation>Tilbakestill til standardverdier</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="588"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="590"/>
         <source>General</source>
         <translation>Generelt</translation>
     </message>
@@ -3010,7 +3918,7 @@ Fortsette?</translation>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="291"/>
         <source>Filter applied to &apos;{layer_name}&apos;: {count} features</source>
-        <translation>Filter brukt paa &apos;{layer_name}&apos;: {count} objekter</translation>
+        <translation>Filter brukt paa '{layer_name}': {count} objekter</translation>
     </message>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="296"/>
@@ -3020,25 +3928,25 @@ Fortsette?</translation>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="312"/>
         <source>Filter cleared for &apos;{layer_name}&apos;: {count} features visible</source>
-        <translation>Filter fjernet for &apos;{layer_name}&apos;: {count} objekter synlige</translation>
+        <translation>Filter fjernet for '{layer_name}': {count} objekter synlige</translation>
     </message>
 </context>
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="909"/>
+        <location filename="../adapters/task_builder.py" line="912"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Ingen objekt valgt! Valgwidgeten mistet objektet. Velg et objekt paa nytt.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1027"/>
+        <location filename="../adapters/task_builder.py" line="1030"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Valgt lag er ugyldig eller kilden kan ikke finnes. Operasjon avbrutt.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1042"/>
+        <location filename="../adapters/task_builder.py" line="1045"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
-        <translation>Lag &apos;{0}&apos; er ennaa ikke initialisert. Proev aa velge et annet lag, og bytt deretter tilbake til dette.</translation>
+        <translation>Lag '{0}' er ennaa ikke initialisert. Proev aa velge et annet lag, og bytt deretter tilbake til dette.</translation>
     </message>
 </context>
 <context>
@@ -3057,7 +3965,7 @@ Fortsette?</translation>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="556"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
         <source>Explore ...</source>
         <translation>Utforsk...</translation>
     </message>
@@ -3067,7 +3975,7 @@ Fortsette?</translation>
     <message>
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
-        <translation type="obsolete">Language changed to &apos;{0}&apos;.</translation>
+        <translation type="obsolete">Language changed to '{0}'.</translation>
     </message>
 </context>
 </TS>

@@ -651,3 +651,15 @@ Result: Que veux-tu faire dans cette session ?
 - [2026-10-01] Site publié (PR #88–#92). Vidéos : `website/video/*.mp4|webp` (1280×720, ≈3 Mo). Pour refaire une
   vidéo : lanceurs `%LOCALAPPDATA%\Temp\fm_video\clip.sh <scène>` puis `render.sh <scène>` (scripts pris sur origin/main).
   Le QGIS OSGeo4W de l'utilisateur partage le profil QGIS4 : les prises restaurent désormais l'état de sa fenêtre.
+- [2026-10-14] FilterMate 5 (branche `claude/v5-raster-lidar`, plan `docs/plans/V5_RASTER_LIDAR_PLAN.md`) :
+  EXPLORING sélectionne sur la source (vecteur / raster / nuage), FILTERING relie avec ses prédicats + tampon.
+  Moteur `adapters/qgis/coverage_layers/` (jobs source/cible, `CrossFilterTask`, registre des sources dérivées),
+  service `core/services/cross_filter_service.py`, UI `ui/controllers/coverage_mode_controller.py` +
+  `ui/widgets/coverage_panels/`. Ne JAMAIS nommer un dossier `coverage` (ignoré par `.gitignore` et par
+  `scripts/prepare_plugin_zip.sh`). Pièges vérifiés en QGIS 4.2 : remplir l'entrée `VirtualRasterInputLayers`
+  AVANT de l'affecter à `rInputLayers` (sip copie la liste) ; une valeur écrite par `virtualraster` n'est pas
+  NoData même avec `setUserNoDataValue` (utiliser `valeur / (condition)` → NaN) ; transparence raster en
+  opacité 0–1 depuis 3.30 ; `QgsPointCloudLayerExporter.prepareExport()` sur le thread principal ; la grille
+  EXPLORING est une `QVBoxLayout` imbriquée dans une `QGridLayout` (`getItemPosition(-1)` fait planter Qt).
+  Vérifier en réel : `scripts/fm5_scenarios.py` (python-qgis, sans UI) et `scripts/fm5_gui_check.py`
+  (`qgis-bin --profiles-path` jetable + `QGIS_PLUGINPATH` vers le dépôt), données `~/fm5_testdata`.

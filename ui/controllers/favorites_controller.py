@@ -260,7 +260,7 @@ class FavoritesController(BaseController):
             True if favorite was added successfully
         """
         expression = self.get_current_filter_expression()
-        if not expression:
+        if not expression and not self._capture_coverage_layers():
             self._show_warning(self.tr("No active filter to save."))
             return False
 
@@ -820,6 +820,9 @@ class FavoritesController(BaseController):
                 # Skip non-vector layers
                 if not hasattr(map_layer, 'subsetString'):
                     continue
+                # FilterMate 5: raster / point cloud states are captured below.
+                if self._is_coverage_layer(map_layer):
+                    continue
                 # Skip the source layer (already captured in main expression)
                 if layer_id == source_layer_id:
                     continue
@@ -864,6 +867,11 @@ class FavoritesController(BaseController):
                 if spatial_config is None:
                     spatial_config = {}
                 spatial_config['source_layer_signature'] = layer_signature_for(layer)
+            coverage_layers = self._capture_coverage_layers()
+            if coverage_layers:
+                if spatial_config is None:
+                    spatial_config = {}
+                spatial_config['coverage_layers'] = coverage_layers
 
             # Use FavoritesService.add_favorite() with individual parameters
             favorite_id = self._favorites_service.add_favorite(
@@ -913,12 +921,46 @@ class FavoritesController(BaseController):
         shape favorites store) pass through unchanged.
         """
         try:
-            return self._spatial.apply_favorite_subsets_directly(favorite)
+            coverage = (favorite.spatial_config or {}).get('coverage_layers') if isinstance(favorite.spatial_config, dict) else None
+            applied = True
+            if favorite.expression or favorite.remote_layers or not coverage:
+                applied = self._spatial.apply_favorite_subsets_directly(favorite)
+            if coverage:
+                applied = self._apply_coverage_layers(coverage) > 0 or applied
+            return applied
         except Exception as e:
             logger.error(f"Failed to apply favorite: {e}")
             import traceback
             logger.debug(traceback.format_exc())
             return False
+
+    # === FilterMate 5: raster / point cloud layers ===
+
+    @staticmethod
+    def _is_coverage_layer(layer) -> bool:
+        try:
+            from ...adapters.qgis.coverage_layers.favorites_bridge import is_coverage_layer
+            return is_coverage_layer(layer)
+        except Exception:
+            return False
+
+    @staticmethod
+    def _capture_coverage_layers() -> list:
+        try:
+            from ...adapters.qgis.coverage_layers.favorites_bridge import capture
+            return capture()
+        except Exception as e:
+            logger.debug(f"Raster / point cloud states not captured: {e}")
+            return []
+
+    @staticmethod
+    def _apply_coverage_layers(entries) -> int:
+        try:
+            from ...adapters.qgis.coverage_layers.favorites_bridge import apply
+            return apply(entries)
+        except Exception as e:
+            logger.warning(f"Raster / point cloud states not applied: {e}")
+            return 0
 
     def _show_info(self, message: str) -> None:
         """Push an info to the QGIS message bar (transient, non-blocking)."""

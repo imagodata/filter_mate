@@ -403,7 +403,13 @@ class FilteringController(BaseController, LayerSelectionMixin):
             if layer is None:
                 layer = dockwidget.current_layer
 
-            if layer is None or not isinstance(layer, QgsVectorLayer):
+            # FilterMate 5: raster and point cloud layers can be the source too.
+            try:
+                from ...adapters.qgis.point_cloud_capability import is_coverage_layer
+            except ImportError:
+                def is_coverage_layer(_layer):
+                    return False
+            if layer is None or not (isinstance(layer, QgsVectorLayer) or is_coverage_layer(layer)):
                 logger.debug("populate_layers_checkable_combobox: No valid source layer")
                 return False
 
@@ -512,14 +518,17 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 if not layer_obj:
                     skipped_reasons.append(f"{layer_name}: layer_obj is None (not in project)")
                     continue
-                if not isinstance(layer_obj, QgsVectorLayer):
+                if is_coverage_layer(layer_obj):
+                    # FilterMate 5: raster / point cloud targets, clipped by the source geometry.
+                    pass
+                elif not isinstance(layer_obj, QgsVectorLayer):
                     skipped_reasons.append(f"{layer_name}: not QgsVectorLayer")
                     continue
                 # v4.2: Skip non-spatial tables (tables without geometry)
-                if not layer_obj.isSpatial():
+                elif not layer_obj.isSpatial():
                     skipped_reasons.append(f"{layer_name}: non-spatial table (no geometry)")
                     continue
-                if not is_layer_source_available(layer_obj, require_psycopg2=False):
+                elif not is_layer_source_available(layer_obj, require_psycopg2=False):
                     skipped_reasons.append(f"{layer_name}: source not available")
                     continue
 
@@ -897,10 +906,12 @@ class FilteringController(BaseController, LayerSelectionMixin):
             from qgis.core import QgsProject
             project = QgsProject.instance()
 
+            from qgis.core import QgsVectorLayer
             target_layers = []
             for layer_id in self._target_layer_ids:
                 layer = project.mapLayer(layer_id)
-                if layer and layer.isValid():
+                # FilterMate 5: raster / point cloud targets go to the cross filter service.
+                if layer and layer.isValid() and isinstance(layer, QgsVectorLayer):
                     target_layers.append(layer)
 
             # Get current features and expression from dockwidget

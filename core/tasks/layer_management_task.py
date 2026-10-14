@@ -160,6 +160,24 @@ except ImportError:
         """Nothing to complete without the domain module."""
         return False
 
+# Raster registration (FilterMate 5, feature-flagged). Same contract as the
+# point cloud block above: absent modules mean "no raster layer registered".
+try:
+    from ...adapters.qgis.point_cloud_capability import is_raster_layer
+    from ..domain.raster_support import build_raster_layer_properties, ensure_raster_layer_properties
+except ImportError:
+    def is_raster_layer(layer):
+        """No raster support without the capability module."""
+        return False
+
+    def build_raster_layer_properties(layer_id, layer_name, crs_authid, qgis_provider, default_is_linking=False):
+        """No raster template without the domain module."""
+        return {}
+
+    def ensure_raster_layer_properties(layer_props, template):
+        """Nothing to complete without the domain module."""
+        return False
+
 
 class LayersManagementEngineTask(QgsTask):
     """
@@ -996,6 +1014,8 @@ class LayersManagementEngineTask(QgsTask):
         """
         if is_point_cloud_layer(layer):
             return self._add_point_cloud_layer(layer)
+        if is_raster_layer(layer):
+            return self._add_coverage_layer(layer, build_raster_layer_properties, ensure_raster_layer_properties, "raster")
 
         if not isinstance(layer, QgsVectorLayer) or not layer.isSpatial():
             # Log skipped non-spatial layers
@@ -1090,6 +1110,21 @@ class LayersManagementEngineTask(QgsTask):
         Returns:
             bool: True if the layer was added to project_layers.
         """
+        return self._add_coverage_layer(
+            layer, build_point_cloud_layer_properties, ensure_point_cloud_layer_properties, "point cloud")
+
+    def _add_coverage_layer(self, layer, build_template, ensure_template, kind_label):
+        """Register a raster or point cloud layer from its domain template.
+
+        Args:
+            layer: QgsRasterLayer or QgsPointCloudLayer to register.
+            build_template: Domain function building the ``PROJECT_LAYERS`` entry.
+            ensure_template: Domain function completing a stored entry.
+            kind_label: Kind name used in the log messages.
+
+        Returns:
+            bool: True if the layer was added to project_layers.
+        """
         try:
             crs_authid = layer.crs().authid()
         except (RuntimeError, AttributeError):
@@ -1099,7 +1134,7 @@ class LayersManagementEngineTask(QgsTask):
         except (RuntimeError, AttributeError):
             qgis_provider = ""
 
-        template = build_point_cloud_layer_properties(
+        template = build_template(
             layer.id(),
             layer.name(),
             crs_authid,
@@ -1107,7 +1142,7 @@ class LayersManagementEngineTask(QgsTask):
             self._get_default_is_linking(),
         )
         if not all(section in template for section in ("infos", "exploring", "filtering")):
-            logger.warning(f"add_project_layer: no point cloud template available, skipping '{layer.name()}'")
+            logger.warning(f"add_project_layer: no {kind_label} template available, skipping '{layer.name()}'")
             return False
 
         layer_variables = self._load_existing_layer_properties(layer)
@@ -1117,7 +1152,7 @@ class LayersManagementEngineTask(QgsTask):
             layer_variables = template
             self._set_layer_variables(layer, layer_variables)
         else:
-            ensure_point_cloud_layer_properties(layer_variables, template)
+            ensure_template(layer_variables, template)
 
         if self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == 0:
             properties_count = (
@@ -1139,7 +1174,7 @@ class LayersManagementEngineTask(QgsTask):
 
         self.project_layers[layer.id()] = layer_props
         logger.info(
-            f"add_project_layer: registered point cloud layer '{layer.name()}' "
+            f"add_project_layer: registered {kind_label} layer '{layer.name()}' "
             f"(provider={qgis_provider}, crs={crs_authid}, new={is_new_layer})"
         )
         return True

@@ -490,6 +490,10 @@ class LayerValidationResult:
     error: Optional[str] = None
 
 
+# ``layer_provider_type`` of raster and point cloud entries (core/domain/*_support.py).
+COVERAGE_PROVIDER_TYPES = ("raster", "pointcloud")
+
+
 class LayerFilterBuilder:
     """
     Builds validated lists of layers for geometric filtering.
@@ -530,6 +534,13 @@ class LayerFilterBuilder:
             self._log_diagnostics(source_layer, raw_layers_list)
 
         for layer_id in raw_layers_list:
+            # FilterMate 5: raster / point cloud targets are clipped by the cross
+            # filter service, never by the vector engine (a deferred retry of the
+            # task can read the full list back).
+            infos = self._project_layers.get(layer_id, {}).get("infos", {})
+            if infos.get("layer_provider_type") in COVERAGE_PROVIDER_TYPES:
+                _layer_logger.debug(f"build_layers_to_filter: coverage target {infos.get('layer_name')} left to the cross filter")
+                continue
             result = self._validate_and_build_layer_info(layer_id, source_layer.id())
 
             if result.is_valid and result.layer_info:

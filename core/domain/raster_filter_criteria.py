@@ -219,3 +219,130 @@ class SamplingStats:
             std_value=std_val,
             median_value=median_val,
         )
+
+
+# ---------------------------------------------------------------------------
+# FilterMate 5: selection on a raster source (EXPLORING)
+# ---------------------------------------------------------------------------
+
+class RasterSelectionMode(Enum):
+    """How the pixels of a raster source are selected in EXPLORING."""
+
+    RANGE = "range"
+    CLASSES = "classes"
+    EXPRESSION = "expression"
+
+
+@dataclass(frozen=True)
+class RasterSelection:
+    """Pixels kept by a raster EXPLORING selection.
+
+    Attributes:
+        band: 1-based band number.
+        mode: Range of values, set of class values, or raster calculator expression.
+        minimum: Lower bound (inclusive) for RANGE, None = unbounded.
+        maximum: Upper bound (inclusive) for RANGE, None = unbounded.
+        classes: Pixel values kept for CLASSES (paletted / categorical rasters).
+        expression: Raster calculator expression for EXPRESSION, using
+            ``"<ref>@<band>"`` references; a pixel is kept where it is not 0.
+    """
+
+    band: int = 1
+    mode: RasterSelectionMode = RasterSelectionMode.RANGE
+    minimum: Optional[float] = None
+    maximum: Optional[float] = None
+    classes: frozenset = frozenset()
+    expression: str = ""
+
+    def __post_init__(self):
+        if self.band < 1:
+            raise ValueError(f"band must be >= 1, got {self.band}")
+        if (self.mode is RasterSelectionMode.RANGE and self.minimum is not None
+                and self.maximum is not None and self.minimum > self.maximum):
+            raise ValueError(f"minimum ({self.minimum}) > maximum ({self.maximum})")
+
+    @property
+    def is_empty(self) -> bool:
+        """True when the selection keeps no constraint at all."""
+        if self.mode is RasterSelectionMode.RANGE:
+            return self.minimum is None and self.maximum is None
+        if self.mode is RasterSelectionMode.CLASSES:
+            return not self.classes
+        return not (self.expression or "").strip()
+
+    def keeps(self, value: float) -> bool:
+        """Tell whether one pixel value is selected (RANGE and CLASSES only).
+
+        Raises:
+            ValueError: For EXPRESSION, which needs the raster calculator.
+        """
+        if self.mode is RasterSelectionMode.RANGE:
+            if self.minimum is not None and value < self.minimum:
+                return False
+            if self.maximum is not None and value > self.maximum:
+                return False
+            return True
+        if self.mode is RasterSelectionMode.CLASSES:
+            return int(round(value)) in self.classes
+        raise ValueError("an expression selection cannot be evaluated per value")
+
+    def to_calc_formula(self, reference: str) -> str:
+        """Raster calculator formula, 1 where the pixel is selected and 0 elsewhere.
+
+        Args:
+            reference: Layer reference used in the virtual raster (``"mnt"``).
+
+        Returns:
+            Formula such as ``("mnt@1" >= 200 AND "mnt@1" <= 260)``.
+        """
+        ref = f'"{reference}@{self.band}"'
+        if self.mode is RasterSelectionMode.RANGE:
+            parts = []
+            if self.minimum is not None:
+                parts.append(f"{ref} >= {_fmt(self.minimum)}")
+            if self.maximum is not None:
+                parts.append(f"{ref} <= {_fmt(self.maximum)}")
+            return "(" + " AND ".join(parts) + ")" if parts else "1"
+        if self.mode is RasterSelectionMode.CLASSES:
+            if not self.classes:
+                return "0"
+            return "(" + " OR ".join(f"{ref} = {_fmt(c)}" for c in sorted(self.classes)) + ")"
+        return f"({self.expression.strip()})" if self.expression.strip() else "1"
+
+    def describe(self) -> str:
+        """Short human readable summary (English, translated by the UI)."""
+        if self.mode is RasterSelectionMode.RANGE:
+            low = "-∞" if self.minimum is None else _fmt(self.minimum)
+            high = "+∞" if self.maximum is None else _fmt(self.maximum)
+            return f"band {self.band} in [{low} ; {high}]"
+        if self.mode is RasterSelectionMode.CLASSES:
+            return f"band {self.band} classes " + ", ".join(_fmt(c) for c in sorted(self.classes))
+        return self.expression.strip()
+
+    def to_dict(self) -> Dict:
+        return {
+            "band": self.band,
+            "mode": self.mode.value,
+            "minimum": self.minimum,
+            "maximum": self.maximum,
+            "classes": sorted(self.classes),
+            "expression": self.expression,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict) -> "RasterSelection":
+        return cls(
+            band=int(data.get("band", 1)),
+            mode=RasterSelectionMode(data.get("mode", "range")),
+            minimum=data.get("minimum"),
+            maximum=data.get("maximum"),
+            classes=frozenset(int(c) for c in data.get("classes", ()) or ()),
+            expression=data.get("expression", "") or "",
+        )
+
+
+def _fmt(value) -> str:
+    """Format a number without a useless trailing ``.0``."""
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    return repr(value) if isinstance(value, float) else str(value)

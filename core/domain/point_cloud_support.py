@@ -36,6 +36,26 @@ ASPRS_CLASS_NAMES: Dict[int, str] = {
 }
 
 
+# Classes added by the IGN LiDAR HD nomenclature on top of ASPRS 0-18.
+LIDAR_HD_CLASS_NAMES: Dict[int, str] = {
+    64: "Permanent above-ground structure",
+    65: "Artifact",
+    66: "Virtual point",
+    67: "Miscellaneous built structure",
+}
+
+# Presets of the EXPLORING class list: label -> classification codes.
+CLASS_PRESETS: Dict[str, tuple] = {
+    "Ground": (2,),
+    "Vegetation": (3, 4, 5),
+    "Buildings": (6,),
+    "Above ground": (3, 4, 5, 6, 17, 64, 67),
+    "Water": (9,),
+}
+
+NOISE_CLASSES = (7, 18, 65)
+
+
 def asprs_class_label(code: int) -> str:
     """Return a display label for an ASPRS classification code.
 
@@ -45,7 +65,7 @@ def asprs_class_label(code: int) -> str:
     Returns:
         ``"2 - Ground"`` for known codes, ``"42 - Class 42"`` otherwise.
     """
-    name = ASPRS_CLASS_NAMES.get(code)
+    name = ASPRS_CLASS_NAMES.get(code) or LIDAR_HD_CLASS_NAMES.get(code)
     if name is None:
         name = f"Class {code}"
     return f"{code} - {name}"

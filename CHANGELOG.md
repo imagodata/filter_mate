@@ -2,11 +2,22 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
+## [Unreleased] - FilterMate 5.0 (branch `claude/v5-raster-lidar`)
 
 ### Added
 
-- **Interactive filtering of point cloud layers (LAS/LAZ/COPC, `QgsPointCloudLayer`).** When a point cloud is the current layer, the filtering tab shows a point cloud panel in place of the vector widgets: ASPRS classification checklist (with point counts when the layer statistics are available), elevation (Z) range, intensity range and return number. The dock's Filter, Unfilter, Reset, Undo and Redo buttons drive it; the filter is applied with `setSubsetString` (`QgsPointCloudExpression` syntax, e.g. `Classification IN (2, 6) AND Z >= 10 AND Z <= 150`) and recorded in the filter history, so undo/redo restores the previous subset. Export is not available for point cloud layers yet. Experimental, behind `APP.OPTIONS.POINT_CLOUD.enabled` (off by default); requires QGIS 3.26 or newer.
+- **Raster and point cloud layers are first-class sources and targets.** FilterMate 5 model: EXPLORING selects on the source layer, whatever its kind; FILTERING relates that selection to the target layers with its usual settings (layers to filter, combine operators, geometric predicates, buffer). Vector, raster and point cloud layers can be mixed in any direction (9 combinations).
+- **EXPLORING adapts to the current layer.** Raster: band, pixel value (pixel picker map tool, Ctrl+click extends the range), value range with an interactive histogram and a live preview hiding the other pixels, classes of paletted rasters, raster calculator expression. Point cloud (LAS/LAZ/COPC/EPT/VPC): ASPRS / LiDAR HD classes with presets, Z / intensity / return ranges (Z kept to 3 decimals), height above a DTM computed with PDAL (`filters.hag_dem`), editable expression, live preview, option to apply the selection to the other tiles of the dataset. The panel input is kept per layer.
+- **Selection → source geometry.** A raster selection is vectorized (`gdal.Polygonize`, sieved, simplified at the pixel size); a point cloud selection becomes the footprint of the kept points (`identify` at the matching level of detail, occupancy grid). The FILTERING buffer applies to it like to vector features.
+- **Targets of every kind.** Vector targets keep the features that satisfy the predicates, with a new optional *minimum coverage* (%) for polygons; raster targets keep the pixels inside (or outside, with Disjoint) the source geometry through a clipped VRT; point cloud targets keep the points inside (or outside) through a derived COPC written by PDAL (`readers.copc` polygon filter, `filters.crop`), or `QgsPointCloudLayerExporter` when PDAL is missing, or an X/Y expression (`CROSS_FILTER.point_cloud_clip = bbox`).
+- **Derived sources are safe.** Layers keep their id, style and position (`setDataSource`); Unfilter, Undo / Redo (own per-source history) and plugin unload put the original source back; project files are always written with the original source (`writeMapLayer` hook, `<filtermate_derived>` marker); derived files live in a session cache that is removed on unload.
+- **Export of raster and point cloud layers as they are filtered**: GeoTIFF / COG (`QgsRasterFileWriter` + `gdal.Translate`), LAZ / LAS / COPC / GPKG / CSV (`QgsPointCloudLayerExporter`, `pdal` for COPC), from the EXPORTING list or the Export button of a raster / point cloud source.
+- Options `APP.OPTIONS.RASTER.enabled` and `APP.OPTIONS.CROSS_FILTER.*` (clip mode, max pixels, footprint resolution, cache size, pdal path). Raster and point cloud support are on by default.
+- `scripts/fm5_scenarios.py` (headless, 37 checks on a LiDAR HD tile) and `scripts/fm5_gui_check.py` (drives the real dock).
+
+### Changed
+
+- The experimental point cloud panel (4.10 dev, in FILTERING, which disabled EXPLORING) is replaced by the coverage mode controller; its known defects (input reset on reactivation, Z rounded to 2 decimals, statistics read once, filter never combined, shared history, export refused) are gone with it.
 
 ## [4.9.2] - 2026-09-14
 

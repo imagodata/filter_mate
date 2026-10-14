@@ -52,6 +52,17 @@ class LayerSummary:
     crs_authid: str = ""
     has_active_filter: bool = False
     active_filter_expression: str = ""
+    # FilterMate 5: "vector", "raster" or "point_cloud" (vector by default so
+    # older clients and accessors keep working).
+    layer_kind: str = "vector"
+
+
+@dataclass(frozen=True)
+class CrossFilterResult:
+    """Outcome of a cross filter (FilterMate 5): targets of any kind clipped by a vector source."""
+    filtered: List[str] = field(default_factory=list)
+    failed: Dict[str, str] = field(default_factory=dict)
+    error: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -135,6 +146,15 @@ class FilterMateAccessor(Protocol):
     def apply_favorite(self, favorite_id: str) -> Optional[HistoryStep]:
         """Apply the favorite identified by ``favorite_id``. Returns the
         resulting step, or ``None`` when the id doesn't resolve.
+        """
+        ...
+
+    def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
+                     buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
+                     selected_only: bool = True) -> Optional[CrossFilterResult]:
+        """Filter vector / raster / point cloud ``target_layers`` by the (selected)
+        features of the vector ``source_layer``. ``None`` when the source
+        does not resolve (route: 404).
         """
         ...
 
@@ -240,6 +260,19 @@ class InMemoryAccessor:
             return None
         return HistoryStep(layer_name=fav.layer_name, expression=fav.expression)
 
+    def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
+                     buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
+                     selected_only: bool = True) -> Optional[CrossFilterResult]:
+        names = {layer.name: layer for layer in self.layers}
+        source = names.get(source_layer)
+        if source is None or source.layer_kind != "vector":
+            return None
+        filtered = [name for name in target_layers if name in names and name != source_layer]
+        failed = {name: "layer not found" for name in target_layers if name not in names}
+        for name in filtered:
+            self._active[name] = f"cross:{source_layer}"
+        return CrossFilterResult(filtered=filtered, failed=failed)
+
     def _with_active(self, layer: LayerSummary) -> LayerSummary:
         expr = self._active.get(layer.name, layer.active_filter_expression)
         if not expr:
@@ -253,4 +286,5 @@ class InMemoryAccessor:
             crs_authid=layer.crs_authid,
             has_active_filter=True,
             active_filter_expression=expr,
+            layer_kind=layer.layer_kind,
         )
