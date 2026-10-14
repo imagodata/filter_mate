@@ -288,6 +288,32 @@ def s_sections_gap():
         gap = exporting[0].mapTo(d, exporting[0].rect().topLeft()).y() - row.mapTo(d, row.rect().bottomLeft()).y()
         check('sections: no blank between FILTERING and EXPORTING', gap <= 24, f'{gap}px')
 
+    tabs = [b for b in d.toolBox_tabTools.findChildren(QAbstractButton) if b.objectName() == 'qt_toolbox_toolboxbutton']
+    last = max(tabs, key=lambda b: b.mapTo(d, b.rect().topLeft()).y())
+    bar = d.frame_actions
+    gap_bottom = bar.mapTo(d, bar.rect().topLeft()).y() - last.mapTo(d, last.rect().bottomLeft()).y()
+    check('sections: no blank above the action bar', gap_bottom <= 24, f'{gap_bottom}px')
+
+
+def s_harmony():
+    d = dock()
+    ref = d.comboBox_filtering_current_layer.height()
+    for n in ('comboBox_filtering_geometric_predicates', 'mQgsDoubleSpinBox_filtering_buffer_value',
+              'comboBox_filtering_buffer_type', 'mQgsSpinBox_filtering_buffer_segments',
+              'comboBox_filtering_source_layer_combine_operator'):
+        w = getattr(d, n)
+        check(f'harmony: {n} height = source combo', abs(w.height() - ref) <= 1, f'{w.height()} vs {ref}')
+    spin = d.mQgsDoubleSpinBox_filtering_buffer_value
+    combo = d.comboBox_filtering_current_layer
+    check('harmony: buffer row starts at the values edge', abs(spin.mapTo(d, spin.rect().topLeft()).x() - combo.mapTo(d, combo.rect().topLeft()).x()) <= 1)
+    groups = [d.mGroupBox_exploring_single_selection, d.mGroupBox_exploring_multiple_selection, d.mGroupBox_exploring_custom_selection]
+    tops = [g.mapTo(d, g.rect().topLeft()).y() for g in groups]
+    gaps = [tops[i + 1] - (tops[i] + groups[i].height()) for i in range(2)]
+    check('harmony: even gaps between EXPLORING groups', abs(gaps[0] - gaps[1]) <= 1, str(gaps))
+    rail = d.widget_exploring_keys
+    check('harmony: first group top-aligned with the rail', abs(tops[0] - rail.mapTo(d, rail.rect().topLeft()).y()) <= 2,
+          f'{tops[0]} vs {rail.mapTo(d, rail.rect().topLeft()).y()}')
+
 
 def s_finish():
     failed = [name for name, ok in STATE['results'] if not ok]
@@ -299,7 +325,7 @@ def s_finish():
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
          (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_handover, 1000), (s_alignment, 500),
-         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300),
+         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300),
          (s_finish, 500)]
 
 

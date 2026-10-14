@@ -123,7 +123,7 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
     border: 1px solid {fm_group_border};
     border-radius: 6px;
     margin-top: 0px;
-    padding: 34px 8px 8px 8px;
+    padding: 30px 8px 6px 8px;
     color: {fm_text};
     font-weight: 600;
 }
@@ -137,7 +137,7 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
     subcontrol-origin: padding;
     subcontrol-position: top left;
     left: 30px;
-    top: 8px;
+    top: 7px;
     padding: 0px 4px;
     color: {fm_text};
     background: transparent;
@@ -303,24 +303,8 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
 #dockWidgetContents QToolBox#toolBox_tabTools::tab:hover {
     border-color: {fm_field_hover};
 }
-#dockWidgetContents QToolBox#toolBox_tabTools QToolButton {
-    background-color: {fm_section};
-    color: {fm_text};
-    border: 1px solid {fm_section_border};
-    border-radius: 6px;
-    font-weight: 600;
-    text-align: left;
-    /* Room on the left for the header icon (ui/layout/mockup_layout.py). */
-    padding: 0px 10px 0px 38px;
-    min-height: 34px;
-    max-height: 34px;
-}
-#dockWidgetContents QToolBox#toolBox_tabTools QToolButton:checked {
-    border-color: {fm_section_on};
-}
-#dockWidgetContents QToolBox#toolBox_tabTools QToolButton:hover {
-    border-color: {fm_field_hover};
-}
+/* The section headers are QToolBox buttons (not QToolButton), styled by ::tab above.
+   A QToolButton rule here would hit the tool buttons inside the sections. */
 
 /* --- Action bar --------------------------------------------------------- */
 
@@ -393,4 +377,22 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
     padding: 0px;
     margin: 0px;
     border: none;
+}
+
+/* Scroll areas inherit the 6 px QFrame padding of default.qss: content starts at the edge,
+   so the EXPLORING groups top-align with the rail. */
+#dockWidgetContents QScrollArea {
+    padding: 0px;
+}
+
+/* Every field of a row as tall as the combo boxes (same content height, padding and border). */
+#dockWidgetContents QSpinBox,
+#dockWidgetContents QDoubleSpinBox,
+#dockWidgetContents QgsDoubleSpinBox,
+#dockWidgetContents QgsSpinBox,
+#dockWidgetContents QLineEdit#lineEdit_exporting_output_folder,
+#dockWidgetContents QLineEdit#lineEdit_exporting_zip {
+    min-height: {combobox_height};
+    max-height: {combobox_height};
+    padding: 4px 8px;
 }

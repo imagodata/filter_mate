@@ -68,6 +68,11 @@ def merge_buffer_rows(dw: Any) -> bool:
         type_row.removeWidget(widget)
         widget.setMaximumWidth(max_width)
         value_row.addWidget(widget)
+    # The data-defined override button goes last: the row starts with the value, like the others.
+    override = getattr(dw, 'mPropertyOverrideButton_filtering_buffer_value_property', None)
+    if override is not None and value_row.indexOf(override) >= 0:
+        value_row.removeWidget(override)
+        value_row.addWidget(override)
     values.takeAt(type_index)
     _remove_spacer(values, 'verticalSpacer_filtering_values_buttons_bottom1', type_index - 1)
 
@@ -431,8 +436,32 @@ class _ToolBoxFitter(QObject if QObject is not None else object):
                       + layout.spacing() * len(headers) + margins.top() + margins.bottom() + frame)
             if toolbox.maximumHeight() != height:
                 toolbox.setMaximumHeight(height)
+            self._fit_toolset(height)
         except RuntimeError:
             pass
+
+    def _fit_toolset(self, toolbox_height: int) -> None:
+        """The splitter gives the height the sections do not need to EXPLORING (mockup), not to a blank."""
+        toolset = self._toolbox.parentWidget()
+        while toolset is not None and toolset.objectName() != 'frame_toolset':
+            toolset = toolset.parentWidget()
+        if toolset is None:
+            return
+        layout = toolset.layout()
+        extra = 0
+        if layout is not None:
+            margins = layout.contentsMargins()
+            extra = margins.top() + margins.bottom()
+        top = self._toolbox.mapTo(toolset, self._toolbox.rect().topLeft()).y()
+        wanted = toolbox_height + max(extra, top) + 2
+        if toolset.maximumHeight() != wanted:
+            toolset.setMaximumHeight(wanted)
+        splitter = toolset.parentWidget()
+        if splitter is not None:
+            from qgis.PyQt.QtWidgets import QFrame
+            frame = splitter.findChild(QFrame, 'frame_exploring')
+            if frame is not None and frame.maximumHeight() < 16777215:
+                frame.setMaximumHeight(16777215)  # EXPLORING takes the rest
 
 
 def fit_tool_box(dw: Any) -> bool:
@@ -446,10 +475,86 @@ def fit_tool_box(dw: Any) -> bool:
     return True
 
 
+FIELD_GAP = 4      # between two widgets of one row
+GROUP_GAP = 6      # between two EXPLORING groups, and between their rows
+EXPLORING_GROUP_LAYOUTS = ('verticalLayout_exploring_single_content', 'verticalLayout_exploring_multiple_selection',
+                           'verticalLayout_exploring_custom_selection')
+
+
+def _row_widgets(layout: Any):
+    """Widgets placed directly in ``layout`` and its sub-layouts (not their children)."""
+    for index in range(layout.count()):
+        item = layout.itemAt(index)
+        if item.widget() is not None:
+            yield item.widget()
+        elif item.layout() is not None:
+            yield from _row_widgets(item.layout())
+
+
+def _row_layouts(layout: Any):
+    for index in range(layout.count()):
+        child = layout.itemAt(index).layout()
+        if child is not None:
+            yield child
+            yield from _row_layouts(child)
+
+
+def harmonize_spacing(dw: Any) -> bool:
+    """One set of gaps for the whole dock (mockup); field heights are in mockup.qss.
+
+    Run after the dimension and spacing managers (end of ``apply_dynamic_dimensions``),
+    which set their own per-layout values.
+    """
+    from qgis.PyQt.QtWidgets import QBoxLayout
+    for name in ('verticalLayout_filtering_values', 'verticalLayout_exporting_values'):
+        values = getattr(dw, name, None)
+        if values is None:
+            continue
+        values.setSpacing(ROW_GAP)
+        for row in _row_layouts(values):
+            if isinstance(row, QBoxLayout) and row.direction() in (QBoxLayout.Direction.LeftToRight,
+                                                                   QBoxLayout.Direction.RightToLeft):
+                row.setSpacing(FIELD_GAP)
+    tabs = getattr(dw, 'verticalLayout_exploring_tabs_content', None)
+    if tabs is not None:
+        tabs.setSpacing(GROUP_GAP)
+    for name in EXPLORING_GROUP_LAYOUTS:
+        layout = getattr(dw, name, None)
+        if layout is not None:
+            layout.setSpacing(GROUP_GAP)
+            layout.setContentsMargins(0, 2, 0, 2)
+    for aligner in ('_fm_aligner_filtering', '_fm_aligner_exporting'):
+        if getattr(dw, aligner, None) is not None:
+            getattr(dw, aligner).align()
+    return True
+
+
+def even_exploring_groups(dw: Any) -> bool:
+    """Spacers between two EXPLORING groups go: the layout spacing alone separates them."""
+    layout = getattr(dw, 'verticalLayout_exploring_tabs_content', None)
+    if layout is None:
+        return False
+    for index in reversed(range(1, layout.count() - 1)):
+        before, item, after = layout.itemAt(index - 1), layout.itemAt(index), layout.itemAt(index + 1)
+        if item.spacerItem() is not None and before.widget() is not None and after.widget() is not None:
+            layout.takeAt(index)
+    # Groups at their natural height, the final spacer takes the rest: equal gaps between them.
+    from qgis.PyQt.QtWidgets import QSizePolicy
+    for name in ('mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection',
+                 'mGroupBox_exploring_custom_selection'):
+        group = getattr(dw, name, None)
+        if group is not None:
+            group.setSizePolicy(group.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Maximum)
+    if not layout.property('fm_stretched'):
+        layout.addStretch(1)  # without an expanding item, the surplus would widen every gap
+        layout.setProperty('fm_stretched', True)
+    return True
+
+
 def apply_mockup_layout(dw: Any) -> None:
     """Every layout change of the design; each one is skipped on its own if the form differs."""
     for change in (merge_buffer_rows, pack_exploring_rail, size_section_tabs, rail_outside_scroll,
-                   tighten_vertical_rhythm, align_key_columns, fit_tool_box):
+                   tighten_vertical_rhythm, align_key_columns, fit_tool_box, even_exploring_groups):
         try:
             change(dw)
         except Exception as exc:

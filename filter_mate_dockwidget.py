@@ -1033,6 +1033,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
             self._apply_qgis_widget_dimensions()
             self._align_key_layouts()
+            # FilterMate 5 design: one set of gaps and field heights, after the managers above.
+            from .ui.layout.mockup_layout import harmonize_spacing
+            harmonize_spacing(self)
             logger.info("Successfully applied dynamic dimensions to all widgets")
         except Exception as e:
             logger.error(f"Error applying dynamic dimensions: {e}", exc_info=True)
