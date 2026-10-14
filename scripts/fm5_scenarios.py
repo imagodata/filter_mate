@@ -424,10 +424,30 @@ def s14_raster_selection_replay():
     registry().restore_all(project)
 
 
+# --- 15. REST API accessor ------------------------------------------------------
+def s15_rest_api_accessor():
+    from filter_mate.filtermate_api.qgis_accessor import QGISFilterMateAccessor
+    import types
+    accessor = QGISFilterMateAccessor(public_api=types.SimpleNamespace(get_active_filters=lambda: {}), plugin=None)
+    kinds = {layer.name: layer.layer_kind for layer in accessor.list_layers()}
+    check('API lists layer kinds', kinds.get('mnt') == 'raster' and kinds.get('lhd') == 'point_cloud' and kinds.get('batiment') == 'vector',
+          str(kinds))
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_bat.selectByIds([f.id() for f in cur_bat.getFeatures(QgsFeatureRequest().setLimit(5))])
+    result = accessor.cross_filter('batiment', ['mnt', 'lhd', 'ghost'], ['Intersect'], buffer=2.0)
+    check('API cross_filter', result is not None and sorted(result.filtered) == ['lhd', 'mnt'] and 'ghost' in result.failed,
+          str(result))
+    marked = {layer.name: layer.has_active_filter for layer in accessor.list_layers()}
+    check('API marks clipped layers as filtered', marked.get('mnt') and marked.get('lhd'), str(marked))
+    cur_bat.removeSelection()
+    registry().restore_all(project)
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
                  s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites,
-                 s12_refilter_and_operators, s13_processing, s14_raster_selection_replay):
+                 s12_refilter_and_operators, s13_processing, s14_raster_selection_replay,
+                 s15_rest_api_accessor):
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 

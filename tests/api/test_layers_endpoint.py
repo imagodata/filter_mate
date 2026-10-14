@@ -34,6 +34,7 @@ class TestListLayers:
             "crs_authid": "EPSG:2154",
             "has_active_filter": False,
             "active_filter_expression": "",
+            "layer_kind": "vector",
         }
 
     def test_empty_accessor_returns_empty_list(self, client_factory):

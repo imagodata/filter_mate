@@ -39,19 +39,8 @@ OPERATORS = (None, "AND", "OR", "AND NOT")
 
 def kind_without_flags(layer):
     """Layer kind from its class only (Processing does not depend on the dock options)."""
-    from ...core.domain.layer_kind import LayerKind
-    from qgis.core import QgsRasterLayer, QgsVectorLayer
-    try:
-        from qgis.core import QgsPointCloudLayer
-    except ImportError:
-        QgsPointCloudLayer = None
-    if isinstance(layer, QgsVectorLayer):
-        return LayerKind.VECTOR
-    if isinstance(layer, QgsRasterLayer):
-        return LayerKind.RASTER
-    if QgsPointCloudLayer is not None and isinstance(layer, QgsPointCloudLayer):
-        return LayerKind.POINT_CLOUD
-    return LayerKind.OTHER
+    from ...adapters.qgis.point_cloud_capability import layer_kind_by_class
+    return layer_kind_by_class(layer)
 
 
 class CrossFilterAlgorithm(QgsProcessingAlgorithm):

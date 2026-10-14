@@ -185,6 +185,29 @@ def get_layer_kind(layer: Any) -> Any:
     return LayerKind.OTHER
 
 
+def layer_kind_by_class(layer: Any) -> Any:
+    """Kind from the layer class only, ignoring the dock options (Processing, REST API).
+
+    Web rasters (WMS, XYZ...) stay OTHER: their pixels cannot be analysed.
+    """
+    from ...core.domain.layer_kind import LayerKind
+    try:
+        from qgis.core import QgsRasterLayer, QgsVectorLayer
+    except Exception:
+        return LayerKind.OTHER
+    try:
+        if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
+            return LayerKind.VECTOR
+        if isinstance(QgsRasterLayer, type) and isinstance(layer, QgsRasterLayer):
+            return LayerKind.RASTER if layer.providerType() in ANALYSIS_RASTER_PROVIDERS else LayerKind.OTHER
+        point_cloud_type = _resolve_point_cloud_class()
+        if point_cloud_type is not None and isinstance(layer, point_cloud_type):
+            return LayerKind.POINT_CLOUD
+    except (TypeError, RuntimeError, AttributeError):
+        pass
+    return LayerKind.OTHER
+
+
 def is_coverage_layer(layer: Any) -> bool:
     """True for a usable raster or point cloud layer (non-vector FilterMate layer)."""
     return is_point_cloud_layer(layer) or is_raster_layer(layer)
