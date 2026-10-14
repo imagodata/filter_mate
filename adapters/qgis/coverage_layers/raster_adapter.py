@@ -456,3 +456,109 @@ def clear_selection_preview(layer: QgsRasterLayer) -> bool:
         layer.triggerRepaint()
     layer.removeCustomProperty(_PREVIEW_PROPERTY)
     return True
+
+
+# === EXPLORING tools: zoom to the selected range, range linked to the style ===
+
+def mask_bounds(mask) -> Optional[Tuple[int, int, int, int]]:
+    """``(first_row, last_row, first_col, last_col)`` of the True cells, None when there is none."""
+    import numpy as np
+    rows = np.flatnonzero(np.any(mask, axis=1))
+    if rows.size == 0:
+        return None
+    cols = np.flatnonzero(np.any(mask, axis=0))
+    return int(rows[0]), int(rows[-1]), int(cols[0]), int(cols[-1])
+
+
+def selection_extent(layer: QgsRasterLayer, selection: RasterSelection, max_pixels: int = 262144) -> Optional[QgsRectangle]:
+    """Extent (layer CRS) of the pixels kept by a RANGE / CLASSES selection, read on a coarse grid.
+
+    None when no pixel is kept or the selection is an expression.
+    """
+    if selection is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION:
+        return None
+    extent = layer.extent()
+    width, height = _grid_for(extent, layer.width(), layer.height(), max_pixels)
+    array = read_band_array(layer.dataProvider(), selection.band, extent, width, height)
+    bounds = mask_bounds(selection_mask(array, selection))
+    if bounds is None:
+        return None
+    first_row, last_row, first_col, last_col = bounds
+    size_x, size_y = extent.width() / width, extent.height() / height
+    return QgsRectangle(extent.xMinimum() + first_col * size_x, extent.yMaximum() - (last_row + 1) * size_y,
+                        extent.xMinimum() + (last_col + 1) * size_x, extent.yMaximum() - first_row * size_y)
+
+
+def rescale_values(values: List[float], old_min: float, old_max: float, low: float, high: float) -> List[float]:
+    """Values moved linearly from ``[old_min, old_max]`` to ``[low, high]`` (colour ramp stops)."""
+    span = old_max - old_min
+    if span == 0:
+        return [low + (high - low) * index / max(1, len(values) - 1) for index in range(len(values))]
+    return [low + (value - old_min) / span * (high - low) for value in values]
+
+
+_LINKED_RENDERERS: Dict[str, object] = {}
+
+
+def link_range_to_style(layer: QgsRasterLayer, band: int, low: float, high: float) -> bool:
+    """Stretch the layer style over ``[low, high]``: grey contrast or pseudocolour ramp stops.
+
+    The first call keeps a copy of the renderer, restored by :func:`unlink_range_from_style`.
+    Returns False for a renderer that has no single band range (multiband, paletted, ...).
+    """
+    renderer = layer.renderer()
+    if renderer is None or low is None or high is None or high <= low:
+        return False
+    kind = renderer.type()
+    if kind not in ('singlebandgray', 'singlebandpseudocolor'):
+        return False
+    if layer.id() not in _LINKED_RENDERERS:
+        _LINKED_RENDERERS[layer.id()] = renderer.clone()
+    try:
+        if kind == 'singlebandgray':
+            enhancement = renderer.contrastEnhancement()
+            if enhancement is None:
+                return False
+            enhancement.setMinimumValue(low)
+            enhancement.setMaximumValue(high)
+        else:
+            shader_function = renderer.shader().rasterShaderFunction() if renderer.shader() else None
+            if shader_function is None:
+                return False
+            items = shader_function.colorRampItemList()
+            old_min, old_max = shader_function.minimumValue(), shader_function.maximumValue()
+            for item, value in zip(items, rescale_values([item.value for item in items], old_min, old_max, low, high)):
+                item.value = value
+            shader_function.setColorRampItemList(items)
+            shader_function.setMinimumValue(low)
+            shader_function.setMaximumValue(high)
+            renderer.setClassificationMin(low)
+            renderer.setClassificationMax(high)
+    except Exception as exc:
+        logger.debug(f"[FM5] range not linked to the style: {exc}")
+        return False
+    layer.triggerRepaint()
+    return True
+
+
+def is_style_linked(layer: QgsRasterLayer) -> bool:
+    return layer is not None and layer.id() in _LINKED_RENDERERS
+
+
+def unlink_range_from_style(layer: QgsRasterLayer) -> bool:
+    """Give the layer back the style it had before :func:`link_range_to_style`."""
+    saved = _LINKED_RENDERERS.pop(layer.id(), None) if layer is not None else None
+    if saved is None:
+        return False
+    current = layer.renderer()
+    transparency = current.rasterTransparency() if current is not None else None
+    restored = saved.clone()
+    if transparency is not None:
+        # The selection preview lives in the transparency: keep it on the restored style.
+        from qgis.core import QgsRasterTransparency
+        copy = QgsRasterTransparency()
+        copy.setTransparentSingleValuePixelList(transparency.transparentSingleValuePixelList())
+        restored.setRasterTransparency(copy)
+    layer.setRenderer(restored)
+    layer.triggerRepaint()
+    return True

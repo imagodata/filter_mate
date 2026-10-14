@@ -70,6 +70,13 @@ def _install_package() -> None:
     criteria_mod = types.ModuleType(f"{_PKG}.core.domain.point_cloud_filter_criteria")
     criteria_mod.PointCloudAttributeSummary = _AttributeSummary
     criteria_mod.PointCloudLayerSummary = _LayerSummary
+    # The attribute registry (real, pure) imports these two from the criteria module.
+    real_path = os.path.join(_PROJECT_ROOT, "core", "domain", "point_cloud_filter_criteria.py")
+    real_spec = importlib.util.spec_from_file_location(f"{_PKG}_real_criteria", real_path)
+    real_criteria = importlib.util.module_from_spec(real_spec)
+    real_spec.loader.exec_module(real_criteria)
+    criteria_mod.AttributeRange = real_criteria.AttributeRange
+    criteria_mod.format_number = real_criteria.format_number
     sys.modules[f"{_PKG}.core.domain.point_cloud_filter_criteria"] = criteria_mod
 
     full = f"{_PKG}.adapters.qgis.point_cloud_layer_adapter"
@@ -273,7 +280,7 @@ class TestReadSummaryClasses:
 
 
 class TestReadSummaryRanges:
-    def test_ranges_only_for_present_standard_attributes(self):
+    def test_ranges_only_for_present_attributes(self):
         stats = _Stats(minimums={"Z": 1.5, "Intensity": 0, "ReturnNumber": 1},
                        maximums={"Z": 250.0, "Intensity": 65535, "ReturnNumber": 5})
         summary = adapter.read_point_cloud_summary(_Layer(stats=stats))
@@ -281,6 +288,14 @@ class TestReadSummaryRanges:
         assert summary.range_of("Z") == _AttributeSummary("Z", 1.5, 250.0)
         assert summary.range_of("Intensity") == _AttributeSummary("Intensity", 0.0, 65535.0)
         assert summary.range_of("ReturnNumber") is None
+
+    def test_other_attributes_follow_in_layer_order(self):
+        stats = _Stats(minimums={"ScanAngleRank": -20.5, "Z": 2.0, "UserData": 0},
+                       maximums={"ScanAngleRank": 19.0, "Z": 8.0, "UserData": 3})
+        layer = _Layer(attributes=("X", "Y", "UserData", "Classification", "ScanAngleRank", "Z"), stats=stats)
+        summary = adapter.read_point_cloud_summary(layer)
+        assert [r.name for r in summary.ranges] == ["Z", "UserData", "ScanAngleRank"]
+        assert summary.range_of("ScanAngleRank") == _AttributeSummary("ScanAngleRank", -20.5, 19.0)
 
     def test_ranges_follow_constant_order(self):
         stats = _Stats(minimums={"GpsTime": 1.0, "Z": 2.0}, maximums={"GpsTime": 9.0, "Z": 8.0})

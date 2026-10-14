@@ -75,6 +75,8 @@ def s_setup():
 
 
 def s_open():
+    from qgis.PyQt.QtCore import QSettings
+    QSettings().setValue('FilterMate/discord_welcome_dismissed', True)  # modal welcome would block the run
     import qgis.utils
     if 'filter_mate' not in plugins:
         ok = qgis.utils.loadPlugin('filter_mate') and qgis.utils.startPlugin('filter_mate')
@@ -196,6 +198,57 @@ def s_picker_check():
     check('picker: marker and held button cleared with another map tool', tool._marker is None and not d.pushButton_exploring_identify.isDown())
 
 
+def s_raster_tools():
+    from qgis.PyQt.QtWidgets import QAbstractButton
+    d, c = dock(), ctrl()
+    panel = c._raster_panel
+    layer = c.active_layer
+    STATE['raster_extent'] = iface.mapCanvas().extent()
+    low, high = panel._data_bounds()
+    STATE['range'] = (low + (high - low) * 0.4, low + (high - low) * 0.6)
+    panel._set_range(*STATE['range'])
+    panel._emit_now()
+    STATE['style_before'] = layer.renderer().type()
+    link = d.findChild(QAbstractButton, 'pushButton_checkable_exploring_raster_link')
+    STATE['link_visible'] = link is not None and link.isVisible()
+    if link is not None:
+        link.setChecked(True)
+    d.pushButton_exploring_zoom.click()
+
+
+def _style_range(layer):
+    renderer = layer.renderer()
+    kind = renderer.type()
+    if kind == 'singlebandgray':
+        enhancement = renderer.contrastEnhancement()
+        return enhancement.minimumValue(), enhancement.maximumValue()
+    if kind == 'singlebandpseudocolor':
+        return renderer.classificationMin(), renderer.classificationMax()
+    return None, None
+
+
+def s_raster_tools_check():
+    from qgis.PyQt.QtWidgets import QAbstractButton
+    d, c = dock(), ctrl()
+    layer = c.active_layer
+    low, high = STATE['range']
+    check('raster tools: link button in the raster rail', STATE['link_visible'])
+    style_low, style_high = _style_range(layer)
+    check('raster tools: the style stretches over the selected range',
+          style_low is not None and abs(style_low - low) < 1e-6 and abs(style_high - high) < 1e-6,
+          f'{style_low}..{style_high} vs {low}..{high} ({layer.renderer().type()})')
+    canvas_extent = iface.mapCanvas().extent()
+    before = STATE['raster_extent']
+    check('raster tools: zoom frames the selected range (not the whole layer)',
+          canvas_extent.width() <= layer.extent().width() * 1.06, f'{before.width():.0f} -> {canvas_extent.width():.0f}')
+    link = d.findChild(QAbstractButton, 'pushButton_checkable_exploring_raster_link')
+    if link is not None:
+        link.setChecked(False)
+    restored = _style_range(layer)
+    check('raster tools: unlinking gives the style back', restored != (low, high) and layer.renderer().type() == STATE['style_before'],
+          str(restored))
+
+
 def s_handover():
     canvas = iface.mapCanvas()
     iface.actionPan().trigger()
@@ -266,6 +319,72 @@ def s_pc_groups():
     check('pc groups: expanding a group activates it', expression.isChecked() and not ranges.isChecked())
     classes.setChecked(True)
     check('pc groups: back to classes', classes.isChecked() and not expression.isChecked())
+
+
+def s_pc_conditions():
+    """ATTRIBUTES: Z between and Intensity >= joined by OR give one OR chain, AND groups parenthesised."""
+    import sys
+    from qgis.PyQt.QtWidgets import QPushButton
+    pc = ctrl()._pc_panel
+    module = sys.modules[type(pc).__module__]
+    names = pc.condition_attributes()
+    check('pc conditions: layer attributes offered (not X / Y / Classification)',
+          'Z' in names and 'Intensity' in names and not {'X', 'Y', 'Classification'} & set(names), ', '.join(names))
+    pc._ranges_group.setChecked(True)
+    pc.restore_state(dict(pc.state(), conditions=[]))
+    add = pc.findChild(QPushButton, 'pushButton_point_cloud_add_condition')
+    check('pc conditions: add button visible', add is not None and add.isVisible())
+    add.click()
+    add.click()
+    rows = pc._condition_rows
+    check('pc conditions: two named rows', len(rows) == 2 and all(r.objectName() == 'widget_point_cloud_condition' for r in rows))
+    z_row, i_row = rows
+    z_row._attribute_combo.setCurrentIndex(z_row._attribute_combo.findData('Z'))
+    i_row._attribute_combo.setCurrentIndex(i_row._attribute_combo.findData('Intensity'))
+    i_row._op_combo.setCurrentIndex(i_row._op_combo.findData('>='))
+    i_row._join_combo.setCurrentIndex(i_row._join_combo.findData('OR'))
+    z_low, z_high = module.summary_bounds(pc._summary, 'Z')
+    i_low, i_high = module.summary_bounds(pc._summary, 'Intensity')
+    low, high = round(z_low + (z_high - z_low) / 4, 3), round(z_low + (z_high - z_low) * 3 / 4, 3)
+    level = float(round((i_low + i_high) / 2))
+    z_row._low_spin.setValue(low)
+    z_row._high_spin.setValue(high)
+    i_row._low_spin.setValue(level)
+    fmt = module.format_number
+    expected = f"(Z >= {fmt(low)} AND Z <= {fmt(high)}) OR (Intensity >= {fmt(level)})"
+    check('pc conditions: OR chain expression', pc.expression() == expected, f'{pc.expression()!r} vs {expected!r}')
+    check('pc conditions: generated expression shown', pc._expression_edit.toPlainText() == expected,
+          pc._expression_edit.toPlainText())
+    check('pc conditions: join combo hidden on the first row only',
+          z_row._join_combo.isHidden() and not i_row._join_combo.isHidden())
+    if pc._return_button.isVisible():
+        pc._return_actions['last'].trigger()
+        last = expected[:-1] + ' AND ReturnNumber = NumberOfReturns)'
+        check('pc conditions: last return shortcut joins the last group', pc.expression() == last, pc.expression())
+    lhd = layer('lhd')
+    before = lhd.subsetString()
+    for text in (pc.expression(), 'Intensity <> 0', 'ReturnNumber = NumberOfReturns'):
+        check(f'pc conditions: layer accepts {text!r}', lhd.setSubsetString(text))
+    lhd.setSubsetString(before)
+    group = pc._ranges_group.minimumSizeHint().width()
+    check('pc conditions: ATTRIBUTES group fits 300 px', group <= 300, f'{group}px')
+    # New rows are shown by a queued call (QLayout::addChildWidget), the layouts run on a posted
+    # LayoutRequest and _CollapsedBand gives the expanded minimum back on a 0 ms timer: measured in
+    # the same pass the group was still one band high and empty (h=34, rows hidden).
+    for _ in range(5):
+        QgsApplication.processEvents()
+    attributes = pc._ranges_group
+    check('pc conditions: ATTRIBUTES grows to its rows', attributes.height() > 34 and not attributes.isCollapsed(),
+          f'h={attributes.height()} min={attributes.minimumHeight()} hint={attributes.sizeHint().height()}')
+    check('pc conditions: a condition row is visible',
+          any(row.isVisible() and row.objectName() == 'widget_point_cloud_condition' for row in pc._condition_rows))
+    host = ctrl()._host
+    check('pc conditions: panel still fits the dock', host.parentWidget().width() <= host.parentWidget().parentWidget().width() + 2,
+          f'{host.parentWidget().width()} vs {host.parentWidget().parentWidget().width()}')
+    save('point_cloud_conditions')
+    # Back to the classes, without conditions (restore_state does not emit: no preview left behind).
+    pc.restore_state(dict(pc.state(), conditions=[], classes_enabled=True, ranges_enabled=False))
+    check('pc conditions: back to classes', pc._classes_group.isChecked() and not pc._ranges_group.isChecked())
 
 
 def s_profile_check():
@@ -574,8 +693,8 @@ def s_finish():
 
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
-         (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_picker, 800), (s_picker_check, 500), (s_handover, 1000), (s_alignment, 500),
-         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
+         (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_picker, 800), (s_picker_check, 500), (s_raster_tools, 2500), (s_raster_tools_check, 500), (s_handover, 1000), (s_alignment, 500),
+         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_pc_conditions, 800), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
          (s_scrollbar_margin, 300), (s_resize_lower, 1500), (s_resize_lower_check, 500),
          (s_list_grow, 1500), (s_list_grow_check, 500), (s_font_reload, 6000), (s_font_reload_check, 500),
          (s_finish, 500)]

@@ -674,3 +674,18 @@ Result: Que veux-tu faire dans cette session ?
   `QgsProcessingFeedback` ; dossier de sortie Processing via `parameterAsFileOutput` (TEMPORARY_OUTPUT) ;
   SQLite n'écrit pas via `\\wsl.localhost`. Historique : source vecteur / géométrie / défiltrage dans un
   historique à part (le dock annule un vecteur par `_linked_runs`). `FM5_ONLY=s13,s17` limite les scénarios.
+- [2026-10-14] Nuages de points, groupe ATTRIBUTES (branche `claude/v5-lidar-conditions`) : registre unique des
+  dimensions LAS/COPC dans `core/domain/point_cloud_attributes.py` (nom, libellé anglais traduit par le panneau via
+  `_catalog`, unité, décimales, entier) + conditions chaînées `{attribute, op, low, high, join}` (AND lie plus fort
+  que OR, `(g1) OR (g2)` ; `low` = borne basse de `between` ou opérande, nombre ou autre attribut ; ops
+  `between = <> >= <= > <`). Anciennes clés `z` / `intensity*` / `return` migrées à la lecture ; `ranges_enabled`
+  et `hag_*` restent les clés courantes (HAG PDAL hors de la liste, toujours ANDé). Retours premier / dernier /
+  unique dans le menu du bouton « Returns » (le raccourci remplace le précédent). Piège vérifié en QGIS 4.2 :
+  déplier un `QgsCollapsibleGroupBox` ré-affiche TOUT enfant direct masqué au repli, même caché entre-temps →
+  mettre les widgets à masquer dans un conteneur. Le parseur COPC accepte `<>`, `!=`, noms entre guillemets ;
+  `setSubsetString` renvoie False sur une erreur de syntaxe. Fumée hors GUI : `python-qgis.bat` + offscreen.
+- [2026-10-14] Mesurer un groupe du panneau nuage APRÈS `processEvents()` : une ligne ajoutée est montrée par un appel
+  différé (`QLayout::addChildWidget`), les layouts tournent sur un `LayoutRequest` posté et `_CollapsedBand` rend
+  le minimum déplié par un minuteur 0 ms → mesuré dans la même passe, ATTRIBUTES déplié vaut 34 px et paraît vide
+  (même pour `grab()`). Autre piège QGIS : `QgsCollapsibleGroupBox.setCollapsed` ne fait que noter l'état quand la
+  boîte est cachée → le panneau réapplique `setCollapsed(isCollapsed())` dans son `showEvent`.
