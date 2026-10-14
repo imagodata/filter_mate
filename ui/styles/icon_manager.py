@@ -149,6 +149,14 @@ class IconManager(StylerBase):
         Returns:
             QIcon appropriate for current theme
         """
+        # FilterMate 5 design: the mockup's stroke icons replace the PNG artwork they redraw.
+        from .mockup_design import icon_key_for, render_icon
+        mockup_key = icon_key_for(icon_name)
+        if mockup_key is not None:
+            mockup_icon = render_icon(mockup_key, self.is_dark_mode)
+            if mockup_icon is not None and not mockup_icon.isNull():
+                return mockup_icon
+
         # Build full path
         icon_path = self._resolve_icon_path(icon_name)
         if not icon_path or not os.path.exists(icon_path):
@@ -246,7 +254,10 @@ class IconManager(StylerBase):
                     button.setIcon(icon)
                     updated += 1
 
+        from ..layout.mockup_layout import update_section_icons
         toolbox = getattr(self.dockwidget, 'toolBox_tabTools', None)
+        if update_section_icons(self.dockwidget, self.is_dark_mode):
+            toolbox = None  # FilterMate 5 design: the headers draw their own centred icon
         if toolbox is not None:
             for index, filename in enumerate(('filter_multi.png', 'save.png', 'parameters.png')):
                 if index < toolbox.count():

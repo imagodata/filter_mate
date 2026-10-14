@@ -439,9 +439,13 @@ class PointCloudExploringPanel(QWidget):
         buttons_row.addWidget(button_none)
         buttons_row.addStretch()
         group_layout.addLayout(buttons_row)
+        # FilterMate 5 design: the class list only (the presets stay usable from the code / state).
+        for button in (*self._preset_buttons.values(), button_all, button_none):
+            button.setVisible(False)
+        group_layout.setSpacing(0)
 
         self._classes_list = QListWidget(self._classes_group)
-        self._classes_list.setMaximumHeight(200)
+        self._classes_list.setMaximumHeight(300)  # the whole ASPRS list, as in the mockup
         self._classes_list.setAccessibleName(self.tr("Point classes"))
         self._classes_list.itemChanged.connect(self._changed)
         group_layout.addWidget(self._classes_list)

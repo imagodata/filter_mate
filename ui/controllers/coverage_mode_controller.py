@@ -442,11 +442,12 @@ class CoverageModeController(BaseController):
             provider = layer.providerType()
         except Exception:
             provider = ''
-        color = '#c98a1d' if kind is LayerKind.RASTER else '#1f9e84'
+        from ..styles.mockup_design import KIND_COLORS, badge_stylesheet
+        color = KIND_COLORS['raster' if kind is LayerKind.RASTER else 'point_cloud']
         name = badge.objectName() or 'label_backend_indicator'
-        self._call(badge, 'setText', f"{label} · {provider}" if provider else label)
+        self._call(badge, 'setText', f"{label} · {provider.upper() if len(provider) <= 4 else provider}" if provider else label)
         self._call(badge, 'setToolTip', self.tr("{0} layer: selection in EXPLORING, relation in FILTERING").format(label))
-        self._call(badge, 'setStyleSheet', f"QLabel#{name}{{background:{color};color:white;border-radius:3px;padding:3px 10px;font-weight:600;}}")
+        self._call(badge, 'setStyleSheet', badge_stylesheet(name, color))
 
     def _apply_layout(self, kind: Any) -> None:
         from ...core.domain.layer_kind import LayerKind

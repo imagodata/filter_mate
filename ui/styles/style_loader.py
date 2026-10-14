@@ -125,11 +125,16 @@ class StyleLoader:
             'button_active_border': '#222222' if dark else colors.get('color_accent_dark', '#01579B'),
             'control_check_icon': os.path.join(os.path.dirname(path), 'check_white.svg').replace('\\', '/'),
         }
-        for filename in ('panel_buttons.qss', 'themed_controls.qss'):
+        for filename in ('panel_buttons.qss', 'themed_controls.qss', 'mockup.qss'):
             with open(os.path.join(os.path.dirname(path), filename), encoding='utf-8') as source:
                 rules = source.read()
             for key, value in replacements.items():
                 rules = rules.replace(f'{{{key}}}', value)
+            if filename == 'mockup.qss':
+                # FilterMate 5 design, last so it wins; dark = the mockup, light = same layout.
+                from .mockup_design import apply_tokens, register_fonts
+                register_fonts()
+                rules = apply_tokens(rules, dark)
             stylesheet += '\n' + rules
         return stylesheet
 

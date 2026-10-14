@@ -337,6 +337,7 @@ class RasterExploringPanel(QWidget):
         group = self._make_group(self.tr("PIXEL VALUE"), "mGroupBox_raster_pixel_value", checkable=False)
         group_layout = group.layout()
         self._pixel_value_label = QLabel("–", group)
+        self._pixel_value_label.setObjectName("label_raster_pixel_value")
         font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
         font.setPointSizeF(max(font.pointSizeF(), 9.0) + 6.0)
         font.setBold(True)
