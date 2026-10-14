@@ -490,9 +490,9 @@ class LayerValidationResult:
     error: Optional[str] = None
 
 
-
 # ``layer_provider_type`` of raster and point cloud entries (core/domain/*_support.py).
 COVERAGE_PROVIDER_TYPES = ("raster", "pointcloud")
+
 
 class LayerFilterBuilder:
     """

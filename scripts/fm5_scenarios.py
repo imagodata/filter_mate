@@ -32,6 +32,7 @@ from qgis.core import (
 
 app = QgsApplication([], False)
 app.initQgis()
+sys.path.append(os.path.join(os.environ.get('QGIS_PREFIX_PATH', ''), 'python', 'plugins'))  # processing
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(os.path.dirname(HERE)))  # parent of the plugin folder
@@ -331,9 +332,148 @@ def s11_favorites():
     registry().restore_all(project)
 
 
+# --- 12. refiltering derived layers, OR operator, preview opacity ------------
+def s12_refilter_and_operators():
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import (
+        apply_selection_preview, band_range, clear_selection_preview, pixel_is_transparent)
+    from filter_mate.core.domain.filter_state import LayerSnapshot  # noqa: F401
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    # (a) raster source filtered twice: the second selection reads the original pixels
+    job = RasterSourceJob(cur_mnt, RasterSelection(band=1, minimum=1240.0, maximum=1270.0))
+    job.apply(cur_mnt)
+    job = RasterSourceJob(cur_mnt, RasterSelection(band=1, minimum=1300.0, maximum=1350.0))
+    job.apply(cur_mnt)
+    low, high, _ = band_range(cur_mnt, 1)
+    check('raster source refiltered from the original', low is not None and low >= 1299.9 and high <= 1350.1,
+          f"range after 2nd filter: {low} - {high}")
+    registry().restore_all(project)
+    # (b) AND of Intersect then Disjoint on a raster target keeps the first clip
+    feats = list(cur_bat.getFeatures(QgsFeatureRequest().setLimit(5)))
+    first = CrossFilterRequest(cur_bat.id(), LayerKind.VECTOR, targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),),
+                               predicates=('Intersect',), buffer_value=2.0)
+    run('V->R intersect', first, VectorSourceJob(cur_bat, feats[:3]))
+    second = CrossFilterRequest(cur_bat.id(), LayerKind.VECTOR, targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),),
+                                predicates=('Disjoint',), buffer_value=2.0, other_layers_combine_operator='AND')
+    run('V->R disjoint AND', second, VectorSourceJob(cur_bat, feats[3:]))
+    centroid = feats[0].geometry().centroid().asPoint()
+    ext = cur_mnt.extent()
+    check('AND keeps the first clip (inside kept)', not nodata_at(cur_mnt, centroid.x(), centroid.y()))
+    check('AND keeps the first clip (outside still NoData)', nodata_at(cur_mnt, ext.xMinimum() + 0.5, ext.yMinimum() + 0.5))
+    registry().restore_all(project)
+    # (c) OR on a vector target tests the features hidden by the previous subset
+    cur_bat.setSubsetString('"fid" = 1')
+    request = CrossFilterRequest(cur_mnt.id(), LayerKind.RASTER, targets=(TargetSpec(cur_bat.id(), LayerKind.VECTOR),),
+                                 predicates=('Intersect',), other_layers_combine_operator='OR')
+    run('R->V OR', request, RasterSourceJob(cur_mnt, RasterSelection(band=1, minimum=1240.0, maximum=1270.0)))
+    check('OR adds the features hidden by the previous subset', count(cur_bat) >= 5, f"{count(cur_bat)} buildings, subset={cur_bat.subsetString()[:60]}")
+    cur_bat.setSubsetString('')
+    registry().restore_all(project)
+    # (d) preview: really transparent, and the user transparency comes back
+    apply_selection_preview(cur_mnt, RasterSelection(band=1, minimum=1240.0, maximum=1270.0), 1189.0, 1359.0)
+    pixels = cur_mnt.renderer().rasterTransparency().transparentSingleValuePixelList()
+    check('preview pixels fully transparent', len(pixels) == 2 and all(pixel_is_transparent(p) for p in pixels))
+    clear_selection_preview(cur_mnt)
+    check('preview cleared', len(cur_mnt.renderer().rasterTransparency().transparentSingleValuePixelList()) == 0)
+
+
+# --- 13. Processing algorithm ---------------------------------------------------
+def s13_processing():
+    import processing  # noqa: F401 - QGIS plugin
+    from processing.core.Processing import Processing
+    from filter_mate.processing.provider import FilterMateProcessingProvider
+    Processing.initialize()
+    registry_ = QgsApplication.processingRegistry()
+    if registry_.providerById('filtermate') is None:
+        registry_.addProvider(FilterMateProcessingProvider())
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    cur_lhd = project.mapLayersByName('lhd')[0]
+    cur_par = project.mapLayersByName('parcelle')[0]
+    cur_bat.selectByIds([f.id() for f in cur_bat.getFeatures(QgsFeatureRequest().setLimit(5))])
+    result = processing.run('filtermate:cross_filter', {
+        'SOURCE': cur_bat, 'SELECTED_ONLY': True, 'TARGETS': [cur_mnt, cur_lhd, cur_par],
+        'PREDICATES': [0], 'BUFFER': 2.0, 'COVERAGE': 0.0, 'OPERATOR': 0})
+    check('processing cross_filter: 3 targets', len(result['LAYERS_FILTERED']) == 3 and not result['LAYERS_FAILED'], str(result))
+    check('processing clipped raster + cloud', cur_mnt.source().endswith('.vrt') and cur_lhd.source().endswith('.copc.laz'))
+    # The 5 buildings may touch no parcel: an empty result (1 = 0) is a valid filter too.
+    check('processing filtered parcels', cur_par.subsetString().startswith('"fid" IN') or cur_par.subsetString() == '1 = 0',
+          cur_par.subsetString()[:50])
+    cur_par.setSubsetString('')
+    cur_bat.removeSelection()
+    registry().restore_all(project)
+
+
+# --- 14. a raster source selection is replayed on project reopen ------------
+def s14_raster_selection_replay():
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import band_range
+    from filter_mate.core.services.cross_filter_service import replay_project_filters
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    RasterSourceJob(cur_mnt, RasterSelection(band=1, minimum=1300.0, maximum=1350.0)).apply(cur_mnt)
+    path = os.path.join(os.environ['LOCALAPPDATA'], 'Temp', 'fm5', 'fm5_selection.qgs') if os.name == 'nt' else os.path.join(OUT, 'fm5_selection.qgs')
+    project.write(path)
+    project.clear()
+    registry().restore_all(project)
+    project.read(path)
+    reopened = project.mapLayersByName('mnt')[0]
+    check('selection: reopened on the original tif', reopened.providerType() == 'gdal' and reopened.source().endswith('mnt_1m.tif'))
+    replay_project_filters(service, synchronous=True)
+    low, high, _ = band_range(reopened, 1)
+    check('selection replayed (virtual raster, same range)', reopened.providerType() == 'virtualraster'
+          and low is not None and low >= 1299.9 and high <= 1350.1, f"{reopened.providerType()} {low}-{high}")
+    registry().restore_all(project)
+
+
+# --- 15. REST API accessor ------------------------------------------------------
+def s15_rest_api_accessor():
+    from filter_mate.filtermate_api.qgis_accessor import QGISFilterMateAccessor
+    import types
+    accessor = QGISFilterMateAccessor(public_api=types.SimpleNamespace(get_active_filters=lambda: {}), plugin=None)
+    kinds = {layer.name: layer.layer_kind for layer in accessor.list_layers()}
+    check('API lists layer kinds', kinds.get('mnt') == 'raster' and kinds.get('lhd') == 'point_cloud' and kinds.get('batiment') == 'vector',
+          str(kinds))
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_bat.selectByIds([f.id() for f in cur_bat.getFeatures(QgsFeatureRequest().setLimit(5))])
+    result = accessor.cross_filter('batiment', ['mnt', 'lhd', 'ghost'], ['Intersect'], buffer=2.0)
+    check('API cross_filter', result is not None and sorted(result.filtered) == ['lhd', 'mnt'] and 'ghost' in result.failed,
+          str(result))
+    marked = {layer.name: layer.has_active_filter for layer in accessor.list_layers()}
+    check('API marks clipped layers as filtered', marked.get('mnt') and marked.get('lhd'), str(marked))
+    cur_bat.removeSelection()
+    registry().restore_all(project)
+
+
+# --- 16. undo never overwrites a layer changed by another source ---------------
+def s16_undo_keeps_newer_changes():
+    from filter_mate.adapters.qgis.coverage_layers.snapshots import take_snapshot
+    cur_bat = project.mapLayersByName('batiment')[0]
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    cur_lhd = project.mapLayersByName('lhd')[0]
+    feats = list(cur_bat.getFeatures(QgsFeatureRequest().setLimit(5)))
+    run('V->R (source batiment)', CrossFilterRequest(cur_bat.id(), LayerKind.VECTOR,
+        targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),), predicates=('Intersect',), buffer_value=2.0),
+        VectorSourceJob(cur_bat, feats))
+    first_clip = cur_mnt.source()
+    before = take_snapshot(cur_lhd, LayerKind.POINT_CLOUD)
+    cur_lhd.setSubsetString('Classification = 5')
+    run('P->R (source lhd)', CrossFilterRequest(cur_lhd.id(), LayerKind.POINT_CLOUD,
+        targets=(TargetSpec(cur_mnt.id(), LayerKind.RASTER),), predicates=('Intersect',)),
+        PointCloudSourceJob(cur_lhd, 2.0, before=before))
+    second_clip = cur_mnt.source()
+    service.undo(cur_bat.id())
+    check('second source changed the raster', second_clip != first_clip)
+    check('undo of the older source leaves the newer clip', cur_mnt.source() == second_clip and 'mnt' in service.last_skipped,
+          f"skipped={service.last_skipped}")
+    service.undo(cur_lhd.id())
+    check('undo of the newer source goes back to the first clip', cur_mnt.source() == first_clip and cur_lhd.subsetString() == '')
+    registry().restore_all(project)
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
-                 s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites):
+                 s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites,
+                 s12_refilter_and_operators, s13_processing, s14_raster_selection_replay,
+                 s15_rest_api_accessor, s16_undo_keeps_newer_changes):
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 

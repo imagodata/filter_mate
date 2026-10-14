@@ -30,8 +30,16 @@ class LayerSnapshot:
         derived: True when ``source`` is a FilterMate derived file.
         original_source: Source before FilterMate derived anything (for derived layers).
         original_provider: Provider before FilterMate derived anything.
-        geometry_wkt: Clip geometry of a derived layer, when known.
+        geometry_wkt: Area kept by a clipped layer, when known.
         side: ``inside`` / ``outside`` for a derived layer.
+        nodata: User NoData value of a derived raster (virtual raster selection).
+        enriched_source: Source a layer was enriched from (point cloud with a
+            HeightAboveGround dimension): ``original_source`` is then the
+            enriched file, which Unfilter keeps, and this is what unloading
+            the plugin or saving the project goes back to.
+        enriched_provider: Provider of ``enriched_source``.
+        selection: JSON of the :class:`RasterSelection` a raster source keeps
+            (virtual raster), to rebuild it when the project is opened again.
     """
 
     layer_id: str
@@ -44,6 +52,10 @@ class LayerSnapshot:
     original_provider: str = ""
     geometry_wkt: str = ""
     side: str = ""
+    nodata: Optional[float] = None
+    enriched_source: str = ""
+    enriched_provider: str = ""
+    selection: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -62,6 +74,15 @@ class LayerSnapshot:
     def base_provider(self) -> str:
         """Provider of :attr:`base_source`."""
         return self.original_provider if self.derived and self.original_provider else self.provider
+
+    @property
+    def pristine_source(self) -> str:
+        """Source before any FilterMate change (enrichment included)."""
+        return self.enriched_source or self.base_source
+
+    @property
+    def pristine_provider(self) -> str:
+        return self.enriched_provider or self.base_provider
 
     def same_state(self, other: "LayerSnapshot") -> bool:
         """True when restoring ``other`` would not change anything."""
@@ -135,6 +156,11 @@ class CrossOperationHistory:
         operation = stack.pop()
         self._undo.setdefault(source_layer_id, []).append(operation)
         return operation
+
+    def clear_source(self, source_layer_id: str) -> None:
+        """Drop the history of one source (vector Reset clears its own history too)."""
+        self._undo.pop(source_layer_id, None)
+        self._redo.pop(source_layer_id, None)
 
     def forget_layer(self, layer_id: str) -> None:
         """Drop every operation touching a removed layer (its snapshots are stale)."""

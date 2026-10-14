@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilterMate Roadmap — Proposed Raster & LiDAR Filtering</title>
-    <meta name="description" content="Proposed FilterMate roadmap for raster zonal-statistics filtering and LiDAR point-cloud classification in QGIS. Features, targets and schedule may change.">
+    <title>FilterMate 5.0 — Raster & LiDAR</title>
+    <meta name="description" content="FilterMate 5.0, in development: EXPLORING adapts to raster and point cloud layers, FILTERING relates vector, raster and LiDAR layers in any direction with its usual predicates and buffer.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,130 +34,107 @@
     <div class="container">
         <div class="hero-badge fade-in">
             <span class="pulse"></span>
-            Proposed for FilterMate 5.0
+            In development for FilterMate 5.0
         </div>
         <h1 class="fade-in fade-in-delay-1">Beyond Vectors:<br><span class="gradient">Raster & LiDAR Filtering</span></h1>
-        <p class="fade-in fade-in-delay-2">A proposed direction for raster zonal statistics and point-cloud filtering, presented here for discussion and planning.</p>
-        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Planning document.</strong> FilterMate 4.9.2 filters vector layers. The features, performance targets and schedule below are not part of the current release and may change.</p>
+        <p class="fade-in fade-in-delay-2">EXPLORING selects on the current layer, whatever its kind. FILTERING relates that selection to vector, raster and point cloud layers with its usual predicates and buffer.</p>
+        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Not released yet.</strong> The released plugin (4.9.2) filters vector layers. What follows is implemented on the 5.0 development branch and tested in QGIS 4.2 and 3.44 LTR; it may still change before the release.</p>
         <div class="hero-stats fade-in fade-in-delay-3">
             <div class="hero-stat">
-                <div class="num">8</div>
-                <div class="label">EPICs</div>
+                <div class="num">3</div>
+                <div class="label">Layer kinds</div>
             </div>
             <div class="hero-stat">
-                <div class="num">17</div>
-                <div class="label">User Stories</div>
+                <div class="num">9</div>
+                <div class="label">Source → target pairs</div>
             </div>
             <div class="hero-stat">
-                <div class="num">5</div>
-                <div class="label">Sprints</div>
+                <div class="num">25.1 M</div>
+                <div class="label">Points in the test tile</div>
             </div>
         </div>
     </div>
 </header>
 
+<!-- ===== MODEL ===== -->
+<section class="section" id="model">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                How it works
+            </div>
+            <h2 class="section-title">EXPLORING selects, FILTERING relates</h2>
+            <p class="section-subtitle">The selection on the source becomes a source geometry; each target kind applies the geometric predicates in its own way.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card highlight fade-in">
+                <span class="star-label">Unchanged</span>
+                <div class="feature-title">Vector source</div>
+                <div class="feature-desc">Features picked in EXPLORING (single, multiple, expression), as today. Vector targets keep the existing engine; raster and point cloud targets are clipped by the same buffered geometry.</div>
+                <div class="feature-tags"><span class="tag must">Selection</span><span class="tag sprint">Features</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Raster source</div>
+                <div class="feature-desc">A value range on a histogram, the classes of a paletted raster or a raster calculator expression. The kept pixels are vectorized and become the source geometry.</div>
+                <div class="feature-tags"><span class="tag must">Selection</span><span class="tag sprint">Pixels</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Point cloud source</div>
+                <div class="feature-desc">ASPRS / LiDAR HD classes, Z, intensity and return ranges, height above a DTM. The footprint of the kept points becomes the source geometry.</div>
+                <div class="feature-tags"><span class="tag must">Selection</span><span class="tag sprint">Points</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Vector targets</div>
+                <div class="feature-desc">Features that satisfy the predicates, with an optional minimum coverage for polygons (for example, parcels at least 50 % inside an elevation range).</div>
+                <div class="feature-tags"><span class="tag should">Target</span><span class="tag sprint">Subset</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Raster targets</div>
+                <div class="feature-desc">Pixels outside the source geometry become NoData through a clipped virtual file; Disjoint keeps the outside. The layer keeps its id, style and place in the legend.</div>
+                <div class="feature-tags"><span class="tag should">Target</span><span class="tag sprint">Clipped VRT</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Point cloud targets</div>
+                <div class="feature-desc">Points outside the source geometry are removed through a derived COPC file written with PDAL (or the QGIS exporter); Disjoint keeps the outside.</div>
+                <div class="feature-tags"><span class="tag should">Target</span><span class="tag sprint">Derived COPC</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
 <!-- ===== RASTER SECTION ===== -->
 <section class="section" id="raster">
     <div class="container">
         <div class="section-header fade-in">
-            <div class="section-label raster">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                Raster Filtering
+            <div class="section-label raster"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                Raster
             </div>
-            <h2 class="section-title">Filter Vectors by What's Underneath</h2>
-            <p class="section-subtitle">The proposed workflow calculates raster statistics inside polygons, then uses those values as filter criteria.</p>
+            <h2 class="section-title">An EXPLORING panel for rasters</h2>
+            <p class="section-subtitle">Band, pixel picker, value range, classes and raster expression, with a live preview on the map.</p>
         </div>
-
         <div class="features-grid">
-            <!-- Zonal Stats — star feature -->
             <div class="feature-card highlight fade-in">
                 <span class="star-label">Key feature</span>
-                <div class="feature-icon blue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--water)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-                </div>
-                <div class="feature-title">Zonal Statistics as Filter</div>
-                <div class="feature-desc">
-                    Compute min, max, mean, standard deviation and median of raster values inside each polygon. Then filter: <em>"show only parcels where average elevation &gt; 500 m"</em> or <em>"exclude zones with high NDVI variance"</em>. The design calls for background processing to keep the UI responsive.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag must">MUST</span>
-                    <span class="tag sprint">Sprint 2</span>
-                </div>
+                <div class="feature-title">Pixel picker</div>
+                <div class="feature-desc">Click on the map to read the value of every band; Ctrl+click extends the selected range to that value.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
             </div>
-
-            <!-- Sampling -->
             <div class="feature-card fade-in">
-                <div class="feature-icon blue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--water)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>
-                </div>
-                <div class="feature-title">Raster Value Sampling</div>
-                <div class="feature-desc">
-                    Sample raster values at the centroid of every vector feature, with multi-band support, CRS reprojection and NoData handling. Design target: under 500 ms for 10,000 points on the reference benchmark.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag must">MUST</span>
-                    <span class="tag sprint">Sprint 1</span>
-                </div>
+                <div class="feature-title">Value range and histogram</div>
+                <div class="feature-desc">Drag the two handles of the histogram or type the bounds; the share of selected pixels updates as you go, and a preview hides the other pixels.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
             </div>
-
-            <!-- Highlight -->
             <div class="feature-card fade-in">
-                <div class="feature-icon green">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00e676" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                </div>
-                <div class="feature-title">Dynamic Raster Highlight</div>
-                <div class="feature-desc">
-                    When a zonal filter is active, pixels outside filtered polygons would turn transparent. The proposed visual mask can be toggled without losing the filter; interactive performance is a design target, not a current measurement.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag should">SHOULD</span>
-                    <span class="tag sprint">Sprint 3</span>
-                </div>
+                <div class="feature-title">Classes and expressions</div>
+                <div class="feature-desc">Paletted rasters (land cover) select by classes; any raster can use a raster calculator expression, also across several rasters.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
             </div>
-
-            <!-- Interactive histogram -->
             <div class="feature-card fade-in">
-                <div class="feature-icon blue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--water)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="14" width="4" height="7"/><rect x="10" y="8" width="4" height="13"/><rect x="16" y="4" width="4" height="17"/></svg>
-                </div>
-                <div class="feature-title">Interactive Histogram</div>
-                <div class="feature-desc">
-                    Visualize the distribution of raster values across your zones. Click and drag on the histogram to set filter thresholds. Updates live as you change bands or layers.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag should">SHOULD</span>
-                    <span class="tag sprint">Sprint 2</span>
-                </div>
-            </div>
-
-            <!-- Clip export -->
-            <div class="feature-card fade-in">
-                <div class="feature-icon orange">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--select-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                </div>
-                <div class="feature-title">Raster Clip & Export</div>
-                <div class="feature-desc">
-                    Export the raster clipped to your filtered polygons as GeoTIFF or Cloud-Optimized GeoTIFF (COG). Metadata, CRS and resolution preserved.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag could">COULD</span>
-                    <span class="tag sprint">Sprint 4</span>
-                </div>
-            </div>
-
-            <!-- Dual panel -->
-            <div class="feature-card fade-in">
-                <div class="feature-icon blue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--water)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
-                </div>
-                <div class="feature-title">Dual Panel UI</div>
-                <div class="feature-desc">
-                    Toggle between vector and raster panels with a single click. Auto-detects layer type. Your existing vector workflows remain untouched.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag must">MUST</span>
-                    <span class="tag sprint">Sprint 0</span>
-                </div>
+                <div class="feature-title">Export</div>
+                <div class="feature-desc">A filtered raster is written as GeoTIFF or Cloud Optimized GeoTIFF, pixels outside the filter set to NoData.</div>
+                <div class="feature-tags"><span class="tag should">EXPORTING</span><span class="tag sprint">GeoTIFF / COG</span></div>
             </div>
         </div>
     </div>
@@ -169,74 +146,33 @@
 <section class="section" id="lidar">
     <div class="container">
         <div class="section-header fade-in">
-            <div class="section-label lidar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="6" cy="6" r="1"/><circle cx="18" cy="6" r="1"/><circle cx="6" cy="18" r="1"/><circle cx="18" cy="18" r="1"/><circle cx="12" cy="4" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="20" cy="12" r="1"/><circle cx="12" cy="20" r="1"/></svg>
+            <div class="section-label lidar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="6" cy="6" r="1"/><circle cx="18" cy="6" r="1"/><circle cx="6" cy="18" r="1"/><circle cx="18" cy="18" r="1"/><circle cx="12" cy="4" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="20" cy="12" r="1"/><circle cx="12" cy="20" r="1"/></svg>
                 LiDAR & Point Cloud
             </div>
-            <h2 class="section-title">Filter 3D Point Clouds Natively</h2>
-            <p class="section-subtitle">A proposed interface for filtering point clouds by classification, elevation, intensity and other attributes.</p>
+            <h2 class="section-title">An EXPLORING panel for point clouds</h2>
+            <p class="section-subtitle">LAS, LAZ, COPC, EPT and virtual point clouds; the criteria stack and the panel input is kept per layer.</p>
         </div>
-
         <div class="features-grid">
-            <!-- Classification — star -->
             <div class="feature-card highlight-purple fade-in">
                 <span class="star-label">Key feature</span>
-                <div class="feature-icon purple">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8a5cc2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-                </div>
-                <div class="feature-title">ASPRS Classification Filter</div>
-                <div class="feature-desc">
-                    Check and uncheck point classes visually: Ground, Vegetation, Buildings, Water, Noise and more. Standard ASPRS labels (0–18) would use readable names, with only the classes found in the data displayed.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag should">SHOULD</span>
-                    <span class="tag sprint">Sprint 3</span>
-                </div>
+                <div class="feature-title">Classes with presets</div>
+                <div class="feature-desc">ASPRS classes plus the LiDAR HD ones (permanent above-ground structures, virtual points…), with presets: ground, vegetation, buildings, above ground, water, without noise.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
             </div>
-
-            <!-- Elevation / attributes -->
             <div class="feature-card fade-in">
-                <div class="feature-icon purple">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8a5cc2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                </div>
-                <div class="feature-title">Elevation & Attribute Sliders</div>
-                <div class="feature-desc">
-                    Filter by Z range, intensity, return number or any attribute. Sliders auto-calibrate to your data's min/max. Combine freely with classification filters.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag should">SHOULD</span>
-                    <span class="tag sprint">Sprint 4</span>
-                </div>
+                <div class="feature-title">Attribute ranges</div>
+                <div class="feature-desc">Z with three decimals, intensity, first / last / single return, and an editable expression for anything else.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
             </div>
-
-            <!-- Multi-criteria -->
             <div class="feature-card fade-in">
-                <div class="feature-icon purple">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8a5cc2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                </div>
-                <div class="feature-title">Multi-Criteria Combiner</div>
-                <div class="feature-desc">
-                    Stack classification + elevation + intensity into a single combined query. Toggle each criterion independently. Save and reload filter presets.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag should">SHOULD</span>
-                    <span class="tag sprint">Sprint 4</span>
-                </div>
+                <div class="feature-title">Height above a DTM</div>
+                <div class="feature-desc">Pick a terrain model: PDAL adds a HeightAboveGround dimension, then "vegetation higher than 2 m" is a live filter.</div>
+                <div class="feature-tags"><span class="tag should">EXPLORING</span><span class="tag sprint">PDAL</span></div>
             </div>
-
-            <!-- Clip & export -->
             <div class="feature-card fade-in">
-                <div class="feature-icon orange">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--select-deep)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                </div>
-                <div class="feature-title">Polygon Clip & LAZ Export</div>
-                <div class="feature-desc">
-                    Clip your point cloud to a vector polygon. Export filtered points to LAZ or COPC via PDAL. Requires QGIS 3.32+; gracefully hidden on older versions.
-                </div>
-                <div class="feature-tags">
-                    <span class="tag could">COULD</span>
-                    <span class="tag sprint">Sprint 5+</span>
-                </div>
+                <div class="feature-title">Tiles and export</div>
+                <div class="feature-desc">Apply a selection to every tile of a LiDAR HD dataset; export filtered points to LAZ, COPC, GeoPackage or CSV.</div>
+                <div class="feature-tags"><span class="tag should">EXPORTING</span><span class="tag sprint">LAZ / COPC</span></div>
             </div>
         </div>
     </div>
@@ -244,55 +180,34 @@
 
 <hr class="divider">
 
-<!-- ===== TIMELINE ===== -->
+<!-- ===== STATUS ===== -->
 <section class="section" id="timeline">
     <div class="container">
         <div class="section-header fade-in">
-            <div class="section-label timeline">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Roadmap
+            <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Status
             </div>
-            <h2 class="section-title">Sprint Timeline</h2>
-            <p class="section-subtitle">A draft sequence of five estimated sprints, starting with raster foundations and then point-cloud support.</p>
+            <h2 class="section-title">Where 5.0 stands</h2>
+            <p class="section-subtitle">Times measured on one IGN LiDAR HD tile (1 km², 25.1 million points) with a 1 m DTM and BD TOPO buildings, QGIS 4.2.</p>
         </div>
-
         <div class="timeline fade-in">
             <div class="timeline-item">
-                <div class="timeline-dot s0">0</div>
-                <div class="timeline-sprint">Sprint 0 &mdash; Foundations (1.5 weeks)</div>
-                <div class="timeline-title">Raster Foundations & Cherry-Pick</div>
-                <div class="timeline-desc">Merge the raster domain layer from the development branch, wire the dual-panel UI into the refactored dockwidget and keep the existing test suite passing.</div>
+                <div class="timeline-dot s0">1</div>
+                <div class="timeline-sprint">Implemented on the development branch</div>
+                <div class="timeline-title">Panels, cross filters, export</div>
+                <div class="timeline-desc">Raster and point cloud panels, the nine source → target pairs, undo / redo, favorites, project save and reopen, Processing algorithm and REST API endpoint.</div>
             </div>
-
             <div class="timeline-item">
-                <div class="timeline-dot s1">1</div>
-                <div class="timeline-sprint">Sprint 1 &mdash; Raster Sampling (1.5 weeks)</div>
-                <div class="timeline-title">Raster Info + Value Sampling</div>
-                <div class="timeline-desc">Display raster metadata, sample values at polygon centroids with automatic reprojection and add multi-band selection. Target benchmark: under 500 ms for 10,000 features.</div>
-                <div class="timeline-milestone">Alpha Raster</div>
+                <div class="timeline-dot s1">2</div>
+                <div class="timeline-sprint">Measured</div>
+                <div class="timeline-title">From a fraction of a second to a few seconds</div>
+                <div class="timeline-desc">Raster clipped by buildings: 0.5 s. Point cloud clipped by five buildings: 0.7 s. Parcels by elevation range: 0.2 s. Point cloud clipped by an elevation zone: 14 s (4 million points rewritten).</div>
             </div>
-
             <div class="timeline-item">
-                <div class="timeline-dot s2">2</div>
-                <div class="timeline-sprint">Sprint 2 &mdash; Zonal Stats (2.5 weeks)</div>
-                <div class="timeline-title">Zonal Statistics + Interactive Histogram</div>
-                <div class="timeline-desc">Background zonal statistics, polygon filtering by thresholds and an interactive histogram. Target benchmark: 100 polygons on a 1 GB raster in under 10 seconds.</div>
-                <div class="timeline-milestone">Beta Raster</div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot s3">3</div>
-                <div class="timeline-sprint">Sprint 3 &mdash; Highlight + PC Foundations (2.5 weeks)</div>
-                <div class="timeline-title">Raster Highlight + Point Cloud Architecture</div>
-                <div class="timeline-desc">Dynamic pixel masking for filtered zones. In parallel: hexagonal port/adapter for point clouds, conditional detection (QGIS 3.26+), ASPRS classification filter.</div>
-                <div class="timeline-milestone">Raster V1 + Alpha Point Cloud</div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot s4">4</div>
-                <div class="timeline-sprint">Sprint 4 &mdash; Point Cloud Complete (2 weeks)</div>
-                <div class="timeline-title">Elevation Sliders + Multi-Criteria + Raster Export</div>
-                <div class="timeline-desc">Attribute/Z range filters for point clouds. Multi-criteria combiner. Raster clip-to-polygon export. Full test suite.</div>
+                <div class="timeline-dot s2">3</div>
+                <div class="timeline-sprint">Before the release</div>
+                <div class="timeline-title">Wider testing</div>
+                <div class="timeline-desc">QGIS 3.22 to 3.28, Linux and macOS with PDAL, translations of the new panels in every language, user guide and videos.</div>
                 <div class="timeline-milestone">FilterMate 5.0</div>
             </div>
         </div>

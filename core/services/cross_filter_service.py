@@ -14,7 +14,7 @@ subset strings.
 import logging
 from typing import Callable, Iterable, List, Optional
 
-from ..domain.cross_filter import CrossFilterRequest, TargetSpec
+from ..domain.cross_filter import CrossFilterRequest
 from ..domain.filter_state import CrossOperation, CrossOperationHistory, LayerSnapshot
 from ..domain.layer_kind import LayerKind
 
@@ -35,7 +35,9 @@ class CrossFilterService:
 
     def __init__(self, history: Optional[CrossOperationHistory] = None) -> None:
         self.history = history or CrossOperationHistory()
-        self._running = None
+        self.last_skipped: List[str] = []
+        self._running = []
+        self.replaying: set = set()
 
     # --- run ----------------------------------------------------------------
 
@@ -51,8 +53,8 @@ class CrossFilterService:
         clip_mode = str(_config_option('point_cloud_clip', 'exact') or 'exact')
         jobs = []
         for target in request.targets:
-            if target.layer_id == request.source_layer_id:
-                continue
+            if target.layer_id == request.source_layer_id and request.source_kind is not LayerKind.OTHER:
+                continue  # a real source is filtered by its own job; a stored geometry targets its layer
             layer = project.mapLayer(target.layer_id)
             if layer is None:
                 continue
@@ -66,6 +68,7 @@ class CrossFilterService:
 
         def _done(task, result):
             self._record(task, request)
+            self._running = [t for t in self._running if t is not task and not _finished(t)]
             if on_done is not None:
                 on_done(task, result)
 
@@ -80,9 +83,20 @@ class CrossFilterService:
             task.apply_results(result)
             return task
         from qgis.core import QgsApplication
-        self._running = task
+        self._running = [t for t in self._running if not _finished(t)] + [task]
         QgsApplication.taskManager().addTask(task)
         return task
+
+    def cancel_all(self) -> None:
+        """Cancel the cross filter tasks still running (plugin unload)."""
+        for task in self._running:
+            try:
+                if not _finished(task):
+                    task.on_done = None
+                    task.cancel()
+            except RuntimeError:
+                pass
+        self._running = []
 
     def _record(self, task, request: CrossFilterRequest) -> None:
         if task.changes:
@@ -92,16 +106,28 @@ class CrossFilterService:
     # --- undo / redo / unfilter --------------------------------------------
 
     def _restore(self, pairs: Iterable, use_before: bool, project=None) -> List[str]:
+        """Restore one side of an operation, only on layers still in the other side's state.
+
+        A layer changed since the operation (another source filtered it again,
+        the user edited its subset) is left alone and listed in
+        :attr:`last_skipped`: undoing must never overwrite newer work.
+        """
         from qgis.core import QgsProject
-        from ...adapters.qgis.coverage_layers.snapshots import restore_snapshot
+        from ...adapters.qgis.coverage_layers.snapshots import restore_snapshot, take_snapshot
         project = project or QgsProject.instance()
         restored = []
+        self.last_skipped = []
         for before, after in pairs:
-            snapshot = before if use_before else after
+            snapshot, expected = (before, after) if use_before else (after, before)
             layer = project.mapLayer(snapshot.layer_id)
             if layer is None:
                 continue
             try:
+                current = take_snapshot(layer, LayerKind(snapshot.kind))
+                if not current.same_state(expected) and not current.same_state(snapshot):
+                    self.last_skipped.append(layer.name())
+                    logger.info(f"[FM5] '{layer.name()}' changed since this operation: left as is")
+                    continue
                 if restore_snapshot(layer, snapshot):
                     restored.append(snapshot.layer_id)
             except Exception as exc:
@@ -127,7 +153,8 @@ class CrossFilterService:
             return []
         return self._restore(operation.changes, use_before=False, project=project)
 
-    def unfilter(self, source_layer_id: str, layer_ids: Iterable[str], kinds: dict, project=None) -> List[str]:
+    def unfilter(self, source_layer_id: str, layer_ids: Iterable[str], kinds: dict, project=None,
+                 record: bool = True) -> List[str]:
         """Put layers back on their original source with no subset (undoable).
 
         Args:
@@ -153,7 +180,7 @@ class CrossFilterService:
                 changes.append((before, take_snapshot(layer, kind)))
             except Exception as exc:
                 logger.warning(f"[FM5] '{layer.name()}' not cleared: {exc}", exc_info=True)
-        if changes:
+        if changes and record:
             self.history.push(CrossOperation(source_layer_id, tuple(changes), description='unfilter'))
         return [before.layer_id for before, _ in changes]
 
@@ -171,22 +198,44 @@ def replay_project_filters(service: Optional['CrossFilterService'] = None, synch
     registry().install()
     queued = 0
     for layer, snapshot in pending_replays():
+        if layer.id() in service.replaying:
+            continue  # already queued (setup and readProject can both trigger)
         try:
             kind = LayerKind(snapshot.kind)
         except ValueError:
             continue
         if not kind.is_coverage:
             continue
+        if snapshot.selection and not snapshot.geometry_wkt:
+            # A raster source filtered by its own selection: rebuilt at once (no task needed).
+            from ...adapters.qgis.coverage_layers.source_jobs import apply_stored_selection
+            if apply_stored_selection(layer, snapshot) is not None:
+                queued += 1
+                logger.info(f"[FM5] replayed the stored raster selection of '{layer.name()}'")
+            continue
         # The stored geometry is the area kept (outside already subtracted):
         # clip the original source again, keeping its inside.
-        request = CrossFilterRequest(source_layer_id=f"replay:{layer.id()}", source_kind=LayerKind.OTHER,
+        request = CrossFilterRequest(source_layer_id=layer.id(), source_kind=LayerKind.OTHER,
                                      targets=(TargetSpec(layer.id(), kind),), predicates=('Intersect',))
         geometry = snapshot.geometry_wkt
         job = FixedGeometrySourceJob(layer, geometry)
-        service.run(request, job, synchronous=synchronous)
+        service.replaying.add(layer.id())
+
+        def _done(task, result, layer_id=layer.id()):
+            service.replaying.discard(layer_id)
+
+        service.run(request, job, on_done=_done, synchronous=synchronous)
         queued += 1
         logger.info(f"[FM5] replaying the stored {kind.value} filter of '{layer.name()}'")
     return queued
+
+
+def _finished(task) -> bool:
+    try:
+        from qgis.core import QgsTask
+        return task.status() in (QgsTask.TaskStatus.Complete, QgsTask.TaskStatus.Terminated)
+    except Exception:
+        return True
 
 
 _service: Optional[CrossFilterService] = None

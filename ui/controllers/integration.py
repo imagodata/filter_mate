@@ -1984,13 +1984,13 @@ class ControllerIntegration:
         except Exception as e:
             logger.warning(f"delegate_vector_source_coverage_task failed: {e}")
 
-    def delegate_coverage_export(self, layer_ids: list, folder):
+    def delegate_coverage_export(self, layer_ids: list, folder, crs=None, zip_path=None):
         """Export raster / point cloud layers checked in EXPORTING (background task)."""
         controller = self._point_cloud_ui_controller
         if controller is None or not layer_ids:
             return None
         try:
-            return controller.export_coverage_layers(layer_ids, folder)
+            return controller.export_coverage_layers(layer_ids, folder, crs, zip_path)
         except Exception as e:
             logger.warning(f"delegate_coverage_export failed: {e}")
             return None

@@ -37,7 +37,6 @@ SOURCES = \
     ../ui/managers/export_dialog_manager.py \
     ../ui/widgets/backend_indicator.py \
     ../ui/widgets/custom_widgets.py \
-    ../ui/widgets/favorites_widget.py \
     ../ui/widgets/history_widget.py \
     ../ui/widgets/json_view/datatypes.py \
     ../ui/widgets/json_view/model.py \

@@ -213,9 +213,11 @@ def s_raster_preview():
 
 
 def s_raster_preview_check():
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import pixel_is_transparent
     renderer = layer('mnt').renderer()
     pixels = renderer.rasterTransparency().transparentSingleValuePixelList() if renderer.rasterTransparency() else []
-    check('raster preview hides pixels outside the range', len(pixels) == 2, str(len(pixels)))
+    check('raster preview hides pixels outside the range', len(pixels) == 2 and all(pixel_is_transparent(p) for p in pixels),
+          str([(p.min, p.max, getattr(p, 'opacity', None)) for p in pixels]))
     save(iface.mainWindow(), '04-raster-preview')
     dock().pushButton_checkable_exploring_selecting.setChecked(False)
 
@@ -299,7 +301,8 @@ def s_back_to_vector_check():
 
 def s_export():
     layer('lhd').setSubsetString('Classification = 9')
-    STATE['export_task'] = controller().export_coverage_layers([layer('mnt').id(), layer('lhd').id()], OUT)
+    STATE['export_task'] = controller().export_coverage_layers([layer('mnt').id(), layer('lhd').id()], OUT, None,
+                                                               os.path.join(OUT, 'export.zip'))
     check('export task started', STATE['export_task'] is not None)
 
 
@@ -318,6 +321,10 @@ def s_export_check():
     results = getattr(controller(), 'last_export_results', None) or []
     check('export raster + point cloud (background task)', len(results) == 2 and all(r.success for r in results),
           str([(r.path, r.message) for r in results]))
+    import zipfile
+    archive = os.path.join(OUT, 'export_raster_lidar.zip')
+    names = zipfile.ZipFile(archive).namelist() if os.path.exists(archive) else []
+    check('export zip of raster + point cloud', sorted(names) == ['lhd.laz', 'mnt.tif'], str(names))
     layer('lhd').setSubsetString('')
 
 
@@ -340,8 +347,15 @@ STEPS = [
 ]
 
 
+STOP_AFTER = os.environ.get('FM5_STOP_AFTER', '')
+
+
 def run_step(index=0):
     if index >= len(STEPS):
+        return
+    if STOP_AFTER and index > 0 and STEPS[index - 1][0].__name__ == STOP_AFTER:
+        log(f'stopping after {STOP_AFTER}')
+        s_finish()
         return
     if STATE.get('waiting'):
         QTimer.singleShot(1000, lambda: run_step(index))

@@ -9,12 +9,12 @@ sync state.
 
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
-from ..accessor import FilterMateAccessor, FilterStatus, HistoryStep
+from ..accessor import CrossFilterResult, FilterMateAccessor, FilterStatus, HistoryStep
 
 router = APIRouter(prefix="/filters", tags=["filters"])
 
@@ -128,3 +128,38 @@ async def redo_filter(request: Request) -> HistoryStepResponse:
         step=step,
         active_filters=accessor.get_active_filters(),
     )
+
+
+# --- FilterMate 5: cross filter -----------------------------------------------
+
+_PREDICATES = ("Intersect", "Contain", "Disjoint", "Equal", "Touch", "Overlap", "Are within", "Cross")
+_OPERATORS = ("AND", "OR", "AND NOT")
+
+
+class CrossFilterRequestBody(BaseModel):
+    source_layer: str = Field(..., min_length=1, description="Vector source layer name")
+    target_layers: List[str] = Field(..., min_length=1, description="Layers to filter: vector, raster or point cloud")
+    predicates: List[str] = Field(default_factory=lambda: ["Intersect"], description=f"Any of {', '.join(_PREDICATES)}")
+    buffer: float = Field(default=0.0, description="Buffer of the source geometry (source CRS units, metres for a geographic CRS)")
+    coverage_min: float = Field(default=0.0, ge=0.0, le=100.0, description="Minimum share of a polygon target inside the source (%)")
+    operator: Optional[str] = Field(default=None, description="Combine with the targets' previous filter: AND, OR, AND NOT (null = replace)")
+    selected_only: bool = Field(default=True, description="Use the selected source features (all when none is selected)")
+
+
+@router.post("/cross", response_model=CrossFilterResult)
+async def cross_filter(payload: CrossFilterRequestBody, request: Request) -> CrossFilterResult:
+    """Filter layers of any kind (vector, raster, point cloud) by a vector source layer."""
+    unknown = [p for p in payload.predicates if p not in _PREDICATES]
+    if unknown:
+        raise HTTPException(status_code=422, detail="Unknown predicate")
+    if payload.operator is not None and payload.operator not in _OPERATORS:
+        raise HTTPException(status_code=422, detail="Unknown operator")
+    result = _accessor(request).cross_filter(
+        source_layer=payload.source_layer, target_layers=payload.target_layers, predicates=payload.predicates,
+        buffer=payload.buffer, coverage_min=payload.coverage_min, operator=payload.operator,
+        selected_only=payload.selected_only)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Source layer not found")
+    if result.error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cross filter failed")
+    return result

@@ -61,7 +61,7 @@ class DerivedSourceRegistry:
                 layer = None
         if layer is not None:
             try:
-                if snapshot.derived and snapshot.geometry_wkt:
+                if snapshot.derived and (snapshot.geometry_wkt or snapshot.selection):
                     layer.setCustomProperty(DERIVED_PROPERTY, json.dumps(snapshot.to_dict()))
                 else:
                     layer.removeCustomProperty(DERIVED_PROPERTY)
@@ -106,19 +106,25 @@ class DerivedSourceRegistry:
             snapshot = self._derived.get(layer.id())
         except RuntimeError:
             return
-        if snapshot is None or not snapshot.original_source:
+        if snapshot is None or not snapshot.pristine_source:
             return
         try:
+            source = snapshot.pristine_source
+            try:
+                # Relative paths when the project uses them (QgsPathResolver).
+                source = self._project.pathResolver().writePath(source) if self._project is not None else source
+            except Exception:
+                pass
             datasource = element.firstChildElement('datasource')
             if not datasource.isNull():
                 while datasource.hasChildNodes():
                     datasource.removeChild(datasource.firstChild())
-                datasource.appendChild(document.createTextNode(snapshot.original_source))
+                datasource.appendChild(document.createTextNode(source))
             provider = element.firstChildElement('provider')
-            if not provider.isNull() and snapshot.original_provider:
+            if not provider.isNull() and snapshot.pristine_provider:
                 while provider.hasChildNodes():
                     provider.removeChild(provider.firstChild())
-                provider.appendChild(document.createTextNode(snapshot.original_provider))
+                provider.appendChild(document.createTextNode(snapshot.pristine_provider))
             marker = document.createElement('filtermate_derived')
             marker.setAttribute('state', json.dumps(snapshot.to_dict()))
             element.appendChild(marker)
@@ -135,8 +141,8 @@ class DerivedSourceRegistry:
             layer = project.mapLayer(layer_id)
             if layer is None:
                 continue
-            original = LayerSnapshot(layer_id, snapshot.kind, source=snapshot.original_source,
-                                     provider=snapshot.original_provider, subset='')
+            original = LayerSnapshot(layer_id, snapshot.kind, source=snapshot.pristine_source,
+                                     provider=snapshot.pristine_provider, subset='')
             try:
                 restore_snapshot(layer, original, self)
                 restored += 1
@@ -160,13 +166,19 @@ def registry() -> DerivedSourceRegistry:
 def take_snapshot(layer: QgsMapLayer, kind: LayerKind, derived_registry: Optional[DerivedSourceRegistry] = None) -> LayerSnapshot:
     """Capture the current filter state of ``layer``."""
     reg = derived_registry or registry()
-    known = reg.get(layer.id())
     subset = layer.subsetString() if _supports_subset(layer) else ''
+    if kind is LayerKind.VECTOR:
+        # A vector layer is only ever filtered through its subset; its source
+        # (which embeds the subset for OGR / PostgreSQL) is not tracked, so a
+        # restore never reloads the provider.
+        return LayerSnapshot(layer.id(), kind.value, subset=subset)
+    known = reg.get(layer.id())
     if known is not None and known.source == layer.source():
         return LayerSnapshot(layer.id(), kind.value, source=layer.source(), provider=layer.providerType(),
                              subset=subset, derived=True, original_source=known.original_source,
                              original_provider=known.original_provider, geometry_wkt=known.geometry_wkt,
-                             side=known.side)
+                             side=known.side, nodata=known.nodata, enriched_source=known.enriched_source,
+                             enriched_provider=known.enriched_provider, selection=known.selection)
     return LayerSnapshot(layer.id(), kind.value, source=layer.source(), provider=layer.providerType(), subset=subset)
 
 
@@ -179,11 +191,16 @@ def restore_snapshot(layer: QgsMapLayer, snapshot: LayerSnapshot,
     """
     reg = derived_registry or registry()
     changed = False
-    if snapshot.source and (layer.source() != snapshot.source or layer.providerType() != snapshot.provider):
-        layer.setDataSource(snapshot.source, layer.name(), snapshot.provider, QgsDataProvider.ProviderOptions(), False)
+    if snapshot.kind != LayerKind.VECTOR.value and snapshot.source and (
+            layer.source() != snapshot.source or layer.providerType() != snapshot.provider):
+        if not swap_source(layer, snapshot.source, snapshot.provider):
+            raise RuntimeError(f"source '{snapshot.source}' could not be opened")
         changed = True
         if snapshot.kind == LayerKind.RASTER.value:
             _sync_alpha_band(layer)
+            if snapshot.provider == 'virtualraster' and snapshot.nodata is not None:
+                from .raster_adapter import set_user_nodata
+                set_user_nodata(layer, snapshot.nodata)
     if _supports_subset(layer) and layer.subsetString() != (snapshot.subset or ''):
         try:
             from ....infrastructure.database.sql_utils import safe_set_subset_string
@@ -195,6 +212,17 @@ def restore_snapshot(layer: QgsMapLayer, snapshot: LayerSnapshot,
     if changed:
         layer.triggerRepaint()
     return changed
+
+
+def swap_source(layer, source: str, provider: str) -> bool:
+    """``setDataSource`` that puts the previous source back when the new one is invalid."""
+    previous_source, previous_provider = layer.source(), layer.providerType()
+    layer.setDataSource(source, layer.name(), provider, QgsDataProvider.ProviderOptions(), False)
+    if layer.isValid():
+        return True
+    logger.warning(f"[FM5] '{layer.name()}': '{source}' could not be opened, previous source restored")
+    layer.setDataSource(previous_source, layer.name(), previous_provider, QgsDataProvider.ProviderOptions(), False)
+    return False
 
 
 def _sync_alpha_band(layer) -> None:
@@ -236,7 +264,7 @@ def pending_replays(project: Optional[QgsProject] = None):
         except (TypeError, ValueError):
             layer.removeCustomProperty(DERIVED_PROPERTY)
             continue
-        if registry().is_derived(layer.id()) or not snapshot.geometry_wkt:
+        if registry().is_derived(layer.id()) or not (snapshot.geometry_wkt or snapshot.selection):
             continue
         if layer.source() != snapshot.original_source:
             continue  # the user changed the source since: the stored filter no longer applies

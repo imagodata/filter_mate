@@ -405,12 +405,10 @@ class FilteringController(BaseController, LayerSelectionMixin):
 
             # FilterMate 5: raster and point cloud layers can be the source too.
             try:
-                from ...adapters.qgis.point_cloud_capability import is_coverage_layer, get_layer_kind
+                from ...adapters.qgis.point_cloud_capability import is_coverage_layer
             except ImportError:
                 def is_coverage_layer(_layer):
                     return False
-
-                get_layer_kind = None
             if layer is None or not (isinstance(layer, QgsVectorLayer) or is_coverage_layer(layer)):
                 logger.debug("populate_layers_checkable_combobox: No valid source layer")
                 return False

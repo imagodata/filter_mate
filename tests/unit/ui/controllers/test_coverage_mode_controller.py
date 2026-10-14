@@ -60,7 +60,7 @@ class FakeService:
         self.undo_ok = {}
         self.redo_ok = {}
 
-    def unfilter(self, source_id, ids, kinds):
+    def unfilter(self, source_id, ids, kinds, record=True):
         self.calls.append(("unfilter", source_id, tuple(ids)))
         return list(ids)
 
@@ -190,12 +190,29 @@ class TestDispatch:
         monkeypatch.setattr(controller, "_finish_restore", lambda ids: restored.append(ids))
         monkeypatch.setattr(controller, "_run_filter", lambda layer: restored.append(("filter", layer.id())))
         monkeypatch.setattr(controller, "_run_export", lambda ids: restored.append(("export", ids)))
+        monkeypatch.setattr(controller, "_layers_checked_for_export", lambda: [])
         assert controller.handle_task("undo") and controller.handle_task("redo")
         assert controller.handle_task("filter") and controller.handle_task("export")
         assert controller.handle_task("whatever") is True
         service = ctrl_module._test_service
         assert ("undo", "r1") in service.calls and ("redo", "r1") in service.calls
         assert ("filter", "r1") in restored and ("export", ["r1"]) in restored
+
+    def test_export_defers_to_exporting_tab_when_layers_are_checked(self, ctrl_module, layers, monkeypatch):
+        dock = _dock(current_layer=layers["r1"])
+        controller = ctrl_module.CoverageModeController(dock)
+        controller._active_layer = layers["r1"]
+        monkeypatch.setattr(controller, "_layers_checked_for_export", lambda: ["v2", "r1"])
+        assert controller.handle_task("export") is False
+
+    def test_actions_blocked_while_a_task_runs(self, ctrl_module, layers, monkeypatch):
+        dock = _dock(current_layer=layers["r1"])
+        controller = ctrl_module.CoverageModeController(dock)
+        controller._active_layer = layers["r1"]
+        monkeypatch.setattr(controller, "is_running", lambda: True)
+        assert controller.handle_task("undo") is True
+        assert ("undo", "r1") not in ctrl_module._test_service.calls
+        assert ctrl_module._test_feedback.messages[-1][0] == "warning"
 
     def test_task_releases_panel_when_current_layer_changed(self, ctrl_module, layers, monkeypatch):
         dock = _dock(current_layer=layers["v1"])
@@ -215,9 +232,19 @@ class TestVectorSourceTargets:
         assert controller.split_coverage_targets(["v2", "r1", "p1", "o1"]) == (["v2", "o1"], ["r1", "p1"])
         assert controller.split_coverage_targets([]) == ([], [])
 
+    @staticmethod
+    def _linking(controller, changed=True):
+        """Stand-in for _run_vector_source_filter: the cross task changed layers (or not)."""
+        def fake(source, ids, run_index=None):
+            if changed:
+                controller._linked_runs[source.id()][run_index] = True
+            return True
+        return fake
+
     def test_undo_redo_follow_linked_runs(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
-        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda source, ids: True)
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller))
         monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
         source = layers["v1"]
         controller.run_vector_source_task("filter", source, ["r1"])   # linked run
@@ -232,20 +259,52 @@ class TestVectorSourceTargets:
         controller.run_vector_source_task("redo", source, [])
         assert service.calls.count(("redo", "v1")) == 1
 
-    def test_unfilter_clears_targets_and_links(self, ctrl_module, layers, monkeypatch):
+    def test_cross_task_without_change_is_not_linked(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
-        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda source, ids: True)
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller, changed=False))
+        controller.run_vector_source_task("filter", layers["v1"], ["r1"])
+        controller.run_vector_source_task("undo", layers["v1"], [])
+        assert ("undo", "v1") not in ctrl_module._test_service.calls
+
+    def test_disabled_targets_or_predicates_skip_coverage_targets(self, ctrl_module, layers, monkeypatch):
+        dock = _dock(pushButton_checkable_filtering_layers_to_filter=_checked(True),
+                     pushButton_checkable_filtering_geometric_predicates=_checked(False))
+        controller = ctrl_module.CoverageModeController(dock)
+        ran = []
+        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda *a, **k: ran.append(a) or True)
+        controller.run_vector_source_task("filter", layers["v1"], ["r1"])
+        assert ran == [] and controller._linked_runs["v1"] == [False]
+
+    def test_unfilter_keeps_links_like_the_vector_history(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller))
         monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
         controller.run_vector_source_task("filter", layers["v1"], ["r1", "p1"])
         controller.run_vector_source_task("unfilter", layers["v1"], ["r1", "p1"])
         assert ("unfilter", "v1", ("r1", "p1")) in ctrl_module._test_service.calls
+        # Undo after Unfilter goes back to before the last filter (vector engine rule).
+        controller.run_vector_source_task("undo", layers["v1"], [])
+        assert ("undo", "v1") in ctrl_module._test_service.calls
+
+    def test_reset_clears_links_and_history(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller))
+        monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
+        cleared = []
+        ctrl_module._test_service.history = types.SimpleNamespace(clear_source=lambda sid: cleared.append(sid))
+        controller.run_vector_source_task("filter", layers["v1"], ["r1"])
+        controller.run_vector_source_task("reset", layers["v1"], ["r1"])
+        assert cleared == ["v1"]
         controller.run_vector_source_task("undo", layers["v1"], [])
         assert ("undo", "v1") not in ctrl_module._test_service.calls
 
     def test_filter_without_coverage_targets_records_unlinked_run(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         ran = []
-        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda source, ids: ran.append(ids) or True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda source, ids, run_index=None: ran.append(ids) or True)
         controller.run_vector_source_task("filter", layers["v1"], [])
         assert ran == [] and controller._linked_runs["v1"] == [False]
 

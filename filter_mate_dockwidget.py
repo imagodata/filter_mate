@@ -6388,6 +6388,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             fm = plugins['filter_mate']; self.close(); fm.pluginIsActive, fm.app = False, None; QTimer.singleShot(100, fm.run)
         except Exception as e: show_error("FilterMate", self.tr("Error reloading plugin: {0}").format(str(e)))
 
+    def _flush_coverage_export(self) -> None:
+        """FilterMate 5: start the raster / point cloud export prepared by the export branch."""
+        pending, self._pending_coverage_export = getattr(self, '_pending_coverage_export', None), None
+        integration = getattr(self, '_controller_integration', None)
+        if pending and integration is not None and hasattr(integration, 'delegate_coverage_export'):
+            integration.delegate_coverage_export(*pending)
+
     def _coverage_action(self, action: str) -> bool:
         """FilterMate 5: run an EXPLORING button on the active raster / point cloud layer."""
         integration = getattr(self, '_controller_integration', None)
@@ -6706,11 +6713,22 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 if coverage_ids:
                     exporting_props = self.project_props.setdefault('EXPORTING', {})
                     folder = exporting_props.get('OUTPUT_FOLDER_TO_EXPORT', '') if exporting_props.get('HAS_OUTPUT_FOLDER_TO_EXPORT') else ''
-                    integration.delegate_coverage_export(coverage_ids, folder or None)
-                    exporting_props['LAYERS_TO_EXPORT'] = vector_ids
-                    exporting_props['HAS_LAYERS_TO_EXPORT'] = bool(vector_ids)
+                    # A single layer / GPKG export stores a FILE path: raster and
+                    # point cloud files go next to it.
+                    if folder and os.path.splitext(folder)[1] and not os.path.isdir(folder):
+                        folder = os.path.dirname(folder)
+                    crs = None
+                    if exporting_props.get('HAS_PROJECTION_TO_EXPORT') and exporting_props.get('PROJECTION_TO_EXPORT'):
+                        crs = QgsCoordinateReferenceSystem.fromWkt(exporting_props['PROJECTION_TO_EXPORT'])
+                    # Started when the vector export really starts (after the
+                    # "preserve groups" dialog, which can still be canceled).
+                    zip_path = exporting_props.get('ZIP_TO_EXPORT', '') if exporting_props.get('HAS_ZIP_TO_EXPORT') else ''
+                    self._pending_coverage_export = (coverage_ids, folder or None, crs, zip_path or None)
+                    # The vector export skips raster / point cloud layers itself
+                    # (TaskParameterBuilder.build_export_params).
                     layers_to_export = vector_ids
                     if not vector_ids:
+                        self._flush_coverage_export()
                         return
 
             # FIX 2026-01-22 v4.3.7: Sync ALL export flags JUST-IN-TIME
@@ -6815,10 +6833,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                         # Schedule safe Qt destruction before emitting the task
                         dialog.deleteLater()
                         self._export_recap_dialog = None
+                        self._flush_coverage_export()
                         self.launchingTask.emit(task_name)
 
                     def _on_rejected():
                         logger.info(f"{current_datatype} export cancelled by user")
+                        self._pending_coverage_export = None
                         dialog.deleteLater()
                         self._export_recap_dialog = None
 
@@ -6829,6 +6849,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except Exception as e:
                 logger.warning(f"Export group dialog setup failed: {e}", exc_info=True)
 
+            self._flush_coverage_export()
             self.launchingTask.emit(task_name)
             return
 
@@ -6858,22 +6879,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 return
 
         all_targets = self.get_layers_to_filter()
-        # FilterMate 5: raster / point cloud targets of a vector source are not
-        # sent to the vector engine; they are clipped by the same source geometry
-        # right after the vector task is launched (and follow unfilter / undo).
-        vector_targets, coverage_targets = all_targets, []
+        self.PROJECT_LAYERS[self.current_layer.id()]["filtering"]["layers_to_filter"] = all_targets
+        self.setLayerVariableEvent(self.current_layer, [("filtering", "layers_to_filter")])
+        # FilterMate 5: the vector engine skips raster / point cloud targets
+        # (LayerFilterBuilder); they are clipped by the same source geometry
+        # right after the vector task is launched, and follow unfilter / undo.
+        coverage_targets = []
         integration = getattr(self, '_controller_integration', None)
         if integration is not None and hasattr(integration, 'delegate_split_coverage_targets'):
-            vector_targets, coverage_targets = integration.delegate_split_coverage_targets(all_targets)
-        filtering_props = self.PROJECT_LAYERS[self.current_layer.id()]["filtering"]
-        filtering_props["layers_to_filter"] = vector_targets
-        self.setLayerVariableEvent(self.current_layer, [("filtering", "layers_to_filter")])
+            _, coverage_targets = integration.delegate_split_coverage_targets(all_targets)
         source_layer = self.current_layer
-        try:
-            self.launchingTask.emit(task_name)
-        finally:
-            if coverage_targets:
-                filtering_props["layers_to_filter"] = all_targets
+        self.launchingTask.emit(task_name)
         if integration is not None and hasattr(integration, 'delegate_vector_source_coverage_task'):
             integration.delegate_vector_source_coverage_task(task_name, source_layer, coverage_targets)
 

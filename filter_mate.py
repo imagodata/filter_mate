@@ -1315,6 +1315,8 @@ class FilterMate:
         try:
             from .adapters.qgis.coverage_layers.snapshots import registry as _coverage_registry
             from .adapters.qgis.coverage_layers import cache as _coverage_cache
+            from .core.services.cross_filter_service import get_cross_filter_service
+            get_cross_filter_service().cancel_all()
             restored = _coverage_registry().restore_all()
             _coverage_registry().uninstall()
             _coverage_cache.purge_session()

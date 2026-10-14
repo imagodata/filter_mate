@@ -815,6 +815,9 @@ class TaskParameterBuilder:
 
         for layer_key in export_layer_ids:
             if layer_key in project_layers:
+                # FilterMate 5: raster / point cloud layers have their own writers.
+                if project_layers[layer_key]["infos"].get("layer_provider_type") in ("raster", "pointcloud"):
+                    continue
                 layers_to_export.append(project_layers[layer_key]["infos"])
             else:
                 # Handle layers not in PROJECT_LAYERS but still in QGIS project

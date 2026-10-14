@@ -39,6 +39,13 @@ class CrossFilterTask(QgsTask):
             geometry = self.source_job.compute(self.request, self.isCanceled)
             logger.info(f"⏱ [FM5] source geometry ({self.source_job.kind.value}) in {self.source_job.elapsed:.2f}s "
                         f"{self.source_job.details}")
+            if self.source_job.message:
+                # The selection could not be read: never empty the targets for that.
+                self.error = self.source_job.message
+                return False
+            if geometry.isEmpty() and self.target_jobs:
+                self.error = 'the selection is empty: nothing to relate to the target layers'
+                return False
             total = max(1, len(self.target_jobs))
             for index, job in enumerate(self.target_jobs):
                 if self.isCanceled():
@@ -89,6 +96,10 @@ class CrossFilterTask(QgsTask):
                 logger.info(f"⏱ [FM5] target {job.kind.value} '{job.layer_name}': success={job.outcome.success} "
                             f"kept={job.outcome.kept_count} {job.outcome.elapsed:.2f}s {job.outcome.message}")
         self.outcomes = [job.outcome for job in self.target_jobs]
+        for job in [self.source_job] + list(self.target_jobs):
+            release = getattr(job, 'release', None)
+            if release is not None:
+                release()
         if self.on_done is not None:
             try:
                 self.on_done(self, result)

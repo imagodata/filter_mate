@@ -25,6 +25,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from .accessor import (
+    CrossFilterResult,
     Favorite,
     FavoritesUnavailable,
     FilterStatus,
@@ -32,6 +33,50 @@ from .accessor import (
     LayerSummary,
 )
 from .main_thread import run_on_main_thread
+
+
+def _plugin_module(name: str):
+    """Import a module of the FilterMate plugin, whatever way the API package was loaded.
+
+    Inside the plugin the API is ``filter_mate.filtermate_api`` (relative
+    import); launched by uvicorn it is the top-level ``filtermate_api``.
+    """
+    import importlib
+    for candidate in (f"..{name}", f"filter_mate.{name}", name):
+        try:
+            if candidate.startswith(".."):
+                if not __package__ or "." not in __package__:
+                    continue
+                return importlib.import_module(candidate, __package__)
+            return importlib.import_module(candidate)
+        except ImportError:
+            continue
+    raise ImportError(name)
+
+
+def _layer_kind(layer) -> str:
+    """"vector", "raster", "point_cloud" or "other" (class based, see point_cloud_capability)."""
+    try:
+        from qgis.core import QgsVectorLayer
+        if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
+            return "vector"
+    except ImportError:
+        pass
+    try:
+        return _plugin_module("adapters.qgis.point_cloud_capability").layer_kind_by_class(layer).value
+    except Exception:
+        return "other"
+
+
+def _derived_marker(layer) -> str:
+    """Short description of a FilterMate clip of a raster / point cloud layer, "" when none."""
+    try:
+        snapshot = _plugin_module("adapters.qgis.coverage_layers.snapshots").registry().get(layer.id())
+    except Exception:
+        return ""
+    if snapshot is None:
+        return ""
+    return "filtermate:clip" if snapshot.geometry_wkt else "filtermate:selection"
 
 
 def _safe(callable_, default):
@@ -82,7 +127,7 @@ class QGISFilterMateAccessor:
     # ------------------------------------------------------------------
 
     def list_layers(self) -> List[LayerSummary]:
-        """Return all valid vector layers in the current QgsProject."""
+        """Return all valid vector, raster and point cloud layers of the current QgsProject."""
         try:
             from qgis.core import QgsProject, QgsVectorLayer
         except ImportError:
@@ -94,30 +139,98 @@ class QGISFilterMateAccessor:
 
         out: List[LayerSummary] = []
         for layer in project.mapLayers().values():
-            if not isinstance(layer, QgsVectorLayer):
+            kind = "vector" if isinstance(layer, QgsVectorLayer) else _layer_kind(layer)
+            if kind not in ("vector", "raster", "point_cloud"):
                 continue
             if not _safe(layer.isValid, False):
                 continue
 
             name = _safe(layer.name, "")
-            subset = _safe(layer.subsetString, "") or ""
-            geom_type_int = _safe(layer.geometryType, -1)
+            subset = (_safe(layer.subsetString, "") or "") if hasattr(layer, "subsetString") else ""
             crs_obj = _safe(layer.crs, None)
             crs_authid = _safe(crs_obj.authid, "") if crs_obj else ""
+            if kind == "vector":
+                count = _safe(layer.featureCount, -1)
+                geometry = _GEOMETRY_TYPE_NAMES.get(_safe(layer.geometryType, -1), "Unknown")
+            elif kind == "point_cloud":
+                count = _safe(layer.pointCount, -1)
+                geometry = "PointCloud"
+            else:
+                count = -1
+                geometry = "Raster"
+            derived = _derived_marker(layer)
 
             out.append(
                 LayerSummary(
                     layer_id=_safe(layer.id, ""),
                     name=name,
                     provider_type=_safe(layer.providerType, ""),
-                    feature_count=_safe(layer.featureCount, -1),
-                    geometry_type=_GEOMETRY_TYPE_NAMES.get(geom_type_int, "Unknown"),
+                    feature_count=count,
+                    geometry_type=geometry,
                     crs_authid=crs_authid,
-                    has_active_filter=bool(subset and subset.strip()),
-                    active_filter_expression=active_filters.get(name, subset),
+                    has_active_filter=bool((subset and subset.strip()) or derived),
+                    active_filter_expression=active_filters.get(name, subset or derived),
+                    layer_kind=kind,
                 )
             )
         return out
+
+    def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
+                     buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
+                     selected_only: bool = True) -> Optional[CrossFilterResult]:
+        """FilterMate 5 cross filter, run on the Qt main thread (it changes layers)."""
+        # Clipping a point cloud can take a while: wait longer than for a subset.
+        return run_on_main_thread(self._cross_filter_main_thread, source_layer, list(target_layers), list(predicates),
+                                  float(buffer), float(coverage_min), operator, bool(selected_only), timeout=600.0)
+
+    def _cross_filter_main_thread(self, source_layer, target_layers, predicates, buffer, coverage_min,
+                                  operator, selected_only) -> Optional[CrossFilterResult]:
+        try:
+            from qgis.core import QgsProject
+            cross_filter = _plugin_module("core.domain.cross_filter")
+            CrossFilterRequest, TargetSpec = cross_filter.CrossFilterRequest, cross_filter.TargetSpec
+            LayerKind = _plugin_module("core.domain.layer_kind").LayerKind
+            get_cross_filter_service = _plugin_module("core.services.cross_filter_service").get_cross_filter_service
+            VectorSourceJob = _plugin_module("adapters.qgis.coverage_layers.source_jobs").VectorSourceJob
+        except ImportError as exc:
+            return CrossFilterResult(error=str(exc))
+        project = QgsProject.instance()
+        sources = [l for l in project.mapLayersByName(source_layer) if _layer_kind(l) == "vector"]
+        if not sources:
+            return None
+        source = sources[0]
+        if selected_only and source.selectedFeatureCount():
+            features = list(source.getSelectedFeatures())
+        else:
+            features = list(source.getFeatures())
+        targets, failed = [], {}
+        for name in target_layers:
+            layers = [l for l in project.mapLayersByName(name) if l.id() != source.id()]
+            kind = _layer_kind(layers[0]) if layers else "other"
+            if not layers or kind == "other":
+                failed[name] = "layer not found or not filterable"
+                continue
+            targets.append(TargetSpec(layers[0].id(), LayerKind(kind)))
+        if not targets or not features:
+            return CrossFilterResult(failed=failed, error=None if targets else "no filterable target")
+        request = CrossFilterRequest(source_layer_id=source.id(), source_kind=LayerKind.VECTOR, targets=tuple(targets),
+                                     predicates=tuple(predicates) or ("Intersect",), buffer_value=buffer,
+                                     coverage_min=coverage_min, other_layers_combine_operator=operator)
+        task = get_cross_filter_service().run(request, VectorSourceJob(source, features), synchronous=True)
+        if task.error:
+            return CrossFilterResult(failed=failed, error=task.error)
+        filtered = []
+        for outcome in task.outcomes:
+            layer = project.mapLayer(outcome.layer_id)
+            name = layer.name() if layer is not None else outcome.layer_id
+            if outcome.success:
+                filtered.append(name)
+            else:
+                failed[name] = outcome.message or "failed"
+        self._last_applied_at = datetime.now(timezone.utc).isoformat()
+        self._last_applied_layer = source_layer
+        self._last_applied_source = "rest_api:cross"
+        return CrossFilterResult(filtered=filtered, failed=failed)
 
     # ------------------------------------------------------------------
     # Filter mutations — delegated to the PublicAPI

@@ -13,7 +13,7 @@ import logging
 import time
 
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.core import QgsDataProvider, QgsTask
+from qgis.core import QgsTask
 
 from ....core.domain.filter_state import LayerSnapshot
 from ....core.domain.layer_kind import LayerKind
@@ -38,6 +38,7 @@ class HeightAboveGroundTask(QgsTask):
         self.crs = layer.crs().authid() or layer.crs().toWkt()
         self.output = ''
         self.message = ''
+        self.after = None
 
     def run(self) -> bool:
         started = time.perf_counter()
@@ -48,7 +49,7 @@ class HeightAboveGroundTask(QgsTask):
             return False
         self.output = cache.new_path(f"{self.layer_name}_hag", '.copc.laz')
         stages = [
-            {"type": reader, "filename": self.before.base_source},
+            {"type": reader, "filename": self.before.base_source},  # a clip is redone by the filter that follows
             {"type": "filters.hag_dem", "raster": self.dem_path},
             {"type": "writers.copc", "filename": self.output, "forward": "all", "extra_dims": "all", "a_srs": self.crs},
         ]
@@ -65,15 +66,20 @@ class HeightAboveGroundTask(QgsTask):
         if layer is None:
             self.done.emit(False, 'layer removed')
             return
-        layer.setDataSource(self.output, layer.name(), 'copc', QgsDataProvider.ProviderOptions(), False)
-        if not layer.isValid():
+        from .snapshots import swap_source
+        if not swap_source(layer, self.output, 'copc'):
             self.done.emit(False, 'derived point cloud could not be opened')
             return
         if self.before.subset:
             layer.setSubsetString(self.before.subset)
-        registry().record(LayerSnapshot(self.layer_id, LayerKind.POINT_CLOUD.value, source=layer.source(), provider='copc',
-                                        subset=layer.subsetString(), derived=True,
-                                        original_source=self.before.base_source,
-                                        original_provider=self.before.base_provider), layer)
+        # The enriched cloud becomes the base of the layer (Unfilter keeps the
+        # HeightAboveGround dimension); the pristine source is what unloading
+        # and saving the project go back to.
+        self.after = LayerSnapshot(self.layer_id, LayerKind.POINT_CLOUD.value, source=layer.source(), provider='copc',
+                                   subset=layer.subsetString(), derived=True,
+                                   original_source=self.output, original_provider='copc',
+                                   enriched_source=self.before.pristine_source,
+                                   enriched_provider=self.before.pristine_provider)
+        registry().record(self.after, layer)
         layer.triggerRepaint()
         self.done.emit(True, '')

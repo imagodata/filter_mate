@@ -118,12 +118,30 @@ class CoverageModeController(BaseController):
         try:
             from qgis.core import QgsProject
             from qgis.PyQt.QtCore import QTimer
-            QgsProject.instance().readProject.connect(self._on_project_read)
+            project = QgsProject.instance()
+            project.readProject.connect(self._on_project_read)
+            project.cleared.connect(self._on_project_cleared)
+            project.layersWillBeRemoved.connect(self._on_layers_removed)
             self._project_signal_connected = True
             QTimer.singleShot(1500, self.replay_stored_filters)
         except Exception as exc:
             logger.debug(f"[FM5] stored filters replay not scheduled: {exc}")
         logger.debug("CoverageModeController setup complete (panels deferred)")
+
+    def _on_project_cleared(self) -> None:
+        """A new / closed project: histories and links refer to layers that are gone."""
+        self.service.history.clear()
+        self._linked_runs.clear()
+        self._linked_redo.clear()
+        self._panel_states.clear()
+        self._histogram_cache.clear()
+
+    def _on_layers_removed(self, layer_ids) -> None:
+        for layer_id in layer_ids or []:
+            self.service.history.forget_layer(layer_id)
+            self._linked_runs.pop(layer_id, None)
+            self._linked_redo.pop(layer_id, None)
+            self._panel_states.pop(layer_id, None)
 
     def _on_project_read(self, *_args) -> None:
         try:
@@ -134,6 +152,8 @@ class CoverageModeController(BaseController):
 
     def replay_stored_filters(self) -> int:
         """Clip again the raster / point cloud layers whose filter was saved in the project."""
+        if getattr(self, '_torn_down', False):
+            return 0
         try:
             from ...core.services.cross_filter_service import replay_project_filters
             count = replay_project_filters(self.service)
@@ -146,6 +166,7 @@ class CoverageModeController(BaseController):
         return count
 
     def teardown(self) -> None:
+        self._torn_down = True
         self.deactivate()
         if self._extras is not None:
             self._extras_call('teardown')
@@ -153,10 +174,21 @@ class CoverageModeController(BaseController):
         if getattr(self, '_project_signal_connected', False):
             try:
                 from qgis.core import QgsProject
-                QgsProject.instance().readProject.disconnect(self._on_project_read)
-            except (TypeError, RuntimeError):
+                project = QgsProject.instance()
+                for signal, slot in ((project.readProject, self._on_project_read),
+                                     (project.cleared, self._on_project_cleared),
+                                     (project.layersWillBeRemoved, self._on_layers_removed)):
+                    try:
+                        signal.disconnect(slot)
+                    except (TypeError, RuntimeError):
+                        pass
+            except Exception:
                 pass
             self._project_signal_connected = False
+        try:
+            self.service.cancel_all()
+        except Exception:
+            pass
         for widget_name in ('_host', '_coverage_spin'):
             widget = getattr(self, widget_name)
             setattr(self, widget_name, None)
@@ -168,6 +200,11 @@ class CoverageModeController(BaseController):
                     pass
         self._raster_panel = None
         self._pc_panel = None
+        self._running_task = None
+        self._export_task = None
+        self._hag_task = None
+        self._base_keepalive = None
+        self._histogram_cache.clear()
 
     @property
     def active_layer(self) -> Any:
@@ -237,6 +274,7 @@ class CoverageModeController(BaseController):
         logger.info(f"[FM5] {kind.value} layer active: {self._layer_name(layer)}")
 
     def deactivate(self) -> None:
+        self._base_keepalive = None
         if self._active_layer is None and not self._saved_visibility:
             return
         self._leave_layer()
@@ -709,11 +747,14 @@ class CoverageModeController(BaseController):
         panel = self._pc_panel
         if panel is None:
             return ''
-        expression = panel.expression() or ''
-        if not include_hag and 'HeightAboveGround' in expression:
-            parts = [p for p in expression.split(' AND ') if 'HeightAboveGround' not in p]
-            expression = ' AND '.join(parts)
-        return expression.strip()
+        if include_hag:
+            return (panel.expression() or '').strip()
+        try:
+            from ..widgets.coverage_panels.point_cloud_exploring_panel import build_point_cloud_expression
+            return (build_point_cloud_expression(panel.state(), hag_available=False) or '').strip()
+        except Exception as exc:
+            logger.debug(f"[FM5] expression without height above ground unavailable: {exc}")
+            return
 
     # === Exploring buttons ===
 
@@ -949,6 +990,14 @@ class CoverageModeController(BaseController):
         if task_name not in COVERAGE_TASKS:
             logger.warning(f"[FM5] unknown task '{task_name}' on a coverage layer, ignored")
             return True
+        if task_name == 'export':
+            exporting = self._layers_checked_for_export()
+            if exporting:
+                return False  # the EXPORTING tab handles vector, raster and point cloud layers alike
+        if task_name != 'export' and self.is_running():
+            _, show_warning = _feedback()
+            show_warning(self.tr("A FilterMate task is still running: wait for it to finish"))
+            return True
         try:
             if task_name == 'filter':
                 self._run_filter(layer)
@@ -965,6 +1014,22 @@ class CoverageModeController(BaseController):
             _, show_warning = _feedback()
             show_warning(self.tr("FilterMate task failed: {0}").format(exc))
         return True
+
+    def is_running(self) -> bool:
+        task = self._running_task
+        if task is None:
+            return False
+        try:
+            from qgis.core import QgsTask
+            return task.status() in (QgsTask.TaskStatus.Queued, QgsTask.TaskStatus.OnHold, QgsTask.TaskStatus.Running)
+        except Exception:
+            return False
+
+    def _layers_checked_for_export(self) -> List[str]:
+        try:
+            return list(self.dockwidget.get_layers_to_export() or [])
+        except Exception:
+            return []
 
     def _run_filter(self, layer: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
@@ -1007,15 +1072,17 @@ class CoverageModeController(BaseController):
             elif not targets:
                 show_warning(self.tr("Select points first: classes, attribute ranges or an expression"))
                 return
-            if self._pc_panel.apply_to_tiles():
-                self._apply_to_sibling_tiles(layer, expression, source_op)
+            siblings = self._apply_to_sibling_tiles(layer, expression, source_op) if self._pc_panel.apply_to_tiles() else []
             if not targets:
                 after = take_snapshot(layer, LayerKind.POINT_CLOUD)
-                if not after.same_state(before):
-                    self.service.history.push(CrossOperation(layer.id(), ((before, after),), 'point cloud selection'))
+                changes = (((before, after),) if not after.same_state(before) else ()) + tuple(siblings)
+                if changes:
+                    self.service.history.push(CrossOperation(layer.id(), changes, 'point cloud selection'))
                 self._after_run(layer, [], self.tr("Point cloud filtered: {0}").format(layer.subsetString()))
                 return
             from ...adapters.qgis.coverage_layers.source_jobs import PointCloudSourceJob
+            if siblings:
+                self.service.history.push(CrossOperation(layer.id(), tuple(siblings), 'point cloud tiles'))
             source_job = PointCloudSourceJob(layer, float(_option('point_cloud_footprint_resolution', 2.0)), before=before)
         self._start_task(request, source_job)
 
@@ -1025,25 +1092,37 @@ class CoverageModeController(BaseController):
         except Exception:
             return []
 
-    def _apply_to_sibling_tiles(self, layer: Any, expression: str, operator: Optional[str]) -> None:
-        """Apply the same selection to the point clouds of the same folder (LiDAR HD tiles)."""
+    def _apply_to_sibling_tiles(self, layer: Any, expression: str, operator: Optional[str]) -> list:
+        """Apply the same selection to the point clouds of the same folder (LiDAR HD tiles).
+
+        The folder is the one of the ORIGINAL source (a derived layer lives in
+        the cache). Returns the (before, after) snapshots for the history.
+        """
         import os
         from qgis.core import QgsProject
         from ...core.domain.cross_filter import combine_subset
+        from ...core.domain.layer_kind import LayerKind
+        from ...adapters.qgis.coverage_layers.snapshots import take_snapshot
+        if not expression:
+            return []
         try:
-            folder = os.path.dirname(layer.source())
+            folder = os.path.dirname(take_snapshot(layer, LayerKind.POINT_CLOUD).pristine_source)
         except Exception:
-            return
+            return []
+        changes = []
         for other in QgsProject.instance().mapLayers().values():
-            if other.id() == layer.id() or not self.is_coverage(other) or _kind_of(other) is not self._kind:
+            if other.id() == layer.id() or _kind_of(other) is not LayerKind.POINT_CLOUD:
                 continue
             try:
-                if os.path.dirname(other.source()) != folder:
+                before = take_snapshot(other, LayerKind.POINT_CLOUD)
+                if os.path.dirname(before.pristine_source) != folder:
                     continue
-                other.setSubsetString(combine_subset(other.subsetString(), expression, operator) if expression else other.subsetString())
-                other.triggerRepaint()
+                if other.setSubsetString(combine_subset(other.subsetString(), expression, operator)):
+                    other.triggerRepaint()
+                    changes.append((before, take_snapshot(other, LayerKind.POINT_CLOUD)))
             except Exception as exc:
                 logger.debug(f"[FM5] sibling tile '{other.name()}' not filtered: {exc}")
+        return changes
 
     def _start_task(self, request: Any, source_job: Any) -> None:
         show_info, _ = _feedback()
@@ -1052,23 +1131,48 @@ class CoverageModeController(BaseController):
         self._set_busy(True)
 
         def done(task, result):
+            if getattr(self, '_torn_down', False):
+                return
             self._set_busy(False)
             self._running_task = None
-            layer = self._active_layer
+            layer = self._map_layer(source_job.layer_id)
+            if not result:
+                # Nothing was applied: put back the point cloud selection subset
+                # set before the task, so the source is not left filtered
+                # without a history entry.
+                self._rollback_source(source_job, layer)
+                _, show_warning = _feedback()
+                show_warning(self.tr("Filter not applied: {0}").format(task.error or self.tr("canceled")))
+                self._after_run(layer, [], '')
+                return
             failures = [o for o in task.outcomes if not o.success]
             parts = [self.tr("{0} target(s) filtered").format(len(task.outcomes) - len(failures))]
             if failures:
                 parts.append(self.tr("{0} failed: {1}").format(len(failures), '; '.join(f.message for f in failures if f.message)[:300]))
-            if task.error:
-                parts.append(task.error)
             self._after_run(layer, task.outcomes, ' — '.join(parts))
 
-        self._running_task = self.service.run(request, source_job, on_done=done)
+        try:
+            self._running_task = self.service.run(request, source_job, on_done=done)
+        except Exception:
+            self._set_busy(False)
+            self._rollback_source(source_job, self._map_layer(source_job.layer_id))
+            raise
         show_info(self.tr("FilterMate: filtering from '{0}'…").format(layer_name))
         try:
             dw.launchingTask  # noqa: B018 - presence check only
         except AttributeError:
             pass
+
+    @staticmethod
+    def _rollback_source(source_job: Any, layer: Any) -> None:
+        from ...core.domain.layer_kind import LayerKind
+        if layer is None or getattr(source_job, 'kind', None) is not LayerKind.POINT_CLOUD:
+            return
+        try:
+            from ...adapters.qgis.coverage_layers.snapshots import restore_snapshot
+            restore_snapshot(layer, source_job.before)
+        except Exception as exc:
+            logger.warning(f"[FM5] point cloud selection not rolled back: {exc}")
 
     def _set_busy(self, busy: bool) -> None:
         button = getattr(self.dockwidget, 'pushButton_action_filter', None)
@@ -1106,7 +1210,11 @@ class CoverageModeController(BaseController):
         self._finish_restore(restored)
 
     def _finish_restore(self, layer_ids: List[str]) -> None:
-        show_info, _ = _feedback()
+        show_info, show_warning = _feedback()
+        skipped = list(getattr(self.service, 'last_skipped', []) or [])
+        if skipped:
+            show_warning(self.tr("Changed since, left as is: {0}").format(', '.join(skipped)))
+            self.service.last_skipped = []
         for layer_id in layer_ids or []:
             self._refresh_canvas(self._map_layer(layer_id))
         self._refresh_counts(self._active_layer)
@@ -1115,7 +1223,8 @@ class CoverageModeController(BaseController):
 
     # === Export ===
 
-    def _run_export(self, layer_ids: List[str], folder: Optional[str] = None) -> Any:
+    def _run_export(self, layer_ids: List[str], folder: Optional[str] = None, crs: Any = None,
+                    zip_path: Optional[str] = None) -> Any:
         """Export coverage layers as they are filtered, in a background task.
 
         Returns:
@@ -1138,11 +1247,11 @@ class CoverageModeController(BaseController):
             try:
                 if kind is LayerKind.RASTER:
                     fmt = str(_option('raster_export_format', 'COG'))
-                    jobs.append(exporters.RasterExportJob(layer, exporters.output_path(folder, layer.name(), '.tif'), fmt))
+                    jobs.append(exporters.RasterExportJob(layer, exporters.output_path(folder, layer.name(), '.tif'), fmt, crs))
                 elif kind is LayerKind.POINT_CLOUD:
                     fmt = str(_option('point_cloud_export_format', 'LAZ'))
                     extension = exporters.POINT_CLOUD_FORMATS.get(fmt, '.laz')
-                    jobs.append(exporters.PointCloudExportJob(layer, exporters.output_path(folder, layer.name(), extension), fmt))
+                    jobs.append(exporters.PointCloudExportJob(layer, exporters.output_path(folder, layer.name(), extension), fmt, crs))
             except Exception as exc:
                 show_warning(self.tr("'{0}' not exported: {1}").format(layer.name(), exc))
         if not jobs:
@@ -1151,11 +1260,16 @@ class CoverageModeController(BaseController):
         def done(results):
             written = [r.path for r in results if r.success]
             failed = [f"{r.path}: {r.message}" for r in results if not r.success]
+            if zip_path and written:
+                archive = self._zip_exports(zip_path, written)
+                if archive:
+                    written.append(archive)
             if written:
                 show_info(self.tr("Exported: {0}").format(', '.join(written)))
             if failed:
                 show_warning(self.tr("Export failed: {0}").format('; '.join(failed)))
             self.last_export_results = results
+            self._export_task = None
 
         task = exporters.make_export_task(jobs, done)
         self._export_task = task
@@ -1189,15 +1303,22 @@ class CoverageModeController(BaseController):
         source_id = source.id()
         try:
             if task_name == 'filter':
-                ran = bool(coverage_ids) and self._run_vector_source_filter(source, coverage_ids)
-                self._linked_runs.setdefault(source_id, []).append(bool(ran))
+                runs = self._linked_runs.setdefault(source_id, [])
+                runs.append(False)  # set to True once the cross task really changed a layer
                 self._linked_redo[source_id] = []
+                if coverage_ids and self._vector_engine_filters_targets():
+                    self._run_vector_source_filter(source, coverage_ids, run_index=len(runs) - 1)
             elif task_name in ('unfilter', 'reset'):
+                # Same history rules as the vector engine: Unfilter records
+                # nothing (a later Undo goes back to before the last filter, for
+                # every layer), Reset clears the history.
                 if coverage_ids:
                     kinds = {i: _kind_of(self._map_layer(i)) for i in coverage_ids}
-                    self._finish_restore(self.service.unfilter(source_id, coverage_ids, kinds))
-                self._linked_runs[source_id] = []
-                self._linked_redo[source_id] = []
+                    self._finish_restore(self.service.unfilter(source_id, coverage_ids, kinds, record=False))
+                if task_name == 'reset':
+                    self._linked_runs[source_id] = []
+                    self._linked_redo[source_id] = []
+                    self.service.history.clear_source(source_id)
             elif task_name == 'undo':
                 runs = self._linked_runs.get(source_id) or []
                 if runs:
@@ -1215,7 +1336,19 @@ class CoverageModeController(BaseController):
         except Exception as exc:
             logger.warning(f"[FM5] coverage targets of '{self._layer_name(source)}' not processed: {exc}", exc_info=True)
 
-    def _run_vector_source_filter(self, source: Any, coverage_ids: List[str]) -> bool:
+    def _vector_engine_filters_targets(self) -> bool:
+        """The vector engine only filters distant layers when both buttons are on."""
+        dw = self.dockwidget
+        for name in ('pushButton_checkable_filtering_layers_to_filter', 'pushButton_checkable_filtering_geometric_predicates'):
+            button = getattr(dw, name, None)
+            try:
+                if button is not None and not button.isChecked():
+                    return False
+            except Exception:
+                return False
+        return True
+
+    def _run_vector_source_filter(self, source: Any, coverage_ids: List[str], run_index: Optional[int] = None) -> bool:
         _, show_warning = _feedback()
         features = self._vector_source_features(source)
         if not features:
@@ -1232,12 +1365,22 @@ class CoverageModeController(BaseController):
         request = self._build_request(source, LayerKind.VECTOR, settings, targets)
         job = VectorSourceJob(source, features)
 
+        source_id = source.id()
+
         def done(task, result):
-            failures = [o for o in task.outcomes if not o.success]
-            message = self.tr("{0} raster / point cloud target(s) filtered").format(len(task.outcomes) - len(failures))
-            if failures:
-                message += ' — ' + '; '.join(f.message for f in failures if f.message)[:300]
-            self._after_run(source, task.outcomes, message)
+            if getattr(self, '_torn_down', False):
+                return
+            runs = self._linked_runs.get(source_id) or []
+            if task.changes and run_index is not None and run_index < len(runs):
+                runs[run_index] = True
+            if not result:
+                message = self.tr("Raster / point cloud targets not filtered: {0}").format(task.error or self.tr("canceled"))
+            else:
+                failures = [o for o in task.outcomes if not o.success]
+                message = self.tr("{0} raster / point cloud target(s) filtered").format(len(task.outcomes) - len(failures))
+                if failures:
+                    message += ' — ' + '; '.join(f.message for f in failures if f.message)[:300]
+            self._after_run(self._map_layer(source_id), task.outcomes, message)
 
         self.service.run(request, job, on_done=done)
         return True
@@ -1265,9 +1408,32 @@ class CoverageModeController(BaseController):
         request.setLimit(MAX_SOURCE_FEATURES)
         return [f for f in source.getFeatures(request) if f.hasGeometry()]
 
-    def export_coverage_layers(self, layer_ids: List[str], folder: Optional[str]) -> Any:
+    def export_coverage_layers(self, layer_ids: List[str], folder: Optional[str], crs: Any = None,
+                               zip_path: Optional[str] = None) -> Any:
         """Export the raster / point cloud layers checked in EXPORTING (asks for a folder when None)."""
-        return self._run_export(layer_ids, folder or None)
+        return self._run_export(layer_ids, folder or None, crs, zip_path)
+
+    @staticmethod
+    def _zip_exports(zip_path: str, files: List[str]) -> str:
+        """Archive the exported raster / point cloud files next to the vector zip.
+
+        The vector export writes its own archive in another task: these files
+        go to ``<name>_raster_lidar.zip`` instead of racing for the same file.
+        """
+        import os
+        import zipfile
+        base = zip_path[:-4] if zip_path.lower().endswith('.zip') else zip_path
+        archive = f"{base}_raster_lidar.zip"
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(archive)) or '.', exist_ok=True)
+            with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_STORED) as handle:
+                for path in files:
+                    if os.path.isfile(path):
+                        handle.write(path, os.path.basename(path))
+            return archive
+        except OSError as exc:
+            logger.warning(f"[FM5] raster / point cloud zip not written: {exc}")
+            return ''
 
     # === Undo / redo buttons ===
 
@@ -1301,10 +1467,14 @@ class CoverageModeController(BaseController):
         task = HeightAboveGroundTask(layer, dem)
 
         def finished(ok, message):
+            self._hag_task = None
             self._set_busy(False)
             if not ok:
                 show_warning(self.tr("Height above ground not computed: {0}").format(message))
                 return
+            if task.after is not None:
+                from ...core.domain.filter_state import CrossOperation
+                self.service.history.push(CrossOperation(layer.id(), ((task.before, task.after),), 'height above ground'))
             self._populate_point_cloud(layer)
             then()
 

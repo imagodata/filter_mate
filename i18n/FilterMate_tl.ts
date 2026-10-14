@@ -2,6 +2,34 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="fil_PH" sourcelanguage="fil_PH">
 <context>
+    <name>@default</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="314"/>
+        <source>Import from Resource Sharing...</source>
+        <translation>Mag-import mula sa Resource Sharing...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <source>Publish to Resource Sharing...</source>
+        <translation>I-publish sa Resource Sharing...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <source>Publish (no favorites saved)</source>
+        <translation>I-publish (walang na-save na paborito)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="334"/>
+        <source>Quick publish to default repo</source>
+        <translation>Mabilis na pag-publish sa default na repo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/extension.py" line="339"/>
+        <source>Manage Resource Sharing repos...</source>
+        <translation>Pamahalaan ang mga repo ng Resource Sharing...</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="171"/>
@@ -24,7 +52,7 @@
         <translation>Error sa pag-verify ng database: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="617"/>
+        <location filename="../core/services/app_initializer.py" line="601"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Nabigo ang paglo-load ng layer. Gamitin ang F5 upang pilitin ang pag-reload.</translation>
     </message>
@@ -32,32 +60,32 @@
 <context>
     <name>BackendIndicatorWidget</name>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="183"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="185"/>
         <source>Select Backend:</source>
         <translation>Pumili ng Backend:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="202"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="204"/>
         <source>Auto (Default)</source>
         <translation>Auto (Default)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="210"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="212"/>
         <source>Auto-select Optimal for All Layers</source>
         <translation>Awtomatikong pumili ng pinakamagaling para sa lahat ng layer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="220"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="222"/>
         <source>Force {0} for All Layers</source>
         <translation>Pilitin ang {0} para sa lahat ng layer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="263"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="265"/>
         <source>Click to reload layers</source>
         <translation>I-click upang i-reload ang mga layer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/backend_indicator.py" line="298"/>
+        <location filename="../ui/widgets/backend_indicator.py" line="300"/>
         <source>Click to change backend</source>
         <translation>I-click upang palitan ang backend</translation>
     </message>
@@ -73,45 +101,258 @@
 <context>
     <name>ControllerIntegration</name>
     <message>
-        <location filename="../ui/controllers/integration.py" line="612"/>
+        <location filename="../ui/controllers/integration.py" line="634"/>
         <source>Property error: {0}</source>
         <translation>Error sa property: {0}</translation>
     </message>
 </context>
 <context>
+    <name>CoverageModeController</name>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="164"/>
+        <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
+        <translation>Ibinabalik ang filter ng {0} raster / point cloud na layer…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="378"/>
+        <source>cov. ≥ </source>
+        <translation>cov. ≥ </translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="379"/>
+        <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
+        <translation>Pinakamababang bahagi ng target na polygon na nasa loob ng source geometry (0 = anumang overlap). Ginagamit kapag ang source ay raster o point cloud.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <source>Raster</source>
+        <translation>Raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="448"/>
+        <source>Point cloud</source>
+        <translation>Point cloud</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
+        <translation>{0} na layer: pagpili sa EXPLORING, relasyon sa FILTERING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="471"/>
+        <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
+        <translation>Pixel picker: mag-click sa mapa para basahin ang halaga ng bawat band (Ctrl+click para palawakin ang saklaw)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
+        <source>Zoom to the layer</source>
+        <translation>I-zoom sa layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="473"/>
+        <source>Preview: hide the pixels outside the selection</source>
+        <translation>Preview: itago ang mga pixel sa labas ng napili</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="475"/>
+        <source>Not used for raster layers</source>
+        <translation>Hindi ginagamit sa mga raster na layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="476"/>
+        <source>Reset the raster selection</source>
+        <translation>I-reset ang napiling raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
+        <source>Identify points on the map</source>
+        <translation>Tukuyin ang mga punto sa mapa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="481"/>
+        <source>Live preview: show only the points kept by the selection</source>
+        <translation>Live preview: ipakita lamang ang mga punto na pinanatili ng napili</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="483"/>
+        <source>Not used for point cloud layers</source>
+        <translation>Hindi ginagamit sa mga point cloud na layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="484"/>
+        <source>Reset the point cloud criteria</source>
+        <translation>I-reset ang mga pamantayan ng point cloud</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="641"/>
+        <source>Invalid raster calculator expression</source>
+        <translation>Di-wastong expression ng raster calculator</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="679"/>
+        <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
+        <translation>Hindi nahanap ang PDAL: kailangan ng taas sa ibabaw ng DTM ang executable na pdal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <source>A FilterMate task is still running: wait for it to finish</source>
+        <translation>Tumatakbo pa ang isang gawain ng FilterMate: hintaying matapos ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="984"/>
+        <source>FilterMate task failed: {0}</source>
+        <translation>Nabigo ang gawain ng FilterMate: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <source>Select pixels first: a value range, classes or a raster expression</source>
+        <translation>Pumili muna ng mga pixel: saklaw ng halaga, mga klase o raster expression</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1026"/>
+        <source>Raster filtered: {0}</source>
+        <translation>Na-filter ang raster: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1039"/>
+        <source>The point cloud expression was rejected: {0}</source>
+        <translation>Tinanggihan ang expression ng point cloud: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1042"/>
+        <source>Select points first: classes, attribute ranges or an expression</source>
+        <translation>Pumili muna ng mga punto: mga klase, saklaw ng attribute o expression</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1050"/>
+        <source>Point cloud filtered: {0}</source>
+        <translation>Na-filter ang point cloud: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1114"/>
+        <source>Filter not applied: {0}</source>
+        <translation>Hindi nailapat ang filter: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <source>canceled</source>
+        <translation>nakansela</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
+        <source>{0} target(s) filtered</source>
+        <translation>{0} target ang na-filter</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1120"/>
+        <source>{0} failed: {1}</source>
+        <translation>Nabigo ang {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1129"/>
+        <source>FilterMate: filtering from '{0}'…</source>
+        <translation>FilterMate: nagfi-filter mula sa '{0}'…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1185"/>
+        <source>Changed since, left as is: {0}</source>
+        <translation>Nagbago na mula noon, iniwan nang ganoon: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1191"/>
+        <source>{0} layer(s) restored</source>
+        <translation>{0} layer ang naibalik</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1225"/>
+        <source>&apos;{0}&apos; not exported: {1}</source>
+        <translation>Hindi na-export ang '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1237"/>
+        <source>Exported: {0}</source>
+        <translation>Na-export: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1239"/>
+        <source>Export failed: {0}</source>
+        <translation>Nabigo ang pag-export: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1246"/>
+        <source>Exporting {0} layer(s)…</source>
+        <translation>Ine-export ang {0} layer…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1252"/>
+        <source>Export folder</source>
+        <translation>Folder ng export</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1324"/>
+        <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
+        <translation>Nilaktawan ang mga target na raster / point cloud: walang napiling source feature sa EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1346"/>
+        <source>Raster / point cloud targets not filtered: {0}</source>
+        <translation>Hindi na-filter ang mga target na raster / point cloud: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1349"/>
+        <source>{0} raster / point cloud target(s) filtered</source>
+        <translation>{0} target na raster / point cloud ang na-filter</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1434"/>
+        <source>Choose the DTM raster used for the height above ground</source>
+        <translation>Piliin ang DTM raster na gagamitin para sa taas sa ibabaw ng lupa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1442"/>
+        <source>Height above ground not computed: {0}</source>
+        <translation>Hindi nakalkula ang taas sa ibabaw ng lupa: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1454"/>
+        <source>Computing the height above '{0}' with PDAL…</source>
+        <translation>Kinakalkula ang taas sa ibabaw ng '{0}' gamit ang PDAL…</translation>
+    </message>
+</context>
+<context>
     <name>DatabaseManager</name>
     <message>
-        <location filename="../adapters/database_manager.py" line="131"/>
+        <location filename="../adapters/database_manager.py" line="194"/>
         <source>Database file does not exist: {0}</source>
         <translation>Wala ang file ng database: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="138"/>
+        <location filename="../adapters/database_manager.py" line="201"/>
         <source>Failed to connect to database {0}: {1}</source>
         <translation>Nabigo ang koneksyon sa database {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="157"/>
+        <location filename="../adapters/database_manager.py" line="220"/>
         <source>Could not create database directory {0}: {1}</source>
         <translation>Hindi makalikha ng direktoryo ng database {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="211"/>
+        <location filename="../adapters/database_manager.py" line="274"/>
         <source>Failed to create database file {0}: {1}</source>
         <translation>Nabigo ang paglikha ng file ng database {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="488"/>
+        <location filename="../adapters/database_manager.py" line="551"/>
         <source>Cannot initialize FilterMate database: connection failed</source>
         <translation>Hindi ma-initialize ang FilterMate database: nabigo ang koneksyon</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="493"/>
+        <location filename="../adapters/database_manager.py" line="556"/>
         <source>Critical error connecting to database: {0}</source>
         <translation>Kritikal na error sa pagkonekta sa database: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="527"/>
+        <location filename="../adapters/database_manager.py" line="602"/>
         <source>Error during database initialization: {0}</source>
         <translation>Error sa pag-initialize ng database: {0}</translation>
     </message>
@@ -119,27 +360,27 @@
 <context>
     <name>DatasourceManager</name>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="146"/>
+        <location filename="../core/services/datasource_manager.py" line="147"/>
         <source>Database file does not exist: {db_file_path}</source>
         <translation>Hindi umiiral ang file ng database: {db_file_path}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="157"/>
+        <location filename="../core/services/datasource_manager.py" line="158"/>
         <source>Failed to connect to database {db_file_path}: {error}</source>
         <translation>Nabigo ang pagkonekta sa database {db_file_path}: {error}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="182"/>
+        <location filename="../core/services/datasource_manager.py" line="183"/>
         <source>QGIS processing module not available to create spatial index</source>
         <translation>Hindi available ang QGIS Processing module upang lumikha ng spatial index</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="188"/>
+        <location filename="../core/services/datasource_manager.py" line="189"/>
         <source>Cannot create spatial index: layer invalid or source not found.</source>
         <translation>Hindi malikha ang spatial index: hindi wasto ang layer o hindi natagpuan ang pinagmulan.</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="398"/>
+        <location filename="../core/services/datasource_manager.py" line="399"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>May natagpuang mga PostgreSQL layer ngunit hindi naka-install ang psycopg2. Ginagamit ang lokal na Spatialite backend. Para sa mas mahusay na performance sa malalaking dataset, i-install ang psycopg2.</translation>
     </message>
@@ -157,7 +398,7 @@
         <translation>Pumili ng folder kung saan ie-export ang mga layer</translation>
     </message>
     <message>
-        <location filename="../ui/managers/export_dialog_manager.py" line="158"/>
+        <location filename="../ui/managers/export_dialog_manager.py" line="159"/>
         <source>Save your exported data to a zip file</source>
         <translation>I-save ang na-export na data sa isang zip file</translation>
     </message>
@@ -165,37 +406,37 @@
 <context>
     <name>ExportGroupRecapDialog</name>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="116"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="115"/>
         <source>{0} couche(s)</source>
         <translation>{0} layer</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="118"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="117"/>
         <source> dans {0} groupe(s)</source>
         <translation> sa {0} grupo</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="120"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="119"/>
         <source> + {0} hors groupe</source>
         <translation> + {0} nasa labas ng grupo</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="127"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="126"/>
         <source>Destination : {0}</source>
         <translation>Destinasyon: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="147"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="146"/>
         <source>No group detected - all layers are at the root level</source>
         <translation>Walang grupo na nakita - lahat ng layer ay nasa root level</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="155"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="154"/>
         <source>Annuler</source>
         <translation>Kanselahin</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="161"/>
+        <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
         <source>Exporter</source>
         <translation>I-export</translation>
     </message>
@@ -205,50 +446,50 @@
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="228"/>
         <source>No Filter</source>
-        <translation>Walang Filter</translation>
+        <translation type="obsolete">Walang Filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="228"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="264"/>
         <source>No active filter to save.</source>
         <translation>Walang aktibong filter na i-save.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="236"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
         <source>Add Favorite</source>
         <translation>Magdagdag ng Paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="236"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
         <source>Favorite name:</source>
         <translation>Pangalan ng paborito:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="254"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="286"/>
         <source>Favorite &apos;{0}&apos; added successfully</source>
-        <translation>Matagumpay na naidagdag ang paborito &apos;{0}&apos;</translation>
+        <translation>Matagumpay na naidagdag ang paborito '{0}'</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="399"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="505"/>
         <source>Export Favorites</source>
         <translation>I-export ang mga Paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="423"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="529"/>
         <source>Exported {0} favorites</source>
         <translation>Na-export ang {0} paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="425"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="531"/>
         <source>Failed to export favorites</source>
         <translation>Nabigo ang pag-export ng mga paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
         <source>Import Favorites</source>
         <translation>Mag-import ng mga Paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="455"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
@@ -259,183 +500,183 @@ Oo = Idagdag sa kasalukuyan
 Hindi = Palitan lahat ng kasalukuyan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="493"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="602"/>
         <source>Imported {0} favorites</source>
         <translation>Na-import ang {0} paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="495"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="604"/>
         <source>No favorites imported</source>
         <translation>Walang paborito na na-import</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="504"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="613"/>
         <source>Favorites manager not initialized. Please restart FilterMate.</source>
         <translation>Hindi pa nai-initialize ang manager ng paborito. Paki-restart ang FilterMate.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="538"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="658"/>
         <source>Favorites manager dialog not available</source>
         <translation>Hindi available ang dialog ng manager ng paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1801"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1168"/>
         <source>Error: {0}</source>
         <translation>Error: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="775"/>
         <source>Used {0} times</source>
-        <translation>Ginamit ng {0} beses</translation>
+        <translation type="obsolete">Ginamit ng {0} beses</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="786"/>
         <source>Add current filter to favorites</source>
-        <translation>Idagdag ang kasalukuyang filter sa mga paborito</translation>
+        <translation type="obsolete">Idagdag ang kasalukuyang filter sa mga paborito</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="790"/>
         <source>Add filter (no active filter)</source>
-        <translation>Magdagdag ng filter (walang aktibong filter)</translation>
+        <translation type="obsolete">Magdagdag ng filter (walang aktibong filter)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="795"/>
         <source>Manage favorites...</source>
-        <translation>Pamahalaan ang mga paborito...</translation>
+        <translation type="obsolete">Pamahalaan ang mga paborito...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="798"/>
         <source>Export...</source>
-        <translation>I-export...</translation>
+        <translation type="obsolete">I-export...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="801"/>
         <source>Import...</source>
-        <translation>Mag-import...</translation>
+        <translation type="obsolete">Mag-import...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="822"/>
         <source>Global favorites</source>
-        <translation>Mga global na paborito</translation>
+        <translation type="obsolete">Mga global na paborito</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="826"/>
         <source>Copy to global...</source>
-        <translation>Kopyahin sa global...</translation>
+        <translation type="obsolete">Kopyahin sa global...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="837"/>
         <source>── Available global favorites ──</source>
-        <translation>── Mga available na global na paborito ──</translation>
+        <translation type="obsolete">── Mga available na global na paborito ──</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="845"/>
         <source>(No global favorites)</source>
-        <translation>(Walang global na paborito)</translation>
+        <translation type="obsolete">(Walang global na paborito)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="849"/>
         <source>Maintenance</source>
-        <translation>Maintenance</translation>
+        <translation type="obsolete">Maintenance</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="851"/>
         <source>Save to project (.qgz)</source>
-        <translation>I-save sa project (.qgz)</translation>
+        <translation type="obsolete">I-save sa project (.qgz)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="854"/>
         <source>Restore from project</source>
-        <translation>I-restore mula sa project</translation>
+        <translation type="obsolete">I-restore mula sa project</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="859"/>
         <source>Clean up orphan projects</source>
-        <translation>Linisin ang mga orphan na project</translation>
+        <translation type="obsolete">Linisin ang mga orphan na project</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="862"/>
         <source>Database statistics</source>
-        <translation>Mga istatistika ng database</translation>
+        <translation type="obsolete">Mga istatistika ng database</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
         <source>Invalid Name</source>
-        <translation>Hindi Valid na Pangalan</translation>
+        <translation type="obsolete">Hindi Valid na Pangalan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="909"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="763"/>
         <source>Favorite name cannot be empty.</source>
         <translation>Hindi maaaring walang laman ang pangalan ng paborito.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
         <source>Duplicate Name</source>
         <translation>Dobleng Pangalan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="920"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
         <source>A favorite named &apos;{0}&apos; already exists.
 Do you want to replace it?</source>
-        <translation>Mayroon nang paborito na may pangalang &apos;{0}&apos;.
+        <translation>Mayroon nang paborito na may pangalang '{0}'.
 Gusto mo bang palitan ito?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1577"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1044"/>
         <source>Favorite copied to global favorites</source>
         <translation>Nakopya ang paborito sa mga global na paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1580"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1047"/>
         <source>Failed to copy to global favorites</source>
         <translation>Nabigo ang pagkopya sa mga global na paborito</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>Global Favorites</source>
-        <translation>Mga Global na Paborito</translation>
+        <translation type="obsolete">Mga Global na Paborito</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1587"/>
         <source>{0} global favorite(s) available.
 
 Global favorites are shared across all projects.</source>
-        <translation>{0} global na paborito ang available.
+        <translation type="obsolete">{0} global na paborito ang available.
 
 Ang mga global na paborito ay ibinabahagi sa lahat ng project.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1603"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1064"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>Na-save ang {0} paborito sa project file</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1605"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1066"/>
         <source>Save failed</source>
         <translation>Nabigo ang pag-save</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1617"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1077"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>Na-restore ang {0} paborito mula sa project file</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1619"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1079"/>
         <source>No favorites to restore found in project</source>
         <translation>Walang paborito na mare-restore na nahanap sa project</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1646"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1110"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>Nalinis ang {0} orphan na project</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1648"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1112"/>
         <source>No orphan projects to clean up</source>
         <translation>Walang orphan na project na lilinisin</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1773"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1172"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -452,403 +693,473 @@ Kabuuang paborito: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1789"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1188"/>
         <source>Top projects by favorites:</source>
         <translation>Mga nangungunang project ayon sa paborito:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1793"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1192"/>
         <source>FilterMate Statistics</source>
         <translation>Mga Istatistika ng FilterMate</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="513"/>
         <source>Favorites Manager</source>
-        <translation>Favorites Manager</translation>
+        <translation type="obsolete">Favorites Manager</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="513"/>
         <source>No favorites saved yet.
 
-Apply a filter to a layer, then click the ★ indicator and choose &apos;Add current filter to favorites&apos; to save your first favorite.</source>
-        <translation>Wala pang naka-save na favorites.
+Apply a filter to a layer, then click the ★ indicator and choose 'Add current filter to favorites' to save your first favorite.</source>
+        <translation type="obsolete">Wala pang naka-save na favorites.
 
 Mag-apply ng filter sa isang layer, pagkatapos ay i-click ang indicator na ★ at piliin ang «Add current filter to favorites» upang i-save ang iyong unang paborito.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="808"/>
         <source>Import from Resource Sharing...</source>
-        <translation>Mag-import mula sa Resource Sharing…</translation>
+        <translation type="obsolete">Mag-import mula sa Resource Sharing…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="811"/>
         <source>Publish to Resource Sharing...</source>
-        <translation>Mag-publish sa Resource Sharing…</translation>
+        <translation type="obsolete">Mag-publish sa Resource Sharing…</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="816"/>
         <source>Publish (no favorites saved)</source>
-        <translation>Mag-publish (walang naka-save na favorites)</translation>
+        <translation type="obsolete">Mag-publish (walang naka-save na favorites)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1756"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1094"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>Hindi pa naka-initialize ang config directory ng FilterMate — buksan muna ang isang QGIS project na may FilterMate.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation>Hindi aktibo ang Resource Sharing extension. I-enable ang &apos;favorites_sharing&apos; sa FilterMate settings.</translation>
+        <translation type="obsolete">Hindi aktibo ang Resource Sharing extension. I-enable ang 'favorites_sharing' sa FilterMate settings.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
         <source>Shared favorites service is not available.</source>
-        <translation>Hindi available ang serbisyo ng shared favorites.</translation>
+        <translation type="obsolete">Hindi available ang serbisyo ng shared favorites.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
         <source>Shared picker failed: {0}</source>
-        <translation>Nabigo ang shared picker: {0}</translation>
+        <translation type="obsolete">Nabigo ang shared picker: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation>Wala ka pang favorites na mai-publish. I-save muna ang isang filter sa pamamagitan ng menu na ★.</translation>
+        <translation type="obsolete">Wala ka pang favorites na mai-publish. I-save muna ang isang filter sa pamamagitan ng menu na ★.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
         <source>Publish dialog failed: {0}</source>
-        <translation>Nabigo ang publish dialog: {0}</translation>
+        <translation type="obsolete">Nabigo ang publish dialog: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="382"/>
+        <source>Favorites are not ready yet: {0}</source>
+        <translation>Hindi pa handa ang mga paborito: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="387"/>
+        <source>Could not remove &apos;{0}&apos;: {1}</source>
+        <translation>Hindi maalis ang '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="622"/>
+        <source>No favorites saved yet — apply a filter then click the ★ indicator to save your first one.</source>
+        <translation>Wala pang na-save na paborito — maglapat ng filter, pagkatapos ay i-click ang indicator na ★ para i-save ang una mo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="661"/>
+        <source>The favorites manager could not be opened. Details in filtermate.log.</source>
+        <translation>Hindi mabuksan ang tagapamahala ng mga paborito. Mga detalye sa filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <source>Could not replace &apos;{0}&apos;: {1}</source>
+        <translation>Hindi mapalitan ang '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="897"/>
+        <source>Could not save &apos;{0}&apos;: {1}</source>
+        <translation>Hindi ma-save ang '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1021"/>
+        <source>Could not import global favorite: {0}</source>
+        <translation>Hindi ma-import ang pandaigdigang paborito: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1039"/>
+        <source>Could not copy to global: {0}</source>
+        <translation>Hindi makopya sa pandaigdigan: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1059"/>
+        <source>Could not save favorites to project file: {0}</source>
+        <translation>Hindi ma-save ang mga paborito sa file ng proyekto: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1115"/>
+        <source>Orphan projects could not be cleaned up. Details in filtermate.log.</source>
+        <translation>Hindi nalinis ang mga ulilang proyekto. Mga detalye sa filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_controller.py" line="1199"/>
+        <source>Database statistics are unavailable. Details in filtermate.log.</source>
+        <translation>Hindi available ang mga estadistika ng database. Mga detalye sa filtermate.log.</translation>
     </message>
 </context>
 <context>
     <name>FavoritesManagerDialog</name>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="156"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="204"/>
         <source>FilterMate - Favorites Manager</source>
         <translation>FilterMate - Manager ng mga Paborito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1243"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1165"/>
         <source>&lt;b&gt;Saved Favorites ({0})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Mga Naka-save na Paborito ({0})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="218"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="266"/>
         <source>Search by name, expression, tags, or description...</source>
         <translation>Maghanap ayon sa pangalan, expression, tag, o paglalarawan...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="501"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="553"/>
         <source>General</source>
         <translation>Pangkalahatan</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Expression</source>
         <translation>Expression</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="969"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1021"/>
         <source>Remote</source>
         <translation>Remote</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="523"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="575"/>
         <source>Favorite name</source>
         <translation>Pangalan ng paborito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="524"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="576"/>
         <source>Name:</source>
         <translation>Pangalan:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="528"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="580"/>
         <source>Description (auto-generated, editable)</source>
         <translation>Paglalarawan (awtomatikong ginawa, mae-edit)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="529"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="581"/>
         <source>Description:</source>
         <translation>Paglalarawan:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="532"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="584"/>
         <source>Enter tags separated by commas (e.g., urban, population, 2024)</source>
         <translation>Maglagay ng mga tag na pinaghihiwalay ng kuwit (hal., urban, population, 2024)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="535"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="587"/>
         <source>Tags help organize and search favorites.
 Separate multiple tags with commas.</source>
         <translation>Nakakatulong ang mga tag sa pag-organisa at paghahanap ng mga paborito.
 Paghiwalayin ang maraming tag gamit ang kuwit.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="538"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="590"/>
         <source>Tags:</source>
         <translation>Mga Tag:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="543"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="595"/>
         <source>Source Layer:</source>
         <translation>Source Layer:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="547"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="599"/>
         <source>Provider:</source>
         <translation>Provider:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="555"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="607"/>
         <source>Used:</source>
         <translation>Ginamit:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="558"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="610"/>
         <source>Created:</source>
         <translation>Ginawa:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="677"/>
         <source>&lt;b&gt;Source Layer Expression:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Expression ng Source Layer:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="629"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
         <source>Filter expression for source layer</source>
         <translation>Filter expression para sa source layer</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="644"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="696"/>
         <source>&lt;b&gt;Filtered Remote Layers:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Mga Na-filter na Remote Layer:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Layer</source>
         <translation>Layer</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="648"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="700"/>
         <source>Features</source>
         <translation>Mga Feature</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="656"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="708"/>
         <source>&lt;i&gt;No remote layers in this favorite&lt;/i&gt;</source>
         <translation>&lt;i&gt;Walang remote layer sa paboritong ito&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="669"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="721"/>
         <source>Apply</source>
         <translation>Ilapat</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="672"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="724"/>
         <source>Apply this favorite filter to the project</source>
         <translation>Ilapat ang paboritong filter na ito sa project</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="675"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="727"/>
         <source>Save Changes</source>
         <translation>I-save ang mga Pagbabago</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="678"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="730"/>
         <source>Save modifications to this favorite</source>
         <translation>I-save ang mga pagbabago sa paboritong ito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="681"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="733"/>
         <source>Delete</source>
         <translation>Tanggalin</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="684"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="736"/>
         <source>Permanently delete this favorite</source>
         <translation>Permanenteng tanggalin ang paboritong ito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="687"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="739"/>
         <source>Close</source>
         <translation>Isara</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="689"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="741"/>
         <source>Close this dialog</source>
         <translation>Isara ang dialog na ito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="797"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="849"/>
         <source>&lt;b&gt;Favorites ({0}/{1})&lt;/b&gt;</source>
         <translation>&lt;b&gt;Mga Paborito ({0}/{1})&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="963"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1015"/>
         <source>Remote ({0})</source>
         <translation>Remote ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1120"/>
         <source>Delete Favorite</source>
         <translation>Tanggalin ang Paborito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1056"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1120"/>
         <source>Delete favorite &apos;{0}&apos;?</source>
-        <translation>Tanggalin ang paborito &apos;{0}&apos;?</translation>
+        <translation>Tanggalin ang paborito '{0}'?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1167"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1232"/>
         <source>Remote Layers</source>
         <translation>Mga Remote Layer</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="1239"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1303"/>
         <source>&lt;b&gt;Saved Favorites (0)&lt;/b&gt;</source>
         <translation>&lt;b&gt;Mga Naka-save na Paborito (0)&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>Favorites Manager</source>
-        <translation>Manager ng mga Paborito</translation>
+        <translation type="obsolete">Manager ng mga Paborito</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1262"/>
         <source>No favorites saved yet.
 
-Click the ★ indicator and select &apos;Add current filter to favorites&apos; to save your first favorite.</source>
-        <translation>Wala pang naka-save na paborito.
+Click the ★ indicator and select 'Add current filter to favorites' to save your first favorite.</source>
+        <translation type="obsolete">Wala pang naka-save na paborito.
 
-I-click ang ★ indicator at piliin ang &apos;Idagdag ang kasalukuyang filter sa mga paborito&apos; upang i-save ang iyong unang paborito.</translation>
+I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga paborito' upang i-save ang iyong unang paborito.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="184"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="232"/>
         <source>Shared...</source>
         <translation>Nakabahagi…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="186"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="234"/>
         <source>Browse favorites shared via QGIS Resource Sharing collections</source>
         <translation>Tingnan ang mga favorites na ibinahagi sa pamamagitan ng QGIS Resource Sharing collections</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="196"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="244"/>
         <source>Publish...</source>
         <translation>Mag-publish…</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="198"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="246"/>
         <source>Publish selected favorites into a Resource Sharing collection</source>
         <translation>I-publish ang mga napiling favorites sa isang Resource Sharing collection</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
-        <source>Could not delete &apos;{0}&apos;. The favorite is still in the database — check the FilterMate log for details.</source>
-        <translation>Hindi matanggal ang «{0}». Nasa database pa rin ang paborito — tingnan ang FilterMate log para sa mga detalye.</translation>
+        <source>Could not delete '{0}'. The favorite is still in the database — check the FilterMate log for details.</source>
+        <translation type="obsolete">Hindi matanggal ang «{0}». Nasa database pa rin ang paborito — tingnan ang FilterMate log para sa mga detalye.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="231"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="279"/>
         <source>Filter favorites by scope (owner × project).</source>
         <translation>I-filter ang favorites ayon sa scope (may-ari × proyekto).</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="236"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="284"/>
         <source>All</source>
         <translation>Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="237"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="285"/>
         <source>Shared · All projects</source>
         <translation>Shared · Lahat ng proyekto</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="238"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="286"/>
         <source>Shared · This project</source>
         <translation>Shared · Ang proyektong ito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="239"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="287"/>
         <source>Mine · All projects</source>
         <translation>Akin · Lahat ng proyekto</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="240"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="288"/>
         <source>Mine · This project</source>
         <translation>Akin · Ang proyektong ito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="573"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="625"/>
         <source>Mine</source>
         <translation>Akin</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="574"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="626"/>
         <source>Shared</source>
         <translation>Shared</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="585"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="637"/>
         <source>This project</source>
         <translation>Ang proyektong ito</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="586"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="638"/>
         <source>All projects</source>
         <translation>Lahat ng proyekto</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="593"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="645"/>
         <source>Project scope is set when the favorite is created. Move it via the filtering tab (coming soon) to switch projects.</source>
         <translation>Ang saklaw ng proyekto ay itatakda kapag ginawa ang paborito. Ilipat ito sa pamamagitan ng filtering tab (darating na malapit) upang magpalit ng proyekto.</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="614"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="666"/>
         <source>Visibility:</source>
         <translation>Visibility:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="914"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="966"/>
         <source>— (shared with everyone)</source>
         <translation>— (shared sa lahat)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="916"/>
+        <location filename="../ui/dialogs/favorites_manager.py" line="968"/>
         <source>{0} (you)</source>
         <translation>{0} (ikaw)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/favorites_manager.py" line="920"/>
-        <source>{0} — selecting &apos;Mine&apos; on save will transfer ownership to you</source>
-        <translation>{0} — ang pagpili ng &apos;Akin&apos; sa pag-save ay maglilipat ng ownership sa iyo</translation>
+        <location filename="../ui/dialogs/favorites_manager.py" line="972"/>
+        <source>{0} — selecting 'Mine' on save will transfer ownership to you</source>
+        <translation>{0} — ang pagpili ng 'Akin' sa pag-save ay maglilipat ng ownership sa iyo</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1080"/>
+        <source>Could not save &apos;{0}&apos;: {1}</source>
+        <translation>Hindi ma-save ang '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1139"/>
+        <source>Could not delete &apos;{0}&apos;: {1}</source>
+        <translation>Hindi matanggal ang '{0}': {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/favorites_manager.py" line="1150"/>
+        <source>'{0}' was not in the database — refresh and try again.</source>
+        <translation>Wala ang '{0}' sa database — i-refresh at subukang muli.</translation>
     </message>
 </context>
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="588"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="600"/>
         <source>View</source>
         <translation>Tingnan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="590"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="602"/>
         <source>Change</source>
         <translation>Baguhin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="601"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="613"/>
         <source>Select a folder</source>
         <translation>Pumili ng folder</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="608"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="620"/>
         <source>Select a file</source>
         <translation>Pumili ng file</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="616"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="628"/>
         <source>Save to a file</source>
         <translation>I-save sa isang file</translation>
     </message>
@@ -856,17 +1167,17 @@ I-click ang ★ indicator at piliin ang &apos;Idagdag ang kasalukuyang filter sa
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="648"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="660"/>
         <source>View</source>
         <translation>Tingnan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="650"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="662"/>
         <source>Change</source>
         <translation>Baguhin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="659"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="671"/>
         <source>Select an icon</source>
         <translation>Pumili ng icon</translation>
     </message>
@@ -882,67 +1193,67 @@ I-click ang ★ indicator at piliin ang &apos;Idagdag ang kasalukuyang filter sa
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="190"/>
+        <location filename="../filter_mate.py" line="204"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="314"/>
+        <location filename="../filter_mate.py" line="328"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="314"/>
+        <location filename="../filter_mate.py" line="328"/>
         <source>Open FilterMate panel</source>
         <translation>Buksan ang FilterMate panel</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="323"/>
+        <location filename="../filter_mate.py" line="337"/>
         <source>Reset configuration and database</source>
         <translation>I-reset ang pagsasaayos at database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="323"/>
+        <location filename="../filter_mate.py" line="337"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>I-reset ang default na pagsasaayos at burahin ang SQLite database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1334"/>
+        <location filename="../filter_mate.py" line="1421"/>
         <source>Reset Configuration</source>
         <translation>I-reset ang Pagsasaayos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1357"/>
+        <location filename="../filter_mate.py" line="1444"/>
         <source>Configuration reset successfully.</source>
         <translation>Matagumpay na na-reset ang pagsasaayos.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1362"/>
+        <location filename="../filter_mate.py" line="1449"/>
         <source>Default configuration file not found.</source>
         <translation>Hindi nahanap ang default na file ng pagsasaayos.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1383"/>
+        <location filename="../filter_mate.py" line="1470"/>
         <source>Database deleted: {filename}</source>
         <translation>Nabura ang database: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1397"/>
+        <location filename="../filter_mate.py" line="1484"/>
         <source>Restart required</source>
         <translation>Kailangang i-restart</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="403"/>
+        <location filename="../filter_mate.py" line="421"/>
         <source>Obsolete configuration detected</source>
         <translation>Lumang pagsasaayos ang nakita</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="404"/>
+        <location filename="../filter_mate.py" line="422"/>
         <source>unknown version</source>
         <translation>hindi kilalang bersyon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="405"/>
+        <location filename="../filter_mate.py" line="423"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -957,12 +1268,12 @@ Do you want to reset to default settings?
 • No: Keep current configuration (may cause issues)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="412"/>
+        <location filename="../filter_mate.py" line="430"/>
         <source>Corrupted configuration detected</source>
         <translation>Sirang pagsasaayos ang nakita</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="413"/>
+        <location filename="../filter_mate.py" line="431"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -977,12 +1288,12 @@ Do you want to reset to default settings?
 • No: Cancel (the plugin may not work correctly)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="420"/>
+        <location filename="../filter_mate.py" line="438"/>
         <source>Configuration reset</source>
         <translation>I-reset ang Pagsasaayos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="421"/>
+        <location filename="../filter_mate.py" line="439"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -991,76 +1302,76 @@ Do you want to continue?</source>
 Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="469"/>
+        <location filename="../filter_mate.py" line="487"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Hindi na-reset ang pagsasaayos. Ang ilang mga tampok ay maaaring hindi gumana ng tama.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="480"/>
+        <location filename="../filter_mate.py" line="498"/>
         <source>Configuration created with default values</source>
         <translation>Ang pagsasaayos ay nilikha gamit ang mga default na halaga</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="483"/>
+        <location filename="../filter_mate.py" line="501"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Na-reset ang sirang pagsasaayos. Naibalik na ang mga default na setting.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="504"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Na-reset ang lumang pagsasaayos. Naibalik na ang mga default na setting.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="507"/>
+        <location filename="../filter_mate.py" line="525"/>
         <source>Configuration updated to latest version</source>
         <translation>Na-update ang pagsasaayos sa pinakabagong bersyon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="504"/>
+        <location filename="../filter_mate.py" line="522"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Na-update ang pagsasaayos: may bagong mga setting ({sections}). I-access sa pamamagitan ng Options menu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="498"/>
+        <location filename="../filter_mate.py" line="516"/>
         <source>Geometry Simplification</source>
         <translation>Pagpapasimple ng Geometry</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="499"/>
+        <location filename="../filter_mate.py" line="517"/>
         <source>Optimization Thresholds</source>
         <translation>Mga Threshold ng Optimization</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="526"/>
+        <location filename="../filter_mate.py" line="544"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error during configuration migration: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="644"/>
+        <location filename="../filter_mate.py" line="662"/>
         <source>Geometry validation setting</source>
         <translation>Setting ng geometry validation</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="646"/>
-        <source>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
+        <location filename="../filter_mate.py" line="664"/>
+        <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
-FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
+FilterMate recommends disabling this setting (value 'Off') for the following reasons:
 
 • Features with invalid geometries could be silently excluded from exports and filters
 • FilterMate handles geometry validation internally with automatic repair options
-• Some legitimate data may have geometries considered as &apos;invalid&apos; according to strict OGC rules
+• Some legitimate data may have geometries considered as 'invalid' according to strict OGC rules
 
 Do you want to disable this setting now?
 
 • Yes: Disable filtering (recommended for FilterMate)
 • No: Keep current setting</source>
-        <translation>The QGIS setting &apos;Invalid features filtering&apos; is currently set to &apos;{mode}&apos;.
+        <translation>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
-FilterMate recommends disabling this setting (value &apos;Off&apos;) for the following reasons:
+FilterMate recommends disabling this setting (value 'Off') for the following reasons:
 
 • Features with invalid geometries could be silently excluded from exports and filters
 • FilterMate handles geometry validation internally with automatic repair options
-• Some legitimate data may have geometries considered as &apos;invalid&apos; according to strict OGC rules
+• Some legitimate data may have geometries considered as 'invalid' according to strict OGC rules
 
 Do you want to disable this setting now?
 
@@ -1068,17 +1379,17 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="674"/>
+        <location filename="../filter_mate.py" line="692"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Matagumpay na na-disable ang pag-filter ng invalid na geometry.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="681"/>
+        <location filename="../filter_mate.py" line="699"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Hindi binago ang pag-filter ng invalid na geometry. Ang ilang mga tampok ay maaaring ihiwalay sa mga pag-export.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1334"/>
+        <location filename="../filter_mate.py" line="1421"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1095,7 +1406,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1397"/>
+        <location filename="../filter_mate.py" line="1484"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1104,189 +1415,194 @@ Please restart QGIS to apply the changes.</source>
 Please restart QGIS to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="348"/>
+        <location filename="../filter_mate.py" line="366"/>
         <source>Initialization error: {0}</source>
         <translation>Error sa initialization: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="585"/>
+        <location filename="../filter_mate.py" line="603"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} na-reference na layer ang hindi na-load ({layers_list}). Ginagamit ang fallback display.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1388"/>
+        <location filename="../filter_mate.py" line="1475"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Hindi matanggal ang {filename}: {e}</translation>
     </message>
     <message>
         <location filename="../filter_mate.py" line="1405"/>
         <source>Error during reset: {str(e)}</source>
-        <translation>Error sa pag-reset: {str(e)}</translation>
+        <translation type="obsolete">Error sa pag-reset: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1438"/>
+        <location filename="../filter_mate.py" line="1527"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;Salamat sa paggamit ng &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Sumali sa aming komunidad sa Discord upang:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Humingi ng tulong at suporta&lt;/li&gt;&lt;li&gt;Mag-report ng mga bug at isyu&lt;/li&gt;&lt;li&gt;Magmungkahi ng mga bagong feature&lt;/li&gt;&lt;li&gt;Magbahagi ng mga tip sa ibang gumagamit&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;p style='font-size:13px;'&gt;Salamat sa paggamit ng &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Sumali sa aming komunidad sa Discord upang:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Humingi ng tulong at suporta&lt;/li&gt;&lt;li&gt;Mag-report ng mga bug at isyu&lt;/li&gt;&lt;li&gt;Magmungkahi ng mga bagong feature&lt;/li&gt;&lt;li&gt;Magbahagi ng mga tip sa ibang gumagamit&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1454"/>
+        <location filename="../filter_mate.py" line="1543"/>
         <source>  Join us on Discord</source>
         <translation>  Sumali sa amin sa Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1474"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Don&apos;t show this again</source>
         <translation>Huwag nang ipakita ito</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1477"/>
+        <location filename="../filter_mate.py" line="1566"/>
         <source>Close</source>
         <translation>Isara</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1543"/>
+        <location filename="../filter_mate.py" line="1632"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Error sa paglo-load ng plugin: {0}. Suriin ang QGIS Python console para sa mga detalye.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6711"/>
+        <location filename="../filter_mate_dockwidget.py" line="6922"/>
         <source>Current layer: {0}</source>
         <translation>Kasalukuyang layer: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6713"/>
+        <location filename="../filter_mate_dockwidget.py" line="6924"/>
         <source>No layer selected</source>
         <translation>Walang napiling layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>Selected layers:
 {0}</source>
         <translation>Mga napiling layer:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6723"/>
+        <location filename="../filter_mate_dockwidget.py" line="6934"/>
         <source>No layers selected</source>
         <translation>Walang napiling layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6954"/>
         <source>No expression defined</source>
         <translation>Walang expression na tinukoy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6755"/>
+        <location filename="../filter_mate_dockwidget.py" line="6966"/>
         <source>Display expression: {0}</source>
         <translation>Display expression: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6770"/>
+        <location filename="../filter_mate_dockwidget.py" line="6981"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Feature ID: {0}
 Unang attribute: {1}</translation>
     </message>
+    <message>
+        <location filename="../filter_mate.py" line="1493"/>
+        <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
+        <translation>Hindi ma-reset ang configuration. Tiyaking nasusulatan ang folder ng plugin, pagkatapos ay subukang muli. Mga detalye sa filtermate.log.</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="274"/>
+        <location filename="../filter_mate_app.py" line="298"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>May nakitang PostgreSQL layer ({0}) ngunit hindi naka-install ang psycopg2.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="361"/>
+        <location filename="../filter_mate_app.py" line="390"/>
         <source>Cleared {0} caches</source>
         <translation>Na-clear ang {0} cache</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="795"/>
+        <location filename="../filter_mate_app.py" line="856"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Nabigo ang paglikha ng dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="805"/>
+        <location filename="../filter_mate_app.py" line="866"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Nabigo ang pagpapakita ng dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1255"/>
+        <location filename="../filter_mate_app.py" line="1380"/>
         <source>Error executing {0}: {1}</source>
         <translation>Error sa pagpapatupad ng {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1267"/>
+        <location filename="../filter_mate_app.py" line="1392"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Tumatakbo ang plugin sa degraded mode (hindi available ang hexagonal services). Maaaring bumaba ang performance.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1396"/>
+        <location filename="../filter_mate_app.py" line="1641"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ERROR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1396"/>
+        <location filename="../filter_mate_app.py" line="1641"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Hindi maipatupad ang {0}: nabigo ang initialization ng widget.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2167"/>
+        <location filename="../filter_mate_app.py" line="2426"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Hindi maipatupad ang {0}: hindi valid ang layer o hindi nahanap ang source.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2304"/>
+        <location filename="../filter_mate_app.py" line="2563"/>
         <source>All filters cleared - </source>
         <translation>Lahat ng filter na-clear - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2305"/>
+        <location filename="../filter_mate_app.py" line="2564"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} feature ang nakikita sa pangunahing layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2311"/>
+        <location filename="../filter_mate_app.py" line="2572"/>
         <source>Error: result handler missing</source>
         <translation>Error: nawawala ang result handler</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2324"/>
+        <location filename="../filter_mate_app.py" line="2585"/>
         <source>Error during filtering: {0}</source>
         <translation>Error sa pag-filter: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2455"/>
+        <location filename="../filter_mate_app.py" line="2707"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Na-recover ang {0} orphan na paborito: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2591"/>
+        <location filename="../filter_mate_app.py" line="2844"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Nabigo ang pag-load ng layer - i-click upang subukan muli</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2638"/>
+        <location filename="../filter_mate_app.py" line="2900"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>Matagumpay na na-load ang {0} layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1618"/>
+        <location filename="../filter_mate_app.py" line="1865"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1620"/>
+        <location filename="../filter_mate_app.py" line="1867"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1623"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1625"/>
+        <location filename="../filter_mate_app.py" line="1872"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1299,193 +1615,328 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1635"/>
+        <location filename="../filter_mate_app.py" line="1882"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1642"/>
+        <location filename="../filter_mate_app.py" line="1889"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1649"/>
+        <location filename="../filter_mate_app.py" line="1896"/>
         <source>Cancel</source>
         <translation>Kanselahin</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1673"/>
+        <location filename="../filter_mate_app.py" line="1920"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1228"/>
+        <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
+        <translation>Pumili ng layer sa tab na EXPLORING bago patakbuhin ang '{0}'.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="596"/>
+        <location filename="../filter_mate_dockwidget.py" line="616"/>
         <source>Initialization error: {}</source>
         <translation>Error sa initialization: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="925"/>
+        <location filename="../filter_mate_dockwidget.py" line="997"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Hindi kumpleto ang UI configuration - suriin ang mga log</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="929"/>
         <source>UI dimension error: {}</source>
-        <translation>Error sa dimensyon ng UI: {}</translation>
+        <translation type="obsolete">Error sa dimensyon ng UI: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1355"/>
+        <location filename="../filter_mate_dockwidget.py" line="1431"/>
         <source>Favorites manager not available</source>
         <translation>Hindi available ang manager ng mga paborito</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1374"/>
+        <location filename="../filter_mate_dockwidget.py" line="1450"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} Paborito ang naka-save
 I-click upang ilapat o pamahalaan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1382"/>
+        <location filename="../filter_mate_dockwidget.py" line="1458"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Walang naka-save na paborito
 I-click upang idagdag ang kasalukuyang filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1406"/>
+        <location filename="../filter_mate_dockwidget.py" line="1482"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Pinilit ang {0} backend para sa {1} layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1492"/>
+        <location filename="../filter_mate_dockwidget.py" line="1568"/>
         <source>Backend controller not available</source>
         <translation>Hindi available ang backend controller</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1430"/>
+        <location filename="../filter_mate_dockwidget.py" line="1506"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Naka-enable ang PostgreSQL auto-cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1431"/>
+        <location filename="../filter_mate_dockwidget.py" line="1507"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Naka-disable ang PostgreSQL auto-cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1437"/>
+        <location filename="../filter_mate_dockwidget.py" line="1513"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Na-clean up ang mga PostgreSQL session view</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1437"/>
+        <location filename="../filter_mate_dockwidget.py" line="1513"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Walang view na lilinisin o nabigo ang cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1448"/>
+        <location filename="../filter_mate_dockwidget.py" line="1524"/>
         <source>No PostgreSQL connection available</source>
         <translation>Walang available na koneksyon sa PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1454"/>
+        <location filename="../filter_mate_dockwidget.py" line="1530"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Ang schema ay may {0} view mula sa ibang session.
 I-drop pa rin?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1455"/>
+        <location filename="../filter_mate_dockwidget.py" line="1531"/>
         <source>Other Sessions Active</source>
         <translation>May Ibang Aktibong Session</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1457"/>
+        <location filename="../filter_mate_dockwidget.py" line="1533"/>
         <source>Schema cleanup cancelled</source>
         <translation>Nakansela ang schema cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1462"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
-        <translation>Matagumpay na na-drop ang schema &apos;{0}&apos;</translation>
+        <translation>Matagumpay na na-drop ang schema '{0}'</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1464"/>
+        <location filename="../filter_mate_dockwidget.py" line="1540"/>
         <source>Schema cleanup failed</source>
         <translation>Nabigo ang schema cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1490"/>
+        <location filename="../filter_mate_dockwidget.py" line="1566"/>
         <source>PostgreSQL Session Info</source>
         <translation>Impormasyon ng PostgreSQL Session</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Theme adapted: {0}</source>
         <translation>Na-adapt ang tema: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Dark mode</source>
         <translation>Dark mode</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2587"/>
+        <location filename="../filter_mate_dockwidget.py" line="2689"/>
         <source>Light mode</source>
         <translation>Light mode</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3896"/>
+        <location filename="../filter_mate_dockwidget.py" line="4005"/>
         <source>Selected features have no geometry.</source>
         <translation>Walang geometry ang mga napiling feature.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="3915"/>
+        <location filename="../filter_mate_dockwidget.py" line="4024"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Walang napiling feature. Pumili ng feature mula sa dropdown list.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4957"/>
+        <location filename="../filter_mate_dockwidget.py" line="5079"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Hindi valid ang napiling layer o hindi mahanap ang source nito.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5667"/>
+        <location filename="../filter_mate_dockwidget.py" line="5816"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatibong buffer (erosion): pinaliit ang mga polygon papaloob</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5670"/>
+        <location filename="../filter_mate_dockwidget.py" line="5819"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Halaga ng buffer sa metro (positibo=palakihin, negatibo=paliitin ang mga polygon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6144"/>
+        <location filename="../filter_mate_dockwidget.py" line="6293"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Na-activate ang plugin na may {0} vector layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6227"/>
+        <location filename="../filter_mate_dockwidget.py" line="6376"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Hindi awtomatikong nai-reload ang plugin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6229"/>
+        <location filename="../filter_mate_dockwidget.py" line="6378"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Error sa pag-reload ng plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6282"/>
+        <location filename="../filter_mate_dockwidget.py" line="6450"/>
         <source>Layer properties reset to defaults</source>
         <translation>Na-reset ang mga property ng layer sa default</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6283"/>
+        <location filename="../filter_mate_dockwidget.py" line="6451"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Error sa pag-reset ng mga property ng layer: {}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="864"/>
+        <source>Filter</source>
+        <translation>I-filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="865"/>
+        <source>Undo the last filter</source>
+        <translation>I-undo ang huling filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="866"/>
+        <source>Redo the last filter</source>
+        <translation>I-redo ang huling filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <source>Remove the filters</source>
+        <translation>Alisin ang mga filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <source>Export the layers</source>
+        <translation>I-export ang mga layer</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <source>About FilterMate</source>
+        <translation>Tungkol sa FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <source>QFieldCloud</source>
+        <translation>QFieldCloud</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <source>Identify the selected features</source>
+        <translation>Tukuyin ang mga napiling feature</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <source>Zoom to the selected features</source>
+        <translation>I-zoom sa mga napiling feature</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <source>Select the features on the map</source>
+        <translation>Piliin ang mga feature sa mapa</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <source>Follow the features on the map</source>
+        <translation>Sundan ang mga feature sa mapa</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <source>Link the three selection modes</source>
+        <translation>I-link ang tatlong mode ng pagpili</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <source>Reset the layer properties</source>
+        <translation>I-reset ang mga katangian ng layer</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <source>Follow the current layer</source>
+        <translation>Sundan ang kasalukuyang layer</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <source>Layers to filter</source>
+        <translation>Mga layer na ifi-filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <source>Combine with the existing filter</source>
+        <translation>Isama sa umiiral na filter</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <source>Geometric predicates</source>
+        <translation>Mga geometric predicate</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <source>Buffer distance</source>
+        <translation>Distansya ng buffer</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <source>Buffer type</source>
+        <translation>Uri ng buffer</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <source>Layers to export</source>
+        <translation>Mga layer na ie-export</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <source>Projection of the export</source>
+        <translation>Projection ng export</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <source>Export the styles</source>
+        <translation>I-export ang mga estilo</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <source>Export format</source>
+        <translation>Format ng export</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <source>Output folder</source>
+        <translation>Output folder</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <source>Zip the export</source>
+        <translation>I-zip ang export</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1001"/>
+        <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
+        <translation>Hindi mailapat ang layout ng panel; gagamitin ang mga default na laki. Mga detalye sa filtermate.log.</translation>
     </message>
 </context>
 <context>
@@ -1493,183 +1944,183 @@ I-drop pa rin?</translation>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="57"/>
         <source>FilterMate</source>
-        <translation>FilterMate</translation>
+        <translation type="obsolete">FilterMate</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="778"/>
         <source>SINGLE SELECTION</source>
-        <translation>SINGLE SELECTION</translation>
+        <translation type="obsolete">SINGLE SELECTION</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="953"/>
         <source>MULTIPLE SELECTION</source>
-        <translation>MULTIPLE SELECTION</translation>
+        <translation type="obsolete">MULTIPLE SELECTION</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1112"/>
         <source>CUSTOM SELECTION</source>
-        <translation>CUSTOM SELECTION</translation>
+        <translation type="obsolete">CUSTOM SELECTION</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1374"/>
         <source>FILTERING</source>
-        <translation>FILTERING</translation>
+        <translation type="obsolete">FILTERING</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2647"/>
         <source>EXPORTING</source>
-        <translation>EXPORTING</translation>
+        <translation type="obsolete">EXPORTING</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3479"/>
         <source>CONFIGURATION</source>
-        <translation>CONFIGURATION</translation>
+        <translation type="obsolete">CONFIGURATION</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3225"/>
         <source>Select CRS for export</source>
-        <translation>Select CRS for export</translation>
+        <translation type="obsolete">Select CRS for export</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3747"/>
         <source>Export</source>
-        <translation>I-export</translation>
+        <translation type="obsolete">I-export</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2333"/>
         <source>AND</source>
-        <translation>AT</translation>
+        <translation type="obsolete">AT</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2338"/>
         <source>AND NOT</source>
-        <translation>AT HINDI</translation>
+        <translation type="obsolete">AT HINDI</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2343"/>
         <source>OR</source>
-        <translation>O</translation>
+        <translation type="obsolete">O</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3280"/>
         <source>QML</source>
-        <translation>QML</translation>
+        <translation type="obsolete">QML</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3285"/>
         <source>SLD</source>
-        <translation>SLD</translation>
+        <translation type="obsolete">SLD</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2536"/>
         <source> m</source>
-        <translation> m</translation>
+        <translation type="obsolete"> m</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2409"/>
         <source>, </source>
-        <translation>, </translation>
+        <translation type="obsolete">, </translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1574"/>
         <source>Multi-layer filtering</source>
-        <translation>Multi-layer filtering</translation>
+        <translation type="obsolete">Multi-layer filtering</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1661"/>
         <source>Additive filtering for the selected layer</source>
-        <translation>Additive filtering para sa napiling layer</translation>
+        <translation type="obsolete">Additive filtering para sa napiling layer</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="1947"/>
         <source>Geospatial filtering</source>
-        <translation>Geospatial filtering</translation>
+        <translation type="obsolete">Geospatial filtering</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2037"/>
         <source>Buffer</source>
-        <translation>Buffer</translation>
+        <translation type="obsolete">Buffer</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2282"/>
         <source>Expression layer</source>
-        <translation>Expression layer</translation>
+        <translation type="obsolete">Expression layer</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2394"/>
         <source>Geometric predicate</source>
-        <translation>Geometric predicate</translation>
+        <translation type="obsolete">Geometric predicate</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3325"/>
         <source>Output format</source>
-        <translation>Output format</translation>
+        <translation type="obsolete">Output format</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3583"/>
         <source>Filter</source>
-        <translation>Filter</translation>
+        <translation type="obsolete">Filter</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3645"/>
         <source>Reset</source>
-        <translation>I-reset</translation>
+        <translation type="obsolete">I-reset</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2751"/>
         <source>Layers to export</source>
-        <translation>Mga layer na i-export</translation>
+        <translation type="obsolete">Mga layer na i-export</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2832"/>
         <source>Layers projection</source>
-        <translation>Projection ng mga layer</translation>
+        <translation type="obsolete">Projection ng mga layer</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2916"/>
         <source>Save styles</source>
-        <translation>I-save ang mga style</translation>
+        <translation type="obsolete">I-save ang mga style</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2997"/>
         <source>Datatype export</source>
-        <translation>Datatype export</translation>
+        <translation type="obsolete">Datatype export</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3078"/>
         <source>Name of file/directory</source>
-        <translation>Pangalan ng file/directory</translation>
+        <translation type="obsolete">Pangalan ng file/directory</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2205"/>
         <source>Use centroids instead of full geometries for source layer (faster for complex polygons)</source>
-        <translation>Gumamit ng mga centroid sa halip na buong geometry para sa source layer (mas mabilis para sa mga komplikadong polygon)</translation>
+        <translation type="obsolete">Gumamit ng mga centroid sa halip na buong geometry para sa source layer (mas mabilis para sa mga komplikadong polygon)</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2521"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
-        <translation>Halaga ng buffer sa metro (positibo=palakihin, negatibo=paliitin ang mga polygon)</translation>
+        <translation type="obsolete">Halaga ng buffer sa metro (positibo=palakihin, negatibo=paliitin ang mga polygon)</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="2609"/>
         <source>Number of segments for buffer precision</source>
-        <translation>Bilang ng mga segment para sa katumpakan ng buffer</translation>
+        <translation type="obsolete">Bilang ng mga segment para sa katumpakan ng buffer</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget_base.ui" line="3421"/>
         <source>Mode batch</source>
-        <translation>Batch mode</translation>
+        <translation type="obsolete">Batch mode</translation>
     </message>
 </context>
 <context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="281"/>
+        <location filename="../adapters/filter_result_handler.py" line="318"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} feature ang nakikita sa pangunahing layer</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="274"/>
+        <location filename="../adapters/filter_result_handler.py" line="311"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Lahat ng filter na-clear - {count} feature ang nakikita sa pangunahing layer</translation>
     </message>
@@ -1677,47 +2128,47 @@ I-drop pa rin?</translation>
 <context>
     <name>FinishedHandler</name>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="347"/>
+        <location filename="../core/tasks/finished_handler.py" line="346"/>
         <source>Task failed</source>
         <translation>Nabigo ang gawain</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="348"/>
+        <location filename="../core/tasks/finished_handler.py" line="347"/>
         <source>Filter failed for: {0}</source>
         <translation>Nabigo ang filter para sa: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="352"/>
+        <location filename="../core/tasks/finished_handler.py" line="351"/>
         <source> (+{0} more)</source>
         <translation> (+{0} pa)</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="399"/>
+        <location filename="../core/tasks/finished_handler.py" line="398"/>
         <source>Layer(s) filtered</source>
         <translation>Na-filter ang (mga) layer</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="403"/>
+        <location filename="../core/tasks/finished_handler.py" line="402"/>
         <source>Layer(s) filtered to precedent state</source>
         <translation>Na-filter ang (mga) layer sa naunang estado</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="407"/>
+        <location filename="../core/tasks/finished_handler.py" line="406"/>
         <source>Layer(s) unfiltered</source>
         <translation>Inalis ang filter ng (mga) layer</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="411"/>
+        <location filename="../core/tasks/finished_handler.py" line="410"/>
         <source>Filter task : {0}</source>
         <translation>Gawain sa pag-filter: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="432"/>
+        <location filename="../core/tasks/finished_handler.py" line="431"/>
         <source>Export task : {0}</source>
         <translation>Gawain sa pag-export: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="457"/>
+        <location filename="../core/tasks/finished_handler.py" line="456"/>
         <source>Exception: {0}</source>
         <translation>Exception: {0}</translation>
     </message>
@@ -1756,7 +2207,7 @@ I-drop pa rin?</translation>
 <context>
     <name>LayerLifecycleService</name>
     <message>
-        <location filename="../core/services/layer_lifecycle_service.py" line="212"/>
+        <location filename="../core/services/layer_lifecycle_service.py" line="255"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed. The plugin cannot use these layers. Install psycopg2 to enable PostgreSQL support.</source>
         <translation>May nakitang PostgreSQL layer ({0}) ngunit hindi naka-install ang psycopg2. Hindi magagamit ng plugin ang mga layer na ito. Mag-install ng psycopg2 upang i-enable ang suporta sa PostgreSQL.</translation>
     </message>
@@ -1764,7 +2215,7 @@ I-drop pa rin?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="944"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1034"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -1772,21 +2223,21 @@ This error originates from a previous version of FilterMate.
 
 Solution: Remove this layer from the FilterMate project, then re-add it.
 Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
-        <translation>PostgreSQL layer &apos;{0}&apos;: May nakitang sirang data.
+        <translation>PostgreSQL layer '{0}': May nakitang sirang data.
 
-Ang layer na ito ay gumagamit ng &apos;virtual_id&apos; na wala sa PostgreSQL.
+Ang layer na ito ay gumagamit ng 'virtual_id' na wala sa PostgreSQL.
 Ang error na ito ay nagmula sa nakaraang bersyon ng FilterMate.
 
 Solusyon: Alisin ang layer na ito sa FilterMate project, pagkatapos ay idagdag muli.
 Siguraduhin na ang PostgreSQL table ay may nakatakdang PRIMARY KEY.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="970"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1060"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
-        <translation>Walang PRIMARY KEY ang layer &apos;{0}&apos;. Limitadong feature: naka-disable ang materialized view. Rekomendasyon: magdagdag ng PRIMARY KEY para sa optimal na performance.</translation>
+        <translation>Walang PRIMARY KEY ang layer '{0}'. Limitadong feature: naka-disable ang materialized view. Rekomendasyon: magdagdag ng PRIMARY KEY para sa optimal na performance.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1909"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2114"/>
         <source>Exception: {0}</source>
         <translation>Exception: {0}</translation>
     </message>
@@ -1922,6 +2373,252 @@ Siguraduhin na ang PostgreSQL table ay may nakatakdang PRIMARY KEY.</translation
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="395"/>
+        <source>Apply to the other tiles of the dataset</source>
+        <translation>Ilapat sa iba pang tile ng dataset</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="408"/>
+        <source>CLASSES</source>
+        <translation>MGA KLASE</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="413"/>
+        <source>Ground</source>
+        <translation>Lupa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="414"/>
+        <source>Vegetation</source>
+        <translation>Halaman</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="415"/>
+        <source>Buildings</source>
+        <translation>Mga gusali</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <source>Above ground</source>
+        <translation>Higit sa lupa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="417"/>
+        <source>Water</source>
+        <translation>Tubig</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="418"/>
+        <source>Without noise</source>
+        <translation>Walang ingay</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <source>Check only these classes</source>
+        <translation>Lagyan ng check ang mga klaseng ito lamang</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="432"/>
+        <source>All</source>
+        <translation>Lahat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <source>None</source>
+        <translation>Wala</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="443"/>
+        <source>Point classes</source>
+        <translation>Mga klase ng punto</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="459"/>
+        <source>ATTRIBUTE RANGES</source>
+        <translation>MGA SAKLAW NG ATTRIBUTE</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="465"/>
+        <source>Z (m)</source>
+        <translation>Z (m)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="466"/>
+        <source>Lowest elevation kept</source>
+        <translation>Pinakamababang elevation na pinanatili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <source>Highest elevation kept</source>
+        <translation>Pinakamataas na elevation na pinanatili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="475"/>
+        <source>Intensity</source>
+        <translation>Intensity</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="476"/>
+        <source>Lowest intensity kept</source>
+        <translation>Pinakamababang intensity na pinanatili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="477"/>
+        <source>Highest intensity kept</source>
+        <translation>Pinakamataas na intensity na pinanatili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <source>Return</source>
+        <translation>Return</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <source>Echo of the laser pulse kept</source>
+        <translation>Echo ng laser pulse na pinanatili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="495"/>
+        <source>Height above DTM ≥</source>
+        <translation>Taas sa ibabaw ng DTM ≥</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <source>Digital terrain model the height is measured from</source>
+        <translation>Digital terrain model na pinagbabatayan ng pagsukat ng taas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="519"/>
+        <source>Keep the points at least this high above the terrain model</source>
+        <translation>Panatilihin ang mga punto na hindi bababa sa ganito kataas sa ibabaw ng terrain model</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <source>EXPRESSION</source>
+        <translation>EXPRESSION</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="532"/>
+        <source>Point cloud expression</source>
+        <translation>Expression ng point cloud</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="533"/>
+        <source>Check the group to edit the expression by hand</source>
+        <translation>Lagyan ng check ang grupo para i-edit nang mano-mano ang expression</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="560"/>
+        <source>No elevation statistics for this layer</source>
+        <translation>Walang estadistika ng elevation para sa layer na ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="601"/>
+        <source>Height above the terrain is unavailable</source>
+        <translation>Hindi available ang taas sa ibabaw ng terrain</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="611"/>
+        <source>Kept points: {0}</source>
+        <translation>Mga puntong pinanatili: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <source>Current filter: {0}</source>
+        <translation>Kasalukuyang filter: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="617"/>
+        <source>none</source>
+        <translation>wala</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <source>Any</source>
+        <translation>Alinman</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <source>First</source>
+        <translation>Una</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Last</source>
+        <translation>Huli</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Single</source>
+        <translation>Nag-iisa</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudFilterWidget</name>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="141"/>
+        <source>Point cloud filter</source>
+        <translation>Filter ng point cloud</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="152"/>
+        <source>Classification</source>
+        <translation>Klasipikasyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="157"/>
+        <source>All</source>
+        <translation>Lahat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="158"/>
+        <source>None</source>
+        <translation>Wala</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="167"/>
+        <source>Elevation (Z)</source>
+        <translation>Elevation (Z)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="169"/>
+        <source>Intensity</source>
+        <translation>Intensity</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="175"/>
+        <source>Return number</source>
+        <translation>Numero ng return</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="199"/>
+        <source>Minimum</source>
+        <translation>Minimum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="200"/>
+        <source>Maximum</source>
+        <translation>Maximum</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
+        <source>Current filter: {0}</source>
+        <translation>Kasalukuyang filter: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
+        <source>none</source>
+        <translation>wala</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/point_cloud_filter_widget.py" line="329"/>
+        <source>Any</source>
+        <translation>Alinman</translation>
     </message>
 </context>
 <context>
@@ -2068,202 +2765,202 @@ Magpatuloy?</translation>
 <context>
     <name>PublishFavoritesDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="161"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="119"/>
         <source>FilterMate — Publish to Resource Sharing</source>
         <translation>FilterMate — Mag-publish sa Resource Sharing</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="169"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="127"/>
         <source>&lt;b&gt;Publish Favorites&lt;/b&gt; — write a shareable bundle into a QGIS Resource Sharing collection.</source>
         <translation>&lt;b&gt;Mag-publish ng Favorites&lt;/b&gt; — magsulat ng shareable bundle sa isang QGIS Resource Sharing collection.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="189"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="147"/>
         <source>Overwrite existing bundle</source>
         <translation>Palitan ang kasalukuyang bundle</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="199"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="157"/>
         <source>Publish</source>
         <translation>Mag-publish</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="171"/>
         <source>&lt;b&gt;1. Target collection&lt;/b&gt;</source>
         <translation>&lt;b&gt;1. Target collection&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="226"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="184"/>
         <source>Browse...</source>
         <translation>Mag-browse…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="234"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="192"/>
         <source>&lt;b&gt;2. Bundle file name&lt;/b&gt;</source>
         <translation>&lt;b&gt;2. Pangalan ng bundle file&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="236"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="194"/>
         <source>e.g. zones_bruxelles</source>
         <translation>hal. zones_bruxelles</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="239"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="197"/>
         <source>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;name&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</source>
         <translation>&lt;small&gt;→ &lt;code&gt;&amp;lt;target&amp;gt;/filter_mate/favorites/&amp;lt;pangalan&amp;gt;.fmfav-pack.json&lt;/code&gt;&lt;/small&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="202"/>
         <source>&lt;b&gt;3. Collection metadata&lt;/b&gt;</source>
         <translation>&lt;b&gt;3. Metadata ng collection&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="250"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="208"/>
         <source>Collection display name</source>
         <translation>Display name ng collection</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="209"/>
         <source>Name:</source>
         <translation>Pangalan:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="212"/>
         <source>Author / organisation</source>
         <translation>May-akda / organisasyon</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="255"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="213"/>
         <source>Author:</source>
         <translation>May-akda:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="258"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="216"/>
         <source>e.g. CC-BY-4.0, MIT, Proprietary</source>
         <translation>hal. CC-BY-4.0, MIT, Proprietary</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="259"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="217"/>
         <source>License:</source>
         <translation>Lisensya:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="262"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="220"/>
         <source>Comma-separated tags</source>
         <translation>Mga tag na pinaghihiwalay ng kuwit</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="263"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="221"/>
         <source>Tags:</source>
         <translation>Mga tag:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="266"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="224"/>
         <source>https://...</source>
         <translation>https://…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="267"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="225"/>
         <source>Homepage:</source>
         <translation>Homepage:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="271"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="229"/>
         <source>Short description (optional, supports plain text)</source>
         <translation>Maikling paglalarawan (opsyonal, plain text)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="232"/>
         <source>Description:</source>
         <translation>Paglalarawan:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="286"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="244"/>
         <source>&lt;b&gt;4. Favorites to include&lt;/b&gt;</source>
         <translation>&lt;b&gt;4. Mga favorites na isasama&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="248"/>
         <source>Select all</source>
         <translation>Piliin lahat</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="293"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="251"/>
         <source>Select none</source>
         <translation>Wala sa napili</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="332"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="290"/>
         <source>New collection in Resource Sharing root...</source>
         <translation>Bagong collection sa ugat ng Resource Sharing…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="336"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="294"/>
         <source>Custom directory...</source>
         <translation>Custom na direktoryo…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="410"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="368"/>
         <source>Will be created under the Resource Sharing root.</source>
         <translation>Lilikhain sa ilalim ng ugat ng Resource Sharing.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="415"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="373"/>
         <source>Click &apos;Browse...&apos; to choose a directory.</source>
-        <translation>I-click ang &apos;Mag-browse…&apos; upang pumili ng direktoryo.</translation>
+        <translation>I-click ang 'Mag-browse…' upang pumili ng direktoryo.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="421"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="379"/>
         <source>Choose a collection directory</source>
         <translation>Pumili ng collection directory</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="472"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="430"/>
         <source>{0} / {1} selected</source>
         <translation>{0} / {1} ang napili</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="480"/>
         <source>Cannot create collection</source>
         <translation>Hindi malikha ang collection</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="522"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="480"/>
         <source>Resource Sharing root not found. Use &apos;Browse...&apos; to pick a directory instead.</source>
-        <translation>Hindi natagpuan ang ugat ng Resource Sharing. Gamitin ang &apos;Mag-browse…&apos; upang pumili ng direktoryo.</translation>
+        <translation>Hindi natagpuan ang ugat ng Resource Sharing. Gamitin ang 'Mag-browse…' upang pumili ng direktoryo.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="497"/>
         <source>Choose a directory</source>
         <translation>Pumili ng direktoryo</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="497"/>
         <source>Click &apos;Browse...&apos; to pick a target directory.</source>
-        <translation>I-click ang &apos;Mag-browse…&apos; upang pumili ng target na direktoryo.</translation>
+        <translation>I-click ang 'Mag-browse…' upang pumili ng target na direktoryo.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="696"/>
         <source>No favorites selected</source>
         <translation>Walang napiling favorites</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="687"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="696"/>
         <source>Select at least one favorite to publish.</source>
         <translation>Pumili ng hindi bababa sa isang paborito upang i-publish.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="729"/>
         <source>Publish failed</source>
         <translation>Nabigo ang pag-publish</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="720"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="729"/>
         <source>Unknown error.</source>
         <translation>Hindi kilalang error.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="727"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="736"/>
         <source>Published {0} favorite(s) to:
 
 &lt;code&gt;{1}&lt;/code&gt;</source>
@@ -2272,67 +2969,92 @@ Magpatuloy?</translation>
 &lt;code&gt;{1}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="731"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="740"/>
         <source>Collection manifest updated:
 &lt;code&gt;{0}&lt;/code&gt;</source>
         <translation>Na-update ang collection manifest:
 &lt;code&gt;{0}&lt;/code&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="734"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="743"/>
         <source>Publish succeeded</source>
         <translation>Matagumpay ang pag-publish</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Remote repos unavailable</source>
         <translation>Hindi available ang remote repos</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="574"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="539"/>
         <source>Remote repo manager is not initialized.</source>
         <translation>Hindi pa na-initialize ang remote repo manager.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="632"/>
         <source>Publishing to &lt;b&gt;{0}&lt;/b&gt; failed.</source>
         <translation>Nabigo ang pag-publish sa &lt;b&gt;{0}&lt;/b&gt;.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="642"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="637"/>
         <source>Open clone...</source>
         <translation>Buksan ang clone…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="653"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="648"/>
         <source>Wrote bundle to:</source>
         <translation>Isinulat ang bundle sa:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="651"/>
         <source>Pushed commit &lt;code&gt;{0}&lt;/code&gt; to &lt;b&gt;{1}&lt;/b&gt;.</source>
         <translation>Na-push ang commit &lt;code&gt;{0}&lt;/code&gt; sa &lt;b&gt;{1}&lt;/b&gt;.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="656"/>
         <source>No git_url configured — bundle written locally. Push manually via your own tooling.</source>
         <translation>Walang naka-configure na git_url — naisulat ang bundle nang lokal. Mag-push nang manwal sa sarili mong tooling.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="666"/>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="661"/>
         <source>Nothing to commit — bundle content unchanged.</source>
         <translation>Walang ica-commit — hindi nabago ang laman ng bundle.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="587"/>
+        <source>Publishing to {0}...</source>
+        <translation>Nagpa-publish sa {0}...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="587"/>
+        <source>Cancel</source>
+        <translation>Kanselahin</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="591"/>
+        <source>Publishing</source>
+        <translation>Nagpa-publish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="685"/>
+        <source>Publish in progress</source>
+        <translation>Nagpapatuloy ang pag-publish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="685"/>
+        <source>A publish is still running in the background. Wait for it to finish before starting another one.</source>
+        <translation>May pag-publish na tumatakbo pa sa background. Hintaying matapos ito bago magsimula ng isa pa.</translation>
     </message>
 </context>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="179"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="193"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="211"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="225"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -2340,192 +3062,192 @@ Magpatuloy?</translation>
 <context>
     <name>QFieldCloudPushDialog</name>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="96"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="102"/>
         <source>Export to QFieldCloud</source>
         <translation>Export to QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="111"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
         <source>Active Filter</source>
         <translation>Active Filter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="114"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="120"/>
         <source>No active filter</source>
         <translation>No active filter</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="115"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="121"/>
         <source>Filter:</source>
         <translation>Filter:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="117"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="123"/>
         <source>0 layers</source>
         <translation>0 layers</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="118"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
         <source>Layers:</source>
         <translation>Layers:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="124"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="130"/>
         <source>QFieldCloud Project</source>
         <translation>QFieldCloud Project</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="129"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="135"/>
         <source>Project name:</source>
         <translation>Project name:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="133"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="139"/>
         <source>Description:</source>
         <translation>Paglalarawan:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="137"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="143"/>
         <source>Create new</source>
         <translation>Create new</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="138"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="144"/>
         <source>Update existing:</source>
         <translation>Update existing:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="142"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="148"/>
         <source>Mode:</source>
         <translation>Mode:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="152"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="158"/>
         <source>Layer Modes</source>
         <translation>Layer Modes</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="163"/>
         <source>Layer</source>
         <translation>Layer</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="157"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="163"/>
         <source>Mode</source>
         <translation>Mode</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="178"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="184"/>
         <source>Export</source>
         <translation>I-export</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="203"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="209"/>
         <source>{0} layers ({1} features)</source>
         <translation>{0} layers ({1} features)</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="211"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="217"/>
         <source>{0} layers (no filter active)</source>
         <translation>{0} layers (no filter active)</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="290"/>
         <source>Missing Name</source>
         <translation>Missing Name</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="284"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="290"/>
         <source>Please enter a project name.</source>
         <translation>Please enter a project name.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="297"/>
         <source>Not Connected</source>
         <translation>Not Connected</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="291"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="297"/>
         <source>QFieldCloud is not connected. Please configure credentials first.</source>
         <translation>QFieldCloud is not connected. Please configure credentials first.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="365"/>
         <source>No Layers</source>
         <translation>No Layers</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="352"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="365"/>
         <source>No valid layers to export.</source>
         <translation>No valid layers to export.</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="403"/>
         <source>Export Error</source>
         <translation>Export Error</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="380"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="393"/>
         <source>Failed to export layer &apos;{0}&apos;: {1}</source>
-        <translation>Failed to export layer &apos;{0}&apos;: {1}</translation>
+        <translation>Failed to export layer '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="390"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="403"/>
         <source>GPKG export failed: {0}</source>
         <translation>GPKG export failed: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="407"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="420"/>
         <source>Push complete!</source>
         <translation>Push complete!</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Project successfully pushed to QFieldCloud!</source>
         <translation>Project successfully pushed to QFieldCloud!</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Project: {0}</source>
         <translation>Project: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Files: {0}</source>
         <translation>Files: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>Duration: {0:.1f}s</source>
         <translation>Duration: {0:.1f}s</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="417"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="430"/>
         <source>URL: {0}</source>
         <translation>URL: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="425"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="438"/>
         <source>Warnings:</source>
         <translation>Warnings:</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="427"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="440"/>
         <source>Push Complete</source>
         <translation>Push Complete</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="437"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="450"/>
         <source>Error: {0}</source>
         <translation>Error: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="461"/>
         <source>Push Failed</source>
         <translation>Push Failed</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="448"/>
+        <location filename="../extensions/qfieldcloud/ui/push_dialog.py" line="461"/>
         <source>Push failed:
 
 {0}</source>
@@ -2690,82 +3412,248 @@ Magpatuloy?</translation>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="652"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="711"/>
         <source>Type to filter...</source>
         <translation>Mag-type upang mag-filter...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="661"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="720"/>
         <source>Select All</source>
         <translation>Piliin Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="663"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="722"/>
         <source>Select All (non subset)</source>
         <translation>Piliin Lahat (hindi subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="665"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="724"/>
         <source>Select All (subset)</source>
         <translation>Piliin Lahat (subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="667"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="726"/>
         <source>De-select All</source>
         <translation>I-deselect Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="669"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="728"/>
         <source>De-select All (non subset)</source>
         <translation>I-deselect Lahat (hindi subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="671"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="730"/>
         <source>De-select All (subset)</source>
         <translation>I-deselect Lahat (subset)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1329"/>
+        <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
+        <translation>Ipinapakita ang unang {0} feature na nakaayos ayon sa display value. Mag-type sa text filter para hanapin ang buong layer; ikinakarga ng &quot;Select All&quot; ang buong listahan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1337"/>
+        <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
+        <translation>Ipinapakita ang {0} feature ng layer, nakaayos ayon sa display value. Mag-type sa text filter para hanapin ang buong layer; ikinakarga ng &quot;Select All&quot; ang buong listahan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1344"/>
+        <source>Search results for &quot;{0}&quot; over the whole layer.</source>
+        <translation>Mga resulta ng paghahanap para sa &quot;{0}&quot; sa buong layer.</translation>
     </message>
 </context>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="220"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="261"/>
         <source>Select All</source>
         <translation>Piliin Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="222"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="263"/>
         <source>De-select All</source>
         <translation>I-deselect Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="224"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="265"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Piliin lahat ng layer ayon sa uri ng geometry (Mga Linya)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="226"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="267"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>I-deselect lahat ng layer ayon sa uri ng geometry (Mga Linya)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="228"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="269"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Piliin lahat ng layer ayon sa uri ng geometry (Mga Punto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="230"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="271"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>I-deselect lahat ng layer ayon sa uri ng geometry (Mga Punto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="232"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="273"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Piliin lahat ng layer ayon sa uri ng geometry (Mga Polygon)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="234"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="275"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>I-deselect lahat ng layer ayon sa uri ng geometry (Mga Polygon)</translation>
+    </message>
+</context>
+<context>
+    <name>RangeHistogramWidget</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="240"/>
+        <source>Value range histogram</source>
+        <translation>Histogram ng saklaw ng halaga</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="241"/>
+        <source>Drag the handles, or click, to choose the range of values to keep</source>
+        <translation>I-drag ang mga handle, o mag-click, para piliin ang saklaw ng mga halagang pananatilihin</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="329"/>
+        <source>No histogram</source>
+        <translation>Walang histogram</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="358"/>
+        <source>Kept values from {0} to {1}</source>
+        <translation>Mga halagang pinanatili mula {0} hanggang {1}</translation>
+    </message>
+</context>
+<context>
+    <name>RasterExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="288"/>
+        <source>Band</source>
+        <translation>Band</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="291"/>
+        <source>Band whose values are selected</source>
+        <translation>Band na ang mga halaga ang pinipili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="317"/>
+        <source>PIXEL VALUE</source>
+        <translation>HALAGA NG PIXEL</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="324"/>
+        <source>Pixel value of the current band</source>
+        <translation>Halaga ng pixel ng kasalukuyang band</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="335"/>
+        <source>Last {0} values picked</source>
+        <translation>Huling {0} halagang napili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="337"/>
+        <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
+        <translation>Mag-click sa mapa gamit ang pixel picker. Pinapalawak ng Ctrl+click ang saklaw hanggang sa halaga.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="346"/>
+        <source>VALUE RANGE</source>
+        <translation>SAKLAW NG HALAGA</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Min</source>
+        <translation>Min</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Lowest value kept</source>
+        <translation>Pinakamababang halagang pinanatili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Max</source>
+        <translation>Max</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
+        <source>Highest value kept</source>
+        <translation>Pinakamataas na halagang pinanatili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <source>Preview on the map (hide the other pixels)</source>
+        <translation>Preview sa mapa (itago ang iba pang pixel)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="378"/>
+        <source>CLASSES</source>
+        <translation>MGA KLASE</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
+        <source>Raster classes</source>
+        <translation>Mga klase ng raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
+        <source>All</source>
+        <translation>Lahat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="387"/>
+        <source>None</source>
+        <translation>Wala</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="397"/>
+        <source>RASTER EXPRESSION</source>
+        <translation>EXPRESSION NG RASTER</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="401"/>
+        <source>Raster calculator expression; a pixel is kept where it is not 0</source>
+        <translation>Expression ng raster calculator; pinananatili ang pixel kung saan hindi ito 0</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="402"/>
+        <source>Raster expression</source>
+        <translation>Expression ng raster</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="410"/>
+        <source>Use the range</source>
+        <translation>Gamitin ang saklaw</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="411"/>
+        <source>Write the current value range as an expression</source>
+        <translation>Isulat bilang expression ang kasalukuyang saklaw ng halaga</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="483"/>
+        <source>Selected pixels: {0}</source>
+        <translation>Mga napiling pixel: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="730"/>
+        <source>Set a value range first</source>
+        <translation>Magtakda muna ng saklaw ng halaga</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="747"/>
+        <source>NoData</source>
+        <translation>NoData</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="763"/>
+        <source>Last values:</source>
+        <translation>Mga huling halaga:</translation>
     </message>
 </context>
 <context>
@@ -2817,140 +3705,160 @@ Magpatuloy?</translation>
 <context>
     <name>SharedFavoritesPickerDialog</name>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="55"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="77"/>
         <source>FilterMate — Shared Favorites</source>
         <translation>FilterMate — Shared Favorites</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="63"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="85"/>
         <source>&lt;b&gt;Shared Favorites&lt;/b&gt; — discovered from QGIS Resource Sharing collections</source>
         <translation>&lt;b&gt;Shared Favorites&lt;/b&gt; — natagpuan mula sa QGIS Resource Sharing collections</translation>
     </message>
     <message>
         <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="76"/>
         <source>Search by name, description, collection, or tags...</source>
-        <translation>Maghanap ayon sa pangalan, paglalarawan, collection, o mga tag…</translation>
+        <translation type="obsolete">Maghanap ayon sa pangalan, paglalarawan, collection, o mga tag…</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="98"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="129"/>
         <source>Select a shared favorite to preview.</source>
         <translation>Pumili ng shared favorite upang i-preview.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="114"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="145"/>
         <source>Rescan</source>
         <translation>I-scan muli</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="118"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="149"/>
         <source>Fork to my project</source>
         <translation>I-fork sa aking proyekto</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="124"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="155"/>
         <source>Close</source>
         <translation>Isara</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="139"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="211"/>
         <source>No shared collections found. Subscribe to a Resource Sharing repository that ships a &lt;code&gt;filter_mate/favorites&lt;/code&gt; folder, or drop a &lt;code&gt;.fmfav.json&lt;/code&gt; bundle in your resource_sharing collections directory.</source>
         <translation>Walang natagpuang shared collections. Mag-subscribe sa isang Resource Sharing repository na may folder na &lt;code&gt;filter_mate/favorites&lt;/code&gt;, o maglagay ng &lt;code&gt;.fmfav.json&lt;/code&gt; bundle sa iyong resource_sharing collections directory.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="147"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="219"/>
         <source>{0} favorite(s) across {1} collection(s): {2}</source>
         <translation>{0} favorite(s) sa {1} collection(s): {2}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="160"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="248"/>
         <source>Collection: {0}</source>
         <translation>Collection: {0}</translation>
     </message>
     <message>
         <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="172"/>
         <source>No shared favorites match your search.</source>
-        <translation>Walang shared favorite na tumutugma sa iyong paghahanap.</translation>
+        <translation type="obsolete">Walang shared favorite na tumutugma sa iyong paghahanap.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="194"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="280"/>
         <source>&lt;b&gt;{0}&lt;/b&gt; — from &lt;i&gt;{1}&lt;/i&gt;</source>
         <translation>&lt;b&gt;{0}&lt;/b&gt; — mula sa &lt;i&gt;{1}&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="208"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="294"/>
         <source>&lt;b&gt;Expression&lt;/b&gt;</source>
         <translation>&lt;b&gt;Expression&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="213"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="299"/>
         <source>&lt;b&gt;Remote layers&lt;/b&gt;</source>
         <translation>&lt;b&gt;Mga remote layer&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="313"/>
         <source>&lt;b&gt;Tags:&lt;/b&gt; {0}</source>
         <translation>&lt;b&gt;Mga tag:&lt;/b&gt; {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="234"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="320"/>
         <source>&lt;b&gt;Provenance&lt;/b&gt;</source>
         <translation>&lt;b&gt;Pinagmulan&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="236"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="322"/>
         <source>Author: {0}</source>
         <translation>May-akda: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="238"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="324"/>
         <source>License: {0}</source>
         <translation>Lisensya: {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="340"/>
         <source>Fork shared favorite</source>
         <translation>I-fork ang shared favorite</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="254"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="340"/>
         <source>Name in your project:</source>
         <translation>Pangalan sa iyong proyekto:</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="354"/>
         <source>Fork successful</source>
         <translation>Matagumpay ang fork</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="268"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="354"/>
         <source>&apos;{0}&apos; was added to your favorites.</source>
         <translation>«{0}» ay naidagdag sa iyong favorites.</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="360"/>
         <source>Fork failed</source>
         <translation>Nabigo ang fork</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="360"/>
         <source>Could not add the shared favorite to your project.</source>
         <translation>Hindi maidagdag ang shared favorite sa iyong proyekto.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="100"/>
+        <source>Search by name, description, collection, author, or tags...</source>
+        <translation>Maghanap ayon sa pangalan, paglalarawan, koleksyon, may-akda, o tag...</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="107"/>
+        <source>Author:</source>
+        <translation>May-akda:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="180"/>
+        <source>All authors</source>
+        <translation>Lahat ng may-akda</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/shared_picker_dialog.py" line="262"/>
+        <source>No shared favorites match your filters.</source>
+        <translation>Walang nakabahaging paborito na tumutugma sa iyong mga filter.</translation>
     </message>
 </context>
 <context>
     <name>SimpleConfigDialog</name>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="468"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
         <source>Reset to Defaults</source>
         <translation>I-reset sa Default</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="500"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="502"/>
         <source>Validation Error</source>
         <translation>Error sa Validation</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="500"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="502"/>
         <source>Please fix the following errors:
 
 </source>
@@ -2959,12 +3867,12 @@ Magpatuloy?</translation>
 </translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="511"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset Configuration</source>
         <translation>I-reset ang Configuration</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="511"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="513"/>
         <source>Reset all values to defaults?</source>
         <translation>I-reset lahat ng halaga sa default?</translation>
     </message>
@@ -2972,12 +3880,12 @@ Magpatuloy?</translation>
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="151"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="208"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - Babala sa Uri ng PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="155"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="212"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Hindi tugma ang uri sa filter: {warning_detail}...</translation>
     </message>
@@ -2985,12 +3893,12 @@ Magpatuloy?</translation>
 <context>
     <name>TabbedConfigDialog</name>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="568"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="570"/>
         <source>Reset to Defaults</source>
         <translation>I-reset sa Default</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/config_editor_widget.py" line="588"/>
+        <location filename="../ui/dialogs/config_editor_widget.py" line="590"/>
         <source>General</source>
         <translation>Pangkalahatan</translation>
     </message>
@@ -3010,7 +3918,7 @@ Magpatuloy?</translation>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="291"/>
         <source>Filter applied to &apos;{layer_name}&apos;: {count} features</source>
-        <translation>Na-apply ang filter sa &apos;{layer_name}&apos;: {count} feature</translation>
+        <translation>Na-apply ang filter sa '{layer_name}': {count} feature</translation>
     </message>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="296"/>
@@ -3020,25 +3928,25 @@ Magpatuloy?</translation>
     <message>
         <location filename="../adapters/layer_refresh_manager.py" line="312"/>
         <source>Filter cleared for &apos;{layer_name}&apos;: {count} features visible</source>
-        <translation>Na-clear ang filter para sa &apos;{layer_name}&apos;: {count} feature ang nakikita</translation>
+        <translation>Na-clear ang filter para sa '{layer_name}': {count} feature ang nakikita</translation>
     </message>
 </context>
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="909"/>
+        <location filename="../adapters/task_builder.py" line="912"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Walang napiling entity! Nawala ang feature sa selection widget. Pumili muli ng entity.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1027"/>
+        <location filename="../adapters/task_builder.py" line="1030"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Hindi valid ang napiling layer o hindi mahanap ang source nito. Nakansela ang operasyon.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1042"/>
+        <location filename="../adapters/task_builder.py" line="1045"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
-        <translation>Hindi pa nai-initialize ang layer &apos;{0}&apos;. Subukang pumili ng ibang layer pagkatapos ay bumalik sa layer na ito.</translation>
+        <translation>Hindi pa nai-initialize ang layer '{0}'. Subukang pumili ng ibang layer pagkatapos ay bumalik sa layer na ito.</translation>
     </message>
 </context>
 <context>
@@ -3057,7 +3965,7 @@ Magpatuloy?</translation>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="556"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
         <source>Explore ...</source>
         <translation>I-explore...</translation>
     </message>
@@ -3067,7 +3975,7 @@ Magpatuloy?</translation>
     <message>
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
-        <translation type="obsolete">Language changed to &apos;{0}&apos;.</translation>
+        <translation type="obsolete">Language changed to '{0}'.</translation>
     </message>
 </context>
 </TS>

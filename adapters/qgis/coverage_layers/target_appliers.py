@@ -28,7 +28,6 @@ from typing import Callable, List, Optional
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransformContext,
-    QgsDataProvider,
     QgsFeatureRequest,
     QgsGeometry,
     QgsProject,
@@ -59,8 +58,12 @@ MAX_BBOX_TERMS = 50
 
 def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, side: CoverageSide,
                       operator: Optional[str]) -> QgsGeometry:
-    """Combine the clip geometry of an already derived target with a new one."""
-    if not previous_wkt or not operator or previous_side != side.value:
+    """Combine the kept area of an already derived target with a new kept area.
+
+    Both geometries are areas KEPT (outside already subtracted), so they
+    combine whatever their side.
+    """
+    if not previous_wkt or not operator:
         return new
     previous = QgsGeometry.fromWkt(previous_wkt)
     if previous.isEmpty():
@@ -73,6 +76,40 @@ def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, s
     if op == 'AND NOT':
         return make_valid(previous.difference(new))
     return new
+
+
+def _gdal_warp(destination: str, source: str, **options):
+    """gdal.Warp with exceptions scoped to the call (no global UseExceptions in a task thread)."""
+    from osgeo import gdal
+    manager = getattr(gdal, 'ExceptionMgr', None)
+    if manager is not None:
+        with manager(useExceptions=True):
+            return gdal.Warp(destination, source, **options)
+    dataset = gdal.Warp(destination, source, **options)
+    if dataset is None:
+        raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Warp failed')
+    return dataset
+
+
+def _simplified_for_cutline(geometry: QgsGeometry, tolerance: float, max_vertices: int = 20000) -> QgsGeometry:
+    """Simplify a heavy cutline (vectorized selection) to keep the VRT fast to render."""
+    try:
+        if tolerance > 0 and geometry.constGet().nCoordinates() > max_vertices:
+            simplified = geometry.simplify(tolerance)
+            if simplified is not None and not simplified.isEmpty():
+                return make_valid(simplified)
+    except Exception:
+        pass
+    return geometry
+
+
+def _base_raster_layer(snapshot: LayerSnapshot, fallback):
+    """The original raster of a derived target (its NoData, type and extent are the truth)."""
+    if not snapshot.derived:
+        return fallback
+    from qgis.core import QgsRasterLayer
+    base = QgsRasterLayer(snapshot.base_source, 'fm5_base', snapshot.base_provider)
+    return base if base.isValid() else fallback
 
 
 class TargetJob:
@@ -88,6 +125,16 @@ class TargetJob:
         self.before: LayerSnapshot = take_snapshot(layer, self.kind)
         self.outcome = CrossFilterOutcome(self.layer_id, self.kind, False)
         self._started = 0.0
+
+    # Attributes holding QGIS objects owned by Python (layer copies, feature
+    # sources, exporters): released once the task is over, never left for the
+    # interpreter shutdown (QGIS 3.44 crashed on exit when they outlived it).
+    _QGIS_HANDLES = ('_source', '_unfiltered', '_base_layer', '_exporter', '_base_keepalive')
+
+    def release(self) -> None:
+        for name in self._QGIS_HANDLES:
+            if hasattr(self, name):
+                setattr(self, name, None)
 
     def compute(self, source_geometry: QgsGeometry, source_crs: QgsCoordinateReferenceSystem,
                 context: QgsCoordinateTransformContext, request, is_canceled: CanceledFn) -> None:
@@ -120,7 +167,18 @@ class VectorTargetJob(TargetJob):
 
     def __init__(self, layer: QgsVectorLayer, operator: Optional[str]) -> None:
         super().__init__(layer, operator)
-        self._source = QgsVectorLayerFeatureSource(layer)
+        if (operator or '').upper() == 'OR' and self.before.subset:
+            # (previous) OR (kept): the features hidden by the previous subset
+            # must be tested too, so read an unfiltered copy of the layer.
+            unfiltered = QgsVectorLayer(layer.source(), f"{layer.name()}_all", layer.providerType())
+            if unfiltered.isValid():
+                unfiltered.setSubsetString('')
+                self._unfiltered = unfiltered
+                self._source = QgsVectorLayerFeatureSource(unfiltered)
+            else:
+                self._source = QgsVectorLayerFeatureSource(layer)
+        else:
+            self._source = QgsVectorLayerFeatureSource(layer)
         self._is_polygon = _is_polygon_layer(layer)
         self._pk, self._raw_pk = self._primary_key(layer)
         self._expression = ''
@@ -172,6 +230,7 @@ class VectorTargetJob(TargetJob):
         # Release the provider connection held by the feature source before the
         # subset is applied (an open GeoPackage reader made the count fail).
         self._source = None
+        self._unfiltered = None
         self.outcome.kept_count = len(kept)
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
@@ -210,25 +269,27 @@ class RasterTargetJob(TargetJob):
         super().__init__(layer, operator)
         self._base_source = self.before.base_source
         self._base_provider = self.before.base_provider
-        self._extent = QgsRectangle(layer.extent())
-        provider = layer.dataProvider()
-        self._nodata = None
-        try:
-            if provider.sourceHasNoDataValue(1):
-                self._nodata = float(provider.sourceNoDataValue(1))
-        except Exception:
-            self._nodata = None
+        base = _base_raster_layer(self.before, layer)
+        self._extent = QgsRectangle(base.extent())
+        provider = base.dataProvider()
+        self._nodata = []
+        self._float = True
+        self._pixel = 0.0
         try:
             from .raster_adapter import _data_type_name
-            self._float = 'Float' in _data_type_name(provider.dataType(1))
-        except Exception:
-            self._float = True
+            types = [_data_type_name(provider.dataType(band)) for band in range(1, base.bandCount() + 1)]
+            self._float = all('Float' in name for name in types)
+            for band in range(1, base.bandCount() + 1):
+                self._nodata.append(float(provider.sourceNoDataValue(band)) if provider.sourceHasNoDataValue(band) else None)
+            if base.width():
+                self._pixel = self._extent.width() / base.width()
+        except Exception as exc:
+            logger.debug(f"[FM5] raster target metadata incomplete: {exc}")
         self._derived_path = ''
         self._geometry_wkt = ''
         self._side = CoverageSide.INSIDE
 
     def compute(self, source_geometry, source_crs, context, request, is_canceled) -> None:
-        from osgeo import gdal
         self._started = time.perf_counter()
         if self._base_provider != 'gdal':
             self.outcome.message = f"raster provider '{self._base_provider}' cannot be clipped (GDAL files only)"
@@ -248,16 +309,17 @@ class RasterTargetJob(TargetJob):
             ext = self._extent
             geometry = QgsGeometry.fromRect(QgsRectangle(ext.xMinimum() - 2, ext.yMinimum() - 2, ext.xMinimum() - 1, ext.yMinimum() - 1))
         self._geometry_wkt = geometry.asWkt()
+        cutline = _simplified_for_cutline(geometry, self._pixel * 0.5)
         path = cache.new_path(self.layer_name, '.vrt')
-        options = dict(format='VRT', cutlineWKT=self._geometry_wkt, cutlineSRS=self.crs.toWkt(), cropToCutline=False)
-        if self._nodata is not None:
-            options['dstNodata'] = self._nodata
+        options = dict(format='VRT', cutlineWKT=cutline.asWkt(), cutlineSRS=self.crs.toWkt(), cropToCutline=False)
+        if self._nodata and all(value is not None for value in self._nodata):
+            options['dstNodata'] = ' '.join(repr(value) for value in self._nodata)
         elif self._float:
             options['dstNodata'] = -9999.0
         else:
+            # Integer raster without NoData: an alpha band, never a clipped value.
             options['dstAlpha'] = True
-        gdal.UseExceptions()
-        dataset = gdal.Warp(path, self._base_source, **options)
+        dataset = _gdal_warp(path, self._base_source, **options)
         dataset = None  # noqa: F841 - flush the VRT
         if is_canceled():
             self.outcome.message = 'canceled'
@@ -270,16 +332,16 @@ class RasterTargetJob(TargetJob):
     def apply(self, layer) -> Optional[LayerSnapshot]:
         if not self.outcome.success:
             return None
-        from .snapshots import _sync_alpha_band
-        layer.setDataSource(self._derived_path, layer.name(), 'gdal', QgsDataProvider.ProviderOptions(), False)
-        if not layer.isValid():
+        from .snapshots import _sync_alpha_band, swap_source
+        if not swap_source(layer, self._derived_path, 'gdal'):
             self.outcome.success = False
             self.outcome.message = 'derived VRT could not be opened'
             return None
         _sync_alpha_band(layer)
         after = LayerSnapshot(self.layer_id, self.kind.value, source=layer.source(), provider='gdal', derived=True,
                               original_source=self._base_source, original_provider=self._base_provider,
-                              geometry_wkt=self._geometry_wkt, side=self._side.value)
+                              geometry_wkt=self._geometry_wkt, side=self._side.value,
+                              enriched_source=self.before.enriched_source, enriched_provider=self.before.enriched_provider)
         registry().record(after, layer)
         layer.triggerRepaint()
         return after
@@ -315,6 +377,14 @@ class PointCloudTargetJob(TargetJob):
         self._geometry_wkt = ''
         self._side = CoverageSide.INSIDE
         self._extent = QgsRectangle(layer.extent())
+        if self.before.derived:
+            # Outside / empty areas are computed on the ORIGINAL extent: the
+            # clip is applied to the original source, not to the derived one.
+            from qgis.core import QgsPointCloudLayer
+            base = QgsPointCloudLayer(self._base_source, f"{self.layer_name}_base", self._base_provider)
+            if base.isValid():
+                self._extent = QgsRectangle(base.extent())
+        self._extent.grow(1.0)  # header rounding: keep the points on the edge
         self._exporter = None
         if self._mode == 'exact':
             from . import pdal_cli
@@ -353,7 +423,10 @@ class PointCloudTargetJob(TargetJob):
         geometry = self._target_geometry(source_geometry, source_crs, context)
         self._side = side
         if self._mode == 'bbox':
-            self._expression = _bbox_expression(geometry, side is CoverageSide.OUTSIDE) if not geometry.isEmpty() else ('X = X' if side is CoverageSide.OUTSIDE else 'X < X')
+            if geometry.isEmpty():
+                self._expression = 'X = X' if side is CoverageSide.OUTSIDE else 'X < X'
+            else:
+                self._expression = _bbox_expression(geometry, side is CoverageSide.OUTSIDE)
             self.outcome.success = True
             self.outcome.elapsed = time.perf_counter() - self._started
             return
@@ -420,8 +493,8 @@ class PointCloudTargetJob(TargetJob):
                 return None
             layer.triggerRepaint()
             return take_snapshot(layer, self.kind)
-        layer.setDataSource(self._derived_path, layer.name(), self._derived_provider, QgsDataProvider.ProviderOptions(), False)
-        if not layer.isValid():
+        from .snapshots import swap_source
+        if not swap_source(layer, self._derived_path, self._derived_provider):
             self.outcome.success = False
             self.outcome.message = 'derived point cloud could not be opened'
             return None
@@ -431,11 +504,14 @@ class PointCloudTargetJob(TargetJob):
                     layer.dataProvider().generateIndex()
                 except Exception:
                     pass
-            layer.setSubsetString(self._own_subset)
+            if not layer.setSubsetString(self._own_subset):
+                self.outcome.message = f"the layer's own filter could not be kept: {self._own_subset[:120]}"
+                logger.warning(f"[FM5] '{layer.name()}': {self.outcome.message}")
         after = LayerSnapshot(self.layer_id, self.kind.value, source=layer.source(), provider=self._derived_provider,
                               subset=layer.subsetString(), derived=True, original_source=self._base_source,
                               original_provider=self._base_provider, geometry_wkt=self._geometry_wkt,
-                              side=self._side.value)
+                              side=self._side.value, enriched_source=self.before.enriched_source,
+                              enriched_provider=self.before.enriched_provider)
         registry().record(after, layer)
         layer.triggerRepaint()
         return after

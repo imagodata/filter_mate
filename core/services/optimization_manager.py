@@ -259,7 +259,10 @@ class OptimizationManager:
         has_buffer = filtering_params.get("has_buffer_value", False)
         has_buffer_type = filtering_params.get("has_buffer_type", False)
         has_layers_to_filter = filtering_params.get("has_layers_to_filter", False)
-        layers_to_filter_ids = filtering_params.get("layers_to_filter", [])
+        layers_to_filter_ids = [
+            lid for lid in filtering_params.get("layers_to_filter", [])
+            if hasattr(self.project.mapLayer(lid), "featureCount")  # FilterMate 5: no raster / point cloud
+        ]
 
         # Check if distant layers centroid is already enabled
         distant_centroid_enabled = self._is_distant_centroid_enabled()
@@ -390,6 +393,7 @@ class OptimizationManager:
                     self.project.mapLayer(lid).featureCount()
                     for lid in layers_to_filter_ids
                     if self.project.mapLayer(lid) and self.project.mapLayer(lid).isValid()
+                    and hasattr(self.project.mapLayer(lid), "featureCount")
                 )
                 dialog_feature_count = total_features
                 if distant_layers_analyses:

@@ -142,16 +142,24 @@ def get_raster_layer_type() -> Optional[type]:
     return layer_type
 
 
+# Raster providers whose pixels can be read for analysis. Web services (WMS,
+# XYZ, WCS, ArcGIS) are rendered images or remote coverages: never sources or
+# targets, their statistics would be fetched over the network.
+ANALYSIS_RASTER_PROVIDERS = ('gdal', 'virtualraster', 'postgresraster')
+
+
 def is_raster_layer(layer: Any) -> bool:
-    """True when ``layer`` is a ``QgsRasterLayer`` and raster filtering is usable."""
+    """True when ``layer`` is an analysable ``QgsRasterLayer`` and raster filtering is usable."""
     if layer is None:
         return False
     layer_type = get_raster_layer_type()
     if layer_type is None:
         return False
     try:
-        return isinstance(layer, layer_type)
-    except TypeError:
+        if not isinstance(layer, layer_type):
+            return False
+        return layer.providerType() in ANALYSIS_RASTER_PROVIDERS
+    except (TypeError, RuntimeError, AttributeError):
         return False
 
 
@@ -174,6 +182,29 @@ def get_layer_kind(layer: Any) -> Any:
         return LayerKind.POINT_CLOUD
     if is_raster_layer(layer):
         return LayerKind.RASTER
+    return LayerKind.OTHER
+
+
+def layer_kind_by_class(layer: Any) -> Any:
+    """Kind from the layer class only, ignoring the dock options (Processing, REST API).
+
+    Web rasters (WMS, XYZ...) stay OTHER: their pixels cannot be analysed.
+    """
+    from ...core.domain.layer_kind import LayerKind
+    try:
+        from qgis.core import QgsRasterLayer, QgsVectorLayer
+    except Exception:
+        return LayerKind.OTHER
+    try:
+        if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
+            return LayerKind.VECTOR
+        if isinstance(QgsRasterLayer, type) and isinstance(layer, QgsRasterLayer):
+            return LayerKind.RASTER if layer.providerType() in ANALYSIS_RASTER_PROVIDERS else LayerKind.OTHER
+        point_cloud_type = _resolve_point_cloud_class()
+        if point_cloud_type is not None and isinstance(layer, point_cloud_type):
+            return LayerKind.POINT_CLOUD
+    except (TypeError, RuntimeError, AttributeError):
+        pass
     return LayerKind.OTHER
 
 

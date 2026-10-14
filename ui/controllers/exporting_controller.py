@@ -44,6 +44,7 @@ def _is_coverage_layer(layer) -> bool:
     except Exception:
         return False
 
+
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
     from ...core.services.filter_service import FilterService
