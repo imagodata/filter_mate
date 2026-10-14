@@ -82,7 +82,6 @@ TOKENS: Dict[str, Dict[str, str]] = {
     },
 }
 
-# Layer kinds of the mockup: badge background, and the dot / square shape.
 # One spacing scale for the whole dock, in logical pixels.
 SPACING: Dict[str, int] = {
     'fm_edge': 8,    # dock edge -> every block (header, EXPLORING, sections, action bar)
@@ -92,6 +91,9 @@ SPACING: Dict[str, int] = {
     'fm_band': 34,   # section header and collapsed group height (title band)
 }
 
+HEADER_BADGE_HEIGHT = 24  # backend / layer kind and favorites badges
+
+# Layer kinds of the mockup: badge background, and the dot / square shape.
 KIND_COLORS = {
     'vector': '#6fb1f0',
     'raster': '#f0b35a',
@@ -205,6 +207,8 @@ def apply_tokens(stylesheet: str, dark: bool) -> str:
         stylesheet = stylesheet.replace('{fm_kind_' + kind + '}', color)
     # A group's title band is its top padding plus its 1 px top border.
     stylesheet = stylesheet.replace('{fm_band_padding}', f"{SPACING['fm_band'] - 1}px")
+    # Header: 24 px badges one block under the dock title (ui/layout/mockup_layout.py HEADER_HEIGHT).
+    stylesheet = stylesheet.replace('{fm_header_height}', f"{HEADER_BADGE_HEIGHT + SPACING['fm_block']}px")
     for key, value in SPACING.items():
         stylesheet = stylesheet.replace('{' + key + '}', f'{value}px')
     return stylesheet

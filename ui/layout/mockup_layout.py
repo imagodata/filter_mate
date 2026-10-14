@@ -23,7 +23,7 @@ try:
 except ImportError:  # pragma: no cover - unit tests without Qt
     QEvent = QObject = None
 
-from ..styles.mockup_design import SPACING
+from ..styles.mockup_design import HEADER_BADGE_HEIGHT, SPACING
 
 logger = logging.getLogger(__name__)
 
@@ -128,8 +128,8 @@ class _RailSpreader(QObject if QObject is not None else object):
     """Keeps the EXPLORING tools spread over the whole height of their grey band.
 
     The buttons sit between expanding gaps of at least ``GAP``: the free height is shared
-    without entering the rail minimum (a computed spacing did, and the splitter could no
-    longer shrink EXPLORING). Rebuilt when a button is shown, hidden or added (raster /
+    and the rail minimum stays the buttons plus those gaps (a spacing computed from the
+    height entered the minimum, and the splitter could no longer shrink EXPLORING). Rebuilt when a button is shown, hidden or added (raster /
     point cloud tools of ``coverage_dock_extras``, tracking and linking hidden).
     """
 
@@ -157,6 +157,12 @@ class _RailSpreader(QObject if QObject is not None else object):
             from qgis.PyQt.QtCore import QTimer
             QTimer.singleShot(0, self.spread)
 
+    def reset(self) -> None:
+        """Rebuild even if no button changed: the dimensions manager resets the rail spacing and
+        resizes its spacers (``apply_dynamic_dimensions`` runs after this spreader is built)."""
+        self._state = None
+        self.spread()
+
     def spread(self) -> None:
         self._pending = False
         try:
@@ -177,7 +183,7 @@ class _RailSpreader(QObject if QObject is not None else object):
                 layout.takeAt(0)
             for entry in rail_plan(visible):
                 if entry is GAP_ITEM:
-                    layout.addItem(QSpacerItem(0, GAP, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+                    layout.addItem(QSpacerItem(0, GAP, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.MinimumExpanding))
                 else:
                     layout.addWidget(buttons[entry][0], 0, buttons[entry][1])
             layout.setSpacing(0)
@@ -301,7 +307,7 @@ def rail_outside_scroll(dw: Any) -> bool:
 
 
 BLOCK_GAP = BLOCK      # between the header, EXPLORING and each section of the tool box
-BADGE_HEIGHT = 24
+BADGE_HEIGHT = HEADER_BADGE_HEIGHT
 HEADER_HEIGHT = BADGE_HEIGHT + BLOCK  # badges one block below the dock title
 ROW_GAP = GAP          # between two rows of FILTERING / EXPORTING
 
@@ -427,7 +433,7 @@ class _ColumnAligner(QObject if QObject is not None else object):
     def align(self) -> None:
         self._pending = False
         try:
-            if not self._page.isVisible() or self._rounds >= self.MAX_ROUNDS:
+            if not self._page.isVisible():
                 return
             rows = []
             for button, value in self._pairs:
@@ -440,6 +446,8 @@ class _ColumnAligner(QObject if QObject is not None else object):
             if not rows or all(abs(delta) < 1 for _, delta in rows):
                 self._rounds = 0
                 return
+            if self._rounds >= self.MAX_ROUNDS:
+                return  # cannot be reached exactly: wait for the next resize, show or aligned pass
             from qgis.PyQt.QtWidgets import QSizePolicy
             changed = False
             for (spacer, _), needed in zip(rows, spacer_adjustments([delta for _, delta in rows])):
@@ -615,8 +623,11 @@ class _CollapsedBand(QObject if QObject is not None else object):
         self.fit()
 
     def eventFilter(self, watched, event):  # noqa: N802 - Qt override
-        if event.type() in (QEvent.Type.Show, QEvent.Type.Resize):
-            self._schedule()
+        try:
+            if event.type() in (QEvent.Type.Show, QEvent.Type.Resize):
+                self._schedule()
+        except RuntimeError:
+            pass  # plugin closing
         return False
 
     def _schedule(self, *_args) -> None:
@@ -633,6 +644,8 @@ class _CollapsedBand(QObject if QObject is not None else object):
                 if not self._collapsed:
                     self._expanded_min = group.minimumHeight()
                     self._collapsed = True
+                elif group.minimumHeight() != BAND:
+                    self._expanded_min = group.minimumHeight()  # set while collapsed (profile change)
                 if group.minimumHeight() != BAND or group.maximumHeight() != BAND:
                     group.setMinimumHeight(BAND)
                     group.setMaximumHeight(BAND)
@@ -735,12 +748,16 @@ def harmonize_spacing(dw: Any) -> bool:
         # the handle measures one block. The splitter manager's sheet is replaced.
         splitter.setStyleSheet("QSplitter::handle:vertical { margin: 0px 30px; border-radius: 2px; }")
         handle = splitter.handle(1) if splitter.count() > 1 else None
-        for width in range(BLOCK, 0, -1):
+        for width in range(BLOCK, 1, -1):
             splitter.setHandleWidth(width)
             if handle is None or handle.sizeHint().height() <= BLOCK:
                 break
+        else:
+            splitter.setHandleWidth(BLOCK)  # could not be measured: keep a handle one can grab
     # EXPLORING: rail on the dock edge, groups one gap beside it, no stacked margins.
     _set_layout(getattr(dw, 'verticalLayout_main_content', None), (0, 0, 0, 0), GAP)
+    if getattr(dw, '_fm_rail_spreader', None) is not None:
+        dw._fm_rail_spreader.reset()
     _set_layout(getattr(dw, 'horizontalLayout_exploring_rail_and_groups', None), (RAIL_LEFT_INSET, 0, 0, 0), RAIL_GAP)
     _set_layout(getattr(dw, 'gridLayout_main_header', None), (0, 0, 0, 0))
     _set_layout(getattr(dw, 'gridLayout_main_actions', None), (0, 0, 0, 0))

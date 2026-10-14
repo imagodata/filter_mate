@@ -112,7 +112,7 @@
     background-color: {fm_group};
     border: 1px solid {fm_group_border};
     border-radius: 6px;
-    margin-top: 0px;
+    margin: 0px;  /* default.qss leaves 2 px below: borders 8 px apart and 32 px bands */
     /* Title band as tall as a section header; the widgets sit {fm_inset} from the border
        (the group layouts have no margins of their own, see mockup_layout.py). */
     padding: {fm_band_padding} {fm_inset} {fm_inset} {fm_inset};
@@ -367,10 +367,10 @@
     padding: 0px;
     margin: 0px;
 }
-/* default.qss caps the header at 28 px: its height comes from mockup_layout.py (badges + one block). */
+/* default.qss caps the header at 28 px: badges + one block, as mockup_layout.py sets it. */
 #dockWidgetContents QFrame#frame_header {
-    min-height: 0px;
-    max-height: 16777215px;
+    min-height: {fm_header_height};
+    max-height: {fm_header_height};
 }
 
 /* default.qss pads every QFrame by 6 px, QLabel included: icons and captions need none. */

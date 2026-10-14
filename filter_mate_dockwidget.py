@@ -998,9 +998,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 if not success:
                     logger.warning("DimensionsManager.apply() returned False - UI may be misconfigured")
                     iface.messageBar().pushWarning("FilterMate", self.tr("UI configuration incomplete - check logs"))
-                # FilterMate 5 design: one spacing scale, after the manager (it sets its own gaps).
-                from .ui.layout.mockup_layout import harmonize_spacing
-                harmonize_spacing(self)
+                self._harmonize_mockup_spacing()
                 return
             except Exception as e:
                 logger.error(f"DimensionsManager.apply() FAILED: {e}", exc_info=True)
@@ -1037,13 +1035,23 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self._apply_qgis_widget_dimensions()
             self._align_key_layouts()
             # FilterMate 5 design: one set of gaps and field heights, after the managers above.
-            from .ui.layout.mockup_layout import harmonize_spacing
-            harmonize_spacing(self)
+            self._harmonize_mockup_spacing()
             logger.info("Successfully applied dynamic dimensions to all widgets")
         except Exception as e:
             logger.error(f"Error applying dynamic dimensions: {e}", exc_info=True)
             import traceback
             traceback.print_exc()
+
+    def _harmonize_mockup_spacing(self):
+        """FilterMate 5 design: one spacing scale, after the dimension managers (they set their own gaps).
+
+        Isolated so a failure here is not taken for a DimensionsManager failure.
+        """
+        try:
+            from .ui.layout.mockup_layout import harmonize_spacing
+            harmonize_spacing(self)
+        except Exception as e:
+            logger.warning(f"FilterMate 5 spacing scale not applied: {e}", exc_info=True)
 
     def _apply_dockwidget_dimensions(self):
         """
@@ -6137,16 +6145,24 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def _sync_merged_buffer_type(self, value_checked: bool) -> None:
         """FilterMate 5 design: the hidden buffer type switch follows the buffer value switch.
 
-        The layer sync sets both switches with signals blocked, so the ``toggled`` link of
-        ``merge_buffer_rows`` misses it: a layer with a buffer value but no buffer type showed
-        an editable type and segment count that the filter ignored. Setting the switch here
-        (signals on) also stores ``has_buffer_type`` for the layer.
+        The layer sync sets both switches with signals blocked or disconnected, so the
+        ``toggled`` link of ``merge_buffer_rows`` misses it: a layer with a buffer value but
+        no buffer type showed an editable type and segment count that the filter ignored.
+        The switch is set without signals (unchecking it through ``layer_property_changed``
+        would reset the stored type and segments) and ``has_buffer_type`` is written here.
         """
         if not self.property('fm_buffer_rows_merged'):
             return
         button = self.widgets["FILTERING"]["HAS_BUFFER_TYPE"]["WIDGET"]
         if button.isChecked() != value_checked:
-            button.setChecked(value_checked)
+            with SignalBlocker(button):
+                button.setChecked(value_checked)
+        if not self._is_layer_valid():
+            return
+        filtering = self.PROJECT_LAYERS.get(self.current_layer.id(), {}).get("filtering")
+        if isinstance(filtering, dict) and filtering.get("has_buffer_type") != value_checked:
+            filtering["has_buffer_type"] = value_checked
+            self.setLayerVariableEvent(self.current_layer, [("filtering", "has_buffer_type")])
 
     def _update_centroids_source_checkbox_state(self):
         """v4.0 Sprint 8: Optimized - update centroids checkbox enabled state."""
