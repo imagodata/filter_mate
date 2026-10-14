@@ -60,7 +60,7 @@ class FakeService:
         self.undo_ok = {}
         self.redo_ok = {}
 
-    def unfilter(self, source_id, ids, kinds):
+    def unfilter(self, source_id, ids, kinds, record=True):
         self.calls.append(("unfilter", source_id, tuple(ids)))
         return list(ids)
 
@@ -276,7 +276,7 @@ class TestVectorSourceTargets:
         controller.run_vector_source_task("filter", layers["v1"], ["r1"])
         assert ran == [] and controller._linked_runs["v1"] == [False]
 
-    def test_unfilter_clears_targets_and_links(self, ctrl_module, layers, monkeypatch):
+    def test_unfilter_keeps_links_like_the_vector_history(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
         monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller))
@@ -284,6 +284,20 @@ class TestVectorSourceTargets:
         controller.run_vector_source_task("filter", layers["v1"], ["r1", "p1"])
         controller.run_vector_source_task("unfilter", layers["v1"], ["r1", "p1"])
         assert ("unfilter", "v1", ("r1", "p1")) in ctrl_module._test_service.calls
+        # Undo after Unfilter goes back to before the last filter (vector engine rule).
+        controller.run_vector_source_task("undo", layers["v1"], [])
+        assert ("undo", "v1") in ctrl_module._test_service.calls
+
+    def test_reset_clears_links_and_history(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller))
+        monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
+        cleared = []
+        ctrl_module._test_service.history = types.SimpleNamespace(clear_source=lambda sid: cleared.append(sid))
+        controller.run_vector_source_task("filter", layers["v1"], ["r1"])
+        controller.run_vector_source_task("reset", layers["v1"], ["r1"])
+        assert cleared == ["v1"]
         controller.run_vector_source_task("undo", layers["v1"], [])
         assert ("undo", "v1") not in ctrl_module._test_service.calls
 

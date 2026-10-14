@@ -6377,6 +6377,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             fm = plugins['filter_mate']; self.close(); fm.pluginIsActive, fm.app = False, None; QTimer.singleShot(100, fm.run)
         except Exception as e: show_error("FilterMate", self.tr("Error reloading plugin: {0}").format(str(e)))
 
+    def _flush_coverage_export(self) -> None:
+        """FilterMate 5: start the raster / point cloud export prepared by the export branch."""
+        pending, self._pending_coverage_export = getattr(self, '_pending_coverage_export', None), None
+        integration = getattr(self, '_controller_integration', None)
+        if pending and integration is not None and hasattr(integration, 'delegate_coverage_export'):
+            integration.delegate_coverage_export(*pending)
+
     def _coverage_action(self, action: str) -> bool:
         """FilterMate 5: run an EXPLORING button on the active raster / point cloud layer."""
         integration = getattr(self, '_controller_integration', None)
@@ -6713,11 +6720,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     crs = None
                     if exporting_props.get('HAS_PROJECTION_TO_EXPORT') and exporting_props.get('PROJECTION_TO_EXPORT'):
                         crs = QgsCoordinateReferenceSystem.fromWkt(exporting_props['PROJECTION_TO_EXPORT'])
-                    integration.delegate_coverage_export(coverage_ids, folder or None, crs)
+                    # Started when the vector export really starts (after the
+                    # "preserve groups" dialog, which can still be canceled).
+                    self._pending_coverage_export = (coverage_ids, folder or None, crs)
                     # The vector export skips raster / point cloud layers itself
                     # (TaskParameterBuilder.build_export_params).
                     layers_to_export = vector_ids
                     if not vector_ids:
+                        self._flush_coverage_export()
                         return
 
             # FIX 2026-01-22 v4.3.7: Sync ALL export flags JUST-IN-TIME
@@ -6822,10 +6832,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                         # Schedule safe Qt destruction before emitting the task
                         dialog.deleteLater()
                         self._export_recap_dialog = None
+                        self._flush_coverage_export()
                         self.launchingTask.emit(task_name)
 
                     def _on_rejected():
                         logger.info(f"{current_datatype} export cancelled by user")
+                        self._pending_coverage_export = None
                         dialog.deleteLater()
                         self._export_recap_dialog = None
 
@@ -6836,6 +6848,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except Exception as e:
                 logger.warning(f"Export group dialog setup failed: {e}", exc_info=True)
 
+            self._flush_coverage_export()
             self.launchingTask.emit(task_name)
             return
 

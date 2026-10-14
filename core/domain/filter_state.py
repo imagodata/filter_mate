@@ -38,6 +38,8 @@ class LayerSnapshot:
             enriched file, which Unfilter keeps, and this is what unloading
             the plugin or saving the project goes back to.
         enriched_provider: Provider of ``enriched_source``.
+        selection: JSON of the :class:`RasterSelection` a raster source keeps
+            (virtual raster), to rebuild it when the project is opened again.
     """
 
     layer_id: str
@@ -53,6 +55,7 @@ class LayerSnapshot:
     nodata: Optional[float] = None
     enriched_source: str = ""
     enriched_provider: str = ""
+    selection: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -153,6 +156,11 @@ class CrossOperationHistory:
         operation = stack.pop()
         self._undo.setdefault(source_layer_id, []).append(operation)
         return operation
+
+    def clear_source(self, source_layer_id: str) -> None:
+        """Drop the history of one source (vector Reset clears its own history too)."""
+        self._undo.pop(source_layer_id, None)
+        self._redo.pop(source_layer_id, None)
 
     def forget_layer(self, layer_id: str) -> None:
         """Drop every operation touching a removed layer (its snapshots are stale)."""

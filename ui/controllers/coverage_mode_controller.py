@@ -1269,11 +1269,16 @@ class CoverageModeController(BaseController):
                 if coverage_ids and self._vector_engine_filters_targets():
                     self._run_vector_source_filter(source, coverage_ids, run_index=len(runs) - 1)
             elif task_name in ('unfilter', 'reset'):
+                # Same history rules as the vector engine: Unfilter records
+                # nothing (a later Undo goes back to before the last filter, for
+                # every layer), Reset clears the history.
                 if coverage_ids:
                     kinds = {i: _kind_of(self._map_layer(i)) for i in coverage_ids}
-                    self._finish_restore(self.service.unfilter(source_id, coverage_ids, kinds))
-                self._linked_runs[source_id] = []
-                self._linked_redo[source_id] = []
+                    self._finish_restore(self.service.unfilter(source_id, coverage_ids, kinds, record=False))
+                if task_name == 'reset':
+                    self._linked_runs[source_id] = []
+                    self._linked_redo[source_id] = []
+                    self.service.history.clear_source(source_id)
             elif task_name == 'undo':
                 runs = self._linked_runs.get(source_id) or []
                 if runs:

@@ -179,9 +179,13 @@ class RasterSourceJob(SourceJob):
         return job.apply(layer) if job.outcome.success else None
 
     def _record(self, layer, provider: str, nodata=None) -> LayerSnapshot:
+        import json
         after = LayerSnapshot(self.layer_id, self.kind.value, source=layer.source(), provider=provider,
                               derived=True, original_source=self.before.base_source,
-                              original_provider=self.before.base_provider, nodata=nodata)
+                              original_provider=self.before.base_provider, nodata=nodata,
+                              selection=json.dumps(self.selection.to_dict()),
+                              enriched_source=self.before.enriched_source,
+                              enriched_provider=self.before.enriched_provider)
         registry().record(after, layer)
         layer.triggerRepaint()
         return after
@@ -234,3 +238,22 @@ class FixedGeometrySourceJob(SourceJob):
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
         return QgsGeometry.fromWkt(self._wkt)
+
+
+def apply_stored_selection(layer, snapshot: LayerSnapshot) -> Optional[LayerSnapshot]:
+    """Rebuild the virtual raster of a stored raster source selection (main thread)."""
+    import json
+    from .raster_adapter import selection_virtual_uri
+    try:
+        selection = RasterSelection.from_dict(json.loads(snapshot.selection))
+    except (TypeError, ValueError, KeyError):
+        return None
+    uri, _ = selection_virtual_uri(snapshot.base_source, snapshot.base_provider, layer, selection)
+    if not swap_source(layer, uri, 'virtualraster'):
+        return None
+    after = LayerSnapshot(layer.id(), LayerKind.RASTER.value, source=layer.source(), provider='virtualraster',
+                          derived=True, original_source=snapshot.base_source, original_provider=snapshot.base_provider,
+                          selection=snapshot.selection)
+    registry().record(after, layer)
+    layer.triggerRepaint()
+    return after

@@ -140,7 +140,8 @@ class CrossFilterService:
             return []
         return self._restore(operation.changes, use_before=False, project=project)
 
-    def unfilter(self, source_layer_id: str, layer_ids: Iterable[str], kinds: dict, project=None) -> List[str]:
+    def unfilter(self, source_layer_id: str, layer_ids: Iterable[str], kinds: dict, project=None,
+                 record: bool = True) -> List[str]:
         """Put layers back on their original source with no subset (undoable).
 
         Args:
@@ -166,7 +167,7 @@ class CrossFilterService:
                 changes.append((before, take_snapshot(layer, kind)))
             except Exception as exc:
                 logger.warning(f"[FM5] '{layer.name()}' not cleared: {exc}", exc_info=True)
-        if changes:
+        if changes and record:
             self.history.push(CrossOperation(source_layer_id, tuple(changes), description='unfilter'))
         return [before.layer_id for before, _ in changes]
 
@@ -191,6 +192,13 @@ def replay_project_filters(service: Optional['CrossFilterService'] = None, synch
         except ValueError:
             continue
         if not kind.is_coverage:
+            continue
+        if snapshot.selection and not snapshot.geometry_wkt:
+            # A raster source filtered by its own selection: rebuilt at once (no task needed).
+            from ...adapters.qgis.coverage_layers.source_jobs import apply_stored_selection
+            if apply_stored_selection(layer, snapshot) is not None:
+                queued += 1
+                logger.info(f"[FM5] replayed the stored raster selection of '{layer.name()}'")
             continue
         # The stored geometry is the area kept (outside already subtracted):
         # clip the original source again, keeping its inside.

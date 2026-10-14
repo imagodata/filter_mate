@@ -85,7 +85,10 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
         original = LayerSnapshot(layer.id(), kind.value, source=current.base_source, provider=current.base_provider,
                                  subset=stored.subset if kind is LayerKind.POINT_CLOUD else '')
         restore_snapshot(layer, original)
-        if stored.derived and stored.geometry_wkt:
+        if stored.derived and stored.selection and not stored.geometry_wkt:
+            from .source_jobs import apply_stored_selection
+            apply_stored_selection(layer, stored)
+        elif stored.derived and stored.geometry_wkt:
             request = CrossFilterRequest(source_layer_id=layer.id(), source_kind=LayerKind.OTHER,
                                          targets=(TargetSpec(layer.id(), kind),), predicates=('Intersect',))
             service.run(request, FixedGeometrySourceJob(layer, stored.geometry_wkt), synchronous=synchronous)

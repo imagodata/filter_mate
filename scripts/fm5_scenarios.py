@@ -404,10 +404,30 @@ def s13_processing():
     registry().restore_all(project)
 
 
+# --- 14. a raster source selection is replayed on project reopen ------------
+def s14_raster_selection_replay():
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import band_range
+    from filter_mate.core.services.cross_filter_service import replay_project_filters
+    cur_mnt = project.mapLayersByName('mnt')[0]
+    RasterSourceJob(cur_mnt, RasterSelection(band=1, minimum=1300.0, maximum=1350.0)).apply(cur_mnt)
+    path = os.path.join(os.environ['LOCALAPPDATA'], 'Temp', 'fm5', 'fm5_selection.qgs') if os.name == 'nt' else os.path.join(OUT, 'fm5_selection.qgs')
+    project.write(path)
+    project.clear()
+    registry().restore_all(project)
+    project.read(path)
+    reopened = project.mapLayersByName('mnt')[0]
+    check('selection: reopened on the original tif', reopened.providerType() == 'gdal' and reopened.source().endswith('mnt_1m.tif'))
+    replay_project_filters(service, synchronous=True)
+    low, high, _ = band_range(reopened, 1)
+    check('selection replayed (virtual raster, same range)', reopened.providerType() == 'virtualraster'
+          and low is not None and low >= 1299.9 and high <= 1350.1, f"{reopened.providerType()} {low}-{high}")
+    registry().restore_all(project)
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
                  s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen, s11_favorites,
-                 s12_refilter_and_operators, s13_processing):
+                 s12_refilter_and_operators, s13_processing, s14_raster_selection_replay):
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 

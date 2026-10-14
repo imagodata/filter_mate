@@ -61,7 +61,7 @@ class DerivedSourceRegistry:
                 layer = None
         if layer is not None:
             try:
-                if snapshot.derived and snapshot.geometry_wkt:
+                if snapshot.derived and (snapshot.geometry_wkt or snapshot.selection):
                     layer.setCustomProperty(DERIVED_PROPERTY, json.dumps(snapshot.to_dict()))
                 else:
                     layer.removeCustomProperty(DERIVED_PROPERTY)
@@ -178,7 +178,7 @@ def take_snapshot(layer: QgsMapLayer, kind: LayerKind, derived_registry: Optiona
                              subset=subset, derived=True, original_source=known.original_source,
                              original_provider=known.original_provider, geometry_wkt=known.geometry_wkt,
                              side=known.side, nodata=known.nodata, enriched_source=known.enriched_source,
-                             enriched_provider=known.enriched_provider)
+                             enriched_provider=known.enriched_provider, selection=known.selection)
     return LayerSnapshot(layer.id(), kind.value, source=layer.source(), provider=layer.providerType(), subset=subset)
 
 
@@ -264,7 +264,7 @@ def pending_replays(project: Optional[QgsProject] = None):
         except (TypeError, ValueError):
             layer.removeCustomProperty(DERIVED_PROPERTY)
             continue
-        if registry().is_derived(layer.id()) or not snapshot.geometry_wkt:
+        if registry().is_derived(layer.id()) or not (snapshot.geometry_wkt or snapshot.selection):
             continue
         if layer.source() != snapshot.original_source:
             continue  # the user changed the source since: the stored filter no longer applies
