@@ -998,6 +998,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 if not success:
                     logger.warning("DimensionsManager.apply() returned False - UI may be misconfigured")
                     iface.messageBar().pushWarning("FilterMate", self.tr("UI configuration incomplete - check logs"))
+                # FilterMate 5 design: one spacing scale, after the manager (it sets its own gaps).
+                from .ui.layout.mockup_layout import harmonize_spacing
+                harmonize_spacing(self)
                 return
             except Exception as e:
                 logger.error(f"DimensionsManager.apply() FAILED: {e}", exc_info=True)
@@ -6066,6 +6069,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             return
 
         is_checked = self.widgets["FILTERING"]["HAS_BUFFER_VALUE"]["WIDGET"].isChecked()
+        self._sync_merged_buffer_type(is_checked)
 
         # v4.0.7: Get property override state to determine spinbox enabled state
         is_property_active = False
@@ -6112,6 +6116,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             return
 
         is_checked = self.widgets["FILTERING"]["HAS_BUFFER_TYPE"]["WIDGET"].isChecked()
+        if self.property('fm_buffer_rows_merged'):
+            # FilterMate 5 design: type and segments share the buffer value row and its switch.
+            is_checked = self.widgets["FILTERING"]["HAS_BUFFER_VALUE"]["WIDGET"].isChecked()
+            self._sync_merged_buffer_type(is_checked)
 
         # v4.0.3: Disable entire row layout
         self._set_layout_widgets_enabled('horizontalLayout_filtering_buffer_type_segments', is_checked)
@@ -6125,6 +6133,20 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             self._controller_integration.delegate_filtering_buffer_type_state_changed(is_checked)
 
         logger.debug(f"filtering_buffer_type_state_changed: is_checked={is_checked}")
+
+    def _sync_merged_buffer_type(self, value_checked: bool) -> None:
+        """FilterMate 5 design: the hidden buffer type switch follows the buffer value switch.
+
+        The layer sync sets both switches with signals blocked, so the ``toggled`` link of
+        ``merge_buffer_rows`` misses it: a layer with a buffer value but no buffer type showed
+        an editable type and segment count that the filter ignored. Setting the switch here
+        (signals on) also stores ``has_buffer_type`` for the layer.
+        """
+        if not self.property('fm_buffer_rows_merged'):
+            return
+        button = self.widgets["FILTERING"]["HAS_BUFFER_TYPE"]["WIDGET"]
+        if button.isChecked() != value_checked:
+            button.setChecked(value_checked)
 
     def _update_centroids_source_checkbox_state(self):
         """v4.0 Sprint 8: Optimized - update centroids checkbox enabled state."""

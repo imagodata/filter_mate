@@ -234,6 +234,8 @@ class ButtonStyler(StylerBase):
         # Configure QToolButtons similarly
         for button in self.dockwidget.findChildren(QToolButton):
             button.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+            if button.objectName() == 'collapseButton' or type(button).__name__ == 'QgsGroupBoxCollapseButton':
+                continue  # group arrows: sized with the title band (ui/layout/mockup_layout.py)
             button.setMinimumHeight(self._get_height('tool'))
 
     def _harmonize_checkable_pushbuttons(self) -> None:

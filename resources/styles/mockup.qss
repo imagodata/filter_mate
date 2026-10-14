@@ -1,13 +1,12 @@
 /* FilterMate 5 design - mockup "FilterMate 5.0 — Exploring adaptatif".
    Appended last to the dock stylesheet: these rules win over the older ones.
-   {fm_*} tokens come from ui/styles/mockup_design.py (dark = the mockup, light = same layout). */
+   {fm_*} tokens come from ui/styles/mockup_design.py (dark = the mockup, light = same layout).
+   Spacing uses the same scale as ui/layout/mockup_layout.py: {fm_edge} dock edge, {fm_block}
+   between blocks, {fm_gap} between widgets, {fm_inset} inside a group, {fm_band} title band. */
 
-QDockWidget#FilterMateDockWidgetBase {
-    color: {fm_text};
-}
+/* The sheet is set on dockWidgetContents: QDockWidget rules (title bar) never apply here. */
 
 /* IBM Plex (bundled, SIL OFL) like the mockup; numbers in IBM Plex Mono. */
-QDockWidget#FilterMateDockWidgetBase,
 #dockWidgetContents QWidget {
     font-family: "IBM Plex Sans", "Segoe UI", "Noto Sans", sans-serif;
 }
@@ -24,14 +23,6 @@ QDockWidget#FilterMateDockWidgetBase,
     font-size: 20pt;
     font-weight: 500;
 }
-QDockWidget#FilterMateDockWidgetBase::title {
-    background-color: {fm_header};
-    color: {fm_text};
-    text-align: left;
-    font-weight: 600;
-    padding: 6px 10px;
-    border-bottom: 1px solid {fm_group_border};
-}
 
 /* Every frame of the dock sits on the same flat background (no nested panels). */
 #dockWidgetContents QFrame,
@@ -41,7 +32,6 @@ QDockWidget#FilterMateDockWidgetBase::title {
     border-radius: 0px;
 }
 
-QDockWidget#FilterMateDockWidgetBase > QWidget,
 #dockWidgetContents,
 #dockWidgetContents QWidget#scrollAreaWidgetContents,
 #dockWidgetContents QScrollArea,
@@ -123,9 +113,17 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
     border: 1px solid {fm_group_border};
     border-radius: 6px;
     margin-top: 0px;
-    padding: 30px 8px 6px 8px;
+    /* Title band as tall as a section header; the widgets sit {fm_inset} from the border
+       (the group layouts have no margins of their own, see mockup_layout.py). */
+    padding: {fm_band_padding} {fm_inset} {fm_inset} {fm_inset};
     color: {fm_text};
     font-weight: 600;
+}
+/* default.qss gives the EXPLORING groups 36 px by id (more specific): same band for all. */
+#dockWidgetContents QgsCollapsibleGroupBox#mGroupBox_exploring_single_selection,
+#dockWidgetContents QgsCollapsibleGroupBox#mGroupBox_exploring_multiple_selection,
+#dockWidgetContents QgsCollapsibleGroupBox#mGroupBox_exploring_custom_selection {
+    padding-top: {fm_band_padding};
 }
 #dockWidgetContents QgsCollapsibleGroupBox:checked,
 #dockWidgetContents QGroupBox:checked {
@@ -138,6 +136,7 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
     subcontrol-position: top left;
     left: 30px;
     top: 7px;
+    margin: 0px;  /* default.qss adds 4 px above: the title sat low in its band */
     padding: 0px 4px;
     color: {fm_text};
     background: transparent;
@@ -353,22 +352,25 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
     border: 1px solid {fm_group_border};
 }
 
-/* --- Spacing between EXPLORING and the sections below (mockup: one small gap) --- */
+/* --- Spacing: every block between the same edges, {fm_block} apart ------- */
 
+/* The splitter holds EXPLORING and the sections: 6 px + the 2 px dock margin = {fm_edge}
+   on the sides, {fm_block} above (under the header) and below (above the action bar). */
+#dockWidgetContents QSplitter#splitter_main {
+    padding: {fm_block} 6px {fm_block} 6px;
+}
+#dockWidgetContents QFrame#frame_header,
+#dockWidgetContents QFrame#frame_exploring,
+#dockWidgetContents QFrame#frame_toolset,
+#dockWidgetContents QToolBox#toolBox_tabTools,
+#dockWidgetContents QStackedWidget#stackedWidget_exploring_coverage {
+    padding: 0px;
+    margin: 0px;
+}
+/* default.qss caps the header at 28 px: its height comes from mockup_layout.py (badges + one block). */
 #dockWidgetContents QFrame#frame_header {
-    padding: 0px;
-    margin: 0px;
-}
-#dockWidgetContents QFrame#frame_exploring {
-    padding: 4px 6px 0px 6px;
-    margin: 0px 2px 0px 2px;
-}
-#dockWidgetContents QFrame#frame_toolset {
-    padding: 0px;
-    margin: 0px;
-}
-#dockWidgetContents QToolBox#toolBox_tabTools {
-    padding: 0px 4px 0px 4px;
+    min-height: 0px;
+    max-height: 16777215px;
 }
 
 /* default.qss pads every QFrame by 6 px, QLabel included: icons and captions need none. */
@@ -395,4 +397,15 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
     min-height: {combobox_height};
     max-height: {combobox_height};
     padding: 4px 8px;
+}
+/* default.qss sizes every QToolButton of the tool box like a section header (50 px + 24 px
+   padding): the CRS picker button of EXPORTING came out 74 px high. Square, field height. */
+#dockWidgetContents QToolBox QgsProjectionSelectionWidget QToolButton {
+    min-height: {combobox_height};
+    max-height: {combobox_height};
+    height: {combobox_height};
+    min-width: {combobox_height};
+    max-width: {combobox_height};
+    padding: 5px;
+    border: none;
 }
