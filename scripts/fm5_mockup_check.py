@@ -189,7 +189,7 @@ def s_alignment():
             continue
         ky = kw.mapTo(d, kw.rect().center()).y()
         vy = vw.mapTo(d, vw.rect().center()).y()
-        check(f'alignment {key}', abs(ky - vy) <= 8, f'{ky} vs {vy}')
+        check(f'alignment {key}', abs(ky - vy) <= 2, f'{ky} vs {vy}')
 
 
 def s_pc():
@@ -211,6 +211,20 @@ def s_pc_check():
     host = ctrl()._host
     check('pc: panel fits the dock (no sideways scroll)', host.parentWidget().width() <= host.parentWidget().parentWidget().width() + 2, f'{host.parentWidget().width()} vs {host.parentWidget().parentWidget().width()}')
     profile.click()
+
+
+def s_pc_groups():
+    pc = ctrl()._pc_panel
+    classes, ranges, expression = pc._classes_group, pc._ranges_group, pc._expression_group
+    ranges.setChecked(True)
+    check('pc groups: checking ranges unchecks classes', ranges.isChecked() and not classes.isChecked() and not expression.isChecked())
+    check('pc groups: inactive groups collapsed', classes.isCollapsed() and expression.isCollapsed() and not ranges.isCollapsed())
+    ranges.setChecked(False)
+    check('pc groups: the active group cannot be unchecked', ranges.isChecked())
+    expression.setCollapsed(False)
+    check('pc groups: expanding a group activates it', expression.isChecked() and not ranges.isChecked())
+    classes.setChecked(True)
+    check('pc groups: back to classes', classes.isChecked() and not expression.isChecked())
 
 
 def s_profile_check():
@@ -264,6 +278,17 @@ def s_probe():
             log(f'  wide: {type(child).__name__} {child.objectName()!r} {getattr(child, "text", lambda: "")()!r} min={hint} parent={child.parentWidget().objectName()!r}')
 
 
+def s_sections_gap():
+    from qgis.PyQt.QtWidgets import QAbstractButton
+    d = dock()
+    tabs = [b for b in d.toolBox_tabTools.findChildren(QAbstractButton) if b.objectName() == 'qt_toolbox_toolboxbutton']
+    exporting = [b for b in tabs if 'EXPORT' in b.text().upper()]
+    row = d.mQgsDoubleSpinBox_filtering_buffer_value
+    if exporting:
+        gap = exporting[0].mapTo(d, exporting[0].rect().topLeft()).y() - row.mapTo(d, row.rect().bottomLeft()).y()
+        check('sections: no blank between FILTERING and EXPORTING', gap <= 24, f'{gap}px')
+
+
 def s_finish():
     failed = [name for name, ok in STATE['results'] if not ok]
     log(f"\n{len(STATE['results']) - len(failed)}/{len(STATE['results'])} checks passed")
@@ -274,7 +299,7 @@ def s_finish():
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
          (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_handover, 1000), (s_alignment, 500),
-         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500),
+         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300),
          (s_finish, 500)]
 
 

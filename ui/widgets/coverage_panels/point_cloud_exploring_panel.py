@@ -404,6 +404,7 @@ class PointCloudExploringPanel(QWidget):
         layout.addWidget(self._current_filter_label)
         layout.addStretch()
         self.set_current_subset("")
+        self._setup_exclusive_groups()  # last: criteria() reads widgets built above
 
     def _build_classes_group(self) -> Any:
         self._classes_group = self._make_group(self.tr("CLASSES"), "mGroupBox_point_cloud_classes", checked=True)
@@ -681,6 +682,65 @@ class PointCloudExploringPanel(QWidget):
             self._expression_group.setChecked(parsed["expression_enabled"])
         self._custom_expression = parsed["expression"]
         self._apply_expression_mode(parsed["expression_enabled"])
+        self._enforce_single_group()
+
+    # === One active group (as the vector exploring groups) ===
+
+    def _exclusive_groups(self) -> List[Any]:
+        return [self._classes_group, self._ranges_group, self._expression_group]
+
+    def _setup_exclusive_groups(self) -> None:
+        """Classes, ranges and expression are exclusive: always exactly one active group.
+
+        Connected after the groups' own handlers, so checking EXPRESSION still starts
+        from the criteria of the group that was active.
+        """
+        self._switching_group = False
+        for group in self._exclusive_groups():
+            group.toggled.connect(lambda checked, g=group: self._on_exclusive_toggled(g, checked))
+            if hasattr(group, 'collapsedStateChanged'):
+                group.collapsedStateChanged.connect(lambda collapsed, g=group: self._on_exclusive_collapsed(g, collapsed))
+        self._enforce_single_group()
+
+    def _activate_group(self, active: Any) -> None:
+        self._switching_group = True
+        try:
+            for group in self._exclusive_groups():
+                if group is not active and group.isChecked():
+                    group.setChecked(False)  # their own handlers run (expression text kept, debounce)
+                if hasattr(group, 'setCollapsed'):
+                    group.setCollapsed(group is not active)
+            if not active.isChecked():
+                active.setChecked(True)
+        finally:
+            self._switching_group = False
+
+    def _on_exclusive_toggled(self, group: Any, checked: bool) -> None:
+        if self._switching_group:
+            return
+        if checked:
+            self._activate_group(group)
+            return
+        # Unchecking the active group would leave none: keep it checked.
+        with _signals_blocked(group):
+            group.setChecked(True)
+
+    def _on_exclusive_collapsed(self, group: Any, collapsed: bool) -> None:
+        # Expanding a group makes it the active one.
+        if self._switching_group or collapsed or group.isChecked():
+            return
+        self._activate_group(group)
+
+    def _enforce_single_group(self) -> None:
+        """After a restore: the first checked group in visual order stays, classes when none."""
+        groups = self._exclusive_groups()
+        active = next((group for group in groups if group.isChecked()), groups[0])
+        with _signals_blocked(*groups):
+            for group in groups:
+                group.setChecked(group is active)
+                if hasattr(group, 'setCollapsed'):
+                    group.setCollapsed(group is not active)
+        self._apply_expression_mode(self._expression_group.isChecked())
 
     # === Change notification ===
 

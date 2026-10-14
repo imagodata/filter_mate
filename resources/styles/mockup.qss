@@ -293,7 +293,7 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
     border: 1px solid {fm_section_border};
     border-radius: 6px;
     padding: 0px 10px 0px 38px;  /* room for the header icon (ui/layout/mockup_layout.py) */
-    margin: 3px 0px;
+    margin: 0px;
     font-weight: 600;
 }
 #dockWidgetContents QToolBox#toolBox_tabTools::tab:selected {
@@ -371,16 +371,20 @@ QDockWidget#FilterMateDockWidgetBase > QWidget,
 
 /* --- Spacing between EXPLORING and the sections below (mockup: one small gap) --- */
 
+#dockWidgetContents QFrame#frame_header {
+    padding: 0px;
+    margin: 0px;
+}
 #dockWidgetContents QFrame#frame_exploring {
-    padding: 6px 6px 0px 6px;
-    margin: 4px 2px 0px 2px;
+    padding: 4px 6px 0px 6px;
+    margin: 0px 2px 0px 2px;
 }
 #dockWidgetContents QFrame#frame_toolset {
     padding: 0px;
     margin: 0px;
 }
 #dockWidgetContents QToolBox#toolBox_tabTools {
-    padding: 0px 4px 4px 4px;
+    padding: 0px 4px 0px 4px;
 }
 
 /* default.qss pads every QFrame by 6 px, QLabel included: icons and captions need none. */

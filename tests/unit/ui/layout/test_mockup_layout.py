@@ -36,3 +36,9 @@ def test_hidden_buttons_do_not_count():
 def test_gap_never_below_the_minimum():
     assert layout.rail_gap(100, [36] * 6) == 6
     assert layout.rail_gap(100, [], minimum=4) == 4
+
+
+def test_spacer_adjustments_account_for_earlier_moves():
+    # Button 2 is already 4 px low once button 1 moves by +4: it needs nothing more.
+    assert layout.spacer_adjustments([4, 4, 9]) == [4, 0, 5]
+    assert layout.spacer_adjustments([0, -3]) == [0, -3]
