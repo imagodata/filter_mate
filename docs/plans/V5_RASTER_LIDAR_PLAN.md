@@ -1,0 +1,289 @@
+# FilterMate 5.0 — Plan d'implémentation raster + nuage de points
+
+> Rédigé le 14/10/2026, branche `claude/v5-raster-lidar`.
+> Maquette interactive : https://claude.ai/artifact/3QpJuNR5HnzUnGFdDRyiHH (planches « Vue d'ensemble »,
+> « Dock interactif » et « Matrice des filtres croisés »).
+> Ce plan remplace la roadmap de février 2026 (`.serena/memories/backlog_raster_pointcloud_v1_2026_02_11.md`,
+> `website/roadmap.html`). Il part de l'état réel du code au 14/10.
+
+## 1. Objectifs
+
+1. **EXPLORING s'adapte à la couche courante.** Vecteur, raster ou nuage de points : la barre d'outils et les trois
+   groupes repliables gardent leur forme, leur contenu change.
+2. **FILTERING reste le moteur source → cibles** et accepte les trois types en source *et* en cible, soit 9
+   combinaisons (§ 3).
+3. **EXPORTING sait écrire chaque type** : vecteur (existant), raster GeoTIFF / COG, nuage LAZ / COPC / GPKG.
+4. Chaque lot livre l'**interface et la fonctionnalité ensemble**, derrière une option de config tant qu'il n'est pas prêt.
+
+## 2. Point de départ (audit du 14/10)
+
+| Sujet | État | Référence |
+|---|---|---|
+| Tests | 2 173 réussis, 2 ignorés | `pytest` |
+| Raster | **aucun code actif**. Seul le domaine pur `core/domain/raster_filter_criteria.py` existe, et seuls les tests l'utilisent. Le raster a été fusionné puis annulé deux fois. | `docs/audits/AUDIT_2026_04_22.md` |
+| Nuage de points | expérimental, option `APP.OPTIONS.POINT_CLOUD.enabled` à false par défaut. Le panneau est dans FILTERING et **désactive `frame_exploring`**. | `ui/controllers/point_cloud_ui_controller.py:487-512` |
+| Défauts nuage | saisie remise à zéro à chaque activation ; Z arrondi à 2 décimales ; statistiques lues une seule fois ; filtre jamais combiné (`combine_with_existing` non utilisé) ; pile d'historique partagée ; export refusé | voir la mémoire projet `point-cloud-merge-2026-10-01` |
+| Couche courante | un seul combo, `comboBox_filtering_current_layer`, filtré par `HasGeometry`, ce qui exclut les rasters | `ui/managers/configuration_manager.py:876-906` |
+| Rejets vecteur | `_validate_and_prepare_layer` (`filter_mate_dockwidget.py:5058`), `:6281`, `exploring_controller.py:2032`, `layer_sync_controller.py:479,521`, `filtering_controller.py:406`, etc. | rapport d'exploration |
+| Code mort | `ExploringController._setup_layer_combo` / `_populate_field_combo` cherchent des combos qui n'existent pas | `ui/controllers/exploring_controller.py:127-233` |
+| Docs contradictoires | `roadmap.html`, `VIDEO_SCRIPT.md` (« 5 outils raster v5.4+ ») et les annonces Discord présentent le raster comme acquis | — |
+
+### Ce que les spikes du 14/10 ont confirmé (QGIS 4.2.3, GDAL 3.13)
+
+Scripts : `scripts/fm5_probe_api.py` et `scripts/fm5_spike_api.py`, lancés via `python-qgis.bat`. Données : LAZ IGN de 16 874 points,
+MNT `valence.tif` de 6724 × 5627 pixels.
+
+| Mécanisme | Résultat |
+|---|---|
+| Expression X/Y sur un nuage (`X >= … AND Y <= …`) | ✅ `setSubsetString` accepté |
+| `QgsPointCloudLayerExporter` | ✅ **respecte le subset actif** (4 068 points exportés sur 16 874), `setFilterGeometry` découpe exactement par polygone (8 144), export LAZ OK, formats Memory / GPKG / SHP / CSV / DXF / LAS |
+| `QgsPointCloudDataProvider.identify(maxError, geom, zRange, limit)` | ✅ renvoie les attributs des points dans un polygone (8 144 avec maxError 0) |
+| `setDataSource` sur un nuage ou un raster | ✅ garde l'identifiant de la couche, et le renderer pour le raster |
+| Raster virtuel (`virtualraster`) avec `if()` | ✅ valide, mais **le NoData n'est pas déclaré** : poser `setUserNoDataValue` nous-mêmes |
+| `QgsRasterTransparency` avec plages de valeurs | ✅ deux plages transparentes acceptées |
+| `gdal.Warp(format=VRT, cutlineDSName, cropToCutline)` | ✅ VRT de 2,6 Ko, ouvert par QGIS, puis `gdal.Translate(format=COG)` OK |
+| Algos Processing | 4.2 : `pdal:clip`, `pdal:filter`, `pdal:boundary`, `pdal:exportraster`, `pdal:createcopc`, `pdal:virtualpointcloud`, **`pdal:heightabovegroundby*`**, `native:zonalstatisticsfb`, `native:rastersampling`. 3.44 : idem **sans les deux algos de hauteur au-dessus du sol** |
+| PDAL | `pdal.exe` est livré dans `bin/` de QGIS Windows (4.2 et 3.44). Pas de module Python `pdal`. |
+| Fournisseurs | `virtualraster`, `vpc` (nuage virtuel multi-dalles), `copc`, `pdal`, `ept` |
+| ⚠️ QGIS 3.44 | le LAZ ne s'ouvre pas en ligne de commande (`pc valid False`). C'est probablement l'environnement (chemin des plugins PDAL) : **à revérifier dans l'interface graphique** (lot 0) |
+
+## 3. Matrice des filtres croisés
+
+Il y a deux familles de relations, quel que soit le type :
+
+- **Empreinte** (« où ») : la source fournit un polygone, la cible garde ce qui est dedans.
+- **Valeur** (« combien ») : la cible garde ce dont la valeur lue dans la source vérifie une condition.
+
+Deux modes d'application, choisis dans FILTERING :
+
+- **Aperçu rapide** : instantané et réversible, parfois approximatif.
+- **Exact** : calculé dans une `QgsTask`, il produit parfois une source dérivée temporaire.
+
+| Source → cible | Exemple | Relation | Aperçu rapide | Exact | API | QGIS | Lot |
+|---|---|---|---|---|---|---|---|
+| **V → V** | routes à moins de 25 m d'un bâtiment | empreinte | subset SQL (existant) | idem | backends existants | 3.22 | — |
+| **V → R** | MNT limité à une commune | empreinte | VRT découpé, branché par `setDataSource` | idem, puis export COG | `gdal.Warp(VRT, cutline)` | 3.22 | 4 |
+| **V → P** | points sous les bâtiments sélectionnés | empreinte | expression X/Y par boîtes englobantes (OR, plafonné à N boîtes puis union) | `QgsPointCloudLayerExporter` + `setFilterGeometry` → LAZ temporaire → `setDataSource` | exporter | 3.26 | 4 |
+| **R → V** | parcelles d'altitude moyenne entre 200 et 260 m | valeur | `provider.sample()` au centroïde ou au point sur surface | `native:zonalstatisticsfb` (moyenne, min, max, majorité, couverture) → `fid IN (…)` | Processing | 3.22 | 5 |
+| **R → V** | bâtiments dans une zone raster = 1 | empreinte | polygonisation grossière (pas × 4) | `gdal.Polygonize` à la résolution native, tamisée | GDAL | 3.22 | 4 |
+| **R → R** | MNT limité aux forêts de l'OCS GE | valeur | raster virtuel `if("ocs@1" = k, "mnt@1", nodata)` | idem, export COG | `virtualraster` | 3.22 | 5 |
+| **R → P** | végétation à plus de 2 m au-dessus du MNT | valeur | empreinte des pixels dans la plage → X/Y | pipeline `pdal.exe` `filters.hag_dem` → nuage dérivé avec `HeightAboveGround`, puis curseur direct | PDAL CLI | 3.26 + PDAL | 5 |
+| **P → V** | bâtiments couverts par au moins 50 points de classe 6 | valeur | `identify()` avec niveau de détail, ≤ ~500 entités | `pdal:exportraster` (densité ou Z max) puis statistiques zonales | PDAL / Processing | 3.32 | 5 |
+| **P → V** | routes sous la végétation haute | empreinte | empreinte par densité grossière | `pdal:boundary` sur les points filtrés → couche temporaire → moteur vecteur | Processing | 3.32 | 4 |
+| **P → R** | MNT limité à l'emprise des points eau | empreinte | densité grossière → VRT découpé | `pdal:boundary` → VRT découpé | Processing | 3.32 | 4 |
+| **P → P** | même filtre sur 12 dalles LiDAR HD | attributs | `setSubsetString` sur chaque dalle (ou une fois sur un VPC) | idem | `vpc` | 3.26 / 3.32 | 4 |
+
+**Réutilisation clé.** Pour une relation par empreinte vers une cible vecteur, l'empreinte d'un raster ou d'un nuage
+est écrite dans une couche temporaire (GPKG du cache). Elle est ensuite passée **comme couche source au moteur
+vecteur existant** : prédicats, tampon, backends PG / GPKG / Spatialite / OGR. Il n'y a pas de nouveau moteur de
+prédicats à écrire.
+
+## 4. Architecture
+
+### 4.1 Domaine (pur Python, testable sans QGIS)
+
+| Fichier | Contenu |
+|---|---|
+| `core/domain/layer_kind.py` | `LayerKind` (VECTOR, RASTER, POINT_CLOUD) et `kind_of(layer)` côté adaptateur |
+| `core/domain/raster_filter_criteria.py` | **réutilisé** : `ComparisonOperator`, `SamplingMethod` (on ajoute MAX, MIN, MAJORITY), `RasterSamplingCriteria`. Ajout de `RasterRangeCriteria` (bande, min, max, inclusif) et `to_calc_expression()` |
+| `core/domain/point_cloud_filter_criteria.py` | **existant** : ajout de `extra_dimensions` (HeightAboveGround, NumberOfReturns) et du Z exact (aucun arrondi) |
+| `core/domain/cross_filter.py` | `Relation` (FOOTPRINT, VALUE, ATTRIBUTES), `ApplyMode` (LIVE, EXACT), `TargetSpec(layer_id, kind, relation, method, params)`, `CrossFilterRequest(source, source_criteria, targets, combine_operator)`, et la **table de compatibilité** source × cible × relation → méthodes autorisées (elle alimente le menu « méthode » de chaque cible) |
+| `core/domain/filter_state.py` | état filtré d'une couche, quel que soit son type : `SubsetState(subset)`, `RendererMaskState(xml)`, `DataSourceState(original_uri, provider, derived_uri, params)` |
+
+### 4.2 Ports et adaptateurs
+
+| Port (`core/ports/`) | Adaptateur (`adapters/qgis/`) | Rôle |
+|---|---|---|
+| `FootprintPort` | `vector_footprint.py`, `raster_footprint.py` (masque puis `gdal.Polygonize`), `point_cloud_footprint.py` (`pdal:boundary`, avec repli par densité) | produire l'empreinte d'une source |
+| `SamplingPort` | `raster_sampler.py` (`provider.sample`, zonale Processing), `point_cloud_sampler.py` (`identify`, rasterisation) | lire des valeurs par entité |
+| `TargetApplierPort` | `vector_target_applier.py` (enveloppe le moteur existant), `raster_target_applier.py` (VRT cutline, `virtualraster`, masque de transparence), `point_cloud_target_applier.py` (expression, exporter → `setDataSource`) | appliquer à une cible |
+| `ExportPort` | `raster_exporter.py` (`gdal.Translate` GeoTIFF / COG), `point_cloud_exporter.py` (`QgsPointCloudLayerExporter`, `pdal:createcopc`) | écrire |
+| `PdalPort` | `pdal_cli.py` (détection de `pdal.exe` / `pdal`, pipelines JSON, `QgsTask` annulable) | HAG par DEM, colorisation |
+| `CapabilityPort` | `layer_capabilities.py` (**généralise** `point_cloud_capability.py`) | version QGIS, options, présence des algos (`pdal:*`), PDAL CLI, formats GDAL (COG) |
+
+`point_cloud_capability.py` reste en façade de compatibilité. Ses tests restent verts.
+
+### 4.3 Service
+
+`core/services/cross_filter_service.py` orchestre une `CrossFilterRequest` :
+
+1. il lit les critères de la source, fournis par le panneau EXPLORING actif ;
+2. pour chaque cible, il choisit l'adaptateur selon `(kind source, kind cible, relation, mode)` ;
+3. il exécute en `QgsTask` (une tâche par cible, annulable) ; le mode aperçu s'exécute directement s'il prend moins de 200 ms ;
+4. il enregistre un `HistoryEntry` **par couche** avec l'ancien `FilterState` (§ 4.5).
+
+Le chemin vecteur → vecteur actuel n'est **pas réécrit**. Le service délègue à `FilterService` / `filter_task` quand
+la source et toutes les cibles sont des vecteurs (garde-fou contre les régressions).
+
+### 4.4 Interface
+
+| Élément | Changement |
+|---|---|
+| `ui/widgets/exploring_host.py` (nouveau) | `QStackedWidget` placé dans `frame_exploring` : page 0 = les groupes vecteur actuels (déplacés, pas réécrits), page 1 = `RasterExploringPanel`, page 2 = `PointCloudExploringPanel`. Expose `criteria()` et `kind` |
+| barre d'outils `widget_exploring_keys` | les 6 boutons existants sont réaffectés par type (icône, infobulle, action) au lieu d'en créer d'autres : vecteur (identifier, zoom, sélectionner, suivre, lier, réinitialiser) ; raster (pipette, zoom plage, rectangle, valeur sous le curseur, lier la plage au rendu, réinitialiser) ; nuage (identifier un point, zoom, profil d'élévation, aperçu direct, vue 3D, réinitialiser) |
+| `ui/controllers/exploring/` (nouveau) | `VectorExploringStrategy` (enveloppe `ExploringController`), `RasterExploringController`, `PointCloudExploringController`. Le dock choisit le contrôleur dans `current_layer_changed`, au même endroit que la délégation nuage actuelle (`filter_mate_dockwidget.py:5603`) |
+| `ui/widgets/raster/` | `HistogramWidget` (QPainter, poignées min/max, histogramme calculé par `provider.histogram` en tâche), `PixelPickerTool` (`QgsMapToolEmitPoint` + `identify` sur toutes les bandes), `RasterClassListWidget` (rasters à palette) |
+| `ui/widgets/point_cloud/` | refonte de `PointCloudFilterWidget` en 3 groupes : classes + préréglages (nomenclature LiDAR HD : 1, 2, 3, 4, 5, 6, 9, 17, 64, 65, 66), plages Z / intensité / retour avec histogramme Z, expression éditable |
+| bandeau d'info + badge | type · fournisseur · métadonnées (bandes, résolution, NoData / nombre de points, plage Z) |
+| FILTERING | liste des cibles **tous types**, avec un menu « méthode » par cible (issu de la table de compatibilité) ; ligne « Aperçu rapide / Exact » ; les lignes prédicats et tampon ne s'affichent que s'il existe une relation par empreinte vers une cible vecteur |
+| EXPORTING | les formats proposés dépendent des types des couches cochées (§ 6) |
+| combo couche courante | les filtres `HasGeometry` + `RasterLayer` + `PointCloudLayer` dépendent des options `APP.OPTIONS.RASTER.enabled` et `POINT_CLOUD.enabled` |
+
+### 4.5 Historique, projet, cache
+
+- **Historique par couche.** `HistoryEntry.previous_filters` contient aujourd'hui des `(layer_id, subset)`. Il
+  devient `(layer_id, FilterState sérialisé)`. Une migration lit l'ancien format comme `SubsetState`. Annuler et
+  rétablir restaurent le bon type d'état. `LayerRefreshManager._do_refresh` ne doit plus appeler
+  `featureCount()` / `updateExtents()` sur un raster ou un nuage (défaut c).
+- **Sauvegarde du projet.** Une source dérivée (VRT, LAZ temporaire) ne doit jamais être écrite dans le `.qgz`.
+  On se branche sur `QgsProject.writeMapLayer` : dans le DOM, on remplace la source par l'originale et on ajoute une
+  propriété `filtermate/derived` contenant les paramètres. À l'ouverture du projet, on propose de rejouer le filtre,
+  ou on le rejoue automatiquement selon la config.
+- **Cache.** Le cache vit dans `<profil>/filtermate/cache/<projet>/` : VRT, GPKG d'empreintes, LAZ dérivés. Il est
+  purgé à la fermeture du projet, avec un plafond en Go (config).
+
+### 4.6 Options de config (`config/config.default.json`)
+
+`APP.OPTIONS.RASTER.enabled`, `APP.OPTIONS.POINT_CLOUD.enabled`, `APP.OPTIONS.CROSS_FILTER.default_mode`
+(`live` | `exact`), `APP.OPTIONS.CROSS_FILTER.max_live_boxes` (50), `APP.OPTIONS.CACHE.max_gb` (5),
+`APP.OPTIONS.PDAL.path` (vide = détection automatique). Prévoir aussi les migrations de config (cf.
+`tests/unit/test_config_migration.py`).
+
+## 5. Lots
+
+Chaque lot = une ou deux PR, interface et fonctionnalité ensemble, tests unitaires + un scénario QGIS réel.
+Estimations en jours de développement.
+
+### Lot 0 — Spikes restants (2 j)
+- [ ] QGIS 3.44 en interface : ouvrir le LAZ, `setSubsetString`, export LAS (erreur `a_srs` vue en ligne de commande).
+- [ ] QGIS 3.28 / 3.34 si disponibles : exporter, `virtualraster` avec `if()`, `vpc`.
+- [ ] `virtualraster` : NoData (`setUserNoDataValue`), coût de rendu sur un MNT de 1 Go, rééchantillonnage quand les
+      grilles diffèrent (R → R).
+- [ ] `setDataSource` sur un nuage : style, renderer de classification, index COPC.
+- [ ] Pipeline `pdal.exe` `readers.las → filters.hag_dem(raster) → writers.copc` sur une dalle LiDAR HD + RGE ALTI.
+      Mesurer le temps et vérifier la présence de PDAL sous Linux / macOS.
+- [ ] Signal `QgsProject.writeMapLayer` : réécriture du DOM sans casser la sauvegarde.
+- [ ] Données de test : 4 dalles LiDAR HD COPC, RGE ALTI 1 m sur la même emprise, OCS GE raster, BD TOPO 31 (déjà
+      présente). Les poser sous `~/Documents/ign/fm5/`.
+
+### Lot 1 — Socle « type de couche » (5 j)
+- [ ] `LayerKind`, `layer_capabilities.py` (+ façade `point_cloud_capability`), options RASTER / CROSS_FILTER / CACHE.
+- [ ] Combo de couche courante : rasters inclus derrière l'option.
+- [ ] Dispatch par type à la place des rejets vecteur (liste du § 2). Chaque rejet devient « vecteur seulement »
+      explicite ou un aiguillage.
+- [ ] `ExploringHost` (pile de pages) + page vecteur = groupes actuels **déplacés sans changement de
+      comportement**.
+- [ ] Réaffectation de la barre d'outils, bandeau d'info, badge de type.
+- [ ] `FilterState` + historique par couche + correction de `LayerRefreshManager`.
+- [ ] Suppression du code mort de `ExploringController` (`_setup_layer_combo`, `_populate_field_combo`).
+- **Acceptation** : en vecteur, rien ne change (tests existants + scénario BD TOPO). Un raster ou un nuage
+  sélectionné affiche une page vide mais propre, sans erreur dans le log.
+
+### Lot 2 — Nuage de points dans EXPLORING (5 j)
+- [ ] `PointCloudExploringPanel` en 3 groupes (maquette), état conservé **par couche** (défaut d).
+- [ ] Z sans arrondi (`setDecimals(3)` + valeur brute conservée) ; rafraîchissement des statistiques quand
+      `statistics_available` change (défaut e).
+- [ ] Filtre combiné avec le subset existant (`combine_with_existing`), nombre de points retenus en direct.
+- [ ] Outils : identifier un point, zoom sur l'emprise, profil d'élévation (`QgsElevationProfileCanvas` /
+      action QGIS), vue 3D.
+- [ ] Le panneau quitte FILTERING : retrait de `_apply_point_cloud_layout` et de la désactivation de `frame_exploring`.
+- [ ] Prise en compte du changement d'option sans rechargement (combo rafraîchi, défaut f).
+- **Acceptation** : filtre classe + Z + retour sur une dalle LiDAR HD, annuler / rétablir, changement de couche aller-retour sans perte de saisie.
+
+### Lot 3 — Raster dans EXPLORING (6 j)
+- [ ] `RasterExploringPanel` : choix de bande, valeur au pixel (+ derniers relevés, Ctrl+clic qui étend la plage),
+      plage avec histogramme, expression raster validée par `QgsRasterCalcNode.parseRasterCalcString`.
+- [ ] Aperçu « masquer hors plage » : `QgsRasterTransparency` sur une copie du renderer, restauré au défiltrage et à
+      la fermeture.
+- [ ] Rasters à palette / catégoriels : le groupe Plage devient une liste de classes cochables.
+- [ ] Outils : rectangle → statistiques de zone, valeur sous le curseur, lier la plage au rendu (min / max de la
+      symbologie).
+- [ ] Filtrer la couche raster elle-même = `virtualraster` (valeur) branché par `setDataSource`.
+- **Acceptation** : MNT 1 m de 1 km² et MNT départemental en VRT, histogramme calculé en moins de 1 s sur la dalle,
+  aperçu réversible, projet sauvegardé sans source dérivée.
+
+### Lot 4 — Filtres croisés par empreinte (8 j)
+- [ ] `cross_filter.py` (domaine) + table de compatibilité + `CrossFilterService`.
+- [ ] Empreintes : vecteur (existant), raster (polygonisation), nuage (`pdal:boundary`, avec repli par densité).
+- [ ] Applicateurs : V → R (VRT découpé), V → P (boîtes X/Y + exporter exact), R / P → V (empreinte → couche
+      temporaire → moteur vecteur existant), P → R, P → P (même expression, VPC).
+- [ ] FILTERING : cibles tous types, menu méthode par cible, ligne Aperçu / Exact, lignes prédicats / tampon
+      conditionnelles.
+- **Acceptation** : les 6 combinaisons sur les données du lot 0, chacune annulable, temps relevés dans le log (`⏱`).
+
+### Lot 5 — Filtres croisés par valeur (8 j)
+- [ ] R → V : échantillonnage (centroïde, point sur surface, sommets densifiés pour les lignes) et zonale
+      (moyenne, min, max, majorité, couverture minimale). Les fid passent par le chemin existant des sélections
+      multiples (attention aux grandes listes sous PostgreSQL : table temporaire si plus de N).
+- [ ] R → R : `virtualraster` à deux entrées.
+- [ ] R → P : `PdalPort` (HAG par DEM) → nuage dérivé + dimension `HeightAboveGround` exposée dans EXPLORING. En
+      repli sans PDAL : empreinte.
+- [ ] P → V : statistiques de points par entité (`identify` en aperçu, rasterisation + zonale en exact).
+- **Acceptation** : parcelles par altitude moyenne (BD TOPO 31 × RGE ALTI), végétation de plus de 2 m (LiDAR HD ×
+  RGE ALTI), bâtiments sans points de classe 6.
+
+### Lot 6 — Export (5 j)
+- [ ] Raster : couche filtrée (VRT / virtuelle / masque) → GeoTIFF ou COG (`gdal.Translate`, compression, NoData,
+      recadrage à l'empreinte), style `.qml` à côté.
+- [ ] Nuage : `QgsPointCloudLayerExporter` (respecte le subset et la géométrie) → LAZ / GPKG / CSV ; COPC via
+      `pdal:createcopc`. Le bouton Export n'est plus intercepté (défaut b).
+- [ ] Export groupé mixte : `batch_exporter.py` aiguille par type, et la récapitulation de groupe
+      (`export_group_recap_dialog.py`) affiche les trois types.
+- [ ] Tâches avec progression et annulation, chemins de sortie, CRS de sortie (reprojection raster via `gdal.Warp`).
+- **Acceptation** : export d'un MNT découpé en COG lisible par QGIS, export d'un nuage filtré en LAZ (vérifier le
+  nombre de points) puis en COPC, export groupé vecteur + raster + nuage.
+
+### Lot 7 — Transverse et sortie 5.0 (6 j)
+- [ ] Favoris : sérialiser les critères par type (`favorites_service.py`), compatibilité des anciens favoris.
+- [ ] `filtermate_api` + algorithmes Processing (filtre croisé, export de couche filtrée) pour les modèles et le batch.
+- [ ] Sauvegarde et réouverture de projet avec sources dérivées (§ 4.5).
+- [ ] Docs : `roadmap.html` réécrite, guide, `VIDEO_SCRIPT` et annonces corrigés, CHANGELOG, captures et vidéos via
+      `scripts/site_videos.py`.
+- [ ] Recette QGIS réelle 3.44 LTR + 4.2 (Windows), puis Linux. Option nuage activée par défaut, option raster
+      activée par défaut si la recette passe.
+- [ ] Release 5.0 (`metadata.txt`, `qgisMinimumVersion` inchangé à 3.22, fonctions masquées selon les capacités).
+
+**Total estimé : ~45 jours.** Ordre : 0 → 1 → (2 ∥ 3) → 4 → 5 → 6 → 7. Les lots 2 et 3 sont indépendants, et le
+lot 6 peut commencer dès la fin du lot 4 pour l'export raster et nuage simple.
+
+## 6. Export par type
+
+| Type | Formats | Mécanisme | Ce qui est exporté |
+|---|---|---|---|
+| Vecteur | GPKG, SHP, KML, CSV, … (existant) | `core/export/*` | entités du subset |
+| Raster | GeoTIFF, COG, (VRT) | `gdal.Translate` / `gdal.Warp` depuis la source courante (VRT découpé, virtuel) ou depuis la source + plage | pixels retenus, NoData ailleurs, option de recadrage |
+| Nuage | LAZ, LAS, COPC, GPKG (points), CSV | `QgsPointCloudLayerExporter` (+ `pdal:createcopc`) | points du subset et de l'empreinte |
+
+## 7. Compatibilité QGIS
+
+| Fonction | Minimum | Si absent |
+|---|---|---|
+| Raster (exploring, VRT, virtuel, zonale) | 3.22 | — |
+| Nuage, exporter, `identify` | 3.26 | type masqué du combo |
+| Algos `pdal:*` (boundary, exportraster, createcopc, vpc) | 3.32 | repli par densité ; pas de COPC (LAZ seulement) |
+| Hauteur au-dessus du sol (algos natifs) | 4.2 (absent en 3.44) | `pdal.exe filters.hag_dem` si PDAL est détecté, sinon empreinte |
+| PDAL CLI | livré avec QGIS Windows | désactiver R → P exact avec un message |
+
+## 8. Tests
+
+- **Unitaires (sans QGIS)** : domaine (`cross_filter`, critères, table de compatibilité, `FilterState` et migration
+  d'historique), construction des expressions et des formules, choix d'adaptateur. Cible : chaque lot ajoute ses tests,
+  aucun test existant n'est désactivé.
+- **Garde-fous statiques** (comme les tests `test_no_*` existants) : pas de `featureCount()` sur un nuage ou un
+  raster dans les chemins communs, pas d'appel `setDataSource` hors des applicateurs.
+- **Scénarios QGIS réels** : `scripts/fm5_scenarios.py`, lancé via `python-qgis.bat` sur les données du lot 0. Il
+  produit un tableau temps / nombre par combinaison, sur le modèle de `scripts/recipe_screenshots.py`.
+- **Performance (cibles)** : aperçu < 200 ms ; histogramme d'une dalle 1 km² < 1 s ; zonale 10 000 parcelles × MNT
+  1 m < 30 s ; HAG d'une dalle LiDAR HD < 60 s.
+
+## 9. Risques et décisions ouvertes
+
+| # | Sujet | Proposition |
+|---|---|---|
+| D1 | « Filtrer un raster » = masque visuel ou source dérivée ? | **Les deux** : aperçu = transparence, filtre appliqué = source dérivée (VRT / virtuelle) branchée par `setDataSource`. La couche garde son identifiant et son style, ce qui est cohérent avec le subset vecteur. |
+| D2 | Source dérivée dans un projet sauvegardé | réécriture du DOM sur `writeMapLayer` (lot 0 puis lot 7) |
+| D3 | PDAL absent sous Linux / macOS | détection + repli par empreinte, message clair |
+| D4 | Grandes listes de fid (R → V, P → V) sous PostgreSQL | table temporaire ou `ANY(array)`, à mesurer |
+| D5 | Coût du rendu `virtualraster` sur de gros rasters | mesurer au lot 0 ; repli en VRT GDAL + calcul matérialisé en tâche |
+| D6 | Pile d'historique globale | entrées par couche, annulation de la couche courante d'abord (comportement actuel « source seule » conservé) |
+| R1 | Régression du chemin vecteur | page vecteur déplacée sans réécriture, délégation au moteur existant, tests existants obligatoires |
