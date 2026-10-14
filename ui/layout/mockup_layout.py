@@ -5,8 +5,10 @@ Layout changes of the FilterMate 5 design (mockup), applied once after setupUi.
 * EXPLORING: the tool rail sits beside the scroll area so its grey band takes the
   visible height, and its tools are spread evenly over that height.
 * Section headers (FILTERING, EXPORTING, CONFIGURATION) get the mockup height.
-* One 8 px vertical rhythm: header, EXPLORING, sections. The lower zone (sections) is
-  resized with the splitter; FILTERING / EXPORTING rows spread over its height.
+* One spacing scale (``SPACING`` in ``ui/styles/mockup_design.py``, also used by mockup.qss):
+  every block between the same edges and 8 px apart, 6 px between two widgets (rows, fields,
+  groups, rail and widgets), 8 px inside a group, 34 px title bands (section headers, collapsed
+  groups). FILTERING / EXPORTING rows grouped at the top.
 * FILTERING, buffer: the buffer type and the segment count join the buffer
   value row (``25,00 m | Round | 5``). The emptied row and its spacer leave the
   values column, the buffer type button and its spacer leave the buttons
@@ -21,7 +23,17 @@ try:
 except ImportError:  # pragma: no cover - unit tests without Qt
     QEvent = QObject = None
 
+from ..styles.mockup_design import HEADER_BADGE_HEIGHT, SPACING
+
 logger = logging.getLogger(__name__)
+
+EDGE = SPACING['fm_edge']      # dock edge -> every block
+BLOCK = SPACING['fm_block']    # between two blocks
+GAP = SPACING['fm_gap']        # between two widgets
+INSET = SPACING['fm_inset']    # group border -> its widgets (mockup.qss padding)
+BAND = SPACING['fm_band']      # section header / collapsed group height
+DOCK_MARGIN = 2                # dockWidgetContents layout margin, part of EDGE
+QWIDGETSIZE_MAX = 16777215
 
 BUFFER_TYPE_MAX_WIDTH = 110
 SEGMENTS_MAX_WIDTH = 64
@@ -93,68 +105,97 @@ def merge_buffer_rows(dw: Any) -> bool:
     return True
 
 
-RAIL_MIN_GAP = 6
+GAP_ITEM = None  # an expanding gap in a rail plan
 
 
-def rail_gap(available: int, heights, minimum: int = 6) -> int:
-    """Even gap spreading buttons of ``heights`` over ``available`` px (one gap above, between, below)."""
-    heights = [int(h) for h in heights if h > 0]
-    if not heights:
-        return minimum
-    free = int(available) - sum(heights)
-    return max(minimum, free // (len(heights) + 1))
+def rail_plan(visible) -> list:
+    """Order of the rail items: an expanding gap above, between and below the visible buttons.
+
+    ``visible[i]`` tells whether button ``i`` is shown; hidden buttons keep their place
+    without a gap of their own, so the shown ones stay evenly spread.
+    """
+    plan = []
+    for index, shown in enumerate(visible):
+        if shown:
+            plan.append(GAP_ITEM)
+        plan.append(index)
+    if any(visible):
+        plan.append(GAP_ITEM)
+    return plan
 
 
 class _RailSpreader(QObject if QObject is not None else object):
     """Keeps the EXPLORING tools spread over the whole height of their grey band.
 
-    Recomputed on resize and whenever a button is shown or hidden (raster / point
-    cloud tools, tracking and linking hidden), so the gaps stay even.
+    The buttons sit between expanding gaps of at least ``GAP``: the free height is shared
+    and the rail minimum stays the buttons plus those gaps (a spacing computed from the
+    height entered the minimum, and the splitter could no longer shrink EXPLORING). Rebuilt when a button is shown, hidden or added (raster /
+    point cloud tools of ``coverage_dock_extras``, tracking and linking hidden).
     """
 
     def __init__(self, rail: Any, layout: Any) -> None:
         super().__init__(rail)
-        self._rail, self._layout = rail, layout
+        self._layout = layout
+        self._state = None
+        self._watched = set()
+        self._pending = False
         rail.installEventFilter(self)
+        self.spread()
 
     def eventFilter(self, watched, event):  # noqa: N802 - Qt override
-        if event.type() in (QEvent.Type.Resize, QEvent.Type.Show, QEvent.Type.LayoutRequest):
-            self.spread()
+        try:
+            if event.type() in (QEvent.Type.ShowToParent, QEvent.Type.HideToParent,
+                                QEvent.Type.ChildAdded, QEvent.Type.LayoutRequest):
+                self._schedule()
+        except RuntimeError:
+            pass  # plugin closing
         return False
 
-    def spread(self) -> None:
-        try:
-            self._spread()
-        except RuntimeError:
-            pass  # widgets deleted (plugin closing)
+    def _schedule(self) -> None:
+        if not self._pending:
+            self._pending = True
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(0, self.spread)
 
-    def _spread(self) -> None:
-        layout = self._layout
-        buttons = [layout.itemAt(i).widget() for i in range(layout.count())]
-        heights = [w.height() or w.sizeHint().height() for w in buttons if w is not None and not w.isHidden()]
-        outer = self._rail.layout()
-        margins = outer.contentsMargins() if outer is not None else None
-        vertical_margins = (margins.top() + margins.bottom()) if margins is not None else 0
-        # Explicit minimum = buttons + minimal gaps: the spread gap must not become the rail's
-        # minimum height, or EXPLORING could never shrink back (the splitter would "stick").
-        minimum = sum(heights) + RAIL_MIN_GAP * (len(heights) + 1) + vertical_margins
-        if self._rail.minimumHeight() != minimum:
-            self._rail.setMinimumHeight(minimum)
-        available = self._rail.height() - vertical_margins
-        gap = rail_gap(available, heights, RAIL_MIN_GAP)
-        if layout.spacing() != gap:
-            layout.setSpacing(gap)
-        top = layout.contentsMargins()
-        if top.top() != gap:
-            layout.setContentsMargins(top.left(), gap, top.right(), 0)
+    def reset(self) -> None:
+        """Rebuild even if no button changed: the dimensions manager resets the rail spacing and
+        resizes its spacers (``apply_dynamic_dimensions`` runs after this spreader is built)."""
+        self._state = None
+        self.spread()
+
+    def spread(self) -> None:
+        self._pending = False
+        try:
+            layout = self._layout
+            items = [layout.itemAt(i) for i in range(layout.count())]
+            buttons = [(item.widget(), item.alignment()) for item in items if item.widget() is not None]
+            visible = [not button.isHidden() for button, _ in buttons]
+            state = tuple((id(button), shown) for (button, _), shown in zip(buttons, visible))
+            if state == self._state:
+                return
+            self._state = state
+            for button, _ in buttons:
+                if id(button) not in self._watched:
+                    button.installEventFilter(self)  # its show / hide re-spreads the rail
+                    self._watched.add(id(button))
+            from qgis.PyQt.QtWidgets import QSizePolicy, QSpacerItem
+            while layout.count():
+                layout.takeAt(0)
+            for entry in rail_plan(visible):
+                if entry is GAP_ITEM:
+                    layout.addItem(QSpacerItem(0, GAP, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.MinimumExpanding))
+                else:
+                    layout.addWidget(buttons[entry][0], 0, buttons[entry][1])
+            layout.setSpacing(0)
+            margins = layout.contentsMargins()
+            layout.setContentsMargins(margins.left(), 0, margins.right(), 0)
+            layout.invalidate()
+        except RuntimeError:
+            pass  # plugin closing
 
 
 def pack_exploring_rail(dw: Any) -> bool:
-    """EXPLORING tools spread evenly over the whole grey band (user request on the mockup).
-
-    The spacers between the buttons go, an even gap computed from the visible
-    buttons replaces them, and a stretch below takes the rounding.
-    """
+    """EXPLORING tools spread evenly over the whole grey band (user request on the mockup)."""
     layout = getattr(dw, 'verticalLayout_exploring_content', None)
     rail = getattr(dw, 'widget_exploring_keys', None)
     if layout is None or rail is None or layout.property('fm_packed'):
@@ -162,14 +203,12 @@ def pack_exploring_rail(dw: Any) -> bool:
     for index in reversed(range(layout.count())):
         if layout.itemAt(index).spacerItem() is not None:
             layout.takeAt(index)
-    layout.addStretch(1)
     layout.setProperty('fm_packed', True)
     dw._fm_rail_spreader = _RailSpreader(rail, layout)
-    layout.invalidate()
     return True
 
 
-SECTION_TAB_HEIGHT = 34
+SECTION_TAB_HEIGHT = BAND
 SECTION_ICON_SIZE = 16
 SECTION_ICON_LEFT = 12
 SECTION_ICONS = ('filter', 'export', 'settings')  # FILTERING, EXPORTING, CONFIGURATION
@@ -184,6 +223,8 @@ def size_section_tabs(dw: Any) -> bool:
     toolbox = getattr(dw, 'toolBox_tabTools', None)
     if toolbox is None:
         return False
+    if getattr(dw, '_fm_section_icon_labels', None):
+        return True  # already done: a second pass would stack a second set of labels
     from qgis.PyQt.QtCore import Qt
     from qgis.PyQt.QtGui import QIcon
     from qgis.PyQt.QtWidgets import QAbstractButton, QLabel
@@ -210,23 +251,28 @@ def size_section_tabs(dw: Any) -> bool:
 
 
 def update_section_icons(dw: Any, dark: Any = None) -> bool:
-    """Draw the section header icons in the theme color; False when the tabs keep native icons."""
+    """Draw the section header icons in the theme color.
+
+    False when the tabs keep native icons or when no icon could be drawn (QtSvg missing).
+    """
     labels = getattr(dw, '_fm_section_icon_labels', None)
     if not labels:
         return False
     from ..styles.mockup_design import render_icon
     if dark is None:
         dark = bool(getattr(getattr(dw, '_icon_manager', None), 'is_dark_mode', False))
+    drawn = False
     for index, label in labels.items():
-        if index < len(SECTION_ICONS):
-            icon = render_icon(SECTION_ICONS[index], dark)
-            if icon is not None:
-                label.setPixmap(icon.pixmap(64, 64))
-    return True
+        icon = render_icon(SECTION_ICONS[index], dark) if index < len(SECTION_ICONS) else None
+        label.setVisible(icon is not None)
+        if icon is not None:
+            label.setPixmap(icon.pixmap(64, 64))
+            drawn = True
+    return drawn
 
 
-RAIL_GAP = 8
-RAIL_LEFT_INSET = 3  # lines the EXPLORING rail up with the FILTERING one (toolbox page padding)
+RAIL_GAP = GAP       # rail -> widgets, as in FILTERING / EXPORTING
+RAIL_LEFT_INSET = 0  # both rails start at the dock edge
 
 
 def rail_outside_scroll(dw: Any) -> bool:
@@ -260,11 +306,10 @@ def rail_outside_scroll(dw: Any) -> bool:
     return True
 
 
-BLOCK_GAP = 8          # between the header, EXPLORING and each section of the tool box
-HEADER_HEIGHT = 38     # badges are 24 px high: 4 px above, 10 px below (gap to EXPLORING)
-HEADER_PADDING_TOP = 4
-HEADER_PADDING_BOTTOM = 10
-ROW_GAP = 6            # between two rows of FILTERING / EXPORTING
+BLOCK_GAP = BLOCK      # between the header, EXPLORING and each section of the tool box
+BADGE_HEIGHT = HEADER_BADGE_HEIGHT
+HEADER_HEIGHT = BADGE_HEIGHT + BLOCK  # badges one block below the dock title
+ROW_GAP = GAP          # between two rows of FILTERING / EXPORTING
 
 
 def tighten_vertical_rhythm(dw: Any) -> bool:
@@ -272,7 +317,8 @@ def tighten_vertical_rhythm(dw: Any) -> bool:
 
     * The header was fixed at 13 px while its badges are 24 px high.
     * The tool box laid its section headers edge to edge (stylesheet margins are ignored).
-    * FILTERING and EXPORTING rows: one stretch between two rows (see below).
+    * FILTERING and EXPORTING rows: one stretch between two rows (see below); the lower
+      zone is resized with the splitter (no height cap on the tool box).
     """
     header = getattr(dw, 'frame_header', None)
     if header is not None:
@@ -338,20 +384,39 @@ class _ColumnAligner(QObject if QObject is not None else object):
     The two columns of FILTERING / EXPORTING are separate layouts; their expanding
     spacers only lined up while the page was stretched. Here the spacer above each
     button gets the height that centres it on its row, after every layout pass.
+
+    The layout is invalidated only when a spacer really changed, and at most
+    ``MAX_ROUNDS`` passes follow one another until the next resize or show: when the
+    exact position cannot be reached (spacer already at 0, no spacer) the aligner stops
+    instead of looping on its own layout requests. Hidden pages are left alone.
     """
+
+    MAX_ROUNDS = 6
 
     def __init__(self, page: Any, keys_layout: Any, pairs) -> None:
         super().__init__(page)
         self._page, self._keys, self._pairs = page, keys_layout, list(pairs)
         self._pending = False
+        self._rounds = 0
         page.installEventFilter(self)
 
     def eventFilter(self, watched, event):  # noqa: N802 - Qt override
-        if event.type() in (QEvent.Type.Resize, QEvent.Type.Show, QEvent.Type.LayoutRequest) and not self._pending:
+        try:
+            kind = event.type()
+            if kind in (QEvent.Type.Resize, QEvent.Type.Show):
+                self._rounds = 0
+            if kind in (QEvent.Type.Resize, QEvent.Type.Show, QEvent.Type.LayoutRequest):
+                self.schedule()
+        except RuntimeError:
+            pass
+        return False
+
+    def schedule(self) -> None:
+        """Align once the current layout pass is over (positions are final then)."""
+        if not self._pending:
             self._pending = True
             from qgis.PyQt.QtCore import QTimer
-            QTimer.singleShot(0, self.align)  # positions are final once the layout pass is over
-        return False
+            QTimer.singleShot(0, self.align)
 
     def _spacer_above(self, button: Any):
         index = self._keys.indexOf(button)
@@ -366,6 +431,8 @@ class _ColumnAligner(QObject if QObject is not None else object):
     def align(self) -> None:
         self._pending = False
         try:
+            if not self._page.isVisible():
+                return
             rows = []
             for button, value in self._pairs:
                 if button.isHidden() or value.isHidden() or self._keys.indexOf(button) < 0:
@@ -375,14 +442,23 @@ class _ColumnAligner(QObject if QObject is not None else object):
                 v = value.mapTo(self._page, value.rect().center()).y()
                 rows.append((spacer, v - b))
             if not rows or all(abs(delta) < 1 for _, delta in rows):
+                self._rounds = 0
                 return
+            if self._rounds >= self.MAX_ROUNDS:
+                return  # cannot be reached exactly: wait for the next resize, show or aligned pass
             from qgis.PyQt.QtWidgets import QSizePolicy
+            changed = False
             for (spacer, _), needed in zip(rows, spacer_adjustments([delta for _, delta in rows])):
                 if spacer is None or needed == 0:
                     continue
-                height = max(0, spacer.sizeHint().height() + needed)
-                spacer.changeSize(spacer.sizeHint().width(), height, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
-            self._keys.invalidate()
+                current = spacer.sizeHint().height()
+                height = max(0, current + needed)
+                if height != current:
+                    spacer.changeSize(spacer.sizeHint().width(), height, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+                    changed = True
+            if changed:
+                self._rounds += 1
+                self._keys.invalidate()
         except RuntimeError:
             pass  # widgets deleted (plugin closing)
 
@@ -397,16 +473,15 @@ def align_key_columns(dw: Any) -> bool:
         widgets = [(b, v) for b, v in widgets if b is not None and v is not None]
         if page is None or keys is None or not widgets:
             continue
-        setattr(dw, f'_fm_aligner_{page_name.lower()}', _ColumnAligner(page, keys, widgets))
+        if getattr(dw, f'_fm_aligner_{page_name.lower()}', None) is None:
+            setattr(dw, f'_fm_aligner_{page_name.lower()}', _ColumnAligner(page, keys, widgets))
         done = True
     return done
 
 
-FIELD_GAP = 4      # between two widgets of one row
-SCROLLBAR_MARGIN = 6  # between the widgets and the scroll bar / right edge
-GROUP_GAP = 6      # between two EXPLORING groups, and between their rows
-EXPLORING_GROUP_LAYOUTS = ('verticalLayout_exploring_single_content', 'verticalLayout_exploring_multiple_selection',
-                           'verticalLayout_exploring_custom_selection')
+FIELD_GAP = GAP    # between two widgets of one row
+SCROLLBAR_MARGIN = 6  # between the widgets and the scroll bar (user request)
+GROUP_GAP = GAP    # between two EXPLORING groups, and between their rows
 
 
 def _row_widgets(layout: Any):
@@ -427,15 +502,191 @@ def _row_layouts(layout: Any):
             yield from _row_layouts(child)
 
 
+def _set_layout(layout: Any, margins=None, spacing=None) -> None:
+    if layout is None:
+        return
+    if margins is not None:
+        layout.setContentsMargins(*margins)
+    if spacing is not None:
+        layout.setSpacing(spacing)
+
+
+class _CollapsedBand(QObject if QObject is not None else object):
+    """Keeps a collapsed group exactly one title band high.
+
+    QgsCollapsibleGroupBox caps a collapsed group at its title height plus 6 px,
+    but its minimum still counts the stylesheet padding, the layout margins and the
+    minimum set by the dimensions manager: collapsed groups came out 60 px high in
+    EXPLORING and 25 px in the raster panel. Refitted on every resize and show (the
+    dock disconnects ``collapsedStateChanged`` wholesale, and QGIS sets its own
+    maximum in its showEvent, after this filter); the expanded minimum is kept.
+    """
+
+    def __init__(self, group: Any) -> None:
+        super().__init__(group)
+        self._group = group
+        self._pending = False
+        self._collapsed = False
+        self._expanded_min = group.minimumHeight()
+        group.installEventFilter(self)
+        self.fit()
+
+    def eventFilter(self, watched, event):  # noqa: N802 - Qt override
+        try:
+            if event.type() in (QEvent.Type.Show, QEvent.Type.Resize):
+                self._schedule()
+        except RuntimeError:
+            pass  # plugin closing
+        return False
+
+    def _schedule(self, *_args) -> None:
+        if not self._pending:
+            self._pending = True
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(0, self.fit)
+
+    def fit(self) -> None:
+        self._pending = False
+        group = self._group
+        try:
+            if group.isCollapsed():
+                if not self._collapsed:
+                    self._expanded_min = group.minimumHeight()
+                    self._collapsed = True
+                elif group.minimumHeight() != BAND:
+                    self._expanded_min = group.minimumHeight()  # set while collapsed (profile change)
+                if group.minimumHeight() != BAND or group.maximumHeight() != BAND:
+                    group.setMinimumHeight(BAND)
+                    group.setMaximumHeight(BAND)
+            else:
+                if self._collapsed:
+                    group.setMinimumHeight(self._expanded_min)
+                    self._collapsed = False
+                if group.maximumHeight() == BAND:
+                    group.setMaximumHeight(QWIDGETSIZE_MAX)
+        except RuntimeError:
+            pass  # group deleted
+
+
+COLLAPSE_BUTTON_HEIGHT = BAND - 2  # inside the borders: arrow and title centred in the band
+
+
+def fit_group(group: Any) -> None:
+    """A group of EXPLORING or of a raster / point cloud panel on the spacing scale.
+
+    The stylesheet padding gives the title band and the inset; the layout adds
+    nothing but the gap between widgets. Safe to call more than once.
+    """
+    if group is None:
+        return
+    layout = group.layout()
+    _set_layout(layout, (0, 0, 0, 0), GAP)
+    if layout is not None:
+        for row in _row_layouts(layout):
+            row.setSpacing(GAP)
+    # QGIS places the title from the collapse button height (its own stylesheet, written at the
+    # first show): 38 px buttons in EXPLORING, 16 px in the panels, so titles sat 10 px apart.
+    from qgis.PyQt.QtWidgets import QAbstractButton
+    for button in group.findChildren(QAbstractButton):
+        if button.parentWidget() is group and (button.objectName() == 'collapseButton'
+                                               or type(button).__name__ == 'QgsGroupBoxCollapseButton'):
+            button.setFixedHeight(COLLAPSE_BUTTON_HEIGHT)
+    if hasattr(group, 'collapsedStateChanged') and getattr(group, '_fm_band', None) is None:
+        group._fm_band = _CollapsedBand(group)
+    # A layout centres a widget in a taller cell: top-aligned, the gaps stay one GAP.
+    parent = group.parentWidget()
+    holder = _layout_holding(parent.layout(), group) if parent is not None else None
+    if holder is not None:
+        from qgis.PyQt.QtCore import Qt
+        holder.setAlignment(group, Qt.AlignmentFlag.AlignTop)
+
+
+def _layout_holding(layout: Any, widget: Any):
+    """The layout (``layout`` or one of its sub-layouts) that holds ``widget`` directly."""
+    if layout is None:
+        return None
+    if layout.indexOf(widget) >= 0:
+        return layout
+    for child in _row_layouts(layout):
+        if child.indexOf(widget) >= 0:
+            return child
+    return None
+
+
+def fit_panel(panel: Any) -> None:
+    """Raster / point cloud EXPLORING panel on the spacing scale (built lazily, after harmonize)."""
+    if panel is None or panel.layout() is None:
+        return
+    from qgis.PyQt.QtWidgets import QGroupBox
+    _set_layout(panel.layout(), (0, 0, 0, 0), GAP)
+    for row in _row_layouts(panel.layout()):
+        row.setSpacing(GAP)
+    for group in panel.findChildren(QGroupBox):
+        fit_group(group)
+
+
+def _crs_row_gap(dw: Any) -> None:
+    """The CRS combo and its picker button one gap apart (the button is sized in mockup.qss)."""
+    widget = getattr(dw, 'mQgsProjectionSelectionWidget_exporting_projection', None)
+    layout = widget.layout() if widget is not None else None
+    if layout is None:
+        return
+    layout.setSpacing(GAP)
+    for index in reversed(range(layout.count())):
+        if layout.itemAt(index).spacerItem() is not None:
+            layout.takeAt(index)  # QGIS puts 3 px between them, on top of the spacing
+
+
 def harmonize_spacing(dw: Any) -> bool:
-    """One set of gaps for the whole dock (mockup); field heights are in mockup.qss.
+    """One spacing scale for the whole dock (see the module docstring); field heights are in mockup.qss.
 
     Run after the dimension and spacing managers (end of ``apply_dynamic_dimensions``),
     which set their own per-layout values.
     """
-    from qgis.PyQt.QtWidgets import QBoxLayout
-    for name in ('verticalLayout_filtering_values', 'verticalLayout_exporting_values'):
-        values = getattr(dw, name, None)
+    from qgis.PyQt.QtWidgets import QBoxLayout, QGroupBox
+    side = EDGE - DOCK_MARGIN
+    # Header: badges one block under the dock title, right edge on the dock edge.
+    header = getattr(dw, 'frame_header', None)
+    if header is not None:
+        _set_layout(header.layout(), (side, BLOCK, side, 0))
+        header.setFixedHeight(HEADER_HEIGHT)
+    splitter = getattr(dw, 'splitter_main', None)
+    if splitter is not None:
+        # EXPLORING -> FILTERING header, one block. The handle is handleWidth plus what the
+        # stylesheets add around it (it came out 12 px, then 14): the width is lowered until
+        # the handle measures one block. The splitter manager's sheet is replaced.
+        splitter.setStyleSheet("QSplitter::handle:vertical { margin: 0px 30px; border-radius: 2px; }")
+        handle = splitter.handle(1) if splitter.count() > 1 else None
+        for width in range(BLOCK, 1, -1):
+            splitter.setHandleWidth(width)
+            if handle is None or handle.sizeHint().height() <= BLOCK:
+                break
+        else:
+            splitter.setHandleWidth(BLOCK)  # could not be measured: keep a handle one can grab
+    # EXPLORING: rail on the dock edge, groups one gap beside it, no stacked margins.
+    _set_layout(getattr(dw, 'verticalLayout_main_content', None), (0, 0, 0, 0), GAP)
+    if getattr(dw, '_fm_rail_spreader', None) is not None:
+        dw._fm_rail_spreader.reset()
+    _set_layout(getattr(dw, 'horizontalLayout_exploring_rail_and_groups', None), (RAIL_LEFT_INSET, 0, 0, 0), RAIL_GAP)
+    # A small right margin, like a default Qt layout, between the widgets and the scroll bar.
+    _set_layout(getattr(dw, 'gridLayout_main_header', None), (0, 0, SCROLLBAR_MARGIN, 0))
+    _set_layout(getattr(dw, 'gridLayout_main_actions', None), (0, 0, 0, 0))
+    _set_layout(getattr(dw, 'verticalLayout_exploring_tabs_content', None), (0, 0, 0, 0), GROUP_GAP)
+    for name in ('mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection',
+                 'mGroupBox_exploring_custom_selection'):
+        fit_group(getattr(dw, name, None))
+    frame = getattr(dw, 'frame_exploring', None)
+    if frame is not None:
+        for group in frame.findChildren(QGroupBox):
+            fit_group(group)  # raster / point cloud panels already built
+    stack = getattr(dw, 'stackedWidget_exploring_coverage', None)
+    if stack is not None:
+        _set_layout(stack.layout(), (0, 0, 0, 0))
+    # FILTERING / EXPORTING: rail on the section edge, widgets one gap beside it, rows one gap apart.
+    for section in ('filtering', 'exporting'):
+        _set_layout(getattr(dw, f'horizontalLayout_{section}_main', None), (0, 0, SCROLLBAR_MARGIN, 0), 0)
+        _set_layout(getattr(dw, f'horizontalLayout_{section}_content', None), (0, 0, 0, 0), RAIL_GAP)
+        values = getattr(dw, f'verticalLayout_{section}_values', None)
         if values is None:
             continue
         values.setSpacing(ROW_GAP)
@@ -443,36 +694,14 @@ def harmonize_spacing(dw: Any) -> bool:
             if isinstance(row, QBoxLayout) and row.direction() in (QBoxLayout.Direction.LeftToRight,
                                                                    QBoxLayout.Direction.RightToLeft):
                 row.setSpacing(FIELD_GAP)
-    header = getattr(dw, 'frame_header', None)
-    if header is not None and header.layout() is not None:
-        # Badges (24 px) with room above and below: the source layer badge no longer
-        # touches EXPLORING (the dimension managers set 13 / 24 px before this).
-        header.setFixedHeight(HEADER_HEIGHT)
-        header.layout().setContentsMargins(2, HEADER_PADDING_TOP, 2, HEADER_PADDING_BOTTOM)
-    # A small right margin, like a default Qt layout, between the widgets and the scroll bar
-    # (or the edge) in EXPLORING and in the sections.
-    grid = getattr(dw, 'gridLayout_main_header', None)
-    if grid is not None:
-        m = grid.contentsMargins()
-        grid.setContentsMargins(m.left(), m.top(), SCROLLBAR_MARGIN, m.bottom())
-    toolbox = getattr(dw, 'toolBox_tabTools', None)
-    for index in range(toolbox.count() if toolbox is not None else 0):
-        page = toolbox.widget(index)
-        layout = page.layout() if page is not None else None
-        if layout is not None:
-            m = layout.contentsMargins()
-            layout.setContentsMargins(m.left(), m.top(), SCROLLBAR_MARGIN, m.bottom())
-    tabs = getattr(dw, 'verticalLayout_exploring_tabs_content', None)
-    if tabs is not None:
-        tabs.setSpacing(GROUP_GAP)
-    for name in EXPLORING_GROUP_LAYOUTS:
-        layout = getattr(dw, name, None)
-        if layout is not None:
-            layout.setSpacing(GROUP_GAP)
-            layout.setContentsMargins(0, 2, 0, 2)
+    configuration = getattr(dw, 'CONFIGURATION', None)
+    if configuration is not None and configuration.layout() is not None:
+        m = configuration.layout().contentsMargins()
+        configuration.layout().setContentsMargins(m.left(), m.top(), SCROLLBAR_MARGIN, m.bottom())
+    _crs_row_gap(dw)
     for aligner in ('_fm_aligner_filtering', '_fm_aligner_exporting'):
         if getattr(dw, aligner, None) is not None:
-            getattr(dw, aligner).align()
+            getattr(dw, aligner).schedule()  # geometry is stale until the layouts have run
     return True
 
 

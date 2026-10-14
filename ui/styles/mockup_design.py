@@ -12,6 +12,8 @@ One place for the look of the dock:
 * The stroke icons of the mockup, drawn in the text color of the theme and
   served by :class:`IconManager` in place of the PNG files they replace.
 * The badge stylesheets (backend / layer kind, favorites).
+* The spacing scale (:data:`SPACING`), shared by mockup.qss (``{fm_edge}``...)
+  and ``ui/layout/mockup_layout.py``.
 
 Pure functions except :func:`render_icon`, which needs QtSvg.
 """
@@ -79,6 +81,17 @@ TOKENS: Dict[str, Dict[str, str]] = {
         'fm_icon': '#2e2e2e',
     },
 }
+
+# One spacing scale for the whole dock, in logical pixels.
+SPACING: Dict[str, int] = {
+    'fm_edge': 8,    # dock edge -> every block (header, EXPLORING, sections, action bar)
+    'fm_block': 8,   # between two blocks: header, EXPLORING, each section header, action bar
+    'fm_gap': 6,     # between two widgets: rows, fields of a row, groups, rail -> widgets
+    'fm_inset': 8,   # group border -> its widgets
+    'fm_band': 34,   # section header and collapsed group height (title band)
+}
+
+HEADER_BADGE_HEIGHT = 24  # backend / layer kind and favorites badges
 
 # Layer kinds of the mockup: badge background, and the dot / square shape.
 KIND_COLORS = {
@@ -192,6 +205,12 @@ def apply_tokens(stylesheet: str, dark: bool) -> str:
         stylesheet = stylesheet.replace('{' + key + '}', value)
     for kind, color in KIND_COLORS.items():
         stylesheet = stylesheet.replace('{fm_kind_' + kind + '}', color)
+    # A group's title band is its top padding plus its 1 px top border.
+    stylesheet = stylesheet.replace('{fm_band_padding}', f"{SPACING['fm_band'] - 1}px")
+    # Header: 24 px badges one block under the dock title (ui/layout/mockup_layout.py HEADER_HEIGHT).
+    stylesheet = stylesheet.replace('{fm_header_height}', f"{HEADER_BADGE_HEIGHT + SPACING['fm_block']}px")
+    for key, value in SPACING.items():
+        stylesheet = stylesheet.replace('{' + key + '}', f'{value}px')
     return stylesheet
 
 

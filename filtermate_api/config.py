@@ -10,6 +10,7 @@ import hashlib
 import json
 import logging
 import os
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -38,6 +39,17 @@ def _hash_api_key(plaintext: str) -> str:
     return hashlib.sha256(plaintext.encode("utf-8")).hexdigest()
 
 
+def _default_export_root() -> Path:
+    """Per-user folder in the temp directory (shared /tmp on Linux)."""
+    import getpass
+    try:
+        user = getpass.getuser()
+    except Exception:
+        user = "user"
+    safe = "".join(c for c in user if c.isalnum() or c in "-_") or "user"
+    return Path(tempfile.gettempdir()) / f"filtermate_exports_{safe}"
+
+
 @dataclass
 class APIConfig:
     """Configuration for the FilterMate HTTP API."""
@@ -59,6 +71,9 @@ class APIConfig:
     # or derived from ``api_key`` at load time. When neither is set,
     # auth is disabled.
     api_key_hash: str | None = None
+    # FilterMate 5 — POST /export only writes below this folder; clients
+    # name a sub-folder, never a path (no write anywhere on the host).
+    export_root: Path = field(default_factory=lambda: _default_export_root())
 
     def __post_init__(self) -> None:
         # Derive the hash from plaintext when only ``api_key`` was
@@ -94,6 +109,8 @@ class APIConfig:
             log_level=os.getenv("FILTERMATE_API_LOG_LEVEL", "info"),
             cors_origins=cors_origins,
             api_key=os.getenv("FILTERMATE_API_KEY") or None,
+            **({"export_root": Path(os.environ["FILTERMATE_API_EXPORT_ROOT"])}
+               if os.getenv("FILTERMATE_API_EXPORT_ROOT") else {}),
         )
 
     @classmethod
@@ -150,6 +167,7 @@ class APIConfig:
             cors_origins=api_section.get("cors_origins", ["*"]),
             api_key=api_key,
             api_key_hash=api_key_hash,
+            **({"export_root": Path(api_section["export_root"])} if api_section.get("export_root") else {}),
         )
 
     @classmethod
@@ -174,6 +192,8 @@ class APIConfig:
         if "FILTERMATE_API_CORS_ORIGINS" in os.environ:
             raw = os.environ["FILTERMATE_API_CORS_ORIGINS"]
             config.cors_origins = [o.strip() for o in raw.split(",") if o.strip()]
+        if os.environ.get("FILTERMATE_API_EXPORT_ROOT"):
+            config.export_root = Path(os.environ["FILTERMATE_API_EXPORT_ROOT"])
         if "FILTERMATE_API_KEY" in os.environ:
             # Empty env var explicitly disables auth — distinct from "unset".
             plaintext = os.environ["FILTERMATE_API_KEY"] or None

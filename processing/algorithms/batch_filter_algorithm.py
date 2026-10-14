@@ -46,6 +46,10 @@ class BatchFilterAlgorithm(QgsProcessingAlgorithm):
         """
         return QCoreApplication.translate("Processing", string)
 
+    def flags(self):
+        """``setSubsetString`` n'est pas sûr hors du fil principal."""
+        return super().flags() | QgsProcessingAlgorithm.Flag.FlagNoThreading
+
     def initAlgorithm(self, config=None):
         """Déclare les paramètres d'entrée de l'algorithme.
 

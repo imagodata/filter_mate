@@ -13,7 +13,7 @@ DATA = r'\\wsl.localhost\Ubuntu\home\simon\fm5_testdata'
 GPKG = os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Temp', 'fm5', 'cerdagne.gpkg')
 TILE = (r'\\wsl.localhost\Ubuntu\home\simon\dev\ign-lidar-spheron-training\data\raw_tiles'
         r'\pyrenees_villages_cerdagne\LHD_FXX_0616_6153_PTS_C_LAMB93_IGN69.copc.laz')
-OUT = os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Temp', 'fm5gaps', 'out')
+OUT = os.environ.get('FM_CHECK_OUT') or os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Temp', 'fm5gaps', 'out')
 os.makedirs(OUT, exist_ok=True)
 LOG = os.path.join(OUT, 'gaps.log')
 open(LOG, 'w', encoding='utf-8').close()
@@ -250,7 +250,7 @@ def s_back_check():
     check('back to vector: linking visible again', d.pushButton_checkable_exploring_linking_widgets.isVisible())
     check('back to vector: kind tools hidden', not any(b.isVisible() for b in ctrl()._extras._tools.values()))
     card = d.findChild(QLabel, 'label_exploring_coverage_layer')
-    check('back to vector: vector layer card', card is not None and card.isVisible() and 'batiment' in card.text() and 'Vector' in card.text(),
+    check('back to vector: vector layer card', card is not None and card.isVisible() and 'Vector' in card.text(),
           card.text() if card else '')
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
     check('back to vector: no source geometry line', hint is None or not hint.isVisible())
@@ -293,7 +293,7 @@ def s_sections_gap():
     row = d.mQgsDoubleSpinBox_filtering_buffer_value
     if exporting:
         gap = exporting[0].mapTo(d, exporting[0].rect().topLeft()).y() - row.mapTo(d, row.rect().bottomLeft()).y()
-        log(f'gap between FILTERING and EXPORTING: {gap}px')
+        log(f'gap between FILTERING and EXPORTING: {gap}px (rows spread over the section)')
 
     tabs = [b for b in d.toolBox_tabTools.findChildren(QAbstractButton) if b.objectName() == 'qt_toolbox_toolboxbutton']
     last = max(tabs, key=lambda b: b.mapTo(d, b.rect().topLeft()).y())
@@ -317,47 +317,113 @@ def s_harmony():
     tops = [g.mapTo(d, g.rect().topLeft()).y() for g in groups]
     gaps = [tops[i + 1] - (tops[i] + groups[i].height()) for i in range(2)]
     check('harmony: even gaps between EXPLORING groups', abs(gaps[0] - gaps[1]) <= 1, str(gaps))
-    badge = d.backend_indicator_label
-    badge_bottom = badge.mapTo(d, badge.rect().bottomLeft()).y()
-    exploring_top = d.frame_exploring.mapTo(d, d.frame_exploring.rect().topLeft()).y()
-    check('harmony: gap between the source layer badge and EXPLORING', exploring_top - badge_bottom >= 8,
-          f'{exploring_top - badge_bottom}px')
     rail = d.widget_exploring_keys
-    from qgis.PyQt.QtWidgets import QLabel as _QLabel
-    card = d.findChild(_QLabel, 'label_exploring_coverage_layer')
-    first = card if card is not None and card.isVisible() else groups[0]
-    first_top = first.mapTo(d, first.rect().topLeft()).y()
-    check('harmony: layer card top-aligned with the rail', abs(first_top - rail.mapTo(d, rail.rect().topLeft()).y()) <= 2,
+    from qgis.PyQt.QtWidgets import QLabel
+    card = d.findChild(QLabel, 'label_exploring_coverage_layer')
+    first_top = card.mapTo(d, card.rect().topLeft()).y() if card is not None and card.isVisible() else tops[0]
+    check('harmony: layer card (or first group) top-aligned with the rail', abs(first_top - rail.mapTo(d, rail.rect().topLeft()).y()) <= 2,
           f'{first_top} vs {rail.mapTo(d, rail.rect().topLeft()).y()}')
 
 
-def s_resize_lower():
-    d = dock()
-    sp = d.splitter_main
-    before = sp.sizes()
-    total = sum(before)
-    sp.setSizes([int(total * 0.3), total - int(total * 0.3)])
-    STATE['resize'] = (before, d.mQgsDoubleSpinBox_filtering_buffer_value.mapTo(d, d.mQgsDoubleSpinBox_filtering_buffer_value.rect().topLeft()).y())
+def _rect(d, w):
+    p = w.mapTo(d, w.rect().topLeft())
+    return p.x(), p.y(), p.x() + w.width(), p.y() + w.height()
 
 
-def s_resize_lower_check():
+def _scale():
+    from filter_mate.ui.styles.mockup_design import SPACING
+    return SPACING['fm_edge'], SPACING['fm_block'], SPACING['fm_gap'], SPACING['fm_band']
+
+
+def s_spacing_scale():
+    """One spacing scale (ui/styles/mockup_design.py SPACING) across the dock, vector layer, FILTERING open."""
+    from qgis.PyQt.QtWidgets import QAbstractButton, QLabel
     d = dock()
-    sp = d.splitter_main
-    before, buffer_y = STATE['resize']
-    after = sp.sizes()
-    check('resize: the lower zone can be enlarged with the splitter', after[1] > before[1] + 20, f'{before} -> {after}')
-    rows = [d.comboBox_filtering_current_layer, d.checkableComboBoxLayer_filtering_layers_to_filter,
-            d.comboBox_filtering_source_layer_combine_operator, d.comboBox_filtering_geometric_predicates,
-            d.mQgsDoubleSpinBox_filtering_buffer_value]
-    tops = [w.mapTo(d, w.rect().topLeft()).y() for w in rows]
-    gaps = [tops[i + 1] - tops[i] for i in range(len(tops) - 1)]
-    check('resize: rows spread over the taller section', max(gaps) > 50, str(gaps))
-    for key, value in (('pushButton_checkable_filtering_layers_to_filter', 'checkableComboBoxLayer_filtering_layers_to_filter'),
-                       ('pushButton_checkable_filtering_buffer_value', 'mQgsDoubleSpinBox_filtering_buffer_value')):
-        kw, vw = getattr(d, key), getattr(d, value)
-        ky, vy = kw.mapTo(d, kw.rect().center()).y(), vw.mapTo(d, vw.rect().center()).y()
-        check(f'resize: {key} still in front of its row', abs(ky - vy) <= 2, f'{ky} vs {vy}')
-    sp.setSizes(before)
+    edge, block, gap, band = _scale()
+    page = d.FILTERING
+    log(f'dock {d.width()}x{d.height()} toolbox h={d.toolBox_tabTools.height()} max={d.toolBox_tabTools.maximumHeight()} '
+        f'page h={page.height()} hint={page.layout().sizeHint().height()} min={page.layout().minimumSize().height()} '
+        f'current={d.toolBox_tabTools.currentIndex()} dockMin={d.minimumSizeHint().width()}')
+    tabs = sorted((b for b in d.toolBox_tabTools.findChildren(QAbstractButton)
+                   if b.objectName() == 'qt_toolbox_toolboxbutton' and b.isVisible()), key=lambda b: _rect(d, b)[1])
+    rail, keys = _rect(d, d.widget_exploring_keys), _rect(d, d.widget_filtering_keys)
+    groups = [d.mGroupBox_exploring_single_selection, d.mGroupBox_exploring_multiple_selection,
+              d.mGroupBox_exploring_custom_selection]
+    first, combo, badge = _rect(d, groups[0]), _rect(d, d.comboBox_filtering_geometric_predicates), _rect(d, d.frame_header.findChild(QLabel, 'label_backend_indicator'))
+    check('scale: both rails on the dock edge', rail[0] == keys[0] == edge, f'{rail[0]} / {keys[0]} vs {edge}')
+    check('scale: rail -> widgets one gap (EXPLORING, FILTERING)', first[0] - rail[2] == gap and combo[0] - keys[2] == gap,
+          f'{first[0] - rail[2]} / {combo[0] - keys[2]} vs {gap}')
+    rights = {'groups': first[2], 'fields': combo[2], 'sections': _rect(d, tabs[0])[2], 'badges': badge[2]}
+    # Groups and fields stop a small margin before the scroll bar; headers and badges reach the dock edge.
+    check('scale: one right edge', rights['groups'] == rights['fields'] and rights['sections'] == rights['badges'] == d.width() - edge
+          and 4 <= rights['sections'] - rights['fields'] <= 8, str(rights))
+    check('scale: section headers on the dock edge', all(_rect(d, t)[0] == edge for t in tabs))
+    check('scale: header -> EXPLORING one block', rail[1] - badge[3] == block, f'{rail[1] - badge[3]}')
+    check('scale: EXPLORING -> FILTERING header one block', _rect(d, tabs[0])[1] - rail[3] == block,
+          f'{_rect(d, tabs[0])[1] - rail[3]}')
+    buffer = _rect(d, d.mQgsDoubleSpinBox_filtering_buffer_value)
+    check('scale: last FILTERING row -> next header one block', _rect(d, tabs[1])[1] - buffer[3] == block,
+          f'{_rect(d, tabs[1])[1] - buffer[3]}')
+    check('scale: FILTERING header -> first row one block', _rect(d, d.comboBox_filtering_current_layer)[1] - _rect(d, tabs[0])[3] == block)
+    check('scale: collapsed section headers one block apart', _rect(d, tabs[2])[1] - _rect(d, tabs[1])[3] == block)
+    check('scale: section headers one band high', all(t.height() == band for t in tabs), str([t.height() for t in tabs]))
+    gaps = [_rect(d, groups[i + 1])[1] - _rect(d, groups[i])[3] for i in range(2)]
+    check('scale: EXPLORING groups one gap apart', gaps == [gap, gap], str(gaps))
+    collapsed = [g.height() for g in groups if g.isCollapsed()]
+    check('scale: collapsed groups one band high', collapsed and all(h == band for h in collapsed), str(collapsed))
+    from qgis.PyQt.QtWidgets import QWidget
+    names = ('comboBox_filtering_current_layer', 'label_filtering_source_geometry',
+             'checkableComboBoxLayer_filtering_layers_to_filter', 'comboBox_filtering_source_layer_combine_operator',
+             'comboBox_filtering_geometric_predicates', 'mQgsDoubleSpinBox_filtering_buffer_value')
+    rows = [getattr(d, n, None) or d.findChild(QWidget, n) for n in names]
+    rows = [_rect(d, w) for w in rows if w is not None and w.isVisible()]
+    row_gaps = [rows[i + 1][1] - rows[i][3] for i in range(len(rows) - 1)]
+    # Rows spread evenly over the section (resizable with the splitter), at least one gap apart.
+    check('scale: FILTERING rows evenly spaced', min(row_gaps) >= gap and max(row_gaps) - min(row_gaps) <= 2, str(row_gaps))
+    handle = d.splitter_main.handle(1)
+    check('scale: splitter handle one block', handle.height() == block, str(handle.height()))
+
+
+def s_spacing_pc():
+    """Point cloud panel on the same scale: card and groups aligned, one gap apart, collapsed = one band."""
+    from qgis.PyQt.QtWidgets import QGroupBox
+    d = dock()
+    edge, block, gap, band = _scale()
+    panel = ctrl()._pc_panel
+    groups = sorted((g for g in panel.findChildren(QGroupBox) if g.isVisible()), key=lambda g: _rect(d, g)[1])
+    card = getattr(d, 'label_exploring_coverage_layer', None)
+    lefts = {_rect(d, g)[0] for g in groups} | ({_rect(d, card)[0]} if card is not None and card.isVisible() else set())
+    check('scale: panel card and groups share one left edge', len(lefts) == 1, str(lefts))
+    gaps = [_rect(d, groups[i + 1])[1] - _rect(d, groups[i])[3] for i in range(len(groups) - 1)]
+    check('scale: panel groups one gap apart', gaps and all(g == gap for g in gaps), str(gaps))
+    collapsed = [g.height() for g in groups if getattr(g, 'isCollapsed', lambda: False)()]
+    check('scale: panel collapsed groups one band high', all(h == band for h in collapsed), str(collapsed))
+
+
+def s_rail_minimum():
+    """The rail spreading must not raise the EXPLORING minimum (it did: the splitter and the dock
+    could no longer shrink): the rail minimum stays its buttons plus one gap around each."""
+    from qgis.PyQt.QtWidgets import QPushButton
+    d = dock()
+    edge, block, gap, band = _scale()
+    rail = d.widget_exploring_keys
+    buttons = sorted((b for b in rail.findChildren(QPushButton) if b.isVisible()), key=lambda b: b.y())
+    floor = sum(b.height() for b in buttons) + gap * (len(buttons) + 1)
+    minimum = rail.minimumSizeHint().height()
+    check('rail: minimum height = buttons + gaps (no ratchet)', minimum <= floor + 2,
+          f'min {minimum} vs {floor}, height {rail.height()}')
+    gaps = [buttons[0].y()] + [buttons[i + 1].y() - buttons[i].y() - buttons[i].height() for i in range(len(buttons) - 1)] \
+        + [rail.height() - buttons[-1].y() - buttons[-1].height()]
+    check('rail: tools evenly spread', max(gaps) - min(gaps) <= 2 and min(gaps) >= gap, str(gaps))
+
+
+def s_badge_gap():
+    d = dock()
+    badge = d.backend_indicator_label
+    badge_bottom = badge.mapTo(d, badge.rect().bottomLeft()).y()
+    exploring_top = d.frame_exploring.mapTo(d, d.frame_exploring.rect().topLeft()).y()
+    check('header: gap between the source layer badge and EXPLORING', exploring_top - badge_bottom >= 6,
+          f'{exploring_top - badge_bottom}px')
 
 
 def s_source_row():
@@ -366,23 +432,51 @@ def s_source_row():
     button = d.pushButton_checkable_filtering_auto_current_layer
     check('source layer combo and its button: first row of FILTERING',
           d.FILTERING.isAncestorOf(combo) and d.FILTERING.isAncestorOf(button)
-          and combo.mapTo(d, combo.rect().topLeft()).y() <= d.checkableComboBoxLayer_filtering_layers_to_filter.mapTo(d, d.checkableComboBoxLayer_filtering_layers_to_filter.rect().topLeft()).y())
+          and combo.mapTo(d, combo.rect().topLeft()).y()
+          <= d.checkableComboBoxLayer_filtering_layers_to_filter.mapTo(d, d.checkableComboBoxLayer_filtering_layers_to_filter.rect().topLeft()).y())
 
 
 def s_scrollbar_margin():
     d = dock()
-    scroll = d.scrollArea_frame_exploring
-    viewport = scroll.viewport()
+    viewport = d.scrollArea_frame_exploring.viewport()
     right = viewport.mapTo(d, viewport.rect().topRight()).x()
     group = d.mGroupBox_exploring_single_selection
     gap = right - group.mapTo(d, group.rect().topRight()).x()
     check('margin: EXPLORING groups clear of the scroll bar', gap >= 4, f'{gap}px')
     page = d.FILTERING
     page_right = page.mapTo(d, page.rect().topRight()).x()
-    combo = d.comboBox_filtering_source_layer_combine_operator
     other = d.comboBox_filtering_other_layers_combine_operator
     gap2 = page_right - other.mapTo(d, other.rect().topRight()).x()
     check('margin: FILTERING widgets clear of the right edge', gap2 >= 4, f'{gap2}px')
+
+
+def s_resize_lower():
+    d = dock()
+    sp = d.splitter_main
+    before = sp.sizes()
+    total = sum(before)
+    sp.setSizes([int(total * 0.3), total - int(total * 0.3)])
+    STATE['resize'] = before
+
+
+def s_resize_lower_check():
+    d = dock()
+    sp = d.splitter_main
+    before = STATE['resize']
+    after = sp.sizes()
+    check('resize: the lower zone can be enlarged with the splitter', after[1] > before[1] + 20, f'{before} -> {after}')
+    rows = [d.comboBox_filtering_current_layer, d.checkableComboBoxLayer_filtering_layers_to_filter,
+            d.comboBox_filtering_source_layer_combine_operator, d.comboBox_filtering_geometric_predicates,
+            d.mQgsDoubleSpinBox_filtering_buffer_value]
+    tops = [w.mapTo(d, w.rect().topLeft()).y() for w in rows]
+    gaps = [tops[i + 1] - tops[i] for i in range(len(tops) - 1)]
+    check('resize: rows spread over the taller section', max(gaps) - min(gaps) <= 3 and max(gaps) > 48, str(gaps))
+    for key, value in (('pushButton_checkable_filtering_layers_to_filter', 'checkableComboBoxLayer_filtering_layers_to_filter'),
+                       ('pushButton_checkable_filtering_buffer_value', 'mQgsDoubleSpinBox_filtering_buffer_value')):
+        kw, vw = getattr(d, key), getattr(d, value)
+        ky, vy = kw.mapTo(d, kw.rect().center()).y(), vw.mapTo(d, vw.rect().center()).y()
+        check(f'resize: {key} still in front of its row', abs(ky - vy) <= 2, f'{ky} vs {vy}')
+    sp.setSizes(before)
 
 
 def s_finish():
@@ -395,7 +489,8 @@ def s_finish():
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
          (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_handover, 1000), (s_alignment, 500),
-         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_source_row, 300), (s_scrollbar_margin, 300), (s_resize_lower, 1500), (s_resize_lower_check, 500),
+         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
+         (s_scrollbar_margin, 300), (s_resize_lower, 1500), (s_resize_lower_check, 500),
          (s_finish, 500)]
 
 

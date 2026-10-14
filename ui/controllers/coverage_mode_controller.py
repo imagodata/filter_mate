@@ -363,6 +363,15 @@ class CoverageModeController(BaseController):
             logger.warning("[FM5] coverage panel not inserted in EXPLORING")
         host.setVisible(False)
         self._host = host
+        try:
+            # Same spacing scale as the vector groups (the panels are built after the dock layout).
+            from ..layout.mockup_layout import fit_panel
+            if host.layout() is not None:
+                host.layout().setContentsMargins(0, 0, 0, 0)
+            fit_panel(self._raster_panel)
+            fit_panel(self._pc_panel)
+        except Exception as exc:
+            logger.debug(f"[FM5] coverage panel spacing skipped: {exc}")
         self._connect_panels()
         self._ensure_coverage_spin()
         self._extras_call('ensure', host)
