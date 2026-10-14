@@ -32,7 +32,7 @@
 | 🎨 **Dark Mode** | Automatic theme detection |
 | 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
-| 🧰 **Processing Toolbox** | Batch-filter multiple layers with one expression, from the Processing panel or a model |
+| 🧰 **Processing Toolbox** | Cross filters from vector, raster, point cloud or extent sources, point cloud criteria, favorites and export of filtered layers — chainable in models, with four ready-made models and `qgis_process` support ([docs/AUTOMATION.md](docs/AUTOMATION.md)) |
 
 ### 🆕 What's new in 4.9.2
 

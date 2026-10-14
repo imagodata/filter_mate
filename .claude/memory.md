@@ -663,3 +663,14 @@ Result: Que veux-tu faire dans cette session ?
   EXPLORING est une `QVBoxLayout` imbriquée dans une `QGridLayout` (`getItemPosition(-1)` fait planter Qt).
   Vérifier en réel : `scripts/fm5_scenarios.py` (python-qgis, sans UI) et `scripts/fm5_gui_check.py`
   (`qgis-bin --profiles-path` jetable + `QGIS_PLUGINPATH` vers le dépôt), données `~/fm5_testdata`.
+- [2026-10-14] Automatisation FilterMate 5 (branche `claude/v5-processing-api`) : une seule implémentation
+  `adapters/public_api/operations.py` derrière Processing (`processing/algorithms/common.py` + 7 algos, sortie
+  `OUTPUT` = cibles seulement), l'API Python et REST. Modèles `processing/models/*.model3` générés par
+  `scripts/build_processing_models.py` (QGIS Python). Pièges vérifiés en QGIS 4.2 / 3.44 :
+  `QgsProcessingRegistry.addProvider` charge le provider AVANT de l'enregistrer → un modèle lu dans
+  `loadAlgorithms` ne résout pas ses étapes `filtermate:*` (paramètre de dossier perdu) : modèles chargés au
+  `providerAdded` ; garder une référence Python au provider (sinon les sous-classes sont ramassées) ;
+  `QObject` + ABC exige une métaclasse commune ; `QgsRasterFileWriter.writeRaster` refuse un
+  `QgsProcessingFeedback` ; dossier de sortie Processing via `parameterAsFileOutput` (TEMPORARY_OUTPUT) ;
+  SQLite n'écrit pas via `\\wsl.localhost`. Historique : source vecteur / géométrie / défiltrage dans un
+  historique à part (le dock annule un vecteur par `_linked_runs`). `FM5_ONLY=s13,s17` limite les scénarios.

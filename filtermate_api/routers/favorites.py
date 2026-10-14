@@ -38,7 +38,7 @@ def _favorites_unavailable_response() -> HTTPException:
 
 
 @router.get("", response_model=List[Favorite])
-async def list_favorites(request: Request) -> List[Favorite]:
+def list_favorites(request: Request) -> List[Favorite]:
     """Return every favorite the FilterMate session knows about."""
     try:
         return _accessor(request).list_favorites()
@@ -53,7 +53,7 @@ class ApplyFavoriteResponse(BaseModel):
 
 
 @router.post("/{favorite_id}/apply", response_model=ApplyFavoriteResponse)
-async def apply_favorite(favorite_id: str, request: Request) -> ApplyFavoriteResponse:
+def apply_favorite(favorite_id: str, request: Request) -> ApplyFavoriteResponse:
     """Apply the favorite identified by ``favorite_id``."""
     accessor = _accessor(request)
     try:

@@ -28,9 +28,11 @@ from .accessor import (
     CrossFilterResult,
     Favorite,
     FavoritesUnavailable,
+    FilteredLayer,
     FilterStatus,
     HistoryStep,
     LayerSummary,
+    OperationResult,
 )
 from .main_thread import run_on_main_thread
 
@@ -177,60 +179,134 @@ class QGISFilterMateAccessor:
 
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
-                     selected_only: bool = True) -> Optional[CrossFilterResult]:
+                     selected_only: bool = True, raster_selection: Optional[Dict] = None,
+                     point_cloud_criteria: Optional[Dict] = None,
+                     filter_source: bool = False) -> Optional[CrossFilterResult]:
         """FilterMate 5 cross filter, run on the Qt main thread (it changes layers)."""
         # Clipping a point cloud can take a while: wait longer than for a subset.
         return run_on_main_thread(self._cross_filter_main_thread, source_layer, list(target_layers), list(predicates),
-                                  float(buffer), float(coverage_min), operator, bool(selected_only), timeout=600.0)
+                                  float(buffer), float(coverage_min), operator, bool(selected_only),
+                                  raster_selection, point_cloud_criteria, bool(filter_source), timeout=600.0)
 
     def _cross_filter_main_thread(self, source_layer, target_layers, predicates, buffer, coverage_min,
-                                  operator, selected_only) -> Optional[CrossFilterResult]:
+                                  operator, selected_only, raster_selection=None, point_cloud_criteria=None,
+                                  filter_source=False) -> Optional[CrossFilterResult]:
         try:
             from qgis.core import QgsProject
-            cross_filter = _plugin_module("core.domain.cross_filter")
-            CrossFilterRequest, TargetSpec = cross_filter.CrossFilterRequest, cross_filter.TargetSpec
-            LayerKind = _plugin_module("core.domain.layer_kind").LayerKind
-            get_cross_filter_service = _plugin_module("core.services.cross_filter_service").get_cross_filter_service
-            VectorSourceJob = _plugin_module("adapters.qgis.coverage_layers.source_jobs").VectorSourceJob
+            operations = _plugin_module("adapters.public_api.operations")
+            requests = _plugin_module("core.domain.api_requests")
         except ImportError as exc:
             return CrossFilterResult(error=str(exc))
         project = QgsProject.instance()
-        sources = [l for l in project.mapLayersByName(source_layer) if _layer_kind(l) == "vector"]
+        sources = [l for l in project.mapLayersByName(source_layer) if _layer_kind(l) != "other"]
         if not sources:
             return None
-        source = sources[0]
-        if selected_only and source.selectedFeatureCount():
-            features = list(source.getSelectedFeatures())
-        else:
-            features = list(source.getFeatures())
-        targets, failed = [], {}
-        for name in target_layers:
-            layers = [l for l in project.mapLayersByName(name) if l.id() != source.id()]
-            kind = _layer_kind(layers[0]) if layers else "other"
-            if not layers or kind == "other":
-                failed[name] = "layer not found or not filterable"
-                continue
-            targets.append(TargetSpec(layers[0].id(), LayerKind(kind)))
-        if not targets or not features:
-            return CrossFilterResult(failed=failed, error=None if targets else "no filterable target")
-        request = CrossFilterRequest(source_layer_id=source.id(), source_kind=LayerKind.VECTOR, targets=tuple(targets),
-                                     predicates=tuple(predicates) or ("Intersect",), buffer_value=buffer,
-                                     coverage_min=coverage_min, other_layers_combine_operator=operator)
-        task = get_cross_filter_service().run(request, VectorSourceJob(source, features), synchronous=True)
-        if task.error:
-            return CrossFilterResult(failed=failed, error=task.error)
-        filtered = []
-        for outcome in task.outcomes:
-            layer = project.mapLayer(outcome.layer_id)
-            name = layer.name() if layer is not None else outcome.layer_id
-            if outcome.success:
-                filtered.append(name)
-            else:
-                failed[name] = outcome.message or "failed"
+        try:
+            report = operations.cross_filter(
+                sources[0], list(target_layers), predicates=tuple(predicates) or ("Intersect",), buffer=buffer,
+                coverage_min=coverage_min, operator=operator, selected_only=selected_only,
+                raster_selection=requests.raster_selection_from_dict(raster_selection),
+                point_cloud_criteria=requests.point_cloud_criteria_from_dict(point_cloud_criteria),
+                filter_source=filter_source, project=project)
+        except ValueError as exc:
+            return CrossFilterResult(error=str(exc))
+        result = self._cross_result(report)
+        if not result.error:
+            self._mark_applied(source_layer, "rest_api:cross")
+        return result
+
+    @staticmethod
+    def _cross_result(report) -> CrossFilterResult:
+        # REST contract (5.0 first cut): every target that was not filtered is in ``failed``.
+        failed = dict(report.failed)
+        for name in report.skipped:
+            failed.setdefault(name, "layer not found or not filterable")
+        return CrossFilterResult(filtered=report.done_names, failed=failed, error=report.error or None)
+
+    @staticmethod
+    def _operation_result(report) -> OperationResult:
+        return OperationResult(done=report.done_names, failed=dict(report.failed), skipped=dict(report.skipped),
+                               error=report.error or None, outputs=dict(report.outputs))
+
+    def _mark_applied(self, layer: str, source: str) -> None:
         self._last_applied_at = datetime.now(timezone.utc).isoformat()
-        self._last_applied_layer = source_layer
-        self._last_applied_source = "rest_api:cross"
-        return CrossFilterResult(filtered=filtered, failed=failed)
+        self._last_applied_layer = layer
+        self._last_applied_source = source
+
+    def cross_filter_by_geometry(self, wkt: str, crs: str, target_layers: List[str], predicates: List[str],
+                                 buffer: float = 0.0, coverage_min: float = 0.0,
+                                 operator: Optional[str] = None) -> CrossFilterResult:
+        return run_on_main_thread(self._geometry_main_thread, wkt, crs, list(target_layers), list(predicates),
+                                  float(buffer), float(coverage_min), operator, timeout=600.0)
+
+    def _geometry_main_thread(self, wkt, crs, target_layers, predicates, buffer, coverage_min, operator):
+        try:
+            from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry
+            operations = _plugin_module("adapters.public_api.operations")
+        except ImportError as exc:
+            return CrossFilterResult(error=str(exc))
+        reference = QgsCoordinateReferenceSystem(crs)
+        geometry = QgsGeometry.fromWkt(wkt)
+        if not reference.isValid() or geometry.isNull():
+            return CrossFilterResult(error="invalid geometry or CRS")
+        report = operations.cross_filter_by_geometry(geometry, reference, target_layers,
+                                                     predicates=tuple(predicates) or ("Intersect",), buffer=buffer,
+                                                     coverage_min=coverage_min, operator=operator)
+        result = self._cross_result(report)
+        if not result.error:
+            self._mark_applied("geometry", "rest_api:geometry")
+        return result
+
+    def filter_point_clouds(self, layers: List[str], criteria: Dict,
+                            operator: Optional[str] = None) -> OperationResult:
+        return run_on_main_thread(self._point_clouds_main_thread, list(layers), dict(criteria or {}), operator)
+
+    def _point_clouds_main_thread(self, layers, criteria, operator):
+        try:
+            operations = _plugin_module("adapters.public_api.operations")
+            requests = _plugin_module("core.domain.api_requests")
+            report = operations.filter_point_clouds(layers, requests.point_cloud_criteria_from_dict(criteria),
+                                                    operator=operator)
+        except (ImportError, ValueError) as exc:
+            return OperationResult(error=str(exc))
+        return self._operation_result(report)
+
+    def clear_filters(self, layers: List[str]) -> OperationResult:
+        return run_on_main_thread(self._clear_main_thread, list(layers))
+
+    def _clear_main_thread(self, layers):
+        try:
+            report = _plugin_module("adapters.public_api.operations").clear_filters(layers)
+        except ImportError as exc:
+            return OperationResult(error=str(exc))
+        return self._operation_result(report)
+
+    def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
+                      point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
+        return run_on_main_thread(self._export_main_thread, list(layers), folder, vector_format, raster_format,
+                                  point_cloud_format, crs, timeout=1800.0)
+
+    def _export_main_thread(self, layers, folder, vector_format, raster_format, point_cloud_format, crs):
+        try:
+            operations = _plugin_module("adapters.public_api.operations")
+        except ImportError as exc:
+            return OperationResult(error=str(exc))
+        output_crs = None
+        if crs:
+            from qgis.core import QgsCoordinateReferenceSystem
+            output_crs = QgsCoordinateReferenceSystem(crs)
+            if not output_crs.isValid():
+                return OperationResult(error="invalid CRS")
+        report = operations.export_layers(layers, folder, vector_format=vector_format, raster_format=raster_format,
+                                          point_cloud_format=point_cloud_format, crs=output_crs)
+        return self._operation_result(report)
+
+    def get_filter_state(self) -> List[FilteredLayer]:
+        def _state():
+            rows = _plugin_module("adapters.public_api.operations").filter_state()
+            return [FilteredLayer(layer_id=row["id"], name=row["name"], layer_kind=row["kind"],
+                                  subset=row["subset"], derived=row["derived"]) for row in rows]
+        return _safe(lambda: run_on_main_thread(_state), []) or []
 
     # ------------------------------------------------------------------
     # Filter mutations — delegated to the PublicAPI
@@ -326,6 +402,19 @@ class QGISFilterMateAccessor:
             return None
         layer_name = getattr(entry, "layer_name", "") or ""
         expression = getattr(entry, "expression", "") or ""
+        spatial = getattr(entry, "spatial_config", None)
+        if isinstance(spatial, dict) and spatial.get("coverage_layers"):
+            # FilterMate 5: the favorite also clips raster / point cloud layers.
+            # Vector-only favorites keep the PublicAPI path (vector history, signals).
+            try:
+                operations = _plugin_module("adapters.public_api.operations")
+                report = run_on_main_thread(operations.apply_favorite, favorite_id, favorites_service, timeout=600.0)
+            except Exception:
+                return None
+            if report.error or not report.done:
+                return None
+            self._mark_applied(layer_name or report.done_names[0], f"favorite:{favorite_id}")
+            return HistoryStep(layer_name=layer_name or report.done_names[0], expression=expression)
         if not layer_name or not expression:
             return None
         ok = self.apply_filter(
