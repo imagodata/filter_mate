@@ -1,0 +1,198 @@
+"""
+Base commune des algorithmes Processing FilterMate 5.
+
+Tous les algorithmes délèguent à ``adapters.public_api.operations`` (le même
+code que l'API Python et l'API REST) et :
+
+* s'exécutent dans le fil principal (``FlagNoThreading``) : ils modifient les
+  couches du projet sur place, comme le dock ;
+* déclarent la sortie ``OUTPUT`` (couches traitées) pour pouvoir être
+  enchaînés dans le modeleur graphique, par exemple filtre croisé → export ;
+* ignorent, avec un avertissement, les couches hors projet : un filtre posé
+  sur une couche temporaire chargée depuis un chemin serait perdu.
+
+Les opérations restent annulables depuis le dock (historique FilterMate).
+"""
+
+from qgis.core import (
+    QgsProcessing,
+    QgsProcessingAlgorithm,
+    QgsProcessingException,
+    QgsProcessingOutputMultipleLayers,
+    QgsProcessingParameterBoolean,
+    QgsProcessingParameterDefinition,
+    QgsProcessingParameterEnum,
+    QgsProcessingParameterMultipleLayers,
+    QgsProcessingParameterNumber,
+    QgsProcessingParameterString,
+)
+from qgis.PyQt.QtCore import QCoreApplication
+
+from ...core.domain.api_requests import OPERATORS, PREDICATES
+
+try:  # QGIS 3.22+
+    from qgis.core import QgsProcessingParameterPointCloudLayer
+except ImportError:  # pragma: no cover - older QGIS
+    QgsProcessingParameterPointCloudLayer = None
+
+
+def point_cloud_layer_type():
+    """Type de couche « nuage de points » des paramètres multi-couches (repli : toute couche)."""
+    from qgis.core import Qgis
+    for owner, name in ((getattr(Qgis, "ProcessingSourceType", None), "PointCloud"),
+                        (getattr(QgsProcessing, "SourceType", None), "TypePointCloud"),
+                        (QgsProcessing, "TypePointCloud")):
+        value = getattr(owner, name, None) if owner is not None else None
+        if value is not None:
+            return value
+    return QgsProcessing.SourceType.TypeMapLayer
+
+
+class FilterMateAlgorithm(QgsProcessingAlgorithm):
+    """Algorithme FilterMate : fil principal, sortie OUTPUT, rapport d'opération."""
+
+    TARGETS = "TARGETS"
+    PREDICATES = "PREDICATES"
+    BUFFER = "BUFFER"
+    COVERAGE = "COVERAGE"
+    OPERATOR = "OPERATOR"
+    OUTPUT = "OUTPUT"
+    LAYERS_FILTERED = "LAYERS_FILTERED"
+    LAYERS_FAILED = "LAYERS_FAILED"
+
+    def tr(self, string):
+        """Traduit une chaîne via le contexte Processing."""
+        return QCoreApplication.translate("Processing", string)
+
+    def flags(self):
+        """Les couches sont modifiées sur place : exécution dans le fil principal."""
+        return super().flags() | QgsProcessingAlgorithm.Flag.FlagNoThreading
+
+    def group(self):
+        return self.tr("FilterMate")
+
+    def groupId(self):
+        return "filtermate"
+
+    def createInstance(self):
+        return type(self)()
+
+    # --- paramètres partagés ---------------------------------------------------
+
+    def add_target_parameters(self, buffer_parameter=None):
+        """Couches cibles, prédicats, tampon, couverture minimale et combinaison."""
+        self.addParameter(QgsProcessingParameterMultipleLayers(
+            self.TARGETS, self.tr("Couches à filtrer (vecteur, raster, nuage de points)"),
+            layerType=QgsProcessing.SourceType.TypeMapLayer, optional=self.targets_optional()))
+        self.addParameter(QgsProcessingParameterEnum(
+            self.PREDICATES, self.tr("Prédicats géométriques"), options=list(PREDICATES),
+            allowMultiple=True, defaultValue=[0]))
+        self.addParameter(buffer_parameter or QgsProcessingParameterNumber(
+            self.BUFFER, self.tr("Tampon (unités de la source)"),
+            type=QgsProcessingParameterNumber.Type.Double, defaultValue=0.0))
+        self.addParameter(QgsProcessingParameterNumber(
+            self.COVERAGE, self.tr("Couverture minimale des polygones cibles (%)"),
+            type=QgsProcessingParameterNumber.Type.Double, defaultValue=0.0, minValue=0.0, maxValue=100.0))
+        self.add_operator_parameter(self.tr("Combinaison avec le filtre existant des cibles"))
+
+    def targets_optional(self) -> bool:
+        return False
+
+    def add_operator_parameter(self, label, name=None):
+        self.addParameter(QgsProcessingParameterEnum(
+            name or self.OPERATOR, label, options=[self.tr("Remplacer"), "AND", "OR", "AND NOT"], defaultValue=0))
+
+    def add_point_cloud_criteria_parameters(self, prefix=""):
+        """Classes ASPRS, plages Z et intensité, numéro de retour, expression."""
+        number = QgsProcessingParameterNumber.Type.Double
+        self.addParameter(QgsProcessingParameterString(
+            prefix + "CLASSES", self.tr("Classes ASPRS à garder (ex. 3,4,5 ; vide = toutes)"), optional=True))
+        for name, label in (("Z_MIN", self.tr("Z minimum")), ("Z_MAX", self.tr("Z maximum")),
+                            ("INTENSITY_MIN", self.tr("Intensité minimum")),
+                            ("INTENSITY_MAX", self.tr("Intensité maximum"))):
+            self.addParameter(QgsProcessingParameterNumber(prefix + name, label, type=number, optional=True))
+        self.addParameter(QgsProcessingParameterNumber(
+            prefix + "RETURN_NUMBER", self.tr("Numéro de retour (vide = tous)"),
+            type=QgsProcessingParameterNumber.Type.Integer, optional=True, minValue=1, maxValue=15))
+        self.addParameter(QgsProcessingParameterString(
+            prefix + "EXPRESSION", self.tr("Expression nuage de points (ex. ReturnNumber = NumberOfReturns)"),
+            optional=True, multiLine=False))
+
+    def add_output(self):
+        self.addOutput(QgsProcessingOutputMultipleLayers(self.OUTPUT, self.tr("Couches traitées")))
+
+    # --- lecture des paramètres --------------------------------------------------
+
+    @staticmethod
+    def optional_number(algorithm, parameters, name, context, integer=False):
+        """Valeur d'un nombre optionnel, None quand il n'est pas renseigné."""
+        value = parameters.get(name)
+        if value is None or value == "":
+            return None
+        if integer:
+            return algorithm.parameterAsInt(parameters, name, context)
+        return algorithm.parameterAsDouble(parameters, name, context)
+
+    def point_cloud_criteria(self, parameters, context, prefix=""):
+        """PointCloudFilterCriteria lus depuis les paramètres (None quand ils sont vides)."""
+        from ...core.domain.api_requests import point_cloud_criteria_from_values
+        number = lambda name: self.optional_number(self, parameters, prefix + name, context)  # noqa: E731
+        try:
+            criteria = point_cloud_criteria_from_values(
+                classes=self.parameterAsString(parameters, prefix + "CLASSES", context),
+                z_min=number("Z_MIN"), z_max=number("Z_MAX"),
+                intensity_min=number("INTENSITY_MIN"), intensity_max=number("INTENSITY_MAX"),
+                return_number=self.optional_number(self, parameters, prefix + "RETURN_NUMBER", context, integer=True),
+                expression=self.parameterAsString(parameters, prefix + "EXPRESSION", context))
+        except ValueError as exc:
+            raise QgsProcessingException(str(exc))
+        return None if criteria.is_empty else criteria
+
+    def target_settings(self, parameters, context):
+        """Arguments communs des opérations de filtre croisé."""
+        predicates = tuple(PREDICATES[i] for i in self.parameterAsEnums(parameters, self.PREDICATES, context))
+        return dict(
+            predicates=predicates or ("Intersect",),
+            buffer=self.parameterAsDouble(parameters, self.BUFFER, context),
+            coverage_min=self.parameterAsDouble(parameters, self.COVERAGE, context),
+            operator=OPERATORS[self.parameterAsEnum(parameters, self.OPERATOR, context)])
+
+    # --- rapport -----------------------------------------------------------------
+
+    def finish(self, report, feedback, verb=None):
+        """Journal du rapport d'opération et dictionnaire de résultats Processing."""
+        for name, reason in report.skipped.items():
+            feedback.pushWarning(self.tr("Couche ignorée : {0} ({1})").format(name, reason))
+        if report.error:
+            raise QgsProcessingException(report.error)
+        verb = verb or self.tr("filtrée")
+        layers = report.details.get("layers", {})
+        for layer_id, name in report.done.items():
+            info = layers.get(name) or {}
+            suffix = ""
+            if info.get("seconds") is not None:
+                suffix = self.tr(" ({0:.1f} s)").format(info["seconds"])
+            if name in report.outputs:
+                suffix = " → " + report.outputs[name]
+            feedback.pushInfo(self.tr("{0} : {1}{2}").format(name, verb, suffix))
+        for name, message in report.failed.items():
+            feedback.reportError(self.tr("{0} : échec — {1}").format(name, message))
+        return {
+            self.OUTPUT: report.done_ids,
+            self.LAYERS_FILTERED: report.done_names,
+            self.LAYERS_FAILED: list(report.failed),
+        }
+
+
+def advanced(parameter):
+    """Range un paramètre dans les « paramètres avancés »."""
+    from qgis.core import Qgis
+    flag = getattr(getattr(Qgis, "ProcessingParameterFlag", None), "Advanced", None)
+    if flag is None:
+        flag = QgsProcessingParameterDefinition.FlagAdvanced
+    parameter.setFlags(parameter.flags() | flag)
+    return parameter
+
+
+__all__ = ["FilterMateAlgorithm", "QgsProcessingParameterPointCloudLayer", "QgsProcessingParameterBoolean",
+           "advanced", "point_cloud_layer_type"]

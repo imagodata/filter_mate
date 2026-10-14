@@ -9,12 +9,19 @@ sync state.
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from ..accessor import CrossFilterResult, FilterMateAccessor, FilterStatus, HistoryStep
+from ..accessor import (
+    CrossFilterResult,
+    FilteredLayer,
+    FilterMateAccessor,
+    FilterStatus,
+    HistoryStep,
+    OperationResult,
+)
 
 router = APIRouter(prefix="/filters", tags=["filters"])
 
@@ -136,30 +143,153 @@ _PREDICATES = ("Intersect", "Contain", "Disjoint", "Equal", "Touch", "Overlap", 
 _OPERATORS = ("AND", "OR", "AND NOT")
 
 
-class CrossFilterRequestBody(BaseModel):
-    source_layer: str = Field(..., min_length=1, description="Vector source layer name")
+class RasterSelectionBody(BaseModel):
+    """Pixels kept on a raster source (same rules as the EXPLORING raster panel)."""
+    model_config = ConfigDict(extra="forbid")
+
+    band: int = Field(default=1, ge=1, description="1-based band number")
+    mode: Literal["range", "classes", "expression"] = Field(default="range")
+    minimum: Optional[float] = Field(default=None, description="range: lower bound (inclusive)")
+    maximum: Optional[float] = Field(default=None, description="range: upper bound (inclusive)")
+    classes: List[int] = Field(default_factory=list, description="classes: pixel values kept")
+    expression: str = Field(default="", max_length=2000,
+                            description='expression: raster calculator expression, e.g. "mnt@1" > 1200')
+
+    @model_validator(mode="after")
+    def _check_mode(self) -> "RasterSelectionBody":
+        if self.mode == "range":
+            if self.minimum is None and self.maximum is None:
+                raise ValueError("a range needs a minimum, a maximum or both")
+            if self.minimum is not None and self.maximum is not None and self.minimum > self.maximum:
+                raise ValueError("minimum is greater than maximum")
+        elif self.mode == "classes" and not self.classes:
+            raise ValueError("a classes selection needs at least one class")
+        elif self.mode == "expression" and not self.expression.strip():
+            raise ValueError("an expression selection needs an expression")
+        return self
+
+
+class PointCloudCriteriaBody(BaseModel):
+    """Points kept on a point cloud (ASPRS classes, ranges, return number, expression)."""
+    model_config = ConfigDict(extra="forbid")
+
+    classes: List[int] = Field(default_factory=list, description="ASPRS classification codes kept")
+    z_min: Optional[float] = None
+    z_max: Optional[float] = None
+    intensity_min: Optional[float] = None
+    intensity_max: Optional[float] = None
+    return_number: Optional[int] = Field(default=None, ge=1, le=15)
+    expression: str = Field(default="", max_length=2000, description="Point cloud expression, ANDed with the rest")
+
+    @model_validator(mode="after")
+    def _check_bounds(self) -> "PointCloudCriteriaBody":
+        for low, high in ((self.z_min, self.z_max), (self.intensity_min, self.intensity_max)):
+            if low is not None and high is not None and low > high:
+                raise ValueError("minimum is greater than maximum")
+        if any(code < 0 or code > 255 for code in self.classes):
+            raise ValueError("classification codes are 0-255")
+        return self
+
+    def is_empty(self) -> bool:
+        return not (self.classes or self.expression.strip() or self.return_number is not None
+                    or any(v is not None for v in (self.z_min, self.z_max, self.intensity_min, self.intensity_max)))
+
+
+class _RelationBody(BaseModel):
     target_layers: List[str] = Field(..., min_length=1, description="Layers to filter: vector, raster or point cloud")
     predicates: List[str] = Field(default_factory=lambda: ["Intersect"], description=f"Any of {', '.join(_PREDICATES)}")
     buffer: float = Field(default=0.0, description="Buffer of the source geometry (source CRS units, metres for a geographic CRS)")
     coverage_min: float = Field(default=0.0, ge=0.0, le=100.0, description="Minimum share of a polygon target inside the source (%)")
     operator: Optional[str] = Field(default=None, description="Combine with the targets' previous filter: AND, OR, AND NOT (null = replace)")
-    selected_only: bool = Field(default=True, description="Use the selected source features (all when none is selected)")
+
+
+def _check_relation(payload: _RelationBody) -> None:
+    if any(p not in _PREDICATES for p in payload.predicates):
+        raise HTTPException(status_code=422, detail="Unknown predicate")
+    if payload.operator is not None and payload.operator not in _OPERATORS:
+        raise HTTPException(status_code=422, detail="Unknown operator")
+
+
+class CrossFilterRequestBody(_RelationBody):
+    source_layer: str = Field(..., min_length=1, description="Source layer name: vector, raster or point cloud")
+    selected_only: bool = Field(default=True, description="Vector source: use the selected features (all when none is selected)")
+    raster_selection: Optional[RasterSelectionBody] = Field(
+        default=None, description="Raster source (required): pixels kept")
+    point_cloud_criteria: Optional[PointCloudCriteriaBody] = Field(
+        default=None, description="Point cloud source: points kept (null = the points it shows now)")
+    filter_source: bool = Field(default=False, description="Raster source: also mask the source outside the selection")
 
 
 @router.post("/cross", response_model=CrossFilterResult)
 async def cross_filter(payload: CrossFilterRequestBody, request: Request) -> CrossFilterResult:
-    """Filter layers of any kind (vector, raster, point cloud) by a vector source layer."""
-    unknown = [p for p in payload.predicates if p not in _PREDICATES]
-    if unknown:
-        raise HTTPException(status_code=422, detail="Unknown predicate")
-    if payload.operator is not None and payload.operator not in _OPERATORS:
-        raise HTTPException(status_code=422, detail="Unknown operator")
+    """Filter layers of any kind (vector, raster, point cloud) by a source of any kind."""
+    _check_relation(payload)
     result = _accessor(request).cross_filter(
         source_layer=payload.source_layer, target_layers=payload.target_layers, predicates=payload.predicates,
         buffer=payload.buffer, coverage_min=payload.coverage_min, operator=payload.operator,
-        selected_only=payload.selected_only)
+        selected_only=payload.selected_only,
+        raster_selection=payload.raster_selection.model_dump() if payload.raster_selection else None,
+        point_cloud_criteria=(payload.point_cloud_criteria.model_dump()
+                              if payload.point_cloud_criteria and not payload.point_cloud_criteria.is_empty() else None),
+        filter_source=payload.filter_source)
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Source layer not found")
     if result.error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cross filter failed")
     return result
+
+
+class GeometryFilterRequestBody(_RelationBody):
+    wkt: str = Field(..., min_length=1, max_length=1_000_000, description="Geometry in WKT (polygon, extent...)")
+    crs: str = Field(..., min_length=1, max_length=64, description="CRS of the geometry, e.g. EPSG:2154")
+
+
+@router.post("/geometry", response_model=CrossFilterResult)
+async def geometry_filter(payload: GeometryFilterRequestBody, request: Request) -> CrossFilterResult:
+    """Filter layers of any kind by a WKT geometry (an area drawn by a web client, an extent)."""
+    _check_relation(payload)
+    result = _accessor(request).cross_filter_by_geometry(
+        wkt=payload.wkt, crs=payload.crs, target_layers=payload.target_layers, predicates=payload.predicates,
+        buffer=payload.buffer, coverage_min=payload.coverage_min, operator=payload.operator)
+    if result.error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Geometry filter failed")
+    return result
+
+
+class PointCloudFilterRequestBody(BaseModel):
+    layers: List[str] = Field(..., min_length=1, description="Point cloud layers (LiDAR tiles...)")
+    criteria: PointCloudCriteriaBody
+    operator: Optional[str] = Field(default=None, description="Combine with each layer's filter: AND, OR, AND NOT (null = replace)")
+
+
+@router.post("/point-cloud", response_model=OperationResult)
+async def point_cloud_filter(payload: PointCloudFilterRequestBody, request: Request) -> OperationResult:
+    """Apply the same criteria to several point cloud layers."""
+    if payload.criteria.is_empty():
+        raise HTTPException(status_code=422, detail="Empty point cloud criteria")
+    if payload.operator is not None and payload.operator not in _OPERATORS:
+        raise HTTPException(status_code=422, detail="Unknown operator")
+    result = _accessor(request).filter_point_clouds(
+        layers=payload.layers, criteria=payload.criteria.model_dump(), operator=payload.operator)
+    if result.error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Point cloud filter failed")
+    return result
+
+
+class ClearFiltersRequestBody(BaseModel):
+    layers: List[str] = Field(..., min_length=1, description="Layers of any kind to unfilter")
+
+
+@router.post("/clear", response_model=OperationResult)
+async def clear_filters(payload: ClearFiltersRequestBody, request: Request) -> OperationResult:
+    """Put layers of any kind back on their original source, with no filter (undoable in the dock)."""
+    result = _accessor(request).clear_filters(layers=payload.layers)
+    if result.error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Clear failed")
+    return result
+
+
+@router.get("/state", response_model=List[FilteredLayer])
+async def filter_state(request: Request) -> List[FilteredLayer]:
+    """Every layer FilterMate filters now: subset string and / or clipped source."""
+    return _accessor(request).get_filter_state()

@@ -51,18 +51,27 @@ def capture(project: Optional[QgsProject] = None) -> List[Dict]:
     return entries
 
 
-def _resolve(project: QgsProject, entry: Dict):
+def _resolve(project: QgsProject, entry: Dict, kind_of=None):
+    kind_of = kind_of or _kind
     layer = project.mapLayer(entry.get('layer_id', ''))
     if layer is not None:
         return layer
     for candidate in project.mapLayersByName(entry.get('layer_name', '')):
-        if is_coverage_layer(candidate):
+        if getattr(kind_of(candidate), 'is_coverage', False):
             return candidate
     return None
 
 
-def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = None, synchronous: bool = False) -> int:
-    """Re-apply captured raster / point cloud states; returns the number of layers handled."""
+def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = None, synchronous: bool = False,
+          kind_of=None, applied: Optional[List[str]] = None) -> int:
+    """Re-apply captured raster / point cloud states; returns the number of layers handled.
+
+    Args:
+        kind_of: Layer kind function; the default follows the dock options,
+            automation passes the class-based kind (no dock, options off).
+        applied: When given, receives the ids of the layers handled.
+    """
+    kind_of = kind_of or _kind
     from ....core.domain.cross_filter import CrossFilterRequest, TargetSpec
     from ....core.services.cross_filter_service import get_cross_filter_service
     from .snapshots import registry, restore_snapshot, take_snapshot
@@ -72,11 +81,14 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
     registry().install(project)
     handled = 0
     for entry in entries or []:
-        layer = _resolve(project, entry)
+        layer = _resolve(project, entry, kind_of)
         if layer is None:
             logger.warning(f"[FM5] favorite: layer '{entry.get('layer_name')}' not found")
             continue
-        kind = _kind(layer)
+        kind = kind_of(layer)
+        if not getattr(kind, 'is_coverage', False):
+            logger.warning(f"[FM5] favorite: '{layer.name()}' is not a raster / point cloud layer here")
+            continue
         try:
             stored = LayerSnapshot.from_dict(entry)
         except TypeError:
@@ -93,4 +105,6 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
                                          targets=(TargetSpec(layer.id(), kind),), predicates=('Intersect',))
             service.run(request, FixedGeometrySourceJob(layer, stored.geometry_wkt), synchronous=synchronous)
         handled += 1
+        if applied is not None:
+            applied.append(layer.id())
     return handled
