@@ -707,19 +707,47 @@ class CoverageModeController(BaseController):
         if selection is not None:
             apply_selection_preview(layer, selection, low, high)
 
-    def _populate_point_cloud(self, layer: Any) -> None:
+    def _populate_point_cloud(self, layer: Any, keep_kept: bool = False) -> None:
         try:
             from ...adapters.qgis.point_cloud_layer_adapter import read_point_cloud_summary
             from ...adapters.qgis.coverage_layers import pdal_cli
+            self._watch_point_cloud_statistics(layer)
+            kept = self._pc_panel.point_counts()[0] if keep_kept and hasattr(self._pc_panel, 'point_counts') else None
             summary = read_point_cloud_summary(layer)
             self._pc_panel.populate(summary)
             self._pc_panel.set_current_subset(layer.subsetString())
-            self._pc_panel.set_point_counts(None, getattr(summary, 'point_count', None))
+            self._pc_panel.set_point_counts(kept, getattr(summary, 'point_count', None))
             available = pdal_cli.is_available()
             self._pc_panel.set_hag_available(
                 available, '' if available else self.tr("PDAL was not found: the height above a DTM needs the pdal executable"))
         except Exception as exc:
             logger.warning(f"[FM5] point cloud panel not populated: {exc}", exc_info=True)
+
+    def _watch_point_cloud_statistics(self, layer: Any) -> None:
+        """Refresh the panel when QGIS finishes the statistics of the layer (computed in the background
+        after loading: until then only some attributes, often Z alone, have a range)."""
+        signal = getattr(layer, 'statisticsCalculationStateChanged', None)
+        watched = self.__dict__.setdefault('_stats_watched', set())
+        if signal is None or layer.id() in watched:
+            return
+        layer_id = layer.id()
+        signal.connect(lambda *_args, lid=layer_id: self._on_point_cloud_statistics(lid))
+        watched.add(layer_id)
+
+    def _on_point_cloud_statistics(self, layer_id: str) -> None:
+        from ...core.domain.layer_kind import LayerKind
+        layer = self._active_layer
+        try:
+            if layer is None or self._kind is not LayerKind.POINT_CLOUD or layer.id() != layer_id or self._pc_panel is None:
+                return
+            state = layer.statisticsCalculationState() if hasattr(layer, 'statisticsCalculationState') else None
+            calculated = getattr(getattr(type(layer), 'PointCloudStatisticsCalculationState', None), 'Calculated', None)
+            if calculated is not None and state != calculated:
+                return
+        except RuntimeError:
+            return  # layer deleted
+        logger.debug(f"[FM5] point cloud statistics ready, panel refreshed: {self._layer_name(layer)}")
+        self._populate_point_cloud(layer, keep_kept=True)
 
     def _on_point_cloud_criteria_changed(self) -> None:
         selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)

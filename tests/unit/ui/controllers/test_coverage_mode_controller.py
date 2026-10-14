@@ -399,3 +399,65 @@ class TestUndoRedoButtons:
         controller = ctrl_module.CoverageModeController(dock)
         controller.update_undo_redo_buttons()
         app.update_undo_redo_buttons.assert_called_once()
+
+
+class FakeSignal:
+    def __init__(self):
+        self.slots = []
+
+    def connect(self, slot):
+        self.slots.append(slot)
+
+    def emit(self, *args):
+        for slot in list(self.slots):
+            slot(*args)
+
+
+class StatsLayer(FakeLayer):
+    class PointCloudStatisticsCalculationState:
+        NotStarted, Calculating, Calculated = 0, 1, 2
+
+    def __init__(self, layer_id):
+        super().__init__(layer_id, "pc")
+        self.statisticsCalculationStateChanged = FakeSignal()
+        self.state = self.PointCloudStatisticsCalculationState.Calculating
+
+    def statisticsCalculationState(self):
+        return self.state
+
+
+@pytest.mark.unit
+class TestPointCloudStatisticsRefresh:
+    def _controller(self, ctrl_module, layer, monkeypatch):
+        ctrl = ctrl_module.CoverageModeController(_dock())
+        ctrl._pc_panel = MagicMock()
+        ctrl._active_layer = layer
+        ctrl._kind = sys.modules[f"{_PKG}.core.domain.layer_kind"].LayerKind.POINT_CLOUD
+        refreshed = []
+        monkeypatch.setattr(ctrl, "_populate_point_cloud", lambda lyr, keep_kept=False: refreshed.append((lyr.id(), keep_kept)))
+        return ctrl, refreshed
+
+    def test_active_layer_refreshed_once_statistics_are_calculated(self, ctrl_module, monkeypatch):
+        layer = StatsLayer("p1")
+        ctrl, refreshed = self._controller(ctrl_module, layer, monkeypatch)
+        ctrl._watch_point_cloud_statistics(layer)
+        layer.statisticsCalculationStateChanged.emit(layer.state)
+        assert refreshed == []  # still calculating
+        layer.state = layer.PointCloudStatisticsCalculationState.Calculated
+        layer.statisticsCalculationStateChanged.emit(layer.state)
+        assert refreshed == [("p1", True)]  # the kept point count is kept
+
+    def test_other_layer_ignored(self, ctrl_module, monkeypatch):
+        active, other = StatsLayer("p1"), StatsLayer("p2")
+        ctrl, refreshed = self._controller(ctrl_module, active, monkeypatch)
+        ctrl._watch_point_cloud_statistics(other)
+        other.state = other.PointCloudStatisticsCalculationState.Calculated
+        other.statisticsCalculationStateChanged.emit(other.state)
+        assert refreshed == []
+
+    def test_connected_once_per_layer(self, ctrl_module, monkeypatch):
+        layer = StatsLayer("p1")
+        ctrl, _ = self._controller(ctrl_module, layer, monkeypatch)
+        ctrl._watch_point_cloud_statistics(layer)
+        ctrl._watch_point_cloud_statistics(layer)
+        assert len(layer.statisticsCalculationStateChanged.slots) == 1

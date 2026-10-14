@@ -543,6 +543,15 @@ def s_spacing_scale():
     check('scale: splitter handle one block', handle.height() == block, str(handle.height()))
 
 
+def s_pc_statistics():
+    c = ctrl()
+    layer = c.active_layer
+    summary = getattr(c._pc_panel, '_summary', None)
+    names = [r.name for r in getattr(summary, 'ranges', ())]
+    state = layer.statisticsCalculationState() if hasattr(layer, 'statisticsCalculationState') else None
+    check('pc statistics: ranges known beyond Z once QGIS has the statistics', len(names) > 1, f'state={state} ranges={names}')
+
+
 def s_spacing_pc():
     """Point cloud panel on the same scale: card and groups aligned, one gap apart, collapsed = one band."""
     from qgis.PyQt.QtWidgets import QGroupBox
@@ -694,7 +703,7 @@ def s_finish():
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
          (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_picker, 800), (s_picker_check, 500), (s_raster_tools, 2500), (s_raster_tools_check, 500), (s_handover, 1000), (s_alignment, 500),
-         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_pc_conditions, 800), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
+         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_pc_conditions, 800), (s_pc_statistics, 300), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
          (s_scrollbar_margin, 300), (s_resize_lower, 1500), (s_resize_lower_check, 500),
          (s_list_grow, 1500), (s_list_grow_check, 500), (s_font_reload, 6000), (s_font_reload_check, 500),
          (s_finish, 500)]
