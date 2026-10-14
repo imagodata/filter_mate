@@ -342,8 +342,15 @@ STEPS = [
 ]
 
 
+STOP_AFTER = os.environ.get('FM5_STOP_AFTER', '')
+
+
 def run_step(index=0):
     if index >= len(STEPS):
+        return
+    if STOP_AFTER and index > 0 and STEPS[index - 1][0].__name__ == STOP_AFTER:
+        log(f'stopping after {STOP_AFTER}')
+        s_finish()
         return
     if STATE.get('waiting'):
         QTimer.singleShot(1000, lambda: run_step(index))

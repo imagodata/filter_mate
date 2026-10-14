@@ -65,6 +65,14 @@ class SourceJob:
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
         raise NotImplementedError
 
+    _QGIS_HANDLES = ('_layer', '_provider', '_virtual', '_base_keepalive')
+
+    def release(self) -> None:
+        """Drop the QGIS objects owned by the job (see TargetJob.release)."""
+        for name in self._QGIS_HANDLES:
+            if hasattr(self, name):
+                setattr(self, name, None)
+
     def apply(self, layer) -> Optional[LayerSnapshot]:
         """Filter the source layer itself (main thread); None when unchanged."""
         return None

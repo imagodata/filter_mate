@@ -212,6 +212,11 @@ def make_export_task(jobs, on_done=None):
             return True
 
         def finished(self, result):
+            for job in self.jobs:
+                for name in ('exporter', 'pipe'):
+                    if hasattr(job, name):
+                        setattr(job, name, None)
+            self.jobs = []
             if on_done is not None:
                 try:
                     on_done(self.results)

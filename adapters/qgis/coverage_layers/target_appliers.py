@@ -126,6 +126,16 @@ class TargetJob:
         self.outcome = CrossFilterOutcome(self.layer_id, self.kind, False)
         self._started = 0.0
 
+    # Attributes holding QGIS objects owned by Python (layer copies, feature
+    # sources, exporters): released once the task is over, never left for the
+    # interpreter shutdown (QGIS 3.44 crashed on exit when they outlived it).
+    _QGIS_HANDLES = ('_source', '_unfiltered', '_base_layer', '_exporter', '_base_keepalive')
+
+    def release(self) -> None:
+        for name in self._QGIS_HANDLES:
+            if hasattr(self, name):
+                setattr(self, name, None)
+
     def compute(self, source_geometry: QgsGeometry, source_crs: QgsCoordinateReferenceSystem,
                 context: QgsCoordinateTransformContext, request, is_canceled: CanceledFn) -> None:
         raise NotImplementedError

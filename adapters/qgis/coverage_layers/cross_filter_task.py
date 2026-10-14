@@ -96,6 +96,10 @@ class CrossFilterTask(QgsTask):
                 logger.info(f"⏱ [FM5] target {job.kind.value} '{job.layer_name}': success={job.outcome.success} "
                             f"kept={job.outcome.kept_count} {job.outcome.elapsed:.2f}s {job.outcome.message}")
         self.outcomes = [job.outcome for job in self.target_jobs]
+        for job in [self.source_job] + list(self.target_jobs):
+            release = getattr(job, 'release', None)
+            if release is not None:
+                release()
         if self.on_done is not None:
             try:
                 self.on_done(self, result)

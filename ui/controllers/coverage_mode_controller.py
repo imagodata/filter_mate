@@ -196,6 +196,11 @@ class CoverageModeController(BaseController):
                     pass
         self._raster_panel = None
         self._pc_panel = None
+        self._running_task = None
+        self._export_task = None
+        self._hag_task = None
+        self._base_keepalive = None
+        self._histogram_cache.clear()
 
     @property
     def active_layer(self) -> Any:
@@ -263,6 +268,7 @@ class CoverageModeController(BaseController):
         logger.info(f"[FM5] {kind.value} layer active: {self._layer_name(layer)}")
 
     def deactivate(self) -> None:
+        self._base_keepalive = None
         if self._active_layer is None and not self._saved_visibility:
             return
         self._leave_layer()
@@ -1223,6 +1229,7 @@ class CoverageModeController(BaseController):
             if failed:
                 show_warning(self.tr("Export failed: {0}").format('; '.join(failed)))
             self.last_export_results = results
+            self._export_task = None
 
         task = exporters.make_export_task(jobs, done)
         self._export_task = task
@@ -1392,6 +1399,7 @@ class CoverageModeController(BaseController):
         task = HeightAboveGroundTask(layer, dem)
 
         def finished(ok, message):
+            self._hag_task = None
             self._set_busy(False)
             if not ok:
                 show_warning(self.tr("Height above ground not computed: {0}").format(message))

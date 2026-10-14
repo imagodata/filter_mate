@@ -67,6 +67,7 @@ class CrossFilterService:
 
         def _done(task, result):
             self._record(task, request)
+            self._running = [t for t in self._running if t is not task and not _finished(t)]
             if on_done is not None:
                 on_done(task, result)
 
