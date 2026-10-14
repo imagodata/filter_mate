@@ -10,8 +10,10 @@
 
 1. **EXPLORING s'adapte à la couche courante.** Vecteur, raster ou nuage de points : la barre d'outils et les trois
    groupes repliables gardent leur forme, leur contenu change.
-2. **FILTERING reste le moteur source → cibles** et accepte les trois types en source *et* en cible, soit 9
-   combinaisons (§ 3).
+2. **EXPLORING sélectionne sur la couche source, FILTERING décrit la relation avec les cibles.** FILTERING garde
+   sa structure actuelle : couches à filtrer, combinateurs, prédicat géométrique, tampon. Il accepte les trois types
+   en source *et* en cible, soit 9 combinaisons (§ 3). (Révision du 14/10 après retour : plus de « méthode » par
+   cible ni de choix aperçu / exact dans l'interface.)
 3. **EXPORTING sait écrire chaque type** : vecteur (existant), raster GeoTIFF / COG, nuage LAZ / COPC / GPKG.
 4. Chaque lot livre l'**interface et la fonctionnalité ensemble**, derrière une option de config tant qu'il n'est pas prêt.
 
@@ -47,36 +49,48 @@ MNT `valence.tif` de 6724 × 5627 pixels.
 | Fournisseurs | `virtualraster`, `vpc` (nuage virtuel multi-dalles), `copc`, `pdal`, `ept` |
 | ⚠️ QGIS 3.44 | le LAZ ne s'ouvre pas en ligne de commande (`pc valid False`). C'est probablement l'environnement (chemin des plugins PDAL) : **à revérifier dans l'interface graphique** (lot 0) |
 
-## 3. Matrice des filtres croisés
+## 3. Modèle : EXPLORING sélectionne, FILTERING relie
 
-Il y a deux familles de relations, quel que soit le type :
+```
+EXPLORING (couche source)          FILTERING (inchangé dans sa forme)          cibles (tout type)
+sélection selon le type   ──►  géométrie source  ──►  prédicat + tampon + combinateur  ──►  vecteur / raster / nuage
+```
 
-- **Empreinte** (« où ») : la source fournit un polygone, la cible garde ce qui est dedans.
-- **Valeur** (« combien ») : la cible garde ce dont la valeur lue dans la source vérifie une condition.
+**Sélection et géométrie source, selon le type de la source**
 
-Deux modes d'application, choisis dans FILTERING :
+| Source | Sélection dans EXPLORING | Géométrie source |
+|---|---|---|
+| Vecteur | entité unique, multiple, expression (existant) | les entités (moteur actuel) |
+| Raster | plage de valeurs d'une bande, classes cochées (raster à palette), expression raster | masque des pixels retenus (`virtualraster`) → `gdal.Polygonize` (tamisage et simplification à la taille du pixel), limité à l'emprise affichée ou à l'emprise de la couche |
+| Nuage | classes ASPRS, plages Z / intensité / retour, hauteur au-dessus d'un MNT (PDAL), expression | empreinte des points retenus : `pdal:boundary` (3.32+) ou grille de densité vectorisée (repli) |
 
-- **Aperçu rapide** : instantané et réversible, parfois approximatif.
-- **Exact** : calculé dans une `QgsTask`, il produit parfois une source dérivée temporaire.
+**Application du prédicat, selon le type de la cible**
 
-| Source → cible | Exemple | Relation | Aperçu rapide | Exact | API | QGIS | Lot |
-|---|---|---|---|---|---|---|---|
-| **V → V** | routes à moins de 25 m d'un bâtiment | empreinte | subset SQL (existant) | idem | backends existants | 3.22 | — |
-| **V → R** | MNT limité à une commune | empreinte | VRT découpé, branché par `setDataSource` | idem, puis export COG | `gdal.Warp(VRT, cutline)` | 3.22 | 4 |
-| **V → P** | points sous les bâtiments sélectionnés | empreinte | expression X/Y par boîtes englobantes (OR, plafonné à N boîtes puis union) | `QgsPointCloudLayerExporter` + `setFilterGeometry` → LAZ temporaire → `setDataSource` | exporter | 3.26 | 4 |
-| **R → V** | parcelles d'altitude moyenne entre 200 et 260 m | valeur | `provider.sample()` au centroïde ou au point sur surface | `native:zonalstatisticsfb` (moyenne, min, max, majorité, couverture) → `fid IN (…)` | Processing | 3.22 | 5 |
-| **R → V** | bâtiments dans une zone raster = 1 | empreinte | polygonisation grossière (pas × 4) | `gdal.Polygonize` à la résolution native, tamisée | GDAL | 3.22 | 4 |
-| **R → R** | MNT limité aux forêts de l'OCS GE | valeur | raster virtuel `if("ocs@1" = k, "mnt@1", nodata)` | idem, export COG | `virtualraster` | 3.22 | 5 |
-| **R → P** | végétation à plus de 2 m au-dessus du MNT | valeur | empreinte des pixels dans la plage → X/Y | pipeline `pdal.exe` `filters.hag_dem` → nuage dérivé avec `HeightAboveGround`, puis curseur direct | PDAL CLI | 3.26 + PDAL | 5 |
-| **P → V** | bâtiments couverts par au moins 50 points de classe 6 | valeur | `identify()` avec niveau de détail, ≤ ~500 entités | `pdal:exportraster` (densité ou Z max) puis statistiques zonales | PDAL / Processing | 3.32 | 5 |
-| **P → V** | routes sous la végétation haute | empreinte | empreinte par densité grossière | `pdal:boundary` sur les points filtrés → couche temporaire → moteur vecteur | Processing | 3.32 | 4 |
-| **P → R** | MNT limité à l'emprise des points eau | empreinte | densité grossière → VRT découpé | `pdal:boundary` → VRT découpé | Processing | 3.32 | 4 |
-| **P → P** | même filtre sur 12 dalles LiDAR HD | attributs | `setSubsetString` sur chaque dalle (ou une fois sur un VPC) | idem | `vpc` | 3.26 / 3.32 | 4 |
+| Cible | Prédicats proposés | Effet | Mécanisme |
+|---|---|---|---|
+| Vecteur | tous les prédicats actuels + tampon + couverture minimale (nouveau, polygones) | sous-ensemble d'entités | source vecteur : moteur actuel inchangé. Source raster / nuage : test par entité (index spatial + géométrie préparée) → `pk IN (…)` combiné au filtre existant |
+| Raster | Intersecte, Est contenu dans (pixels dans la zone) ; Disjoint (pixels hors zone) | pixels hors zone en NoData, identifiant et style conservés | VRT GDAL découpé (`gdal.Warp`, cutline) branché par `setDataSource` ; Disjoint = découpe par « emprise moins zone » |
+| Nuage | Intersecte, Est contenu dans ; Disjoint | points hors zone retirés | `QgsPointCloudLayerExporter` + `setFilterGeometry` → LAZ temporaire → `setDataSource` (tâche). Option de config : boîtes X/Y instantanées (approximatif) |
 
-**Réutilisation clé.** Pour une relation par empreinte vers une cible vecteur, l'empreinte d'un raster ou d'un nuage
-est écrite dans une couche temporaire (GPKG du cache). Elle est ensuite passée **comme couche source au moteur
-vecteur existant** : prédicats, tampon, backends PG / GPKG / Spatialite / OGR. Il n'y a pas de nouveau moteur de
-prédicats à écrire.
+Les prédicats qui n'ont pas de sens pour des pixels ou des points (touche, croise, chevauche) sont **ramenés à
+Intersecte** pour ces cibles, avec une info-bulle. Le tampon s'applique toujours à la géométrie source.
+
+**Exemples (planche « Relations » de la maquette)**
+
+| Source → cible | Exemple |
+|---|---|
+| V → V | routes à moins de 25 m des bâtiments sélectionnés (existant) |
+| V → R | MNT limité à la commune sélectionnée |
+| V → P | points LiDAR sous les bâtiments sélectionnés, tampon 1 m |
+| R → V | parcelles contenues dans la zone 200–260 m, couverture ≥ 50 % |
+| R → R | MNT limité aux classes forêt de l'OCS GE |
+| R → P | points dans les zones de pente < 15 % |
+| P → V | bâtiments recoupant les points de classe 6 (couverture ≥ 10 %) ; Disjoint = bâtiments absents du nuage |
+| P → R | MNT limité à l'emprise des points eau (classe 9) |
+| P → P | points d'une dalle voisine sous la végétation haute ; pour appliquer simplement les mêmes critères à toutes les dalles : case « appliquer aux dalles du jeu » dans EXPLORING |
+
+**Réutilisation clé.** Quand la source est un vecteur, rien ne change pour les cibles vecteur. Les cibles raster
+et nuage sont traitées après le moteur vecteur, avec la même géométrie source (sélection EXPLORING + tampon).
 
 ## 4. Architecture
 
@@ -87,7 +101,7 @@ prédicats à écrire.
 | `core/domain/layer_kind.py` | `LayerKind` (VECTOR, RASTER, POINT_CLOUD) et `kind_of(layer)` côté adaptateur |
 | `core/domain/raster_filter_criteria.py` | **réutilisé** : `ComparisonOperator`, `SamplingMethod` (on ajoute MAX, MIN, MAJORITY), `RasterSamplingCriteria`. Ajout de `RasterRangeCriteria` (bande, min, max, inclusif) et `to_calc_expression()` |
 | `core/domain/point_cloud_filter_criteria.py` | **existant** : ajout de `extra_dimensions` (HeightAboveGround, NumberOfReturns) et du Z exact (aucun arrondi) |
-| `core/domain/cross_filter.py` | `Relation` (FOOTPRINT, VALUE, ATTRIBUTES), `ApplyMode` (LIVE, EXACT), `TargetSpec(layer_id, kind, relation, method, params)`, `CrossFilterRequest(source, source_criteria, targets, combine_operator)`, et la **table de compatibilité** source × cible × relation → méthodes autorisées (elle alimente le menu « méthode » de chaque cible) |
+| `core/domain/cross_filter.py` | `SpatialPredicate` (les prédicats actuels), `TargetSpec(layer_id, kind)`, `CrossFilterRequest(source_kind, predicates, buffer, coverage_min, targets, combine_operator)`, et la **réduction des prédicats par type de cible** (raster / nuage : intérieur ou extérieur) |
 | `core/domain/filter_state.py` | état filtré d'une couche, quel que soit son type : `SubsetState(subset)`, `RendererMaskState(xml)`, `DataSourceState(original_uri, provider, derived_uri, params)` |
 
 ### 4.2 Ports et adaptateurs
@@ -105,15 +119,16 @@ prédicats à écrire.
 
 ### 4.3 Service
 
-`core/services/cross_filter_service.py` orchestre une `CrossFilterRequest` :
+`core/services/cross_filter_service.py` exécute une `CrossFilterRequest` :
 
-1. il lit les critères de la source, fournis par le panneau EXPLORING actif ;
-2. pour chaque cible, il choisit l'adaptateur selon `(kind source, kind cible, relation, mode)` ;
-3. il exécute en `QgsTask` (une tâche par cible, annulable) ; le mode aperçu s'exécute directement s'il prend moins de 200 ms ;
-4. il enregistre un `HistoryEntry` **par couche** avec l'ancien `FilterState` (§ 4.5).
+1. il obtient la géométrie source : sélection vecteur (moteur existant), raster vectorisé ou empreinte du nuage ;
+   puis il applique le tampon ;
+2. pour chaque cible non traitée par le moteur vecteur actuel, il choisit l'applicateur selon le type de la cible ;
+3. il exécute en `QgsTask` (une tâche par cible, annulable) ;
+4. il enregistre l'état précédent de chaque couche dans un historique **par couche** (§ 4.5).
 
-Le chemin vecteur → vecteur actuel n'est **pas réécrit**. Le service délègue à `FilterService` / `filter_task` quand
-la source et toutes les cibles sont des vecteurs (garde-fou contre les régressions).
+Le chemin vecteur → vecteur actuel n'est **pas réécrit**. Quand la source est un vecteur, le moteur actuel traite
+les cibles vecteur et le service traite ensuite les cibles raster et nuage.
 
 ### 4.4 Interface
 
@@ -125,7 +140,7 @@ la source et toutes les cibles sont des vecteurs (garde-fou contre les régressi
 | `ui/widgets/raster/` | `HistogramWidget` (QPainter, poignées min/max, histogramme calculé par `provider.histogram` en tâche), `PixelPickerTool` (`QgsMapToolEmitPoint` + `identify` sur toutes les bandes), `RasterClassListWidget` (rasters à palette) |
 | `ui/widgets/point_cloud/` | refonte de `PointCloudFilterWidget` en 3 groupes : classes + préréglages (nomenclature LiDAR HD : 1, 2, 3, 4, 5, 6, 9, 17, 64, 65, 66), plages Z / intensité / retour avec histogramme Z, expression éditable |
 | bandeau d'info + badge | type · fournisseur · métadonnées (bandes, résolution, NoData / nombre de points, plage Z) |
-| FILTERING | liste des cibles **tous types**, avec un menu « méthode » par cible (issu de la table de compatibilité) ; ligne « Aperçu rapide / Exact » ; les lignes prédicats et tampon ne s'affichent que s'il existe une relation par empreinte vers une cible vecteur |
+| FILTERING | **même disposition qu'aujourd'hui** : couche source, couches à filtrer (désormais tous types, avec icône de type), combinateurs, prédicats, tampon. Ajouts : une ligne « géométrie source » sous la couche source et une couverture minimale (%) à côté du prédicat |
 | EXPORTING | les formats proposés dépendent des types des couches cochées (§ 6) |
 | combo couche courante | les filtres `HasGeometry` + `RasterLayer` + `PointCloudLayer` dépendent des options `APP.OPTIONS.RASTER.enabled` et `POINT_CLOUD.enabled` |
 
@@ -202,25 +217,23 @@ Estimations en jours de développement.
 - **Acceptation** : MNT 1 m de 1 km² et MNT départemental en VRT, histogramme calculé en moins de 1 s sur la dalle,
   aperçu réversible, projet sauvegardé sans source dérivée.
 
-### Lot 4 — Filtres croisés par empreinte (8 j)
-- [ ] `cross_filter.py` (domaine) + table de compatibilité + `CrossFilterService`.
-- [ ] Empreintes : vecteur (existant), raster (polygonisation), nuage (`pdal:boundary`, avec repli par densité).
-- [ ] Applicateurs : V → R (VRT découpé), V → P (boîtes X/Y + exporter exact), R / P → V (empreinte → couche
-      temporaire → moteur vecteur existant), P → R, P → P (même expression, VPC).
-- [ ] FILTERING : cibles tous types, menu méthode par cible, ligne Aperçu / Exact, lignes prédicats / tampon
-      conditionnelles.
-- **Acceptation** : les 6 combinaisons sur les données du lot 0, chacune annulable, temps relevés dans le log (`⏱`).
+### Lot 4 — Filtres croisés (10 j)
+- [ ] `cross_filter.py` (domaine) + réduction des prédicats par type de cible + `CrossFilterService`.
+- [ ] Géométrie source : vecteur (sélection EXPLORING), raster (masque → polygonisation), nuage (`pdal:boundary`,
+      avec repli par grille de densité). Tampon appliqué à la géométrie source.
+- [ ] Applicateurs : cible vecteur (test par entité → `pk IN (…)` combiné), cible raster (VRT découpé, Disjoint
+      inclus), cible nuage (exporter + géométrie → LAZ → `setDataSource`).
+- [ ] FILTERING : couches à filtrer tous types (icône de type), ligne « géométrie source », couverture minimale.
+- [ ] Source vecteur + cibles raster / nuage : traitées après le moteur vecteur, avec la même géométrie source.
+- **Acceptation** : les 9 combinaisons sur les données de Cerdagne (LiDAR HD 0616_6153, MNT 1 m dérivé, BD TOPO,
+  parcelles), chacune annulable, temps relevés dans le log.
 
-### Lot 5 — Filtres croisés par valeur (8 j)
-- [ ] R → V : échantillonnage (centroïde, point sur surface, sommets densifiés pour les lignes) et zonale
-      (moyenne, min, max, majorité, couverture minimale). Les fid passent par le chemin existant des sélections
-      multiples (attention aux grandes listes sous PostgreSQL : table temporaire si plus de N).
-- [ ] R → R : `virtualraster` à deux entrées.
-- [ ] R → P : `PdalPort` (HAG par DEM) → nuage dérivé + dimension `HeightAboveGround` exposée dans EXPLORING. En
-      repli sans PDAL : empreinte.
-- [ ] P → V : statistiques de points par entité (`identify` en aperçu, rasterisation + zonale en exact).
-- **Acceptation** : parcelles par altitude moyenne (BD TOPO 31 × RGE ALTI), végétation de plus de 2 m (LiDAR HD ×
-  RGE ALTI), bâtiments sans points de classe 6.
+### Lot 5 — Sélections avancées dans EXPLORING (5 j)
+- [ ] Nuage : hauteur au-dessus d'un MNT choisi (pipeline `pdal.exe` `filters.hag_dem` → nuage dérivé avec
+      `HeightAboveGround`, ensuite filtrable en direct) ; repli sans PDAL : critère masqué avec un message.
+- [ ] Nuage : case « appliquer aux dalles du jeu » (même expression sur les nuages du même dossier / VPC).
+- [ ] Raster : classes d'un raster à palette, expression raster multi-couches.
+- **Acceptation** : végétation de plus de 2 m sur la dalle de Cerdagne ; filtre appliqué aux 4 dalles.
 
 ### Lot 6 — Export (5 j)
 - [ ] Raster : couche filtrée (VRT / virtuelle / masque) → GeoTIFF ou COG (`gdal.Translate`, compression, NoData,
@@ -243,7 +256,7 @@ Estimations en jours de développement.
       activée par défaut si la recette passe.
 - [ ] Release 5.0 (`metadata.txt`, `qgisMinimumVersion` inchangé à 3.22, fonctions masquées selon les capacités).
 
-**Total estimé : ~45 jours.** Ordre : 0 → 1 → (2 ∥ 3) → 4 → 5 → 6 → 7. Les lots 2 et 3 sont indépendants, et le
+**Total estimé : ~44 jours.** Ordre : 0 → 1 → (2 ∥ 3) → 4 → 5 → 6 → 7. Les lots 2 et 3 sont indépendants, et le
 lot 6 peut commencer dès la fin du lot 4 pour l'export raster et nuage simple.
 
 ## 6. Export par type
@@ -280,7 +293,8 @@ lot 6 peut commencer dès la fin du lot 4 pour l'export raster et nuage simple.
 
 | # | Sujet | Proposition |
 |---|---|---|
-| D1 | « Filtrer un raster » = masque visuel ou source dérivée ? | **Les deux** : aperçu = transparence, filtre appliqué = source dérivée (VRT / virtuelle) branchée par `setDataSource`. La couche garde son identifiant et son style, ce qui est cohérent avec le subset vecteur. |
+| D1 | « Filtrer un raster » = masque visuel ou source dérivée ? | **Les deux** : aperçu de la sélection dans EXPLORING = transparence ; raster cible filtré = source dérivée (VRT découpé) branchée par `setDataSource`. La couche garde son identifiant et son style, ce qui est cohérent avec le subset vecteur. |
+| D7 | Relations « par valeur » (statistiques zonales) | **remplacées** par le modèle sélection → géométrie → prédicat (retour du 14/10). La couverture minimale couvre l'essentiel du besoin « parcelles majoritairement dans la plage ». |
 | D2 | Source dérivée dans un projet sauvegardé | réécriture du DOM sur `writeMapLayer` (lot 0 puis lot 7) |
 | D3 | PDAL absent sous Linux / macOS | détection + repli par empreinte, message clair |
 | D4 | Grandes listes de fid (R → V, P → V) sous PostgreSQL | table temporaire ou `ANY(array)`, à mesurer |
