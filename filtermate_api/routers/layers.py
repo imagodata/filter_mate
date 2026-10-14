@@ -27,6 +27,6 @@ def _accessor(request: Request) -> FilterMateAccessor:
 
 
 @router.get("", response_model=List[LayerSummary])
-async def list_layers(request: Request) -> List[LayerSummary]:
+def list_layers(request: Request) -> List[LayerSummary]:
     """Return every layer the FilterMate session knows about."""
     return _accessor(request).list_layers()

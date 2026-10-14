@@ -68,7 +68,8 @@ class RasterExportJob:
         writer.setCreateOptions([f'COMPRESS={self.compress}', 'TILED=YES', 'BIGTIFF=IF_SAFER'])
         error = writer.writeRaster(self.pipe, self.columns, self.rows, self.extent, self.layer_crs, self.context, feedback)
         if int(error) != 0:
-            return ExportResult(False, path, f'raster writer error {int(error)}')
+            canceled = feedback is not None and feedback.isCanceled()
+            return ExportResult(False, path, 'canceled' if canceled else f'raster writer error {int(error)}')
         manager = getattr(gdal, 'ExceptionMgr', None)
         scope = manager(useExceptions=True) if manager is not None else _NoScope()
         try:

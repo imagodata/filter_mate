@@ -49,8 +49,9 @@ the next step of a model: plug the `OUTPUT` of a filter into the `LAYERS` of *Ex
 target, a raster source with `FILTER_SOURCE` (or a point cloud source with criteria) filters itself and `OUTPUT` is
 that source.
 
-Notes: the buffer of `cross_filter_from_geometry` is in the units of the first target's CRS; `AND NOT` needs an
-existing filter on the layer (on an unfiltered point cloud it would keep only the excluded points, so it is refused);
+Notes: the buffer of `cross_filter_from_geometry` is in the units of the first target's CRS; on a target with no
+filter yet, `AND`, `OR` and `AND NOT` keep the new selection, like the vector engine; `filter_point_cloud` and point
+cloud source criteria refuse `AND NOT` without an existing filter (they would keep only the excluded points);
 `FILTER_SOURCE` is off by default (the dock masks a raster source, automation leaves it untouched unless asked).
 
 ### Shipped models (`processing/models/`)
