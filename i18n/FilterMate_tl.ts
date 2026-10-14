@@ -109,17 +109,17 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="209"/>
         <source>1 band</source>
         <translation>1 band</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="262"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="210"/>
         <source>{0} bands</source>
         <translation>{0} na band</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="263"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="211"/>
         <source>{0} points</source>
         <translation>{0} na punto</translation>
     </message>
@@ -139,79 +139,84 @@
         <translation type="obsolete">Pinagmulang heometriya: ang mga feature na pinili sa EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Value under the cursor: follow the pixel value of the current band while moving over the map</source>
         <translation>Halaga sa ilalim ng cursor: sundan ang halaga ng pixel ng kasalukuyang band habang gumagalaw sa mapa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band</source>
         <translation>Estadistika ng parihaba: mag-drag sa mapa para basahin ang minimum, maximum at average ng kasalukuyang band</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Profile ng elevation: buksan ang elevation profile ng QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>3D na view: magbukas ng bagong QGIS 3D map view</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="264"/>
         <source>no feature</source>
-        <translation>walang feature</translation>
+        <translation type="obsolete">walang feature</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="265"/>
         <source>{0} feature(s)</source>
-        <translation>{0} na feature</translation>
+        <translation type="obsolete">{0} na feature</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="266"/>
         <source>every pixel</source>
-        <translation>lahat ng pixel</translation>
+        <translation type="obsolete">lahat ng pixel</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="267"/>
         <source>{0} class(es)</source>
-        <translation>{0} na klase</translation>
+        <translation type="obsolete">{0} na klase</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="268"/>
         <source>expression</source>
-        <translation>ekspresyon</translation>
+        <translation type="obsolete">ekspresyon</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="269"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="212"/>
         <source>{0} features</source>
         <translation>{0} na feature</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Point cloud</source>
         <translation>Point cloud</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
         <source>Kept points</source>
-        <translation>Mga pinanatiling punto</translation>
+        <translation type="obsolete">Mga pinanatiling punto</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="355"/>
         <source>Selection → source geometry</source>
-        <translation>Pinili → pinagmulang heometriya</translation>
+        <translation type="obsolete">Pinili → pinagmulang heometriya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
+        <source>Link the range to the style: the layer colours stretch over the selected range</source>
+        <translation>I-link ang saklaw sa estilo: lumalawak ang mga kulay ng layer sa piniling saklaw</translation>
     </message>
 </context>
 <context>
@@ -222,207 +227,207 @@
         <translation>Ibinabalik ang filter ng {0} raster / point cloud na layer…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="395"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="404"/>
         <source>cov. ≥ </source>
         <translation>cov. ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="405"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Pinakamababang bahagi ng target na polygon na nasa loob ng source geometry (0 = anumang overlap). Ginagamit kapag ang source ay raster o point cloud.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>Point cloud</source>
         <translation>Point cloud</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="496"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0} na layer: pagpili sa EXPLORING, relasyon sa FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="502"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Pixel picker: mag-click sa mapa para basahin ang halaga ng bawat band (Ctrl+click para palawakin ang saklaw)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="520"/>
         <source>Zoom to the layer</source>
         <translation>I-zoom sa layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="504"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="513"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Preview: itago ang mga pixel sa labas ng napili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="506"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
         <source>Not used for raster layers</source>
         <translation>Hindi ginagamit sa mga raster na layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="507"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="516"/>
         <source>Reset the raster selection</source>
         <translation>I-reset ang napiling raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="510"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="519"/>
         <source>Identify points on the map</source>
         <translation>Tukuyin ang mga punto sa mapa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="512"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="521"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Live preview: ipakita lamang ang mga punto na pinanatili ng napili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="514"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="523"/>
         <source>Not used for point cloud layers</source>
         <translation>Hindi ginagamit sa mga point cloud na layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="524"/>
         <source>Reset the point cloud criteria</source>
         <translation>I-reset ang mga pamantayan ng point cloud</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="672"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="681"/>
         <source>Invalid raster calculator expression</source>
         <translation>Di-wastong expression ng raster calculator</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="710"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="719"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>Hindi nahanap ang PDAL: kailangan ng taas sa ibabaw ng DTM ang executable na pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="999"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1051"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Tumatakbo pa ang isang gawain ng FilterMate: hintaying matapos ito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1015"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1067"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Nabigo ang gawain ng FilterMate: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1048"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1100"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Pumili muna ng mga pixel: saklaw ng halaga, mga klase o raster expression</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1057"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1109"/>
         <source>Raster filtered: {0}</source>
         <translation>Na-filter ang raster: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1122"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Tinanggihan ang expression ng point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1073"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1125"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Pumili muna ng mga punto: mga klase, saklaw ng attribute o expression</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1081"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1133"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Na-filter ang point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1145"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1197"/>
         <source>Filter not applied: {0}</source>
         <translation>Hindi nailapat ang filter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>canceled</source>
         <translation>nakansela</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1149"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} target ang na-filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1151"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1203"/>
         <source>{0} failed: {1}</source>
         <translation>Nabigo ang {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1160"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: nagfi-filter mula sa '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1216"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Nagbago na mula noon, iniwan nang ganoon: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1222"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1274"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} layer ang naibalik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1256"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>Hindi na-export ang '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1320"/>
         <source>Exported: {0}</source>
         <translation>Na-export: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Export failed: {0}</source>
         <translation>Nabigo ang pag-export: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1329"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Ine-export ang {0} layer…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1335"/>
         <source>Export folder</source>
         <translation>Folder ng export</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1355"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1407"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Nilaktawan ang mga target na raster / point cloud: walang napiling source feature sa EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Hindi na-filter ang mga target na raster / point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1380"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1432"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} target na raster / point cloud ang na-filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1465"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Piliin ang DTM raster na gagamitin para sa taas sa ibabaw ng lupa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1473"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Hindi nakalkula ang taas sa ibabaw ng lupa: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1485"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1537"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Kinakalkula ang taas sa ibabaw ng '{0}' gamit ang PDAL…</translation>
     </message>
@@ -1301,67 +1306,67 @@ I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga 
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="204"/>
+        <location filename="../filter_mate.py" line="206"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="328"/>
+        <location filename="../filter_mate.py" line="330"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="328"/>
+        <location filename="../filter_mate.py" line="330"/>
         <source>Open FilterMate panel</source>
         <translation>Buksan ang FilterMate panel</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="337"/>
+        <location filename="../filter_mate.py" line="339"/>
         <source>Reset configuration and database</source>
         <translation>I-reset ang pagsasaayos at database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="337"/>
+        <location filename="../filter_mate.py" line="339"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>I-reset ang default na pagsasaayos at burahin ang SQLite database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1413"/>
+        <location filename="../filter_mate.py" line="1429"/>
         <source>Reset Configuration</source>
         <translation>I-reset ang Pagsasaayos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1436"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>Configuration reset successfully.</source>
         <translation>Matagumpay na na-reset ang pagsasaayos.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1441"/>
+        <location filename="../filter_mate.py" line="1457"/>
         <source>Default configuration file not found.</source>
         <translation>Hindi nahanap ang default na file ng pagsasaayos.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1462"/>
+        <location filename="../filter_mate.py" line="1478"/>
         <source>Database deleted: {filename}</source>
         <translation>Nabura ang database: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1476"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>Restart required</source>
         <translation>Kailangang i-restart</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="421"/>
+        <location filename="../filter_mate.py" line="423"/>
         <source>Obsolete configuration detected</source>
         <translation>Lumang pagsasaayos ang nakita</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="422"/>
+        <location filename="../filter_mate.py" line="424"/>
         <source>unknown version</source>
         <translation>hindi kilalang bersyon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="423"/>
+        <location filename="../filter_mate.py" line="425"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1376,12 +1381,12 @@ Do you want to reset to default settings?
 • No: Keep current configuration (may cause issues)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="432"/>
         <source>Corrupted configuration detected</source>
         <translation>Sirang pagsasaayos ang nakita</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="431"/>
+        <location filename="../filter_mate.py" line="433"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1396,12 +1401,12 @@ Do you want to reset to default settings?
 • No: Cancel (the plugin may not work correctly)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="438"/>
+        <location filename="../filter_mate.py" line="440"/>
         <source>Configuration reset</source>
         <translation>I-reset ang Pagsasaayos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="439"/>
+        <location filename="../filter_mate.py" line="441"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1410,57 +1415,57 @@ Do you want to continue?</source>
 Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="487"/>
+        <location filename="../filter_mate.py" line="489"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Hindi na-reset ang pagsasaayos. Ang ilang mga tampok ay maaaring hindi gumana ng tama.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="498"/>
+        <location filename="../filter_mate.py" line="500"/>
         <source>Configuration created with default values</source>
         <translation>Ang pagsasaayos ay nilikha gamit ang mga default na halaga</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="501"/>
+        <location filename="../filter_mate.py" line="503"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Na-reset ang sirang pagsasaayos. Naibalik na ang mga default na setting.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="504"/>
+        <location filename="../filter_mate.py" line="506"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Na-reset ang lumang pagsasaayos. Naibalik na ang mga default na setting.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="525"/>
+        <location filename="../filter_mate.py" line="527"/>
         <source>Configuration updated to latest version</source>
         <translation>Na-update ang pagsasaayos sa pinakabagong bersyon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="522"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Na-update ang pagsasaayos: may bagong mga setting ({sections}). I-access sa pamamagitan ng Options menu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="516"/>
+        <location filename="../filter_mate.py" line="518"/>
         <source>Geometry Simplification</source>
         <translation>Pagpapasimple ng Geometry</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="517"/>
+        <location filename="../filter_mate.py" line="519"/>
         <source>Optimization Thresholds</source>
         <translation>Mga Threshold ng Optimization</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="544"/>
+        <location filename="../filter_mate.py" line="546"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error during configuration migration: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="662"/>
+        <location filename="../filter_mate.py" line="664"/>
         <source>Geometry validation setting</source>
         <translation>Setting ng geometry validation</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="664"/>
+        <location filename="../filter_mate.py" line="666"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1487,17 +1492,17 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="692"/>
+        <location filename="../filter_mate.py" line="694"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Matagumpay na na-disable ang pag-filter ng invalid na geometry.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="699"/>
+        <location filename="../filter_mate.py" line="701"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Hindi binago ang pag-filter ng invalid na geometry. Ang ilang mga tampok ay maaaring ihiwalay sa mga pag-export.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1413"/>
+        <location filename="../filter_mate.py" line="1429"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1514,7 +1519,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1476"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1523,17 +1528,17 @@ Please restart QGIS to apply the changes.</source>
 Please restart QGIS to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="366"/>
+        <location filename="../filter_mate.py" line="368"/>
         <source>Initialization error: {0}</source>
         <translation>Error sa initialization: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="603"/>
+        <location filename="../filter_mate.py" line="605"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} na-reference na layer ang hindi na-load ({layers_list}). Ginagamit ang fallback display.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1467"/>
+        <location filename="../filter_mate.py" line="1483"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Hindi matanggal ang {filename}: {e}</translation>
     </message>
@@ -1543,71 +1548,71 @@ Please restart QGIS to apply the changes.</translation>
         <translation type="obsolete">Error sa pag-reset: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1519"/>
+        <location filename="../filter_mate.py" line="1535"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Salamat sa paggamit ng &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Sumali sa aming komunidad sa Discord upang:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Humingi ng tulong at suporta&lt;/li&gt;&lt;li&gt;Mag-report ng mga bug at isyu&lt;/li&gt;&lt;li&gt;Magmungkahi ng mga bagong feature&lt;/li&gt;&lt;li&gt;Magbahagi ng mga tip sa ibang gumagamit&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1535"/>
+        <location filename="../filter_mate.py" line="1551"/>
         <source>  Join us on Discord</source>
         <translation>  Sumali sa amin sa Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1555"/>
+        <location filename="../filter_mate.py" line="1571"/>
         <source>Don&apos;t show this again</source>
         <translation>Huwag nang ipakita ito</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1558"/>
+        <location filename="../filter_mate.py" line="1574"/>
         <source>Close</source>
         <translation>Isara</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1624"/>
+        <location filename="../filter_mate.py" line="1640"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Error sa paglo-load ng plugin: {0}. Suriin ang QGIS Python console para sa mga detalye.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6932"/>
+        <location filename="../filter_mate_dockwidget.py" line="6960"/>
         <source>Current layer: {0}</source>
         <translation>Kasalukuyang layer: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6962"/>
         <source>No layer selected</source>
         <translation>Walang napiling layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6944"/>
+        <location filename="../filter_mate_dockwidget.py" line="6972"/>
         <source>Selected layers:
 {0}</source>
         <translation>Mga napiling layer:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6944"/>
+        <location filename="../filter_mate_dockwidget.py" line="6972"/>
         <source>No layers selected</source>
         <translation>Walang napiling layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6964"/>
+        <location filename="../filter_mate_dockwidget.py" line="6992"/>
         <source>No expression defined</source>
         <translation>Walang expression na tinukoy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6976"/>
+        <location filename="../filter_mate_dockwidget.py" line="7004"/>
         <source>Display expression: {0}</source>
         <translation>Display expression: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6991"/>
+        <location filename="../filter_mate_dockwidget.py" line="7019"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Feature ID: {0}
 Unang attribute: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1485"/>
+        <location filename="../filter_mate.py" line="1501"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Hindi ma-reset ang configuration. Tiyaking nasusulatan ang folder ng plugin, pagkatapos ay subukang muli. Mga detalye sa filtermate.log.</translation>
     </message>
@@ -1766,153 +1771,153 @@ What would you like to do?</translation>
         <translation type="obsolete">Error sa dimensyon ng UI: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1460"/>
         <source>Favorites manager not available</source>
         <translation>Hindi available ang manager ng mga paborito</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1470"/>
+        <location filename="../filter_mate_dockwidget.py" line="1481"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} Paborito ang naka-save
 I-click upang ilapat o pamahalaan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1473"/>
+        <location filename="../filter_mate_dockwidget.py" line="1484"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Walang naka-save na paborito
 I-click upang idagdag ang kasalukuyang filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1493"/>
+        <location filename="../filter_mate_dockwidget.py" line="1504"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Pinilit ang {0} backend para sa {1} layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget.py" line="1590"/>
         <source>Backend controller not available</source>
         <translation>Hindi available ang backend controller</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1517"/>
+        <location filename="../filter_mate_dockwidget.py" line="1528"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Naka-enable ang PostgreSQL auto-cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1518"/>
+        <location filename="../filter_mate_dockwidget.py" line="1529"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Naka-disable ang PostgreSQL auto-cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Na-clean up ang mga PostgreSQL session view</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Walang view na lilinisin o nabigo ang cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1546"/>
         <source>No PostgreSQL connection available</source>
         <translation>Walang available na koneksyon sa PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1541"/>
+        <location filename="../filter_mate_dockwidget.py" line="1552"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Ang schema ay may {0} view mula sa ibang session.
 I-drop pa rin?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget.py" line="1553"/>
         <source>Other Sessions Active</source>
         <translation>May Ibang Aktibong Session</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget.py" line="1555"/>
         <source>Schema cleanup cancelled</source>
         <translation>Nakansela ang schema cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget.py" line="1560"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Matagumpay na na-drop ang schema '{0}'</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget.py" line="1562"/>
         <source>Schema cleanup failed</source>
         <translation>Nabigo ang schema cleanup</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1577"/>
+        <location filename="../filter_mate_dockwidget.py" line="1588"/>
         <source>PostgreSQL Session Info</source>
         <translation>Impormasyon ng PostgreSQL Session</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Theme adapted: {0}</source>
         <translation>Na-adapt ang tema: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Dark mode</source>
         <translation>Dark mode</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Light mode</source>
         <translation>Light mode</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4016"/>
+        <location filename="../filter_mate_dockwidget.py" line="4027"/>
         <source>Selected features have no geometry.</source>
         <translation>Walang geometry ang mga napiling feature.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4035"/>
+        <location filename="../filter_mate_dockwidget.py" line="4046"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Walang napiling feature. Pumili ng feature mula sa dropdown list.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5100"/>
+        <location filename="../filter_mate_dockwidget.py" line="5101"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Hindi valid ang napiling layer o hindi mahanap ang source nito.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5837"/>
+        <location filename="../filter_mate_dockwidget.py" line="5838"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatibong buffer (erosion): pinaliit ang mga polygon papaloob</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5840"/>
+        <location filename="../filter_mate_dockwidget.py" line="5841"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Halaga ng buffer sa metro (positibo=palakihin, negatibo=paliitin ang mga polygon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6314"/>
+        <location filename="../filter_mate_dockwidget.py" line="6342"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Na-activate ang plugin na may {0} vector layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6395"/>
+        <location filename="../filter_mate_dockwidget.py" line="6423"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Hindi awtomatikong nai-reload ang plugin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6397"/>
+        <location filename="../filter_mate_dockwidget.py" line="6425"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Error sa pag-reload ng plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6469"/>
+        <location filename="../filter_mate_dockwidget.py" line="6497"/>
         <source>Layer properties reset to defaults</source>
         <translation>Na-reset ang mga property ng layer sa default</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6470"/>
+        <location filename="../filter_mate_dockwidget.py" line="6498"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Error sa pag-reset ng mga property ng layer: {}</translation>
     </message>
@@ -2042,12 +2047,12 @@ I-drop pa rin?</translation>
         <translation>I-zip ang export</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1004"/>
+        <location filename="../filter_mate_dockwidget.py" line="1005"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Hindi mailapat ang layout ng panel; gagamitin ang mga default na laki. Mga detalye sa filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6549"/>
+        <location filename="../filter_mate_dockwidget.py" line="6577"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
@@ -2489,186 +2494,394 @@ Siguraduhin na ang PostgreSQL table ay may nakatakdang PRIMARY KEY.</translation
     </message>
 </context>
 <context>
+    <name>PointCloudConditionRow</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="460"/>
+        <source>Link with the previous condition</source>
+        <translation>Ugnay sa naunang kondisyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="462"/>
+        <source>AND</source>
+        <translation>AT</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="463"/>
+        <source>OR</source>
+        <translation>O</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="464"/>
+        <source>Attribute</source>
+        <translation>Attribute</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <source>Comparison</source>
+        <translation>Paghahambing</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="470"/>
+        <source>between</source>
+        <translation>sa pagitan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
+        <source>Remove this condition</source>
+        <translation>Alisin ang kondisyong ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
+        <source>Compare with a value or another attribute</source>
+        <translation>Ihambing sa isang halaga o ibang attribute</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="484"/>
+        <source>value</source>
+        <translation>halaga</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="485"/>
+        <source>Value</source>
+        <translation>Halaga</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <source>Highest value kept</source>
+        <translation>Pinakamataas na halagang pinanatili</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="568"/>
+        <source>Observed values: {0} to {1}</source>
+        <translation>Mga nakitang halaga: {0} hanggang {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="568"/>
+        <source>No statistics for this attribute</source>
+        <translation>Walang estadistika para sa attribute na ito</translation>
+    </message>
+</context>
+<context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="402"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="693"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Ilapat sa iba pang tile ng dataset</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="707"/>
         <source>CLASSES</source>
         <translation>MGA KLASE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="421"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="712"/>
         <source>Ground</source>
         <translation>Lupa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="422"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="713"/>
         <source>Vegetation</source>
         <translation>Halaman</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="423"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="714"/>
         <source>Buildings</source>
         <translation>Mga gusali</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="424"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="715"/>
         <source>Above ground</source>
         <translation>Higit sa lupa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="716"/>
         <source>Water</source>
         <translation>Tubig</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="426"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="717"/>
         <source>Without noise</source>
         <translation>Walang ingay</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="724"/>
         <source>Check only these classes</source>
         <translation>Lagyan ng check ang mga klaseng ito lamang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="441"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="732"/>
         <source>All</source>
         <translation>Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="442"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="733"/>
         <source>None</source>
         <translation>Wala</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="456"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="747"/>
         <source>Point classes</source>
         <translation>Mga klase ng punto</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
         <source>ATTRIBUTE RANGES</source>
-        <translation>MGA SAKLAW NG ATTRIBUTE</translation>
+        <translation type="obsolete">MGA SAKLAW NG ATTRIBUTE</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="480"/>
         <source>Z (m)</source>
-        <translation>Z (m)</translation>
+        <translation type="obsolete">Z (m)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
         <source>Lowest elevation kept</source>
-        <translation>Pinakamababang elevation na pinanatili</translation>
+        <translation type="obsolete">Pinakamababang elevation na pinanatili</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="482"/>
         <source>Highest elevation kept</source>
-        <translation>Pinakamataas na elevation na pinanatili</translation>
+        <translation type="obsolete">Pinakamataas na elevation na pinanatili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="839"/>
         <source>Intensity</source>
         <translation>Intensity</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="491"/>
         <source>Lowest intensity kept</source>
-        <translation>Pinakamababang intensity na pinanatili</translation>
+        <translation type="obsolete">Pinakamababang intensity na pinanatili</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="492"/>
         <source>Highest intensity kept</source>
-        <translation>Pinakamataas na intensity na pinanatili</translation>
+        <translation type="obsolete">Pinakamataas na intensity na pinanatili</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
         <source>Return</source>
-        <translation>Return</translation>
+        <translation type="obsolete">Return</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="505"/>
         <source>Echo of the laser pulse kept</source>
-        <translation>Echo ng laser pulse na pinanatili</translation>
+        <translation type="obsolete">Echo ng laser pulse na pinanatili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="799"/>
         <source>Height above DTM ≥</source>
         <translation>Taas sa ibabaw ng DTM ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="529"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="818"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Digital terrain model na pinagbabatayan ng pagsukat ng taas</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="537"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="828"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Panatilihin ang mga punto na hindi bababa sa ganito kataas sa ibabaw ng terrain model</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="546"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="862"/>
         <source>EXPRESSION</source>
         <translation>EXPRESSION</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="550"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="866"/>
         <source>Point cloud expression</source>
         <translation>Expression ng point cloud</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="551"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="867"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Lagyan ng check ang grupo para i-edit nang mano-mano ang expression</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="578"/>
         <source>No elevation statistics for this layer</source>
-        <translation>Walang estadistika ng elevation para sa layer na ito</translation>
+        <translation type="obsolete">Walang estadistika ng elevation para sa layer na ito</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="619"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="925"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Hindi available ang taas sa ibabaw ng terrain</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="634"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="940"/>
         <source>Kept points: {0}</source>
         <translation>Mga puntong pinanatili: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="957"/>
         <source>Current filter: {0}</source>
         <translation>Kasalukuyang filter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="957"/>
         <source>none</source>
         <translation>wala</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>Any</source>
-        <translation>Alinman</translation>
+        <translation type="obsolete">Alinman</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>First</source>
-        <translation>Una</translation>
+        <translation type="obsolete">Una</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Last</source>
-        <translation>Huli</translation>
+        <translation type="obsolete">Huli</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Single</source>
-        <translation>Nag-iisa</translation>
+        <translation type="obsolete">Nag-iisa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
+        <source>ATTRIBUTES</source>
+        <translation>MGA ATTRIBUTE</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="771"/>
+        <source>+ Condition</source>
+        <translation>+ Kondisyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="773"/>
+        <source>Add a condition on an attribute of the layer</source>
+        <translation>Magdagdag ng kondisyon sa isang attribute ng layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Returns</source>
+        <translation>Mga return</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="778"/>
+        <source>Keep the first, last or single returns of the laser pulses</source>
+        <translation>Panatilihin ang una, huli o iisang return ng mga laser pulse</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="781"/>
+        <source>First return (ReturnNumber = 1)</source>
+        <translation>Unang return (ReturnNumber = 1)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="782"/>
+        <source>Last return (ReturnNumber = NumberOfReturns)</source>
+        <translation>Huling return (ReturnNumber = NumberOfReturns)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="783"/>
+        <source>Single return (NumberOfReturns = 1)</source>
+        <translation>Iisang return (NumberOfReturns = 1)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="840"/>
+        <source>Return number</source>
+        <translation>Numero ng return</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="841"/>
+        <source>Number of returns</source>
+        <translation>Bilang ng return</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="842"/>
+        <source>Classification</source>
+        <translation>Klasipikasyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="843"/>
+        <source>Scan angle</source>
+        <translation>Anggulo ng scan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="844"/>
+        <source>User data</source>
+        <translation>Data ng user</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="845"/>
+        <source>Point source ID</source>
+        <translation>ID ng pinagmulan ng punto</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="846"/>
+        <source>GPS time</source>
+        <translation>Oras ng GPS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="847"/>
+        <source>Red</source>
+        <translation>Pula</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="848"/>
+        <source>Green</source>
+        <translation>Berde</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="849"/>
+        <source>Blue</source>
+        <translation>Asul</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="850"/>
+        <source>Infrared</source>
+        <translation>Infrared</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="851"/>
+        <source>Scan direction</source>
+        <translation>Direksyon ng scan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="852"/>
+        <source>Edge of flight line</source>
+        <translation>Gilid ng flight line</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="853"/>
+        <source>Synthetic</source>
+        <translation>Sintetiko</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="854"/>
+        <source>Key point</source>
+        <translation>Pangunahing punto</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="855"/>
+        <source>Withheld</source>
+        <translation>Pinigil</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="856"/>
+        <source>Overlap</source>
+        <translation>Pagsasapaw</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="857"/>
+        <source>Scanner channel</source>
+        <translation>Channel ng scanner</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="858"/>
+        <source>Classification flags</source>
+        <translation>Mga flag ng klasipikasyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="859"/>
+        <source>Height above ground</source>
+        <translation>Taas mula sa lupa</translation>
     </message>
 </context>
 <context>
@@ -3644,154 +3857,159 @@ Magpatuloy?</translation>
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="307"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="323"/>
         <source>Band</source>
         <translation>Band</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="310"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="326"/>
         <source>Band whose values are selected</source>
         <translation>Band na ang mga halaga ang pinipili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="339"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
         <source>PIXEL VALUE</source>
         <translation>HALAGA NG PIXEL</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="347"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="363"/>
         <source>Pixel value of the current band</source>
         <translation>Halaga ng pixel ng kasalukuyang band</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="358"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
         <source>Last {0} values picked</source>
         <translation>Huling {0} halagang napili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>Mag-click sa mapa gamit ang pixel picker. Pinapalawak ng Ctrl+click ang saklaw hanggang sa halaga.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="380"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="408"/>
         <source>VALUE RANGE</source>
         <translation>SAKLAW NG HALAGA</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Lowest value kept</source>
         <translation>Pinakamababang halagang pinanatili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Max</source>
         <translation>Max</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Highest value kept</source>
         <translation>Pinakamataas na halagang pinanatili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="406"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="434"/>
         <source>Preview on the map (hide the other pixels)</source>
         <translation>Preview sa mapa (itago ang iba pang pixel)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="413"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="441"/>
         <source>CLASSES</source>
         <translation>MGA KLASE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
         <source>Raster classes</source>
         <translation>Mga klase ng raster</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="421"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="449"/>
         <source>All</source>
         <translation>Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="422"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="450"/>
         <source>None</source>
         <translation>Wala</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="432"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="460"/>
         <source>RASTER EXPRESSION</source>
         <translation>EXPRESSION NG RASTER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="436"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="464"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Expression ng raster calculator; pinananatili ang pixel kung saan hindi ito 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="437"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="465"/>
         <source>Raster expression</source>
         <translation>Expression ng raster</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="473"/>
         <source>Use the range</source>
         <translation>Gamitin ang saklaw</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="446"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="474"/>
         <source>Write the current value range as an expression</source>
         <translation>Isulat bilang expression ang kasalukuyang saklaw ng halaga</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="519"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="547"/>
         <source>Selected pixels: {0}</source>
         <translation>Mga napiling pixel: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="801"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="829"/>
         <source>Set a value range first</source>
         <translation>Magtakda muna ng saklaw ng halaga</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="818"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="846"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="834"/>
         <source>Last values:</source>
-        <translation>Mga huling halaga:</translation>
+        <translation type="obsolete">Mga huling halaga:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="362"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
         <source>Value of the current band under the cursor</source>
         <translation>Halaga ng kasalukuyang band sa ilalim ng cursor</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="368"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="392"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
         <translation>Estadistika ng kasalukuyang band sa huling parihabang iginuhit sa mapa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="565"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="593"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Sa ilalim ng cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="603"/>
         <source>Zone: {0}</source>
         <translation>Sona: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="603"/>
         <source>no pixel</source>
         <translation>walang pixel</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="862"/>
+        <source>LAST PICKS</source>
+        <translation>HULING MGA PAGBASA</translation>
     </message>
 </context>
 <context>

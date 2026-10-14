@@ -138,6 +138,8 @@ def s_setup():
 
 
 def s_open_plugin():
+    from qgis.PyQt.QtCore import QSettings
+    QSettings().setValue('FilterMate/discord_welcome_dismissed', True)  # modal welcome would block the run
     import qgis.utils
     if 'filter_mate' not in plugins:
         ok = qgis.utils.loadPlugin('filter_mate') and qgis.utils.startPlugin('filter_mate')

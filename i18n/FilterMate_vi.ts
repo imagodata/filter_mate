@@ -109,17 +109,17 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="209"/>
         <source>1 band</source>
         <translation>1 kênh</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="262"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="210"/>
         <source>{0} bands</source>
         <translation>{0} kênh</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="263"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="211"/>
         <source>{0} points</source>
         <translation>{0} điểm</translation>
     </message>
@@ -139,79 +139,84 @@
         <translation type="obsolete">Hình học nguồn: các đối tượng được chọn trong EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Value under the cursor: follow the pixel value of the current band while moving over the map</source>
         <translation>Giá trị dưới con trỏ: theo dõi giá trị điểm ảnh của kênh hiện tại khi di chuyển trên bản đồ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band</source>
         <translation>Thống kê hình chữ nhật: kéo trên bản đồ để đọc giá trị nhỏ nhất, lớn nhất và trung bình của kênh hiện tại</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Mặt cắt độ cao: mở mặt cắt độ cao của QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>Chế độ xem 3D: mở chế độ xem bản đồ 3D mới của QGIS</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="264"/>
         <source>no feature</source>
-        <translation>không có đối tượng</translation>
+        <translation type="obsolete">không có đối tượng</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="265"/>
         <source>{0} feature(s)</source>
-        <translation>{0} đối tượng</translation>
+        <translation type="obsolete">{0} đối tượng</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="266"/>
         <source>every pixel</source>
-        <translation>mọi điểm ảnh</translation>
+        <translation type="obsolete">mọi điểm ảnh</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="267"/>
         <source>{0} class(es)</source>
-        <translation>{0} lớp</translation>
+        <translation type="obsolete">{0} lớp</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="268"/>
         <source>expression</source>
-        <translation>biểu thức</translation>
+        <translation type="obsolete">biểu thức</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="269"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="212"/>
         <source>{0} features</source>
         <translation>{0} đối tượng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Point cloud</source>
         <translation>Đám mây điểm</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
         <source>Kept points</source>
-        <translation>Điểm được giữ lại</translation>
+        <translation type="obsolete">Điểm được giữ lại</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="355"/>
         <source>Selection → source geometry</source>
-        <translation>Lựa chọn → hình học nguồn</translation>
+        <translation type="obsolete">Lựa chọn → hình học nguồn</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
+        <source>Link the range to the style: the layer colours stretch over the selected range</source>
+        <translation>Liên kết dải với kiểu: màu của lớp trải trên dải đã chọn</translation>
     </message>
 </context>
 <context>
@@ -222,207 +227,207 @@
         <translation>Đang khôi phục bộ lọc của {0} lớp raster / đám mây điểm…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="395"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="404"/>
         <source>cov. ≥ </source>
         <translation>phủ ≥</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="405"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Tỷ lệ tối thiểu của đối tượng đích dạng đa giác nằm trong hình học nguồn (0 = chồng lấn bất kỳ). Dùng khi nguồn là raster hoặc đám mây điểm.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>Point cloud</source>
         <translation>Đám mây điểm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="496"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>Lớp {0}: chọn trong EXPLORING, quan hệ trong FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="502"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Bộ chọn điểm ảnh: nhấp vào bản đồ để đọc giá trị của mọi băng (Ctrl+nhấp để mở rộng khoảng)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="520"/>
         <source>Zoom to the layer</source>
         <translation>Phóng tới lớp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="504"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="513"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Xem trước: ẩn các điểm ảnh ngoài vùng chọn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="506"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
         <source>Not used for raster layers</source>
         <translation>Không dùng cho lớp raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="507"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="516"/>
         <source>Reset the raster selection</source>
         <translation>Đặt lại vùng chọn raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="510"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="519"/>
         <source>Identify points on the map</source>
         <translation>Nhận dạng các điểm trên bản đồ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="512"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="521"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Xem trước trực tiếp: chỉ hiển thị các điểm được vùng chọn giữ lại</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="514"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="523"/>
         <source>Not used for point cloud layers</source>
         <translation>Không dùng cho lớp đám mây điểm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="524"/>
         <source>Reset the point cloud criteria</source>
         <translation>Đặt lại tiêu chí đám mây điểm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="672"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="681"/>
         <source>Invalid raster calculator expression</source>
         <translation>Biểu thức máy tính raster không hợp lệ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="710"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="719"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>Không tìm thấy PDAL: tính độ cao so với DTM cần tệp thực thi pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="999"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1051"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Một tác vụ FilterMate vẫn đang chạy: hãy chờ tác vụ hoàn tất</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1015"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1067"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Tác vụ FilterMate thất bại: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1048"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1100"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Hãy chọn điểm ảnh trước: khoảng giá trị, các lớp phân loại hoặc biểu thức raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1057"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1109"/>
         <source>Raster filtered: {0}</source>
         <translation>Đã lọc raster: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1122"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Biểu thức đám mây điểm bị từ chối: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1073"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1125"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Hãy chọn điểm trước: các lớp phân loại, khoảng thuộc tính hoặc biểu thức</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1081"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1133"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Đã lọc đám mây điểm: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1145"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1197"/>
         <source>Filter not applied: {0}</source>
         <translation>Chưa áp dụng bộ lọc: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>canceled</source>
         <translation>đã hủy</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1149"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
         <source>{0} target(s) filtered</source>
         <translation>Đã lọc {0} đích</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1151"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1203"/>
         <source>{0} failed: {1}</source>
         <translation>{0} thất bại: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1160"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: đang lọc từ '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1216"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Đã thay đổi từ đó, giữ nguyên: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1222"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1274"/>
         <source>{0} layer(s) restored</source>
         <translation>Đã khôi phục {0} lớp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1256"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' chưa được xuất: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1320"/>
         <source>Exported: {0}</source>
         <translation>Đã xuất: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Export failed: {0}</source>
         <translation>Xuất thất bại: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1329"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Đang xuất {0} lớp…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1335"/>
         <source>Export folder</source>
         <translation>Thư mục xuất</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1355"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1407"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Bỏ qua các đích raster / đám mây điểm: chưa chọn đối tượng nguồn trong EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Các đích raster / đám mây điểm chưa được lọc: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1380"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1432"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>Đã lọc {0} đích raster / đám mây điểm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1465"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Chọn raster DTM dùng để tính độ cao so với mặt đất</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1473"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Chưa tính độ cao so với mặt đất: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1485"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1537"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Đang tính độ cao so với '{0}' bằng PDAL…</translation>
     </message>
@@ -1301,127 +1306,127 @@ Nhan vao chi bao ★ va chon 'Them bo loc hien tai vao yeu thich' de luu yeu thi
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="204"/>
+        <location filename="../filter_mate.py" line="206"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="328"/>
+        <location filename="../filter_mate.py" line="330"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="328"/>
+        <location filename="../filter_mate.py" line="330"/>
         <source>Open FilterMate panel</source>
         <translation>Mở bảng điều khiển FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="337"/>
+        <location filename="../filter_mate.py" line="339"/>
         <source>Reset configuration and database</source>
         <translation>Đặt lại cấu hình và cơ sở dữ liệu</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="337"/>
+        <location filename="../filter_mate.py" line="339"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Khôi phục cấu hình mặc định và xóa cơ sở dữ liệu SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1413"/>
+        <location filename="../filter_mate.py" line="1429"/>
         <source>Reset Configuration</source>
         <translation>Đặt lại cấu hình</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1436"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>Configuration reset successfully.</source>
         <translation>Đặt lại cấu hình thành công.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1441"/>
+        <location filename="../filter_mate.py" line="1457"/>
         <source>Default configuration file not found.</source>
         <translation>Không tìm thấy tệp cấu hình mặc định.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1462"/>
+        <location filename="../filter_mate.py" line="1478"/>
         <source>Database deleted: {filename}</source>
         <translation>Đã xóa cơ sở dữ liệu: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1476"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>Restart required</source>
         <translation>Cần khởi động lại</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="421"/>
+        <location filename="../filter_mate.py" line="423"/>
         <source>Obsolete configuration detected</source>
         <translation>Phát hiện cấu hình lỗi thời</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="422"/>
+        <location filename="../filter_mate.py" line="424"/>
         <source>unknown version</source>
         <translation>phiên bản không xác định</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="432"/>
         <source>Corrupted configuration detected</source>
         <translation>Phát hiện cấu hình bị hỏng</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="487"/>
+        <location filename="../filter_mate.py" line="489"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Cấu hình chưa được đặt lại. Một số tính năng có thể không hoạt động đúng.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="498"/>
+        <location filename="../filter_mate.py" line="500"/>
         <source>Configuration created with default values</source>
         <translation>Cấu hình đã được tạo với giá trị mặc định</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="501"/>
+        <location filename="../filter_mate.py" line="503"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Cấu hình bị hỏng đã được đặt lại. Cài đặt mặc định đã được khôi phục.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="504"/>
+        <location filename="../filter_mate.py" line="506"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Cấu hình lỗi thời đã được đặt lại. Cài đặt mặc định đã được khôi phục.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="525"/>
+        <location filename="../filter_mate.py" line="527"/>
         <source>Configuration updated to latest version</source>
         <translation>Cấu hình đã được cập nhật lên phiên bản mới nhất</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="522"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Cấu hình đã cập nhật: cài đặt mới có sẵn ({sections}). Truy cập qua menu Tùy chọn.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="516"/>
+        <location filename="../filter_mate.py" line="518"/>
         <source>Geometry Simplification</source>
         <translation>Đơn giản hóa hình học</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="517"/>
+        <location filename="../filter_mate.py" line="519"/>
         <source>Optimization Thresholds</source>
         <translation>Ngưỡng tối ưu hóa</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="662"/>
+        <location filename="../filter_mate.py" line="664"/>
         <source>Geometry validation setting</source>
         <translation>Cài đặt xác thực hình học</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="692"/>
+        <location filename="../filter_mate.py" line="694"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Đã tắt thành công bộ lọc hình học không hợp lệ.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="699"/>
+        <location filename="../filter_mate.py" line="701"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Bộ lọc hình học không hợp lệ không được thay đổi. Một số đối tượng có thể bị loại khỏi xuất.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="423"/>
+        <location filename="../filter_mate.py" line="425"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1436,7 +1441,7 @@ Bạn có muốn đặt lại về cài đặt mặc định không?
 • Không: Giữ cấu hình hiện tại (có thể gây ra sự cố)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="431"/>
+        <location filename="../filter_mate.py" line="433"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1451,12 +1456,12 @@ Bạn có muốn đặt lại về cài đặt mặc định không?
 • Không: Hủy (plugin có thể không hoạt động chính xác)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="438"/>
+        <location filename="../filter_mate.py" line="440"/>
         <source>Configuration reset</source>
         <translation>Đặt lại cấu hình</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="439"/>
+        <location filename="../filter_mate.py" line="441"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1465,12 +1470,12 @@ Do you want to continue?</source>
 Bạn có muốn tiếp tục không?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="544"/>
+        <location filename="../filter_mate.py" line="546"/>
         <source>Error during configuration migration: {}</source>
         <translation>Lỗi trong quá trình di chuyển cấu hình: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="664"/>
+        <location filename="../filter_mate.py" line="666"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1497,7 +1502,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1413"/>
+        <location filename="../filter_mate.py" line="1429"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1514,7 +1519,7 @@ QGIS must be restarted to apply the changes.</source>
 QGIS phải được khởi động lại để áp dụng các thay đổi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1476"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1523,17 +1528,17 @@ Please restart QGIS to apply the changes.</source>
 Vui lòng khởi động lại QGIS để áp dụng các thay đổi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="366"/>
+        <location filename="../filter_mate.py" line="368"/>
         <source>Initialization error: {0}</source>
         <translation>Loi khoi tao: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="603"/>
+        <location filename="../filter_mate.py" line="605"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} lop duoc tham chieu chua duoc tai ({layers_list}). Su dung hien thi du phong.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1467"/>
+        <location filename="../filter_mate.py" line="1483"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Khong the xoa {filename}: {e}</translation>
     </message>
@@ -1543,71 +1548,71 @@ Vui lòng khởi động lại QGIS để áp dụng các thay đổi.</translat
         <translation type="obsolete">Loi trong qua trinh dat lai: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1519"/>
+        <location filename="../filter_mate.py" line="1535"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Cam on ban da su dung &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Tham gia cong dong Discord cua chung toi de:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Nhan tro giup va ho tro&lt;/li&gt;&lt;li&gt;Bao cao loi va su co&lt;/li&gt;&lt;li&gt;De xuat tinh nang moi&lt;/li&gt;&lt;li&gt;Chia se meo voi nguoi dung khac&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1535"/>
+        <location filename="../filter_mate.py" line="1551"/>
         <source>  Join us on Discord</source>
         <translation>  Tham gia Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1555"/>
+        <location filename="../filter_mate.py" line="1571"/>
         <source>Don&apos;t show this again</source>
         <translation>Khong hien thi lai</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1558"/>
+        <location filename="../filter_mate.py" line="1574"/>
         <source>Close</source>
         <translation>Dong</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1624"/>
+        <location filename="../filter_mate.py" line="1640"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Loi tai plugin: {0}. Kiem tra bang dieu khien Python cua QGIS de biet chi tiet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6932"/>
+        <location filename="../filter_mate_dockwidget.py" line="6960"/>
         <source>Current layer: {0}</source>
         <translation>Lop hien tai: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6962"/>
         <source>No layer selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6944"/>
+        <location filename="../filter_mate_dockwidget.py" line="6972"/>
         <source>Selected layers:
 {0}</source>
         <translation>Cac lop da chon:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6944"/>
+        <location filename="../filter_mate_dockwidget.py" line="6972"/>
         <source>No layers selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6964"/>
+        <location filename="../filter_mate_dockwidget.py" line="6992"/>
         <source>No expression defined</source>
         <translation>Chua dinh nghia bieu thuc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6976"/>
+        <location filename="../filter_mate_dockwidget.py" line="7004"/>
         <source>Display expression: {0}</source>
         <translation>Bieu thuc hien thi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6991"/>
+        <location filename="../filter_mate_dockwidget.py" line="7019"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID doi tuong: {0}
 Thuoc tinh dau tien: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1485"/>
+        <location filename="../filter_mate.py" line="1501"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Không thể đặt lại cấu hình. Hãy kiểm tra thư mục plugin có ghi được không, rồi thử lại. Chi tiết trong filtermate.log.</translation>
     </message>
@@ -1766,153 +1771,153 @@ What would you like to do?</translation>
         <translation type="obsolete">Loi kich thuoc UI: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1460"/>
         <source>Favorites manager not available</source>
         <translation>Trinh quan ly yeu thich khong kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1470"/>
+        <location filename="../filter_mate_dockwidget.py" line="1481"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} yeu thich da luu
 Nhan de ap dung hoac quan ly</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1473"/>
+        <location filename="../filter_mate_dockwidget.py" line="1484"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Chua luu yeu thich nao
 Nhan de them bo loc hien tai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1493"/>
+        <location filename="../filter_mate_dockwidget.py" line="1504"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Da buoc backend {0} cho {1} lop</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget.py" line="1590"/>
         <source>Backend controller not available</source>
         <translation>Bo dieu khien backend khong kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1517"/>
+        <location filename="../filter_mate_dockwidget.py" line="1528"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Tu dong don dep PostgreSQL da bat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1518"/>
+        <location filename="../filter_mate_dockwidget.py" line="1529"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Tu dong don dep PostgreSQL da tat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Da don dep cac view phien PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Khong co view de don dep hoac don dep that bai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1546"/>
         <source>No PostgreSQL connection available</source>
         <translation>Khong co ket noi PostgreSQL kha dung</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1541"/>
+        <location filename="../filter_mate_dockwidget.py" line="1552"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Schema co {0} view tu cac phien khac.
 Van xoa?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget.py" line="1553"/>
         <source>Other Sessions Active</source>
         <translation>Cac phien khac dang hoat dong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget.py" line="1555"/>
         <source>Schema cleanup cancelled</source>
         <translation>Don dep schema da huy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget.py" line="1560"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Schema '{0}' da xoa thanh cong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget.py" line="1562"/>
         <source>Schema cleanup failed</source>
         <translation>Don dep schema that bai</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1577"/>
+        <location filename="../filter_mate_dockwidget.py" line="1588"/>
         <source>PostgreSQL Session Info</source>
         <translation>Thong tin phien PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Theme adapted: {0}</source>
         <translation>Giao dien da thich ung: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Dark mode</source>
         <translation>Che do toi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Light mode</source>
         <translation>Che do sang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4016"/>
+        <location filename="../filter_mate_dockwidget.py" line="4027"/>
         <source>Selected features have no geometry.</source>
         <translation>Cac doi tuong da chon khong co hinh hoc.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4035"/>
+        <location filename="../filter_mate_dockwidget.py" line="4046"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Chua chon doi tuong. Chon mot doi tuong tu danh sach xo xuong.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5100"/>
+        <location filename="../filter_mate_dockwidget.py" line="5101"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Lop da chon khong hop le hoac khong tim thay nguon.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5837"/>
+        <location filename="../filter_mate_dockwidget.py" line="5838"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Vung dem am (xoi mon): thu nho da giac vao trong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5840"/>
+        <location filename="../filter_mate_dockwidget.py" line="5841"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Gia tri vung dem tinh bang met (duong=mo rong, am=thu nho da giac)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6314"/>
+        <location filename="../filter_mate_dockwidget.py" line="6342"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin da kich hoat voi {0} lop vector</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6395"/>
+        <location filename="../filter_mate_dockwidget.py" line="6423"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Khong the tu dong tai lai plugin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6397"/>
+        <location filename="../filter_mate_dockwidget.py" line="6425"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Loi tai lai plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6469"/>
+        <location filename="../filter_mate_dockwidget.py" line="6497"/>
         <source>Layer properties reset to defaults</source>
         <translation>Thuoc tinh lop da dat lai ve mac dinh</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6470"/>
+        <location filename="../filter_mate_dockwidget.py" line="6498"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Loi dat lai thuoc tinh lop: {}</translation>
     </message>
@@ -2042,12 +2047,12 @@ Van xoa?</translation>
         <translation>Nén zip bản xuất</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1004"/>
+        <location filename="../filter_mate_dockwidget.py" line="1005"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Không thể áp dụng bố cục bảng điều khiển; dùng kích thước mặc định. Chi tiết trong filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6549"/>
+        <location filename="../filter_mate_dockwidget.py" line="6577"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
@@ -2489,186 +2494,394 @@ Dam bao bang PostgreSQL co PRIMARY KEY duoc dinh nghia.</translation>
     </message>
 </context>
 <context>
+    <name>PointCloudConditionRow</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="460"/>
+        <source>Link with the previous condition</source>
+        <translation>Liên kết với điều kiện trước</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="462"/>
+        <source>AND</source>
+        <translation>VÀ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="463"/>
+        <source>OR</source>
+        <translation>HOẶC</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="464"/>
+        <source>Attribute</source>
+        <translation>Thuộc tính</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <source>Comparison</source>
+        <translation>So sánh</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="470"/>
+        <source>between</source>
+        <translation>trong khoảng</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
+        <source>Remove this condition</source>
+        <translation>Xóa điều kiện này</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
+        <source>Compare with a value or another attribute</source>
+        <translation>So sánh với một giá trị hoặc thuộc tính khác</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="484"/>
+        <source>value</source>
+        <translation>giá trị</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="485"/>
+        <source>Value</source>
+        <translation>Gia tri</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <source>Highest value kept</source>
+        <translation>Giá trị cao nhất được giữ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="568"/>
+        <source>Observed values: {0} to {1}</source>
+        <translation>Giá trị quan sát: {0} đến {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="568"/>
+        <source>No statistics for this attribute</source>
+        <translation>Không có thống kê cho thuộc tính này</translation>
+    </message>
+</context>
+<context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="402"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="693"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Áp dụng cho các ô khác của tập dữ liệu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="707"/>
         <source>CLASSES</source>
         <translation>PHÂN LOẠI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="421"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="712"/>
         <source>Ground</source>
         <translation>Mặt đất</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="422"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="713"/>
         <source>Vegetation</source>
         <translation>Thực vật</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="423"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="714"/>
         <source>Buildings</source>
         <translation>Công trình</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="424"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="715"/>
         <source>Above ground</source>
         <translation>Trên mặt đất</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="716"/>
         <source>Water</source>
         <translation>Nước</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="426"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="717"/>
         <source>Without noise</source>
         <translation>Không nhiễu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="724"/>
         <source>Check only these classes</source>
         <translation>Chỉ chọn các lớp này</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="441"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="732"/>
         <source>All</source>
         <translation>Tất cả</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="442"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="733"/>
         <source>None</source>
         <translation>Không có</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="456"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="747"/>
         <source>Point classes</source>
         <translation>Phân loại điểm</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
         <source>ATTRIBUTE RANGES</source>
-        <translation>KHOẢNG THUỘC TÍNH</translation>
+        <translation type="obsolete">KHOẢNG THUỘC TÍNH</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="480"/>
         <source>Z (m)</source>
-        <translation>Z (m)</translation>
+        <translation type="obsolete">Z (m)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
         <source>Lowest elevation kept</source>
-        <translation>Cao độ thấp nhất được giữ</translation>
+        <translation type="obsolete">Cao độ thấp nhất được giữ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="482"/>
         <source>Highest elevation kept</source>
-        <translation>Cao độ cao nhất được giữ</translation>
+        <translation type="obsolete">Cao độ cao nhất được giữ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="839"/>
         <source>Intensity</source>
         <translation>Cường độ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="491"/>
         <source>Lowest intensity kept</source>
-        <translation>Cường độ thấp nhất được giữ</translation>
+        <translation type="obsolete">Cường độ thấp nhất được giữ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="492"/>
         <source>Highest intensity kept</source>
-        <translation>Cường độ cao nhất được giữ</translation>
+        <translation type="obsolete">Cường độ cao nhất được giữ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
         <source>Return</source>
-        <translation>Lần phản hồi</translation>
+        <translation type="obsolete">Lần phản hồi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="505"/>
         <source>Echo of the laser pulse kept</source>
-        <translation>Phản hồi của xung laser được giữ</translation>
+        <translation type="obsolete">Phản hồi của xung laser được giữ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="799"/>
         <source>Height above DTM ≥</source>
         <translation>Độ cao so với DTM ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="529"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="818"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Mô hình số địa hình dùng làm gốc đo độ cao</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="537"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="828"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Giữ các điểm cao hơn mô hình địa hình ít nhất mức này</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="546"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="862"/>
         <source>EXPRESSION</source>
         <translation>BIỂU THỨC</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="550"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="866"/>
         <source>Point cloud expression</source>
         <translation>Biểu thức đám mây điểm</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="551"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="867"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Chọn nhóm để chỉnh sửa biểu thức thủ công</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="578"/>
         <source>No elevation statistics for this layer</source>
-        <translation>Không có thống kê cao độ cho lớp này</translation>
+        <translation type="obsolete">Không có thống kê cao độ cho lớp này</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="619"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="925"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Không có độ cao so với địa hình</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="634"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="940"/>
         <source>Kept points: {0}</source>
         <translation>Điểm được giữ: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="957"/>
         <source>Current filter: {0}</source>
         <translation>Bộ lọc hiện tại: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="957"/>
         <source>none</source>
         <translation>không có</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>Any</source>
-        <translation>Bất kỳ</translation>
+        <translation type="obsolete">Bất kỳ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>First</source>
-        <translation>Đầu tiên</translation>
+        <translation type="obsolete">Đầu tiên</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Last</source>
-        <translation>Cuối cùng</translation>
+        <translation type="obsolete">Cuối cùng</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Single</source>
-        <translation>Duy nhất</translation>
+        <translation type="obsolete">Duy nhất</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
+        <source>ATTRIBUTES</source>
+        <translation>THUỘC TÍNH</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="771"/>
+        <source>+ Condition</source>
+        <translation>+ Điều kiện</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="773"/>
+        <source>Add a condition on an attribute of the layer</source>
+        <translation>Thêm điều kiện cho một thuộc tính của lớp</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Returns</source>
+        <translation>Phản xạ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="778"/>
+        <source>Keep the first, last or single returns of the laser pulses</source>
+        <translation>Giữ phản xạ đầu, cuối hoặc đơn của xung laser</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="781"/>
+        <source>First return (ReturnNumber = 1)</source>
+        <translation>Phản xạ đầu (ReturnNumber = 1)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="782"/>
+        <source>Last return (ReturnNumber = NumberOfReturns)</source>
+        <translation>Phản xạ cuối (ReturnNumber = NumberOfReturns)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="783"/>
+        <source>Single return (NumberOfReturns = 1)</source>
+        <translation>Phản xạ đơn (NumberOfReturns = 1)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="840"/>
+        <source>Return number</source>
+        <translation>Số lần phản hồi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="841"/>
+        <source>Number of returns</source>
+        <translation>Số phản xạ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="842"/>
+        <source>Classification</source>
+        <translation>Phân loại</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="843"/>
+        <source>Scan angle</source>
+        <translation>Góc quét</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="844"/>
+        <source>User data</source>
+        <translation>Dữ liệu người dùng</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="845"/>
+        <source>Point source ID</source>
+        <translation>ID nguồn điểm</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="846"/>
+        <source>GPS time</source>
+        <translation>Thời gian GPS</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="847"/>
+        <source>Red</source>
+        <translation>Đỏ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="848"/>
+        <source>Green</source>
+        <translation>Lục</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="849"/>
+        <source>Blue</source>
+        <translation>Lam</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="850"/>
+        <source>Infrared</source>
+        <translation>Hồng ngoại</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="851"/>
+        <source>Scan direction</source>
+        <translation>Hướng quét</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="852"/>
+        <source>Edge of flight line</source>
+        <translation>Mép dải bay</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="853"/>
+        <source>Synthetic</source>
+        <translation>Tổng hợp</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="854"/>
+        <source>Key point</source>
+        <translation>Điểm khóa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="855"/>
+        <source>Withheld</source>
+        <translation>Bị giữ lại</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="856"/>
+        <source>Overlap</source>
+        <translation>Chồng phủ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="857"/>
+        <source>Scanner channel</source>
+        <translation>Kênh máy quét</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="858"/>
+        <source>Classification flags</source>
+        <translation>Cờ phân loại</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="859"/>
+        <source>Height above ground</source>
+        <translation>Độ cao trên mặt đất</translation>
     </message>
 </context>
 <context>
@@ -3644,154 +3857,159 @@ Tiep tuc?</translation>
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="307"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="323"/>
         <source>Band</source>
         <translation>Băng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="310"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="326"/>
         <source>Band whose values are selected</source>
         <translation>Băng có giá trị được chọn</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="339"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
         <source>PIXEL VALUE</source>
         <translation>GIÁ TRỊ ĐIỂM ẢNH</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="347"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="363"/>
         <source>Pixel value of the current band</source>
         <translation>Giá trị điểm ảnh của băng hiện tại</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="358"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
         <source>Last {0} values picked</source>
         <translation>{0} giá trị được chọn gần nhất</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>Nhấp vào bản đồ bằng bộ chọn điểm ảnh. Ctrl+nhấp để mở rộng khoảng tới giá trị đó.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="380"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="408"/>
         <source>VALUE RANGE</source>
         <translation>KHOẢNG GIÁ TRỊ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Min</source>
         <translation>Tối thiểu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Lowest value kept</source>
         <translation>Giá trị thấp nhất được giữ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Max</source>
         <translation>Tối đa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Highest value kept</source>
         <translation>Giá trị cao nhất được giữ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="406"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="434"/>
         <source>Preview on the map (hide the other pixels)</source>
         <translation>Xem trước trên bản đồ (ẩn các điểm ảnh khác)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="413"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="441"/>
         <source>CLASSES</source>
         <translation>PHÂN LOẠI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
         <source>Raster classes</source>
         <translation>Phân loại raster</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="421"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="449"/>
         <source>All</source>
         <translation>Tất cả</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="422"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="450"/>
         <source>None</source>
         <translation>Không có</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="432"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="460"/>
         <source>RASTER EXPRESSION</source>
         <translation>BIỂU THỨC RASTER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="436"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="464"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Biểu thức máy tính raster; điểm ảnh được giữ khi giá trị khác 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="437"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="465"/>
         <source>Raster expression</source>
         <translation>Biểu thức raster</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="473"/>
         <source>Use the range</source>
         <translation>Dùng khoảng giá trị</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="446"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="474"/>
         <source>Write the current value range as an expression</source>
         <translation>Ghi khoảng giá trị hiện tại thành biểu thức</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="519"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="547"/>
         <source>Selected pixels: {0}</source>
         <translation>Điểm ảnh đã chọn: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="801"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="829"/>
         <source>Set a value range first</source>
         <translation>Hãy đặt khoảng giá trị trước</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="818"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="846"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="834"/>
         <source>Last values:</source>
-        <translation>Giá trị gần nhất:</translation>
+        <translation type="obsolete">Giá trị gần nhất:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="362"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
         <source>Value of the current band under the cursor</source>
         <translation>Giá trị của kênh hiện tại dưới con trỏ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="368"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="392"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
         <translation>Thống kê kênh hiện tại trong hình chữ nhật vẽ gần nhất trên bản đồ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="565"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="593"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Dưới con trỏ: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="603"/>
         <source>Zone: {0}</source>
         <translation>Vùng: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="603"/>
         <source>no pixel</source>
         <translation>không có điểm ảnh</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="862"/>
+        <source>LAST PICKS</source>
+        <translation>SỐ ĐO GẦN NHẤT</translation>
     </message>
 </context>
 <context>

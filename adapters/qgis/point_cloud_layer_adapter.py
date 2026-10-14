@@ -11,6 +11,7 @@ import logging
 import math
 from typing import Any, List, Optional, Tuple
 
+from ...core.domain import point_cloud_attributes as pc_attributes
 from ...core.domain.point_cloud_filter_criteria import (
     PointCloudAttributeSummary,
     PointCloudLayerSummary,
@@ -18,9 +19,13 @@ from ...core.domain.point_cloud_filter_criteria import (
 
 logger = logging.getLogger(__name__)
 
-POINT_CLOUD_RANGE_ATTRIBUTES = ("Z", "Intensity", "ReturnNumber", "NumberOfReturns", "GpsTime")
+# Read first, in this order; the other attributes of the layer follow in layer order.
+POINT_CLOUD_RANGE_ATTRIBUTES = (
+    pc_attributes.Z, pc_attributes.INTENSITY, pc_attributes.RETURN_NUMBER,
+    pc_attributes.NUMBER_OF_RETURNS, pc_attributes.GPS_TIME,
+)
 
-_CLASSIFICATION_ATTRIBUTE = "Classification"
+_CLASSIFICATION_ATTRIBUTE = pc_attributes.CLASSIFICATION
 
 
 def _safe_call(obj: Any, name: str, default: Any = None) -> Any:
@@ -113,13 +118,18 @@ def _read_classes(stats: Any) -> Tuple[Tuple[int, int], ...]:
 
 
 def _read_ranges(stats: Any, attributes: Tuple[str, ...]) -> Tuple[PointCloudAttributeSummary, ...]:
-    """Min/max of the standard numeric attributes present on the layer."""
+    """Min/max of the attributes present on the layer (the attribute conditions are built on them).
+
+    The standard ones come first; X, Y and Classification are left out (the
+    classes are counted by :func:`_read_classes`).
+    """
     if stats is None:
         return ()
+    skipped = set(pc_attributes.NON_CONDITION_ATTRIBUTES)
+    names = [name for name in POINT_CLOUD_RANGE_ATTRIBUTES if name in attributes]
+    names += [name for name in attributes if name not in names and name not in skipped]
     ranges: List[PointCloudAttributeSummary] = []
-    for name in POINT_CLOUD_RANGE_ATTRIBUTES:
-        if name not in attributes:
-            continue
+    for name in names:
         minimum = maximum = None
         try:
             minimum = _to_float(stats.minimum(name))

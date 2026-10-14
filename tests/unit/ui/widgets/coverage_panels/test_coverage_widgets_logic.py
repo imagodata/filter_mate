@@ -315,20 +315,104 @@ class TestPresets:
             assert cloud.preset_codes(name, range(256)) == tuple(sorted(cloud.CLASS_PRESETS[name]))
 
 
-class TestReturns:
-    def test_choices(self):
-        assert cloud.return_choices(3, True) == [None, "first", "last", "single", 1, 2, 3]
-        assert cloud.return_choices(3, False) == [None, "first", 1, 2, 3]
-        assert cloud.return_choices(40, False)[-1] == cloud.MAX_RETURN_NUMBERS
-        assert cloud.return_choices(0, False) == [None, "first", 1]
+class TestReturnShortcuts:
+    def test_available_with_the_attributes(self):
+        assert cloud.return_presets_available(("Z", "ReturnNumber", "NumberOfReturns")) == ("first", "last", "single")
+        assert cloud.return_presets_available(("Z", "ReturnNumber")) == ("first",)
+        assert cloud.return_presets_available(("Z", "NumberOfReturns")) == ("single",)
+        assert cloud.return_presets_available(("Z",)) == ()
+        assert cloud.return_presets_available(()) == ("first", "last", "single")  # unknown schema
 
-    def test_criteria(self):
-        assert cloud.return_criteria(None) == (None, ())
-        assert cloud.return_criteria("first") == (None, ("ReturnNumber = 1",))
-        assert cloud.return_criteria("last") == (None, ("ReturnNumber = NumberOfReturns",))
-        assert cloud.return_criteria("single") == (None, ("NumberOfReturns = 1",))
-        assert cloud.return_criteria(2) == (2, ())
-        assert cloud.return_criteria(True) == (None, ())
+    def test_conditions(self):
+        def expression(key):
+            return cloud.pc_attributes.conditions_expression([cloud.return_preset_condition(key)])
+        assert expression("first") == "ReturnNumber = 1"
+        assert expression("last") == "ReturnNumber = NumberOfReturns"
+        assert expression("single") == "NumberOfReturns = 1"
+        assert cloud.return_preset_condition("last", "OR")["join"] == "OR"
+
+    def test_preset_of_a_condition(self):
+        assert cloud.return_preset_of({"attribute": "ReturnNumber", "op": "=", "low": 1}) == "first"
+        assert cloud.return_preset_of({"attribute": "ReturnNumber", "op": "=", "low": "NumberOfReturns"}) == "last"
+        assert cloud.return_preset_of({"attribute": "NumberOfReturns", "op": "=", "low": 1, "join": "OR"}) == "single"
+        assert cloud.return_preset_of({"attribute": "ReturnNumber", "op": "=", "low": 2}) is None
+        assert cloud.return_preset_of({"attribute": "Z", "op": "between"}) is None
+        assert cloud.return_preset_of("junk") is None
+
+
+class TestAttributeAliases:
+    def test_panel_constants_come_from_the_registry(self):
+        assert cloud.Z_ATTRIBUTE == cloud.pc_attributes.Z == "Z"
+        assert cloud.HAG_ATTRIBUTE == cloud.pc_attributes.HEIGHT_ABOVE_GROUND == "HeightAboveGround"
+        assert cloud.RETURN_NUMBER_ATTRIBUTE == "ReturnNumber"
+        assert cloud.NUMBER_OF_RETURNS_ATTRIBUTE == "NumberOfReturns"
+
+    def test_every_registry_label_is_in_the_translation_catalog(self):
+        source = (_PROJECT_ROOT / "ui" / "widgets" / "coverage_panels" / "point_cloud_exploring_panel.py").read_text(
+            encoding="utf-8")
+        for item in cloud.pc_attributes.KNOWN_ATTRIBUTES:
+            if item.label not in ("X", "Y", "Z"):
+                assert f'self.tr("{item.label}")' in source, item.label
+
+
+class TestOpenBounds:
+    def test_between_bounds_at_the_data_edges_are_dropped(self):
+        condition = cloud.pc_attributes.parse_condition({"attribute": "Z", "op": "between", "low": 12.0, "high": 190.0})
+        assert cloud.drop_open_bounds(condition, 12.5, 187.0) == dict(condition, low=None, high=None)
+        inner = dict(condition, low=20.0, high=100.0)
+        assert cloud.drop_open_bounds(inner, 12.5, 187.0) == inner
+
+    def test_one_sided_operators(self):
+        at_least = {"attribute": "Intensity", "op": ">=", "low": 0.0, "high": None, "join": "AND"}
+        assert cloud.drop_open_bounds(at_least, 0.0, 4095.0)["low"] is None
+        at_most = dict(at_least, op="<=", low=4095.0)
+        assert cloud.drop_open_bounds(at_most, 0.0, 4095.0)["low"] is None
+        assert cloud.drop_open_bounds(dict(at_most, low=200.0), 0.0, 4095.0)["low"] == 200.0
+
+    def test_other_operators_are_kept(self):
+        strict = {"attribute": "Intensity", "op": ">", "low": 0.0, "high": None, "join": "AND"}
+        assert cloud.drop_open_bounds(strict, 0.0, 4095.0) == strict
+        last = {"attribute": "ReturnNumber", "op": "<=", "low": "NumberOfReturns", "high": None, "join": "AND"}
+        assert cloud.drop_open_bounds(last, 1.0, 5.0) == last
+
+
+class TestLegacyStateMigration:
+    def test_z_intensity_and_number_return(self):
+        state = {"ranges_enabled": True, "z": [10.5, None], "intensity_enabled": True, "intensity": [100, 900],
+                 "return": 2}
+        assert cloud.parse_point_cloud_state(state)["conditions"] == [
+            {"attribute": "Z", "op": "between", "low": 10.5, "high": None, "join": "AND"},
+            {"attribute": "Intensity", "op": "between", "low": 100.0, "high": 900.0, "join": "AND"},
+            {"attribute": "ReturnNumber", "op": "=", "low": 2.0, "high": None, "join": "AND"},
+        ]
+
+    @pytest.mark.parametrize("choice,expected", [
+        ("first", "ReturnNumber = 1"), ("last", "ReturnNumber = NumberOfReturns"), ("single", "NumberOfReturns = 1"),
+    ])
+    def test_return_shortcuts(self, choice, expected):
+        conditions = cloud.parse_point_cloud_state({"return": choice})["conditions"]
+        assert cloud.pc_attributes.conditions_expression(conditions) == expected
+
+    def test_unchecked_intensity_unbounded_z_and_junk_give_nothing(self):
+        state = {"z": [None, None], "intensity_enabled": False, "intensity": [1, 2], "return": 99}
+        assert cloud.parse_point_cloud_state(state)["conditions"] == []
+        assert cloud.parse_point_cloud_state({"return": [1]})["conditions"] == []
+        assert cloud.parse_point_cloud_state({"return": True})["conditions"] == []
+
+    def test_old_keys_are_not_kept(self):
+        parsed = cloud.parse_point_cloud_state({"z": [1, 2], "intensity_enabled": True, "return": "first"})
+        assert not {"z", "intensity", "intensity_enabled", "return"} & set(parsed)
+
+    def test_conditions_win_over_old_keys(self):
+        state = {"z": [1, 2], "conditions": [{"attribute": "Intensity", "op": ">=", "low": 5}]}
+        assert [c["attribute"] for c in cloud.parse_point_cloud_state(state)["conditions"]] == ["Intensity"]
+        assert cloud.parse_point_cloud_state(dict(state, conditions=[]))["conditions"] == []
+
+    def test_old_hag_keys_keep_working(self):
+        state = {"classes_enabled": False, "ranges_enabled": True, "z": [None, 150], "hag_enabled": True,
+                 "hag_min": 3, "hag_layer_id": "dtm"}
+        assert cloud.build_point_cloud_expression(state) == "Z <= 150 AND HeightAboveGround >= 3"
+        assert cloud.hag_from_state(state) == ("dtm", 3.0)
 
 
 class TestPointCloudCriteriaFromState:
@@ -336,17 +420,18 @@ class TestPointCloudCriteriaFromState:
         criteria = cloud.build_point_cloud_criteria({})
         assert criteria.is_empty
         assert criteria.to_subset_string() == ""
+        assert cloud.parse_point_cloud_state({})["conditions"] == []
 
     def test_classes_count_only_when_the_group_is_checked(self):
         assert cloud.build_point_cloud_criteria({"classes": [6, 2]}).to_subset_string() == "Classification IN (2, 6)"
         assert cloud.build_point_cloud_criteria({"classes_enabled": False, "classes": [2]}).is_empty
 
-    def test_ranges_count_only_when_the_group_is_checked(self):
+    def test_conditions_count_only_when_the_group_is_checked(self):
         state = {"z": [10.5, None], "intensity_enabled": True, "intensity": [100, 900], "return": 1}
         assert cloud.build_point_cloud_criteria(state).is_empty
         state["ranges_enabled"] = True
         assert cloud.build_point_cloud_criteria(state).to_subset_string() == (
-            "Z >= 10.5 AND Intensity >= 100 AND Intensity <= 900 AND ReturnNumber = 1")
+            "Z >= 10.5 AND Intensity >= 100 AND Intensity <= 900 AND (ReturnNumber = 1)")
 
     def test_intensity_needs_its_checkbox(self):
         state = {"ranges_enabled": True, "intensity": [100, 900]}
@@ -360,15 +445,32 @@ class TestPointCloudCriteriaFromState:
         assert criteria.to_subset_string() == (
             "Classification IN (2, 6) AND Z <= 150.25 AND (ReturnNumber = NumberOfReturns)")
 
+    def test_and_chain_keeps_ranges(self):
+        state = {"classes_enabled": False, "ranges_enabled": True, "conditions": [
+            {"attribute": "Z", "op": "between", "low": 1, "high": 5},
+            {"attribute": "Intensity", "op": "<=", "low": 900}]}
+        criteria = cloud.build_point_cloud_criteria(state)
+        assert [item.attribute for item in criteria.ranges] == ["Z", "Intensity"]
+        assert criteria.extra_clauses == ()
+
+    def test_or_chain_is_one_extra_clause(self):
+        state = {"classes_enabled": False, "ranges_enabled": True, "conditions": [
+            {"attribute": "Z", "op": "between", "low": 1, "high": 5},
+            {"attribute": "Intensity", "op": ">=", "low": 100, "join": "OR"}]}
+        criteria = cloud.build_point_cloud_criteria(state)
+        assert criteria.ranges == ()
+        assert criteria.extra_clauses == ("(Z >= 1 AND Z <= 5) OR (Intensity >= 100)",)
+
     def test_exact_bounds_are_not_rounded(self):
         state = {"ranges_enabled": True, "z": [12.3456, 187.0004]}
         assert cloud.build_point_cloud_criteria(state).to_subset_string() == "Z >= 12.3456 AND Z <= 187.0004"
 
     def test_inverted_bounds_and_junk_are_tolerated(self):
-        parsed = cloud.parse_point_cloud_state({"z": [5, 1], "classes": [2, 2.5, 300, "x"], "return": 99})
-        assert parsed["z"] == (1.0, 5.0)
+        parsed = cloud.parse_point_cloud_state({"z": [5, 1], "classes": [2, 2.5, 300, "x"], "return": 99,
+                                                "hag_min": "x", "hag_layer_id": 3})
+        assert parsed["conditions"] == [{"attribute": "Z", "op": "between", "low": 1.0, "high": 5.0, "join": "AND"}]
         assert parsed["classes"] == [2]
-        assert parsed["return"] is None
+        assert (parsed["hag_min"], parsed["hag_layer_id"]) == (cloud.DEFAULT_HAG_MIN, None)
 
     def test_parse_is_idempotent(self):
         state = {"classes": [6, 2], "ranges_enabled": True, "z": [1, 2], "return": "single",
@@ -376,10 +478,46 @@ class TestPointCloudCriteriaFromState:
         once = cloud.parse_point_cloud_state(state)
         assert cloud.parse_point_cloud_state(once) == once
 
+    def test_conditions_round_trip(self):
+        conditions = [
+            {"attribute": "Z", "op": "between", "low": 1.5, "high": None, "join": "AND"},
+            {"attribute": "Scan Angle", "op": "<>", "low": 0.0, "high": None, "join": "OR"},
+            {"attribute": "ReturnNumber", "op": "=", "low": "NumberOfReturns", "high": None, "join": "AND"},
+        ]
+        state = {"layer_id": "lidar", "classes_enabled": False, "classes": [], "ranges_enabled": True,
+                 "conditions": conditions, "hag_enabled": False, "hag_min": 2.0, "hag_layer_id": None,
+                 "expression_enabled": False, "expression": "", "apply_to_tiles": True}
+        assert cloud.parse_point_cloud_state(state) == state
+
 
 class TestPointCloudExpression:
     def test_generated_expression(self):
         assert cloud.build_point_cloud_expression({"classes": [2]}) == "Classification = 2"
+
+    def test_or_chain_is_not_double_parenthesised(self):
+        state = {"classes_enabled": False, "ranges_enabled": True, "conditions": [
+            {"attribute": "Z", "op": "between", "low": 1, "high": 5},
+            {"attribute": "Intensity", "op": ">=", "low": 100, "join": "OR"}]}
+        assert cloud.build_point_cloud_expression(state) == "(Z >= 1 AND Z <= 5) OR (Intensity >= 100)"
+        assert cloud.generated_expression(state) == "(Z >= 1 AND Z <= 5) OR (Intensity >= 100)"
+
+    def test_lone_shortcut_is_bare(self):
+        state = {"classes_enabled": False, "ranges_enabled": True, "return": "last"}
+        assert cloud.build_point_cloud_expression(state) == "ReturnNumber = NumberOfReturns"
+
+    def test_or_chain_is_wrapped_before_the_height(self):
+        state = {"classes_enabled": False, "ranges_enabled": True, "hag_enabled": True, "hag_min": 2,
+                 "hag_layer_id": "dtm", "conditions": [
+                     {"attribute": "Z", "op": ">", "low": 300},
+                     {"attribute": "Intensity", "op": "<", "low": 50, "join": "OR"}]}
+        assert cloud.build_point_cloud_expression(state) == (
+            "((Z > 300) OR (Intensity < 50)) AND HeightAboveGround >= 2")
+        assert cloud.build_point_cloud_expression(state, hag_available=False) == "(Z > 300) OR (Intensity < 50)"
+
+    def test_classes_and_or_chain(self):
+        state = {"classes": [6], "ranges_enabled": True, "conditions": [
+            {"attribute": "Z", "op": ">", "low": 300}, {"attribute": "Intensity", "op": "<", "low": 50, "join": "OR"}]}
+        assert cloud.build_point_cloud_expression(state) == "Classification = 6 AND ((Z > 300) OR (Intensity < 50))"
 
     def test_height_above_dtm_is_appended(self):
         state = {"classes": [5], "ranges_enabled": True, "hag_enabled": True, "hag_min": 2.5, "hag_layer_id": "dtm"}

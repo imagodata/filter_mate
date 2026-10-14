@@ -36,6 +36,7 @@ ICON_HOVER = ('<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="11.
               '<path d="M14 14l2.5 2.5"/>')
 ICON_ZONE = '<rect x="3" y="4" width="18" height="14" stroke-dasharray="2.5 2"/><path d="M8 15v-3M12 15V8M16 15v-5"/>'
 ICON_PROFILE = '<path d="M2 18l5-7 4 4 4-8 7 11M2 21h20"/>'
+ICON_LINK_STYLE = '<path d="M4 20V10M9 20V5M14 20v-8M19 20v-4M2 20h20"/>'
 ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 12v10"/>'
 
 # QGIS main window actions run by the point cloud tools, first name found wins
@@ -150,7 +151,8 @@ def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -
 def tools_for(kind_value: str) -> List[str]:
     """Object names of the extra tool buttons shown for a layer kind value."""
     if kind_value == 'raster':
-        return ['pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone']
+        return ['pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
+                'pushButton_checkable_exploring_raster_link']
     if kind_value == 'point_cloud':
         return ['pushButton_exploring_point_cloud_profile', 'pushButton_exploring_point_cloud_3d']
     return []
@@ -192,6 +194,7 @@ class CoverageDockExtras(QObject):
         self._layer_id: Optional[str] = None
         self._hover_base = None
         self._hover_base_id: Optional[str] = None
+        self._link_connected = False
 
     @property
     def dockwidget(self) -> Any:
@@ -251,6 +254,9 @@ class CoverageDockExtras(QObject):
             ('pushButton_checkable_exploring_raster_zone', True,
              self.tr("Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band"),
              self._on_zone_toggled),
+            ('pushButton_checkable_exploring_raster_link', True,
+             self.tr("Link the range to the style: the layer colours stretch over the selected range"),
+             self._on_link_toggled),
             ('pushButton_exploring_point_cloud_profile', False,
              self.tr("Elevation profile: open the QGIS elevation profile of the map"), self._open_elevation_profile),
             ('pushButton_exploring_point_cloud_3d', False,
@@ -288,6 +294,7 @@ class CoverageDockExtras(QObject):
         bodies = {
             'pushButton_checkable_exploring_raster_hover': ICON_HOVER,
             'pushButton_checkable_exploring_raster_zone': ICON_ZONE,
+            'pushButton_checkable_exploring_raster_link': ICON_LINK_STYLE,
             'pushButton_exploring_point_cloud_profile': ICON_PROFILE,
             'pushButton_exploring_point_cloud_3d': ICON_3D,
         }
@@ -351,7 +358,8 @@ class CoverageDockExtras(QObject):
 
     def leave(self) -> None:
         """Stop the map interactions of the outgoing layer (hover, rectangle tool)."""
-        for name in ('pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone'):
+        for name in ('pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
+                     'pushButton_checkable_exploring_raster_link'):
             button = self._tools.get(name)
             if button is not None:
                 self._guarded(self._uncheck, button)
@@ -543,6 +551,58 @@ class CoverageDockExtras(QObject):
             logger.debug(f"[FM5] value under the cursor unreadable: {exc}")
             return
         panel.set_hover_value(layer_point.x(), layer_point.y(), values.get(panel.current_band()))
+
+    # === Raster: range linked to the layer style ===
+
+    def _on_link_toggled(self, checked: bool) -> None:
+        panel = self._controller._raster_panel
+        if panel is None:
+            return
+        if checked:
+            if not self._link_connected:
+                panel.selectionChanged.connect(self._apply_link)
+                self._link_connected = True
+            self._apply_link()
+        else:
+            if self._link_connected:
+                try:
+                    panel.selectionChanged.disconnect(self._apply_link)
+                except (TypeError, RuntimeError):
+                    pass
+                self._link_connected = False
+            self._unlink_style()
+
+    def _link_range(self) -> Tuple[Optional[float], Optional[float]]:
+        """Range of the panel, an open side replaced by the band minimum / maximum."""
+        panel = self._controller._raster_panel
+        selection = panel.selection() if panel is not None else None
+        low, high = panel._data_bounds() if panel is not None else (None, None)
+        if selection is not None and getattr(selection.mode, 'value', '') == 'range':
+            low = selection.minimum if selection.minimum is not None else low
+            high = selection.maximum if selection.maximum is not None else high
+        return low, high
+
+    def _apply_link(self, *_args) -> None:
+        layer, panel = self._controller.active_layer, self._controller._raster_panel
+        if layer is None or panel is None:
+            return
+        from ...adapters.qgis.coverage_layers.raster_adapter import link_range_to_style
+        low, high = self._link_range()
+        try:
+            if not link_range_to_style(layer, panel.current_band(), low, high):
+                logger.debug("[FM5] this raster style has no single band range to link")
+        except RuntimeError:
+            pass
+
+    def _unlink_style(self) -> None:
+        layer = self._controller.active_layer
+        if layer is None:
+            return
+        from ...adapters.qgis.coverage_layers.raster_adapter import unlink_range_from_style
+        try:
+            unlink_range_from_style(layer)
+        except RuntimeError:
+            pass
 
     # === Raster: statistics of a rectangle ===
 

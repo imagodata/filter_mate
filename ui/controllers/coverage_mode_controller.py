@@ -787,7 +787,10 @@ class CoverageModeController(BaseController):
                 else:
                     self._identify_point_cloud()
             elif action == 'zoom':
-                self._zoom_to(layer)
+                if self._kind is LayerKind.RASTER:
+                    self._zoom_to_selection(layer)  # mockup: zoom on the extent of the selected range
+                else:
+                    self._zoom_to(layer)
             elif action in ('select', 'deselect'):
                 enabled = action == 'select'
                 if self._kind is LayerKind.RASTER:
@@ -832,6 +835,33 @@ class CoverageModeController(BaseController):
             extent = transform.transformBoundingBox(extent)
         except Exception:
             pass
+        canvas.setExtent(extent)
+        canvas.refresh()
+
+    def _zoom_to_selection(self, layer: Any) -> None:
+        """Zoom on the pixels kept by the raster range / classes; the whole layer without one."""
+        panel = self._raster_panel
+        selection = panel.selection() if panel is not None else None
+        extent = None
+        try:
+            from ...adapters.qgis.coverage_layers.raster_adapter import selection_extent
+            extent = selection_extent(self._base_raster(layer), selection) if selection is not None else None
+        except Exception as exc:
+            logger.debug(f"[FM5] extent of the selected range not computed: {exc}")
+        if extent is None or extent.isEmpty():
+            self._zoom_to(layer)
+            return
+        iface = self._iface()
+        if iface is None:
+            return
+        from qgis.core import QgsCoordinateTransform, QgsProject
+        canvas = iface.mapCanvas()
+        try:
+            transform = QgsCoordinateTransform(layer.crs(), canvas.mapSettings().destinationCrs(), QgsProject.instance())
+            extent = transform.transformBoundingBox(extent)
+        except Exception:
+            pass
+        extent.scale(1.05)  # a small margin around the selected pixels
         canvas.setExtent(extent)
         canvas.refresh()
 

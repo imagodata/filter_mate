@@ -110,7 +110,8 @@ class TestPointCloudCard:
 class TestTools:
     def test_raster_tools(self):
         assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_hover",
-                                              "pushButton_checkable_exploring_raster_zone"]
+                                              "pushButton_checkable_exploring_raster_zone",
+                                              "pushButton_checkable_exploring_raster_link"]
 
     def test_point_cloud_tools(self):
         assert extras.tools_for("point_cloud") == ["pushButton_exploring_point_cloud_profile",
@@ -125,7 +126,7 @@ class TestTools:
                 assert name.startswith(("pushButton_exploring_", "pushButton_checkable_exploring_"))
 
     def test_every_tool_has_an_icon(self):
-        assert all(body.strip().startswith("<") for body in (extras.ICON_HOVER, extras.ICON_ZONE,
+        assert all(body.strip().startswith("<") for body in (extras.ICON_HOVER, extras.ICON_ZONE, extras.ICON_LINK_STYLE,
                                                             extras.ICON_PROFILE, extras.ICON_3D))
 
 

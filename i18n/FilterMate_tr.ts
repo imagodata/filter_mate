@@ -109,17 +109,17 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="209"/>
         <source>1 band</source>
         <translation>1 bant</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="262"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="210"/>
         <source>{0} bands</source>
         <translation>{0} bant</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="263"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="211"/>
         <source>{0} points</source>
         <translation>{0} nokta</translation>
     </message>
@@ -139,79 +139,84 @@
         <translation type="obsolete">Kaynak geometri: EXPLORING içinde seçilen detaylar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Value under the cursor: follow the pixel value of the current band while moving over the map</source>
         <translation>İmlecin altındaki değer: harita üzerinde gezinirken geçerli bandın piksel değerini izle</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band</source>
         <translation>Dikdörtgen istatistikleri: geçerli bandın minimum, maksimum ve ortalamasını okumak için haritada sürükleyin</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Yükseklik profili: haritanın QGIS yükseklik profilini aç</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="398"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>3B görünüm: yeni bir QGIS 3B harita görünümü aç</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="264"/>
         <source>no feature</source>
-        <translation>detay yok</translation>
+        <translation type="obsolete">detay yok</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="265"/>
         <source>{0} feature(s)</source>
-        <translation>{0} detay</translation>
+        <translation type="obsolete">{0} detay</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="266"/>
         <source>every pixel</source>
-        <translation>tüm pikseller</translation>
+        <translation type="obsolete">tüm pikseller</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="267"/>
         <source>{0} class(es)</source>
-        <translation>{0} sınıf</translation>
+        <translation type="obsolete">{0} sınıf</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="268"/>
         <source>expression</source>
-        <translation>ifade</translation>
+        <translation type="obsolete">ifade</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="269"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="212"/>
         <source>{0} features</source>
         <translation>{0} detay</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Vector</source>
         <translation>Vektör</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="546"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="400"/>
         <source>Point cloud</source>
         <translation>Nokta bulutu</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
         <source>Kept points</source>
-        <translation>Tutulan noktalar</translation>
+        <translation type="obsolete">Tutulan noktalar</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="355"/>
         <source>Selection → source geometry</source>
-        <translation>Seçim → kaynak geometri</translation>
+        <translation type="obsolete">Seçim → kaynak geometri</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
+        <source>Link the range to the style: the layer colours stretch over the selected range</source>
+        <translation>Aralığı stile bağla: katman renkleri seçilen aralığa yayılır</translation>
     </message>
 </context>
 <context>
@@ -222,207 +227,207 @@
         <translation>{0} raster / nokta bulutu katmanının filtresi geri yükleniyor…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="395"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="404"/>
         <source>cov. ≥ </source>
         <translation>kapsama ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="405"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Hedef çokgenin kaynak geometrinin içinde kalan en küçük payı (0 = herhangi bir örtüşme). Kaynak bir raster veya nokta bulutu olduğunda kullanılır.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="478"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
         <source>Point cloud</source>
         <translation>Nokta bulutu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="496"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0} katmanı: seçim EXPLORING'de, ilişki FILTERING'de</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="502"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Piksel seçici: her bandın değerini okumak için haritaya tıklayın (Ctrl+tıklama aralığı genişletir)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="520"/>
         <source>Zoom to the layer</source>
         <translation>Katmana yakınlaştır</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="504"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="513"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Önizleme: seçimin dışındaki pikselleri gizle</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="506"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
         <source>Not used for raster layers</source>
         <translation>Raster katmanları için kullanılmaz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="507"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="516"/>
         <source>Reset the raster selection</source>
         <translation>Raster seçimini sıfırla</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="510"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="519"/>
         <source>Identify points on the map</source>
         <translation>Haritada noktaları sorgula</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="512"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="521"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Canlı önizleme: yalnızca seçimin tuttuğu noktaları göster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="514"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="523"/>
         <source>Not used for point cloud layers</source>
         <translation>Nokta bulutu katmanları için kullanılmaz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="524"/>
         <source>Reset the point cloud criteria</source>
         <translation>Nokta bulutu ölçütlerini sıfırla</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="672"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="681"/>
         <source>Invalid raster calculator expression</source>
         <translation>Geçersiz raster hesaplayıcı ifadesi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="710"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="719"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL bulunamadı: DTM üzerindeki yükseklik için pdal çalıştırılabilir dosyası gerekir</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="999"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1051"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Bir FilterMate görevi hâlâ çalışıyor: bitmesini bekleyin</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1015"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1067"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate görevi başarısız oldu: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1048"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1100"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Önce pikselleri seçin: bir değer aralığı, sınıflar veya bir raster ifadesi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1057"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1109"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster filtrelendi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1122"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Nokta bulutu ifadesi reddedildi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1073"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1125"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Önce noktaları seçin: sınıflar, öznitelik aralıkları veya bir ifade</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1081"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1133"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Nokta bulutu filtrelendi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1145"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1197"/>
         <source>Filter not applied: {0}</source>
         <translation>Filtre uygulanmadı: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>canceled</source>
         <translation>iptal edildi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1149"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} hedef filtrelendi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1151"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1203"/>
         <source>{0} failed: {1}</source>
         <translation>{0} başarısız oldu: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1160"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: '{0}' kaynağından filtreleniyor…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1216"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Sonradan değişti, olduğu gibi bırakıldı: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1222"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1274"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} katman geri yüklendi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1256"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' dışa aktarılamadı: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1320"/>
         <source>Exported: {0}</source>
         <translation>Dışa aktarıldı: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Export failed: {0}</source>
         <translation>Dışa aktarma başarısız oldu: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1329"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} katman dışa aktarılıyor…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1335"/>
         <source>Export folder</source>
         <translation>Dışa aktarma klasörü</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1355"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1407"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Raster / nokta bulutu hedefleri atlandı: EXPLORING'de kaynak nesne seçilmedi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Raster / nokta bulutu hedefleri filtrelenmedi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1380"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1432"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} raster / nokta bulutu hedefi filtrelendi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1465"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Zeminden yükseklik için kullanılacak DTM rasterini seçin</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1473"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Zeminden yükseklik hesaplanmadı: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1485"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1537"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>'{0}' üzerindeki yükseklik PDAL ile hesaplanıyor…</translation>
     </message>
@@ -1301,127 +1306,127 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="204"/>
+        <location filename="../filter_mate.py" line="206"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="328"/>
+        <location filename="../filter_mate.py" line="330"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="328"/>
+        <location filename="../filter_mate.py" line="330"/>
         <source>Open FilterMate panel</source>
         <translation>FilterMate panelini aç</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="337"/>
+        <location filename="../filter_mate.py" line="339"/>
         <source>Reset configuration and database</source>
         <translation>Yapılandırmayı ve veritabanını sıfırla</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="337"/>
+        <location filename="../filter_mate.py" line="339"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Varsayılan yapılandırmayı geri yükle ve SQLite veritabanını sil</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1413"/>
+        <location filename="../filter_mate.py" line="1429"/>
         <source>Reset Configuration</source>
         <translation>Yapılandırmayı Sıfırla</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1436"/>
+        <location filename="../filter_mate.py" line="1452"/>
         <source>Configuration reset successfully.</source>
         <translation>Yapılandırma başarıyla sıfırlandı.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1441"/>
+        <location filename="../filter_mate.py" line="1457"/>
         <source>Default configuration file not found.</source>
         <translation>Varsayılan yapılandırma dosyası bulunamadı.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1462"/>
+        <location filename="../filter_mate.py" line="1478"/>
         <source>Database deleted: {filename}</source>
         <translation>Veritabanı silindi: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1476"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>Restart required</source>
         <translation>Yeniden başlatma gerekli</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="421"/>
+        <location filename="../filter_mate.py" line="423"/>
         <source>Obsolete configuration detected</source>
         <translation>Eski yapılandırma algılandı</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="422"/>
+        <location filename="../filter_mate.py" line="424"/>
         <source>unknown version</source>
         <translation>bilinmeyen sürüm</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="430"/>
+        <location filename="../filter_mate.py" line="432"/>
         <source>Corrupted configuration detected</source>
         <translation>Bozuk yapılandırma algılandı</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="487"/>
+        <location filename="../filter_mate.py" line="489"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Yapılandırma sıfırlanmadı. Bazı özellikler düzgün çalışmayabilir.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="498"/>
+        <location filename="../filter_mate.py" line="500"/>
         <source>Configuration created with default values</source>
         <translation>Yapılandırma varsayılan değerlerle oluşturuldu</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="501"/>
+        <location filename="../filter_mate.py" line="503"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Bozuk yapılandırma sıfırlandı. Varsayılan ayarlar geri yüklendi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="504"/>
+        <location filename="../filter_mate.py" line="506"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Eski yapılandırma sıfırlandı. Varsayılan ayarlar geri yüklendi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="525"/>
+        <location filename="../filter_mate.py" line="527"/>
         <source>Configuration updated to latest version</source>
         <translation>Yapılandırma en son sürüme güncellendi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="522"/>
+        <location filename="../filter_mate.py" line="524"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Yapılandırma güncellendi: yeni ayarlar mevcut ({sections}). Seçenekler menüsünden erişin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="516"/>
+        <location filename="../filter_mate.py" line="518"/>
         <source>Geometry Simplification</source>
         <translation>Geometri Basitleştirme</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="517"/>
+        <location filename="../filter_mate.py" line="519"/>
         <source>Optimization Thresholds</source>
         <translation>Optimizasyon Eşikleri</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="662"/>
+        <location filename="../filter_mate.py" line="664"/>
         <source>Geometry validation setting</source>
         <translation>Geometri doğrulama ayarı</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="692"/>
+        <location filename="../filter_mate.py" line="694"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Geçersiz geometri filtreleme başarıyla devre dışı bırakıldı.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="699"/>
+        <location filename="../filter_mate.py" line="701"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Geçersiz geometri filtreleme değiştirilmedi. Bazı özellikler dışa aktarmalardan hariç tutulabilir.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="423"/>
+        <location filename="../filter_mate.py" line="425"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1436,7 +1441,7 @@ Varsayılan ayarlara sıfırlamak istiyor musunuz?
 • Hayır: Mevcut yapılandırmayı koru (sorunlara neden olabilir)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="431"/>
+        <location filename="../filter_mate.py" line="433"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1451,12 +1456,12 @@ Varsayılan ayarlara sıfırlamak istiyor musunuz?
 • Hayır: İptal (eklenti düzgün çalışmayabilir)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="438"/>
+        <location filename="../filter_mate.py" line="440"/>
         <source>Configuration reset</source>
         <translation>Yapılandırma sıfırlama</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="439"/>
+        <location filename="../filter_mate.py" line="441"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1465,12 +1470,12 @@ Do you want to continue?</source>
 Devam etmek istiyor musunuz?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="544"/>
+        <location filename="../filter_mate.py" line="546"/>
         <source>Error during configuration migration: {}</source>
         <translation>Yapılandırma geçişi sırasında hata: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="664"/>
+        <location filename="../filter_mate.py" line="666"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1497,7 +1502,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1413"/>
+        <location filename="../filter_mate.py" line="1429"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1514,7 +1519,7 @@ Bu:
 Değişiklikleri uygulamak için QGIS yeniden başlatılmalıdır.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1476"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1523,17 +1528,17 @@ Please restart QGIS to apply the changes.</source>
 Değişiklikleri uygulamak için lütfen QGIS'i yeniden başlatın.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="366"/>
+        <location filename="../filter_mate.py" line="368"/>
         <source>Initialization error: {0}</source>
         <translation>Başlatma hatası: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="603"/>
+        <location filename="../filter_mate.py" line="605"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} referanslı katman yüklenmedi ({layers_list}). Yedek görüntüleme kullanılıyor.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1467"/>
+        <location filename="../filter_mate.py" line="1483"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename} silinemedi: {e}</translation>
     </message>
@@ -1543,71 +1548,71 @@ Değişiklikleri uygulamak için lütfen QGIS'i yeniden başlatın.</translation
         <translation type="obsolete">Sıfırlama sırasında hata: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1519"/>
+        <location filename="../filter_mate.py" line="1535"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate&lt;/b&gt; kullandığınız için teşekkürler!&lt;br&gt;Discord topluluğumuza katılarak:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Yardım ve destek alın&lt;/li&gt;&lt;li&gt;Hata ve sorunları bildirin&lt;/li&gt;&lt;li&gt;Yeni özellikler önerin&lt;/li&gt;&lt;li&gt;Diğer kullanıcılarla ipuçlarını paylaşın&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1535"/>
+        <location filename="../filter_mate.py" line="1551"/>
         <source>  Join us on Discord</source>
         <translation>  Discord'da bize katılın</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1555"/>
+        <location filename="../filter_mate.py" line="1571"/>
         <source>Don&apos;t show this again</source>
         <translation>Bunu bir daha gösterme</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1558"/>
+        <location filename="../filter_mate.py" line="1574"/>
         <source>Close</source>
         <translation>Kapat</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1624"/>
+        <location filename="../filter_mate.py" line="1640"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Eklenti yüklenirken hata: {0}. Ayrıntılar için QGIS Python konsolunu kontrol edin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6932"/>
+        <location filename="../filter_mate_dockwidget.py" line="6960"/>
         <source>Current layer: {0}</source>
         <translation>Geçerli katman: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6934"/>
+        <location filename="../filter_mate_dockwidget.py" line="6962"/>
         <source>No layer selected</source>
         <translation>Katman seçilmedi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6944"/>
+        <location filename="../filter_mate_dockwidget.py" line="6972"/>
         <source>Selected layers:
 {0}</source>
         <translation>Seçili katmanlar:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6944"/>
+        <location filename="../filter_mate_dockwidget.py" line="6972"/>
         <source>No layers selected</source>
         <translation>Katman seçilmedi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6964"/>
+        <location filename="../filter_mate_dockwidget.py" line="6992"/>
         <source>No expression defined</source>
         <translation>İfade tanımlanmadı</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6976"/>
+        <location filename="../filter_mate_dockwidget.py" line="7004"/>
         <source>Display expression: {0}</source>
         <translation>Görüntüleme ifadesi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6991"/>
+        <location filename="../filter_mate_dockwidget.py" line="7019"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Özellik kimliği: {0}
 İlk öznitelik: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1485"/>
+        <location filename="../filter_mate.py" line="1501"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Yapılandırma sıfırlanamadı. Eklenti klasörünün yazılabilir olduğunu denetleyip tekrar deneyin. Ayrıntılar filtermate.log dosyasında.</translation>
     </message>
@@ -1766,153 +1771,153 @@ What would you like to do?</translation>
         <translation type="obsolete">Arayüz boyut hatası: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1449"/>
+        <location filename="../filter_mate_dockwidget.py" line="1460"/>
         <source>Favorites manager not available</source>
         <translation>Favori yöneticisi kullanılamıyor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1470"/>
+        <location filename="../filter_mate_dockwidget.py" line="1481"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} favori kaydedildi
 Uygulamak veya yönetmek için tıklayın</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1473"/>
+        <location filename="../filter_mate_dockwidget.py" line="1484"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Kaydedilmiş favori yok
 Geçerli filtreyi eklemek için tıklayın</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1493"/>
+        <location filename="../filter_mate_dockwidget.py" line="1504"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{1} katman için {0} arka ucu zorlandı</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1579"/>
+        <location filename="../filter_mate_dockwidget.py" line="1590"/>
         <source>Backend controller not available</source>
         <translation>Arka uç denetleyicisi kullanılamıyor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1517"/>
+        <location filename="../filter_mate_dockwidget.py" line="1528"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL otomatik temizleme etkinleştirildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1518"/>
+        <location filename="../filter_mate_dockwidget.py" line="1529"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL otomatik temizleme devre dışı bırakıldı</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL oturum görünümleri temizlendi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1524"/>
+        <location filename="../filter_mate_dockwidget.py" line="1535"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Temizlenecek görünüm yok veya temizleme başarısız</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1546"/>
         <source>No PostgreSQL connection available</source>
         <translation>Kullanılabilir PostgreSQL bağlantısı yok</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1541"/>
+        <location filename="../filter_mate_dockwidget.py" line="1552"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Şema diğer oturumlardan {0} görünüm içeriyor.
 Yine de silinsin mi?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1542"/>
+        <location filename="../filter_mate_dockwidget.py" line="1553"/>
         <source>Other Sessions Active</source>
         <translation>Diğer oturumlar aktif</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1544"/>
+        <location filename="../filter_mate_dockwidget.py" line="1555"/>
         <source>Schema cleanup cancelled</source>
         <translation>Şema temizleme iptal edildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget.py" line="1560"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Şema '{0}' başarıyla silindi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1551"/>
+        <location filename="../filter_mate_dockwidget.py" line="1562"/>
         <source>Schema cleanup failed</source>
         <translation>Şema temizleme başarısız</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1577"/>
+        <location filename="../filter_mate_dockwidget.py" line="1588"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL Oturum Bilgisi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema uyarlandı: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Dark mode</source>
         <translation>Karanlık mod</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2700"/>
+        <location filename="../filter_mate_dockwidget.py" line="2711"/>
         <source>Light mode</source>
         <translation>Açık mod</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4016"/>
+        <location filename="../filter_mate_dockwidget.py" line="4027"/>
         <source>Selected features have no geometry.</source>
         <translation>Seçili özelliklerin geometrisi yok.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4035"/>
+        <location filename="../filter_mate_dockwidget.py" line="4046"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Özellik seçilmedi. Açılır listeden bir özellik seçin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5100"/>
+        <location filename="../filter_mate_dockwidget.py" line="5101"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Seçilen katman geçersiz veya kaynağı bulunamıyor.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5837"/>
+        <location filename="../filter_mate_dockwidget.py" line="5838"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatif tampon (erozyon): poligonları içe doğru daraltır</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5840"/>
+        <location filename="../filter_mate_dockwidget.py" line="5841"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Metre cinsinden tampon değeri (pozitif=genişlet, negatif=poligonları daralt)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6314"/>
+        <location filename="../filter_mate_dockwidget.py" line="6342"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Eklenti {0} vektör katmanla etkinleştirildi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6395"/>
+        <location filename="../filter_mate_dockwidget.py" line="6423"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Eklenti otomatik olarak yeniden yüklenemedi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6397"/>
+        <location filename="../filter_mate_dockwidget.py" line="6425"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Eklenti yeniden yüklenirken hata: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6469"/>
+        <location filename="../filter_mate_dockwidget.py" line="6497"/>
         <source>Layer properties reset to defaults</source>
         <translation>Katman özellikleri varsayılanlara sıfırlandı</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6470"/>
+        <location filename="../filter_mate_dockwidget.py" line="6498"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Katman özelliklerini sıfırlarken hata: {}</translation>
     </message>
@@ -2042,12 +2047,12 @@ Yine de silinsin mi?</translation>
         <translation>Dışa aktarmayı zip'le</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1004"/>
+        <location filename="../filter_mate_dockwidget.py" line="1005"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Panel yerleşimi uygulanamadı; varsayılan boyutlar kullanılıyor. Ayrıntılar filtermate.log dosyasında.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6549"/>
+        <location filename="../filter_mate_dockwidget.py" line="6577"/>
         <source>Vector</source>
         <translation>Vektör</translation>
     </message>
@@ -2489,186 +2494,394 @@ PostgreSQL tablosunun tanımlı bir PRIMARY KEY içerdiğinden emin olun.</trans
     </message>
 </context>
 <context>
+    <name>PointCloudConditionRow</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="460"/>
+        <source>Link with the previous condition</source>
+        <translation>Önceki koşulla bağlantı</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="462"/>
+        <source>AND</source>
+        <translation>VE</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="463"/>
+        <source>OR</source>
+        <translation>VEYA</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="464"/>
+        <source>Attribute</source>
+        <translation>Öznitelik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="467"/>
+        <source>Comparison</source>
+        <translation>Karşılaştırma</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="470"/>
+        <source>between</source>
+        <translation>arasında</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
+        <source>Remove this condition</source>
+        <translation>Bu koşulu kaldır</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
+        <source>Compare with a value or another attribute</source>
+        <translation>Bir değerle veya başka bir öznitelikle karşılaştır</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="484"/>
+        <source>value</source>
+        <translation>değer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="485"/>
+        <source>Value</source>
+        <translation>Değer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="488"/>
+        <source>Highest value kept</source>
+        <translation>Tutulan en yüksek değer</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="568"/>
+        <source>Observed values: {0} to {1}</source>
+        <translation>Gözlenen değerler: {0} ile {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="568"/>
+        <source>No statistics for this attribute</source>
+        <translation>Bu öznitelik için istatistik yok</translation>
+    </message>
+</context>
+<context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="402"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="693"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Veri kümesinin diğer karolarına uygula</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="416"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="707"/>
         <source>CLASSES</source>
         <translation>SINIFLAR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="421"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="712"/>
         <source>Ground</source>
         <translation>Zemin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="422"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="713"/>
         <source>Vegetation</source>
         <translation>Bitki örtüsü</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="423"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="714"/>
         <source>Buildings</source>
         <translation>Binalar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="424"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="715"/>
         <source>Above ground</source>
         <translation>Zemin üstü</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="425"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="716"/>
         <source>Water</source>
         <translation>Su</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="426"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="717"/>
         <source>Without noise</source>
         <translation>Gürültüsüz</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="433"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="724"/>
         <source>Check only these classes</source>
         <translation>Yalnızca bu sınıfları işaretle</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="441"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="732"/>
         <source>All</source>
         <translation>Tümü</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="442"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="733"/>
         <source>None</source>
         <translation>Hiçbiri</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="456"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="747"/>
         <source>Point classes</source>
         <translation>Nokta sınıfları</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="474"/>
         <source>ATTRIBUTE RANGES</source>
-        <translation>ÖZNİTELİK ARALIKLARI</translation>
+        <translation type="obsolete">ÖZNİTELİK ARALIKLARI</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="480"/>
         <source>Z (m)</source>
-        <translation>Z (m)</translation>
+        <translation type="obsolete">Z (m)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="481"/>
         <source>Lowest elevation kept</source>
-        <translation>Tutulan en düşük yükseklik</translation>
+        <translation type="obsolete">Tutulan en düşük yükseklik</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="482"/>
         <source>Highest elevation kept</source>
-        <translation>Tutulan en yüksek yükseklik</translation>
+        <translation type="obsolete">Tutulan en yüksek yükseklik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="490"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="839"/>
         <source>Intensity</source>
         <translation>Yoğunluk</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="491"/>
         <source>Lowest intensity kept</source>
-        <translation>Tutulan en düşük yoğunluk</translation>
+        <translation type="obsolete">Tutulan en düşük yoğunluk</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="492"/>
         <source>Highest intensity kept</source>
-        <translation>Tutulan en yüksek yoğunluk</translation>
+        <translation type="obsolete">Tutulan en yüksek yoğunluk</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
         <source>Return</source>
-        <translation>Dönüş</translation>
+        <translation type="obsolete">Dönüş</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="505"/>
         <source>Echo of the laser pulse kept</source>
-        <translation>Tutulan lazer darbesi yankısı</translation>
+        <translation type="obsolete">Tutulan lazer darbesi yankısı</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="799"/>
         <source>Height above DTM ≥</source>
         <translation>DTM üzerindeki yükseklik ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="529"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="818"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Yüksekliğin ölçüldüğü sayısal arazi modeli</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="537"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="828"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Noktaları arazi modelinin en az bu kadar üstünde tut</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="546"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="862"/>
         <source>EXPRESSION</source>
         <translation>İFADE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="550"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="866"/>
         <source>Point cloud expression</source>
         <translation>Nokta bulutu ifadesi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="551"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="867"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>İfadeyi elle düzenlemek için grubu işaretleyin</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="578"/>
         <source>No elevation statistics for this layer</source>
-        <translation>Bu katman için yükseklik istatistiği yok</translation>
+        <translation type="obsolete">Bu katman için yükseklik istatistiği yok</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="619"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="925"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Araziden yükseklik kullanılamıyor</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="634"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="940"/>
         <source>Kept points: {0}</source>
         <translation>Tutulan noktalar: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="957"/>
         <source>Current filter: {0}</source>
         <translation>Geçerli filtre: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="957"/>
         <source>none</source>
         <translation>yok</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>Any</source>
-        <translation>Herhangi</translation>
+        <translation type="obsolete">Herhangi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>First</source>
-        <translation>İlk</translation>
+        <translation type="obsolete">İlk</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Last</source>
-        <translation>Son</translation>
+        <translation type="obsolete">Son</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Single</source>
-        <translation>Tek</translation>
+        <translation type="obsolete">Tek</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
+        <source>ATTRIBUTES</source>
+        <translation>ÖZNİTELİKLER</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="771"/>
+        <source>+ Condition</source>
+        <translation>+ Koşul</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="773"/>
+        <source>Add a condition on an attribute of the layer</source>
+        <translation>Katmanın bir özniteliğine koşul ekle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <source>Returns</source>
+        <translation>Dönüşler</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="778"/>
+        <source>Keep the first, last or single returns of the laser pulses</source>
+        <translation>Lazer darbelerinin ilk, son veya tekil dönüşlerini tut</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="781"/>
+        <source>First return (ReturnNumber = 1)</source>
+        <translation>İlk dönüş (ReturnNumber = 1)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="782"/>
+        <source>Last return (ReturnNumber = NumberOfReturns)</source>
+        <translation>Son dönüş (ReturnNumber = NumberOfReturns)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="783"/>
+        <source>Single return (NumberOfReturns = 1)</source>
+        <translation>Tekil dönüş (NumberOfReturns = 1)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="840"/>
+        <source>Return number</source>
+        <translation>Dönüş numarası</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="841"/>
+        <source>Number of returns</source>
+        <translation>Dönüş sayısı</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="842"/>
+        <source>Classification</source>
+        <translation>Sınıflandırma</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="843"/>
+        <source>Scan angle</source>
+        <translation>Tarama açısı</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="844"/>
+        <source>User data</source>
+        <translation>Kullanıcı verisi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="845"/>
+        <source>Point source ID</source>
+        <translation>Nokta kaynağı kimliği</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="846"/>
+        <source>GPS time</source>
+        <translation>GPS zamanı</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="847"/>
+        <source>Red</source>
+        <translation>Kırmızı</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="848"/>
+        <source>Green</source>
+        <translation>Yeşil</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="849"/>
+        <source>Blue</source>
+        <translation>Mavi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="850"/>
+        <source>Infrared</source>
+        <translation>Kızılötesi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="851"/>
+        <source>Scan direction</source>
+        <translation>Tarama yönü</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="852"/>
+        <source>Edge of flight line</source>
+        <translation>Uçuş hattı kenarı</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="853"/>
+        <source>Synthetic</source>
+        <translation>Sentetik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="854"/>
+        <source>Key point</source>
+        <translation>Anahtar nokta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="855"/>
+        <source>Withheld</source>
+        <translation>Alıkonulmuş</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="856"/>
+        <source>Overlap</source>
+        <translation>Örtüşme</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="857"/>
+        <source>Scanner channel</source>
+        <translation>Tarayıcı kanalı</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="858"/>
+        <source>Classification flags</source>
+        <translation>Sınıflandırma bayrakları</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="859"/>
+        <source>Height above ground</source>
+        <translation>Zemin üstü yükseklik</translation>
     </message>
 </context>
 <context>
@@ -3644,154 +3857,159 @@ Devam edilsin mi?</translation>
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="307"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="323"/>
         <source>Band</source>
         <translation>Bant</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="310"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="326"/>
         <source>Band whose values are selected</source>
         <translation>Değerleri seçilen bant</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="339"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="355"/>
         <source>PIXEL VALUE</source>
         <translation>PİKSEL DEĞERİ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="347"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="363"/>
         <source>Pixel value of the current band</source>
         <translation>Geçerli bandın piksel değeri</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="358"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="382"/>
         <source>Last {0} values picked</source>
         <translation>Seçilen son {0} değer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="371"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>Piksel seçici ile haritaya tıklayın. Ctrl+tıklama aralığı bu değere kadar genişletir.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="380"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="408"/>
         <source>VALUE RANGE</source>
         <translation>DEĞER ARALIĞI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Min</source>
         <translation>En az</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Lowest value kept</source>
         <translation>Tutulan en düşük değer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Max</source>
         <translation>En çok</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="389"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
         <source>Highest value kept</source>
         <translation>Tutulan en yüksek değer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="406"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="434"/>
         <source>Preview on the map (hide the other pixels)</source>
         <translation>Haritada önizleme (diğer pikselleri gizle)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="413"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="441"/>
         <source>CLASSES</source>
         <translation>SINIFLAR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="417"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
         <source>Raster classes</source>
         <translation>Raster sınıfları</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="421"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="449"/>
         <source>All</source>
         <translation>Tümü</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="422"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="450"/>
         <source>None</source>
         <translation>Hiçbiri</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="432"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="460"/>
         <source>RASTER EXPRESSION</source>
         <translation>RASTER İFADESİ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="436"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="464"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Raster hesaplayıcı ifadesi; piksel, sonuç 0 olmadığı yerde tutulur</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="437"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="465"/>
         <source>Raster expression</source>
         <translation>Raster ifadesi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="445"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="473"/>
         <source>Use the range</source>
         <translation>Aralığı kullan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="446"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="474"/>
         <source>Write the current value range as an expression</source>
         <translation>Geçerli değer aralığını ifade olarak yaz</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="519"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="547"/>
         <source>Selected pixels: {0}</source>
         <translation>Seçilen pikseller: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="801"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="829"/>
         <source>Set a value range first</source>
         <translation>Önce bir değer aralığı belirleyin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="818"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="846"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="834"/>
         <source>Last values:</source>
-        <translation>Son değerler:</translation>
+        <translation type="obsolete">Son değerler:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="362"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="386"/>
         <source>Value of the current band under the cursor</source>
         <translation>İmlecin altındaki geçerli bant değeri</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="368"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="392"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
         <translation>Haritada son çizilen dikdörtgendeki geçerli bant istatistikleri</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="565"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="593"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>İmlecin altında: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="603"/>
         <source>Zone: {0}</source>
         <translation>Bölge: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="575"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="603"/>
         <source>no pixel</source>
         <translation>piksel yok</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="862"/>
+        <source>LAST PICKS</source>
+        <translation>SON ÖLÇÜMLER</translation>
     </message>
 </context>
 <context>
