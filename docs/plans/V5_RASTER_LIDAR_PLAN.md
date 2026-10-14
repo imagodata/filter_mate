@@ -6,6 +6,22 @@
 > Ce plan remplace la roadmap de février 2026 (`.serena/memories/backlog_raster_pointcloud_v1_2026_02_11.md`,
 > `website/roadmap.html`). Il part de l'état réel du code au 14/10.
 
+## État d'avancement (14/10/2026, fin de journée)
+
+| Lot | État | Commits |
+|---|---|---|
+| 0 Spikes | fait (4.2 et 3.44 en ligne de commande ; 3.44 avec interface non testé) | 6328d3f3 |
+| 1 Socle type de couche | fait | 14be40d2 |
+| 2 Nuage dans EXPLORING | fait (panneau 3 groupes, état par couche, Z à 3 décimales, aperçu en direct, HAG via PDAL) | a88af228 |
+| 3 Raster dans EXPLORING | fait (bande, pipette, plage + histogramme, aperçu, classes, expression) | a88af228 |
+| 4 Filtres croisés | fait : 9 combinaisons, couverture minimale, Disjoint, combinaison AND/OR/AND NOT des découpes | 08283761, a88af228 |
+| 5 Sélections avancées | fait : HAG (PDAL), « appliquer aux dalles du jeu » ; classes raster, expression raster | a88af228 |
+| 6 Export | fait : GeoTIFF/COG, LAZ/LAS/COPC/GPKG/CSV, en tâche de fond, depuis EXPORTING ou le bouton Export | a88af228 |
+| 7 Transverse | partiel : déchargement + projet OK ; **favoris, API/Processing, site, rejouer un filtre dérivé à la réouverture du projet : non faits** | — |
+
+Vérifications : suite unitaire verte ; `scripts/fm5_scenarios.py` 37/37 (QGIS 4.2 sans interface, dalle LiDAR HD
+Cerdagne) ; `scripts/fm5_gui_check.py` 25/25 (QGIS 4.2 avec interface, profil jetable).
+
 ## 1. Objectifs
 
 1. **EXPLORING s'adapte à la couche courante.** Vecteur, raster ou nuage de points : la barre d'outils et les trois

@@ -182,6 +182,7 @@ class CoverageModeController(BaseController):
         if first_activation:
             self._save_dock_state()
         self._apply_layout(kind)
+        self._show_kind_badge(layer, kind)
         if kind is LayerKind.RASTER:
             self._populate_raster(layer)
         else:
@@ -337,6 +338,8 @@ class CoverageModeController(BaseController):
             widget = getattr(dw, name, None)
             if widget is not None:
                 self._saved_visibility[widget] = not widget.isHidden()
+        badge = getattr(dw, 'backend_indicator_label', None)
+        self._saved_badge = (badge.text(), badge.toolTip(), badge.styleSheet()) if badge is not None else None
         self._saved_tooltips = {}
         self._saved_enabled = {}
         for name in EXPLORING_BUTTONS:
@@ -356,6 +359,29 @@ class CoverageModeController(BaseController):
             self._call(button, 'setEnabled', self._saved_enabled.get(name, True))
         self._saved_tooltips = {}
         self._saved_enabled = {}
+        badge = getattr(dw, 'backend_indicator_label', None)
+        saved_badge, self._saved_badge = getattr(self, '_saved_badge', None), None
+        if badge is not None and saved_badge is not None:
+            self._call(badge, 'setText', saved_badge[0])
+            self._call(badge, 'setToolTip', saved_badge[1])
+            self._call(badge, 'setStyleSheet', saved_badge[2])
+
+    def _show_kind_badge(self, layer: Any, kind: Any) -> None:
+        """Show "Raster · gdal" / "Point cloud · copc" in the backend badge."""
+        from ...core.domain.layer_kind import LayerKind
+        badge = getattr(self.dockwidget, 'backend_indicator_label', None)
+        if badge is None:
+            return
+        label = self.tr("Raster") if kind is LayerKind.RASTER else self.tr("Point cloud")
+        try:
+            provider = layer.providerType()
+        except Exception:
+            provider = ''
+        color = '#c98a1d' if kind is LayerKind.RASTER else '#1f9e84'
+        name = badge.objectName() or 'label_backend_indicator'
+        self._call(badge, 'setText', f"{label} · {provider}" if provider else label)
+        self._call(badge, 'setToolTip', self.tr("{0} layer: selection in EXPLORING, relation in FILTERING").format(label))
+        self._call(badge, 'setStyleSheet', f"QLabel#{name}{{background:{color};color:white;border-radius:3px;padding:3px 10px;font-weight:600;}}")
 
     def _apply_layout(self, kind: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
@@ -655,6 +681,8 @@ class CoverageModeController(BaseController):
                 else:
                     self._stop_preview(layer)
                     self._refresh_canvas(layer)
+            elif action == 'backend':
+                pass
             elif action == 'reset':
                 self._stop_preview(layer)
                 panel = self._current_panel()

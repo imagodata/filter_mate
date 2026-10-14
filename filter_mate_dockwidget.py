@@ -1391,6 +1391,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def _on_backend_indicator_clicked(self, event):
         """v4.0 Sprint 19: → BackendController."""
         logger.debug("_on_backend_indicator_clicked called")
+        if self._coverage_action('backend'):
+            return  # raster / point cloud: the badge shows the kind, there is no backend to choose
 
         if self._controller_integration and self._controller_integration.backend_controller:
             # Use QTimer to defer menu display after mouse event completes

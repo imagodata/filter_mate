@@ -293,7 +293,10 @@ class RasterExploringPanel(QWidget):
         band_row.addWidget(self._band_combo)
         layout.addLayout(band_row)
 
-        layout.addWidget(self._build_pixel_group())
+        self._pixel_group = self._build_pixel_group()
+        if hasattr(self._pixel_group, 'setCollapsed'):
+            self._pixel_group.setCollapsed(True)  # opened by the first picked pixel
+        layout.addWidget(self._pixel_group)
         layout.addWidget(self._build_range_group())
         layout.addWidget(self._build_classes_group())
         layout.addWidget(self._build_expression_group())
@@ -500,6 +503,8 @@ class RasterExploringPanel(QWidget):
         band = self.current_band()
         self._history = push_history(self._history, (float(x), float(y), values.get(band), band))
         self._refresh_pixel_display()
+        if hasattr(self._pixel_group, 'setCollapsed'):
+            self._pixel_group.setCollapsed(False)
         value = values.get(band)
         if extend and value is not None and self._mode is RasterSelectionMode.RANGE:
             self._set_range(*extend_range(self._low, self._high, value))
