@@ -277,9 +277,33 @@ def s9_exports():
     check('restore_all on unload', mnt.source().endswith('mnt_1m.tif') and lhd.source() == TILE, f"{restored} layers")
 
 
+# --- 10. reopening a project replays the stored clips ---------------------
+def s10_replay_on_reopen():
+    from filter_mate.core.services.cross_filter_service import replay_project_filters
+    request = CrossFilterRequest(bat.id(), LayerKind.VECTOR,
+                                 targets=(TargetSpec(mnt.id(), LayerKind.RASTER), TargetSpec(lhd.id(), LayerKind.POINT_CLOUD)),
+                                 predicates=('Disjoint',), buffer_value=2.0)
+    run('V->R+P disjoint before save', request, VectorSourceJob(bat, first5))
+    kept_points = lhd.pointCount()
+    check('disjoint keeps the outside points', 0 < kept_points < 25111931, f"{kept_points} points")
+    path = os.path.join(OUT, 'fm5_replay.qgs') if os.name != 'nt' else os.path.join(os.environ['LOCALAPPDATA'], 'Temp', 'fm5', 'fm5_replay.qgs')
+    project.write(path)
+    project.clear()
+    registry().restore_all(project)
+    project.read(path)
+    reopened_mnt = project.mapLayersByName('mnt')[0]
+    reopened_lhd = project.mapLayersByName('lhd')[0]
+    check('reopened layers on original sources', reopened_mnt.source().endswith('mnt_1m.tif') and reopened_lhd.source() == TILE)
+    queued = replay_project_filters(service, synchronous=True)
+    check('stored clips replayed', queued == 2 and reopened_mnt.source().endswith('.vrt') and reopened_lhd.source().endswith('.copc.laz'),
+          f"queued={queued} mnt={reopened_mnt.source()[-20:]} lhd={reopened_lhd.source()[-30:]}")
+    check('replayed point count identical', reopened_lhd.pointCount() == kept_points, f"{reopened_lhd.pointCount()} vs {kept_points}")
+    registry().restore_all(project)
+
+
 for scenario in (s0_predicates, s1_vector_to_raster, s2_vector_to_point_cloud, s3_raster_to_vector,
                  s4_raster_to_raster, s5_raster_to_point_cloud, s6_point_cloud_to_vector,
-                 s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports):
+                 s7_point_cloud_to_raster, s8_point_cloud_to_point_cloud, s9_exports, s10_replay_on_reopen):
     print(f"--- {scenario.__name__}", flush=True)
     safe(scenario)
 

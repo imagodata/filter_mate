@@ -113,11 +113,46 @@ class CoverageModeController(BaseController):
     # === Lifecycle ===
 
     def setup(self) -> None:
-        """Nothing is built before the first raster / point cloud layer is selected."""
+        """Panels are built on the first raster / point cloud layer; stored clips are replayed."""
+        try:
+            from qgis.core import QgsProject
+            from qgis.PyQt.QtCore import QTimer
+            QgsProject.instance().readProject.connect(self._on_project_read)
+            self._project_signal_connected = True
+            QTimer.singleShot(1500, self.replay_stored_filters)
+        except Exception as exc:
+            logger.debug(f"[FM5] stored filters replay not scheduled: {exc}")
         logger.debug("CoverageModeController setup complete (panels deferred)")
+
+    def _on_project_read(self, *_args) -> None:
+        try:
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(1500, self.replay_stored_filters)
+        except Exception as exc:
+            logger.debug(f"[FM5] stored filters replay not scheduled: {exc}")
+
+    def replay_stored_filters(self) -> int:
+        """Clip again the raster / point cloud layers whose filter was saved in the project."""
+        try:
+            from ...core.services.cross_filter_service import replay_project_filters
+            count = replay_project_filters(self.service)
+        except Exception as exc:
+            logger.warning(f"[FM5] stored raster / point cloud filters not replayed: {exc}")
+            return 0
+        if count:
+            show_info, _ = _feedback()
+            show_info(self.tr("Restoring the filter of {0} raster / point cloud layer(s)…").format(count))
+        return count
 
     def teardown(self) -> None:
         self.deactivate()
+        if getattr(self, '_project_signal_connected', False):
+            try:
+                from qgis.core import QgsProject
+                QgsProject.instance().readProject.disconnect(self._on_project_read)
+            except (TypeError, RuntimeError):
+                pass
+            self._project_signal_connected = False
         for widget_name in ('_host', '_coverage_spin'):
             widget = getattr(self, widget_name)
             setattr(self, widget_name, None)

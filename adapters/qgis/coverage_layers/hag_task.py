@@ -74,6 +74,6 @@ class HeightAboveGroundTask(QgsTask):
         registry().record(LayerSnapshot(self.layer_id, LayerKind.POINT_CLOUD.value, source=layer.source(), provider='copc',
                                         subset=layer.subsetString(), derived=True,
                                         original_source=self.before.base_source,
-                                        original_provider=self.before.base_provider))
+                                        original_provider=self.before.base_provider), layer)
         layer.triggerRepaint()
         self.done.emit(True, '')

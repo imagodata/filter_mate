@@ -21,6 +21,8 @@ from ....core.domain.layer_kind import LayerKind
 
 logger = logging.getLogger(__name__)
 
+DERIVED_PROPERTY = 'filtermate/derived'
+
 
 def _supports_subset(layer: QgsMapLayer) -> bool:
     return hasattr(layer, 'subsetString') and hasattr(layer, 'setSubsetString')
@@ -41,12 +43,30 @@ class DerivedSourceRegistry:
     def is_derived(self, layer_id: str) -> bool:
         return layer_id in self._derived
 
-    def record(self, snapshot: LayerSnapshot) -> None:
-        """Remember (or forget, for a non derived snapshot) the state of a layer."""
+    def record(self, snapshot: LayerSnapshot, layer: Optional[QgsMapLayer] = None) -> None:
+        """Remember (or forget, for a non derived snapshot) the state of a layer.
+
+        The state is also kept as the ``filtermate/derived`` custom property of
+        the layer, saved with the project, so the filter can be rebuilt when the
+        project is opened again (see :func:`replay_project_filters`).
+        """
         if snapshot.derived:
             self._derived[snapshot.layer_id] = snapshot
         else:
             self._derived.pop(snapshot.layer_id, None)
+        if layer is None:
+            try:
+                layer = QgsProject.instance().mapLayer(snapshot.layer_id)
+            except Exception:
+                layer = None
+        if layer is not None:
+            try:
+                if snapshot.derived and snapshot.geometry_wkt:
+                    layer.setCustomProperty(DERIVED_PROPERTY, json.dumps(snapshot.to_dict()))
+                else:
+                    layer.removeCustomProperty(DERIVED_PROPERTY)
+            except RuntimeError:
+                pass
 
     def forget(self, layer_id: str) -> None:
         self._derived.pop(layer_id, None)
@@ -171,7 +191,7 @@ def restore_snapshot(layer: QgsMapLayer, snapshot: LayerSnapshot,
         except ImportError:
             layer.setSubsetString(snapshot.subset or '')
         changed = True
-    reg.record(snapshot)
+    reg.record(snapshot, layer)
     if changed:
         layer.triggerRepaint()
     return changed
@@ -194,3 +214,31 @@ def _sync_alpha_band(layer) -> None:
         renderer.setAlphaBand(alpha)
     except Exception as exc:
         logger.debug(f"[FM5] alpha band not synchronized: {exc}")
+
+
+def pending_replays(project: Optional[QgsProject] = None):
+    """Layers of ``project`` holding a derived filter that is not applied (project just opened).
+
+    Returns:
+        List of ``(layer, LayerSnapshot)``.
+    """
+    project = project or QgsProject.instance()
+    pending = []
+    for layer in project.mapLayers().values():
+        try:
+            raw = layer.customProperty(DERIVED_PROPERTY)
+        except RuntimeError:
+            continue
+        if not raw:
+            continue
+        try:
+            snapshot = LayerSnapshot.from_dict(json.loads(raw))
+        except (TypeError, ValueError):
+            layer.removeCustomProperty(DERIVED_PROPERTY)
+            continue
+        if registry().is_derived(layer.id()) or not snapshot.geometry_wkt:
+            continue
+        if layer.source() != snapshot.original_source:
+            continue  # the user changed the source since: the stored filter no longer applies
+        pending.append((layer, snapshot))
+    return pending

@@ -158,6 +158,37 @@ class CrossFilterService:
         return [before.layer_id for before, _ in changes]
 
 
+def replay_project_filters(service: Optional['CrossFilterService'] = None, synchronous: bool = False) -> int:
+    """Rebuild the raster / point cloud clips stored in the opened project.
+
+    Each layer is clipped again by its stored geometry (same side), from its
+    original source, in a background task. Returns the number of layers queued.
+    """
+    from ...adapters.qgis.coverage_layers.snapshots import pending_replays, registry
+    from ...adapters.qgis.coverage_layers.source_jobs import FixedGeometrySourceJob
+    from ..domain.cross_filter import CrossFilterRequest, TargetSpec
+    service = service or get_cross_filter_service()
+    registry().install()
+    queued = 0
+    for layer, snapshot in pending_replays():
+        try:
+            kind = LayerKind(snapshot.kind)
+        except ValueError:
+            continue
+        if not kind.is_coverage:
+            continue
+        # The stored geometry is the area kept (outside already subtracted):
+        # clip the original source again, keeping its inside.
+        request = CrossFilterRequest(source_layer_id=f"replay:{layer.id()}", source_kind=LayerKind.OTHER,
+                                     targets=(TargetSpec(layer.id(), kind),), predicates=('Intersect',))
+        geometry = snapshot.geometry_wkt
+        job = FixedGeometrySourceJob(layer, geometry)
+        service.run(request, job, synchronous=synchronous)
+        queued += 1
+        logger.info(f"[FM5] replaying the stored {kind.value} filter of '{layer.name()}'")
+    return queued
+
+
 _service: Optional[CrossFilterService] = None
 
 

@@ -280,7 +280,7 @@ class RasterTargetJob(TargetJob):
         after = LayerSnapshot(self.layer_id, self.kind.value, source=layer.source(), provider='gdal', derived=True,
                               original_source=self._base_source, original_provider=self._base_provider,
                               geometry_wkt=self._geometry_wkt, side=self._side.value)
-        registry().record(after)
+        registry().record(after, layer)
         layer.triggerRepaint()
         return after
 
@@ -314,6 +314,7 @@ class PointCloudTargetJob(TargetJob):
         self._expression = ''
         self._geometry_wkt = ''
         self._side = CoverageSide.INSIDE
+        self._extent = QgsRectangle(layer.extent())
         self._exporter = None
         if self._mode == 'exact':
             from . import pdal_cli
@@ -356,27 +357,30 @@ class PointCloudTargetJob(TargetJob):
             self.outcome.success = True
             self.outcome.elapsed = time.perf_counter() - self._started
             return
+        # Like the raster target, the stored geometry is the area KEPT (outside
+        # = extent minus the source geometry) and the clip always keeps the inside.
+        if side is CoverageSide.OUTSIDE:
+            geometry = make_valid(QgsGeometry.fromRect(self._extent).difference(geometry))
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
                                      geometry, side, self.operator)
         self._geometry_wkt = geometry.asWkt() if not geometry.isEmpty() else ''
         if self._use_pdal:
-            self._compute_pdal(geometry, side, is_canceled)
+            self._compute_pdal(geometry, is_canceled)
         else:
-            self._compute_exporter(geometry, side, is_canceled)
+            self._compute_exporter(geometry, is_canceled)
         self.outcome.elapsed = time.perf_counter() - self._started
 
-    def _compute_pdal(self, geometry: QgsGeometry, side: CoverageSide, is_canceled) -> None:
+    def _compute_pdal(self, geometry: QgsGeometry, is_canceled) -> None:
         from . import pdal_cli
         path = cache.new_path(self.layer_name, '.copc.laz')
         reader = {"type": pdal_cli.reader_for(self._base_source), "filename": self._base_source}
         stages = [reader]
         if geometry.isEmpty():
-            if side is CoverageSide.INSIDE:
-                stages.append({"type": "filters.head", "count": 0})
+            stages.append({"type": "filters.head", "count": 0})
         else:
-            if side is CoverageSide.INSIDE and reader["type"] == 'readers.copc':
+            if reader["type"] == 'readers.copc':
                 reader["polygon"] = geometry.asWkt()
-            stages.append({"type": "filters.crop", "polygon": geometry.asWkt(), "outside": side is CoverageSide.OUTSIDE})
+            stages.append({"type": "filters.crop", "polygon": geometry.asWkt()})
         stages.append({"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all",
                        "a_srs": self.crs.authid() or self.crs.toWkt()})
         ok, message = pdal_cli.run_pipeline(stages, is_canceled=is_canceled)
@@ -387,14 +391,15 @@ class PointCloudTargetJob(TargetJob):
         self.outcome.success = True
         self.outcome.details['derived'] = path
 
-    def _compute_exporter(self, geometry: QgsGeometry, side: CoverageSide, is_canceled) -> None:
+    def _compute_exporter(self, geometry: QgsGeometry, is_canceled) -> None:
         if self._exporter is None:
             self.outcome.message = 'point cloud cannot be clipped (no pdal and no exporter)'
             return
-        if side is CoverageSide.OUTSIDE:
-            geometry = make_valid(QgsGeometry.fromRect(QgsProject.instance().mapLayer(self.layer_id).extent()).difference(geometry)) \
-                if QgsProject.instance().mapLayer(self.layer_id) is not None else geometry
-        self._exporter.setFilterGeometry(geometry.constGet().clone() if not geometry.isEmpty() else None)
+        if geometry.isEmpty():
+            # Nothing kept: a tiny polygon outside the extent (None would export everything).
+            ext = self._extent
+            geometry = QgsGeometry.fromRect(QgsRectangle(ext.xMinimum() - 2, ext.yMinimum() - 2, ext.xMinimum() - 1, ext.yMinimum() - 1))
+        self._exporter.setFilterGeometry(geometry.constGet().clone())
         self._exporter.doExport()
         error = self._exporter.lastError()
         if error:
@@ -431,7 +436,7 @@ class PointCloudTargetJob(TargetJob):
                               subset=layer.subsetString(), derived=True, original_source=self._base_source,
                               original_provider=self._base_provider, geometry_wkt=self._geometry_wkt,
                               side=self._side.value)
-        registry().record(after)
+        registry().record(after, layer)
         layer.triggerRepaint()
         return after
 

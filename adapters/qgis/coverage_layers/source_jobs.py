@@ -141,7 +141,7 @@ class RasterSourceJob(SourceJob):
         after = LayerSnapshot(self.layer_id, self.kind.value, source=layer.source(), provider='virtualraster',
                               derived=True, original_source=self.before.base_source,
                               original_provider=self.before.base_provider)
-        registry().record(after)
+        registry().record(after, layer)
         layer.triggerRepaint()
         return after
 
@@ -168,3 +168,16 @@ class PointCloudSourceJob(SourceJob):
     def apply(self, layer) -> Optional[LayerSnapshot]:
         after = take_snapshot(layer, self.kind)
         return None if after.same_state(self.before) else after
+
+
+class FixedGeometrySourceJob(SourceJob):
+    """A stored clip geometry (project reopened): no selection to read, nothing to filter on the source."""
+
+    kind = LayerKind.OTHER
+
+    def __init__(self, layer, geometry_wkt: str) -> None:
+        super().__init__(layer)
+        self._wkt = geometry_wkt
+
+    def _raw_geometry(self, is_canceled) -> QgsGeometry:
+        return QgsGeometry.fromWkt(self._wkt)
