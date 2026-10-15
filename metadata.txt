@@ -9,11 +9,11 @@ qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 supportsQt6=yes
 description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector, raster and LiDAR point cloud data with lightning-fast performance on ANY data source. Full QGIS 4 / Qt6 support.
-version=4.9.2
+version=5.0.0
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🎯 FilterMate 4.9.2 - Your Swiss Army Knife for Spatial Data!
+about=🎯 FilterMate 5.0 - Your Swiss Army Knife for Spatial Data: vector, raster and LiDAR point clouds!
 
     Stop struggling with complex filters. FilterMate makes spatial queries intuitive, fast, and powerful.
 
@@ -37,6 +37,7 @@ about=🎯 FilterMate 4.9.2 - Your Swiss Army Knife for Spatial Data!
     🎨 Beautiful UI that adapts to your QGIS theme
     ⚡ Filter chaining with dynamic buffer expressions
 
+    💡 v5.0.0: FilterMate 5 filters raster and LiDAR point cloud layers too. EXPLORING adapts to the current layer (raster value range with histogram, pixel picker, classes and expression; point cloud classes, Z / intensity / return ranges, attribute conditions, height above a DTM with PDAL); FILTERING relates that selection to layers of any kind in every direction (minimum coverage, Disjoint); EXPORTING writes GeoTIFF / COG and LAZ / COPC. Processing algorithms and models, qgis_process, Python and REST APIs. Tested in CI with the real dock on QGIS 3.22 to 4.2.
     💡 v4.9.2: Fix the GeoPackage layer that showed 0 features when re-filtered as a source after being filtered as a target (a closing parenthesis was lost while combining the new expression with the R-tree subset, invalid SQL accepted silently by OGR); with the combine option off, a new source filter now replaces the previous subset instead of being ANDed to it.
     💡 v4.9.1: Fix the filter refused on the first click on PostgreSQL selections of 100 000 features or more (materialized-view path called a missing facade method), fix after a project switch with the panel open ("wrapped C/C++ object of type QgsVectorLayer has been deleted" when the previous layer is gone) and a QGIS crash after a plugin reload followed by a project close (the panel is now removed and deleted on unload, so no feature-picker gather can outlive its layer); timing lines for the validate/reset steps of a layer change.
     💡 v4.9.0: Open another project with the panel open and it follows (four causes fixed and verified in QGIS 4.2), one stable FilterMate project row per project and no more duplicated favorites, PostgreSQL feature list without the server-side sort that fetched the whole table (13 s → 30 ms) and deferred while the canvas renders (no more 17 s freeze at project open), type-to-find in the layer combo, busy cursor and pressed button during tasks, plain-language error messages, accessible names, lighter zip, lint in CI, Qt6 enum guard.
@@ -64,7 +65,8 @@ repository=https://github.com/imagodata/filter_mate
 
 hasProcessingProvider=yes
 
-changelog=v4.9.2 (2026-09-14): GeoPackage layer empty (0 features) when re-filtered as a source after being filtered as a target fixed (the subset combiners dropped a closing parenthesis of the R-tree subset, invalid SQL accepted silently by OGR); with the combine option off the new source filter replaces the previous subset instead of being ANDed to it (targets already did).
+changelog=v5.0.0 (2026-10-15): FilterMate 5 - raster and LiDAR point cloud layers are sources and targets like vector layers. EXPLORING adapts to the current layer: raster band, pixel picker, value range with histogram and live preview, classes of paletted rasters, raster expression; point cloud ASPRS / LiDAR HD classes, Z / intensity / return ranges, chained attribute conditions, height above a DTM (PDAL), tiles of the same dataset. FILTERING keeps its form and relates that selection to vector, raster and point cloud targets (9 combinations, buffer, minimum coverage, Disjoint); clipped rasters (VRT) and point clouds (COPC) keep the layer id and style, follow undo / redo, are restored on unload and never written to the project file. EXPORTING writes GeoTIFF / COG and LAZ / LAS / COPC / GPKG / CSV. Automation: 7 Processing algorithms, 4 models, qgis_process, Python and REST APIs. Raster and point cloud support on by default, switched live in Configuration. Fixes found by the new CI runs on QGIS 3.22 to 4.2 (engine and dock): QGIS crash when the panel opened on QGIS 3.22-3.34, possible crash when a layer was removed, plugin not loading before QGIS 3.34.2, rasters not clipped with GDAL older than 3.9, point clouds with PDAL older than 2.4, modal extension dialog at every start.
+    v4.9.2 (2026-09-14): GeoPackage layer empty (0 features) when re-filtered as a source after being filtered as a target fixed (the subset combiners dropped a closing parenthesis of the R-tree subset, invalid SQL accepted silently by OGR); with the combine option off the new source filter replaces the previous subset instead of being ANDed to it (targets already did).
     v4.9.1 (2026-09-14): Filter refused on the first click and accepted on the second on PostgreSQL selections of 100 000 features or more (the materialized-view path called a facade method that does not exist) fixed; Python error after a project switch (RuntimeError on the deleted previous layer in the exploring and filtering controllers) fixed; QGIS access violation after a plugin reload followed by a project close fixed (the dock widget is removed and deleted on unload, no feature-picker gather outlives its layer); layer_change_validate / layer_change_reset timing lines.
 
 # Tags are comma separated with spaces allowed
