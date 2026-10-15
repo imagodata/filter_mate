@@ -109,3 +109,24 @@ class TestInProjectDedupe:
         count, names = service.auto_migrate_on_project_load("target")
         assert (count, names) == (1, ["50m"])
         assert sorted(r[2] for r in _rows(path)) == ["50m", "YONNE"]
+
+
+def test_fresh_database_without_favorites_table_is_quiet(tmp_path, caplog):
+    """New profile: the database exists before fm_favorites does (found by the dock smoke test,
+    which logged "no such table: fm_favorites" twice at ERROR on every first start)."""
+    path = str(tmp_path / "fresh.db")
+    sqlite3.connect(path).close()
+    service = FavoritesMigrationService(path)
+    with caplog.at_level("ERROR"):
+        # FilterMateApp._auto_migrate_orphan_favorites calls these two first, then auto_migrate_on_project_load.
+        assert service.dedupe_project_favorites("project-1") == 0
+        assert service.count_orphan_favorites() == 0
+        assert service.auto_migrate_on_project_load("project-1") == (0, [])
+    assert not [record for record in caplog.records if record.levelname == "ERROR"]
+
+
+def test_missing_database_file_is_not_created(tmp_path):
+    path = tmp_path / "missing.db"
+    service = FavoritesMigrationService(str(path))
+    assert service.count_orphan_favorites() == 0
+    assert not path.exists()

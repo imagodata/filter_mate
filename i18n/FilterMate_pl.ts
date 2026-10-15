@@ -4,27 +4,27 @@
 <context>
     <name>@default</name>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="314"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="312"/>
         <source>Import from Resource Sharing...</source>
         <translation>Importuj z Resource Sharing...</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="319"/>
         <source>Publish to Resource Sharing...</source>
         <translation>Opublikuj w Resource Sharing...</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="319"/>
         <source>Publish (no favorites saved)</source>
         <translation>Opublikuj (brak zapisanych ulubionych)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="334"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="332"/>
         <source>Quick publish to default repo</source>
         <translation>Szybka publikacja w domyślnym repozytorium</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="339"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Manage Resource Sharing repos...</source>
         <translation>Zarządzaj repozytoriami Resource Sharing...</translation>
     </message>
@@ -567,6 +567,24 @@
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
         <source>Exporter</source>
         <translation>Eksportuj</translation>
+    </message>
+</context>
+<context>
+    <name>ExtensionRegistry</name>
+    <message>
+        <location filename="../extensions/registry.py" line="390"/>
+        <source>install the QGIS plugin {0}</source>
+        <translation>zainstaluj wtyczkę QGIS {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/registry.py" line="394"/>
+        <source>install {0}</source>
+        <translation>zainstaluj {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/registry.py" line="395"/>
+        <source>The {0} extension is off because {1} is missing: {2}, then restart QGIS.</source>
+        <translation>Rozszerzenie {0} jest wyłączone, ponieważ brakuje {1}: {2}, a następnie uruchom ponownie QGIS.</translation>
     </message>
 </context>
 <context>
@@ -1588,39 +1606,39 @@ Uruchom ponownie QGIS, aby zastosować zmiany.</translation>
         <translation>Błąd ładowania wtyczki: {0}. Sprawdź konsolę Python QGIS, aby uzyskać szczegóły.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6960"/>
+        <location filename="../filter_mate_dockwidget.py" line="6963"/>
         <source>Current layer: {0}</source>
         <translation>Bieżąca warstwa: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6962"/>
+        <location filename="../filter_mate_dockwidget.py" line="6965"/>
         <source>No layer selected</source>
         <translation>Nie wybrano warstwy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6972"/>
+        <location filename="../filter_mate_dockwidget.py" line="6975"/>
         <source>Selected layers:
 {0}</source>
         <translation>Wybrane warstwy:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6972"/>
+        <location filename="../filter_mate_dockwidget.py" line="6975"/>
         <source>No layers selected</source>
         <translation>Nie wybrano warstw</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6992"/>
+        <location filename="../filter_mate_dockwidget.py" line="6995"/>
         <source>No expression defined</source>
         <translation>Nie zdefiniowano wyrażenia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7004"/>
+        <location filename="../filter_mate_dockwidget.py" line="7007"/>
         <source>Display expression: {0}</source>
         <translation>Wyrażenie wyświetlania: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7019"/>
+        <location filename="../filter_mate_dockwidget.py" line="7022"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID obiektu: {0}
@@ -1660,92 +1678,92 @@ Pierwszy atrybut: {1}</translation>
         <translation>Wyczyszczono {0} pamięci podręcznych</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="919"/>
+        <location filename="../filter_mate_app.py" line="920"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Nie udało się utworzyć panelu dokowanego: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="929"/>
+        <location filename="../filter_mate_app.py" line="930"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Nie udało się wyświetlić panelu dokowanego: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1443"/>
+        <location filename="../filter_mate_app.py" line="1444"/>
         <source>Error executing {0}: {1}</source>
         <translation>Błąd wykonywania {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1455"/>
+        <location filename="../filter_mate_app.py" line="1456"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Wtyczka działa w trybie awaryjnym (usługi hexagonalne niedostępne). Wydajność może być obniżona.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1704"/>
+        <location filename="../filter_mate_app.py" line="1705"/>
         <source>FilterMate ERROR</source>
         <translation>Błąd FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1704"/>
+        <location filename="../filter_mate_app.py" line="1705"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Nie można wykonać {0}: inicjalizacja widżetu nie powiodła się.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2487"/>
+        <location filename="../filter_mate_app.py" line="2488"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Nie można {0}: warstwa nieprawidłowa lub nie znaleziono źródła.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2624"/>
+        <location filename="../filter_mate_app.py" line="2625"/>
         <source>All filters cleared - </source>
         <translation>Wszystkie filtry wyczyszczone - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2625"/>
+        <location filename="../filter_mate_app.py" line="2626"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} obiektów widocznych w warstwie głównej</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2633"/>
+        <location filename="../filter_mate_app.py" line="2634"/>
         <source>Error: result handler missing</source>
         <translation>Błąd: brak procedury obsługi wyniku</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2646"/>
+        <location filename="../filter_mate_app.py" line="2647"/>
         <source>Error during filtering: {0}</source>
         <translation>Błąd podczas filtrowania: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2768"/>
+        <location filename="../filter_mate_app.py" line="2769"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Odzyskano {0} osieroconych ulubionych: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2903"/>
+        <location filename="../filter_mate_app.py" line="2904"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Ładowanie warstwy nie powiodło się - kliknij, aby ponowić</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2960"/>
+        <location filename="../filter_mate_app.py" line="2961"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} warstw(a) załadowanych pomyślnie</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1926"/>
+        <location filename="../filter_mate_app.py" line="1927"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1928"/>
+        <location filename="../filter_mate_app.py" line="1929"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1931"/>
+        <location filename="../filter_mate_app.py" line="1932"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1933"/>
+        <location filename="../filter_mate_app.py" line="1934"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1758,32 +1776,32 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1943"/>
+        <location filename="../filter_mate_app.py" line="1944"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1950"/>
+        <location filename="../filter_mate_app.py" line="1951"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1957"/>
+        <location filename="../filter_mate_app.py" line="1958"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1981"/>
+        <location filename="../filter_mate_app.py" line="1982"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1291"/>
+        <location filename="../filter_mate_app.py" line="1292"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Wybierz warstwę na karcie EXPLORING przed uruchomieniem '{0}'.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="846"/>
+        <location filename="../filter_mate_app.py" line="847"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} warstw(y) pozostaje przefiltrowanych: {1}. Włącz ponownie opcję, aby usunąć filtr.</translation>
     </message>
@@ -1796,7 +1814,7 @@ What would you like to do?</translation>
         <translation>Błąd inicjalizacji: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1000"/>
+        <location filename="../filter_mate_dockwidget.py" line="1003"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Konfiguracja interfejsu niekompletna - sprawdź logi</translation>
     </message>
@@ -1806,288 +1824,288 @@ What would you like to do?</translation>
         <translation type="obsolete">Błąd wymiarów interfejsu: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1460"/>
+        <location filename="../filter_mate_dockwidget.py" line="1463"/>
         <source>Favorites manager not available</source>
         <translation>Menedżer ulubionych niedostępny</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1481"/>
+        <location filename="../filter_mate_dockwidget.py" line="1484"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} ulubionych zapisanych
 Kliknij, aby zastosować lub zarządzać</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1484"/>
+        <location filename="../filter_mate_dockwidget.py" line="1487"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Brak zapisanych ulubionych
 Kliknij, aby dodać bieżący filtr</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1504"/>
+        <location filename="../filter_mate_dockwidget.py" line="1507"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Wymuszono backend {0} dla {1} warstw(y)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1590"/>
+        <location filename="../filter_mate_dockwidget.py" line="1593"/>
         <source>Backend controller not available</source>
         <translation>Kontroler backendu niedostępny</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1528"/>
+        <location filename="../filter_mate_dockwidget.py" line="1531"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Automatyczne czyszczenie PostgreSQL włączone</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1529"/>
+        <location filename="../filter_mate_dockwidget.py" line="1532"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Automatyczne czyszczenie PostgreSQL wyłączone</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Widoki sesji PostgreSQL wyczyszczone</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Brak widoków do wyczyszczenia lub czyszczenie nie powiodło się</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget.py" line="1549"/>
         <source>No PostgreSQL connection available</source>
         <translation>Brak dostępnego połączenia PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1552"/>
+        <location filename="../filter_mate_dockwidget.py" line="1555"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Schemat ma {0} widok(ów) z innych sesji.
 Usunąć mimo to?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1553"/>
+        <location filename="../filter_mate_dockwidget.py" line="1556"/>
         <source>Other Sessions Active</source>
         <translation>Inne sesje aktywne</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget.py" line="1558"/>
         <source>Schema cleanup cancelled</source>
         <translation>Czyszczenie schematu anulowane</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Schemat '{0}' pomyślnie usunięty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget.py" line="1565"/>
         <source>Schema cleanup failed</source>
         <translation>Czyszczenie schematu nie powiodło się</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1588"/>
+        <location filename="../filter_mate_dockwidget.py" line="1591"/>
         <source>PostgreSQL Session Info</source>
         <translation>Info sesji PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Theme adapted: {0}</source>
         <translation>Motyw dostosowany: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Dark mode</source>
         <translation>Tryb ciemny</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Light mode</source>
         <translation>Tryb jasny</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4027"/>
+        <location filename="../filter_mate_dockwidget.py" line="4030"/>
         <source>Selected features have no geometry.</source>
         <translation>Wybrane obiekty nie mają geometrii.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4046"/>
+        <location filename="../filter_mate_dockwidget.py" line="4049"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Nie wybrano obiektu. Wybierz obiekt z listy rozwijanej.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5101"/>
+        <location filename="../filter_mate_dockwidget.py" line="5104"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Wybrana warstwa jest nieprawidłowa lub nie można znaleźć jej źródła.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5838"/>
+        <location filename="../filter_mate_dockwidget.py" line="5841"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Bufor ujemny (erozja): zmniejsza wielokąty do wewnątrz</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5841"/>
+        <location filename="../filter_mate_dockwidget.py" line="5844"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Wartość bufora w metrach (dodatnia=rozszerz, ujemna=zmniejsz wielokąty)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6342"/>
+        <location filename="../filter_mate_dockwidget.py" line="6345"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Wtyczka aktywowana z {0} warstwami wektorowymi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6423"/>
+        <location filename="../filter_mate_dockwidget.py" line="6426"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Nie można automatycznie przeładować wtyczki.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6425"/>
+        <location filename="../filter_mate_dockwidget.py" line="6428"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Błąd podczas przeładowywania wtyczki: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6497"/>
+        <location filename="../filter_mate_dockwidget.py" line="6500"/>
         <source>Layer properties reset to defaults</source>
         <translation>Właściwości warstwy zresetowane do domyślnych</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6498"/>
+        <location filename="../filter_mate_dockwidget.py" line="6501"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Błąd resetowania właściwości warstwy: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
         <source>Filter</source>
         <translation>Filtruj</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
         <source>Undo the last filter</source>
         <translation>Cofnij ostatni filtr</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
         <source>Redo the last filter</source>
         <translation>Ponów ostatni filtr</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
         <source>Remove the filters</source>
         <translation>Usuń filtry</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
         <source>Export the layers</source>
         <translation>Eksportuj warstwy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>About FilterMate</source>
         <translation>O FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Identify the selected features</source>
         <translation>Identyfikuj wybrane obiekty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Zoom to the selected features</source>
         <translation>Przybliż do wybranych obiektów</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Select the features on the map</source>
         <translation>Zaznacz obiekty na mapie</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>Follow the features on the map</source>
         <translation>Śledź obiekty na mapie</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>Link the three selection modes</source>
         <translation>Połącz trzy tryby wyboru</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Reset the layer properties</source>
         <translation>Resetuj właściwości warstwy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Follow the current layer</source>
         <translation>Śledź bieżącą warstwę</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Layers to filter</source>
         <translation>Warstwy do przefiltrowania</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Combine with the existing filter</source>
         <translation>Połącz z istniejącym filtrem</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Geometric predicates</source>
         <translation>Predykaty geometryczne</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Buffer distance</source>
         <translation>Odległość bufora</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Buffer type</source>
         <translation>Typ bufora</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Layers to export</source>
         <translation>Warstwy do wyeksportowania</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Projection of the export</source>
         <translation>Układ współrzędnych eksportu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Export the styles</source>
         <translation>Eksportuj style</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="892"/>
         <source>Export format</source>
         <translation>Format eksportu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="893"/>
         <source>Output folder</source>
         <translation>Folder wyjściowy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="894"/>
         <source>Zip the export</source>
         <translation>Spakuj eksport do ZIP</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1005"/>
+        <location filename="../filter_mate_dockwidget.py" line="1008"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Nie można zastosować układu panelu; używane są domyślne rozmiary. Szczegóły w filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6577"/>
+        <location filename="../filter_mate_dockwidget.py" line="6580"/>
         <source>Vector</source>
         <translation>Wektor</translation>
     </message>
@@ -2368,7 +2386,7 @@ Usunąć mimo to?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1034"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1038"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2385,12 +2403,12 @@ Rozwiązanie: Usuń tę warstwę z projektu FilterMate, a następnie dodaj ją p
 Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1060"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1064"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Warstwa '{0}' nie ma PRIMARY KEY. Ograniczone funkcje: widoki zmaterializowane wyłączone. Zalecenie: dodaj PRIMARY KEY dla optymalnej wydajności.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="2114"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2087"/>
         <source>Exception: {0}</source>
         <translation>Wyjątek: {0}</translation>
     </message>
@@ -3410,12 +3428,12 @@ Kontynuować?</translation>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="196"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="194"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="228"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="226"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>

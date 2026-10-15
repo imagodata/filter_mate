@@ -359,22 +359,25 @@ class ExtensionRegistry:
             return False
 
     def _show_missing_deps_message(self, ext: BaseExtension, iface: Any) -> None:
-        """Show a message when extension deps are missing, with dismiss option."""
+        """Say once, in the message bar, that an extension waits for its dependencies.
+
+        Never a modal dialog: the extensions start with QGIS, and an optional one that most users
+        have no dependency for (Favorites Sharing needs the Resource Sharing plugin) must not block
+        the start. The notice is shown once, then dismissed; ``config.json → EXTENSIONS → <id> →
+        enabled`` turns the extension off for good.
+        """
         ext_id = ext.metadata.id
 
         if ext.is_warning_dismissed():
             return
 
         try:
-            from qgis.PyQt.QtWidgets import QCheckBox, QMessageBox
+            from qgis.PyQt.QtCore import QCoreApplication
 
             deps = ", ".join(ext.metadata.dependencies) if ext.metadata.dependencies else "?"
 
-            # FIX 2026-04-23: per-extension install hint so the dialog
-            # stops telling users "pip install resource_sharing" when
-            # the dep is actually a QGIS plugin installed via the
-            # Plugin Manager. Falls back to the legacy pip wording for
-            # extensions that don't override missing_deps_hint().
+            # FIX 2026-04-23: per-extension install hint (a QGIS plugin is installed from the
+            # Plugin Manager, not with pip).
             try:
                 hint = ext.missing_deps_hint() or {}
             except Exception as hint_err:
@@ -382,44 +385,20 @@ class ExtensionRegistry:
                 hint = {}
             method = (hint.get("method") or "pip").lower()
             install_cmd = hint.get("install_command") or f"pip install {deps}"
-            details = hint.get("details") or ""
 
             if method == "qgis_plugin":
-                step_one = f"Installez le plugin QGIS : {install_cmd}"
+                step = QCoreApplication.translate("ExtensionRegistry", "install the QGIS plugin {0}").format(install_cmd)
             elif method == "manual":
-                step_one = install_cmd
+                step = install_cmd
             else:
-                step_one = f"Installez : {install_cmd}"
-
-            msg = QMessageBox(iface.mainWindow())
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle(f"FilterMate — Extension {ext.metadata.name}")
-            msg.setText(
-                f"L'extension <b>{ext.metadata.name}</b> n'a pas pu démarrer "
-                f"car les dépendances requises ne sont pas disponibles.\n"
-            )
-            informative_lines = [
-                f"Paquets manquants : {deps}",
-                "",
-                "Pour l'activer :",
-                f"  1. {step_one}",
-                "  2. Redémarrez QGIS (ou rechargez le plugin FilterMate)",
-            ]
-            if details:
-                informative_lines.extend(["", details])
-            informative_lines.extend([
-                "",
-                "Réglages :",
-                f"  config.json → EXTENSIONS → {ext_id} → enabled",
-            ])
-            msg.setInformativeText("\n".join(informative_lines))
-
-            checkbox = QCheckBox("Ne plus afficher ce message")
-            msg.setCheckBox(checkbox)
-            msg.exec()
-
-            if checkbox.isChecked():
-                ext.dismiss_warning()
+                step = QCoreApplication.translate("ExtensionRegistry", "install {0}").format(install_cmd)
+            text = QCoreApplication.translate("ExtensionRegistry", "The {0} extension is off because {1} is missing: {2}, then restart QGIS.").format(
+                ext.metadata.name, deps, step)
+            from qgis.core import Qgis
+            # Duration 0: pushed while QGIS starts, it stays until closed instead of the usual 5 s.
+            iface.messageBar().pushMessage("FilterMate", text, Qgis.MessageLevel.Info, 0)
+            ext.dismiss_warning()  # once: not at every QGIS start
+            logger.info("Extension '%s': %s", ext_id, text)
 
         except Exception as e:
             logger.debug("Could not show missing deps message: %s", e)

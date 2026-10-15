@@ -4,27 +4,27 @@
 <context>
     <name>@default</name>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="314"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="312"/>
         <source>Import from Resource Sharing...</source>
         <translation>Tuo Resource Sharingista...</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="319"/>
         <source>Publish to Resource Sharing...</source>
         <translation>Julkaise Resource Sharingiin...</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="319"/>
         <source>Publish (no favorites saved)</source>
         <translation>Julkaise (suosikkeja ei tallennettu)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="334"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="332"/>
         <source>Quick publish to default repo</source>
         <translation>Pikajulkaisu oletusrepositorioon</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="339"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Manage Resource Sharing repos...</source>
         <translation>Hallitse Resource Sharing -repositorioita...</translation>
     </message>
@@ -567,6 +567,24 @@
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
         <source>Exporter</source>
         <translation>Vie</translation>
+    </message>
+</context>
+<context>
+    <name>ExtensionRegistry</name>
+    <message>
+        <location filename="../extensions/registry.py" line="390"/>
+        <source>install the QGIS plugin {0}</source>
+        <translation>asenna QGIS-lisäosa {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/registry.py" line="394"/>
+        <source>install {0}</source>
+        <translation>asenna {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/registry.py" line="395"/>
+        <source>The {0} extension is off because {1} is missing: {2}, then restart QGIS.</source>
+        <translation>Laajennus {0} on pois käytöstä, koska {1} puuttuu: {2} ja käynnistä QGIS uudelleen.</translation>
     </message>
 </context>
 <context>
@@ -1588,39 +1606,39 @@ Käynnistä QGIS uudelleen ottaaksesi muutokset käyttöön.</translation>
         <translation>Virhe laajennuksen latauksessa: {0}. Tarkista QGIS Python -konsoli lisatietoja varten.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6960"/>
+        <location filename="../filter_mate_dockwidget.py" line="6963"/>
         <source>Current layer: {0}</source>
         <translation>Nykyinen taso: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6962"/>
+        <location filename="../filter_mate_dockwidget.py" line="6965"/>
         <source>No layer selected</source>
         <translation>Tasoa ei ole valittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6972"/>
+        <location filename="../filter_mate_dockwidget.py" line="6975"/>
         <source>Selected layers:
 {0}</source>
         <translation>Valitut tasot:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6972"/>
+        <location filename="../filter_mate_dockwidget.py" line="6975"/>
         <source>No layers selected</source>
         <translation>Tasoja ei ole valittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6992"/>
+        <location filename="../filter_mate_dockwidget.py" line="6995"/>
         <source>No expression defined</source>
         <translation>Lauseketta ei ole maaritetty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7004"/>
+        <location filename="../filter_mate_dockwidget.py" line="7007"/>
         <source>Display expression: {0}</source>
         <translation>Nayttolauseke: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7019"/>
+        <location filename="../filter_mate_dockwidget.py" line="7022"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Kohteen tunnus: {0}
@@ -1660,92 +1678,92 @@ Ensimmainen attribuutti: {1}</translation>
         <translation>{0} vailimuistia tyhjennetty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="919"/>
+        <location filename="../filter_mate_app.py" line="920"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Dockwidgetin luonti epaonnistui: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="929"/>
+        <location filename="../filter_mate_app.py" line="930"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Dockwidgetin nayttaminen epaonnistui: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1443"/>
+        <location filename="../filter_mate_app.py" line="1444"/>
         <source>Error executing {0}: {1}</source>
         <translation>Virhe suoritettaessa {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1455"/>
+        <location filename="../filter_mate_app.py" line="1456"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Laajennus toimii rajoitetussa tilassa (heksagonaalipalvelut eivat ole kaytettavissa). Suorituskyky voi olla alentunut.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1704"/>
+        <location filename="../filter_mate_app.py" line="1705"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate VIRHE</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1704"/>
+        <location filename="../filter_mate_app.py" line="1705"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Kohdetta {0} ei voi suorittaa: widgetin alustus epaonnistui.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2487"/>
+        <location filename="../filter_mate_app.py" line="2488"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Toimintoa {0} ei voi suorittaa: taso virheellinen tai lahdetta ei loydy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2624"/>
+        <location filename="../filter_mate_app.py" line="2625"/>
         <source>All filters cleared - </source>
         <translation>Kaikki suodattimet poistettu - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2625"/>
+        <location filename="../filter_mate_app.py" line="2626"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} kohdetta nakyvissa paatasolla</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2633"/>
+        <location filename="../filter_mate_app.py" line="2634"/>
         <source>Error: result handler missing</source>
         <translation>Virhe: tuloskasittelija puuttuu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2646"/>
+        <location filename="../filter_mate_app.py" line="2647"/>
         <source>Error during filtering: {0}</source>
         <translation>Virhe suodatuksen aikana: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2768"/>
+        <location filename="../filter_mate_app.py" line="2769"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} orpoa suosikkia palautettu: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2903"/>
+        <location filename="../filter_mate_app.py" line="2904"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Tason lataus epaonnistui - napsauta yrittaaksesi uudelleen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2960"/>
+        <location filename="../filter_mate_app.py" line="2961"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} tasoa ladattu onnistuneesti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1926"/>
+        <location filename="../filter_mate_app.py" line="1927"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1928"/>
+        <location filename="../filter_mate_app.py" line="1929"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1931"/>
+        <location filename="../filter_mate_app.py" line="1932"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1933"/>
+        <location filename="../filter_mate_app.py" line="1934"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1758,32 +1776,32 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1943"/>
+        <location filename="../filter_mate_app.py" line="1944"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1950"/>
+        <location filename="../filter_mate_app.py" line="1951"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1957"/>
+        <location filename="../filter_mate_app.py" line="1958"/>
         <source>Cancel</source>
         <translation>Peruuta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1981"/>
+        <location filename="../filter_mate_app.py" line="1982"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1291"/>
+        <location filename="../filter_mate_app.py" line="1292"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Valitse taso EXPLORING-välilehdessä ennen kuin suoritat toiminnon '{0}'.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="846"/>
+        <location filename="../filter_mate_app.py" line="847"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} tasoa pysyy suodatettuna: {1}. Ota asetus uudelleen käyttöön poistaaksesi suodatuksen.</translation>
     </message>
@@ -1796,7 +1814,7 @@ What would you like to do?</translation>
         <translation>Alustusvirhe: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1000"/>
+        <location filename="../filter_mate_dockwidget.py" line="1003"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Kayttoliittymaasetukset puutteelliset - tarkista lokit</translation>
     </message>
@@ -1806,288 +1824,288 @@ What would you like to do?</translation>
         <translation type="obsolete">Kayttoliittyman mittavirhe: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1460"/>
+        <location filename="../filter_mate_dockwidget.py" line="1463"/>
         <source>Favorites manager not available</source>
         <translation>Suosikkien hallinta ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1481"/>
+        <location filename="../filter_mate_dockwidget.py" line="1484"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} suosikkia tallennettu
 Napsauta kayttaaksesi tai hallitaksesi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1484"/>
+        <location filename="../filter_mate_dockwidget.py" line="1487"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Ei tallennettuja suosikkeja
 Napsauta lisaataksesi nykyisen suodattimen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1504"/>
+        <location filename="../filter_mate_dockwidget.py" line="1507"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{0} taustaohjelmisto pakotettu {1} tasolle</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1590"/>
+        <location filename="../filter_mate_dockwidget.py" line="1593"/>
         <source>Backend controller not available</source>
         <translation>Taustaohjelmiston ohjain ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1528"/>
+        <location filename="../filter_mate_dockwidget.py" line="1531"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL automaattinen siivous kaytoessa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1529"/>
+        <location filename="../filter_mate_dockwidget.py" line="1532"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL automaattinen siivous poissa kaytosta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL-istuntonakymat siivottu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Ei nakymia siivottavaksi tai siivous epaonnistui</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget.py" line="1549"/>
         <source>No PostgreSQL connection available</source>
         <translation>PostgreSQL-yhteytta ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1552"/>
+        <location filename="../filter_mate_dockwidget.py" line="1555"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Skeemassa on {0} nakymaa muista istunnoista.
 Poista silti?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1553"/>
+        <location filename="../filter_mate_dockwidget.py" line="1556"/>
         <source>Other Sessions Active</source>
         <translation>Muita istuntoja aktiivisena</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget.py" line="1558"/>
         <source>Schema cleanup cancelled</source>
         <translation>Skeeman siivous peruutettu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Skeema '{0}' poistettu onnistuneesti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget.py" line="1565"/>
         <source>Schema cleanup failed</source>
         <translation>Skeeman siivous epaonnistui</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1588"/>
+        <location filename="../filter_mate_dockwidget.py" line="1591"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL istuntotiedot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Theme adapted: {0}</source>
         <translation>Teema mukautettu: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Dark mode</source>
         <translation>Tumma tila</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Light mode</source>
         <translation>Vaalea tila</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4027"/>
+        <location filename="../filter_mate_dockwidget.py" line="4030"/>
         <source>Selected features have no geometry.</source>
         <translation>Valituilla kohteilla ei ole geometriaa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4046"/>
+        <location filename="../filter_mate_dockwidget.py" line="4049"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Kohdetta ei ole valittu. Valitse kohde pudotusvalikosta.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5101"/>
+        <location filename="../filter_mate_dockwidget.py" line="5104"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Valittu taso on virheellinen tai sen lahdetta ei loydy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5838"/>
+        <location filename="../filter_mate_dockwidget.py" line="5841"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatiivinen puskuri (eroosio): kutistaa monikulmioita sisaanpain</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5841"/>
+        <location filename="../filter_mate_dockwidget.py" line="5844"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Puskuriarvo metrissa (positiivinen=laajenna, negatiivinen=kutista monikulmioita)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6342"/>
+        <location filename="../filter_mate_dockwidget.py" line="6345"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Laajennus aktivoitu {0} vektoritasolla</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6423"/>
+        <location filename="../filter_mate_dockwidget.py" line="6426"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Laajennusta ei voitu ladata uudelleen automaattisesti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6425"/>
+        <location filename="../filter_mate_dockwidget.py" line="6428"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Virhe laajennuksen uudelleenlatauksessa: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6497"/>
+        <location filename="../filter_mate_dockwidget.py" line="6500"/>
         <source>Layer properties reset to defaults</source>
         <translation>Tason ominaisuudet palautettu oletusarvoihin</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6498"/>
+        <location filename="../filter_mate_dockwidget.py" line="6501"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Virhe tason ominaisuuksien nollauksessa: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
         <source>Filter</source>
         <translation>Suodata</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
         <source>Undo the last filter</source>
         <translation>Kumoa viimeisin suodatus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
         <source>Redo the last filter</source>
         <translation>Tee viimeisin suodatus uudelleen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
         <source>Remove the filters</source>
         <translation>Poista suodattimet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
         <source>Export the layers</source>
         <translation>Vie tasot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>About FilterMate</source>
         <translation>Tietoja FilterMatesta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Identify the selected features</source>
         <translation>Tunnista valitut kohteet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Zoom to the selected features</source>
         <translation>Zoomaa valittuihin kohteisiin</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Select the features on the map</source>
         <translation>Valitse kohteet kartalta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>Follow the features on the map</source>
         <translation>Seuraa kohteita kartalla</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>Link the three selection modes</source>
         <translation>Yhdistä kolme valintatilaa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Reset the layer properties</source>
         <translation>Nollaa tason ominaisuudet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Follow the current layer</source>
         <translation>Seuraa nykyistä tasoa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Layers to filter</source>
         <translation>Suodatettavat tasot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Combine with the existing filter</source>
         <translation>Yhdistä olemassa olevaan suodattimeen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Geometric predicates</source>
         <translation>Geometriset predikaatit</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Buffer distance</source>
         <translation>Puskurin etäisyys</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Buffer type</source>
         <translation>Puskurin tyyppi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Layers to export</source>
         <translation>Vietävät tasot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Projection of the export</source>
         <translation>Viennin projektio</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Export the styles</source>
         <translation>Vie tyylit</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="892"/>
         <source>Export format</source>
         <translation>Vientimuoto</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="893"/>
         <source>Output folder</source>
         <translation>Tulostekansio</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="894"/>
         <source>Zip the export</source>
         <translation>Pakkaa vienti zip-tiedostoon</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1005"/>
+        <location filename="../filter_mate_dockwidget.py" line="1008"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Paneelin asettelua ei voitu ottaa käyttöön; käytetään oletuskokoja. Lisätietoja tiedostossa filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6577"/>
+        <location filename="../filter_mate_dockwidget.py" line="6580"/>
         <source>Vector</source>
         <translation>Vektori</translation>
     </message>
@@ -2368,7 +2386,7 @@ Poista silti?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1034"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1038"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2385,12 +2403,12 @@ Ratkaisu: Poista tama taso FilterMate-projektista ja lisaa se uudelleen.
 Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1060"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1064"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Tasolla '{0}' ei ole PRIMARY KEY -avainta. Rajoitettu toiminnallisuus: materialisoidut nakymat poistettu kaytosta. Suositus: lisaa PRIMARY KEY optimaalisen suorituskyvyn varmistamiseksi.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="2114"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2087"/>
         <source>Exception: {0}</source>
         <translation>Poikkeus: {0}</translation>
     </message>
@@ -3410,12 +3428,12 @@ Jatketaanko?</translation>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="196"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="194"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="228"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="226"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>

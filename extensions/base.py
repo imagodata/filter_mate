@@ -164,7 +164,7 @@ class BaseExtension(ABC):
                 ``'manual'`` — drives the icon/wording in the dialog.
               - ``install_command``: exact string to display (e.g.
                 ``'pip install qfieldcloud-sdk'`` or
-                ``'Extensions → Installer/Gérer les extensions → Resource Sharing'``).
+                ``'Resource Sharing'``: the notice reads "install the QGIS plugin Resource Sharing").
               - ``details``: optional extra context (URL, caveats…).
         """
         deps = ", ".join(self.metadata.dependencies) if self.metadata.dependencies else "?"

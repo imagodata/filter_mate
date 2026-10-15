@@ -4,27 +4,27 @@
 <context>
     <name>@default</name>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="314"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="312"/>
         <source>Import from Resource Sharing...</source>
         <translation>Resource Sharing에서 가져오기...</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="319"/>
         <source>Publish to Resource Sharing...</source>
         <translation>Resource Sharing에 게시...</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="319"/>
         <source>Publish (no favorites saved)</source>
         <translation>게시(저장된 즐겨찾기 없음)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="334"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="332"/>
         <source>Quick publish to default repo</source>
         <translation>기본 저장소에 빠른 게시</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="339"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Manage Resource Sharing repos...</source>
         <translation>Resource Sharing 저장소 관리...</translation>
     </message>
@@ -567,6 +567,24 @@
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
         <source>Exporter</source>
         <translation>내보내기 도구</translation>
+    </message>
+</context>
+<context>
+    <name>ExtensionRegistry</name>
+    <message>
+        <location filename="../extensions/registry.py" line="390"/>
+        <source>install the QGIS plugin {0}</source>
+        <translation>QGIS 플러그인 {0}을(를) 설치하십시오</translation>
+    </message>
+    <message>
+        <location filename="../extensions/registry.py" line="394"/>
+        <source>install {0}</source>
+        <translation>{0}을(를) 설치하십시오</translation>
+    </message>
+    <message>
+        <location filename="../extensions/registry.py" line="395"/>
+        <source>The {0} extension is off because {1} is missing: {2}, then restart QGIS.</source>
+        <translation>{1}이(가) 없어 {0} 확장 기능이 꺼져 있습니다: {2} 후 QGIS를 다시 시작하십시오.</translation>
     </message>
 </context>
 <context>
@@ -1588,39 +1606,39 @@ Please restart QGIS to apply the changes.</source>
         <translation>플러그인 로드 오류: {0}. 자세한 내용은 QGIS Python 콘솔을 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6960"/>
+        <location filename="../filter_mate_dockwidget.py" line="6963"/>
         <source>Current layer: {0}</source>
         <translation>현재 레이어: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6962"/>
+        <location filename="../filter_mate_dockwidget.py" line="6965"/>
         <source>No layer selected</source>
         <translation>선택된 레이어 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6972"/>
+        <location filename="../filter_mate_dockwidget.py" line="6975"/>
         <source>Selected layers:
 {0}</source>
         <translation>선택된 레이어:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6972"/>
+        <location filename="../filter_mate_dockwidget.py" line="6975"/>
         <source>No layers selected</source>
         <translation>선택된 레이어 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6992"/>
+        <location filename="../filter_mate_dockwidget.py" line="6995"/>
         <source>No expression defined</source>
         <translation>정의된 표현식 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7004"/>
+        <location filename="../filter_mate_dockwidget.py" line="7007"/>
         <source>Display expression: {0}</source>
         <translation>표시 표현식: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7019"/>
+        <location filename="../filter_mate_dockwidget.py" line="7022"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>객체 ID: {0}
@@ -1660,92 +1678,92 @@ First attribute: {1}</source>
         <translation>{0}개 캐시 삭제됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="919"/>
+        <location filename="../filter_mate_app.py" line="920"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>도킹 위젯 생성 실패: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="929"/>
+        <location filename="../filter_mate_app.py" line="930"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>도킹 위젯 표시 실패: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1443"/>
+        <location filename="../filter_mate_app.py" line="1444"/>
         <source>Error executing {0}: {1}</source>
         <translation>{0} 실행 오류: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1455"/>
+        <location filename="../filter_mate_app.py" line="1456"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>플러그인이 저하 모드로 실행 중입니다 (헥사고날 서비스 사용 불가). 성능이 저하될 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1704"/>
+        <location filename="../filter_mate_app.py" line="1705"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate 오류</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1704"/>
+        <location filename="../filter_mate_app.py" line="1705"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>{0}을(를) 실행할 수 없음: 위젯 초기화 실패.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2487"/>
+        <location filename="../filter_mate_app.py" line="2488"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0}할 수 없음: 레이어가 유효하지 않거나 소스를 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2624"/>
+        <location filename="../filter_mate_app.py" line="2625"/>
         <source>All filters cleared - </source>
         <translation>모든 필터 해제됨 - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2625"/>
+        <location filename="../filter_mate_app.py" line="2626"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>메인 레이어에 {0}{1}개 객체 표시</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2633"/>
+        <location filename="../filter_mate_app.py" line="2634"/>
         <source>Error: result handler missing</source>
         <translation>오류: 결과 핸들러가 없습니다</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2646"/>
+        <location filename="../filter_mate_app.py" line="2647"/>
         <source>Error during filtering: {0}</source>
         <translation>필터링 중 오류: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2768"/>
+        <location filename="../filter_mate_app.py" line="2769"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0}개의 고아 즐겨찾기 복구됨: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2903"/>
+        <location filename="../filter_mate_app.py" line="2904"/>
         <source>Layer loading failed - click to retry</source>
         <translation>레이어 로드 실패 - 재시도하려면 클릭</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2960"/>
+        <location filename="../filter_mate_app.py" line="2961"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0}개 레이어가 성공적으로 로드됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1926"/>
+        <location filename="../filter_mate_app.py" line="1927"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1928"/>
+        <location filename="../filter_mate_app.py" line="1929"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1931"/>
+        <location filename="../filter_mate_app.py" line="1932"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1933"/>
+        <location filename="../filter_mate_app.py" line="1934"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1758,32 +1776,32 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1943"/>
+        <location filename="../filter_mate_app.py" line="1944"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1950"/>
+        <location filename="../filter_mate_app.py" line="1951"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1957"/>
+        <location filename="../filter_mate_app.py" line="1958"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1981"/>
+        <location filename="../filter_mate_app.py" line="1982"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1291"/>
+        <location filename="../filter_mate_app.py" line="1292"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>'{0}'을(를) 실행하기 전에 EXPLORING 탭에서 레이어를 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="846"/>
+        <location filename="../filter_mate_app.py" line="847"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0}개 레이어가 필터링된 상태로 남아 있습니다: {1}. 필터를 해제하려면 옵션을 다시 켜십시오.</translation>
     </message>
@@ -1796,7 +1814,7 @@ What would you like to do?</translation>
         <translation>초기화 오류: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1000"/>
+        <location filename="../filter_mate_dockwidget.py" line="1003"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI 설정이 불완전합니다 - 로그를 확인하세요</translation>
     </message>
@@ -1806,288 +1824,288 @@ What would you like to do?</translation>
         <translation type="obsolete">UI 크기 오류: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1460"/>
+        <location filename="../filter_mate_dockwidget.py" line="1463"/>
         <source>Favorites manager not available</source>
         <translation>즐겨찾기 관리자를 사용할 수 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1481"/>
+        <location filename="../filter_mate_dockwidget.py" line="1484"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0}개 즐겨찾기 저장됨
 적용 또는 관리하려면 클릭</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1484"/>
+        <location filename="../filter_mate_dockwidget.py" line="1487"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ 저장된 즐겨찾기 없음
 현재 필터를 추가하려면 클릭</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1504"/>
+        <location filename="../filter_mate_dockwidget.py" line="1507"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{1}개 레이어에 {0} 백엔드 강제 적용됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1590"/>
+        <location filename="../filter_mate_dockwidget.py" line="1593"/>
         <source>Backend controller not available</source>
         <translation>백엔드 컨트롤러를 사용할 수 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1528"/>
+        <location filename="../filter_mate_dockwidget.py" line="1531"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL 자동 정리 활성화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1529"/>
+        <location filename="../filter_mate_dockwidget.py" line="1532"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL 자동 정리 비활성화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL 세션 뷰 정리 완료</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>No views to clean or cleanup failed</source>
         <translation>정리할 뷰가 없거나 정리 실패</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget.py" line="1549"/>
         <source>No PostgreSQL connection available</source>
         <translation>사용 가능한 PostgreSQL 연결 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1552"/>
+        <location filename="../filter_mate_dockwidget.py" line="1555"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>스키마에 다른 세션의 뷰가 {0}개 있습니다.
 그래도 삭제하시겠습니까?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1553"/>
+        <location filename="../filter_mate_dockwidget.py" line="1556"/>
         <source>Other Sessions Active</source>
         <translation>다른 세션 활성 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget.py" line="1558"/>
         <source>Schema cleanup cancelled</source>
         <translation>스키마 정리 취소됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>스키마 '{0}'이(가) 성공적으로 삭제됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget.py" line="1565"/>
         <source>Schema cleanup failed</source>
         <translation>스키마 정리 실패</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1588"/>
+        <location filename="../filter_mate_dockwidget.py" line="1591"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL 세션 정보</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Theme adapted: {0}</source>
         <translation>테마 적용됨: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Dark mode</source>
         <translation>다크 모드</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Light mode</source>
         <translation>라이트 모드</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4027"/>
+        <location filename="../filter_mate_dockwidget.py" line="4030"/>
         <source>Selected features have no geometry.</source>
         <translation>선택된 객체에 도형이 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4046"/>
+        <location filename="../filter_mate_dockwidget.py" line="4049"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>선택된 객체가 없습니다. 드롭다운 목록에서 객체를 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5101"/>
+        <location filename="../filter_mate_dockwidget.py" line="5104"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>선택된 레이어가 유효하지 않거나 소스를 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5838"/>
+        <location filename="../filter_mate_dockwidget.py" line="5841"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>음수 버퍼 (침식): 폴리곤을 안쪽으로 축소</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5841"/>
+        <location filename="../filter_mate_dockwidget.py" line="5844"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>미터 단위 버퍼 값 (양수=확장, 음수=폴리곤 축소)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6342"/>
+        <location filename="../filter_mate_dockwidget.py" line="6345"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>{0}개의 벡터 레이어로 플러그인 활성화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6423"/>
+        <location filename="../filter_mate_dockwidget.py" line="6426"/>
         <source>Could not reload plugin automatically.</source>
         <translation>플러그인을 자동으로 다시 불러올 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6425"/>
+        <location filename="../filter_mate_dockwidget.py" line="6428"/>
         <source>Error reloading plugin: {0}</source>
         <translation>플러그인 다시 불러오기 오류: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6497"/>
+        <location filename="../filter_mate_dockwidget.py" line="6500"/>
         <source>Layer properties reset to defaults</source>
         <translation>레이어 속성이 기본값으로 초기화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6498"/>
+        <location filename="../filter_mate_dockwidget.py" line="6501"/>
         <source>Error resetting layer properties: {}</source>
         <translation>레이어 속성 초기화 오류: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
         <source>Filter</source>
         <translation>필터</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
         <source>Undo the last filter</source>
         <translation>마지막 필터 실행 취소</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
         <source>Redo the last filter</source>
         <translation>마지막 필터 다시 실행</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
         <source>Remove the filters</source>
         <translation>필터 제거</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
         <source>Export the layers</source>
         <translation>레이어 내보내기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>About FilterMate</source>
         <translation>FilterMate 정보</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Identify the selected features</source>
         <translation>선택한 피처 식별</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Zoom to the selected features</source>
         <translation>선택한 피처로 확대</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Select the features on the map</source>
         <translation>지도에서 피처 선택</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>Follow the features on the map</source>
         <translation>지도에서 피처 따라가기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>Link the three selection modes</source>
         <translation>세 가지 선택 모드 연결</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Reset the layer properties</source>
         <translation>레이어 속성 초기화</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Follow the current layer</source>
         <translation>현재 레이어 따라가기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Layers to filter</source>
         <translation>필터링할 레이어</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Combine with the existing filter</source>
         <translation>기존 필터와 결합</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Geometric predicates</source>
         <translation>지오메트리 술어</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Buffer distance</source>
         <translation>버퍼 거리</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Buffer type</source>
         <translation>버퍼 유형</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Layers to export</source>
         <translation>내보낼 레이어</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Projection of the export</source>
         <translation>내보내기 투영법</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Export the styles</source>
         <translation>스타일 내보내기</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="892"/>
         <source>Export format</source>
         <translation>내보내기 형식</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="893"/>
         <source>Output folder</source>
         <translation>출력 폴더</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="894"/>
         <source>Zip the export</source>
         <translation>내보내기를 zip으로 압축</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1005"/>
+        <location filename="../filter_mate_dockwidget.py" line="1008"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>패널 레이아웃을 적용할 수 없어 기본 크기를 사용합니다. 자세한 내용은 filtermate.log를 참조하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6577"/>
+        <location filename="../filter_mate_dockwidget.py" line="6580"/>
         <source>Vector</source>
         <translation>벡터</translation>
     </message>
@@ -2368,7 +2386,7 @@ Drop anyway?</source>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1034"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1038"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2385,12 +2403,12 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 PostgreSQL 테이블에 PRIMARY KEY가 정의되어 있는지 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1060"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1064"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>레이어 '{0}'에 PRIMARY KEY가 없습니다. 기능 제한: 구체화된 뷰가 비활성화됩니다. 최적 성능을 위해 PRIMARY KEY를 추가하세요.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="2114"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2087"/>
         <source>Exception: {0}</source>
         <translation>예외: {0}</translation>
     </message>
@@ -3410,12 +3428,12 @@ Continue?</source>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="196"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="194"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="228"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="226"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>

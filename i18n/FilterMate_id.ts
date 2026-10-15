@@ -4,27 +4,27 @@
 <context>
     <name>@default</name>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="314"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="312"/>
         <source>Import from Resource Sharing...</source>
         <translation>Impor dari Resource Sharing...</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="319"/>
         <source>Publish to Resource Sharing...</source>
         <translation>Terbitkan ke Resource Sharing...</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="321"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="319"/>
         <source>Publish (no favorites saved)</source>
         <translation>Terbitkan (tanpa favorit tersimpan)</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="334"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="332"/>
         <source>Quick publish to default repo</source>
         <translation>Terbitkan cepat ke repositori default</translation>
     </message>
     <message>
-        <location filename="../extensions/favorites_sharing/extension.py" line="339"/>
+        <location filename="../extensions/favorites_sharing/extension.py" line="337"/>
         <source>Manage Resource Sharing repos...</source>
         <translation>Kelola repositori Resource Sharing...</translation>
     </message>
@@ -567,6 +567,24 @@
         <location filename="../ui/dialogs/export_group_recap_dialog.py" line="160"/>
         <source>Exporter</source>
         <translation>Ekspor</translation>
+    </message>
+</context>
+<context>
+    <name>ExtensionRegistry</name>
+    <message>
+        <location filename="../extensions/registry.py" line="390"/>
+        <source>install the QGIS plugin {0}</source>
+        <translation>pasang plugin QGIS {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/registry.py" line="394"/>
+        <source>install {0}</source>
+        <translation>pasang {0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/registry.py" line="395"/>
+        <source>The {0} extension is off because {1} is missing: {2}, then restart QGIS.</source>
+        <translation>Ekstensi {0} nonaktif karena {1} tidak ada: {2}, lalu mulai ulang QGIS.</translation>
     </message>
 </context>
 <context>
@@ -1588,39 +1606,39 @@ Silakan mulai ulang QGIS untuk menerapkan perubahan.</translation>
         <translation>Kesalahan memuat plugin: {0}. Periksa konsol Python QGIS untuk detail.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6960"/>
+        <location filename="../filter_mate_dockwidget.py" line="6963"/>
         <source>Current layer: {0}</source>
         <translation>Lapisan saat ini: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6962"/>
+        <location filename="../filter_mate_dockwidget.py" line="6965"/>
         <source>No layer selected</source>
         <translation>Tidak ada lapisan dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6972"/>
+        <location filename="../filter_mate_dockwidget.py" line="6975"/>
         <source>Selected layers:
 {0}</source>
         <translation>Lapisan terpilih:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6972"/>
+        <location filename="../filter_mate_dockwidget.py" line="6975"/>
         <source>No layers selected</source>
         <translation>Tidak ada lapisan dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6992"/>
+        <location filename="../filter_mate_dockwidget.py" line="6995"/>
         <source>No expression defined</source>
         <translation>Tidak ada ekspresi didefinisikan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7004"/>
+        <location filename="../filter_mate_dockwidget.py" line="7007"/>
         <source>Display expression: {0}</source>
         <translation>Ekspresi tampilan: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7019"/>
+        <location filename="../filter_mate_dockwidget.py" line="7022"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID Fitur: {0}
@@ -1660,92 +1678,92 @@ Atribut pertama: {1}</translation>
         <translation>{0} cache dihapus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="919"/>
+        <location filename="../filter_mate_app.py" line="920"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Gagal membuat dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="929"/>
+        <location filename="../filter_mate_app.py" line="930"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Gagal menampilkan dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1443"/>
+        <location filename="../filter_mate_app.py" line="1444"/>
         <source>Error executing {0}: {1}</source>
         <translation>Kesalahan menjalankan {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1455"/>
+        <location filename="../filter_mate_app.py" line="1456"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plugin berjalan dalam mode terdegradasi (layanan heksagonal tidak tersedia). Kinerja mungkin berkurang.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1704"/>
+        <location filename="../filter_mate_app.py" line="1705"/>
         <source>FilterMate ERROR</source>
         <translation>KESALAHAN FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1704"/>
+        <location filename="../filter_mate_app.py" line="1705"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Tidak dapat menjalankan {0}: inisialisasi widget gagal.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2487"/>
+        <location filename="../filter_mate_app.py" line="2488"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Tidak dapat {0}: lapisan tidak valid atau sumber tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2624"/>
+        <location filename="../filter_mate_app.py" line="2625"/>
         <source>All filters cleared - </source>
         <translation>Semua filter dihapus - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2625"/>
+        <location filename="../filter_mate_app.py" line="2626"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} fitur terlihat di lapisan utama</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2633"/>
+        <location filename="../filter_mate_app.py" line="2634"/>
         <source>Error: result handler missing</source>
         <translation>Kesalahan: penangan hasil hilang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2646"/>
+        <location filename="../filter_mate_app.py" line="2647"/>
         <source>Error during filtering: {0}</source>
         <translation>Kesalahan saat filtering: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2768"/>
+        <location filename="../filter_mate_app.py" line="2769"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} favorit yatim dipulihkan: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2903"/>
+        <location filename="../filter_mate_app.py" line="2904"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Pemuatan lapisan gagal - klik untuk coba lagi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2960"/>
+        <location filename="../filter_mate_app.py" line="2961"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} lapisan berhasil dimuat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1926"/>
+        <location filename="../filter_mate_app.py" line="1927"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1928"/>
+        <location filename="../filter_mate_app.py" line="1929"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1931"/>
+        <location filename="../filter_mate_app.py" line="1932"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1933"/>
+        <location filename="../filter_mate_app.py" line="1934"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1758,32 +1776,32 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1943"/>
+        <location filename="../filter_mate_app.py" line="1944"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1950"/>
+        <location filename="../filter_mate_app.py" line="1951"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1957"/>
+        <location filename="../filter_mate_app.py" line="1958"/>
         <source>Cancel</source>
         <translation>Batal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1981"/>
+        <location filename="../filter_mate_app.py" line="1982"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1291"/>
+        <location filename="../filter_mate_app.py" line="1292"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Pilih layer di tab EXPLORING sebelum menjalankan '{0}'.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="846"/>
+        <location filename="../filter_mate_app.py" line="847"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} lapisan tetap terfilter: {1}. Aktifkan kembali opsi ini untuk menghapus filternya.</translation>
     </message>
@@ -1796,7 +1814,7 @@ What would you like to do?</translation>
         <translation>Kesalahan inisialisasi: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1000"/>
+        <location filename="../filter_mate_dockwidget.py" line="1003"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Konfigurasi UI tidak lengkap - periksa log</translation>
     </message>
@@ -1806,288 +1824,288 @@ What would you like to do?</translation>
         <translation type="obsolete">Kesalahan dimensi UI: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1460"/>
+        <location filename="../filter_mate_dockwidget.py" line="1463"/>
         <source>Favorites manager not available</source>
         <translation>Manajer favorit tidak tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1481"/>
+        <location filename="../filter_mate_dockwidget.py" line="1484"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} Favorit tersimpan
 Klik untuk menerapkan atau mengelola</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1484"/>
+        <location filename="../filter_mate_dockwidget.py" line="1487"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Tidak ada favorit tersimpan
 Klik untuk menambah filter saat ini</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1504"/>
+        <location filename="../filter_mate_dockwidget.py" line="1507"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Backend {0} dipaksa untuk {1} lapisan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1590"/>
+        <location filename="../filter_mate_dockwidget.py" line="1593"/>
         <source>Backend controller not available</source>
         <translation>Pengontrol backend tidak tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1528"/>
+        <location filename="../filter_mate_dockwidget.py" line="1531"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Pembersihan otomatis PostgreSQL diaktifkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1529"/>
+        <location filename="../filter_mate_dockwidget.py" line="1532"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Pembersihan otomatis PostgreSQL dinonaktifkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>View sesi PostgreSQL dibersihkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1535"/>
+        <location filename="../filter_mate_dockwidget.py" line="1538"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Tidak ada view untuk dibersihkan atau pembersihan gagal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1546"/>
+        <location filename="../filter_mate_dockwidget.py" line="1549"/>
         <source>No PostgreSQL connection available</source>
         <translation>Tidak ada koneksi PostgreSQL tersedia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1552"/>
+        <location filename="../filter_mate_dockwidget.py" line="1555"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Skema memiliki {0} view dari sesi lain.
 Tetap hapus?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1553"/>
+        <location filename="../filter_mate_dockwidget.py" line="1556"/>
         <source>Other Sessions Active</source>
         <translation>Sesi Lain Aktif</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget.py" line="1558"/>
         <source>Schema cleanup cancelled</source>
         <translation>Pembersihan skema dibatalkan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Skema '{0}' berhasil dihapus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1562"/>
+        <location filename="../filter_mate_dockwidget.py" line="1565"/>
         <source>Schema cleanup failed</source>
         <translation>Pembersihan skema gagal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1588"/>
+        <location filename="../filter_mate_dockwidget.py" line="1591"/>
         <source>PostgreSQL Session Info</source>
         <translation>Info Sesi PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema disesuaikan: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Dark mode</source>
         <translation>Mode gelap</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2711"/>
+        <location filename="../filter_mate_dockwidget.py" line="2714"/>
         <source>Light mode</source>
         <translation>Mode terang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4027"/>
+        <location filename="../filter_mate_dockwidget.py" line="4030"/>
         <source>Selected features have no geometry.</source>
         <translation>Fitur terpilih tidak memiliki geometri.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4046"/>
+        <location filename="../filter_mate_dockwidget.py" line="4049"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Tidak ada fitur dipilih. Pilih fitur dari daftar dropdown.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5101"/>
+        <location filename="../filter_mate_dockwidget.py" line="5104"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Lapisan terpilih tidak valid atau sumbernya tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5838"/>
+        <location filename="../filter_mate_dockwidget.py" line="5841"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Buffer negatif (erosi): menyusutkan poligon ke dalam</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5841"/>
+        <location filename="../filter_mate_dockwidget.py" line="5844"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Nilai buffer dalam meter (positif=perluas, negatif=susutkan poligon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6342"/>
+        <location filename="../filter_mate_dockwidget.py" line="6345"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin diaktifkan dengan {0} lapisan vektor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6423"/>
+        <location filename="../filter_mate_dockwidget.py" line="6426"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Tidak dapat memuat ulang plugin secara otomatis.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6425"/>
+        <location filename="../filter_mate_dockwidget.py" line="6428"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Kesalahan memuat ulang plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6497"/>
+        <location filename="../filter_mate_dockwidget.py" line="6500"/>
         <source>Layer properties reset to defaults</source>
         <translation>Properti lapisan direset ke default</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6498"/>
+        <location filename="../filter_mate_dockwidget.py" line="6501"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Kesalahan mereset properti lapisan: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="867"/>
+        <location filename="../filter_mate_dockwidget.py" line="870"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="868"/>
+        <location filename="../filter_mate_dockwidget.py" line="871"/>
         <source>Undo the last filter</source>
         <translation>Urungkan filter terakhir</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="869"/>
+        <location filename="../filter_mate_dockwidget.py" line="872"/>
         <source>Redo the last filter</source>
         <translation>Ulangi filter terakhir</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="873"/>
         <source>Remove the filters</source>
         <translation>Hapus filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="874"/>
         <source>Export the layers</source>
         <translation>Ekspor layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>About FilterMate</source>
         <translation>Tentang FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Identify the selected features</source>
         <translation>Identifikasi fitur terpilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Zoom to the selected features</source>
         <translation>Zoom ke fitur terpilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Select the features on the map</source>
         <translation>Pilih fitur pada peta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>Follow the features on the map</source>
         <translation>Ikuti fitur pada peta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>Link the three selection modes</source>
         <translation>Tautkan ketiga mode seleksi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Reset the layer properties</source>
         <translation>Atur ulang properti layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Follow the current layer</source>
         <translation>Ikuti layer saat ini</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Layers to filter</source>
         <translation>Layer yang akan difilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Combine with the existing filter</source>
         <translation>Gabungkan dengan filter yang ada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Geometric predicates</source>
         <translation>Predikat geometri</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Buffer distance</source>
         <translation>Jarak buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Buffer type</source>
         <translation>Tipe buffer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Layers to export</source>
         <translation>Layer yang akan diekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Projection of the export</source>
         <translation>Proyeksi ekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Export the styles</source>
         <translation>Ekspor gaya</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="892"/>
         <source>Export format</source>
         <translation>Format ekspor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="893"/>
         <source>Output folder</source>
         <translation>Folder keluaran</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="894"/>
         <source>Zip the export</source>
         <translation>Kompres ekspor ke zip</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1005"/>
+        <location filename="../filter_mate_dockwidget.py" line="1008"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Tata letak panel tidak dapat diterapkan; ukuran default dipakai. Detail ada di filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6577"/>
+        <location filename="../filter_mate_dockwidget.py" line="6580"/>
         <source>Vector</source>
         <translation>Vektor</translation>
     </message>
@@ -2368,7 +2386,7 @@ Tetap hapus?</translation>
 <context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1034"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1038"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2385,12 +2403,12 @@ Solusi: Hapus lapisan ini dari proyek FilterMate, lalu tambahkan kembali.
 Pastikan tabel PostgreSQL memiliki PRIMARY KEY yang didefinisikan.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1060"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1064"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Lapisan '{0}' tidak memiliki PRIMARY KEY. Fitur terbatas: materialized view dinonaktifkan. Rekomendasi: tambahkan PRIMARY KEY untuk kinerja optimal.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="2114"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2087"/>
         <source>Exception: {0}</source>
         <translation>Pengecualian: {0}</translation>
     </message>
@@ -3410,12 +3428,12 @@ Lanjutkan?</translation>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="196"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="194"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="228"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="226"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>

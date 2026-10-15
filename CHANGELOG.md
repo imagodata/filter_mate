@@ -14,6 +14,7 @@ All notable changes to FilterMate will be documented in this file.
 - **Export of raster and point cloud layers as they are filtered**: GeoTIFF / COG (`QgsRasterFileWriter` + `gdal.Translate`), LAZ / LAS / COPC / GPKG / CSV (`QgsPointCloudLayerExporter`, `pdal` for COPC), from the EXPORTING list or the Export button of a raster / point cloud source.
 - Options `APP.OPTIONS.RASTER.enabled` and `APP.OPTIONS.CROSS_FILTER.*` (clip mode, max pixels, footprint resolution, cache size, pdal path). Raster and point cloud support are on by default.
 - `scripts/fm5_scenarios.py` (headless, 37 checks on a LiDAR HD tile) and `scripts/fm5_gui_check.py` (drives the real dock).
+- CI: the dock itself is driven in QGIS with its GUI (Xvfb) on the same images (`tests/qgis_headless/run_gui_smoke.py`): vector, raster and point cloud layers as the current layer, a cross filter of each kind through the dock widgets, undo / unfilter, and the raster option switched off and on.
 - CI job *QGIS headless* (`.github/workflows/qgis-headless.yml`): the plugin is loaded the way `qgis_process` loads it in the official QGIS Docker images (3.22, 3.28, 3.34, 3.44 on Ubuntu 24.04 and 25.10, 3.44 with a recent PDAL, 4.2, nightly), then cross filters run on small synthetic data (`tests/qgis_headless/`).
 - **Automation of FilterMate 5** (one implementation, `adapters/public_api/operations.py`, behind three surfaces — see `docs/AUTOMATION.md`):
   - Processing: `cross_filter_from_raster`, `cross_filter_from_point_cloud`, `cross_filter_from_geometry`, `filter_point_cloud`, `clear_filters`, `apply_favorite`, `export_filtered_layers`; every filter declares an `OUTPUT` (layers handled) so it chains into the next step of a model.
@@ -24,6 +25,11 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Fixed
 
+- **QGIS 3.22 – 3.34: QGIS crashed when the panel opened.** A spacer inserted in the EXPORTING values with `QBoxLayout.insertItem` was deleted at once by PyQt5 5.15.6 (no ownership transfer) and left a dangling item in the layout. It is now handed to the layout (`sip.transferto`); `tests/test_no_layout_insert_item_temporaries.py` keeps it that way.
+- **QGIS could crash when a layer was removed from the project**: the multiple-selection widget was reset by reading a layout item after `removeWidget` had deleted it.
+- Unregistering a layer that is still in the project (a raster / point cloud kind switched off) would have written a default style named `FilterMate_style_<layer>` into the layer's data source (GeoPackage / PostgreSQL `layer_styles`) or a `.qml` next to its file, and failed on QGIS 4: that code, never read back, is removed.
+- An optional extension without its dependency (Favorites Sharing without the Resource Sharing plugin, the usual case) showed a modal dialog in French at every QGIS start; it is now a translated message bar notice, shown once.
+- New profile: no more `no such table: fm_favorites` errors in the log at the first start.
 - **QGIS 3.22 – 3.34.1: the plugin did not load.** `QAction` was imported from `qgis.PyQt.QtGui`, where QGIS Qt5 builds only alias it since 3.34.2. `QAction` and `QShortcut` now fall back to `QtWidgets` (plugin menu, history menu, keyboard shortcuts, configuration editor menus); `tests/test_no_qtwidgets_relocated_symbols.py` requires the fallback.
 - **GDAL older than 3.9** (QGIS 3.44 on Ubuntu 24.04, QGIS 3.34 and older Linux builds): raster targets were not clipped, because `gdal.Warp` has no `cutlineWKT` / `cutlineSRS` there. The cutline now goes through an in-memory GeoPackage that carries its CRS.
 - **PDAL older than 2.4** (Ubuntu 22.04): it has no `writers.copc`, so point cloud targets failed. The version is now read (`pdal --version`): point cloud targets are clipped by `QgsPointCloudLayerExporter`, a COPC export writes LAZ with a message, and the height above a DTM is disabled with a message naming the version.

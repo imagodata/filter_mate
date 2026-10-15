@@ -710,8 +710,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         try:
             layout = self.horizontalLayout_exploring_multiple_feature_picker
-            if layout.count() > 0 and (item := layout.itemAt(0)) and item.widget():
-                layout.removeWidget(item.widget()); item.widget().deleteLater()
+            if layout.count() > 0 and (item := layout.itemAt(0)) and (old_widget := item.widget()):
+                # removeWidget deletes `item` (the QWidgetItem): calling item.widget() afterwards read
+                # freed memory and crashed QGIS now and then when a layer was removed.
+                layout.removeWidget(old_widget)
+                old_widget.deleteLater()
             if hasattr(self, 'checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection') and self.checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection:
                 try:
                     self.checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection.reset()

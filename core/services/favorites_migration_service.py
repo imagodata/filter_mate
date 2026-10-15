@@ -52,7 +52,7 @@ class FavoritesMigrationService:
         Returns:
             Number of orphan favorites
         """
-        if not self._db_path:
+        if not self._db_path or not self._favorites_table_exists():
             return 0
 
         try:
@@ -224,6 +224,8 @@ class FavoritesMigrationService:
         Returns:
             Tuple of (migrated_count, migrated_names)
         """
+        if not self._favorites_table_exists():
+            return 0, []  # new profile: the favorites table is created later, nothing to migrate
         # 2026-09-14: the unstable project identity of earlier versions left
         # exact copies of a favorite inside one project (five "YONNE" in a
         # real profile); drop them once, keeping the most used / oldest copy.
@@ -234,6 +236,24 @@ class FavoritesMigrationService:
         logger.info(f"🔄 Found {orphan_count} orphan favorite(s) - auto-migrating to current project")
         return self.migrate_orphan_favorites(project_uuid)
 
+    def _favorites_table_exists(self) -> bool:
+        """False on a new profile: FavoritesService creates fm_favorites after this service first runs."""
+        import os
+        if not self._db_path or not os.path.isfile(self._db_path):  # connect() would create an empty file
+            return False
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self._db_path)
+            try:
+                row = conn.execute(
+                    "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'fm_favorites'").fetchone()
+            finally:
+                conn.close()
+            return row is not None
+        except Exception as e:
+            logger.debug(f"Favorites table not checked: {e}")
+            return False
+
     def dedupe_project_favorites(self, project_uuid: str) -> int:
         """Delete the exact copies (same name, expression, layer) of a favorite
         within ``project_uuid``, keeping the most used, then the oldest one.
@@ -241,7 +261,7 @@ class FavoritesMigrationService:
         Returns:
             Number of deleted copies
         """
-        if not self._db_path or not project_uuid:
+        if not self._db_path or not project_uuid or not self._favorites_table_exists():
             return 0
         try:
             import sqlite3

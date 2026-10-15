@@ -485,7 +485,7 @@ class ActionBarManager(LayoutManagerBase):
                     QtWidgets.QSizePolicy.Policy.Minimum
                 )
                 if self._position == 'left':
-                    container.insertItem(0, self._vertical_action_spacer)
+                    container.insertSpacerItem(0, self._vertical_action_spacer)  # insertItem: no /Transfer/ in PyQt5 5.15.6
                 else:
                     container.addItem(self._vertical_action_spacer)
         else:

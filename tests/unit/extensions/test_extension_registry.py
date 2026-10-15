@@ -753,3 +753,54 @@ class TestConfigAPI:
 
         # Idempotent — second call is a no-op now that schema and config agree
         assert ext.seed_default_config() is False
+
+
+class TestMissingDependenciesNotice:
+    """An optional extension without its dependencies must never block QGIS start with a modal dialog
+    (found by the dock smoke test: every new user without resource_sharing got one, in French)."""
+
+    @pytest.fixture(autouse=True)
+    def identity_translation(self):
+        import sys
+        qtcore = sys.modules["qgis.PyQt.QtCore"]  # what `from qgis.PyQt.QtCore import ...` reads
+        with patch.object(qtcore, "QCoreApplication", MagicMock(translate=lambda context, text: text)):
+            yield
+
+    def _ext(self, dismissed=False):
+        ext = UnavailableExtension()
+        state = {'dismissed': dismissed}
+        ext.is_warning_dismissed = lambda: state['dismissed']
+        ext.dismiss_warning = lambda: state.update(dismissed=True) or True
+        return ext, state
+
+    def test_notice_goes_to_the_message_bar_once(self, registry):
+        ext, state = self._ext()
+        iface = MagicMock()
+        with patch("qgis.PyQt.QtWidgets.QMessageBox") as message_box:
+            registry._show_missing_deps_message(ext, iface)
+        message_box.assert_not_called()
+        iface.messageBar.return_value.pushMessage.assert_called_once()
+        title, text, _level, duration = iface.messageBar.return_value.pushMessage.call_args.args
+        assert "Unavailable Extension" in text and "nonexistent_package" in text
+        assert duration == 0  # pushed while QGIS starts: stays until closed
+        assert state['dismissed'] is True  # not repeated at every start
+
+    def test_dismissed_notice_is_silent(self, registry):
+        ext, _ = self._ext(dismissed=True)
+        iface = MagicMock()
+        registry._show_missing_deps_message(ext, iface)
+        iface.messageBar.assert_not_called()
+
+    def test_plugin_hint_names_the_plugin(self, registry):
+        ext, _ = self._ext()
+        ext.missing_deps_hint = lambda: {"method": "qgis_plugin", "install_command": "Resource Sharing"}
+        iface = MagicMock()
+        registry._show_missing_deps_message(ext, iface)
+        assert "Resource Sharing" in iface.messageBar.return_value.pushMessage.call_args.args[1]
+
+    def test_failed_notice_is_not_dismissed(self, registry):
+        ext, state = self._ext()
+        iface = MagicMock()
+        iface.messageBar.return_value.pushMessage.side_effect = RuntimeError("no message bar yet")
+        registry._show_missing_deps_message(ext, iface)
+        assert state['dismissed'] is False  # shown at the next start instead

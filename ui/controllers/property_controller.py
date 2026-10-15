@@ -771,7 +771,8 @@ class PropertyController(BaseController):
 
         current_layer = getattr(dw, 'current_layer', None)
 
-        if current_layer is not None:
+        # Raster / point cloud source: the buffer applies to a polygon (vectorized selection, footprint).
+        if current_layer is not None and hasattr(current_layer, 'geometryType'):
             try:
                 geom_type = current_layer.geometryType()
 
