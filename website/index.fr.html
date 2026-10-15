@@ -64,7 +64,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Regarder la vidéo sélectionnée"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Voir la présentation</button>
                 <a class="home-text-link" href="guide.fr.html">Lire le guide <span aria-hidden="true">→</span></a>
             </div>
-            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 et Qt6</p>
+            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 et Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>Découvrir le fonctionnement</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -89,6 +89,23 @@
         </ol>
         <a class="inline-cta" href="guide.fr.html#tutorial">Suivre le tutoriel du premier filtre <span aria-hidden="true">→</span></a>
         <div class="callout demo-download"><strong>Essayez sur un petit jeu de données.</strong><p>Quatre couches autour de Toutens, un projet QGIS stylé, un favori importable et des instructions en français et anglais. Décompressez le ZIP avant d’ouvrir le projet.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Télécharger la démo (ZIP, 203 Ko)</a></div>
+    </div>
+</section>
+
+<section class="home-section fm5" id="fm5" aria-labelledby="fm5-title">
+    <div class="home-container capability-layout">
+        <div class="fm5-visual">
+            <div class="fm5-shots">
+                <img src="img/guide/fm5_raster_exploring.png" alt="Panneau EXPLORING d’une couche raster : bande, plage de valeurs et histogramme" loading="lazy" width="440" height="1086">
+                <img src="img/guide/fm5_pointcloud_exploring.png" alt="Panneau EXPLORING d’un nuage de points : classes LiDAR" loading="lazy" width="440" height="1086">
+            </div>
+            <p class="fm5-caption">Le panneau suit la couche courante : un raster à gauche, un nuage de points à droite.</p>
+        </div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">Nouveau dans FilterMate 5</p><h2 id="fm5-title">Rasters et nuages de points LiDAR, filtrés comme n’importe quelle couche.</h2><p>Choisissez un raster ou un nuage de points comme couche courante et EXPLORING affiche ses propres outils. FILTERING relie ensuite la sélection à des couches de tout type.</p></div>
+            <ul class="capability-list"><li><strong>Raster</strong><span>Bande, pipette de pixel, plage de valeurs avec histogramme et aperçu en direct, classes, expression raster.</span></li><li><strong>Nuages de points</strong><span>Classes ASPRS et LiDAR HD, plages de Z, d’intensité et de retour, hauteur au-dessus d’un MNT.</span></li><li><strong>Dans tous les sens</strong><span>Vecteur, raster et nuage de points en source ou en cible : neuf combinaisons avec tampon, couverture minimale et Disjoint.</span></li><li><strong>Sans risque</strong><span>Les couches découpées gardent leur identifiant et leur style. Annuler, rétablir et les fichiers de projet reviennent à la source d’origine.</span></li><li><strong>Exporter</strong><span>GeoTIFF et COG pour les rasters ; LAZ, LAS, COPC, GPKG et CSV pour les nuages de points.</span></li><li><strong>Automatiser</strong><span>Sept algorithmes Processing, quatre modèles, qgis_process, API Python et REST.</span></li><li><strong>Testé</strong><span>CI sur QGIS 3.22, 3.28, 3.34, 3.44 et 4.2, via Processing et le panneau lui-même.</span></li></ul>
+            <a class="inline-cta" href="guide.fr.html#raster-lidar">Lire le guide de FilterMate 5 <span aria-hidden="true">→</span></a>
+        </div>
     </div>
 </section>
 
@@ -146,7 +163,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.fr.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Le filtrage spatial pour QGIS, par imagodata.</p></div><ul><li><a href="guide.fr.html">Guide utilisateur</a></li><li><a href="stories.fr.html">Cas d’usage</a></li><li><a href="roadmap.html" hreflang="en">Feuille de route</a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Code source</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Signaler un problème</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 4.9.2 · Données des vidéos et captures : BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+    <div class="home-container footer-note">FilterMate 5.0 · Données des vidéos et captures : BD TOPO® © IGN, Licence Ouverte 2.0.</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="Vidéo"><video controls playsinline muted></video><form method="dialog"><button>Fermer</button></form></dialog>

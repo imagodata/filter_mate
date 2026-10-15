@@ -685,6 +685,9 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
 .product-shot img { width: 100%; border: 1px solid var(--rule); box-shadow: 0 24px 60px rgba(22, 35, 43, .16); }
 .product-shot p { max-width: 70ch; margin: 14px 0 0 var(--gutter); color: var(--text-2); font-size: .9rem; }
 .capability-layout .section-heading { margin-bottom: 22px; }
+.fm5-shots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.fm5-shots img { width: 100%; height: auto; border: 1px solid var(--rule); box-shadow: 0 24px 60px rgba(22, 35, 43, .16); }
+.fm5-caption { max-width: 70ch; margin: 14px 0 0; color: var(--text-2); font-size: .9rem; }
 .capability-list { margin: 0; padding: 0; list-style: none; border-top: 2px solid var(--text); }
 .capability-list li { display: grid; grid-template-columns: 100px 1fr; gap: 18px; padding: 13px 0; border-bottom: 1px solid var(--rule); }
 .capability-list strong { font-weight: 600; }
