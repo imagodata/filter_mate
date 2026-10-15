@@ -537,6 +537,18 @@ def s_rasters_on_check():
     check('layers to filter list each layer once', len(targets) == len(set(targets)), str(targets))
 
 
+def s_remove_layer():
+    """Removing a layer from the project unregisters it (the task ignored the ids QGIS sends until 5.0)."""
+    STATE['removed_id'] = layer('dem').id()
+    project.removeMapLayer(STATE['removed_id'])
+    return lambda: STATE['removed_id'] not in app().PROJECT_LAYERS and tasks_idle()
+
+
+def s_remove_layer_check():
+    check('layer removed from the project: unregistered', STATE['removed_id'] not in app().PROJECT_LAYERS
+          and 'dem' not in current_layer_list(), f"registered={STATE['removed_id'] in app().PROJECT_LAYERS}")
+
+
 def s_finish():
     check('no Python error and no FilterMate critical message in the log', not STATE['python_errors'],
           '; '.join(STATE['python_errors'][:3]))
@@ -553,7 +565,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_layout_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,
          s_point_cloud_source, s_point_cloud_select, s_point_cloud_filter, s_point_cloud_check, s_point_cloud_settled,
-         s_back_to_vector, s_rasters_off, s_rasters_off_check, s_rasters_on_check, s_finish]
+         s_back_to_vector, s_rasters_off, s_rasters_off_check, s_rasters_on_check,
+         s_remove_layer, s_remove_layer_check, s_finish]
 
 
 def run_step(index=0):

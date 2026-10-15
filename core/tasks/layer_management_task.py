@@ -344,7 +344,10 @@ class LayersManagementEngineTask(QgsTask):
 
             elif self.task_action == 'remove_layers':
                 self.layers = self.task_parameters["task"]["layers"]
-                self.project_layers = self.task_parameters["task"]["project_layers"]
+                # A copy: deleting from the shared PROJECT_LAYERS in this worker thread hid the removal
+                # from LayerTaskCompletionHandler._handle_remove_layers (it compares the dock's dict with
+                # the result to delete the layer's properties and history), and the UI may iterate it.
+                self.project_layers = dict(self.task_parameters["task"]["project_layers"])
                 self.reset_all = self.task_parameters["task"]["reset_all_layers_variables_flag"]
                 result = self.manage_project_layers()
                 if self.isCanceled() or result is False:
@@ -393,13 +396,12 @@ class LayersManagementEngineTask(QgsTask):
                         if self.isCanceled():
                             return False
             elif self.task_action == 'remove_layers':
-                # Layer objects, whatever their type: FilterMateApp.apply_layer_kind_options sends the
-                # rasters / point clouds of a kind just switched off, no longer a filterable type.
-                # The ids sent for QGIS layersWillBeRemoved are left alone, as they always were (no
-                # string ever matched the former isinstance check); pruning them needs the shared
-                # PROJECT_LAYERS dict copied first, or the completion handler sees nothing removed.
-                if not isinstance(layer, str) and hasattr(layer, 'id') and layer.id() in self.project_layers:
-                    result = self.remove_project_layer(layer.id())
+                # Ids (QGIS layersWillBeRemoved) or layer objects of any type (a raster / point cloud
+                # kind switched off: no longer a filterable type). Until 5.0 no id ever matched the
+                # isinstance check, so removed layers stayed registered with their properties.
+                layer_id = layer if isinstance(layer, str) else (layer.id() if hasattr(layer, 'id') else None)
+                if layer_id in self.project_layers:
+                    result = self.remove_project_layer(layer_id)
                     if self.isCanceled() or result is False:
                         return False
 
