@@ -23,7 +23,11 @@ try:
         QMenu, QToolButton, QSizePolicy
     )
     from qgis.PyQt.QtCore import Qt, pyqtSignal
-    from qgis.PyQt.QtGui import QAction, QIcon, QCursor
+    from qgis.PyQt.QtGui import QIcon, QCursor
+    try:
+        from qgis.PyQt.QtGui import QAction
+    except ImportError:  # QGIS < 3.34.2 (Qt5): QAction is in QtWidgets
+        from qgis.PyQt.QtWidgets import QAction
     PYQT_AVAILABLE = True
 except ImportError:
     # Stubs for testing without QGIS

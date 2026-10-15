@@ -21,14 +21,23 @@
 
 Revue adversariale (Opus) : 33 constats, corrigés dans 62a84f2d sauf les points ouverts ci-dessous.
 
+### Suite (14–15/10/2026)
+
+| PR | Contenu |
+|---|---|
+| #95, #96 | Automatisation : 7 algorithmes Processing + 4 modèles, `qgis_process`, API Python et REST (`docs/AUTOMATION.md`) |
+| #97–#100 | Design de la maquette : carte de couche, outils par type, échelle d'espacement, pipette, icônes du rail |
+| #101, #102 | Nuages : conditions d'attributs dynamiques et chaînées, panneau qui suit les statistiques de la couche ; outils raster d'EXPLORING |
+| `claude/v5-release-hardening` | Avant la sortie : fonds de plan web exclus du combo, cache des fichiers dérivés nettoyé et plafonné (verrou de session, repli dans le temp, fichiers en cours d'écriture protégés), échecs nommés par couche, tâches annulées au déchargement, fenêtre « Nouveautés de FilterMate 5 », metadata ; job CI QGIS sans interface (Docker, 8 images de 3.22 à la nightly), qui a trouvé trois incompatibilités, corrigées : plugin non chargé avant QGIS 3.34.2 (`QAction` / `QShortcut`), rasters cibles non découpés avec GDAL < 3.9 (`cutlineWKT`), PDAL < 2.4 sans `writers.copc` ; options raster et nuage (actives par défaut) appliquées dès leur modification dans l'onglet Configuration |
+
 **Vérifications** : suite unitaire 2266 OK ; tests API 126 OK (fastapi en dossier isolé) ; flake8 (config CI) 0 ; `scripts/fm5_scenarios.py` 62/62 (QGIS 4.2
 sans interface, dalle LiDAR HD 0616_6153 Cerdagne, MNT 1 m et classes dérivés par PDAL, BD TOPO et parcelles WFS) ;
 `scripts/fm5_gui_check.py` 26/26 sur QGIS 4.2 (Qt6) et 25/25 sur QGIS 3.44 LTR (Qt5), profil jetable.
 
 **Points ouverts**
 - QGIS 3.44 plante à la fermeture avec ces couches chargées, **même sans FilterMate** (vérifié) : à signaler à QGIS si reproductible hors `\\wsl.localhost`.
-- QGIS 3.22–3.28 non testés (API utilisées : `virtualraster` 3.22, `QgsPointCloudLayerExporter` 3.26, transparence opacité 3.30+ avec repli).
-- PDAL sous Linux / macOS non vérifié (repli : exporteur QGIS, HAG indisponible avec message).
+- QGIS 3.22, 3.28 et 3.34 testés **sans interface** (job CI `qgis-headless` : chargement du plugin, Processing, filtres croisés) ; le dock n'est vérifié en interface que sur 3.44 et 4.2 (`scripts/fm5_gui_check.py`).
+- PDAL sous Linux vérifié en CI : pdal 2.3 des images 3.22–3.34 (repli sur l'exporteur QGIS, HAG indisponible avec message) et pdal récent de conda-forge. macOS non vérifié. Les images QGIS compilées sans PDAL ne savent pas ouvrir le LAS dérivé : nuage cible en échec avec message (mode `bbox` possible).
 - Avec l'option zip, les fichiers raster / nuage vont dans `<nom>_raster_lidar.zip` à côté de l'archive vecteur (pas dans la même archive).
 - Traductions des 32 langues hors fr/en produites par modèle : relecture humaine souhaitable avant la sortie.
 

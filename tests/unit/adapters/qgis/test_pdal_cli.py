@@ -1,0 +1,111 @@
+# -*- coding: utf-8 -*-
+"""pdal command line tool: version detection and the COPC writer gate (writers.copc needs PDAL 2.4)."""
+import importlib.util
+import pathlib
+import subprocess
+
+import pytest
+
+pytestmark = pytest.mark.unit
+
+_PATH = pathlib.Path(__file__).resolve().parents[4] / "adapters" / "qgis" / "coverage_layers" / "pdal_cli.py"
+
+
+def _load():
+    spec = importlib.util.spec_from_file_location("fm_pdal_cli_test", _PATH)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+pdal_cli = _load()
+
+BANNER = "-" * 80 + "\npdal {} (git-version: Release)\n" + "-" * 80 + "\n"
+
+
+@pytest.fixture
+def fake_pdal(monkeypatch):
+    """Point find_pdal at a fake executable whose ``--version`` prints ``state['out']``."""
+    state = {'exe': '/opt/pdal/bin/pdal', 'out': BANNER.format('2.6.3'), 'calls': 0, 'raise': None}
+
+    def run(argv, **kwargs):
+        state['calls'] += 1
+        assert argv == [state['exe'], '--version']
+        assert kwargs.get('errors') == 'replace'  # a non UTF-8 banner never raises
+        assert kwargs.get('timeout', 99) <= 5  # read on the main thread at worst
+        if state['raise'] is not None:
+            raise state['raise']
+        return subprocess.CompletedProcess(argv, 0, stdout=state['out'], stderr='')
+
+    pdal_cli.reset_cache()
+    monkeypatch.setattr(pdal_cli, 'find_pdal', lambda: state['exe'])
+    monkeypatch.setattr(pdal_cli.subprocess, 'run', run)
+    yield state
+    pdal_cli.reset_cache()
+
+
+@pytest.mark.parametrize("text, expected", [
+    ('2.6.3', (2, 6, 3)),
+    ('2.3.0', (2, 3, 0)),
+    ('2.4', (2, 4, 0)),
+    ('3.0.0-dev', (3, 0, 0)),
+])
+def test_version_parsed_from_banner(fake_pdal, text, expected):
+    fake_pdal['out'] = BANNER.format(text)
+    assert pdal_cli.version() == expected
+
+
+@pytest.mark.parametrize("text, supported", [('2.3.0', False), ('2.4.0', True), ('2.6.3', True), ('3.0.0', True)])
+def test_copc_writer_needs_pdal_2_4(fake_pdal, text, supported):
+    fake_pdal['out'] = BANNER.format(text)
+    assert pdal_cli.supports_copc() is supported
+    assert (pdal_cli.copc_unavailable_reason() == '') is supported
+
+
+def test_old_pdal_reason_names_the_version(fake_pdal):
+    fake_pdal['out'] = BANNER.format('2.3.0')
+    assert '2.3.0' in pdal_cli.copc_unavailable_reason()
+
+
+def test_unreadable_version_is_trusted(fake_pdal):
+    """A pdal that answers oddly keeps the previous behavior: try it, report its error if it fails."""
+    fake_pdal['out'] = 'something else\n'
+    assert pdal_cli.version() is None
+    assert pdal_cli.supports_copc() is True
+
+
+@pytest.mark.parametrize("error", [OSError('exec format error'), subprocess.TimeoutExpired('pdal', 5)])
+def test_pdal_that_cannot_run_is_not_used(fake_pdal, error):
+    """Its pipelines would fail the same way: the QGIS exporter does the clip instead."""
+    fake_pdal['raise'] = error
+    assert pdal_cli.version() is None
+    assert pdal_cli.supports_copc() is False
+    assert pdal_cli.copc_unavailable_reason().startswith('pdal could not be run')
+    pdal_cli.supports_copc()
+    assert fake_pdal['calls'] == 1  # the failure is cached too
+
+
+def test_warm_up_reads_the_version_in_the_background(fake_pdal):
+    thread = pdal_cli.warm_up()
+    thread.join(5)
+    assert fake_pdal['calls'] == 1
+    assert pdal_cli.warm_up() is None  # already known
+    assert pdal_cli.version() == (2, 6, 3)
+    assert fake_pdal['calls'] == 1
+
+
+def test_version_asked_once_per_executable(fake_pdal):
+    pdal_cli.version()
+    pdal_cli.version()
+    assert fake_pdal['calls'] == 1
+    fake_pdal['exe'] = '/usr/bin/pdal'
+    pdal_cli.version()
+    assert fake_pdal['calls'] == 2
+
+
+def test_no_pdal(monkeypatch):
+    pdal_cli.reset_cache()
+    monkeypatch.setattr(pdal_cli, 'find_pdal', lambda: None)
+    assert pdal_cli.version() is None
+    assert pdal_cli.supports_copc() is False
+    assert pdal_cli.copc_unavailable_reason() == 'pdal not found'

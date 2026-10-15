@@ -22,7 +22,11 @@
 """
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QSize, Qt, QUrl
-from qgis.PyQt.QtGui import QAction, QIcon, QDesktopServices, QPixmap
+from qgis.PyQt.QtGui import QIcon, QDesktopServices, QPixmap
+try:
+    from qgis.PyQt.QtGui import QAction
+except ImportError:  # QGIS < 3.34.2 (Qt5): QAction is in QtWidgets
+    from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtWidgets import (QMessageBox, QCheckBox, QDialog,
     QVBoxLayout, QHBoxLayout, QLabel, QPushButton)
 import weakref

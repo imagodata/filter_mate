@@ -789,6 +789,64 @@ class FilterMateApp:
             stability_constants=STABILITY_CONSTANTS
         )
 
+    def apply_layer_kind_options(self):
+        """Raster / point cloud layers switched on or off in the Configuration tab.
+
+        Registers the project layers of the kinds now enabled, unregisters those of the kinds
+        turned off and re-filters the current-layer combo box. Unlike F5 (force_reload_layers),
+        nothing else is reset and no task is canceled: a running export or height-above-ground
+        computation, or another plugin's task, keeps going.
+
+        Returns:
+            tuple: ``(added, removed)`` layer counts.
+        """
+        if getattr(self, '_unloading', False) or not self.dockwidget or not self.PROJECT:
+            return 0, 0
+        filterable = get_filterable_layer_types() or (QgsVectorLayer,)
+        coverage = [layer for layer in self.PROJECT.mapLayers().values() if not isinstance(layer, QgsVectorLayer)]
+        removed = [layer.id() for layer in coverage if layer.id() in self.PROJECT_LAYERS and not isinstance(layer, filterable)]
+        added = self._filter_usable_layers([layer for layer in coverage if layer.id() not in self.PROJECT_LAYERS])
+        combo = getattr(self.dockwidget, 'comboBox_filtering_current_layer', None)
+        if combo is not None:
+            try:
+                flags = get_current_layer_combo_filters()
+                if flags is not None:
+                    combo.setFilters(flags)
+                exclude_non_analysis_rasters(combo)
+            except Exception as e:
+                logger.debug(f"Current-layer combo box not re-filtered: {e}")
+        if removed:
+            self._warn_filtered_layers_left(removed)
+            self.manage_task('remove_layers', removed)
+        if added:
+            self.manage_task('add_layers', added)
+        logger.info(f"Layer kinds changed: {len(added)} layer(s) registered, {len(removed)} unregistered")
+        return len(added), len(removed)
+
+    def _warn_filtered_layers_left(self, layer_ids):
+        """Layers of a kind just turned off keep their filter (clipped source, subset string):
+        say so, since FilterMate no longer lists them to unfilter them."""
+        try:
+            from .adapters.qgis.coverage_layers.snapshots import registry
+            derived = registry()
+        except Exception:
+            derived = None
+        names = []
+        for layer_id in layer_ids:
+            layer = self.PROJECT.mapLayer(layer_id)
+            if layer is None:
+                continue
+            try:
+                subset = layer.subsetString() if hasattr(layer, 'subsetString') else ''
+            except Exception:
+                subset = ''
+            if subset or (derived is not None and derived.get(layer_id) is not None):
+                names.append(layer.name())
+        if names:
+            show_warning(QCoreApplication.translate(
+                "FilterMateApp", "{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.").format(
+                len(names), ', '.join(names[:3]) + (' …' if len(names) > 3 else '')))
+
     def run(self):
         """Initialize and display the FilterMate dockwidget. Delegates to AppInitializer."""
         logger.debug("FilterMateApp.run() called")

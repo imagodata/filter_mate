@@ -712,7 +712,10 @@ class CoverageDockExtras(QObject):
         iface = self._controller._iface()
         if iface is None:
             return None
-        from qgis.PyQt.QtGui import QAction
+        try:
+            from qgis.PyQt.QtGui import QAction
+        except ImportError:  # QGIS < 3.34.2 (Qt5): QAction is in QtWidgets
+            from qgis.PyQt.QtWidgets import QAction
         for name in names:
             try:
                 action = iface.mainWindow().findChild(QAction, name)

@@ -363,6 +363,67 @@ class TestMigrateConfigPersistsNewSections:
         assert user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] is True
 
 
+def _raster_section(value=True):
+    return {
+        "description": "Raster filtering",
+        "enabled": {"value": value, "choices": [True, False], "description": "Show raster layers"},
+    }
+
+
+def _fm5_default():
+    default = _default_config_with_point_cloud()
+    default["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] = True
+    default["APP"]["OPTIONS"]["RASTER"] = _raster_section()
+    return default
+
+
+class TestFilterMate5EnablesLayerKinds:
+    """Raster and point cloud layers are on by default in FilterMate 5. A 4.x
+    config still carries the off default of the experimental point cloud flag:
+    it is turned on once, then the Configuration panel decides."""
+
+    def _user_4x(self, point_cloud_value=False):
+        user = _migrated_user_config()
+        user["APP"]["OPTIONS"]["POINT_CLOUD"] = _point_cloud_section()
+        user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] = point_cloud_value
+        return user
+
+    def test_4x_point_cloud_off_is_turned_on(self, config_helpers):
+        user = self._user_4x(False)
+        assert config_helpers._migrate_config(user, _fm5_default()) is True
+        assert user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] is True
+        assert user["APP"]["OPTIONS"]["RASTER"]["enabled"]["value"] is True
+
+    def test_turned_on_only_once(self, config_helpers):
+        """Switched off again in the Configuration panel: stays off at the next start."""
+        user = self._user_4x(False)
+        config_helpers._migrate_config(user, _fm5_default())
+        user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] = False
+        user["APP"]["OPTIONS"]["RASTER"]["enabled"]["value"] = False
+        assert config_helpers._migrate_config(user, _fm5_default()) is False
+        assert user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] is False
+        assert user["APP"]["OPTIONS"]["RASTER"]["enabled"]["value"] is False
+
+    def test_4x_without_point_cloud_section_gets_defaults(self, config_helpers):
+        user = _migrated_user_config()
+        config_helpers._migrate_config(user, _fm5_default())
+        assert user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] is True
+        assert user["APP"]["OPTIONS"]["RASTER"]["enabled"]["value"] is True
+
+    def test_template_without_raster_never_flips(self, config_helpers):
+        """The marker is the RASTER section of the template: without it, nothing is forced."""
+        user = self._user_4x(False)
+        config_helpers._migrate_config(user, _default_config_with_point_cloud())
+        assert user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]["value"] is False
+
+    def test_raw_flag_value_is_turned_on_too(self, config_helpers):
+        user = _migrated_user_config()
+        user["APP"]["OPTIONS"]["POINT_CLOUD"] = {"enabled": False}
+        config_helpers._migrate_config(user, _fm5_default())
+        enabled = user["APP"]["OPTIONS"]["POINT_CLOUD"]["enabled"]
+        assert (enabled["value"] if isinstance(enabled, dict) else enabled) is True
+
+
 @pytest.fixture(scope="module")
 def default_config():
     with open(CONFIG_DEFAULT_PATH, "r", encoding="utf-8") as f:
@@ -412,3 +473,11 @@ class TestDefaultConfigRasterAndCrossFilterSections:
     def test_sections_order(self, default_config):
         keys = list(default_config["APP"]["OPTIONS"].keys())
         assert keys[-3:] == ["POINT_CLOUD", "RASTER", "CROSS_FILTER"]
+
+
+class TestMigrationOddShapes:
+    @pytest.mark.parametrize("app", [[], "x", None])
+    def test_non_dict_app_section_does_not_raise(self, config_helpers, app):
+        user = {"APP": app}
+        default = {"APP": {"OPTIONS": {"RASTER": {"enabled": {"value": True}}}}}
+        config_helpers._migrate_config(user, default)  # no AttributeError from step 0

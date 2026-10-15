@@ -181,6 +181,27 @@ def _migrate_config(config_data, default_data):
     """
     dirty = False
 
+    # 0) FilterMate 5: raster and point cloud layers are on by default. A config
+    # written before 5.0 (no RASTER section yet) still holds the off default of
+    # the 4.x experimental point cloud flag: turn it on once. Afterwards the
+    # RASTER section exists and the Configuration panel decides.
+    def _options(data):
+        app_section = data.get("APP") if isinstance(data, dict) else None
+        return app_section.get("OPTIONS") if isinstance(app_section, dict) else None
+
+    user_options, default_options = _options(config_data), _options(default_data)
+    if (isinstance(user_options, dict) and isinstance(default_options, dict)
+            and "RASTER" in default_options and "RASTER" not in user_options):
+        point_cloud = user_options.get("POINT_CLOUD")
+        if isinstance(point_cloud, dict):
+            enabled = point_cloud.get("enabled")
+            if isinstance(enabled, dict) and enabled.get("value") is False:
+                enabled["value"] = True
+                dirty = True
+            elif enabled is False:
+                point_cloud["enabled"] = True
+                dirty = True
+
     # 1) Merge new keys from default into user config (recursive, non-destructive)
     if _merge_missing_keys(config_data, default_data):
         dirty = True
@@ -191,10 +212,14 @@ def _migrate_config(config_data, default_data):
     if _sync_metadata(config_data, default_data):
         dirty = True
 
-    app = config_data.get("APP", {})
-    dockwidget = app.get("DOCKWIDGET", {})
-    options = app.get("OPTIONS", {})
-    colors = dockwidget.get("COLORS", {})
+    def _section(parent, key):
+        value = parent.get(key) if isinstance(parent, dict) else None
+        return value if isinstance(value, dict) else {}
+
+    app = _section(config_data, "APP")
+    dockwidget = _section(app, "DOCKWIDGET")
+    options = _section(app, "OPTIONS")
+    colors = _section(dockwidget, "COLORS")
 
     # 2) Add _hidden metadata where missing
     hidden_targets = {

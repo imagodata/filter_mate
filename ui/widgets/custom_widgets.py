@@ -41,7 +41,6 @@ from qgis.PyQt.QtCore import (
 )
 from qgis.PyQt.QtGui import (
     QBrush,
-    QAction,
     QColor,
     QCursor,
     QFont,
@@ -50,6 +49,10 @@ from qgis.PyQt.QtGui import (
     QPixmap,
     QStandardItem
 )
+try:
+    from qgis.PyQt.QtGui import QAction
+except ImportError:  # QGIS < 3.34.2 (Qt5): QAction is in QtWidgets
+    from qgis.PyQt.QtWidgets import QAction
 from qgis.PyQt.QtWidgets import (
     QApplication,
     QComboBox,

@@ -130,6 +130,11 @@ class CoverageModeController(BaseController):
             QTimer.singleShot(1500, self.replay_stored_filters)
         except Exception as exc:
             logger.debug(f"[FM5] stored filters replay not scheduled: {exc}")
+        try:
+            from ...adapters.qgis.coverage_layers import pdal_cli
+            pdal_cli.warm_up()  # the point cloud panel then never waits for `pdal --version`
+        except Exception as exc:
+            logger.debug(f"[FM5] pdal version not read in the background: {exc}")
         logger.debug("CoverageModeController setup complete (panels deferred)")
 
     def _on_project_cleared(self) -> None:
@@ -787,9 +792,17 @@ class CoverageModeController(BaseController):
             self._pc_panel.populate(summary)
             self._pc_panel.set_current_subset(layer.subsetString())
             self._pc_panel.set_point_counts(kept, getattr(summary, 'point_count', None))
-            available = pdal_cli.is_available()
-            self._pc_panel.set_hag_available(
-                available, '' if available else self.tr("PDAL was not found: the height above a DTM needs the pdal executable"))
+            reason = pdal_cli.copc_unavailable_reason()
+            if not reason:
+                message = ''
+            elif not pdal_cli.is_available():
+                message = self.tr("PDAL was not found: the height above a DTM needs the pdal executable")
+            elif pdal_cli.version() is not None:
+                message = self.tr("PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later").format(
+                    '.'.join(map(str, pdal_cli.version())))
+            else:
+                message = self.tr("PDAL could not be run, the height above a DTM is unavailable: {0}").format(reason)
+            self._pc_panel.set_hag_available(not message, message)
         except Exception as exc:
             logger.warning(f"[FM5] point cloud panel not populated: {exc}", exc_info=True)
 
