@@ -357,6 +357,11 @@ class FilterMate:
             logger.debug("FilterMate.initGui: Registering Processing provider")
             self.initProcessing()
 
+            # FilterMate 5: remove the derived-file folders of crashed QGIS
+            # sessions (live sessions hold a lock), off the startup path.
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(30000, self._cleanup_stale_cache)
+
             logger.debug("FilterMate.initGui: Completed successfully")
 
         except Exception as e:
@@ -371,6 +376,19 @@ class FilterMate:
             )
             # Re-raise to prevent partial initialization
             raise
+
+    @staticmethod
+    def _cleanup_stale_cache():
+        try:
+            import threading
+            from .adapters.qgis.coverage_layers import cache as _coverage_cache
+            # The root is read here (config, QGIS API); the removal of possibly
+            # large folders runs off the main thread.
+            threading.Thread(target=_coverage_cache.cleanup_stale_sessions,
+                             kwargs={'root': _coverage_cache.cache_root()},
+                             name='FilterMate cache cleanup', daemon=True).start()
+        except Exception as e:
+            logger.debug(f"FilterMate: stale cache sessions not cleaned: {e}")
 
     # --------------------------------------------------------------------------
 
@@ -1323,8 +1341,15 @@ class FilterMate:
         try:
             from .adapters.qgis.coverage_layers.snapshots import registry as _coverage_registry
             from .adapters.qgis.coverage_layers import cache as _coverage_cache
-            from .core.services.cross_filter_service import get_cross_filter_service
-            get_cross_filter_service().cancel_all()
+            from .core.services.cross_filter_service import all_services
+            for _service in all_services():  # the dock's and the automation one
+                _service.cancel_all()
+            # Exports and height-above-ground runs read / write the cache too:
+            # stop them before it is removed (their callbacks return early).
+            from qgis.core import QgsApplication
+            for _task in QgsApplication.taskManager().activeTasks():
+                if str(_task.description()).startswith('FilterMate: '):
+                    _task.cancel()
             restored = _coverage_registry().restore_all()
             _coverage_registry().uninstall()
             _coverage_cache.purge_session()
@@ -1581,6 +1606,58 @@ class FilterMate:
         if cb.isChecked():
             settings.setValue('FilterMate/discord_welcome_dismissed', True)
 
+    WHATS_NEW_VERSION = 5
+
+    def _show_whats_new(self) -> bool:
+        """Present FilterMate 5 once (raster and point cloud layers); True when shown."""
+        settings = QSettings()
+        try:
+            seen = int(settings.value('FilterMate/whats_new_seen', 0) or 0)
+        except (TypeError, ValueError):
+            seen = 0
+        if seen >= self.WHATS_NEW_VERSION:
+            return False
+        settings.setValue('FilterMate/whats_new_seen', self.WHATS_NEW_VERSION)
+
+        page = 'guide.fr.html' if getattr(self, '_current_locale', 'en') == 'fr' else 'guide.html'
+        guide_url = f"https://imagodata.github.io/filter_mate/{page}#raster-lidar"
+
+        dlg = QDialog(self.iface.mainWindow())
+        dlg.setWindowTitle(self.tr("What's new in FilterMate 5"))
+        dlg.setMinimumWidth(460)
+        layout = QVBoxLayout(dlg)
+        layout.setSpacing(12)
+        layout.setContentsMargins(24, 20, 24, 20)
+
+        text = QLabel(self.tr(
+            "<p style='font-size:13px;'><b>FilterMate now works with raster and point cloud layers.</b></p>"
+            "<ul style='margin-left:10px; font-size:12px;'>"
+            "<li><b>EXPLORING</b> adapts to the current layer: value range and classes of a raster, "
+            "classes, elevation and attributes of a LiDAR point cloud.</li>"
+            "<li><b>FILTERING</b> relates that selection to layers of any kind, with the usual predicates "
+            "and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped "
+            "to a municipality.</li>"
+            "<li><b>EXPORTING</b> writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).</li>"
+            "<li>Processing algorithms and models, qgis_process, Python and REST APIs.</li>"
+            "</ul>"
+        ))
+        text.setWordWrap(True)
+        layout.addWidget(text)
+
+        bottom = QHBoxLayout()
+        guide_btn = QPushButton(self.tr("Open the user guide"))
+        guide_btn.clicked.connect(lambda: QDesktopServices.openUrl(QUrl(guide_url)))
+        bottom.addWidget(guide_btn)
+        bottom.addStretch()
+        close_btn = QPushButton(self.tr("Close"))
+        close_btn.setDefault(True)
+        close_btn.clicked.connect(dlg.accept)
+        bottom.addWidget(close_btn)
+        layout.addLayout(bottom)
+
+        dlg.exec()
+        return True
+
     def get_public_api(self):
         """Get the public API instance for inter-plugin communication.
 
@@ -1622,7 +1699,9 @@ class FilterMate:
                     self.app.run()
                     if self.app.dockwidget:
                         self.app.dockwidget.closingPlugin.connect(self.onClosePlugin)
-                        self._show_discord_welcome()
+                        # One dialog per opening: the Discord invitation waits for the next one.
+                        if not self._show_whats_new():
+                            self._show_discord_welcome()
                         self._init_extensions_dockwidget_ui()
                 else:
                     # App already exists, call run() which will show the dockwidget

@@ -23,12 +23,18 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Fixed
 
+- **Basemaps in the layer list**: WMS, WMTS, XYZ, WCS and ArcGIS raster layers were offered in the current-layer combo box, although FilterMate cannot read their pixels and ignored them; they are no longer listed (`setExcludedProviders`).
+- **Cache of derived files**: the `CROSS_FILTER.cache_max_gb` limit only wrote a log line, and the clipped VRT / point clouds of removed layers, closed projects and failed runs stayed on disk until QGIS closed. With the panel open, files that no layer and no undo / redo step refer to are now removed after each run or height-above-ground computation, a layer removal, a Reset and a project change (never the files a task is still writing). Over the limit, the oldest undo steps that keep such files alive are forgotten first (steps that free nothing are kept), and a warning tells the user when the current filters alone exceed it.
+- A live QGIS session now holds a lock on its cache folder, naming its computer: another QGIS instance no longer removes it after 24 h of inactivity, and the folders of crashed sessions of the same computer are removed at the next start whatever their age (a day for folders of other computers or file systems without locks). When the cache folder cannot be written (profile on a read-only share), derived files go to a per-user folder of the system temp folder instead of every raster / point cloud target failing. Cache file names are ASCII, so a layer named with accents never loses its derived file.
+- A raster / point cloud target that fails is reported as a warning naming the layer (`<layer>: <reason>`), not as an information message with the reason alone.
+- Unloading the plugin cancels the raster / point cloud exports and height-above-ground computations still running (their callbacks no longer touch the unloaded panel, and a canceled height computation never swaps the layer source), and the cross filters started by the automation API as well as the dock's.
 - A raster source filtered alone (no target layer) in expression mode, or a multiband raster, was not masked: its selection is now read when the source is applied (dock and automation).
 - REST routes no longer block the API while QGIS works: they run in FastAPI's thread pool, so a long export does not freeze the other requests.
 - Raster exports from Processing report their progress and stop when the algorithm is canceled.
 
 ### Changed
 
+- One-time "What's new in FilterMate 5" dialog the first time the panel opens after the update (raster and point cloud layers, link to the user guide); the Discord invitation waits for the next opening. Plugin description and tags mention raster and LiDAR point cloud layers.
 - `filtermate:batch_filter` runs on the main thread (`setSubsetString` is not thread-safe).
 - The experimental point cloud panel (4.10 dev, in FILTERING, which disabled EXPLORING) is replaced by the coverage mode controller; its known defects (input reset on reactivation, Z rounded to 2 decimals, statistics read once, filter never combined, shared history, export refused) are gone with it.
 

@@ -146,6 +146,23 @@ def get_raster_layer_type() -> Optional[type]:
 # XYZ, WCS, ArcGIS) are rendered images or remote coverages: never sources or
 # targets, their statistics would be fetched over the network.
 ANALYSIS_RASTER_PROVIDERS = ('gdal', 'virtualraster', 'postgresraster')
+# The other raster providers, hidden from the current-layer combo box: a
+# basemap (OSM, orthophoto) in the list could be chosen and do nothing.
+NON_ANALYSIS_RASTER_PROVIDERS = ('wms', 'wcs', 'arcgismapserver', 'grassraster')
+
+
+def exclude_non_analysis_rasters(combo: Any) -> None:
+    """Hide web / non analysable rasters from a ``QgsMapLayerComboBox``.
+
+    The combo box filters (``RasterLayer``) admit every raster layer, while
+    FilterMate only handles :data:`ANALYSIS_RASTER_PROVIDERS`.
+    """
+    try:
+        excluded = list(combo.excludedProviders()) if hasattr(combo, 'excludedProviders') else []
+        merged = excluded + [key for key in NON_ANALYSIS_RASTER_PROVIDERS if key not in excluded]
+        combo.setExcludedProviders(merged)
+    except (AttributeError, TypeError, RuntimeError) as exc:
+        logger.debug(f"Web rasters not excluded from the layer combo box: {exc}")
 
 
 def is_raster_layer(layer: Any) -> bool:

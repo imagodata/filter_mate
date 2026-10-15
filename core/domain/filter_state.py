@@ -12,7 +12,7 @@ touched together.
 This is a PURE PYTHON module with NO QGIS dependencies.
 """
 from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, NamedTuple, Optional, Tuple
 import itertools
 import time
 
@@ -107,6 +107,13 @@ class CrossOperation:
         return tuple(before.layer_id for before, _ in self.changes)
 
 
+class DroppedStep(NamedTuple):
+    """An operation forgotten by :meth:`CrossOperationHistory.drop_oldest`."""
+
+    operation: CrossOperation
+    from_undo: bool  # False: the furthest step of a redo stack
+
+
 class CrossOperationHistory:
     """Undo / redo stacks of cross filter operations, per source layer.
 
@@ -161,6 +168,46 @@ class CrossOperationHistory:
         """Drop the history of one source (vector Reset clears its own history too)."""
         self._undo.pop(source_layer_id, None)
         self._redo.pop(source_layer_id, None)
+
+    def operations(self) -> List[CrossOperation]:
+        """Every operation still kept (undo and redo stacks)."""
+        return [op for stacks in (self._undo, self._redo) for stack in stacks.values() for op in stack]
+
+    def _oldest(self, holds: Optional[Callable[[CrossOperation], bool]] = None):
+        # Bottom of each stack: the oldest undo step, or the furthest redo step.
+        # Undo / redo pop from the top, so dropping a bottom never shifts them.
+        # ``op_id`` is a process-wide counter: comparable across histories.
+        found = None
+        for stacks, from_undo in ((self._undo, True), (self._redo, False)):
+            for source_id, stack in stacks.items():
+                if not stack or (holds is not None and not any(holds(op) for op in stack)):
+                    continue
+                if found is None or stack[0].op_id < found[2].op_id:
+                    found = (stacks, source_id, stack[0], from_undo)
+        return found
+
+    def oldest(self, holds: Optional[Callable[[CrossOperation], bool]] = None) -> Optional[CrossOperation]:
+        """The operation :meth:`drop_oldest` would forget, None when nothing qualifies."""
+        found = self._oldest(holds)
+        return found[2] if found else None
+
+    def drop_oldest(self, holds: Optional[Callable[[CrossOperation], bool]] = None) -> Optional["DroppedStep"]:
+        """Forget the bottom of the stack whose bottom is the oldest.
+
+        Args:
+            holds: Only stacks with at least one operation for which it is
+                True are considered (e.g. "keeps a derived file alive"), so
+                dropping never wipes stacks that would free nothing.
+
+        Returns:
+            The dropped step, None when nothing qualifies.
+        """
+        found = self._oldest(holds)
+        if found is None:
+            return None
+        stacks, source_id, operation, from_undo = found
+        stacks[source_id].pop(0)
+        return DroppedStep(operation, from_undo)
 
     def forget_layer(self, layer_id: str) -> None:
         """Drop every operation touching a removed layer (its snapshots are stale)."""

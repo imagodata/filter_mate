@@ -212,3 +212,60 @@ class TestLidarHdClasses:
         assert asprs_class_label(200) == "200 - Class 200"
         assert set(LIDAR_HD_CLASS_NAMES) == {64, 65, 66, 67}
         assert CLASS_PRESETS["Buildings"] == (6,)
+
+
+class TestHistoryTrimming:
+    def _op(self, source, layer, name):
+        snap = LayerSnapshot(layer, "raster", source=f"/c/{name}.vrt", provider="gdal")
+        return CrossOperation(source, ((snap, snap),), description=name)
+
+    def _names(self, history):
+        return sorted(op.description for op in history.operations())
+
+    def test_operations_lists_undo_and_redo(self):
+        history = CrossOperationHistory()
+        history.push(self._op("a", "r", "1"))
+        history.push(self._op("a", "r", "2"))
+        history.undo("a")
+        assert self._names(history) == ["1", "2"]
+
+    def test_drop_oldest_across_sources(self):
+        history = CrossOperationHistory()
+        for source, name in (("a", "1"), ("b", "2"), ("a", "3")):
+            history.push(self._op(source, "r", name))
+        assert history.oldest().description == "1"
+        step = history.drop_oldest()
+        assert step.operation.description == "1" and step.from_undo
+        assert history.drop_oldest().operation.description == "2"
+        assert not history.can_undo("b")
+        assert history.drop_oldest().operation.description == "3"
+        assert history.drop_oldest() is None and history.oldest() is None
+
+    def test_drop_keeps_undo_and_redo_order(self):
+        history = CrossOperationHistory()
+        for name in ("1", "2", "3"):
+            history.push(self._op("a", "r", name))
+        history.undo("a")  # 3 to redo
+        history.undo("a")  # 2 to redo
+        assert history.drop_oldest().operation.description == "1"
+        assert history.redo("a").description == "2"
+        assert history.redo("a").description == "3"
+
+    def test_redo_bottom_is_the_furthest_step(self):
+        history = CrossOperationHistory()
+        history.push(self._op("a", "r", "1"))
+        history.push(self._op("a", "r", "2"))
+        history.undo("a")
+        history.undo("a")  # redo stack: [2, 1]
+        step = history.drop_oldest()
+        assert step.operation.description == "2" and not step.from_undo
+        assert history.redo("a").description == "1"
+
+    def test_holds_limits_the_stacks_considered(self):
+        history = CrossOperationHistory()
+        history.push(self._op("a", "r", "1"))
+        history.push(self._op("b", "p", "2"))
+        holds = lambda op: op.description == "2"  # noqa: E731
+        assert history.oldest(holds).description == "2"
+        assert history.drop_oldest(holds).operation.description == "2"
+        assert history.drop_oldest(holds) is None and history.can_undo("a")

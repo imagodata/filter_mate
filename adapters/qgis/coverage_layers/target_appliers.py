@@ -124,7 +124,14 @@ class TargetJob:
         self.operator = operator
         self.before: LayerSnapshot = take_snapshot(layer, self.kind)
         self.outcome = CrossFilterOutcome(self.layer_id, self.kind, False)
+        self.outputs: List[str] = []  # cache files written, settled once applied
         self._started = 0.0
+
+    def _new_path(self, suffix: str) -> str:
+        """A cache file for this job, protected from the cache cleaner until the task is applied."""
+        path = cache.new_path(self.layer_name, suffix)
+        self.outputs.append(path)
+        return path
 
     # Attributes holding QGIS objects owned by Python (layer copies, feature
     # sources, exporters): released once the task is over, never left for the
@@ -310,7 +317,7 @@ class RasterTargetJob(TargetJob):
             geometry = QgsGeometry.fromRect(QgsRectangle(ext.xMinimum() - 2, ext.yMinimum() - 2, ext.xMinimum() - 1, ext.yMinimum() - 1))
         self._geometry_wkt = geometry.asWkt()
         cutline = _simplified_for_cutline(geometry, self._pixel * 0.5)
-        path = cache.new_path(self.layer_name, '.vrt')
+        path = self._new_path('.vrt')
         options = dict(format='VRT', cutlineWKT=cutline.asWkt(), cutlineSRS=self.crs.toWkt(), cropToCutline=False)
         if self._nodata and all(value is not None for value in self._nodata):
             options['dstNodata'] = ' '.join(repr(value) for value in self._nodata)
@@ -410,7 +417,7 @@ class PointCloudTargetJob(TargetJob):
         self._base_layer = base  # keep alive while the task runs
         exporter = QgsPointCloudLayerExporter(base)
         exporter.setFormat(QgsPointCloudLayerExporter.ExportFormat.Las)
-        exporter.setFileName(cache.new_path(self.layer_name, '.laz'))
+        exporter.setFileName(self._new_path('.laz'))
         exporter.setAllAttributes()
         self._exporter = exporter
 
@@ -445,7 +452,7 @@ class PointCloudTargetJob(TargetJob):
 
     def _compute_pdal(self, geometry: QgsGeometry, is_canceled) -> None:
         from . import pdal_cli
-        path = cache.new_path(self.layer_name, '.copc.laz')
+        path = self._new_path('.copc.laz')
         reader = {"type": pdal_cli.reader_for(self._base_source), "filename": self._base_source}
         stages = [reader]
         if geometry.isEmpty():

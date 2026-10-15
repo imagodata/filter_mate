@@ -30,7 +30,8 @@ try:
 except ImportError:
     from qgis.core import QgsMapLayerProxyModel
 try:
-    from .adapters.qgis.point_cloud_capability import get_filterable_layer_types, get_current_layer_combo_filters
+    from .adapters.qgis.point_cloud_capability import (
+        get_filterable_layer_types, get_current_layer_combo_filters, exclude_non_analysis_rasters)
 except ImportError:
     def get_filterable_layer_types():
         """Vector-only fallback when the point cloud capability module is unavailable."""
@@ -38,6 +39,10 @@ except ImportError:
 
     def get_current_layer_combo_filters():
         """No combo filter override when the point cloud capability module is unavailable."""
+        return None
+
+    def exclude_non_analysis_rasters(_combo):
+        """No provider exclusion when the point cloud capability module is unavailable."""
         return None
 from qgis.utils import iface
 
@@ -2877,6 +2882,7 @@ class FilterMateApp:
                 # the point cloud capability adds PointCloudLayer when the feature is enabled.
                 flags = get_current_layer_combo_filters()
                 self.dockwidget.comboBox_filtering_current_layer.setFilters(flags if flags is not None else QgsMapLayerProxyModel.Filter.HasGeometry)
+                exclude_non_analysis_rasters(self.dockwidget.comboBox_filtering_current_layer)
         except Exception as e: logger.debug(f"ComboBox filter setup (non-critical): {e}")
 
         # Trigger layer change with active or first layer

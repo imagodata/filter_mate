@@ -339,6 +339,34 @@ class TestCurrentLayerComboFilters:
         assert cap.get_current_layer_combo_filters() is None
 
 
+class _FakeCombo:
+    def __init__(self, excluded=()):
+        self.excluded = list(excluded)
+
+    def excludedProviders(self):
+        return list(self.excluded)
+
+    def setExcludedProviders(self, providers):
+        self.excluded = list(providers)
+
+
+class TestExcludeNonAnalysisRasters:
+    def test_web_rasters_are_excluded(self):
+        combo = _FakeCombo()
+        cap.exclude_non_analysis_rasters(combo)
+        assert {"wms", "wcs", "arcgismapserver"} <= set(combo.excluded)
+        assert not set(combo.excluded) & set(cap.ANALYSIS_RASTER_PROVIDERS)
+
+    def test_existing_exclusions_are_kept_once(self):
+        combo = _FakeCombo(excluded=["memory", "wms"])
+        cap.exclude_non_analysis_rasters(combo)
+        cap.exclude_non_analysis_rasters(combo)
+        assert combo.excluded[0] == "memory" and combo.excluded.count("wms") == 1
+
+    def test_combo_without_the_api_is_left_alone(self):
+        cap.exclude_non_analysis_rasters(object())  # no exception
+
+
 class _FakeProject:
     def __init__(self, layers, fail=False):
         self._layers = {layer.id(): layer for layer in layers}

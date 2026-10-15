@@ -58,7 +58,9 @@ class HeightAboveGroundTask(QgsTask):
         return ok
 
     def finished(self, result: bool) -> None:
-        if not result:
+        cache.settle([getattr(self, 'output', '')])
+        if not result or self.isCanceled() or cache.is_closed():
+            # Canceled or plugin unloaded: never swap the source of the layer.
             self.done.emit(False, self.message or 'canceled')
             return
         from qgis.core import QgsProject

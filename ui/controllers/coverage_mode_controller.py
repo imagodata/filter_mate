@@ -109,6 +109,10 @@ class CoverageModeController(BaseController):
         self._linked_runs: Dict[str, List[bool]] = {}
         self._linked_redo: Dict[str, List[bool]] = {}
         self._running_task: Any = None
+        self._export_task: Any = None
+        self._hag_task: Any = None
+        self._tidy_pending = False
+        self._cache_warned = False
         self._extras: Any = None  # CoverageDockExtras: layer card, kind tools, source geometry line
 
     # === Lifecycle ===
@@ -130,18 +134,76 @@ class CoverageModeController(BaseController):
 
     def _on_project_cleared(self) -> None:
         """A new / closed project: histories and links refer to layers that are gone."""
-        self.service.history.clear()
+        from ...core.services.cross_filter_service import clear_histories
+        clear_histories()  # the dock's and the automation one
         self._linked_runs.clear()
         self._linked_redo.clear()
         self._panel_states.clear()
         self._histogram_cache.clear()
+        self._schedule_cache_tidy()
 
     def _on_layers_removed(self, layer_ids) -> None:
+        from ...core.services.cross_filter_service import forget_layer_everywhere
         for layer_id in layer_ids or []:
-            self.service.history.forget_layer(layer_id)
+            forget_layer_everywhere(layer_id)
             self._linked_runs.pop(layer_id, None)
             self._linked_redo.pop(layer_id, None)
             self._panel_states.pop(layer_id, None)
+        self._schedule_cache_tidy()  # runs once the layers are gone
+
+    def _unlink_dropped_run(self, source_id: str) -> None:
+        """The oldest cross operation of a vector source was forgotten: so is its link.
+
+        ``_linked_runs`` pairs each vector filter run with a cross operation
+        (True) or none (False); the oldest True stood for the dropped
+        operation, which a later Undo / Redo must no longer look for.
+        """
+        runs = self._linked_runs.get(source_id) or []
+        for index, linked in enumerate(runs):
+            if linked:
+                runs[index] = False
+                return
+
+    def _schedule_cache_tidy(self, delay_ms: int = 0) -> None:
+        """Remove unused derived files soon (once no FilterMate task runs)."""
+        if self._tidy_pending or getattr(self, '_torn_down', False):
+            return
+        try:
+            from qgis.PyQt.QtCore import QTimer
+            self._tidy_pending = True
+            QTimer.singleShot(delay_ms, self._tidy_cache)
+        except Exception as exc:
+            self._tidy_pending = False
+            logger.debug(f"[FM5] cache tidy not scheduled: {exc}")
+
+    def _tidy_cache(self) -> None:
+        self._tidy_pending = False
+        if getattr(self, '_torn_down', False):
+            return
+        try:
+            from ...core.services.cross_filter_service import tidy_cache
+            report = tidy_cache()
+        except Exception as exc:
+            logger.warning(f"[FM5] cache not tidied: {exc}")
+            return
+        if report is None:
+            self._schedule_cache_tidy(3000)  # a task may be writing a derived file
+            return
+        if report['dropped']:
+            for service, step in report['dropped']:
+                if service is self.service and step.from_undo:
+                    self._unlink_dropped_run(step.operation.source_layer_id)
+            self.update_undo_redo_buttons()
+        over = bool(report['limit']) and report['size'] > report['limit']
+        if not over:
+            self._cache_warned = False  # warn again next time the limit is reached
+        elif not self._cache_warned:
+            # Current filters alone are over the limit: only the user can free them.
+            self._cache_warned = True
+            _, show_warning = _feedback()
+            show_warning(self.tr("The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the "
+                                 "raster / point cloud layers you no longer need").format(
+                f"{report['size'] / 1024 ** 3:.1f}", f"{report['limit'] / 1024 ** 3:.1f}"))
 
     def _on_project_read(self, *_args) -> None:
         try:
@@ -189,6 +251,14 @@ class CoverageModeController(BaseController):
             self.service.cancel_all()
         except Exception:
             pass
+        for task_name in ('_export_task', '_hag_task'):
+            task = getattr(self, task_name, None)
+            setattr(self, task_name, None)
+            if task is not None:
+                try:
+                    task.cancel()  # its callback returns early once torn down
+                except RuntimeError:
+                    pass
         for widget_name in ('_host', '_coverage_spin'):
             widget = getattr(self, widget_name)
             setattr(self, widget_name, None)
@@ -1228,8 +1298,8 @@ class CoverageModeController(BaseController):
             failures = [o for o in task.outcomes if not o.success]
             parts = [self.tr("{0} target(s) filtered").format(len(task.outcomes) - len(failures))]
             if failures:
-                parts.append(self.tr("{0} failed: {1}").format(len(failures), '; '.join(f.message for f in failures if f.message)[:300]))
-            self._after_run(layer, task.outcomes, ' — '.join(parts))
+                parts.append(self.tr("{0} failed: {1}").format(len(failures), self._failure_text(failures)))
+            self._after_run(layer, task.outcomes, ' — '.join(parts), warning=bool(failures))
 
         try:
             self._running_task = self.service.run(request, source_job, on_done=done)
@@ -1258,13 +1328,23 @@ class CoverageModeController(BaseController):
         button = getattr(self.dockwidget, 'pushButton_action_filter', None)
         self._call(button, 'setEnabled', not busy)
 
-    def _after_run(self, layer: Any, outcomes, message: str) -> None:
-        show_info, _ = _feedback()
+    def _after_run(self, layer: Any, outcomes, message: str, warning: bool = False) -> None:
+        show_info, show_warning = _feedback()
         self._refresh_canvas(layer)
         self._refresh_counts(layer)
         self.update_undo_redo_buttons()
         if message:
-            show_info(message)
+            (show_warning if warning else show_info)(message)
+        self._schedule_cache_tidy()
+
+    def _failure_text(self, failures) -> str:
+        """``layer: reason`` for every failed target, cut to fit the message bar."""
+        parts = []
+        for outcome in failures:
+            layer = self._map_layer(outcome.layer_id)
+            name = self._layer_name(layer) if layer is not None else outcome.layer_id
+            parts.append(f"{name}: {outcome.message or self.tr('failed')}")
+        return '; '.join(parts)[:300]
 
     def _refresh_counts(self, layer: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
@@ -1338,6 +1418,8 @@ class CoverageModeController(BaseController):
             return None
 
         def done(results):
+            if getattr(self, '_torn_down', False):
+                return
             written = [r.path for r in results if r.success]
             failed = [f"{r.path}: {r.message}" for r in results if not r.success]
             if zip_path and written:
@@ -1399,6 +1481,7 @@ class CoverageModeController(BaseController):
                     self._linked_runs[source_id] = []
                     self._linked_redo[source_id] = []
                     self.service.history.clear_source(source_id)
+                    self._schedule_cache_tidy()  # the forgotten steps kept derived files
             elif task_name == 'undo':
                 runs = self._linked_runs.get(source_id) or []
                 if runs:
@@ -1453,14 +1536,14 @@ class CoverageModeController(BaseController):
             runs = self._linked_runs.get(source_id) or []
             if task.changes and run_index is not None and run_index < len(runs):
                 runs[run_index] = True
+            failures = [o for o in task.outcomes if not o.success]
             if not result:
                 message = self.tr("Raster / point cloud targets not filtered: {0}").format(task.error or self.tr("canceled"))
             else:
-                failures = [o for o in task.outcomes if not o.success]
                 message = self.tr("{0} raster / point cloud target(s) filtered").format(len(task.outcomes) - len(failures))
                 if failures:
-                    message += ' — ' + '; '.join(f.message for f in failures if f.message)[:300]
-            self._after_run(self._map_layer(source_id), task.outcomes, message)
+                    message += ' — ' + self._failure_text(failures)
+            self._after_run(self._map_layer(source_id), task.outcomes, message, warning=not result or bool(failures))
 
         self.service.run(request, job, on_done=done)
         return True
@@ -1547,8 +1630,11 @@ class CoverageModeController(BaseController):
         task = HeightAboveGroundTask(layer, dem)
 
         def finished(ok, message):
+            if getattr(self, '_torn_down', False):
+                return
             self._hag_task = None
             self._set_busy(False)
+            self._schedule_cache_tidy()
             if not ok:
                 show_warning(self.tr("Height above ground not computed: {0}").format(message))
                 return

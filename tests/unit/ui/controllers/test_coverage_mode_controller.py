@@ -111,6 +111,11 @@ def ctrl_module(monkeypatch):
     service = FakeService()
     service_module = types.ModuleType(f"{_PKG}.core.services.cross_filter_service")
     service_module.get_cross_filter_service = lambda: service
+    service_module.calls = []
+    service_module.clear_histories = lambda: service_module.calls.append(("clear_histories",))
+    service_module.forget_layer_everywhere = lambda layer_id: service_module.calls.append(("forget", layer_id))
+    service_module.tidy_report = None
+    service_module.tidy_cache = lambda: service_module.tidy_report
     monkeypatch.setitem(sys.modules, service_module.__name__, service_module)
     feedback = sys.modules[f"{_PKG}.infrastructure.feedback"]
     feedback.messages = []
@@ -122,6 +127,7 @@ def ctrl_module(monkeypatch):
     monkeypatch.setitem(sys.modules, spec.name, module)
     spec.loader.exec_module(module)
     module._test_service = service
+    module._test_service_module = service_module
     module._test_feedback = feedback
     module._test_kinds = kinds
     return module
@@ -399,6 +405,95 @@ class TestUndoRedoButtons:
         controller = ctrl_module.CoverageModeController(dock)
         controller.update_undo_redo_buttons()
         app.update_undo_redo_buttons.assert_called_once()
+
+
+@pytest.mark.unit
+class TestFailuresCacheAndTeardown:
+
+    def _outcome(self, ctrl_module, layer_id, message=""):
+        from types import SimpleNamespace
+        return SimpleNamespace(layer_id=layer_id, message=message, success=False)
+
+    def test_failures_name_their_layer(self, ctrl_module, layers):
+        controller = ctrl_module.CoverageModeController(_dock())
+        text = controller._failure_text([self._outcome(ctrl_module, "r1", "pdal: no space left"),
+                                         self._outcome(ctrl_module, "gone")])
+        assert text == "r1: pdal: no space left; gone: failed"
+
+    def test_failed_run_is_a_warning(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        for name in ("_refresh_canvas", "_refresh_counts", "update_undo_redo_buttons", "_schedule_cache_tidy"):
+            monkeypatch.setattr(controller, name, lambda *a, **k: None)
+        controller._after_run(layers["r1"], [], "1 target(s) filtered — 1 failed: p1: boom", warning=True)
+        controller._after_run(layers["r1"], [], "2 target(s) filtered")
+        assert [kind for kind, _ in ctrl_module._test_feedback.messages] == ["warning", "info"]
+
+    def test_removed_layers_leave_every_history(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        tidies = []
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: tidies.append(a))
+        controller._linked_runs["r1"] = [True]
+        controller._on_layers_removed(["r1", "p1"])
+        assert ctrl_module._test_service_module.calls == [("forget", "r1"), ("forget", "p1")]
+        assert "r1" not in controller._linked_runs and tidies == [()]
+
+    def test_project_cleared_clears_every_history(self, ctrl_module, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        controller._on_project_cleared()
+        assert ctrl_module._test_service_module.calls == [("clear_histories",)]
+
+    def test_tidy_waits_for_running_tasks(self, ctrl_module, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        scheduled = []
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda delay_ms=0: scheduled.append(delay_ms))
+        ctrl_module._test_service_module.tidy_report = None  # a FilterMate task runs
+        controller._tidy_cache()
+        assert scheduled == [3000]
+
+    def test_cache_over_limit_warns_once(self, ctrl_module, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        refreshed = []
+        monkeypatch.setattr(controller, "update_undo_redo_buttons", lambda: refreshed.append(1))
+        gb = 1024 ** 3
+        over = {"size": 6 * gb, "limit": 5 * gb, "removed": 0, "dropped": []}
+        ctrl_module._test_service_module.tidy_report = over
+        controller._tidy_cache()
+        controller._tidy_cache()
+        warnings = [msg for kind, msg in ctrl_module._test_feedback.messages if kind == "warning"]
+        assert len(warnings) == 1 and "6.0" in warnings[0] and "5.0" in warnings[0]
+        ctrl_module._test_service_module.tidy_report = dict(over, size=gb)
+        controller._tidy_cache()
+        ctrl_module._test_service_module.tidy_report = over
+        controller._tidy_cache()  # back over the limit later: warned again
+        assert len([1 for kind, _ in ctrl_module._test_feedback.messages if kind == "warning"]) == 2
+        assert refreshed == []
+
+    def test_dropped_vector_step_unlinks_its_run(self, ctrl_module, monkeypatch):
+        from types import SimpleNamespace
+        controller = ctrl_module.CoverageModeController(_dock())
+        refreshed = []
+        monkeypatch.setattr(controller, "update_undo_redo_buttons", lambda: refreshed.append(1))
+        controller._linked_runs["v1"] = [True, False, True]
+        controller._linked_runs["v2"] = [True]
+        step = SimpleNamespace(from_undo=True, operation=SimpleNamespace(source_layer_id="v1"))
+        other_service = object()  # the automation history: its steps are not linked to the dock
+        ctrl_module._test_service_module.tidy_report = {
+            "size": 0, "limit": 0, "removed": 0,
+            "dropped": [(ctrl_module._test_service, step), (other_service, step)]}
+        controller._tidy_cache()
+        assert controller._linked_runs == {"v1": [False, False, True], "v2": [True]}
+        assert refreshed == [1]
+
+    def test_teardown_cancels_export_and_height_tasks(self, ctrl_module, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "deactivate", lambda: None)
+        export, hag = MagicMock(), MagicMock()
+        controller._export_task, controller._hag_task = export, hag
+        controller.teardown()
+        export.cancel.assert_called_once()
+        hag.cancel.assert_called_once()
+        assert controller._export_task is None and controller._hag_task is None
 
 
 class FakeSignal:

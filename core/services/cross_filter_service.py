@@ -12,6 +12,7 @@ Undo / Redo / Unfilter buttons can restore derived sources as well as
 subset strings.
 """
 import logging
+import weakref
 from typing import Callable, Iterable, List, Optional
 
 from ..domain.cross_filter import CrossFilterRequest
@@ -19,6 +20,10 @@ from ..domain.filter_state import CrossOperation, CrossOperationHistory, LayerSn
 from ..domain.layer_kind import LayerKind
 
 logger = logging.getLogger(__name__)
+
+# Every live service (the dock's and the automation one): their histories
+# keep derived files alive (see tidy_cache).
+_SERVICES: "weakref.WeakSet" = weakref.WeakSet()
 
 
 def _config_option(key: str, default):
@@ -38,6 +43,7 @@ class CrossFilterService:
         self.last_skipped: List[str] = []
         self._running = []
         self.replaying: set = set()
+        _SERVICES.add(self)
 
     # --- run ----------------------------------------------------------------
 
@@ -88,11 +94,16 @@ class CrossFilterService:
         return task
 
     def cancel_all(self) -> None:
-        """Cancel the cross filter tasks still running (plugin unload)."""
+        """Cancel the cross filter tasks still running (plugin unload).
+
+        A task whose ``run`` is over may still wait for ``finished`` on the
+        main thread: its callback is dropped too (and the closed cache stops
+        it from applying anything).
+        """
         for task in self._running:
             try:
+                task.on_done = None
                 if not _finished(task):
-                    task.on_done = None
                     task.cancel()
             except RuntimeError:
                 pass
@@ -228,6 +239,114 @@ def replay_project_filters(service: Optional['CrossFilterService'] = None, synch
         queued += 1
         logger.info(f"[FM5] replaying the stored {kind.value} filter of '{layer.name()}'")
     return queued
+
+
+def all_services() -> List[CrossFilterService]:
+    """Every live :class:`CrossFilterService`."""
+    return list(_SERVICES)
+
+
+def clear_histories() -> None:
+    """Forget every cross filter history (the project they refer to was closed)."""
+    for service in all_services():
+        service.history.clear()
+
+
+def forget_layer_everywhere(layer_id: str) -> None:
+    """Drop the operations touching a removed layer from every history."""
+    for service in all_services():
+        service.history.forget_layer(layer_id)
+
+
+def _snapshot_sources(snapshot) -> tuple:
+    return tuple(s for s in (snapshot.source, snapshot.original_source, snapshot.enriched_source) if s)
+
+
+def _operation_sources(operation) -> list:
+    return [s for before, after in operation.changes for s in _snapshot_sources(before) + _snapshot_sources(after)]
+
+
+def current_sources(project=None) -> set:
+    """Sources the layers use now: derived registry and project layers."""
+    from qgis.core import QgsProject
+    from ...adapters.qgis.coverage_layers.snapshots import registry
+    project = project or QgsProject.instance()
+    sources = set()
+    reg = registry()
+    for layer_id in reg.layer_ids():
+        snapshot = reg.get(layer_id)
+        if snapshot is not None:
+            sources.update(_snapshot_sources(snapshot))
+    for layer in project.mapLayers().values():
+        try:
+            sources.add(layer.source())
+        except RuntimeError:
+            pass
+    return sources
+
+
+def history_sources() -> set:
+    """Sources kept by every undo / redo step of every service."""
+    return {s for service in all_services() for op in service.history.operations() for s in _operation_sources(op)}
+
+
+def referenced_sources(project=None) -> set:
+    """Sources still in use: project layers, derived registry and every undo / redo snapshot."""
+    return current_sources(project) | history_sources()
+
+
+def filtermate_tasks_active() -> bool:
+    """True while a FilterMate task runs (the cache is tidied once they are over)."""
+    try:
+        from qgis.core import QgsApplication
+        tasks = QgsApplication.taskManager().activeTasks()
+    except Exception:
+        return False
+    return any(str(task.description()).startswith('FilterMate') for task in tasks)
+
+
+def tidy_cache(project=None) -> Optional[dict]:
+    """Remove the derived files nothing refers to, then keep the cache under its limit.
+
+    While the cache is over ``CROSS_FILTER.cache_max_gb``, the oldest undo /
+    redo step of a history that keeps a derived file alive (a file no layer
+    shows) is forgotten, until the limit is met or no step holds such a file.
+    Current filters and files of running tasks are never touched.
+
+    Returns:
+        None when a FilterMate task runs (try again later), else
+        ``{'size': bytes, 'limit': bytes, 'removed': entries, 'dropped': [(service, DroppedStep)]}``.
+    """
+    from ...adapters.qgis.coverage_layers import cache
+    if filtermate_tasks_active():
+        return None
+    current = current_sources(project)
+    removed = cache.collect_garbage(current | history_sources())
+    limit = cache.max_bytes()
+    sizes = cache.entry_sizes()
+    size = sum(sizes.values())
+    dropped = []
+    while limit and size > limit:
+        held = {cache.file_key(name) for name in cache.unused_entries(current, names=sizes)}
+        if not held:
+            break  # the current filters alone are over the limit
+
+        def holds(operation, held=held) -> bool:
+            return any(key in source for source in _operation_sources(operation) for key in held)
+
+        candidates = [(op.op_id, service) for service in all_services()
+                      for op in (service.history.oldest(holds),) if op is not None]
+        if not candidates:
+            break
+        service = min(candidates, key=lambda c: c[0])[1]
+        dropped.append((service, service.history.drop_oldest(holds)))
+        for name in cache.unused_entries(current | history_sources(), names=sizes):
+            size -= sizes.pop(name)
+    if dropped:
+        removed += cache.collect_garbage(current | history_sources())
+        size = sum(cache.entry_sizes().values())
+        logger.info(f"[FM5] cache over its limit: {len(dropped)} oldest undo step(s) forgotten")
+    return {'size': size, 'limit': limit, 'removed': removed, 'dropped': dropped}
 
 
 def _finished(task) -> bool:
