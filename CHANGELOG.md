@@ -47,6 +47,7 @@ FilterMate 5 filters raster and LiDAR point cloud layers as well as vector layer
 
 ### Changed
 
+- **Favorites Sharing (breaking)**: the plaintext `auth_header` of a repo entry is refused (audit EXT-6, announced for 5.0). The repo is kept but the token is not used: store it in the QGIS Authentication Manager and select it in *Manage Repos → Edit → Authentication* (`authcfg_id`); the next save removes the plaintext token from `config.json`.
 - One-time "What's new in FilterMate 5" dialog the first time the panel opens after the update (raster and point cloud layers, link to the user guide); the Discord invitation waits for the next opening. Plugin description and tags mention raster and LiDAR point cloud layers.
 - Switching raster or point cloud layers on or off in the Configuration tab (`APP.OPTIONS.RASTER.enabled`, `APP.OPTIONS.POINT_CLOUD.enabled`, both on by default) takes effect at once: those layers are added to or removed from the layer lists. A configuration written by a development build from before the raster option, while point clouds were experimental and off, gets them on once. Turning a kind off neither cancels running tasks nor unfilters its layers: a warning names those that stay filtered.
 - `filtermate:batch_filter` runs on the main thread (`setSubsetString` is not thread-safe).
