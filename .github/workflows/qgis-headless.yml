@@ -82,4 +82,5 @@ jobs:
             python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm > /dev/null
             timeout 900 xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
               --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py 2>&1 \
-              | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"'
+              | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"
+            timeout 120 xvfb-run -a python3 /src/tests/qgis_headless/run_combo_pick_check.py'

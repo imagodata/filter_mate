@@ -600,6 +600,10 @@ class UndoRedoHandler:
 
         dockwidget._saved_layer_id_before_filter = source_layer.id()
         saved_layer_id = source_layer.id()
+        # A layer the user picks after this point is theirs: the checks only undo async changes.
+        # ``_user_layer_pick`` = (perf_counter, layer id), recorded when a user input really changed the
+        # combo's layer (ConfigurationManager._stamp_user_layer_picks).
+        protection_started = time.perf_counter()
 
         # Create weak reference to dockwidget
         weak_dockwidget = weakref.ref(dockwidget)
@@ -609,6 +613,8 @@ class UndoRedoHandler:
             try:
                 dw = weak_dockwidget()
                 if not dw:
+                    return
+                if getattr(dw, '_user_layer_pick', (0.0, None))[0] >= protection_started:
                     return
 
                 saved_layer = QgsProject.instance().mapLayer(saved_layer_id)
