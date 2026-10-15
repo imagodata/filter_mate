@@ -222,214 +222,219 @@
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="165"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="208"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>የ{0} ራስተር / የነጥብ ደመና ንብርብር(ሮች) ማጣሪያ በመመለስ ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="404"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="455"/>
         <source>cov. ≥ </source>
         <translation>ሽፋን ≥</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="405"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>የፖሊጎን ዒላማ በምንጭ ጂኦሜትሪ ውስጥ ያለው ዝቅተኛ ድርሻ (0 = ማንኛውም መደራረብ)። ምንጩ ራስተር ወይም የነጥብ ደመና ሲሆን ጥቅም ላይ ይውላል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
         <source>Raster</source>
         <translation>ራስተር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
         <source>Point cloud</source>
         <translation>የነጥብ ደመና</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="496"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="547"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0} ንብርብር፦ በ EXPLORING ውስጥ ምርጫ፣ በ FILTERING ውስጥ ግንኙነት</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>የፒክሰል መራጭ፦ የእያንዳንዱን ባንድ እሴት ለማንበብ ካርታው ላይ ጠቅ ያድርጉ (Ctrl+ጠቅ ማድረግ ክልሉን ያሰፋል)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="520"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
         <source>Zoom to the layer</source>
         <translation>ወደ ንብርብሩ አጉላ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="513"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="564"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>ቅድመ እይታ፦ ከምርጫው ውጭ ያሉ ፒክሰሎችን ደብቅ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="566"/>
         <source>Not used for raster layers</source>
         <translation>ለራስተር ንብርብሮች ጥቅም ላይ አይውልም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="516"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="567"/>
         <source>Reset the raster selection</source>
         <translation>የራስተር ምርጫን ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="570"/>
         <source>Identify points on the map</source>
         <translation>በካርታው ላይ ነጥቦችን ለይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="572"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>ቀጥታ ቅድመ እይታ፦ በምርጫው የተያዙ ነጥቦችን ብቻ አሳይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
         <source>Not used for point cloud layers</source>
         <translation>ለነጥብ ደመና ንብርብሮች ጥቅም ላይ አይውልም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="524"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
         <source>Reset the point cloud criteria</source>
         <translation>የነጥብ ደመና መስፈርቶችን ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="681"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="732"/>
         <source>Invalid raster calculator expression</source>
         <translation>ልክ ያልሆነ የራስተር ካልኩሌተር አገላለጽ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="719"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="772"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL አልተገኘም፦ ከ DTM በላይ ያለውን ከፍታ ለማስላት የ pdal ተፈጻሚ ፋይል ያስፈልጋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1051"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1130"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>የ FilterMate ተግባር አሁንም እየሰራ ነው፦ እስኪጨርስ ይጠብቁ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1067"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1146"/>
         <source>FilterMate task failed: {0}</source>
         <translation>የ FilterMate ተግባር አልተሳካም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1100"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1179"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>መጀመሪያ ፒክሰሎችን ይምረጡ፦ የእሴት ክልል፣ ምድቦች ወይም የራስተር አገላለጽ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1109"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1188"/>
         <source>Raster filtered: {0}</source>
         <translation>ራስተር ተጣርቷል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1122"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>የነጥብ ደመና አገላለጽ ውድቅ ተደርጓል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1125"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1204"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>መጀመሪያ ነጥቦችን ይምረጡ፦ ምድቦች፣ የባህሪ ክልሎች ወይም አገላለጽ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
         <source>Point cloud filtered: {0}</source>
         <translation>የነጥብ ደመና ተጣርቷል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1197"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1276"/>
         <source>Filter not applied: {0}</source>
         <translation>ማጣሪያ አልተተገበረም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
         <source>canceled</source>
         <translation>ተሰርዟል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1280"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} ዒላማ(ዎች) ተጣርተዋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1203"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1282"/>
         <source>{0} failed: {1}</source>
         <translation>{0} አልተሳካም፦ {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1291"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate፦ ከ'{0}' በማጣራት ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1357"/>
         <source>Changed since, left as is: {0}</source>
         <translation>ከዚያ በኋላ ተቀይሯል፣ እንደነበረ ቀርቷል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1274"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1363"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} ንብርብር(ሮች) ተመልሰዋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' አልተላከም፦ {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1320"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1411"/>
         <source>Exported: {0}</source>
         <translation>ተልኳል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1413"/>
         <source>Export failed: {0}</source>
         <translation>መላክ አልተሳካም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1329"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1420"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} ንብርብር(ሮችን) በመላክ ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1335"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1426"/>
         <source>Export folder</source>
         <translation>የመላኪያ አቃፊ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1407"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1498"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>ራስተር / የነጥብ ደመና ዒላማዎች ተዘልለዋል፦ በ EXPLORING ውስጥ ምንጭ ገጽታ አልተመረጠም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>ራስተር / የነጥብ ደመና ዒላማዎች አልተጣሩም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} ራስተር / የነጥብ ደመና ዒላማ(ዎች) ተጣርተዋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>ከምድር በላይ ላለው ከፍታ የሚጠቀምበትን DTM ራስተር ይምረጡ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1619"/>
         <source>Height above ground not computed: {0}</source>
         <translation>ከምድር በላይ ያለው ከፍታ አልተሰላም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1537"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>ከ'{0}' በላይ ያለውን ከፍታ በ PDAL በማስላት ላይ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="185"/>
+        <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
+        <translation>የFilterMate መሸጎጫ {0} GB ይዟል፣ ከ{1} GB ገደቡ በላይ ነው፦ ከእንግዲህ የማያስፈልጉዎትን የራስተር / የነጥብ ደመና ንብርብሮች ማጣሪያ ያስወግዱ</translation>
     </message>
 </context>
 <context>
@@ -1331,42 +1336,42 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>ነባሪ ውቅረትን ዳግም አስጀምርና SQLite ዳታቤዝን ሰርዝ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1429"/>
+        <location filename="../filter_mate.py" line="1443"/>
         <source>Reset Configuration</source>
         <translation>ውቅረት ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1452"/>
+        <location filename="../filter_mate.py" line="1466"/>
         <source>Configuration reset successfully.</source>
         <translation>ውቅረት በተሳካ ሁኔታ ዳግም ተጀምሯል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1457"/>
+        <location filename="../filter_mate.py" line="1471"/>
         <source>Default configuration file not found.</source>
         <translation>ነባሪ ውቅረት ፋይል አልተገኘም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1478"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>Database deleted: {filename}</source>
         <translation>ዳታቤዝ ተሰርዟል: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1506"/>
         <source>Restart required</source>
         <translation>ዳግም ማስጀመር ያስፈልጋል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="423"/>
+        <location filename="../filter_mate.py" line="436"/>
         <source>Obsolete configuration detected</source>
         <translation>ያረጀ ውቅረት ተገኝቷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="424"/>
+        <location filename="../filter_mate.py" line="437"/>
         <source>unknown version</source>
         <translation>ያልታወቀ ስሪት</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="425"/>
+        <location filename="../filter_mate.py" line="438"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1381,12 +1386,12 @@ Do you want to reset to default settings?
 • No: Keep current configuration (may cause issues)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="432"/>
+        <location filename="../filter_mate.py" line="445"/>
         <source>Corrupted configuration detected</source>
         <translation>የተበላሸ ውቅረት ተገኝቷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="446"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1401,12 +1406,12 @@ Do you want to reset to default settings?
 • No: Cancel (the plugin may not work correctly)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="440"/>
+        <location filename="../filter_mate.py" line="453"/>
         <source>Configuration reset</source>
         <translation>ውቅረት ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="441"/>
+        <location filename="../filter_mate.py" line="454"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1415,57 +1420,57 @@ Do you want to continue?</source>
 Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="489"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>ውቅረት አልተዘዋወረም። አንዳንድ ባህሪያት በትክክል ላይሰሩ ይችላሉ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="500"/>
+        <location filename="../filter_mate.py" line="513"/>
         <source>Configuration created with default values</source>
         <translation>ውቅረት በነባሪ እሴቶች ተፈጥሯል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="503"/>
+        <location filename="../filter_mate.py" line="516"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>የተበላሸ ውቅረት ዳግም ተጀምሯል። ነባሪ ቅንብሮች ተመልሰዋል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="506"/>
+        <location filename="../filter_mate.py" line="519"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>ያረጀ ውቅረት ዳግም ተጀምሯል። ነባሪ ቅንብሮች ተመልሰዋል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="527"/>
+        <location filename="../filter_mate.py" line="540"/>
         <source>Configuration updated to latest version</source>
         <translation>ውቅረት ወደ አዲሱ ስሪት ተዘምኗል</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="524"/>
+        <location filename="../filter_mate.py" line="537"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>ውቅረት ተዘምኗል: አዲስ ቅንብሮች አሉ ({sections})። በአማራጭምነው ይድረሱ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="518"/>
+        <location filename="../filter_mate.py" line="531"/>
         <source>Geometry Simplification</source>
         <translation>የጂኦሜትሪ ማሳለጥ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="519"/>
+        <location filename="../filter_mate.py" line="532"/>
         <source>Optimization Thresholds</source>
         <translation>የማሳጣኘት ደረጃዎች</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="546"/>
+        <location filename="../filter_mate.py" line="559"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error during configuration migration: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="664"/>
+        <location filename="../filter_mate.py" line="677"/>
         <source>Geometry validation setting</source>
         <translation>የጂኦሜትሪ ማረጋገጫ ቅንብር</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="666"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1492,17 +1497,17 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="694"/>
+        <location filename="../filter_mate.py" line="707"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>ልክ ያልሆነ ጂኦሜትሪ ማጣራት በተሳካ ሁኔታ ተሰናክሏል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="701"/>
+        <location filename="../filter_mate.py" line="714"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>ልክ ያልሆነ ጂኦሜትሪ ማጣራት አልተሻሻለም። አንዳንድ ባህሪያት ከወጪዎች ሊገለሉ ይችላሉ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1429"/>
+        <location filename="../filter_mate.py" line="1443"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1519,7 +1524,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1506"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1528,17 +1533,17 @@ Please restart QGIS to apply the changes.</source>
 Please restart QGIS to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="373"/>
         <source>Initialization error: {0}</source>
         <translation>ማስጀመር ስህተት: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="605"/>
+        <location filename="../filter_mate.py" line="618"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} የተጠቀሰ(ሱ) ንብርብር(ዎች) አልተጫነ(ኑ)ም ({layers_list})። ተለዋጭ ማሳያ ይጠቀማል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1483"/>
+        <location filename="../filter_mate.py" line="1497"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename} ን መሰረዝ አልተቻለም: {e}</translation>
     </message>
@@ -1548,27 +1553,27 @@ Please restart QGIS to apply the changes.</translation>
         <translation type="obsolete">ዳግም ማስጀመር ወቅት ስህተት: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1535"/>
+        <location filename="../filter_mate.py" line="1549"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate&lt;/b&gt;ን ስለተጠቀሙ እናመሰግናለን!&lt;br&gt;የDiscord ማህበረሰባችንን ይቀላቀሉ:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;እርዳታ እና ድጋፍ ያግኙ&lt;/li&gt;&lt;li&gt;ስህተቶችን እና ችግሮችን ያሳውቁ&lt;/li&gt;&lt;li&gt;አዲስ ባህሪያትን ይጠቁሙ&lt;/li&gt;&lt;li&gt;ምክሮችን ከሌሎች ተጠቃሚዎች ጋር ያጋሩ&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1551"/>
+        <location filename="../filter_mate.py" line="1565"/>
         <source>  Join us on Discord</source>
         <translation>  በDiscord ይቀላቀሉን</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1571"/>
+        <location filename="../filter_mate.py" line="1585"/>
         <source>Don&apos;t show this again</source>
         <translation>ይህን እንደገና አታሳይ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1574"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>Close</source>
         <translation>ዝጋ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1640"/>
+        <location filename="../filter_mate.py" line="1708"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>ፕለጊን መጫን ስህተት: {0}። ዝርዝር ለማየት QGIS Python ኮንሶል ይመልከቱ።</translation>
     </message>
@@ -1612,110 +1617,125 @@ First attribute: {1}</source>
 የመጀመሪያ ባህሪ: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1501"/>
+        <location filename="../filter_mate.py" line="1515"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>ውቅሩን ዳግም ማስጀመር አልተቻለም። የፕለጊኑ አቃፊ ሊጻፍበት እንደሚችል ያረጋግጡ፣ ከዚያ እንደገና ይሞክሩ። ዝርዝሮች በ filtermate.log ውስጥ።</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1615"/>
+        <source>What&apos;s new in FilterMate 5</source>
+        <translation>በFilterMate 5 ውስጥ ያሉ አዳዲስ ነገሮች</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1621"/>
+        <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate አሁን ከራስተር እና ከነጥብ ደመና ንብርብሮች ጋር ይሰራል።&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; ከአሁኑ ንብርብር ጋር ይስማማል፦ የራስተር የእሴት ክልል እና ክፍሎች፣ የLiDAR ነጥብ ደመና ክፍሎች፣ ከፍታ እና ባህሪያት።&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; ያንን ምርጫ ከማንኛውም ዓይነት ንብርብሮች ጋር በተለመዱት ቅድመ ሁኔታዎች እና ቋት ያገናኛል፦ በከፍታ ክልል ውስጥ ያሉ መሬቶች፣ በሕንፃዎች ስር ያሉ የLiDAR ነጥቦች፣ በማዘጋጃ ቤት የተቆረጠ DTM።&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; የተጣሩ ራስተሮችን (GeoTIFF, COG) እና የነጥብ ደመናዎችን (LAZ, COPC) ይጽፋል።&lt;/li&gt;&lt;li&gt;የProcessing አልጎሪዝሞች እና ሞዴሎች፣ qgis_process፣ Python እና REST APIዎች።&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1637"/>
+        <source>Open the user guide</source>
+        <translation>የተጠቃሚ መመሪያውን ክፈት</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="298"/>
+        <location filename="../filter_mate_app.py" line="303"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL ንብርብሮች ተገኝተዋል ({0}) ግን psycopg2 አልተጫነም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="390"/>
+        <location filename="../filter_mate_app.py" line="395"/>
         <source>Cleared {0} caches</source>
         <translation>{0} መሸጎጫዎች ተጽድተዋል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="856"/>
+        <location filename="../filter_mate_app.py" line="861"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>ዶክ ዊጀት መፍጠር አልተሳካም: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="866"/>
+        <location filename="../filter_mate_app.py" line="871"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>ዶክ ዊጀት ማሳየት አልተሳካም: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1380"/>
+        <location filename="../filter_mate_app.py" line="1385"/>
         <source>Error executing {0}: {1}</source>
         <translation>{0}ን ማስኬድ ስህተት: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1392"/>
+        <location filename="../filter_mate_app.py" line="1397"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>ፕለጊን በዝቅተኛ ሁነታ እየሰራ ነው (ሄክሳጎናል አገልግሎቶች አይገኙም)። አፈጻጸም ሊቀንስ ይችላል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1641"/>
+        <location filename="../filter_mate_app.py" line="1646"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ስህተት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1641"/>
+        <location filename="../filter_mate_app.py" line="1646"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>{0}ን ማስኬድ አይቻልም: ዊጀት ማስጀመር አልተሳካም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2424"/>
+        <location filename="../filter_mate_app.py" line="2429"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0} አይቻልም: ንብርብር ልክ ያልሆነ ወይም ምንጭ አልተገኘም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2561"/>
+        <location filename="../filter_mate_app.py" line="2566"/>
         <source>All filters cleared - </source>
         <translation>ሁሉም ማጣሪያዎች ተጽድተዋል - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2562"/>
+        <location filename="../filter_mate_app.py" line="2567"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>በዋና ንብርብር ውስጥ {0}{1} ባህሪያት ይታያሉ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2570"/>
+        <location filename="../filter_mate_app.py" line="2575"/>
         <source>Error: result handler missing</source>
         <translation>ስህተት: የውጤት ተቆጣጣሪ ይጎድላል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2583"/>
+        <location filename="../filter_mate_app.py" line="2588"/>
         <source>Error during filtering: {0}</source>
         <translation>ማጣራት ወቅት ስህተት: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2705"/>
+        <location filename="../filter_mate_app.py" line="2710"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} ወላጅ-አልባ ተወዳጅ(ዎች) ተመልሰዋል: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2840"/>
+        <location filename="../filter_mate_app.py" line="2845"/>
         <source>Layer loading failed - click to retry</source>
         <translation>ንብርብር መጫን አልተሳካም - እንደገና ለመሞከር ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2896"/>
+        <location filename="../filter_mate_app.py" line="2902"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} ንብርብር(ዎች) በተሳካ ሁኔታ ተጫነ(ኑ)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1863"/>
+        <location filename="../filter_mate_app.py" line="1868"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1865"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1868"/>
+        <location filename="../filter_mate_app.py" line="1873"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1875"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1728,27 +1748,27 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1880"/>
+        <location filename="../filter_mate_app.py" line="1885"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1887"/>
+        <location filename="../filter_mate_app.py" line="1892"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1894"/>
+        <location filename="../filter_mate_app.py" line="1899"/>
         <source>Cancel</source>
         <translation>ሰርዝ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1918"/>
+        <location filename="../filter_mate_app.py" line="1923"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1228"/>
+        <location filename="../filter_mate_app.py" line="1233"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>'{0}'ን ከማስኬድዎ በፊት በ EXPLORING ትር ውስጥ ንብርብር ይምረጡ።</translation>
     </message>

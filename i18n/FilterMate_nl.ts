@@ -222,214 +222,219 @@
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="165"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="208"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Filter van {0} raster-/puntenwolklaag/-lagen herstellen…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="404"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="455"/>
         <source>cov. ≥ </source>
         <translation>dekking ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="405"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Minimaal aandeel van een polygoondoel binnen de brongeometrie (0 = elke overlapping). Wordt gebruikt wanneer de bron een raster of een puntenwolk is.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
         <source>Point cloud</source>
         <translation>Puntenwolk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="496"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="547"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0}-laag: selectie in EXPLORING, relatie in FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Pixelkiezer: klik op de kaart om de waarde van elke band te lezen (Ctrl+klik breidt het bereik uit)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="520"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
         <source>Zoom to the layer</source>
         <translation>Zoomen naar de laag</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="513"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="564"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Voorbeeld: pixels buiten de selectie verbergen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="566"/>
         <source>Not used for raster layers</source>
         <translation>Niet gebruikt voor rasterlagen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="516"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="567"/>
         <source>Reset the raster selection</source>
         <translation>De rasterselectie herstellen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="570"/>
         <source>Identify points on the map</source>
         <translation>Punten op de kaart identificeren</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="572"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Live voorbeeld: alleen de door de selectie behouden punten tonen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
         <source>Not used for point cloud layers</source>
         <translation>Niet gebruikt voor puntenwolklagen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="524"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
         <source>Reset the point cloud criteria</source>
         <translation>De puntenwolkcriteria herstellen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="681"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="732"/>
         <source>Invalid raster calculator expression</source>
         <translation>Ongeldige uitdrukking voor de rasterberekening</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="719"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="772"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL is niet gevonden: de hoogte boven een DTM vereist het uitvoerbare bestand pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1051"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1130"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Er wordt nog een FilterMate-taak uitgevoerd: wacht tot die klaar is</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1067"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1146"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate-taak mislukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1100"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1179"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Selecteer eerst pixels: een waardebereik, klassen of een rasteruitdrukking</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1109"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1188"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1122"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>De puntenwolkuitdrukking is geweigerd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1125"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1204"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Selecteer eerst punten: klassen, attribuutbereiken of een uitdrukking</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Puntenwolk gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1197"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1276"/>
         <source>Filter not applied: {0}</source>
         <translation>Filter niet toegepast: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
         <source>canceled</source>
         <translation>geannuleerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1280"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} doel(en) gefilterd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1203"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1282"/>
         <source>{0} failed: {1}</source>
         <translation>{0} mislukt: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1291"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filteren vanuit '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1357"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Sindsdien gewijzigd, ongemoeid gelaten: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1274"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1363"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} laag/lagen hersteld</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' niet geëxporteerd: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1320"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1411"/>
         <source>Exported: {0}</source>
         <translation>Geëxporteerd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1413"/>
         <source>Export failed: {0}</source>
         <translation>Exporteren mislukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1329"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1420"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} laag/lagen exporteren…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1335"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1426"/>
         <source>Export folder</source>
         <translation>Exportmap</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1407"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1498"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Raster-/puntenwolkdoelen overgeslagen: geen bronobject geselecteerd in EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Raster-/puntenwolkdoelen niet gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} raster-/puntenwolkdoel(en) gefilterd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Kies het DTM-raster dat voor de hoogte boven maaiveld wordt gebruikt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1619"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Hoogte boven maaiveld niet berekend: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1537"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Hoogte boven '{0}' berekenen met PDAL…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="185"/>
+        <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
+        <translation>De cache van FilterMate neemt {0} GB in beslag, boven de limiet van {1} GB: verwijder het filter van de raster- / puntenwolklagen die u niet meer nodig hebt</translation>
     </message>
 </context>
 <context>
@@ -1331,102 +1336,102 @@ Klik op de ★-indicator en selecteer 'Huidig filter toevoegen aan favorieten' o
         <translation>Standaardconfiguratie resetten en SQLite-database verwijderen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1429"/>
+        <location filename="../filter_mate.py" line="1443"/>
         <source>Reset Configuration</source>
         <translation>Configuratie Resetten</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1452"/>
+        <location filename="../filter_mate.py" line="1466"/>
         <source>Configuration reset successfully.</source>
         <translation>Configuratie succesvol gereset.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1457"/>
+        <location filename="../filter_mate.py" line="1471"/>
         <source>Default configuration file not found.</source>
         <translation>Standaard configuratiebestand niet gevonden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1478"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>Database deleted: {filename}</source>
         <translation>Database verwijderd: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1506"/>
         <source>Restart required</source>
         <translation>Herstart vereist</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="423"/>
+        <location filename="../filter_mate.py" line="436"/>
         <source>Obsolete configuration detected</source>
         <translation>Verouderde configuratie gedetecteerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="424"/>
+        <location filename="../filter_mate.py" line="437"/>
         <source>unknown version</source>
         <translation>onbekende versie</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="432"/>
+        <location filename="../filter_mate.py" line="445"/>
         <source>Corrupted configuration detected</source>
         <translation>Beschadigde configuratie gedetecteerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="489"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Configuratie niet gereset. Sommige functies werken mogelijk niet correct.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="500"/>
+        <location filename="../filter_mate.py" line="513"/>
         <source>Configuration created with default values</source>
         <translation>Configuratie aangemaakt met standaardwaarden</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="503"/>
+        <location filename="../filter_mate.py" line="516"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Beschadigde configuratie gereset. Standaardinstellingen zijn hersteld.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="506"/>
+        <location filename="../filter_mate.py" line="519"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Verouderde configuratie gereset. Standaardinstellingen zijn hersteld.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="527"/>
+        <location filename="../filter_mate.py" line="540"/>
         <source>Configuration updated to latest version</source>
         <translation>Configuratie bijgewerkt naar nieuwste versie</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="524"/>
+        <location filename="../filter_mate.py" line="537"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Configuratie bijgewerkt: nieuwe instellingen beschikbaar ({sections}). Toegang via Opties menu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="518"/>
+        <location filename="../filter_mate.py" line="531"/>
         <source>Geometry Simplification</source>
         <translation>Geometrie vereenvoudiging</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="519"/>
+        <location filename="../filter_mate.py" line="532"/>
         <source>Optimization Thresholds</source>
         <translation>Optimalisatie drempels</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="664"/>
+        <location filename="../filter_mate.py" line="677"/>
         <source>Geometry validation setting</source>
         <translation>Geometrie validatie instelling</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="694"/>
+        <location filename="../filter_mate.py" line="707"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filteren van ongeldige geometrieën succesvol uitgeschakeld.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="701"/>
+        <location filename="../filter_mate.py" line="714"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filteren van ongeldige geometrieën niet gewijzigd. Sommige objecten kunnen worden uitgesloten van exports.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="425"/>
+        <location filename="../filter_mate.py" line="438"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1441,7 +1446,7 @@ Wilt u de standaardinstellingen herstellen?
 • Nee: Huidige configuratie behouden (kan problemen veroorzaken)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="446"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1456,12 +1461,12 @@ Wilt u de standaardinstellingen herstellen?
 • Nee: Annuleren (de plugin werkt mogelijk niet correct)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="440"/>
+        <location filename="../filter_mate.py" line="453"/>
         <source>Configuration reset</source>
         <translation>Configuratie herstellen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="441"/>
+        <location filename="../filter_mate.py" line="454"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1470,12 +1475,12 @@ Do you want to continue?</source>
 Wilt u doorgaan?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="546"/>
+        <location filename="../filter_mate.py" line="559"/>
         <source>Error during configuration migration: {}</source>
         <translation>Fout tijdens configuratiemigratie: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="666"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1502,7 +1507,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1429"/>
+        <location filename="../filter_mate.py" line="1443"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1519,7 +1524,7 @@ Dit zal:
 QGIS moet opnieuw worden opgestart om de wijzigingen toe te passen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1506"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1528,17 +1533,17 @@ Please restart QGIS to apply the changes.</source>
 Start QGIS opnieuw op om de wijzigingen toe te passen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="373"/>
         <source>Initialization error: {0}</source>
         <translation>Initialisatiefout: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="605"/>
+        <location filename="../filter_mate.py" line="618"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} gerefereerde la(a)g(en) niet geladen ({layers_list}). Terugvalweergave wordt gebruikt.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1483"/>
+        <location filename="../filter_mate.py" line="1497"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Kan {filename} niet verwijderen: {e}</translation>
     </message>
@@ -1548,27 +1553,27 @@ Start QGIS opnieuw op om de wijzigingen toe te passen.</translation>
         <translation type="obsolete">Fout tijdens resetten: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1535"/>
+        <location filename="../filter_mate.py" line="1549"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Bedankt voor het gebruik van &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Word lid van onze Discord-community om:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Hulp en ondersteuning te krijgen&lt;/li&gt;&lt;li&gt;Bugs en problemen te melden&lt;/li&gt;&lt;li&gt;Nieuwe functies voor te stellen&lt;/li&gt;&lt;li&gt;Tips te delen met andere gebruikers&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1551"/>
+        <location filename="../filter_mate.py" line="1565"/>
         <source>  Join us on Discord</source>
         <translation>  Volg ons op Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1571"/>
+        <location filename="../filter_mate.py" line="1585"/>
         <source>Don&apos;t show this again</source>
         <translation>Niet meer tonen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1574"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>Close</source>
         <translation>Sluiten</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1640"/>
+        <location filename="../filter_mate.py" line="1708"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Fout bij laden van plugin: {0}. Controleer de QGIS Python-console voor details.</translation>
     </message>
@@ -1612,110 +1617,125 @@ First attribute: {1}</source>
 Eerste attribuut: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1501"/>
+        <location filename="../filter_mate.py" line="1515"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>De configuratie kon niet worden hersteld. Controleer of de pluginmap beschrijfbaar is en probeer het opnieuw. Details in filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1615"/>
+        <source>What&apos;s new in FilterMate 5</source>
+        <translation>Nieuw in FilterMate 5</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1621"/>
+        <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate werkt nu met raster- en puntenwolklagen.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; past zich aan de huidige laag aan: waardebereik en klassen van een raster, klassen, hoogte en attributen van een LiDAR-puntenwolk.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relateert die selectie aan lagen van elk type, met de gebruikelijke predicaten en buffer: percelen binnen een hoogtebereik, LiDAR-punten onder gebouwen, een DTM bijgesneden tot een gemeente.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; schrijft gefilterde rasters (GeoTIFF, COG) en puntenwolken (LAZ, COPC) weg.&lt;/li&gt;&lt;li&gt;Processing-algoritmen en -modellen, qgis_process, Python- en REST-API&apos;s.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1637"/>
+        <source>Open the user guide</source>
+        <translation>Gebruikershandleiding openen</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="298"/>
+        <location filename="../filter_mate_app.py" line="303"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL-lagen gedetecteerd ({0}) maar psycopg2 is niet geinstalleerd.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="390"/>
+        <location filename="../filter_mate_app.py" line="395"/>
         <source>Cleared {0} caches</source>
         <translation>{0} caches gewist</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="856"/>
+        <location filename="../filter_mate_app.py" line="861"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Kan dockwidget niet aanmaken: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="866"/>
+        <location filename="../filter_mate_app.py" line="871"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Kan dockwidget niet weergeven: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1380"/>
+        <location filename="../filter_mate_app.py" line="1385"/>
         <source>Error executing {0}: {1}</source>
         <translation>Fout bij uitvoeren van {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1392"/>
+        <location filename="../filter_mate_app.py" line="1397"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plugin draait in beperkte modus (hexagonale services niet beschikbaar). Prestaties kunnen verminderd zijn.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1641"/>
+        <location filename="../filter_mate_app.py" line="1646"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate FOUT</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1641"/>
+        <location filename="../filter_mate_app.py" line="1646"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Kan {0} niet uitvoeren: widget-initialisatie mislukt.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2424"/>
+        <location filename="../filter_mate_app.py" line="2429"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Kan {0} niet uitvoeren: laag ongeldig of bron niet gevonden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2561"/>
+        <location filename="../filter_mate_app.py" line="2566"/>
         <source>All filters cleared - </source>
         <translation>Alle filters gewist - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2562"/>
+        <location filename="../filter_mate_app.py" line="2567"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} objecten zichtbaar in hoofdlaag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2570"/>
+        <location filename="../filter_mate_app.py" line="2575"/>
         <source>Error: result handler missing</source>
         <translation>Fout: resultaatverwerker ontbreekt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2583"/>
+        <location filename="../filter_mate_app.py" line="2588"/>
         <source>Error during filtering: {0}</source>
         <translation>Fout tijdens filteren: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2705"/>
+        <location filename="../filter_mate_app.py" line="2710"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} verweesd(e) favoriet(en) hersteld: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2840"/>
+        <location filename="../filter_mate_app.py" line="2845"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Laden van laag mislukt - klik om opnieuw te proberen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2896"/>
+        <location filename="../filter_mate_app.py" line="2902"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} la(a)g(en) succesvol geladen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1863"/>
+        <location filename="../filter_mate_app.py" line="1868"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1865"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1868"/>
+        <location filename="../filter_mate_app.py" line="1873"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1875"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1728,27 +1748,27 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1880"/>
+        <location filename="../filter_mate_app.py" line="1885"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1887"/>
+        <location filename="../filter_mate_app.py" line="1892"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1894"/>
+        <location filename="../filter_mate_app.py" line="1899"/>
         <source>Cancel</source>
         <translation>Annuleren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1918"/>
+        <location filename="../filter_mate_app.py" line="1923"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1228"/>
+        <location filename="../filter_mate_app.py" line="1233"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Kies een laag in het tabblad EXPLORING voordat u '{0}' uitvoert.</translation>
     </message>

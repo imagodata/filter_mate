@@ -222,214 +222,219 @@
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="165"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="208"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Възстановяване на филтъра на {0} растерни слоя / слоя с облак от точки…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="404"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="455"/>
         <source>cov. ≥ </source>
         <translation>покр. ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="405"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Минимален дял на целеви полигон вътре в геометрията на източника (0 = всяко припокриване). Използва се, когато източникът е растер или облак от точки.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
         <source>Raster</source>
         <translation>Растер</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="487"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
         <source>Point cloud</source>
         <translation>Облак от точки</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="496"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="547"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>Слой {0}: избор в EXPLORING, релация във FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="511"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Избор на пиксели: щракнете върху картата, за да прочетете стойността на всеки канал (Ctrl+клик разширява диапазона)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="520"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
         <source>Zoom to the layer</source>
         <translation>Мащабиране до слоя</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="513"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="564"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Преглед: скриване на пикселите извън избора</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="566"/>
         <source>Not used for raster layers</source>
         <translation>Не се използва за растерни слоеве</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="516"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="567"/>
         <source>Reset the raster selection</source>
         <translation>Нулиране на растерния избор</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="570"/>
         <source>Identify points on the map</source>
         <translation>Идентифициране на точки на картата</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="572"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Преглед на живо: показване само на точките, запазени от избора</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
         <source>Not used for point cloud layers</source>
         <translation>Не се използва за слоеве с облак от точки</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="524"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
         <source>Reset the point cloud criteria</source>
         <translation>Нулиране на критериите за облака от точки</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="681"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="732"/>
         <source>Invalid raster calculator expression</source>
         <translation>Невалиден израз на растровия калкулатор</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="719"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="772"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL не е намерен: височината над DTM изисква изпълним файл pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1051"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1130"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Задача на FilterMate все още се изпълнява: изчакайте да приключи</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1067"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1146"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Задачата на FilterMate е неуспешна: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1100"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1179"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Първо изберете пиксели: диапазон от стойности, класове или растров израз</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1109"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1188"/>
         <source>Raster filtered: {0}</source>
         <translation>Растерът е филтриран: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1122"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Изразът за облака от точки е отхвърлен: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1125"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1204"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Първо изберете точки: класове, диапазони на атрибути или израз</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Облакът от точки е филтриран: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1197"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1276"/>
         <source>Filter not applied: {0}</source>
         <translation>Филтърът не е приложен: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
         <source>canceled</source>
         <translation>отменено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1280"/>
         <source>{0} target(s) filtered</source>
         <translation>Филтрирани цели: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1203"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1282"/>
         <source>{0} failed: {1}</source>
         <translation>{0} е неуспешно: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1291"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: филтриране от '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1357"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Променено междувременно, оставено без промяна: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1274"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1363"/>
         <source>{0} layer(s) restored</source>
         <translation>Възстановени слоеве: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' не е експортиран: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1320"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1411"/>
         <source>Exported: {0}</source>
         <translation>Експортирано: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1413"/>
         <source>Export failed: {0}</source>
         <translation>Експортирането е неуспешно: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1329"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1420"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Експортиране на слоеве: {0}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1335"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1426"/>
         <source>Export folder</source>
         <translation>Папка за експорт</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1407"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1498"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Растерните цели / целите с облак от точки са пропуснати: не е избран обект източник в EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Растерните цели / целите с облак от точки не са филтрирани: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>Филтрирани растерни цели / цели с облак от точки: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Изберете DTM растера, използван за височината над земята</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1619"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Височината над земята не е изчислена: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1537"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Изчисляване на височината над '{0}' с PDAL…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="185"/>
+        <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
+        <translation>Кешът на FilterMate заема {0} GB, над ограничението си от {1} GB: премахнете филтъра от растерните слоеве / слоевете с облаци от точки, които вече не са ви нужни</translation>
     </message>
 </context>
 <context>
@@ -1331,42 +1336,42 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>Възстановяване на конфигурацията по подразбиране и изтриване на SQLite базата данни</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1429"/>
+        <location filename="../filter_mate.py" line="1443"/>
         <source>Reset Configuration</source>
         <translation>Възстановяване на конфигурацията</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1452"/>
+        <location filename="../filter_mate.py" line="1466"/>
         <source>Configuration reset successfully.</source>
         <translation>Конфигурацията е възстановена успешно.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1457"/>
+        <location filename="../filter_mate.py" line="1471"/>
         <source>Default configuration file not found.</source>
         <translation>Файлът с конфигурация по подразбиране не е намерен.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1478"/>
+        <location filename="../filter_mate.py" line="1492"/>
         <source>Database deleted: {filename}</source>
         <translation>Базата данни е изтрита: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1506"/>
         <source>Restart required</source>
         <translation>Изисква се рестартиране</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="423"/>
+        <location filename="../filter_mate.py" line="436"/>
         <source>Obsolete configuration detected</source>
         <translation>Открита е остаряла конфигурация</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="424"/>
+        <location filename="../filter_mate.py" line="437"/>
         <source>unknown version</source>
         <translation>неизвестна версия</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="425"/>
+        <location filename="../filter_mate.py" line="438"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1381,12 +1386,12 @@ Do you want to reset to default settings?
 • Не: Запазване на текущата конфигурация (може да причини проблеми)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="432"/>
+        <location filename="../filter_mate.py" line="445"/>
         <source>Corrupted configuration detected</source>
         <translation>Открита е повредена конфигурация</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="433"/>
+        <location filename="../filter_mate.py" line="446"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1401,12 +1406,12 @@ Do you want to reset to default settings?
 • Не: Отказ (добавката може да не работи правилно)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="440"/>
+        <location filename="../filter_mate.py" line="453"/>
         <source>Configuration reset</source>
         <translation>Конфигурацията е възстановена</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="441"/>
+        <location filename="../filter_mate.py" line="454"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1415,57 +1420,57 @@ Do you want to continue?</source>
 Искате ли да продължите?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="489"/>
+        <location filename="../filter_mate.py" line="502"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Конфигурацията не е възстановена. Някои функции може да не работят правилно.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="500"/>
+        <location filename="../filter_mate.py" line="513"/>
         <source>Configuration created with default values</source>
         <translation>Конфигурацията е създадена с подразбиращи се стойности</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="503"/>
+        <location filename="../filter_mate.py" line="516"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Повредената конфигурация е възстановена. Настройките по подразбиране са възстановени.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="506"/>
+        <location filename="../filter_mate.py" line="519"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Остарялата конфигурация е възстановена. Настройките по подразбиране са възстановени.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="527"/>
+        <location filename="../filter_mate.py" line="540"/>
         <source>Configuration updated to latest version</source>
         <translation>Конфигурацията е обновена до последната версия</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="524"/>
+        <location filename="../filter_mate.py" line="537"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Конфигурацията е обновена: нови настройки са налични ({sections}). Достъп чрез менюто Опции.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="518"/>
+        <location filename="../filter_mate.py" line="531"/>
         <source>Geometry Simplification</source>
         <translation>Опростяване на геометрия</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="519"/>
+        <location filename="../filter_mate.py" line="532"/>
         <source>Optimization Thresholds</source>
         <translation>Прагове за оптимизация</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="546"/>
+        <location filename="../filter_mate.py" line="559"/>
         <source>Error during configuration migration: {}</source>
         <translation>Грешка по време на миграция на конфигурацията: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="664"/>
+        <location filename="../filter_mate.py" line="677"/>
         <source>Geometry validation setting</source>
         <translation>Настройка за валидиране на геометрия</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="666"/>
+        <location filename="../filter_mate.py" line="679"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1492,17 +1497,17 @@ FilterMate препоръчва деактивиране на тази наст�
 • Не: Запазване на текущата настройка</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="694"/>
+        <location filename="../filter_mate.py" line="707"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Филтрирането на невалидна геометрия е деактивирано успешно.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="701"/>
+        <location filename="../filter_mate.py" line="714"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Филтрирането на невалидна геометрия не е променено. Някои обекти може да бъдат изключени от експорта.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1429"/>
+        <location filename="../filter_mate.py" line="1443"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1519,7 +1524,7 @@ QGIS must be restarted to apply the changes.</source>
 QGIS трябва да бъде рестартиран, за да се приложат промените.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1506"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1528,17 +1533,17 @@ Please restart QGIS to apply the changes.</source>
 Моля, рестартирайте QGIS, за да приложите промените.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="368"/>
+        <location filename="../filter_mate.py" line="373"/>
         <source>Initialization error: {0}</source>
         <translation>Грешка при инициализация: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="605"/>
+        <location filename="../filter_mate.py" line="618"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} реферирани слой(а) не са заредени ({layers_list}). Използва се резервно показване.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1483"/>
+        <location filename="../filter_mate.py" line="1497"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Не може да се изтрие {filename}: {e}</translation>
     </message>
@@ -1548,27 +1553,27 @@ Please restart QGIS to apply the changes.</source>
         <translation type="obsolete">Грешка по време на възстановяване: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1535"/>
+        <location filename="../filter_mate.py" line="1549"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Благодарим ви, че използвате &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Присъединете се към нашата Discord общност, за да:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Получите помощ и поддръжка&lt;/li&gt;&lt;li&gt;Докладвате грешки и проблеми&lt;/li&gt;&lt;li&gt;Предложите нови функции&lt;/li&gt;&lt;li&gt;Споделите съвети с други потребители&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1551"/>
+        <location filename="../filter_mate.py" line="1565"/>
         <source>  Join us on Discord</source>
         <translation>  Присъединете се към нас в Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1571"/>
+        <location filename="../filter_mate.py" line="1585"/>
         <source>Don&apos;t show this again</source>
         <translation>Не показвай отново</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1574"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>Close</source>
         <translation>Затваряне</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1640"/>
+        <location filename="../filter_mate.py" line="1708"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Грешка при зареждане на добавката: {0}. Проверете конзолата на QGIS Python за подробности.</translation>
     </message>
@@ -1612,110 +1617,125 @@ First attribute: {1}</source>
 Първи атрибут: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1501"/>
+        <location filename="../filter_mate.py" line="1515"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Конфигурацията не може да бъде нулирана. Проверете дали папката на плъгина е достъпна за запис и опитайте отново. Подробности в filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1615"/>
+        <source>What&apos;s new in FilterMate 5</source>
+        <translation>Какво ново във FilterMate 5</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1621"/>
+        <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
+        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate вече работи с растерни слоеве и слоеве с облаци от точки.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; се адаптира към текущия слой: диапазон от стойности и класове на растер, класове, надморска височина и атрибути на облак от точки LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; свързва тази селекция със слоеве от всякакъв тип, с обичайните предикати и буфер: парцели в диапазон на надморска височина, точки LiDAR под сгради, ЦМТ, изрязан по община.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; записва филтрираните растери (GeoTIFF, COG) и облаци от точки (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Алгоритми и модели на Processing, qgis_process, Python и REST API.&lt;/li&gt;&lt;/ul&gt;</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate.py" line="1637"/>
+        <source>Open the user guide</source>
+        <translation>Отваряне на ръководството за потребителя</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="298"/>
+        <location filename="../filter_mate_app.py" line="303"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Открити са PostgreSQL слоеве ({0}), но psycopg2 не е инсталиран.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="390"/>
+        <location filename="../filter_mate_app.py" line="395"/>
         <source>Cleared {0} caches</source>
         <translation>{0} кеша изчистени</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="856"/>
+        <location filename="../filter_mate_app.py" line="861"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Неуспешно създаване на докинг панел: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="866"/>
+        <location filename="../filter_mate_app.py" line="871"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Неуспешно показване на докинг панел: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1380"/>
+        <location filename="../filter_mate_app.py" line="1385"/>
         <source>Error executing {0}: {1}</source>
         <translation>Грешка при изпълнение на {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1392"/>
+        <location filename="../filter_mate_app.py" line="1397"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Добавката работи в ограничен режим (хексагоналните услуги не са налични). Производителността може да бъде намалена.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1641"/>
+        <location filename="../filter_mate_app.py" line="1646"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ГРЕШКА</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1641"/>
+        <location filename="../filter_mate_app.py" line="1646"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Не може да се изпълни {0}: инициализацията на уиджета е неуспешна.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2424"/>
+        <location filename="../filter_mate_app.py" line="2429"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Не може да се изпълни {0}: невалиден слой или източникът не е намерен.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2561"/>
+        <location filename="../filter_mate_app.py" line="2566"/>
         <source>All filters cleared - </source>
         <translation>Всички филтри изчистени - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2562"/>
+        <location filename="../filter_mate_app.py" line="2567"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} обекта видими в основния слой</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2570"/>
+        <location filename="../filter_mate_app.py" line="2575"/>
         <source>Error: result handler missing</source>
         <translation>Грешка: липсва обработчик на резултата</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2583"/>
+        <location filename="../filter_mate_app.py" line="2588"/>
         <source>Error during filtering: {0}</source>
         <translation>Грешка по време на филтриране: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2705"/>
+        <location filename="../filter_mate_app.py" line="2710"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} осиротели любими възстановени: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2840"/>
+        <location filename="../filter_mate_app.py" line="2845"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Зареждането на слоя е неуспешно - щракнете за повторен опит</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2896"/>
+        <location filename="../filter_mate_app.py" line="2902"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} слой(а) заредени успешно</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1863"/>
+        <location filename="../filter_mate_app.py" line="1868"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1865"/>
+        <location filename="../filter_mate_app.py" line="1870"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1868"/>
+        <location filename="../filter_mate_app.py" line="1873"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1875"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1728,27 +1748,27 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1880"/>
+        <location filename="../filter_mate_app.py" line="1885"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1887"/>
+        <location filename="../filter_mate_app.py" line="1892"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1894"/>
+        <location filename="../filter_mate_app.py" line="1899"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1918"/>
+        <location filename="../filter_mate_app.py" line="1923"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1228"/>
+        <location filename="../filter_mate_app.py" line="1233"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Изберете слой в раздела EXPLORING, преди да изпълните '{0}'.</translation>
     </message>
