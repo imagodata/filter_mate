@@ -222,9 +222,6 @@ class RepoEditDialog(QDialog if HAS_QT else object):
             target_collection=self._target_collection_edit.text().strip(),
             is_default=self._default_check.isChecked(),
             authcfg_id=self._get_auth_id(),
-            # Carry the legacy header through unmodified so the manager
-            # can decide to drop it on save (when authcfg_id is set).
-            auth_header=(self._original.auth_header if self._original else ""),
             extra=(dict(self._original.extra) if self._original else {}),
         )
 
@@ -450,8 +447,6 @@ class RepoManagerDialog(QDialog if HAS_QT else object):
     def _auth_label(repo: RemoteRepo) -> str:
         if repo.authcfg_id:
             return f"🔐 {repo.authcfg_id}"
-        if repo.auth_header:
-            return "⚠ plaintext"
         return "—"
 
     def _selected_index(self) -> int:

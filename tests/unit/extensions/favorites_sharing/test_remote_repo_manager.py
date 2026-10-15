@@ -14,7 +14,7 @@ import types
 import pytest
 
 from extensions.favorites_sharing.remote_repo_manager import (
-    LEGACY_AUTH_HEADER_DEADLINE,
+    PLAINTEXT_AUTH_REMOVED_IN,
     RemoteRepo,
     RemoteRepoManager,
     RepoStatus,
@@ -96,19 +96,22 @@ class TestRemoteRepoFromConfig:
         })
         assert repo is not None
         assert repo.authcfg_id == "qg1xy7w"
-        assert repo.auth_header == ""
+        assert not hasattr(repo, "auth_header")
 
-    def test_legacy_auth_header_logs_deprecation(self, caplog):
+    def test_plaintext_auth_header_is_refused(self, caplog):
+        """FilterMate 5.0 (audit EXT-6): the plaintext token of a 4.x entry is never
+        used nor kept; the repo itself is, and the user is told what to do."""
         import logging
-        with caplog.at_level(logging.WARNING,
-                             logger="FilterMate.FavoritesSharing.RemoteRepo"):
+        with caplog.at_level(logging.ERROR, logger="FilterMate.FavoritesSharing.RemoteRepo"):
             repo = RemoteRepo.from_config_entry({
-                "name": "Legacy", "auth_header": "Bearer tok",
+                "name": "Legacy4x", "git_url": "https://x/a.git", "auth_header": "Bearer tok",
             })
-        assert repo is not None
-        assert repo.auth_header == "Bearer tok"
-        assert any("legacy plaintext auth_header" in rec.message
-                   for rec in caplog.records)
+        assert repo is not None and repo.git_url == "https://x/a.git"
+        assert not hasattr(repo, "auth_header")
+        assert "auth_header" not in repo.extra  # so the next save drops it from config.json
+        messages = [rec.message for rec in caplog.records if rec.levelname == "ERROR"]
+        assert any("Legacy4x" in m and "Authentication Manager" in m and PLAINTEXT_AUTH_REMOVED_IN in m
+                   for m in messages)
 
     def test_authcfg_id_does_not_warn(self, caplog):
         import logging
@@ -117,59 +120,8 @@ class TestRemoteRepoFromConfig:
             RemoteRepo.from_config_entry({
                 "name": "Encrypted", "authcfg_id": "qg1xy7w",
             })
-        assert not any("legacy plaintext auth_header" in rec.message
+        assert not any("plaintext auth_header" in rec.message
                        for rec in caplog.records)
-
-    def test_legacy_auth_header_purge_tripwire(self):
-        """Tripwire for the EXT-6 audit promise.
-
-        ``LEGACY_AUTH_HEADER_DEADLINE`` is currently enforced only via a
-        ``logger.warning`` — there is no runtime guard that rejects entries
-        carrying a plaintext ``auth_header`` once FilterMate is at or past
-        the declared deadline. This test fails the moment the plugin
-        version reaches ``LEGACY_AUTH_HEADER_DEADLINE`` (currently
-        ``"5.0.0"``) so the dev cannot ship a major bump without:
-
-        1. dropping the ``auth_header`` field from ``RemoteRepo``,
-        2. removing the warning path in ``from_config_entry``,
-        3. raising on / refusing entries that still carry it,
-        4. deleting this tripwire.
-
-        See `project_audit_general_deep_2026_04_29.md` (P1-EXT6).
-        """
-        import os
-        import re
-
-        plugin_root = os.path.dirname(os.path.dirname(os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        )))
-        metadata_path = os.path.join(plugin_root, "metadata.txt")
-        assert os.path.exists(metadata_path), \
-            f"metadata.txt not found at {metadata_path}"
-
-        with open(metadata_path, encoding="utf-8") as fh:
-            match = re.search(r"^version=(\S+)\s*$", fh.read(), re.MULTILINE)
-        assert match, "metadata.txt is missing a version= line"
-        current = match.group(1)
-
-        def _version_tuple(v: str) -> tuple:
-            # Strip any trailing pre-release tag (e.g. "5.0.0-rc1").
-            head = v.split("-", 1)[0]
-            return tuple(int(p) for p in head.split(".") if p.isdigit())
-
-        current_t = _version_tuple(current)
-        deadline_t = _version_tuple(LEGACY_AUTH_HEADER_DEADLINE)
-
-        if current_t >= deadline_t:
-            pytest.fail(
-                f"FilterMate is at v{current} (>= deadline "
-                f"{LEGACY_AUTH_HEADER_DEADLINE}). Time to drop legacy "
-                "plaintext auth_header support per the EXT-6 audit "
-                "promise: remove the field on RemoteRepo, drop the "
-                "warning branch in from_config_entry, raise on entries "
-                "that still carry it (or skip them), and delete this "
-                "tripwire test."
-            )
 
     def test_collection_dir_uses_collections_subdir(self, tmp_path):
         repo = RemoteRepo.from_config_entry({
@@ -417,32 +369,16 @@ class TestSaveRepos:
             {"name": "B", "local_clone": "/tmp/b", "target_collection": "coll"},
         ]
 
-    def test_save_repos_drops_legacy_auth_header_when_authcfg_set(self):
-        """Migration path: when both fields exist, drop the plaintext one."""
-        mgr = RemoteRepoManager(FakeExtension([]))
-        repo = RemoteRepo(
-            name="Migrated",
-            git_url="https://x/a.git",
-            auth_header="Bearer LEGACY",
-            authcfg_id="cfg-new",
-        )
+    def test_plaintext_auth_header_is_never_saved(self):
+        """A 4.x entry read then saved loses its plaintext token, keeps everything else."""
         ext = FakeExtension([])
         mgr = RemoteRepoManager(ext)
+        repo = RemoteRepo.from_config_entry({
+            "name": "Old", "git_url": "https://x/a.git", "auth_header": "Bearer KEEP",
+        })
         mgr.save_repos([repo])
         saved_entry = ext.last_set_call[1][0]
-        assert saved_entry.get("authcfg_id") == "cfg-new"
-        assert "auth_header" not in saved_entry
-
-    def test_save_repos_keeps_legacy_auth_header_alone(self):
-        """Without authcfg_id, the legacy header survives the round-trip."""
-        ext = FakeExtension([])
-        mgr = RemoteRepoManager(ext)
-        repo = RemoteRepo(
-            name="Old", git_url="https://x/a.git", auth_header="Bearer KEEP",
-        )
-        mgr.save_repos([repo])
-        saved_entry = ext.last_set_call[1][0]
-        assert saved_entry["auth_header"] == "Bearer KEEP"
+        assert saved_entry == {"name": "Old", "git_url": "https://x/a.git"}
 
     def test_save_repos_enforces_single_default(self):
         """Two is_default=True entries → only the first survives as default."""
