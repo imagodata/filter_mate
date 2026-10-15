@@ -590,8 +590,8 @@ processing.run("filtermate:batch_filter", {
 
 <!-- 13 ----------------------------------------------------------------- -->
 <section id="raster-lidar">
-    <h2><span class="num">13</span>Rasters et nuages de points <small>(5.0, en développement)</small></h2>
-    <div class="callout warn"><p><strong>Pas encore publié.</strong> Cette section décrit la version 5.0 en développement ; la version publiée (4.9.2) filtre les couches vecteur.</p></div>
+    <h2><span class="num">13</span>Rasters et nuages de points <small>(5.0)</small></h2>
+    <div class="callout tip"><p><strong>Nouveau dans la version 5.0.</strong> Les couches raster et nuage de points LiDAR sont des sources et des cibles à part entière. Les prérequis ne changent pas : QGIS 3.22 ou plus récent (nuages de points à partir de 3.26), Qt5 ou Qt6. PDAL 2.4 ou plus récent est facultatif (hauteur au-dessus d'un MNT, écriture directe de COPC).</p></div>
     <p>
         Le principe ne change pas : <strong>EXPLORING sélectionne</strong> sur la couche courante, <strong>FILTERING relie</strong> cette sélection aux couches à filtrer
         avec ses prédicats géométriques et son tampon. Quand la couche courante est un raster ou un nuage de points, les groupes vecteur d'EXPLORING laissent la place
@@ -630,9 +630,61 @@ processing.run("filtermate:batch_filter", {
         </tbody>
     </table>
     </div>
+    <h3>Neuf combinaisons</h3>
     <p>
-        Annuler, Rétablir et Défiltrer remettent les sources d'origine ; le projet est toujours enregistré avec elles et les découpes sont rejouées à son ouverture.
-        L'export écrit les rasters en GeoTIFF / COG et les nuages en LAZ / COPC. L'algorithme Processing <code>filtermate:cross_filter</code> fait la même chose dans un modèle.
+        La source (la couche courante) et les cibles peuvent être de n'importe quel type : vecteur → vecteur, vecteur → raster, vecteur → nuage de points, raster → vecteur, raster → raster,
+        raster → nuage de points, nuage de points → vecteur, nuage de points → raster et nuage de points → nuage de points. FILTERING garde sa forme : couches à filtrer, opérateurs de combinaison,
+        prédicats géométriques et tampon. Deux réglages sont nouveaux : la <strong>couverture minimale</strong> (%) des polygones par la géométrie source, et <strong>Disjoint</strong>,
+        qui garde ce qui se trouve à l'extérieur.
+    </p>
+    <div class="fig-row">
+        <figure class="narrow">
+            <img src="img/guide/fm5_filtering_targets.png" alt="FILTERING avec une source vecteur, un raster et un nuage de points dans la liste des couches à filtrer" loading="lazy" width="440" height="1086">
+            <figcaption>FILTERING depuis une couche vecteur : le raster et le nuage de points figurent parmi les cibles.</figcaption>
+        </figure>
+        <figure class="narrow">
+            <img src="img/guide/fm5_export_tab.png" alt="EXPORTING avec un raster, un nuage de points et une couche vecteur cochés" loading="lazy" width="440" height="1086">
+            <figcaption>EXPORTING : un raster, un nuage de points et une couche vecteur dans le même export.</figcaption>
+        </figure>
+    </div>
+    <h3>Résultats sur la carte</h3>
+    <div class="fig-row">
+        <figure>
+            <img src="img/guide/fm5_vector_to_raster.png" alt="Un raster découpé autour d'un polygone sélectionné sur le canevas QGIS" loading="lazy" width="954" height="591">
+            <figcaption>Vecteur → raster : les pixels autour du polygone sélectionné sont conservés (tampon de 150 m).</figcaption>
+        </figure>
+        <figure>
+            <img src="img/guide/fm5_raster_to_vector.png" alt="Polygones retenus par une plage de valeurs raster, les autres pixels masqués par l'aperçu" loading="lazy" width="954" height="591">
+            <figcaption>Raster → vecteur : les polygones qui vérifient la plage de valeurs ; l'aperçu masque les autres pixels.</figcaption>
+        </figure>
+        <figure>
+            <img src="img/guide/fm5_pointcloud_to_vector.png" alt="Points de bâtiment (classe 6) dans le polygone retenu par le filtre du nuage de points" loading="lazy" width="954" height="591">
+            <figcaption>Nuage de points → vecteur : le polygone qui contient des points de la classe 6 (bâtiment).</figcaption>
+        </figure>
+    </div>
+    <p>Ces captures ont été réalisées dans QGIS 4.2 sur un petit jeu de données synthétique.</p>
+    <h3>Annuler, projet, export</h3>
+    <p>
+        Les rasters découpés (VRT) et les nuages de points découpés (COPC) gardent l'identifiant, le style et la position de la couche. Annuler, Rétablir et Défiltrer remettent les sources d'origine ;
+        le projet est toujours enregistré avec la source d'origine et les découpes sont rejouées à son ouverture. L'export écrit les rasters en GeoTIFF / COG et les nuages en LAZ / LAS / COPC / GPKG / CSV, seuls ou avec des couches vecteur.
+    </p>
+    <h3>Options</h3>
+    <p>
+        La prise en charge des rasters et des nuages de points est activée par défaut. Dans l'onglet <strong>Configuration</strong>, <code>APP.OPTIONS.RASTER.enabled</code> et
+        <code>APP.OPTIONS.POINT_CLOUD.enabled</code> activent ou désactivent chaque type ; les listes de couches suivent immédiatement. Désactiver un type ne défiltre pas ses couches : un avertissement nomme celles qui restent filtrées.
+        Les options <code>APP.OPTIONS.CROSS_FILTER.*</code> règlent le mode de découpe des nuages de points (exact ou boîte englobante), le nombre maximal de pixels raster, la résolution de l'empreinte, la taille du cache et le chemin de <code>pdal</code>.
+    </p>
+    <figure class="narrow">
+        <img src="img/guide/fm5_configuration.png" alt="Onglet Configuration avec les options RASTER et POINT_CLOUD activées" loading="lazy" width="440" height="1086">
+        <figcaption>Onglet Configuration : les options RASTER et POINT_CLOUD.</figcaption>
+    </figure>
+    <div class="callout"><p><strong>PDAL.</strong> La hauteur au-dessus d'un MNT et l'écriture directe de fichiers COPC demandent PDAL 2.4 ou plus récent. Avec un PDAL plus ancien, les cibles nuage de points sont découpées par l'exporteur de QGIS, un export COPC écrit du LAZ avec un message, et la hauteur au-dessus d'un MNT est désactivée avec un message qui nomme la version.</p></div>
+    <h3>Automatisation</h3>
+    <p>
+        Sept algorithmes Processing (<code>cross_filter_from_raster</code>, <code>cross_filter_from_point_cloud</code>, <code>cross_filter_from_geometry</code>, <code>filter_point_cloud</code>,
+        <code>clear_filters</code>, <code>apply_favorite</code>, <code>export_filtered_layers</code>) et quatre modèles prêts à l'emploi (extraction par zone, végétation haute près de lignes,
+        parcelles sur pente douce, bâtiments absents du LiDAR) s'exécutent depuis la boîte à outils, <code>qgis_process</code> (le plugin démarre sans fenêtre QGIS), Python et l'API REST.
+        Voir <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a>.
     </p>
 </section>
 
@@ -669,7 +721,7 @@ processing.run("filtermate:batch_filter", {
 </section>
 
 <footer class="doc-foot">
-    <p>FilterMate 4.9.2, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
+    <p>FilterMate 5.0, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
     <p><a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d'usage</a>, <a href="roadmap.html">Feuille de route</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
 </footer>
 

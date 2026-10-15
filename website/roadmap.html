@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FilterMate 5.0 — Raster & LiDAR</title>
-    <meta name="description" content="FilterMate 5.0, in development: EXPLORING adapts to raster and point cloud layers, FILTERING relates vector, raster and LiDAR layers in any direction with its usual predicates and buffer.">
+    <meta name="description" content="FilterMate 5.0, released 2026-10-15: EXPLORING adapts to raster and point cloud layers, FILTERING relates vector, raster and LiDAR layers in any direction with its usual predicates and buffer.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,11 +34,11 @@
     <div class="container">
         <div class="hero-badge fade-in">
             <span class="pulse"></span>
-            In development for FilterMate 5.0
+            Released in FilterMate 5.0 · 2026-10-15
         </div>
         <h1 class="fade-in fade-in-delay-1">Beyond Vectors:<br><span class="gradient">Raster & LiDAR Filtering</span></h1>
         <p class="fade-in fade-in-delay-2">EXPLORING selects on the current layer, whatever its kind. FILTERING relates that selection to vector, raster and point cloud layers with its usual predicates and buffer.</p>
-        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Not released yet.</strong> The released plugin (4.9.2) filters vector layers. What follows is implemented on the 5.0 development branch and tested in QGIS 4.2 and 3.44 LTR; it may still change before the release.</p>
+        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Released on 2026-10-15.</strong> FilterMate 5.0 filters vector, raster and point cloud layers. Raster and point cloud support is on by default and can be switched off in the Configuration tab. Every release is tested in CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, with Processing and with the dock itself.</p>
         <div class="hero-stats fade-in fade-in-delay-3">
             <div class="hero-stat">
                 <div class="num">3</div>
@@ -187,15 +187,15 @@
             <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 Status
             </div>
-            <h2 class="section-title">Where 5.0 stands</h2>
+            <h2 class="section-title">What 5.0 delivers</h2>
             <p class="section-subtitle">Times measured on one IGN LiDAR HD tile (1 km², 25.1 million points) with a 1 m DTM and BD TOPO buildings, QGIS 4.2.</p>
         </div>
         <div class="timeline fade-in">
             <div class="timeline-item">
                 <div class="timeline-dot s0">1</div>
-                <div class="timeline-sprint">Implemented on the development branch</div>
+                <div class="timeline-sprint">Released</div>
                 <div class="timeline-title">Panels, cross filters, export</div>
-                <div class="timeline-desc">Raster and point cloud panels, the nine source → target pairs, undo / redo, favorites, project save and reopen, Processing algorithm and REST API endpoint.</div>
+                <div class="timeline-desc">Raster and point cloud panels, the nine source → target pairs, undo / redo, favorites, project save and reopen, export of every kind, seven Processing algorithms, four models, the Python and REST APIs.</div>
             </div>
             <div class="timeline-item">
                 <div class="timeline-dot s1">2</div>
@@ -205,9 +205,9 @@
             </div>
             <div class="timeline-item">
                 <div class="timeline-dot s2">3</div>
-                <div class="timeline-sprint">Before the release</div>
-                <div class="timeline-title">Wider testing</div>
-                <div class="timeline-desc">QGIS 3.22 to 3.28, Linux and macOS with PDAL, translations of the new panels in every language, user guide and videos.</div>
+                <div class="timeline-sprint">Tested</div>
+                <div class="timeline-title">QGIS 3.22 to 4.2</div>
+                <div class="timeline-desc">A CI job loads FilterMate in the official QGIS Docker images (3.22, 3.28, 3.34, 3.44, 4.2) and drives the dock under Xvfb. Point clouds need QGIS 3.26 or later; PDAL 2.4 or later is optional (height above a DTM, direct COPC writing).</div>
                 <div class="timeline-milestone">FilterMate 5.0</div>
             </div>
         </div>
