@@ -387,6 +387,44 @@
     padding: 0px;
 }
 
+/* Spin box steppers. Once the box itself is styled (border, background, padding), Qt no longer draws
+   the native up / down buttons: on Linux and macOS they came out as a stray corner ("150.000 ⌟").
+   Drawn here on every platform, on the right of the field, one arrow per half. */
+#dockWidgetContents QAbstractSpinBox::up-button,
+#dockWidgetContents QAbstractSpinBox::down-button {
+    subcontrol-origin: border;
+    width: 16px;
+    border: none;
+    background: transparent;
+}
+#dockWidgetContents QAbstractSpinBox::up-button {
+    subcontrol-position: top right;
+}
+#dockWidgetContents QAbstractSpinBox::down-button {
+    subcontrol-position: bottom right;
+}
+#dockWidgetContents QAbstractSpinBox::up-button:hover,
+#dockWidgetContents QAbstractSpinBox::down-button:hover {
+    background: {fm_field_hover};
+    border-radius: 3px;
+}
+#dockWidgetContents QAbstractSpinBox::up-arrow {
+    image: url({spin_up_icon});
+    width: 10px;
+    height: 10px;
+}
+#dockWidgetContents QAbstractSpinBox::down-arrow {
+    image: url({spin_down_icon});
+    width: 10px;
+    height: 10px;
+}
+#dockWidgetContents QAbstractSpinBox::up-arrow:disabled,
+#dockWidgetContents QAbstractSpinBox::up-arrow:off,
+#dockWidgetContents QAbstractSpinBox::down-arrow:disabled,
+#dockWidgetContents QAbstractSpinBox::down-arrow:off {
+    image: none;
+}
+
 /* Every field of a row as tall as the combo boxes (same content height, padding and border). */
 #dockWidgetContents QSpinBox,
 #dockWidgetContents QDoubleSpinBox,
