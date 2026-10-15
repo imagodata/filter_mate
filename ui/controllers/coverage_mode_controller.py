@@ -497,7 +497,50 @@ class CoverageModeController(BaseController):
                 parent_layout.insertLayout(index, row)
             else:
                 parent_layout.insertWidget(index + 1, spin)
+        self._fit_coverage_spin(spin)
         self._coverage_spin = spin
+
+    @staticmethod
+    def _fit_coverage_spin(spin) -> None:
+        """Keep the field wide enough for "cov. ≥ 100 %": its size hint ignores the stylesheet padding
+        and the steppers drawn by mockup.qss, and the text came out clipped ("cov. ≥ 50 !"). Measured
+        again whenever the font or the style changes (the dock font arrives after creation)."""
+        from qgis.PyQt.QtCore import QEvent, QObject
+        from qgis.PyQt.QtWidgets import QLineEdit
+        editor = spin.findChild(QLineEdit)  # draws the text, with its own stylesheet font (monospace)
+
+        def fit():
+            try:
+                metrics = (editor or spin).fontMetrics()
+                text = f"{spin.prefix()}{spin.maximum()}{spin.suffix()}"
+                width = metrics.horizontalAdvance(text) if hasattr(metrics, 'horizontalAdvance') else metrics.width(text)
+                # Spin box padding 8 + 8, the inner editor's own QLineEdit padding 8 + 8, steppers 16 + gap 4,
+                # frame / slack 12 (measured in QGIS 4.2: a 101 px editor showed 85 px of text).
+                wanted = width + 16 + 16 + 20 + 12
+                if spin.minimumWidth() != wanted:
+                    spin.setMinimumWidth(wanted)
+            except (AttributeError, RuntimeError, TypeError):
+                pass
+
+        events = (QEvent.Type.Show, QEvent.Type.FontChange, QEvent.Type.StyleChange, QEvent.Type.Polish)
+
+        class _Fit(QObject):
+            def eventFilter(self, watched, event):  # noqa: N802 - Qt override
+                try:
+                    if event.type() in events:
+                        fit()
+                except RuntimeError:
+                    pass
+                return False
+
+        try:
+            spin._fm_fit = _Fit(spin)
+            for widget in (spin, editor):
+                if widget is not None:
+                    widget.installEventFilter(spin._fm_fit)
+        except (AttributeError, RuntimeError, TypeError):
+            pass
+        fit()
 
     @staticmethod
     def _find_parent_layout(widget):
