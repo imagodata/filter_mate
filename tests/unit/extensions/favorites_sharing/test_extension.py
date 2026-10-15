@@ -120,7 +120,8 @@ class TestMissingDepsHint:
         assert hint.get("method") == "qgis_plugin"
         install_cmd = (hint.get("install_command") or "").lower()
         assert "pip" not in install_cmd
-        assert "extensions" in install_cmd or "plugin" in install_cmd
+        # The plugin name: the registry's notice reads "install the QGIS plugin {0}" (translated).
+        assert install_cmd == "resource sharing"
         # Package names both acceptable (users may hit either fork)
         details = (hint.get("details") or "").lower()
         assert "qgis_resource_sharing" in details or "resource_sharing" in details

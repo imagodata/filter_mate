@@ -2,9 +2,14 @@ name: QGIS headless
 
 # FilterMate inside the official QGIS Docker images: the plugin is loaded the
 # way qgis_process loads it, then raster / vector / point cloud cross filters
-# run on tiny synthetic data (tests/qgis_headless/). Same thing locally:
+# run on tiny synthetic data (tests/qgis_headless/run_smoke.py); then QGIS
+# starts with its GUI under Xvfb and the dock is driven like a user does
+# (run_gui_smoke.py). Same thing locally:
 #   docker run --rm -v "$PWD:/src:ro" qgis/qgis:ltr bash -c \
 #     'python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm && python3 /src/tests/qgis_headless/run_smoke.py /tmp/fm'
+#   docker run --rm -v "$PWD:/src:ro" -e FM_FIXTURES=/tmp/fm qgis/qgis:ltr bash -c \
+#     'python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm && xvfb-run -a qgis --nologo --noversioncheck \
+#      --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py'
 
 on:
   push:
@@ -17,7 +22,7 @@ jobs:
   smoke:
     name: qgis/qgis:${{ matrix.image }}${{ matrix.pdal && ' + pdal' || '' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45  # two smoke tests, PDAL installed twice on the + pdal entry
     # The job found, and every entry now guards against (October 2026):
     #   - QGIS < 3.34.2 has QAction / QShortcut in QtWidgets only (tests/test_no_qtwidgets_relocated_symbols.py);
     #   - GDAL < 3.9 has no cutlineWKT / cutlineSRS (adapters/qgis/coverage_layers/gdal_warp.py);
@@ -62,3 +67,19 @@ jobs:
             python3 --version
             python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm > /dev/null
             python3 /src/tests/qgis_headless/run_smoke.py /tmp/fm'
+
+    - name: Dock smoke test (QGIS GUI under Xvfb)
+      if: ${{ !cancelled() }}  # also when the engine smoke test failed: the dock is a separate story
+      env:
+        IMAGE: qgis/qgis:${{ matrix.image }}
+        INSTALL_PDAL: ${{ matrix.pdal == true }}
+      run: |
+        docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" \
+          -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONUNBUFFERED=1 -e FM_FIXTURES=/tmp/fm -e INSTALL_PDAL \
+          "$IMAGE" bash -ec '
+            set -o pipefail  # the QGIS exit code is the test result, not the filter grep
+            if [ "$INSTALL_PDAL" = "true" ]; then bash /src/tests/qgis_headless/install_pdal.sh; fi
+            python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm > /dev/null
+            timeout 900 xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
+              --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py 2>&1 \
+              | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"'

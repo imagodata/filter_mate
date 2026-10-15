@@ -211,10 +211,8 @@ class FavoritesSharingExtension(BaseExtension):
         """Resource Sharing is a QGIS plugin — not a pip package."""
         return {
             "method": "qgis_plugin",
-            "install_command": (
-                "Extensions → Installer/Gérer les extensions → "
-                "Chercher « Resource Sharing » → Installer"
-            ),
+            # The plugin name: the registry's translated notice says "install the QGIS plugin {0}".
+            "install_command": "Resource Sharing",
             "details": (
                 "Le plugin officiel est disponible dans le dépôt QGIS "
                 "standard (packages: qgis_resource_sharing ou "

@@ -92,7 +92,8 @@ def _registry(monkeypatch, app, derived_ids):
 
 def test_turned_off_kind_is_unregistered_and_enabled_kind_registered(app):
     assert app.apply_layer_kind_options() == (1, 2)
-    app.manage_task.assert_any_call('remove_layers', ['r1', 'r2'])
+    removed = [call.args[1] for call in app.manage_task.call_args_list if call.args[0] == 'remove_layers']
+    assert [[layer.id() for layer in layers] for layers in removed] == [['r1', 'r2']]  # objects, not ids
     added = [call.args[1] for call in app.manage_task.call_args_list if call.args[0] == 'add_layers']
     assert [[layer.id() for layer in layers] for layers in added] == [['p1']]
     combo = app.dockwidget.comboBox_filtering_current_layer

@@ -976,7 +976,11 @@ class ConfigurationManager(QObject):
             d.verticalLayout_exporting_values.insertWidget(0, d.checkableComboBoxLayer_exporting_layers)
             d.checkableComboBoxLayer_exporting_layers.show()
             logger.debug(f"Inserted exporting layers widget, visible: {d.checkableComboBoxLayer_exporting_layers.isVisible()}")
-            d.verticalLayout_exporting_values.insertItem(1, QtWidgets.QSpacerItem(20, 4, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding))
+            # insertSpacerItem, not insertItem: PyQt5 5.15.6 (QGIS 3.22-3.34) lacks /Transfer/ on
+            # QBoxLayout.insertItem, so Python kept the spacer, deleted it at once, and the dangling
+            # item crashed QGIS when the dock opened.
+            d.verticalLayout_exporting_values.insertSpacerItem(1, QtWidgets.QSpacerItem(
+                20, 4, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding))
 
         # Same rationale as setup_filtering_tab_widgets: let QSS own the height.
         d.checkableComboBoxLayer_exporting_layers.setSizePolicy(

@@ -150,10 +150,8 @@ class QFieldCloudExtension(BaseExtension):
         """QFieldSync is a QGIS plugin — not a pip package."""
         return {
             "method": "qgis_plugin",
-            "install_command": (
-                "Extensions → Installer/Gérer les extensions → "
-                "Chercher « QFieldSync » → Installer"
-            ),
+            # The plugin name: the registry's translated notice says "install the QGIS plugin {0}".
+            "install_command": "QFieldSync",
             "details": (
                 "QFieldSync est publié par OPENGIS.ch dans le dépôt "
                 "QGIS officiel. Aucun pip install requis."

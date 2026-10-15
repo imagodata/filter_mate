@@ -804,7 +804,8 @@ class FilterMateApp:
             return 0, 0
         filterable = get_filterable_layer_types() or (QgsVectorLayer,)
         coverage = [layer for layer in self.PROJECT.mapLayers().values() if not isinstance(layer, QgsVectorLayer)]
-        removed = [layer.id() for layer in coverage if layer.id() in self.PROJECT_LAYERS and not isinstance(layer, filterable)]
+        # Layer objects: the task removes them whatever their type (ids are left alone there).
+        removed = [layer for layer in coverage if layer.id() in self.PROJECT_LAYERS and not isinstance(layer, filterable)]
         added = self._filter_usable_layers([layer for layer in coverage if layer.id() not in self.PROJECT_LAYERS])
         combo = getattr(self.dockwidget, 'comboBox_filtering_current_layer', None)
         if combo is not None:
@@ -816,7 +817,7 @@ class FilterMateApp:
             except Exception as e:
                 logger.debug(f"Current-layer combo box not re-filtered: {e}")
         if removed:
-            self._warn_filtered_layers_left(removed)
+            self._warn_filtered_layers_left([layer.id() for layer in removed])
             self.manage_task('remove_layers', removed)
         if added:
             self.manage_task('add_layers', added)

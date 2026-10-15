@@ -393,11 +393,15 @@ class LayersManagementEngineTask(QgsTask):
                         if self.isCanceled():
                             return False
             elif self.task_action == 'remove_layers':
-                if isinstance(layer, filterable_types):
-                    if layer.id() in self.project_layers.keys():
-                        result = self.remove_project_layer(layer)
-                        if self.isCanceled() or result is False:
-                            return False
+                # Layer objects, whatever their type: FilterMateApp.apply_layer_kind_options sends the
+                # rasters / point clouds of a kind just switched off, no longer a filterable type.
+                # The ids sent for QGIS layersWillBeRemoved are left alone, as they always were (no
+                # string ever matched the former isinstance check); pruning them needs the shared
+                # PROJECT_LAYERS dict copied first, or the completion handler sees nothing removed.
+                if not isinstance(layer, str) and hasattr(layer, 'id') and layer.id() in self.project_layers:
+                    result = self.remove_project_layer(layer.id())
+                    if self.isCanceled() or result is False:
+                        return False
 
         # Sort layers once after all operations (performance optimization)
         self.project_layers = dict(OrderedDict(sorted(
@@ -1203,8 +1207,9 @@ class LayersManagementEngineTask(QgsTask):
             return True  # Not an error - layer may have already been removed
 
         try:
-            self.save_variables_from_layer(layer_id)
-            self.save_style_from_layer_id(layer_id)
+            # Nothing is saved here: save_variables_from_layer(layer_id) only logged "Expected QgsVectorLayer,
+            # got str", and the former save_style_from_layer_id put a default style in the user's data source
+            # (GPKG / PostgreSQL layer_styles) or a .qml next to it, never read back.
             del self.project_layers[layer_id]
             logger.debug(f"remove_project_layer: successfully removed layer '{layer_id}'")
             return True
@@ -1745,38 +1750,6 @@ class LayersManagementEngineTask(QgsTask):
                                     self.removingLayerVariable.emit(layer, variable_key)
                 finally:
                     cur.close()
-
-    def save_style_from_layer_id(self, layer_id):
-        """
-        Save layer style to database or file.
-
-        Args:
-            layer_id (str): Layer ID to save style for
-
-        Returns:
-            bool: True (always, errors are logged but not propagated)
-        """
-        if layer_id in self.project_layers.keys():
-            if "infos" not in self.project_layers[layer_id]:
-                logger.warning(f"Layer {layer_id} missing 'infos' dictionary, skipping style save")
-                return True
-
-            if "layer_name" not in self.project_layers[layer_id]["infos"]:
-                logger.warning(f"Layer {layer_id} missing 'layer_name' in infos, skipping style save")
-                return True
-
-            layers = [layer for layer in self.PROJECT.mapLayersByName(self.project_layers[layer_id]["infos"]["layer_name"]) if layer.id() == layer_id]
-            if len(layers) > 0:
-                layer = layers[0]
-                try:
-                    layer.deleteStyleFromDatabase(name=f"FilterMate_style_{layer.name()}")
-                    layer.saveStyleToDatabase(name=f"FilterMate_style_{layer.name()}", description=f"FilterMate style for {layer.name()}", useAsDefault=True, uiFileContent="")
-                except (RuntimeError, AttributeError) as e:
-                    logger.debug(f"Could not save style to database for layer {layer.name()}, falling back to file: {e}")
-                    layer_path = layer.source().split('|')[0]
-                    layer.saveNamedStyle(os.path.normcase(os.path.join(os.path.split(layer_path)[0], f'FilterMate_style_{layer.name()}.qml')))
-
-        return True
 
     def remove_variables_from_all_layers(self):
         """

@@ -285,7 +285,6 @@ def _task(existing=None, default_is_linking=True):
     task._get_default_is_linking = MagicMock(return_value=default_is_linking)
     task.return_typped_value = lambda value, action=None: (value, type(value))
     task.save_variables_from_layer = MagicMock()
-    task.save_style_from_layer_id = MagicMock()
     for helper in VECTOR_ONLY_HELPERS:
         setattr(task, helper, MagicMock(side_effect=AssertionError(f"{helper} reached for a point cloud layer")))
     return task
@@ -458,8 +457,31 @@ class TestManageProjectLayers:
 
         assert task.manage_project_layers() is True
         assert task.project_layers == {}
-        task.save_variables_from_layer.assert_called_once_with("pc-1")
-        task.save_style_from_layer_id.assert_called_once_with("pc-1")
+        task.save_variables_from_layer.assert_not_called()  # it only ever logged an error for an id
+
+    def test_remove_layers_reaches_a_kind_just_switched_off(self, point_cloud_disabled):
+        """Configuration tab: point clouds switched off -> FilterMateApp.apply_layer_kind_options asks to
+        remove the registered ones; they are no longer a filterable type but must still be removed
+        (found by the dock smoke test: the layer stayed registered)."""
+        task = _task()
+        task.task_action = "remove_layers"
+        pc = _FakePointCloudLayer()
+        task.project_layers["pc-1"] = {"infos": {"layer_geometry_type": POINT_CLOUD_GEOMETRY_TYPE, "layer_name": "nuage"}}
+        task.layers = [pc]
+
+        assert task.manage_project_layers() is True
+        assert task.project_layers == {}
+
+    def test_remove_layers_leaves_ids_from_qgis_alone(self, point_cloud_enabled):
+        """layersWillBeRemoved sends ids: kept as before (the shared PROJECT_LAYERS dict must be copied
+        before they can be pruned, see the comment in manage_project_layers)."""
+        task = _task()
+        task.task_action = "remove_layers"
+        task.project_layers["pc-1"] = {"infos": {"layer_geometry_type": POINT_CLOUD_GEOMETRY_TYPE, "layer_name": "nuage"}}
+        task.layers = ["pc-1"]
+
+        assert task.manage_project_layers() is True
+        assert list(task.project_layers) == ["pc-1"]
 
 
 @pytest.mark.unit
@@ -543,7 +565,8 @@ class TestRegistrationGuardsAst:
         second_args = _isinstance_second_args(method)
         assert second_args, "isinstance guards expected"
         assert not any(_is_name(arg, "QgsVectorLayer") for arg in second_args)
-        assert sum(1 for arg in second_args if _is_name(arg, "filterable_types")) == 2
+        # add_layers only: remove_layers goes by id, a kind switched off is no longer filterable.
+        assert sum(1 for arg in second_args if _is_name(arg, "filterable_types")) == 1
 
         assignments = [
             n for n in ast.walk(method)
