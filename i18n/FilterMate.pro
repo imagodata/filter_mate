@@ -15,6 +15,7 @@ SOURCES = \
     ../core/services/layer_lifecycle_service.py \
     ../core/tasks/finished_handler.py \
     ../core/tasks/layer_management_task.py \
+    ../extensions/registry.py \
     ../extensions/favorites_sharing/extension.py \
     ../extensions/favorites_sharing/ui/publish_dialog.py \
     ../extensions/favorites_sharing/ui/shared_picker_dialog.py \
