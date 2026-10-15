@@ -57,6 +57,14 @@ def test_spacer_adjustments_account_for_earlier_moves():
     assert layout.spacer_adjustments([0, -3]) == [0, -3]
 
 
+def test_spacer_adjustments_skip_buttons_without_spacer():
+    """The first button has no spacer above it (36 px button, 30 px combo: 3 px it can never make up).
+    That unreachable delta must not shift the next rows: they got wrong corrections, and with the key
+    column counting in the page height the page grew at every pass (rows 4000 px apart)."""
+    assert layout.spacer_adjustments([-3, 2, 5], [False, True, True]) == [0, 2, 3]
+    assert layout.spacer_adjustments([-3, 2, 5]) == [-3, 5, 3]  # all adjustable: unchanged rule
+
+
 def test_spacing_tokens_in_the_stylesheet():
     from importlib import import_module
     design = import_module(f"{_PKG}.ui.styles.mockup_design")

@@ -302,11 +302,25 @@ def s_open_plugin():
     return lambda: dock() is not None and registered(*expected) and tasks_idle()
 
 
+def filtering_rows_span():
+    """Pixels between the first and the last FILTERING value row (about 4 rows of 30 px + gaps)."""
+    d = dock()
+    rows = [getattr(d, name) for name in ('comboBox_filtering_current_layer', 'mQgsDoubleSpinBox_filtering_buffer_value')]
+    tops = [w.mapTo(d, w.rect().topLeft()).y() for w in rows]
+    return tops[1] - tops[0]
+
+
 def s_dock_ready():
     expected = ['zones', 'dem'] + (['cloud'] if has_point_clouds() else [])
     check('dock open, every fixture layer registered', dock() is not None and dock().isVisible() and registered(*expected),
           f"registered={[name for name in expected if registered(name)]}")
     return settled()
+
+
+def s_layout_check():
+    # The key column aligner used to grow the page at every pass: rows 4000 px apart, one row visible.
+    span = filtering_rows_span()
+    check('FILTERING rows laid out together (key column aligner)', 0 < span < 600, f"first to last row: {span} px")
 
 
 def s_vector_source():
@@ -535,7 +549,7 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
-STEPS = [s_setup, s_open_plugin, s_dock_ready,
+STEPS = [s_setup, s_open_plugin, s_dock_ready, s_layout_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,
          s_point_cloud_source, s_point_cloud_select, s_point_cloud_filter, s_point_cloud_check, s_point_cloud_settled,

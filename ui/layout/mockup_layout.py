@@ -364,14 +364,18 @@ EXPORTING_PAIRS = (
 )
 
 
-def spacer_adjustments(deltas) -> list:
+def spacer_adjustments(deltas, adjustable=None) -> list:
     """Height to add to the spacer above each button so its centre meets its row's.
 
     ``deltas[i]`` = row centre - button centre, measured before any change; moving
     the spacer above button i also moves every later button, hence the running shift.
+    ``adjustable[i]`` False: no spacer above button i, it gets 0 and shifts nothing.
     """
     shift, out = 0, []
-    for delta in deltas:
+    for index, delta in enumerate(deltas):
+        if adjustable is not None and not adjustable[index]:
+            out.append(0)
+            continue
         needed = int(round(delta)) - shift
         out.append(needed)
         shift += needed
@@ -433,6 +437,8 @@ class _ColumnAligner(QObject if QObject is not None else object):
         try:
             if not self._page.isVisible():
                 return
+            if self._pairs:
+                _keys_follow_rows(self._pairs[0][0].parentWidget())
             rows = []
             for button, value in self._pairs:
                 if button.isHidden() or value.isHidden() or self._keys.indexOf(button) < 0:
@@ -448,7 +454,8 @@ class _ColumnAligner(QObject if QObject is not None else object):
                 return  # cannot be reached exactly: wait for the next resize, show or aligned pass
             from qgis.PyQt.QtWidgets import QSizePolicy
             changed = False
-            for (spacer, _), needed in zip(rows, spacer_adjustments([delta for _, delta in rows])):
+            adjustments = spacer_adjustments([delta for _, delta in rows], [spacer is not None for spacer, _ in rows])
+            for (spacer, _), needed in zip(rows, adjustments):
                 if spacer is None or needed == 0:
                     continue
                 current = spacer.sizeHint().height()
@@ -461,6 +468,29 @@ class _ColumnAligner(QObject if QObject is not None else object):
                 self._keys.invalidate()
         except RuntimeError:
             pass  # widgets deleted (plugin closing)
+
+
+def _keys_follow_rows(holder: Any) -> None:
+    """The key column follows the value rows and never sets the page height.
+
+    The aligner grows the fixed spacers of the key column up to the value rows; those rows
+    are spread by stretches over the page height. With the key column counting in the page's
+    minimum height, every alignment made the page taller (it sits in a resizable scroll area),
+    the stretches wider and the next alignment larger: rows ended up 4000 px apart (FILTERING
+    showed one row). With an ``Ignored`` vertical policy its height is the row's, set by the
+    value column alone. ``holder`` is the widget holding the key buttons (widget_filtering_keys).
+    An explicit minimum height (1 px) wins over the minimum size hint whatever the policy, which
+    the dimension managers reset: both are enforced at every alignment pass.
+    """
+    from qgis.PyQt.QtWidgets import QSizePolicy
+    if holder is None:
+        return
+    if holder.minimumHeight() != 1:
+        holder.setMinimumHeight(1)
+    policy = holder.sizePolicy()
+    if policy.verticalPolicy() != QSizePolicy.Policy.Ignored:
+        policy.setVerticalPolicy(QSizePolicy.Policy.Ignored)
+        holder.setSizePolicy(policy)
 
 
 def align_key_columns(dw: Any) -> bool:
