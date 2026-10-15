@@ -347,6 +347,13 @@ def s_vector_select():
     return lambda: bool(dock().get_current_features()[0]) and ready()
 
 
+def grab(name):
+    """FM_GRAB_DIR set: save the dock as <name>.png there (visual checks of the panel at stable steps)."""
+    folder = os.environ.get('FM_GRAB_DIR')
+    if folder:
+        dock().grab().save(os.path.join(folder, f"{name}.png"))
+
+
 def message_bar_texts():
     texts = []
     for item in iface.messageBar().items():
@@ -358,6 +365,7 @@ def message_bar_texts():
 
 
 def s_vector_filter():
+    grab('vector_source')
     STATE['cloud_source'] = layer('cloud').source() if layer('cloud') else ''
     features, expression = dock().get_current_features()
     print(f"   EXPLORING selection at filter time: {len(features or [])} feature(s), expression={expression!r}",
@@ -454,6 +462,7 @@ def s_raster_select():
 
 
 def s_raster_filter():
+    grab('raster_source')
     run_task('filter')
     return lambda: layer('zones').subsetString() != '' and tasks_idle()
 
@@ -497,6 +506,7 @@ def s_point_cloud_select():
 def s_point_cloud_filter():
     if not has_point_clouds():
         return None
+    grab('point_cloud_source')
     run_task('filter')
     return lambda: layer('zones').subsetString() != '' and tasks_idle()
 
