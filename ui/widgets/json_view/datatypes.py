@@ -6,6 +6,10 @@ from shutil import copyfile
 
 from qgis.PyQt import QtCore, QtGui, QtWidgets
 from qgis.PyQt.QtCore import QCoreApplication
+try:
+    from qgis.PyQt.QtGui import QAction
+except ImportError:  # QGIS < 3.34.2 (Qt5): QAction is in QtWidgets
+    from qgis.PyQt.QtWidgets import QAction
 from qgis.gui import QgsColorButton
 from . import themes
 
@@ -565,7 +569,7 @@ class UrlType(DataType):
         return False
 
     def actions(self, index):
-        explore = QtGui.QAction(
+        explore = QAction(
             QCoreApplication.translate("UrlType", "Explore ..."), None)
         explore.triggered.connect(
             partial(webbrowser.open, index.data(QtCore.Qt.ItemDataRole.DisplayRole)))
@@ -597,9 +601,9 @@ class FilepathType(DataType):
         return value_item
 
     def actions(self, index):
-        view = QtGui.QAction(
+        view = QAction(
             QCoreApplication.translate("FilepathType", "View"), None)
-        self.change = QtGui.QAction(
+        self.change = QAction(
             QCoreApplication.translate("FilepathType", "Change"), None)
         path = index.data(QtCore.Qt.ItemDataRole.DisplayRole)
         view.triggered.connect(partial(webbrowser.open, path))
@@ -657,9 +661,9 @@ class FilepathTypeImages(DataType):
         return value_item
 
     def actions(self, index):
-        view = QtGui.QAction(
+        view = QAction(
             QCoreApplication.translate("FilepathTypeImages", "View"), None)
-        self.change = QtGui.QAction(
+        self.change = QAction(
             QCoreApplication.translate("FilepathTypeImages", "Change"), None)
         path_view = index.data(QtCore.Qt.ItemDataRole.UserRole)
         path_change = os.path.normcase(os.path.join(PLUGIN_DIR, "icons"))

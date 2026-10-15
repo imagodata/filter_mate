@@ -7107,7 +7107,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def _setup_keyboard_shortcuts(self):
         """Setup keyboard shortcuts: F5=reload layers, Ctrl+Z=undo, Ctrl+Y=redo."""
-        from qgis.PyQt.QtGui import QKeySequence, QShortcut
+        from qgis.PyQt.QtGui import QKeySequence
+        try:
+            from qgis.PyQt.QtGui import QShortcut
+        except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
+            from qgis.PyQt.QtWidgets import QShortcut
         self._reload_shortcut = QShortcut(QKeySequence("F5"), self)
         self._reload_shortcut.activated.connect(self._on_reload_layers_shortcut)
         self._reload_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)

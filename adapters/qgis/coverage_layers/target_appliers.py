@@ -47,6 +47,7 @@ from ....core.domain.cross_filter import (
 from ....core.domain.filter_state import LayerSnapshot
 from ....core.domain.layer_kind import LayerKind
 from . import cache
+from .gdal_warp import gdal_warp, polygonal_wkt
 from .geometry_tools import make_valid, prepared_engine, target_matches, transform_geometry
 from .snapshots import registry, take_snapshot
 
@@ -76,19 +77,6 @@ def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, s
     if op == 'AND NOT':
         return make_valid(previous.difference(new))
     return new
-
-
-def _gdal_warp(destination: str, source: str, **options):
-    """gdal.Warp with exceptions scoped to the call (no global UseExceptions in a task thread)."""
-    from osgeo import gdal
-    manager = getattr(gdal, 'ExceptionMgr', None)
-    if manager is not None:
-        with manager(useExceptions=True):
-            return gdal.Warp(destination, source, **options)
-    dataset = gdal.Warp(destination, source, **options)
-    if dataset is None:
-        raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Warp failed')
-    return dataset
 
 
 def _simplified_for_cutline(geometry: QgsGeometry, tolerance: float, max_vertices: int = 20000) -> QgsGeometry:
@@ -124,7 +112,14 @@ class TargetJob:
         self.operator = operator
         self.before: LayerSnapshot = take_snapshot(layer, self.kind)
         self.outcome = CrossFilterOutcome(self.layer_id, self.kind, False)
+        self.outputs: List[str] = []  # cache files written, settled once applied
         self._started = 0.0
+
+    def _new_path(self, suffix: str) -> str:
+        """A cache file for this job, protected from the cache cleaner until the task is applied."""
+        path = cache.new_path(self.layer_name, suffix)
+        self.outputs.append(path)
+        return path
 
     # Attributes holding QGIS objects owned by Python (layer copies, feature
     # sources, exporters): released once the task is over, never left for the
@@ -310,7 +305,7 @@ class RasterTargetJob(TargetJob):
             geometry = QgsGeometry.fromRect(QgsRectangle(ext.xMinimum() - 2, ext.yMinimum() - 2, ext.xMinimum() - 1, ext.yMinimum() - 1))
         self._geometry_wkt = geometry.asWkt()
         cutline = _simplified_for_cutline(geometry, self._pixel * 0.5)
-        path = cache.new_path(self.layer_name, '.vrt')
+        path = self._new_path('.vrt')
         options = dict(format='VRT', cutlineWKT=cutline.asWkt(), cutlineSRS=self.crs.toWkt(), cropToCutline=False)
         if self._nodata and all(value is not None for value in self._nodata):
             options['dstNodata'] = ' '.join(repr(value) for value in self._nodata)
@@ -319,7 +314,7 @@ class RasterTargetJob(TargetJob):
         else:
             # Integer raster without NoData: an alpha band, never a clipped value.
             options['dstAlpha'] = True
-        dataset = _gdal_warp(path, self._base_source, **options)
+        dataset = gdal_warp(path, self._base_source, **options)
         dataset = None  # noqa: F841 - flush the VRT
         if is_canceled():
             self.outcome.message = 'canceled'
@@ -388,7 +383,7 @@ class PointCloudTargetJob(TargetJob):
         self._exporter = None
         if self._mode == 'exact':
             from . import pdal_cli
-            self._use_pdal = pdal_cli.is_available() and self._pdal_readable(self._base_source)
+            self._use_pdal = pdal_cli.supports_copc() and self._pdal_readable(self._base_source)
             if not self._use_pdal:
                 self._prepare_exporter()
 
@@ -410,7 +405,7 @@ class PointCloudTargetJob(TargetJob):
         self._base_layer = base  # keep alive while the task runs
         exporter = QgsPointCloudLayerExporter(base)
         exporter.setFormat(QgsPointCloudLayerExporter.ExportFormat.Las)
-        exporter.setFileName(cache.new_path(self.layer_name, '.laz'))
+        exporter.setFileName(self._new_path('.laz'))
         exporter.setAllAttributes()
         self._exporter = exporter
 
@@ -445,15 +440,17 @@ class PointCloudTargetJob(TargetJob):
 
     def _compute_pdal(self, geometry: QgsGeometry, is_canceled) -> None:
         from . import pdal_cli
-        path = cache.new_path(self.layer_name, '.copc.laz')
+        path = self._new_path('.copc.laz')
         reader = {"type": pdal_cli.reader_for(self._base_source), "filename": self._base_source}
         stages = [reader]
-        if geometry.isEmpty():
+        # filters.crop takes polygons only: make_valid / an intersection can add lines and points.
+        polygon = None if geometry.isEmpty() else polygonal_wkt(geometry.asWkt())
+        if polygon is None:
             stages.append({"type": "filters.head", "count": 0})
         else:
             if reader["type"] == 'readers.copc':
-                reader["polygon"] = geometry.asWkt()
-            stages.append({"type": "filters.crop", "polygon": geometry.asWkt()})
+                reader["polygon"] = polygon
+            stages.append({"type": "filters.crop", "polygon": polygon})
         stages.append({"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all",
                        "a_srs": self.crs.authid() or self.crs.toWkt()})
         ok, message = pdal_cli.run_pipeline(stages, is_canceled=is_canceled)

@@ -184,7 +184,10 @@ class QFieldCloudExtension(BaseExtension):
 
     def create_ui(self, toolbar: Any, menu_name: str) -> List[Any]:
         """Create QFieldCloud menu entries (button is in dockwidget)."""
-        from qgis.PyQt.QtGui import QAction
+        try:
+            from qgis.PyQt.QtGui import QAction
+        except ImportError:  # QGIS < 3.34.2 (Qt5): QAction is in QtWidgets
+            from qgis.PyQt.QtWidgets import QAction
 
         actions = []
         parent = self._iface.mainWindow()

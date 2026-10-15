@@ -110,7 +110,7 @@ class TestAppStaticGuards:
         handler = guarded[0].handlers[0]
         assert ast.unparse(handler.type) == "ImportError"
         fallbacks = {s.name for s in handler.body if isinstance(s, ast.FunctionDef)}
-        assert fallbacks == {"get_filterable_layer_types", "get_current_layer_combo_filters"}
+        assert fallbacks == imported  # every imported helper has a fallback
 
     def test_filter_usable_layers_fallback_uses_filterable_types(self):
         method = _method(_first_class(_parse(_APP)), "_filter_usable_layers")
@@ -148,7 +148,8 @@ class TestConfigurationManagerStaticGuards:
             if isinstance(node, ast.ImportFrom) and node.module == _CAPABILITY_MODULE and node.level == 3
         ]
         assert len(imports) == 1
-        assert {alias.name for alias in imports[0].names} == {"get_current_layer_combo_filters"}
+        assert {alias.name for alias in imports[0].names} == {"get_current_layer_combo_filters",
+                                                              "exclude_non_analysis_rasters"}
         guarded = [
             node for node in ast.walk(method) if isinstance(node, ast.Try)
             and any(isinstance(s, ast.ImportFrom) and s.module == _CAPABILITY_MODULE for s in node.body)

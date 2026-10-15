@@ -10,6 +10,10 @@ Author: FilterMate Team
 """
 
 from qgis.PyQt import QtGui, QtCore, QtWidgets
+try:
+    from qgis.PyQt.QtGui import QShortcut
+except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
+    from qgis.PyQt.QtWidgets import QShortcut
 from .view import JsonView
 from .model import JsonSortFilterProxyModel
 
@@ -109,11 +113,11 @@ class SearchableJsonView(QtWidgets.QWidget):
         self._search_input.returnPressed.connect(self._on_search_enter)
 
         # Keyboard shortcut for search
-        shortcut = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+F"), self)
+        shortcut = QShortcut(QtGui.QKeySequence("Ctrl+F"), self)
         shortcut.activated.connect(self._focus_search)
 
         # Escape to clear search
-        escape_shortcut = QtGui.QShortcut(QtGui.QKeySequence("Escape"), self._search_input)
+        escape_shortcut = QShortcut(QtGui.QKeySequence("Escape"), self._search_input)
         escape_shortcut.activated.connect(self._clear_search)
 
     def _apply_search_styling(self):

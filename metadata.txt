@@ -8,7 +8,7 @@ name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 supportsQt6=yes
-description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector data with lightning-fast performance on ANY data source. Full QGIS 4 / Qt6 support.
+description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector, raster and LiDAR point cloud data with lightning-fast performance on ANY data source. Full QGIS 4 / Qt6 support.
 version=4.9.2
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
@@ -19,7 +19,7 @@ about=🎯 FilterMate 4.9.2 - Your Swiss Army Knife for Spatial Data!
 
     🌟 WHY FILTERMATE?
     ━━━━━━━━━━━━━━━━━
-    ✓ Works with EVERYTHING: PostgreSQL, Spatialite, GeoPackage, Shapefiles, WFS...
+    ✓ Works with EVERYTHING: PostgreSQL, Spatialite, GeoPackage, Shapefiles, WFS, rasters (GeoTIFF, COG, VRT) and LiDAR point clouds (LAS, LAZ, COPC)...
     ✓ Lightning fast: 2-8× faster with 4 performance optimizers + smart caching
     ✓ Intuitive: Filter by clicking, drawing, or selecting - no SQL needed!
     ✓ Professional: Undo/Redo, Favorites, Dark Mode, 34 languages
@@ -27,11 +27,12 @@ about=🎯 FilterMate 4.9.2 - Your Swiss Army Knife for Spatial Data!
 
     🔥 KILLER FEATURES:
     ━━━━━━━━━━━━━━━━━━
+    🏔️ Rasters and LiDAR point clouds: select by value range, classes or point attributes, then filter layers of any kind with that selection (vector, raster and point cloud, in every direction)
     📍 Geometric filtering with buffer, intersection, containment...
     🔍 Smart entity search across any layer type
     ⭐ Save & share your favorite filter configurations with spatial context
     🤝 Publish favorites to git repos (private/team) with authcfg credentials
-    🌐 REST API to drive FilterMate from external tools (X-API-Key auth)
+    🌐 REST API to drive FilterMate from external tools (X-API-Key auth), Processing algorithms and models, qgis_process
     📦 One-click export to GeoPackage with embedded QGIS project (preserves group structure, styles & CRS)
     🎨 Beautiful UI that adapts to your QGIS theme
     ⚡ Filter chaining with dynamic buffer expressions
@@ -67,7 +68,7 @@ changelog=v4.9.2 (2026-09-14): GeoPackage layer empty (0 features) when re-filte
     v4.9.1 (2026-09-14): Filter refused on the first click and accepted on the second on PostgreSQL selections of 100 000 features or more (the materialized-view path called a facade method that does not exist) fixed; Python error after a project switch (RuntimeError on the deleted previous layer in the exploring and filtering controllers) fixed; QGIS access violation after a plugin reload followed by a project close fixed (the dock widget is removed and deleted on unload, no feature-picker gather outlives its layer); layer_change_validate / layer_change_reset timing lines.
 
 # Tags are comma separated with spaces allowed
-tags=python,filter,vector,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export
+tags=python,filter,vector,raster,point cloud,lidar,las,laz,copc,dem,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export
 
 homepage=https://imagodata.github.io/filter_mate/
 category=Plugins

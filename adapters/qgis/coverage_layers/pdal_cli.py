@@ -9,10 +9,12 @@ straight to COPC, height above a DTM (``filters.hag_dem``).
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from typing import Callable, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
@@ -75,12 +77,84 @@ def find_pdal() -> Optional[str]:
 
 
 def reset_cache() -> None:
-    global _cached
+    global _cached, _version_cached
     _cached = None
+    _version_cached = None
 
 
 def is_available() -> bool:
     return find_pdal() is not None
+
+
+# writers.copc, used by every FilterMate pipeline, came with PDAL 2.4
+# (Ubuntu 22.04 and the QGIS 3.22-3.34 Docker images ship 2.3).
+COPC_MIN_VERSION = (2, 4)
+# The version may be read on the main thread (first point cloud panel): warm_up() reads it earlier.
+VERSION_TIMEOUT = 5.0
+
+# (executable, version or None, error when it could not be run)
+_version_cached: Optional[Tuple[str, Optional[Tuple[int, int, int]], str]] = None
+
+
+def _subprocess_kwargs() -> dict:
+    return {'creationflags': _CREATE_NO_WINDOW} if sys.platform.startswith('win') else {}
+
+
+def _probe() -> Tuple[Optional[Tuple[int, int, int]], str]:
+    """``(version, error)`` of the pdal executable, read once per executable."""
+    global _version_cached
+    exe = find_pdal()
+    if not exe:
+        return None, ''
+    cached = _version_cached
+    if cached is not None and cached[0] == exe:
+        return cached[1], cached[2]
+    parsed, error = None, ''
+    try:
+        out = subprocess.run(  # nosec B603 - fixed argv, no shell
+            [exe, '--version'], capture_output=True, text=True, errors='replace', timeout=VERSION_TIMEOUT,
+            **_subprocess_kwargs()).stdout or ''
+        match = re.search(r'pdal\s+(\d+)\.(\d+)(?:\.(\d+))?', out, re.IGNORECASE)
+        if match:
+            parsed = (int(match.group(1)), int(match.group(2)), int(match.group(3) or 0))
+    except (OSError, subprocess.SubprocessError) as exc:  # cannot be launched, or hangs
+        error = str(exc) or type(exc).__name__
+    _version_cached = (exe, parsed, error)
+    logger.debug(f"[FM5] pdal version: {parsed} {error}")
+    return parsed, error
+
+
+def version() -> Optional[Tuple[int, int, int]]:
+    """Version of the pdal executable, or None when there is none or it cannot be read."""
+    return _probe()[0]
+
+
+def warm_up() -> Optional[threading.Thread]:
+    """Read the version in a background thread, so that the panel never waits for pdal; None when known."""
+    exe = find_pdal()
+    cached = _version_cached
+    if not exe or (cached is not None and cached[0] == exe):
+        return None
+    thread = threading.Thread(target=_probe, name='filtermate-pdal-version', daemon=True)
+    thread.start()
+    return thread
+
+
+def copc_unavailable_reason() -> str:
+    """Why pdal cannot write COPC ('' when it can). A version that cannot be parsed is trusted."""
+    if not is_available():
+        return 'pdal not found'
+    found, error = _probe()
+    if error:
+        return f"pdal could not be run: {error}"
+    if found is not None and found[:2] < COPC_MIN_VERSION:
+        return f"pdal {'.'.join(map(str, found))} has no writers.copc (PDAL 2.4 or later needed)"
+    return ''
+
+
+def supports_copc() -> bool:
+    """True when the pdal executable can run FilterMate pipelines (they all end with writers.copc)."""
+    return copc_unavailable_reason() == ''
 
 
 def reader_for(path: str) -> str:
@@ -113,12 +187,9 @@ def run_pipeline(stages: list, timeout: float = 3600.0, is_canceled: Optional[Ca
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as handle:
             json.dump({"pipeline": stages}, handle)
-        kwargs = {}
-        if sys.platform.startswith('win'):
-            kwargs['creationflags'] = _CREATE_NO_WINDOW
         process = subprocess.Popen(  # nosec B603 - fixed argv, no shell
             [exe, 'pipeline', pipeline_path],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **kwargs)
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **_subprocess_kwargs())
         elapsed = 0.0
         while True:
             try:

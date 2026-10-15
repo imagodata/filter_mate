@@ -172,10 +172,11 @@ class PointCloudExportJob:
             return ExportResult(False, path, error)
         if self.fmt == 'COPC':
             from . import pdal_cli
-            if not pdal_cli.is_available():
+            reason = pdal_cli.copc_unavailable_reason()
+            if reason:
                 fallback = self.target.replace('.staging.laz', '.laz')
                 shutil.move(self.target, fallback)
-                return ExportResult(True, fallback, 'pdal not found: LAZ written instead of COPC')
+                return ExportResult(True, fallback, f'{reason}: LAZ written instead of COPC')
             ok, message = pdal_cli.run_pipeline([
                 {"type": "readers.las", "filename": self.target},
                 {"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all"},

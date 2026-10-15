@@ -69,7 +69,12 @@ class CrossFilterTask(QgsTask):
 
     def apply_results(self, result: bool) -> None:
         """Apply the computed results on the main thread (also used by synchronous runs)."""
+        from . import cache
         project = QgsProject.instance()
+        if result and cache.is_closed():
+            # The plugin unloaded while the task ran: its files are gone.
+            result = False
+            self.error = 'FilterMate was unloaded'
         if result:
             source_layer = project.mapLayer(self.source_job.layer_id)
             if source_layer is not None:
@@ -96,6 +101,7 @@ class CrossFilterTask(QgsTask):
                 logger.info(f"⏱ [FM5] target {job.kind.value} '{job.layer_name}': success={job.outcome.success} "
                             f"kept={job.outcome.kept_count} {job.outcome.elapsed:.2f}s {job.outcome.message}")
         self.outcomes = [job.outcome for job in self.target_jobs]
+        cache.settle(path for job in self.target_jobs for path in getattr(job, 'outputs', ()))
         for job in [self.source_job] + list(self.target_jobs):
             release = getattr(job, 'release', None)
             if release is not None:

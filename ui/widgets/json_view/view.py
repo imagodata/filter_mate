@@ -1,4 +1,8 @@
 from qgis.PyQt import QtGui, QtCore, QtWidgets
+try:
+    from qgis.PyQt.QtGui import QAction
+except ImportError:  # QGIS < 3.34.2 (Qt5): QAction is in QtWidgets
+    from qgis.PyQt.QtWidgets import QAction
 from . import delegate
 from . import themes
 from .datatypes import TypeRole
@@ -316,7 +320,7 @@ class JsonView(QtWidgets.QTreeView):
             qactions = []
             for action in actions:
                 if isinstance(action, str):
-                    qaction = QtGui.QAction(action, None)
+                    qaction = QAction(action, None)
                     qactions.append(qaction)
                 else:
                     qactions.append(action)

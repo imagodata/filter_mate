@@ -42,6 +42,9 @@ class HeightAboveGroundTask(QgsTask):
 
     def run(self) -> bool:
         started = time.perf_counter()
+        self.message = pdal_cli.copc_unavailable_reason()  # the panel gate may be stale: the pipeline ends with writers.copc
+        if self.message:
+            return False
         try:
             reader = pdal_cli.reader_for(self.before.base_source)
         except ValueError as exc:
@@ -58,7 +61,9 @@ class HeightAboveGroundTask(QgsTask):
         return ok
 
     def finished(self, result: bool) -> None:
-        if not result:
+        cache.settle([getattr(self, 'output', '')])
+        if not result or self.isCanceled() or cache.is_closed():
+            # Canceled or plugin unloaded: never swap the source of the layer.
             self.done.emit(False, self.message or 'canceled')
             return
         from qgis.core import QgsProject

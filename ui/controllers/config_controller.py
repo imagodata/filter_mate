@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, List
 import logging
 import json
 
-from qgis.PyQt.QtCore import pyqtSignal, Qt
+from qgis.PyQt.QtCore import pyqtSignal, Qt, QTimer
 
 from .base_controller import BaseController
 
@@ -180,6 +180,9 @@ class ConfigController(BaseController):
             if 'LANGUAGE' in items_keys_values_path:
                 return
 
+            # Compared after the save: the tree shows translated section names
+            layer_kinds_before = self._layer_kind_flags()
+
             # Apply the change handler
             changes_summary: List[str] = []
 
@@ -194,6 +197,7 @@ class ConfigController(BaseController):
 
             # Save immediately
             self._save_configuration()
+            self._apply_layer_kinds_change(layer_kinds_before, changes_summary)
 
             if changes_summary:
                 logger.info(f"Applied live: {', '.join(changes_summary)}")
@@ -206,6 +210,29 @@ class ConfigController(BaseController):
 
         except Exception as e:
             logger.error(f"Error applying configuration change: {e}")
+
+    # === Layer kinds (raster / point cloud) ===
+
+    @staticmethod
+    def _layer_kind_flags() -> Optional[tuple]:
+        """``(point clouds, rasters)`` usable now (option on and QGIS able to filter them); None when unreadable."""
+        try:
+            from ...adapters.qgis.point_cloud_capability import get_point_cloud_layer_type, get_raster_layer_type
+            return get_point_cloud_layer_type() is not None, get_raster_layer_type() is not None
+        except Exception as e:
+            logger.debug(f"Layer kind flags unreadable: {e}")
+            return None
+
+    def _apply_layer_kinds_change(self, before: Optional[tuple], changes_summary: List[str]) -> None:
+        """APP.OPTIONS.POINT_CLOUD / RASTER ``enabled`` switched: register or unregister those layers
+        (FilterMateApp.apply_layer_kind_options), once the editor has committed the value."""
+        after = self._layer_kind_flags()
+        if before is None or after is None or after == before:
+            return
+        apply_options = getattr(getattr(self.dockwidget, 'app', None), 'apply_layer_kind_options', None)
+        if callable(apply_options):
+            QTimer.singleShot(0, apply_options)
+            changes_summary.append(f"layer kinds (point clouds={after[0]}, rasters={after[1]})")
 
     # === Immediate (Live Preview) Changes ===
 
