@@ -472,17 +472,33 @@ class TestManageProjectLayers:
         assert task.manage_project_layers() is True
         assert task.project_layers == {}
 
-    def test_remove_layers_leaves_ids_from_qgis_alone(self, point_cloud_enabled):
-        """layersWillBeRemoved sends ids: kept as before (the shared PROJECT_LAYERS dict must be copied
-        before they can be pruned, see the comment in manage_project_layers)."""
+    def test_remove_layers_accepts_ids_from_qgis(self, point_cloud_enabled):
+        """QGIS layersWillBeRemoved sends ids: the layer is unregistered (no string ever matched the
+        former isinstance check, so removed layers stayed registered since January 2026)."""
         task = _task()
         task.task_action = "remove_layers"
         task.project_layers["pc-1"] = {"infos": {"layer_geometry_type": POINT_CLOUD_GEOMETRY_TYPE, "layer_name": "nuage"}}
-        task.layers = ["pc-1"]
+        task.project_layers["vec-1"] = {"infos": {"layer_geometry_type": "GeometryType.Polygon", "layer_name": "communes"}}
+        task.layers = ["pc-1", "unknown-id"]
 
         assert task.manage_project_layers() is True
-        assert list(task.project_layers) == ["pc-1"]
+        assert list(task.project_layers) == ["vec-1"]
 
+    def test_remove_layers_works_on_a_copy(self, point_cloud_enabled):
+        """The worker must not delete from the shared PROJECT_LAYERS: LayerTaskCompletionHandler finds the
+        removed layers by comparing the dock's dict with the result, then deletes their properties and
+        history; with the shared dict already pruned it found nothing."""
+        task = _task()
+        shared = {"pc-1": {"infos": {"layer_geometry_type": POINT_CLOUD_GEOMETRY_TYPE, "layer_name": "nuage"}},
+                  "vec-1": {"infos": {"layer_geometry_type": "GeometryType.Polygon", "layer_name": "communes"}}}
+        task.task_action = "remove_layers"
+        task.task_parameters = {"task": {
+            "layers": ["pc-1"], "project_layers": shared, "reset_all_layers_variables_flag": False,
+            "config_data": {}, "db_file_path": "", "project_uuid": "p"}}
+
+        assert task.run() is True
+        assert set(shared) == {"pc-1", "vec-1"}
+        assert set(task.project_layers) == {"vec-1"}
 
 @pytest.mark.unit
 class TestRemoveProjectLayer:
