@@ -865,11 +865,19 @@ class FilterResultHandler:
             return
 
         saved_layer_id = current_layer_id_before_filter
+        # One generation per window: a timer of an earlier window (or of a window ended early by
+        # a user pick) does nothing, not even during the next task.
+        generation = getattr(dockwidget, '_combo_protection_gen', 0) + 1
+        dockwidget._combo_protection_gen = generation
+        protection_started = time.perf_counter()
+
+        def window_current():
+            return getattr(dockwidget, '_combo_protection_gen', None) == generation
 
         def restore_combobox_if_needed():
             """Check and restore combobox to saved layer if it was changed."""
             try:
-                if not dockwidget:
+                if not dockwidget or not window_current():
                     return
                 saved_layer = QgsProject.instance().mapLayer(saved_layer_id)
                 if saved_layer and saved_layer.isValid():
@@ -893,10 +901,16 @@ class FilterResultHandler:
                 logger.debug(f"v3.0.19: Error in delayed combobox check: {e}")
 
         def unblock_and_reconnect_combobox():
-            """Unblock combobox signals and reconnect handler AFTER protection window."""
+            """Unblock combobox signals and reconnect handler AFTER protection window.
+
+            Also called at once when the user picks a layer in the window
+            (ConfigurationManager._stamp_user_layer_picks via ``_end_post_filter_window``).
+            """
             try:
-                if not dockwidget:
+                if not dockwidget or not window_current():
                     return
+                dockwidget._combo_protection_gen = generation + 1  # this window is over
+                dockwidget._end_post_filter_window = None
                 # Unblock Qt internal signals
                 dockwidget.comboBox_filtering_current_layer.blockSignals(False)
                 # Reconnect our handler
@@ -910,6 +924,8 @@ class FilterResultHandler:
                 # v3.0.19: CRITICAL FIX - Reset _filtering_in_progress HERE, not earlier
                 dockwidget._filtering_in_progress = False
 
+                apply_user_pick()
+
                 logger.debug("v3.0.19: ✅ Unblocked combobox, reconnected handler, and reset filtering flag after protection")
                 QgsMessageLog.logMessage(
                     "v3.0.19: ✅ Combobox protection ENDED - signals reconnected, filtering flag reset",
@@ -917,6 +933,32 @@ class FilterResultHandler:
                 )
             except Exception as e:
                 logger.error(f"v3.0.19: Error reconnecting combobox: {e}")
+
+        def apply_user_pick():
+            """The layer the user picked in this window (signals blocked: never processed) becomes current."""
+            try:
+                picked_at, picked_id = getattr(dockwidget, '_user_layer_pick', (0.0, None))
+                if picked_at < protection_started or not picked_id:
+                    return
+                app = getattr(dockwidget, 'app', None)
+                if app is not None and (getattr(app, '_initializing_project', False)
+                                        or getattr(app, '_loading_new_project', False)):
+                    return
+                picked = QgsProject.instance().mapLayer(picked_id)
+                current = getattr(dockwidget, 'current_layer', None)
+                if picked is None or picked_id not in getattr(dockwidget, 'PROJECT_LAYERS', {}):
+                    return
+                if current is not None and current.id() == picked_id:
+                    return
+                logger.info(f"Applying the layer picked during the post-filter window: '{picked.name()}'")
+                if dockwidget.comboBox_filtering_current_layer.currentLayer() is not picked:
+                    dockwidget.comboBox_filtering_current_layer.setLayer(picked)  # signals connected: applies it
+                else:
+                    dockwidget.current_layer_changed(picked, manual_change=True)
+            except (RuntimeError, AttributeError) as e:
+                logger.debug(f"Layer picked during the post-filter window not applied: {e}")
+
+        dockwidget._end_post_filter_window = unblock_and_reconnect_combobox
 
         # Schedule checks during protection window (signals still blocked)
         # v4.1.3: Reduced delays for faster response time

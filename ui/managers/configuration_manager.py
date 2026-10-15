@@ -910,6 +910,7 @@ class ConfigurationManager(QObject):
             # Fallback to VectorLayer only
             d.comboBox_filtering_current_layer.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
         self._enable_layer_search(d.comboBox_filtering_current_layer)
+        self._stamp_user_layer_picks(d)
 
         # Apply themed icon to centroids checkbox
         try:
@@ -964,6 +965,67 @@ class ConfigurationManager(QObject):
         # sibling QgsMapLayerComboBox row. Only the size policy is set here.
         d.checkableComboBoxLayer_filtering_layers_to_filter.setSizePolicy(
             d.comboBox_filtering_current_layer.sizePolicy())
+
+    @staticmethod
+    def _stamp_user_layer_picks(d) -> None:
+        """Record the layers the user picks in the current-layer combo box: ``d._user_layer_pick``
+        = (time.perf_counter(), layer id), set only when the layer really changed after a user input.
+
+        After a filter, undo or unfilter the dock blocks the combo's signals and moves it back to the
+        source layer for 1.5-2 s (async layer changes used to move it). A pick made in that window
+        ends it at once (``d._end_post_filter_window``, set by FilterResultHandler) and the undo /
+        redo checks leave it alone. An event filter on the combo, its popup and the search popup,
+        because blockSignals silences ``activated`` too and the completer bypasses the combo.
+        """
+        import time
+        import weakref
+        from qgis.PyQt.QtCore import QEvent, QObject, QTimer
+        combo = d.comboBox_filtering_current_layer
+        if getattr(combo, '_fm_pick_filter', None) is not None:
+            return
+        dock_ref = weakref.ref(d)
+        inputs = (QEvent.Type.MouseButtonRelease, QEvent.Type.KeyPress, QEvent.Type.Wheel)
+
+        def layer_id():
+            layer = combo.currentLayer()
+            return layer.id() if layer is not None else None
+
+        def after_input(before):
+            try:
+                dock = dock_ref()
+                now = layer_id()
+                if dock is None or now is None or now == before:
+                    return  # no change: a click in the search field, Escape, Home / End...
+                dock._user_layer_pick = (time.perf_counter(), now)
+                end_window = getattr(dock, '_end_post_filter_window', None)
+                if callable(end_window):
+                    end_window()
+            except RuntimeError:
+                pass  # combo deleted (plugin closing)
+
+        class _UserLayerPick(QObject):
+            def eventFilter(self, watched, event):  # noqa: N802 - Qt override
+                try:
+                    if event.type() in inputs:
+                        before = layer_id()
+                        QTimer.singleShot(0, lambda: after_input(before))
+                except RuntimeError:
+                    pass
+                return False
+
+        try:
+            pick_filter = _UserLayerPick(combo)
+            watched = [combo, combo.view(), combo.view().viewport()]
+            if combo.lineEdit() is not None:
+                watched.append(combo.lineEdit())
+            completer = combo.completer()
+            if completer is not None and completer.popup() is not None:
+                watched += [completer.popup(), completer.popup().viewport()]
+            for widget in watched:
+                widget.installEventFilter(pick_filter)
+            combo._fm_pick_filter = pick_filter
+        except (AttributeError, TypeError, RuntimeError) as e:
+            logger.debug(f"User layer picks not recorded: {e}")
 
     def setup_exporting_tab_widgets(self):
         """v4.0 Sprint 16: Configure widgets for Exporting tab (migrated from dockwidget)."""

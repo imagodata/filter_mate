@@ -404,7 +404,32 @@ def s_vector_check():
 def s_vector_undo_check():
     check('undo puts the raster target back', os.path.normpath(layer('dem').source()) == os.path.normpath(M['dem']),
           layer('dem').source())
+    # Right after undo, the user picks another layer: for 1.5-2 s the dock moves the combo back to the source
+    # layer when an async change moved it, never against the user (the pick ends that window at once).
+    # A real key press (the combo's signals are blocked in that window, `activated` would not even fire).
+    from qgis.PyQt.QtCore import QEvent
+    from qgis.PyQt.QtGui import QKeyEvent
+    from qgis.PyQt.QtWidgets import QApplication
+    combo = dock().comboBox_filtering_current_layer
+    before = combo.currentLayer()
+    STATE['blocked_at_pick'] = combo.signalsBlocked()  # True: the post-filter window path is exercised
+    for key in (Qt.Key.Key_Down, Qt.Key.Key_Up):
+        QApplication.sendEvent(combo, QKeyEvent(QEvent.Type.KeyPress, key, Qt.KeyboardModifier.NoModifier))
+        if combo.currentLayer() is not None and combo.currentLayer() is not before:
+            break
+    STATE['picked'] = combo.currentLayer().name() if combo.currentLayer() else None
+    STATE['picked_from'] = before.name() if before else None
     return settled()
+
+
+def s_user_pick_after_undo_check():
+    current = dock().comboBox_filtering_current_layer.currentLayer()
+    dock_layer = getattr(dock(), 'current_layer', None)
+    check('a layer picked right after undo is kept and applied',
+          STATE['picked'] not in (None, STATE['picked_from']) and current is not None and current.name() == STATE['picked']
+          and dock_layer is not None and dock_layer.name() == STATE['picked'],
+          f"picked={STATE['picked']} (from {STATE['picked_from']}) combo={current.name() if current else None} "
+          f"dock={dock_layer.name() if dock_layer else None} signals blocked at the pick={STATE['blocked_at_pick']}")
 
 
 def s_raster_source():
@@ -551,6 +576,7 @@ def s_finish():
 
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_layout_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
+         s_user_pick_after_undo_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,
          s_point_cloud_source, s_point_cloud_select, s_point_cloud_filter, s_point_cloud_check, s_point_cloud_settled,
          s_back_to_vector, s_rasters_off, s_rasters_off_check, s_rasters_on_check, s_finish]
