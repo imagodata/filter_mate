@@ -17,12 +17,11 @@ Design rules:
 - stderr is captured and returned verbatim — operators paste it into bug
   reports.
 - Credentials are injected via ``http.extraHeader`` so they never land
-  in process argv. Two sources are supported, the first one wins:
-  * ``authcfg_id`` — resolved at exec time through ``QgsAuthManager``,
-    which decrypts the stored Basic/PAT credential into an
-    ``Authorization:`` header. The plaintext never touches config.json.
-  * ``auth_header`` — legacy plaintext fallback for pre-migration
-    configs (deprecated).
+  in process argv. The credential comes from ``authcfg_id`` only, resolved
+  at exec time through ``QgsAuthManager``, which decrypts the stored
+  Basic/PAT credential into an ``Authorization:`` header. The plaintext
+  never touches config.json (the legacy plaintext ``auth_header`` was
+  removed in FilterMate 5.0, audit EXT-6).
 """
 
 from __future__ import annotations
@@ -178,9 +177,8 @@ class GitClient:
     that already exist (everything else). Construct one per repo.
     """
     cwd: str
-    auth_header: Optional[str] = None
-    # Preferred over auth_header when both are set. Resolved lazily via
-    # QgsAuthManager — keeps credentials encrypted at rest in QGIS' keystore.
+    # Resolved lazily via QgsAuthManager — keeps credentials encrypted at
+    # rest in QGIS' keystore.
     authcfg_id: Optional[str] = None
     git_binary: str = "git"
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS
@@ -194,20 +192,20 @@ class GitClient:
     def _resolve_auth_header(self) -> Optional[str]:
         """Return the Authorization header value to inject, or None.
 
-        Priority: ``authcfg_id`` (decrypted via QgsAuthManager) wins over
-        the legacy ``auth_header`` field. If the QGIS auth manager is not
-        importable (standalone tests, headless harness without QGIS) the
-        method silently falls back to ``auth_header``.
+        The header comes from ``authcfg_id`` (decrypted via QgsAuthManager).
+        Without it, or when it cannot be resolved (QGIS auth manager not
+        importable, entry missing, master password refused), git runs
+        unauthenticated.
         """
-        if self.authcfg_id:
-            header = _resolve_authcfg_header(self.authcfg_id)
-            if header:
-                return header
+        if not self.authcfg_id:
+            return None
+        header = _resolve_authcfg_header(self.authcfg_id)
+        if not header:
             logger.warning(
                 "authcfg_id %r could not be resolved to a credential — "
-                "falling back to auth_header (if any).", self.authcfg_id,
+                "running git unauthenticated.", self.authcfg_id,
             )
-        return self.auth_header or None
+        return header or None
 
     # ------------------------------------------------------------------
     # Low-level run

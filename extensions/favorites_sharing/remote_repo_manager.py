@@ -26,17 +26,15 @@ from .git_resolver import GitResolution, resolve_for_extension
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
 
-# Deadline for dropping read-side support of the legacy plaintext
-# ``auth_header`` field on RemoteRepo. After this version we will raise
-# a config-load error instead of silently migrating, so users have a
-# hard prompt to move to ``authcfg_id``. Bump conservatively when
-# planning the next major release.
-LEGACY_AUTH_HEADER_DEADLINE = "5.0.0"
+# The plaintext ``auth_header`` of FilterMate 4.x repo entries is refused
+# since 5.0.0 (audit EXT-6): the token is never used, an error tells the user
+# to move it to the QGIS Authentication Manager (``authcfg_id``), and the
+# next save removes it from config.json. The repo entry itself is kept.
+PLAINTEXT_AUTH_REMOVED_IN = "5.0.0"
 
-# Repos already warned about a legacy plaintext auth_header. Re-parsing the
-# same config (e.g. on every save_repos round-trip) would otherwise spam the
-# log with one entry per read. Cleared by save when the legacy field is dropped.
-_LEGACY_AUTH_WARNED: set = set()
+# Repos already reported. Re-parsing the same config (e.g. on every
+# save_repos round-trip) would otherwise log one error per read.
+_PLAINTEXT_AUTH_REPORTED: set = set()
 
 
 def _profile_repos_root() -> str:
@@ -92,13 +90,10 @@ class RepoStatus(Enum):
 class RemoteRepo:
     """One configured publish target (validated entry).
 
-    Authentication is preferably stored as ``authcfg_id`` — a reference
-    to a QGIS Auth Manager entry that ships an encrypted PAT/Basic
-    credential. The legacy ``auth_header`` field still works (for
-    config files that pre-date the migration) but logs a deprecation
-    warning on read; new entries should leave it empty. Read-side
-    support is scheduled for removal in
-    ``LEGACY_AUTH_HEADER_DEADLINE`` (FilterMate 5.0.0).
+    Authentication is stored as ``authcfg_id`` only — a reference to a
+    QGIS Auth Manager entry that ships an encrypted PAT/Basic credential.
+    The plaintext ``auth_header`` of 4.x entries is refused since
+    FilterMate 5.0.0 (see ``from_config_entry``).
     """
 
     name: str
@@ -107,11 +102,8 @@ class RemoteRepo:
     local_clone: str = ""
     target_collection: str = ""
     is_default: bool = False
-    # Preferred — references an entry in QgsAuthManager. Encrypted at rest.
+    # References an entry in QgsAuthManager. Encrypted at rest.
     authcfg_id: str = ""
-    # DEPRECATED — plaintext header. Read-only fallback for legacy configs.
-    # Will be rejected in FilterMate 5.0.0 (see LEGACY_AUTH_HEADER_DEADLINE).
-    auth_header: str = ""
     # Forward-compatible catch-all for unknown fields
     extra: Dict[str, Any] = field(default_factory=dict)
 
@@ -234,15 +226,17 @@ class RemoteRepo:
         }
         extra = {k: v for k, v in entry.items() if k not in known}
 
-        auth_header = str(entry.get("auth_header") or "").strip()
-        if auth_header and name not in _LEGACY_AUTH_WARNED:
-            logger.warning(
-                "Repo %r uses legacy plaintext auth_header — migrate to "
-                "authcfg_id (Manage Repos → Edit → Authentication). "
-                "Support will be removed in FilterMate %s.",
-                name, LEGACY_AUTH_HEADER_DEADLINE,
+        # "auth_header" is a known key: never kept in ``extra``, so the next
+        # save drops the plaintext token from config.json.
+        if str(entry.get("auth_header") or "").strip() and name not in _PLAINTEXT_AUTH_REPORTED:
+            logger.error(
+                "Repo %r: the plaintext auth_header in config.json is refused since "
+                "FilterMate %s and is not used. Store the token in the QGIS "
+                "Authentication Manager and select it in Manage Repos → Edit → "
+                "Authentication; the next save removes it from config.json.",
+                name, PLAINTEXT_AUTH_REMOVED_IN,
             )
-            _LEGACY_AUTH_WARNED.add(name)
+            _PLAINTEXT_AUTH_REPORTED.add(name)
 
         return cls(
             name=name,
@@ -252,7 +246,6 @@ class RemoteRepo:
             target_collection=str(entry.get("target_collection") or "").strip(),
             is_default=bool(entry.get("is_default") or False),
             authcfg_id=str(entry.get("authcfg_id") or "").strip(),
-            auth_header=auth_header,
             extra=extra,
         )
 
@@ -406,9 +399,8 @@ class RemoteRepoManager:
     def _serialize_repo(repo: RemoteRepo) -> Dict[str, Any]:
         """Turn a RemoteRepo back into a config-shaped dict.
 
-        Drops empty fields and the deprecated ``auth_header`` whenever
-        ``authcfg_id`` is set — the dialog migrates legacy entries this
-        way without forcing a separate UI step.
+        Drops empty fields; a plaintext ``auth_header`` is never written
+        (refused since FilterMate 5.0.0).
         """
         entry: Dict[str, Any] = {"name": repo.name}
         for key in ("git_url", "branch", "local_clone",
@@ -418,9 +410,6 @@ class RemoteRepoManager:
                 entry[key] = val
         if repo.is_default:
             entry["is_default"] = True
-        # Keep auth_header only when nothing has migrated yet
-        if repo.auth_header and not repo.authcfg_id:
-            entry["auth_header"] = repo.auth_header
         # Round-trip unknown forward-compatibility fields
         if repo.extra:
             for k, v in repo.extra.items():
@@ -459,7 +448,6 @@ class RemoteRepoManager:
 
         client = GitClient(
             cwd=repo.expanded_local_clone or os.getcwd(),
-            auth_header=repo.auth_header or None,
             authcfg_id=repo.authcfg_id or None,
             git_binary=self._git_binary_or_default(),
             timeout_seconds=timeout,
@@ -506,7 +494,6 @@ class RemoteRepoManager:
 
         client = GitClient(
             cwd=repo.expanded_local_clone,
-            auth_header=repo.auth_header or None,
             authcfg_id=repo.authcfg_id or None,
             git_binary=self._git_binary_or_default(),
         )
@@ -589,7 +576,6 @@ class RemoteRepoManager:
         # Step 3 — git add / commit / push
         client = GitClient(
             cwd=repo.expanded_local_clone,
-            auth_header=repo.auth_header or None,
             authcfg_id=repo.authcfg_id or None,
             git_binary=self._git_binary_or_default(),
         )

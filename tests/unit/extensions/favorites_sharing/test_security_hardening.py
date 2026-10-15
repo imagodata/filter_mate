@@ -123,11 +123,11 @@ def test_auth_header_newline_is_stripped(tmp_path):
         captured["cmd"] = list(cmd)
         return _FakeProc()
 
-    client = GitClient(
-        cwd=str(tmp_path),
-        auth_header="Bearer token\n[remote \"x\"]\nurl=evil",
-    )
-    with patch("extensions.favorites_sharing.git_client.subprocess.run", _fake_run):
+    # The header comes from the QGIS Auth Manager entry (authcfg_id): a poisoned stored credential.
+    client = GitClient(cwd=str(tmp_path), authcfg_id="qg1xy7w")
+    with patch("extensions.favorites_sharing.git_client._resolve_authcfg_header",
+               lambda authcfg_id: "Bearer token\n[remote \"x\"]\nurl=evil"), \
+            patch("extensions.favorites_sharing.git_client.subprocess.run", _fake_run):
         client.commit("msg")
 
     cmd = captured["cmd"]

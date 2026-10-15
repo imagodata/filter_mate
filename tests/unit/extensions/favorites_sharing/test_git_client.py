@@ -188,12 +188,13 @@ class TestGitClient:
             return orig_run(cmd, **kwargs)
 
         monkeypatch.setattr(subprocess, "run", spy)
+        # The credential comes from the QGIS Auth Manager (authcfg_id), resolved at exec time.
+        import extensions.favorites_sharing.git_client as git_client_module
+        monkeypatch.setattr(git_client_module, "_resolve_authcfg_header",
+                            lambda authcfg_id: "Bearer SECRET-TOKEN-123")
 
         dest = tmp_path / "clone"
-        client = GitClient(
-            cwd=str(dest),
-            auth_header="Bearer SECRET-TOKEN-123",
-        )
+        client = GitClient(cwd=str(dest), authcfg_id="qg1xy7w")
         client.clone(str(seeded_remote), branch="main")
 
         # The token should appear in the -c http.extraHeader= slot, not
@@ -272,13 +273,13 @@ class TestSecretScrubbing:
 
 
 # ---------------------------------------------------------------------------
-# authcfg_id resolution — preferred over plaintext auth_header
+# authcfg_id resolution — the only credential source since FilterMate 5.0
 # ---------------------------------------------------------------------------
 
 
 class TestAuthcfgResolution:
-    """``authcfg_id`` should win over ``auth_header`` when both are set,
-    and gracefully fall back when QgsAuthManager is not available."""
+    """``authcfg_id`` is the only credential source (the plaintext auth_header
+    was removed in 5.0, audit EXT-6); without QgsAuthManager git runs anonymous."""
 
     def test_resolve_returns_none_without_qgis(self, monkeypatch):
         """Standalone tests have no qgis.core importable — must not crash."""
@@ -296,24 +297,21 @@ class TestAuthcfgResolution:
         from extensions.favorites_sharing.git_client import _resolve_authcfg_header
         assert _resolve_authcfg_header("anything") is None
 
-    def test_falls_back_to_plaintext_when_authcfg_unresolvable(
-        self, tmp_path, monkeypatch,
-    ):
-        """When authcfg_id can't be resolved (no QGIS), GitClient still
-        uses the legacy auth_header — preserves BC during migration."""
+    def test_unresolvable_authcfg_runs_unauthenticated(self, tmp_path):
+        """No QGIS in the test harness: authcfg returns None and nothing else is used."""
         from extensions.favorites_sharing.git_client import GitClient
 
-        client = GitClient(
-            cwd=str(tmp_path),
-            authcfg_id="qg1xy7w",
-            auth_header="Bearer LEGACY-FALLBACK",
-        )
-        # No QGIS in the test harness, so authcfg returns None and we fall
-        # back to the plaintext.
-        assert client._resolve_auth_header() == "Bearer LEGACY-FALLBACK"
+        client = GitClient(cwd=str(tmp_path), authcfg_id="qg1xy7w")
+        assert client._resolve_auth_header() is None
+
+    def test_plaintext_auth_header_is_gone(self, tmp_path):
+        from extensions.favorites_sharing.git_client import GitClient
+
+        with pytest.raises(TypeError):
+            GitClient(cwd=str(tmp_path), auth_header="Bearer LEGACY")
 
     def test_no_credentials_at_all_returns_none(self, tmp_path):
-        """No authcfg_id, no auth_header → None (anonymous git)."""
+        """No authcfg_id → None (anonymous git)."""
         from extensions.favorites_sharing.git_client import GitClient
 
         client = GitClient(cwd=str(tmp_path))

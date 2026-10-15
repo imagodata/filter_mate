@@ -173,8 +173,8 @@ class FavoritesSharingExtension(BaseExtension):
                     "List of git-backed collection repos that can be "
                     "selected as publish targets. Each entry: "
                     "{name, git_url, branch, local_clone, "
-                    "target_collection, is_default?, authcfg_id?, "
-                    "auth_header?}. local_clone is resolved under the "
+                    "target_collection, is_default?, authcfg_id?}. "
+                    "local_clone is resolved under the "
                     "QGIS roaming profile dir by default: an empty value "
                     "maps to [profile]/FilterMate/repos/<name>; a "
                     "relative path maps to [profile]/FilterMate/repos/"
@@ -187,9 +187,9 @@ class FavoritesSharingExtension(BaseExtension):
                     "exists, FilterMate writes the bundle locally and "
                     "leaves the push to the user (fallback A: SMB mount "
                     "/ external sync). authcfg_id references a QGIS Auth "
-                    "Manager entry — preferred over auth_header (which "
-                    "stores the token in plain text and is deprecated). "
-                    "Use the 'Manage Repos…' dialog to create entries."
+                    "Manager entry (the plaintext auth_header of 4.x is "
+                    "refused since 5.0). Use the 'Manage Repos…' dialog "
+                    "to create entries."
                 ),
             },
             "git_binary_path": {
