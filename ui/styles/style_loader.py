@@ -124,6 +124,9 @@ class StyleLoader:
             'button_active_background': active_background,
             'button_active_border': '#222222' if dark else colors.get('color_accent_dark', '#01579B'),
             'control_check_icon': os.path.join(os.path.dirname(path), 'check_white.svg').replace('\\', '/'),
+            # Spin box steppers: drawn by the stylesheet on every platform (see mockup.qss).
+            'spin_up_icon': os.path.join(os.path.dirname(path), 'spin_up.svg').replace('\\', '/'),
+            'spin_down_icon': os.path.join(os.path.dirname(path), 'spin_down.svg').replace('\\', '/'),
         }
         for filename in ('panel_buttons.qss', 'themed_controls.qss', 'mockup.qss'):
             with open(os.path.join(os.path.dirname(path), filename), encoding='utf-8') as source:
