@@ -93,7 +93,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="350"/>
+        <location filename="../ui/controllers/config_controller.py" line="377"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Error al cancelar los cambios: {0}</translation>
     </message>
@@ -222,219 +222,229 @@
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="208"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="232"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Restaurando el filtro de {0} capa(s) ráster / nube de puntos…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="455"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
         <source>cov. ≥ </source>
         <translation>cob. ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Proporción mínima de un objetivo poligonal dentro de la geometría de origen (0 = cualquier solapamiento). Se usa cuando el origen es un ráster o una nube de puntos.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Raster</source>
         <translation>Ráster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Point cloud</source>
         <translation>Nube de puntos</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="547"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>Capa {0}: selección en EXPLORING, relación en FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="586"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Selector de píxeles: haga clic en el mapa para leer el valor de cada banda (Ctrl+clic amplía el rango)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="595"/>
         <source>Zoom to the layer</source>
         <translation>Ampliar a la capa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="564"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="588"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Vista previa: ocultar los píxeles fuera de la selección</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="566"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="590"/>
         <source>Not used for raster layers</source>
         <translation>No se usa para capas ráster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="567"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="591"/>
         <source>Reset the raster selection</source>
         <translation>Restablecer la selección ráster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="570"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="594"/>
         <source>Identify points on the map</source>
         <translation>Identificar puntos en el mapa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="572"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="596"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Vista previa en vivo: mostrar solo los puntos conservados por la selección</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="598"/>
         <source>Not used for point cloud layers</source>
         <translation>No se usa para capas de nube de puntos</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="599"/>
         <source>Reset the point cloud criteria</source>
         <translation>Restablecer los criterios de la nube de puntos</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="756"/>
         <source>Invalid raster calculator expression</source>
         <translation>Expresión de la calculadora ráster no válida</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="772"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="799"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>No se encontró PDAL: la altura sobre un MDT requiere el ejecutable pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1162"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Una tarea de FilterMate sigue en ejecución: espere a que termine</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1146"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1178"/>
         <source>FilterMate task failed: {0}</source>
         <translation>La tarea de FilterMate falló: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1179"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1211"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Seleccione primero los píxeles: un rango de valores, clases o una expresión ráster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1188"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1220"/>
         <source>Raster filtered: {0}</source>
         <translation>Ráster filtrado: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1233"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Se rechazó la expresión de la nube de puntos: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1204"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1236"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Seleccione primero los puntos: clases, rangos de atributos o una expresión</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1244"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Nube de puntos filtrada: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1276"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
         <source>Filter not applied: {0}</source>
         <translation>Filtro no aplicado: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1554"/>
         <source>canceled</source>
         <translation>cancelado</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1280"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1312"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} objetivo(s) filtrado(s)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1282"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
         <source>{0} failed: {1}</source>
         <translation>{0} falló: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1291"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1323"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filtrando desde '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1357"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Modificada desde entonces, se deja como está: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1363"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1395"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} capa(s) restaurada(s)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' no exportada: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1411"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1443"/>
         <source>Exported: {0}</source>
         <translation>Exportado: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1413"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1445"/>
         <source>Export failed: {0}</source>
         <translation>Error de exportación: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1420"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1452"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Exportando {0} capa(s)…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1426"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1458"/>
         <source>Export folder</source>
         <translation>Carpeta de exportación</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1498"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1531"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Objetivos ráster / nube de puntos omitidos: ninguna entidad de origen seleccionada en EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1554"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Objetivos ráster / nube de puntos no filtrados: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} objetivo(s) ráster / nube de puntos filtrado(s)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1641"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Elija el ráster MDT utilizado para la altura sobre el suelo</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1619"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1652"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Altura sobre el suelo no calculada: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1664"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Calculando la altura sobre '{0}' con PDAL…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="185"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="209"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>La caché de FilterMate ocupa {0} GB, por encima de su límite de {1} GB: quite el filtro de las capas ráster / nube de puntos que ya no necesite</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="801"/>
+        <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
+        <translation>PDAL {0} es demasiado antiguo: la altura sobre un MDT requiere PDAL 2.4 o posterior</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="804"/>
+        <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
+        <translation>No se pudo ejecutar PDAL, la altura sobre un MDT no está disponible: {0}</translation>
     </message>
 </context>
 <context>
@@ -1257,27 +1267,27 @@ Haga clic en el indicador ★ y seleccione 'Añadir filtro actual a favoritos' p
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="600"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="604"/>
         <source>View</source>
         <translation>Ver</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="602"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="606"/>
         <source>Change</source>
         <translation>Cambiar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="613"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="617"/>
         <source>Select a folder</source>
         <translation>Seleccionar una carpeta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="620"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="624"/>
         <source>Select a file</source>
         <translation>Seleccionar un archivo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="628"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="632"/>
         <source>Save to a file</source>
         <translation>Guardar en un archivo</translation>
     </message>
@@ -1285,17 +1295,17 @@ Haga clic en el indicador ★ y seleccione 'Añadir filtro actual a favoritos' p
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="660"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="664"/>
         <source>View</source>
         <translation>Ver</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="662"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="666"/>
         <source>Change</source>
         <translation>Cambiar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="671"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="675"/>
         <source>Select an icon</source>
         <translation>Seleccionar un icono</translation>
     </message>
@@ -1311,127 +1321,127 @@ Haga clic en el indicador ★ y seleccione 'Añadir filtro actual a favoritos' p
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="206"/>
+        <location filename="../filter_mate.py" line="210"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="330"/>
+        <location filename="../filter_mate.py" line="334"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="330"/>
+        <location filename="../filter_mate.py" line="334"/>
         <source>Open FilterMate panel</source>
         <translation>Abrir panel FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="339"/>
+        <location filename="../filter_mate.py" line="343"/>
         <source>Reset configuration and database</source>
         <translation>Restablecer configuración y base de datos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="339"/>
+        <location filename="../filter_mate.py" line="343"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Restablecer la configuración predeterminada y eliminar la base de datos SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1443"/>
+        <location filename="../filter_mate.py" line="1458"/>
         <source>Reset Configuration</source>
         <translation>Restablecer Configuración</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1466"/>
+        <location filename="../filter_mate.py" line="1481"/>
         <source>Configuration reset successfully.</source>
         <translation>Configuración restablecida correctamente.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1471"/>
+        <location filename="../filter_mate.py" line="1486"/>
         <source>Default configuration file not found.</source>
         <translation>Archivo de configuración predeterminado no encontrado.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1507"/>
         <source>Database deleted: {filename}</source>
         <translation>Base de datos eliminada: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1506"/>
+        <location filename="../filter_mate.py" line="1521"/>
         <source>Restart required</source>
         <translation>Se requiere reinicio</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="436"/>
+        <location filename="../filter_mate.py" line="445"/>
         <source>Obsolete configuration detected</source>
         <translation>Configuración obsoleta detectada</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="437"/>
+        <location filename="../filter_mate.py" line="446"/>
         <source>unknown version</source>
         <translation>versión desconocida</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="454"/>
         <source>Corrupted configuration detected</source>
         <translation>Configuración dañada detectada</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="502"/>
+        <location filename="../filter_mate.py" line="511"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Configuración no restablecida. Algunas funciones pueden no funcionar correctamente.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="513"/>
+        <location filename="../filter_mate.py" line="522"/>
         <source>Configuration created with default values</source>
         <translation>Configuración creada con valores predeterminados</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="516"/>
+        <location filename="../filter_mate.py" line="525"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Configuración dañada restablecida. Se han restaurado los ajustes predeterminados.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="519"/>
+        <location filename="../filter_mate.py" line="528"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Configuración obsoleta restablecida. Se han restaurado los ajustes predeterminados.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="540"/>
+        <location filename="../filter_mate.py" line="549"/>
         <source>Configuration updated to latest version</source>
         <translation>Configuración actualizada a la última versión</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="537"/>
+        <location filename="../filter_mate.py" line="546"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Configuración actualizada: nuevos ajustes disponibles ({sections}). Acceso mediante el menú Opciones.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="531"/>
+        <location filename="../filter_mate.py" line="540"/>
         <source>Geometry Simplification</source>
         <translation>Simplificación de geometría</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="541"/>
         <source>Optimization Thresholds</source>
         <translation>Umbrales de optimización</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="677"/>
+        <location filename="../filter_mate.py" line="686"/>
         <source>Geometry validation setting</source>
         <translation>Configuración de validación de geometría</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="707"/>
+        <location filename="../filter_mate.py" line="716"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filtrado de geometrías inválidas desactivado correctamente.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="714"/>
+        <location filename="../filter_mate.py" line="723"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filtrado de geometrías inválidas no modificado. Algunas entidades pueden excluirse de las exportaciones.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="438"/>
+        <location filename="../filter_mate.py" line="447"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1446,7 +1456,7 @@ Do you want to reset to default settings?
 • No: Mantener la configuración actual (puede causar problemas)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="455"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1461,12 +1471,12 @@ Do you want to reset to default settings?
 • No: Cancelar (el plugin puede no funcionar correctamente)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="453"/>
+        <location filename="../filter_mate.py" line="462"/>
         <source>Configuration reset</source>
         <translation>Restablecer configuración</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="463"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1475,12 +1485,12 @@ Do you want to continue?</source>
 ¿Desea continuar?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="559"/>
+        <location filename="../filter_mate.py" line="568"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error durante la migración de configuración: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="679"/>
+        <location filename="../filter_mate.py" line="688"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1507,7 +1517,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1443"/>
+        <location filename="../filter_mate.py" line="1458"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1524,7 +1534,7 @@ Esto:
 QGIS debe reiniciarse para aplicar los cambios.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1506"/>
+        <location filename="../filter_mate.py" line="1521"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1533,17 +1543,17 @@ Please restart QGIS to apply the changes.</source>
 Reinicie QGIS para aplicar los cambios.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="373"/>
+        <location filename="../filter_mate.py" line="377"/>
         <source>Initialization error: {0}</source>
         <translation>Error de inicialización: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="618"/>
+        <location filename="../filter_mate.py" line="627"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} capa(s) referenciada(s) no cargada(s) ({layers_list}). Se usa la visualización alternativa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1497"/>
+        <location filename="../filter_mate.py" line="1512"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>No se puede eliminar {filename}: {e}</translation>
     </message>
@@ -1553,27 +1563,27 @@ Reinicie QGIS para aplicar los cambios.</translation>
         <translation type="obsolete">Error durante el restablecimiento: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1549"/>
+        <location filename="../filter_mate.py" line="1564"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;¡Gracias por usar &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Únase a nuestra comunidad de Discord para:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Obtener ayuda y soporte&lt;/li&gt;&lt;li&gt;Reportar errores y problemas&lt;/li&gt;&lt;li&gt;Sugerir nuevas funcionalidades&lt;/li&gt;&lt;li&gt;Compartir consejos con otros usuarios&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1565"/>
+        <location filename="../filter_mate.py" line="1580"/>
         <source>  Join us on Discord</source>
         <translation>  Únase a nosotros en Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1585"/>
+        <location filename="../filter_mate.py" line="1600"/>
         <source>Don&apos;t show this again</source>
         <translation>No mostrar de nuevo</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1656"/>
         <source>Close</source>
         <translation>Cerrar</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1708"/>
+        <location filename="../filter_mate.py" line="1723"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Error al cargar el complemento: {0}. Consulte la consola Python de QGIS para más detalles.</translation>
     </message>
@@ -1617,22 +1627,22 @@ First attribute: {1}</source>
 Primer atributo: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1530"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>No se pudo restablecer la configuración. Compruebe que la carpeta del complemento tenga permiso de escritura e inténtelo de nuevo. Detalles en filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1615"/>
+        <location filename="../filter_mate.py" line="1630"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Novedades de FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1621"/>
+        <location filename="../filter_mate.py" line="1636"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate ahora trabaja con capas ráster y de nubes de puntos.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; se adapta a la capa actual: rango de valores y clases de un ráster, clases, elevación y atributos de una nube de puntos LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relaciona esa selección con capas de cualquier tipo, con los predicados y el búfer habituales: parcelas dentro de un rango de elevación, puntos LiDAR bajo los edificios, un MDT recortado a un municipio.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; escribe los ráster (GeoTIFF, COG) y las nubes de puntos (LAZ, COPC) filtrados.&lt;/li&gt;&lt;li&gt;Algoritmos y modelos de Processing, qgis_process, API de Python y REST.&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate ahora trabaja con capas ráster y de nubes de puntos.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; se adapta a la capa actual: rango de valores y clases de un ráster, clases, elevación y atributos de una nube de puntos LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relaciona esa selección con capas de cualquier tipo, con los predicados y el búfer habituales: parcelas dentro de un rango de elevación, puntos LiDAR bajo los edificios, un MDT recortado a un municipio.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; escribe los ráster (GeoTIFF, COG) y las nubes de puntos (LAZ, COPC) filtrados.&lt;/li&gt;&lt;li&gt;Algoritmos y modelos de Processing, qgis_process, API de Python y REST.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1637"/>
+        <location filename="../filter_mate.py" line="1652"/>
         <source>Open the user guide</source>
         <translation>Abrir la guía del usuario</translation>
     </message>
@@ -1650,92 +1660,92 @@ Primer atributo: {1}</translation>
         <translation>{0} cachés limpiadas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="861"/>
+        <location filename="../filter_mate_app.py" line="919"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Error al crear el panel acoplable: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="871"/>
+        <location filename="../filter_mate_app.py" line="929"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Error al mostrar el panel acoplable: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1385"/>
+        <location filename="../filter_mate_app.py" line="1443"/>
         <source>Error executing {0}: {1}</source>
         <translation>Error al ejecutar {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1397"/>
+        <location filename="../filter_mate_app.py" line="1455"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Complemento ejecutándose en modo degradado (servicios hexagonales no disponibles). El rendimiento puede verse reducido.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1646"/>
+        <location filename="../filter_mate_app.py" line="1704"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ERROR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1646"/>
+        <location filename="../filter_mate_app.py" line="1704"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>No se puede ejecutar {0}: error en la inicialización del widget.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2429"/>
+        <location filename="../filter_mate_app.py" line="2487"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>No se puede {0}: capa inválida o fuente no encontrada.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2566"/>
+        <location filename="../filter_mate_app.py" line="2624"/>
         <source>All filters cleared - </source>
         <translation>Todos los filtros eliminados – </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2567"/>
+        <location filename="../filter_mate_app.py" line="2625"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} entidades visibles en la capa principal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2575"/>
+        <location filename="../filter_mate_app.py" line="2633"/>
         <source>Error: result handler missing</source>
         <translation>Error: manejador de resultados no encontrado</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2588"/>
+        <location filename="../filter_mate_app.py" line="2646"/>
         <source>Error during filtering: {0}</source>
         <translation>Error durante el filtrado: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2710"/>
+        <location filename="../filter_mate_app.py" line="2768"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} favorito(s) huérfano(s) recuperado(s): {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2845"/>
+        <location filename="../filter_mate_app.py" line="2903"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Error al cargar la capa – clic para reintentar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2902"/>
+        <location filename="../filter_mate_app.py" line="2960"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} capa(s) cargada(s) correctamente</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1868"/>
+        <location filename="../filter_mate_app.py" line="1926"/>
         <source>filter</source>
         <translation>filtrar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1928"/>
         <source>unfilter</source>
         <translation>desfiltrar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1873"/>
+        <location filename="../filter_mate_app.py" line="1931"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Modo de edición detectado</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1875"/>
+        <location filename="../filter_mate_app.py" line="1933"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1748,29 +1758,34 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1885"/>
+        <location filename="../filter_mate_app.py" line="1943"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Guardar cambios y {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1892"/>
+        <location filename="../filter_mate_app.py" line="1950"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Descartar cambios y {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1899"/>
+        <location filename="../filter_mate_app.py" line="1957"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1923"/>
+        <location filename="../filter_mate_app.py" line="1981"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>No se pudieron guardar los cambios de la capa &quot;{0}&quot;. Operación cancelada.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1233"/>
+        <location filename="../filter_mate_app.py" line="1291"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Elija una capa en la pestaña EXPLORING antes de ejecutar '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="846"/>
+        <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
+        <translation>{0} capa(s) siguen filtradas: {1}. Vuelva a activar la opción para quitarles el filtro.</translation>
     </message>
 </context>
 <context>
@@ -3395,12 +3410,12 @@ Todos los resultados de filtrado no guardados se perderán.
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="193"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="196"/>
         <source>QFieldCloud Settings...</source>
         <translation>Configuración de QFieldCloud...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="225"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="228"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Exportar capas filtradas a QFieldCloud</translation>
     </message>
@@ -3758,52 +3773,52 @@ Todos los resultados de filtrado no guardados se perderán.
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="711"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="714"/>
         <source>Type to filter...</source>
         <translation>Escriba para filtrar...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="720"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="723"/>
         <source>Select All</source>
         <translation>Seleccionar todo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="722"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="725"/>
         <source>Select All (non subset)</source>
         <translation>Seleccionar todo (sin subconjunto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="724"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="727"/>
         <source>Select All (subset)</source>
         <translation>Seleccionar todo (subconjunto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="726"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="729"/>
         <source>De-select All</source>
         <translation>Deseleccionar todo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="728"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="731"/>
         <source>De-select All (non subset)</source>
         <translation>Deseleccionar todo (sin subconjunto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="730"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="733"/>
         <source>De-select All (subset)</source>
         <translation>Deseleccionar todo (subconjunto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1329"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1332"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Se muestran las primeras {0} entidades ordenadas por valor de visualización. Escriba en el filtro de texto para buscar en toda la capa; &quot;Seleccionar todo&quot; carga la lista completa.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1337"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1340"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Se muestran {0} entidades de la capa, ordenadas por valor de visualización. Escriba en el filtro de texto para buscar en toda la capa; &quot;Seleccionar todo&quot; carga la lista completa.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1344"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1347"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>Resultados de la búsqueda de &quot;{0}&quot; en toda la capa.</translation>
     </message>
@@ -3811,42 +3826,42 @@ Todos los resultados de filtrado no guardados se perderán.
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="261"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="264"/>
         <source>Select All</source>
         <translation>Seleccionar todo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="263"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="266"/>
         <source>De-select All</source>
         <translation>Deseleccionar todo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="265"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="268"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Seleccionar todas las capas por tipo de geometría (Líneas)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="267"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="270"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Deseleccionar todas las capas por tipo de geometría (Líneas)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="269"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="272"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Seleccionar todas las capas por tipo de geometría (Puntos)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="271"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="274"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Deseleccionar todas las capas por tipo de geometría (Puntos)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="273"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="276"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Seleccionar todas las capas por tipo de geometría (Polígonos)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="275"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="278"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Deseleccionar todas las capas por tipo de geometría (Polígonos)</translation>
     </message>
@@ -4068,12 +4083,12 @@ Todos los resultados de filtrado no guardados se perderán.
 <context>
     <name>SearchableJsonView</name>
     <message>
-        <location filename="../ui/widgets/json_view/searchable_view.py" line="75"/>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="79"/>
         <source>Search configuration... (Ctrl+F)</source>
         <translation>Buscar en la configuración... (Ctrl+F)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="184"/>
         <source>No match</source>
         <translation>Sin coincidencias</translation>
     </message>
@@ -4341,7 +4356,7 @@ Todos los resultados de filtrado no guardados se perderán.
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="572"/>
         <source>Explore ...</source>
         <translation>Explorar ...</translation>
     </message>

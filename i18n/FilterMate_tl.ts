@@ -93,7 +93,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="350"/>
+        <location filename="../ui/controllers/config_controller.py" line="377"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Error sa pagkansela ng mga pagbabago: {0}</translation>
     </message>
@@ -222,219 +222,229 @@
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="208"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="232"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Ibinabalik ang filter ng {0} raster / point cloud na layer…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="455"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
         <source>cov. ≥ </source>
         <translation>cov. ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Pinakamababang bahagi ng target na polygon na nasa loob ng source geometry (0 = anumang overlap). Ginagamit kapag ang source ay raster o point cloud.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Point cloud</source>
         <translation>Point cloud</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="547"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0} na layer: pagpili sa EXPLORING, relasyon sa FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="586"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Pixel picker: mag-click sa mapa para basahin ang halaga ng bawat band (Ctrl+click para palawakin ang saklaw)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="595"/>
         <source>Zoom to the layer</source>
         <translation>I-zoom sa layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="564"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="588"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Preview: itago ang mga pixel sa labas ng napili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="566"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="590"/>
         <source>Not used for raster layers</source>
         <translation>Hindi ginagamit sa mga raster na layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="567"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="591"/>
         <source>Reset the raster selection</source>
         <translation>I-reset ang napiling raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="570"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="594"/>
         <source>Identify points on the map</source>
         <translation>Tukuyin ang mga punto sa mapa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="572"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="596"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Live preview: ipakita lamang ang mga punto na pinanatili ng napili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="598"/>
         <source>Not used for point cloud layers</source>
         <translation>Hindi ginagamit sa mga point cloud na layer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="599"/>
         <source>Reset the point cloud criteria</source>
         <translation>I-reset ang mga pamantayan ng point cloud</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="756"/>
         <source>Invalid raster calculator expression</source>
         <translation>Di-wastong expression ng raster calculator</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="772"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="799"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>Hindi nahanap ang PDAL: kailangan ng taas sa ibabaw ng DTM ang executable na pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1162"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Tumatakbo pa ang isang gawain ng FilterMate: hintaying matapos ito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1146"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1178"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Nabigo ang gawain ng FilterMate: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1179"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1211"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Pumili muna ng mga pixel: saklaw ng halaga, mga klase o raster expression</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1188"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1220"/>
         <source>Raster filtered: {0}</source>
         <translation>Na-filter ang raster: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1233"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Tinanggihan ang expression ng point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1204"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1236"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Pumili muna ng mga punto: mga klase, saklaw ng attribute o expression</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1244"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Na-filter ang point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1276"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
         <source>Filter not applied: {0}</source>
         <translation>Hindi nailapat ang filter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1554"/>
         <source>canceled</source>
         <translation>nakansela</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1280"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1312"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} target ang na-filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1282"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
         <source>{0} failed: {1}</source>
         <translation>Nabigo ang {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1291"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1323"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: nagfi-filter mula sa '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1357"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Nagbago na mula noon, iniwan nang ganoon: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1363"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1395"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} layer ang naibalik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>Hindi na-export ang '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1411"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1443"/>
         <source>Exported: {0}</source>
         <translation>Na-export: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1413"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1445"/>
         <source>Export failed: {0}</source>
         <translation>Nabigo ang pag-export: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1420"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1452"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Ine-export ang {0} layer…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1426"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1458"/>
         <source>Export folder</source>
         <translation>Folder ng export</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1498"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1531"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Nilaktawan ang mga target na raster / point cloud: walang napiling source feature sa EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1554"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Hindi na-filter ang mga target na raster / point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} target na raster / point cloud ang na-filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1641"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Piliin ang DTM raster na gagamitin para sa taas sa ibabaw ng lupa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1619"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1652"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Hindi nakalkula ang taas sa ibabaw ng lupa: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1664"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Kinakalkula ang taas sa ibabaw ng '{0}' gamit ang PDAL…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="185"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="209"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>Ang cache ng FilterMate ay gumagamit ng {0} GB, lampas sa limitasyon nitong {1} GB: alisin ang filter sa mga raster / point cloud layer na hindi mo na kailangan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="801"/>
+        <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
+        <translation>Masyadong luma ang PDAL {0}: kailangan ng taas sa ibabaw ng DTM ang PDAL 2.4 o mas bago</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="804"/>
+        <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
+        <translation>Hindi mapatakbo ang PDAL, hindi magagamit ang taas sa ibabaw ng DTM: {0}</translation>
     </message>
 </context>
 <context>
@@ -1257,27 +1267,27 @@ I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga 
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="600"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="604"/>
         <source>View</source>
         <translation>Tingnan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="602"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="606"/>
         <source>Change</source>
         <translation>Baguhin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="613"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="617"/>
         <source>Select a folder</source>
         <translation>Pumili ng folder</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="620"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="624"/>
         <source>Select a file</source>
         <translation>Pumili ng file</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="628"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="632"/>
         <source>Save to a file</source>
         <translation>I-save sa isang file</translation>
     </message>
@@ -1285,17 +1295,17 @@ I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga 
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="660"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="664"/>
         <source>View</source>
         <translation>Tingnan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="662"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="666"/>
         <source>Change</source>
         <translation>Baguhin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="671"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="675"/>
         <source>Select an icon</source>
         <translation>Pumili ng icon</translation>
     </message>
@@ -1311,67 +1321,67 @@ I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga 
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="206"/>
+        <location filename="../filter_mate.py" line="210"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="330"/>
+        <location filename="../filter_mate.py" line="334"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="330"/>
+        <location filename="../filter_mate.py" line="334"/>
         <source>Open FilterMate panel</source>
         <translation>Buksan ang FilterMate panel</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="339"/>
+        <location filename="../filter_mate.py" line="343"/>
         <source>Reset configuration and database</source>
         <translation>I-reset ang pagsasaayos at database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="339"/>
+        <location filename="../filter_mate.py" line="343"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>I-reset ang default na pagsasaayos at burahin ang SQLite database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1443"/>
+        <location filename="../filter_mate.py" line="1458"/>
         <source>Reset Configuration</source>
         <translation>I-reset ang Pagsasaayos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1466"/>
+        <location filename="../filter_mate.py" line="1481"/>
         <source>Configuration reset successfully.</source>
         <translation>Matagumpay na na-reset ang pagsasaayos.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1471"/>
+        <location filename="../filter_mate.py" line="1486"/>
         <source>Default configuration file not found.</source>
         <translation>Hindi nahanap ang default na file ng pagsasaayos.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1507"/>
         <source>Database deleted: {filename}</source>
         <translation>Nabura ang database: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1506"/>
+        <location filename="../filter_mate.py" line="1521"/>
         <source>Restart required</source>
         <translation>Kailangang i-restart</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="436"/>
+        <location filename="../filter_mate.py" line="445"/>
         <source>Obsolete configuration detected</source>
         <translation>Lumang pagsasaayos ang nakita</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="437"/>
+        <location filename="../filter_mate.py" line="446"/>
         <source>unknown version</source>
         <translation>hindi kilalang bersyon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="438"/>
+        <location filename="../filter_mate.py" line="447"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1386,12 +1396,12 @@ Do you want to reset to default settings?
 • No: Keep current configuration (may cause issues)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="454"/>
         <source>Corrupted configuration detected</source>
         <translation>Sirang pagsasaayos ang nakita</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="455"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1406,12 +1416,12 @@ Do you want to reset to default settings?
 • No: Cancel (the plugin may not work correctly)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="453"/>
+        <location filename="../filter_mate.py" line="462"/>
         <source>Configuration reset</source>
         <translation>I-reset ang Pagsasaayos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="463"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1420,57 +1430,57 @@ Do you want to continue?</source>
 Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="502"/>
+        <location filename="../filter_mate.py" line="511"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Hindi na-reset ang pagsasaayos. Ang ilang mga tampok ay maaaring hindi gumana ng tama.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="513"/>
+        <location filename="../filter_mate.py" line="522"/>
         <source>Configuration created with default values</source>
         <translation>Ang pagsasaayos ay nilikha gamit ang mga default na halaga</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="516"/>
+        <location filename="../filter_mate.py" line="525"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Na-reset ang sirang pagsasaayos. Naibalik na ang mga default na setting.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="519"/>
+        <location filename="../filter_mate.py" line="528"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Na-reset ang lumang pagsasaayos. Naibalik na ang mga default na setting.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="540"/>
+        <location filename="../filter_mate.py" line="549"/>
         <source>Configuration updated to latest version</source>
         <translation>Na-update ang pagsasaayos sa pinakabagong bersyon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="537"/>
+        <location filename="../filter_mate.py" line="546"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Na-update ang pagsasaayos: may bagong mga setting ({sections}). I-access sa pamamagitan ng Options menu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="531"/>
+        <location filename="../filter_mate.py" line="540"/>
         <source>Geometry Simplification</source>
         <translation>Pagpapasimple ng Geometry</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="541"/>
         <source>Optimization Thresholds</source>
         <translation>Mga Threshold ng Optimization</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="559"/>
+        <location filename="../filter_mate.py" line="568"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error during configuration migration: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="677"/>
+        <location filename="../filter_mate.py" line="686"/>
         <source>Geometry validation setting</source>
         <translation>Setting ng geometry validation</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="679"/>
+        <location filename="../filter_mate.py" line="688"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1497,17 +1507,17 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="707"/>
+        <location filename="../filter_mate.py" line="716"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Matagumpay na na-disable ang pag-filter ng invalid na geometry.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="714"/>
+        <location filename="../filter_mate.py" line="723"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Hindi binago ang pag-filter ng invalid na geometry. Ang ilang mga tampok ay maaaring ihiwalay sa mga pag-export.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1443"/>
+        <location filename="../filter_mate.py" line="1458"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1524,7 +1534,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1506"/>
+        <location filename="../filter_mate.py" line="1521"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1533,17 +1543,17 @@ Please restart QGIS to apply the changes.</source>
 Please restart QGIS to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="373"/>
+        <location filename="../filter_mate.py" line="377"/>
         <source>Initialization error: {0}</source>
         <translation>Error sa initialization: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="618"/>
+        <location filename="../filter_mate.py" line="627"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} na-reference na layer ang hindi na-load ({layers_list}). Ginagamit ang fallback display.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1497"/>
+        <location filename="../filter_mate.py" line="1512"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Hindi matanggal ang {filename}: {e}</translation>
     </message>
@@ -1553,27 +1563,27 @@ Please restart QGIS to apply the changes.</translation>
         <translation type="obsolete">Error sa pag-reset: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1549"/>
+        <location filename="../filter_mate.py" line="1564"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Salamat sa paggamit ng &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Sumali sa aming komunidad sa Discord upang:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Humingi ng tulong at suporta&lt;/li&gt;&lt;li&gt;Mag-report ng mga bug at isyu&lt;/li&gt;&lt;li&gt;Magmungkahi ng mga bagong feature&lt;/li&gt;&lt;li&gt;Magbahagi ng mga tip sa ibang gumagamit&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1565"/>
+        <location filename="../filter_mate.py" line="1580"/>
         <source>  Join us on Discord</source>
         <translation>  Sumali sa amin sa Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1585"/>
+        <location filename="../filter_mate.py" line="1600"/>
         <source>Don&apos;t show this again</source>
         <translation>Huwag nang ipakita ito</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1656"/>
         <source>Close</source>
         <translation>Isara</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1708"/>
+        <location filename="../filter_mate.py" line="1723"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Error sa paglo-load ng plugin: {0}. Suriin ang QGIS Python console para sa mga detalye.</translation>
     </message>
@@ -1617,22 +1627,22 @@ First attribute: {1}</source>
 Unang attribute: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1530"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Hindi ma-reset ang configuration. Tiyaking nasusulatan ang folder ng plugin, pagkatapos ay subukang muli. Mga detalye sa filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1615"/>
+        <location filename="../filter_mate.py" line="1630"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Ano ang bago sa FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1621"/>
+        <location filename="../filter_mate.py" line="1636"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;Gumagana na ngayon ang FilterMate sa mga raster at point cloud layer.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; ay umaangkop sa kasalukuyang layer: saklaw ng halaga at mga klase ng isang raster, mga klase, elebasyon at mga attribute ng isang LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; ay iniuugnay ang seleksyong iyon sa mga layer ng anumang uri, gamit ang karaniwang mga predicate at buffer: mga lote sa loob ng saklaw ng elebasyon, mga LiDAR point sa ilalim ng mga gusali, isang DTM na pinutol ayon sa isang munisipalidad.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; ay nagsusulat ng mga na-filter na raster (GeoTIFF, COG) at point cloud (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Mga algorithm at modelo ng Processing, qgis_process, mga API ng Python at REST.&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Gumagana na ngayon ang FilterMate sa mga raster at point cloud layer.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; ay umaangkop sa kasalukuyang layer: saklaw ng halaga at mga klase ng isang raster, mga klase, elebasyon at mga attribute ng isang LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; ay iniuugnay ang seleksyong iyon sa mga layer ng anumang uri, gamit ang karaniwang mga predicate at buffer: mga lote sa loob ng saklaw ng elebasyon, mga LiDAR point sa ilalim ng mga gusali, isang DTM na pinutol ayon sa isang munisipalidad.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; ay nagsusulat ng mga na-filter na raster (GeoTIFF, COG) at point cloud (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Mga algorithm at modelo ng Processing, qgis_process, mga API ng Python at REST.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1637"/>
+        <location filename="../filter_mate.py" line="1652"/>
         <source>Open the user guide</source>
         <translation>Buksan ang gabay ng gumagamit</translation>
     </message>
@@ -1650,92 +1660,92 @@ Unang attribute: {1}</translation>
         <translation>Na-clear ang {0} cache</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="861"/>
+        <location filename="../filter_mate_app.py" line="919"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Nabigo ang paglikha ng dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="871"/>
+        <location filename="../filter_mate_app.py" line="929"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Nabigo ang pagpapakita ng dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1385"/>
+        <location filename="../filter_mate_app.py" line="1443"/>
         <source>Error executing {0}: {1}</source>
         <translation>Error sa pagpapatupad ng {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1397"/>
+        <location filename="../filter_mate_app.py" line="1455"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Tumatakbo ang plugin sa degraded mode (hindi available ang hexagonal services). Maaaring bumaba ang performance.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1646"/>
+        <location filename="../filter_mate_app.py" line="1704"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ERROR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1646"/>
+        <location filename="../filter_mate_app.py" line="1704"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Hindi maipatupad ang {0}: nabigo ang initialization ng widget.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2429"/>
+        <location filename="../filter_mate_app.py" line="2487"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Hindi maipatupad ang {0}: hindi valid ang layer o hindi nahanap ang source.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2566"/>
+        <location filename="../filter_mate_app.py" line="2624"/>
         <source>All filters cleared - </source>
         <translation>Lahat ng filter na-clear - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2567"/>
+        <location filename="../filter_mate_app.py" line="2625"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} feature ang nakikita sa pangunahing layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2575"/>
+        <location filename="../filter_mate_app.py" line="2633"/>
         <source>Error: result handler missing</source>
         <translation>Error: nawawala ang result handler</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2588"/>
+        <location filename="../filter_mate_app.py" line="2646"/>
         <source>Error during filtering: {0}</source>
         <translation>Error sa pag-filter: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2710"/>
+        <location filename="../filter_mate_app.py" line="2768"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Na-recover ang {0} orphan na paborito: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2845"/>
+        <location filename="../filter_mate_app.py" line="2903"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Nabigo ang pag-load ng layer - i-click upang subukan muli</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2902"/>
+        <location filename="../filter_mate_app.py" line="2960"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>Matagumpay na na-load ang {0} layer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1868"/>
+        <location filename="../filter_mate_app.py" line="1926"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1928"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1873"/>
+        <location filename="../filter_mate_app.py" line="1931"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1875"/>
+        <location filename="../filter_mate_app.py" line="1933"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1748,29 +1758,34 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1885"/>
+        <location filename="../filter_mate_app.py" line="1943"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1892"/>
+        <location filename="../filter_mate_app.py" line="1950"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1899"/>
+        <location filename="../filter_mate_app.py" line="1957"/>
         <source>Cancel</source>
         <translation>Kanselahin</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1923"/>
+        <location filename="../filter_mate_app.py" line="1981"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1233"/>
+        <location filename="../filter_mate_app.py" line="1291"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Pumili ng layer sa tab na EXPLORING bago patakbuhin ang '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="846"/>
+        <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
+        <translation>{0} layer ang nananatiling naka-filter: {1}. I-on muli ang opsyon para alisin ang filter.</translation>
     </message>
 </context>
 <context>
@@ -3395,12 +3410,12 @@ Magpatuloy?</translation>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="193"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="196"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="225"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="228"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -3758,52 +3773,52 @@ Magpatuloy?</translation>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="711"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="714"/>
         <source>Type to filter...</source>
         <translation>Mag-type upang mag-filter...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="720"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="723"/>
         <source>Select All</source>
         <translation>Piliin Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="722"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="725"/>
         <source>Select All (non subset)</source>
         <translation>Piliin Lahat (hindi subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="724"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="727"/>
         <source>Select All (subset)</source>
         <translation>Piliin Lahat (subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="726"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="729"/>
         <source>De-select All</source>
         <translation>I-deselect Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="728"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="731"/>
         <source>De-select All (non subset)</source>
         <translation>I-deselect Lahat (hindi subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="730"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="733"/>
         <source>De-select All (subset)</source>
         <translation>I-deselect Lahat (subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1329"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1332"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Ipinapakita ang unang {0} feature na nakaayos ayon sa display value. Mag-type sa text filter para hanapin ang buong layer; ikinakarga ng &quot;Select All&quot; ang buong listahan.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1337"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1340"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Ipinapakita ang {0} feature ng layer, nakaayos ayon sa display value. Mag-type sa text filter para hanapin ang buong layer; ikinakarga ng &quot;Select All&quot; ang buong listahan.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1344"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1347"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>Mga resulta ng paghahanap para sa &quot;{0}&quot; sa buong layer.</translation>
     </message>
@@ -3811,42 +3826,42 @@ Magpatuloy?</translation>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="261"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="264"/>
         <source>Select All</source>
         <translation>Piliin Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="263"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="266"/>
         <source>De-select All</source>
         <translation>I-deselect Lahat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="265"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="268"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Piliin lahat ng layer ayon sa uri ng geometry (Mga Linya)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="267"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="270"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>I-deselect lahat ng layer ayon sa uri ng geometry (Mga Linya)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="269"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="272"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Piliin lahat ng layer ayon sa uri ng geometry (Mga Punto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="271"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="274"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>I-deselect lahat ng layer ayon sa uri ng geometry (Mga Punto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="273"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="276"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Piliin lahat ng layer ayon sa uri ng geometry (Mga Polygon)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="275"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="278"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>I-deselect lahat ng layer ayon sa uri ng geometry (Mga Polygon)</translation>
     </message>
@@ -4068,12 +4083,12 @@ Magpatuloy?</translation>
 <context>
     <name>SearchableJsonView</name>
     <message>
-        <location filename="../ui/widgets/json_view/searchable_view.py" line="75"/>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="79"/>
         <source>Search configuration... (Ctrl+F)</source>
         <translation>Maghanap ng configuration... (Ctrl+F)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="184"/>
         <source>No match</source>
         <translation>Walang tugma</translation>
     </message>
@@ -4341,7 +4356,7 @@ Magpatuloy?</translation>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="572"/>
         <source>Explore ...</source>
         <translation>I-explore...</translation>
     </message>

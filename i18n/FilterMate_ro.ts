@@ -93,7 +93,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="350"/>
+        <location filename="../ui/controllers/config_controller.py" line="377"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Eroare la anularea modificărilor: {0}</translation>
     </message>
@@ -222,219 +222,229 @@
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="208"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="232"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Se restaurează filtrul pentru {0} strat(uri) raster / nor de puncte…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="455"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
         <source>cov. ≥ </source>
         <translation>acop. ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Proporția minimă dintr-un poligon țintă aflată în geometria sursă (0 = orice suprapunere). Folosită când sursa este un raster sau un nor de puncte.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Point cloud</source>
         <translation>Nor de puncte</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="547"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>Strat {0}: selecție în EXPLORING, relație în FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="586"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>Selector de pixeli: faceți clic pe hartă pentru a citi valoarea fiecărei benzi (Ctrl+clic extinde intervalul)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="595"/>
         <source>Zoom to the layer</source>
         <translation>Zoom la strat</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="564"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="588"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>Previzualizare: ascunde pixelii din afara selecției</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="566"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="590"/>
         <source>Not used for raster layers</source>
         <translation>Nefolosit pentru straturile raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="567"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="591"/>
         <source>Reset the raster selection</source>
         <translation>Resetează selecția raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="570"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="594"/>
         <source>Identify points on the map</source>
         <translation>Identifică punctele pe hartă</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="572"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="596"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Previzualizare în direct: afișează doar punctele păstrate de selecție</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="598"/>
         <source>Not used for point cloud layers</source>
         <translation>Nefolosit pentru straturile de nor de puncte</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="599"/>
         <source>Reset the point cloud criteria</source>
         <translation>Resetează criteriile norului de puncte</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="756"/>
         <source>Invalid raster calculator expression</source>
         <translation>Expresie invalidă a calculatorului raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="772"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="799"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL nu a fost găsit: înălțimea deasupra unui MDT necesită executabilul pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1162"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>O sarcină FilterMate încă rulează: așteptați finalizarea ei</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1146"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1178"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Sarcina FilterMate a eșuat: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1179"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1211"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Selectați mai întâi pixelii: un interval de valori, clase sau o expresie raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1188"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1220"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster filtrat: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1233"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Expresia norului de puncte a fost respinsă: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1204"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1236"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Selectați mai întâi punctele: clase, intervale de atribute sau o expresie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1244"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Nor de puncte filtrat: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1276"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
         <source>Filter not applied: {0}</source>
         <translation>Filtru neaplicat: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1554"/>
         <source>canceled</source>
         <translation>anulat</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1280"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1312"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} țintă/ținte filtrată/filtrate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1282"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
         <source>{0} failed: {1}</source>
         <translation>{0} a eșuat: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1291"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1323"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filtrare pornind de la '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1357"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Modificat între timp, lăsat neschimbat: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1363"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1395"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} strat(uri) restaurat(e)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' nu a fost exportat: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1411"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1443"/>
         <source>Exported: {0}</source>
         <translation>Exportat: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1413"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1445"/>
         <source>Export failed: {0}</source>
         <translation>Export eșuat: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1420"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1452"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Se exportă {0} strat(uri)…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1426"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1458"/>
         <source>Export folder</source>
         <translation>Dosar de export</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1498"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1531"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Ținte raster / nor de puncte omise: nicio entitate sursă selectată în EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1554"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Ținte raster / nor de puncte nefiltrate: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} țintă/ținte raster / nor de puncte filtrată/filtrate</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1641"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Alegeți rasterul MDT folosit pentru înălțimea deasupra solului</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1619"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1652"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Înălțimea deasupra solului nu a fost calculată: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1664"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Se calculează înălțimea deasupra '{0}' cu PDAL…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="185"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="209"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>Memoria cache FilterMate ocupă {0} GB, peste limita sa de {1} GB: eliminați filtrul de pe straturile raster / nor de puncte de care nu mai aveți nevoie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="801"/>
+        <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
+        <translation>PDAL {0} este prea vechi: înălțimea deasupra unui MDT necesită PDAL 2.4 sau mai nou</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="804"/>
+        <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
+        <translation>PDAL nu a putut fi rulat, înălțimea deasupra unui MDT nu este disponibilă: {0}</translation>
     </message>
 </context>
 <context>
@@ -1257,27 +1267,27 @@ Faceți clic pe indicatorul ★ și selectați 'Adăugați filtrul curent la fav
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="600"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="604"/>
         <source>View</source>
         <translation>Vizualizare</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="602"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="606"/>
         <source>Change</source>
         <translation>Modificare</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="613"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="617"/>
         <source>Select a folder</source>
         <translation>Selectați un dosar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="620"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="624"/>
         <source>Select a file</source>
         <translation>Selectați un fișier</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="628"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="632"/>
         <source>Save to a file</source>
         <translation>Salvare în fișier</translation>
     </message>
@@ -1285,17 +1295,17 @@ Faceți clic pe indicatorul ★ și selectați 'Adăugați filtrul curent la fav
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="660"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="664"/>
         <source>View</source>
         <translation>Vizualizare</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="662"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="666"/>
         <source>Change</source>
         <translation>Modificare</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="671"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="675"/>
         <source>Select an icon</source>
         <translation>Selectați o pictogramă</translation>
     </message>
@@ -1311,67 +1321,67 @@ Faceți clic pe indicatorul ★ și selectați 'Adăugați filtrul curent la fav
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="206"/>
+        <location filename="../filter_mate.py" line="210"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="330"/>
+        <location filename="../filter_mate.py" line="334"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="330"/>
+        <location filename="../filter_mate.py" line="334"/>
         <source>Open FilterMate panel</source>
         <translation>Deschidere panou FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="339"/>
+        <location filename="../filter_mate.py" line="343"/>
         <source>Reset configuration and database</source>
         <translation>Resetare configurare și bază de date</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="339"/>
+        <location filename="../filter_mate.py" line="343"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Resetare configurarea implicită și ștergerea bazei de date SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1443"/>
+        <location filename="../filter_mate.py" line="1458"/>
         <source>Reset Configuration</source>
         <translation>Resetare configurare</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1466"/>
+        <location filename="../filter_mate.py" line="1481"/>
         <source>Configuration reset successfully.</source>
         <translation>Configurarea a fost resetată cu succes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1471"/>
+        <location filename="../filter_mate.py" line="1486"/>
         <source>Default configuration file not found.</source>
         <translation>Fișierul de configurare implicit nu a fost găsit.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1507"/>
         <source>Database deleted: {filename}</source>
         <translation>Bază de date ștearsă: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1506"/>
+        <location filename="../filter_mate.py" line="1521"/>
         <source>Restart required</source>
         <translation>Repornire necesară</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="436"/>
+        <location filename="../filter_mate.py" line="445"/>
         <source>Obsolete configuration detected</source>
         <translation>Configurare obsoletă detectată</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="437"/>
+        <location filename="../filter_mate.py" line="446"/>
         <source>unknown version</source>
         <translation>versiune necunoscută</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="438"/>
+        <location filename="../filter_mate.py" line="447"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1386,12 +1396,12 @@ Doriți să resetați la setările implicite?
 • Nu: Păstrați configurarea curentă (poate cauza probleme)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="454"/>
         <source>Corrupted configuration detected</source>
         <translation>Configurare coruptă detectată</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="455"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1406,12 +1416,12 @@ Doriți să resetați la setările implicite?
 • Nu: Anulare (pluginul poate să nu funcționeze corect)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="453"/>
+        <location filename="../filter_mate.py" line="462"/>
         <source>Configuration reset</source>
         <translation>Configurare resetată</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="463"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1420,57 +1430,57 @@ Do you want to continue?</source>
 Doriți să continuați?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="502"/>
+        <location filename="../filter_mate.py" line="511"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Configurarea nu a fost resetată. Unele funcționalități pot să nu funcționeze corect.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="513"/>
+        <location filename="../filter_mate.py" line="522"/>
         <source>Configuration created with default values</source>
         <translation>Configurare creată cu valori implicite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="516"/>
+        <location filename="../filter_mate.py" line="525"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Configurarea coruptă a fost resetată. Setările implicite au fost restaurate.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="519"/>
+        <location filename="../filter_mate.py" line="528"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Configurarea obsoletă a fost resetată. Setările implicite au fost restaurate.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="540"/>
+        <location filename="../filter_mate.py" line="549"/>
         <source>Configuration updated to latest version</source>
         <translation>Configurare actualizată la ultima versiune</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="537"/>
+        <location filename="../filter_mate.py" line="546"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Configurare actualizată: setări noi disponibile ({sections}). Accesați din meniul Opțiuni.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="531"/>
+        <location filename="../filter_mate.py" line="540"/>
         <source>Geometry Simplification</source>
         <translation>Simplificare geometrie</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="541"/>
         <source>Optimization Thresholds</source>
         <translation>Praguri de optimizare</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="559"/>
+        <location filename="../filter_mate.py" line="568"/>
         <source>Error during configuration migration: {}</source>
         <translation>Eroare în timpul migrării configurării: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="677"/>
+        <location filename="../filter_mate.py" line="686"/>
         <source>Geometry validation setting</source>
         <translation>Setare validare geometrie</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="679"/>
+        <location filename="../filter_mate.py" line="688"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1497,17 +1507,17 @@ Doriți să dezactivați această setare acum?
 • Nu: Păstrare setare curentă</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="707"/>
+        <location filename="../filter_mate.py" line="716"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filtrarea geometriei invalide a fost dezactivată cu succes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="714"/>
+        <location filename="../filter_mate.py" line="723"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filtrarea geometriei invalide nu a fost modificată. Unele entități pot fi excluse din exporturi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1443"/>
+        <location filename="../filter_mate.py" line="1458"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1524,7 +1534,7 @@ Aceasta va:
 QGIS trebuie repornit pentru a aplica modificările.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1506"/>
+        <location filename="../filter_mate.py" line="1521"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1533,17 +1543,17 @@ Please restart QGIS to apply the changes.</source>
 Vă rugăm să reporniți QGIS pentru a aplica modificările.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="373"/>
+        <location filename="../filter_mate.py" line="377"/>
         <source>Initialization error: {0}</source>
         <translation>Eroare de inițializare: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="618"/>
+        <location filename="../filter_mate.py" line="627"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} strat(uri) referențiat(e) neîncărcat(e) ({layers_list}). Se folosește afișarea de rezervă.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1497"/>
+        <location filename="../filter_mate.py" line="1512"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Imposibil de șters {filename}: {e}</translation>
     </message>
@@ -1553,27 +1563,27 @@ Vă rugăm să reporniți QGIS pentru a aplica modificările.</translation>
         <translation type="obsolete">Eroare în timpul resetării: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1549"/>
+        <location filename="../filter_mate.py" line="1564"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Vă mulțumim că utilizați &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Alăturați-vă comunității noastre Discord pentru a:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Obține ajutor și suport&lt;/li&gt;&lt;li&gt;Raporta erori și probleme&lt;/li&gt;&lt;li&gt;Sugera funcționalități noi&lt;/li&gt;&lt;li&gt;Împărtăși sfaturi cu alți utilizatori&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1565"/>
+        <location filename="../filter_mate.py" line="1580"/>
         <source>  Join us on Discord</source>
         <translation>  Alăturați-vă pe Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1585"/>
+        <location filename="../filter_mate.py" line="1600"/>
         <source>Don&apos;t show this again</source>
         <translation>Nu mai afișa acest mesaj</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1656"/>
         <source>Close</source>
         <translation>Închidere</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1708"/>
+        <location filename="../filter_mate.py" line="1723"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Eroare la încărcarea pluginului: {0}. Verificați consola Python din QGIS pentru detalii.</translation>
     </message>
@@ -1617,22 +1627,22 @@ First attribute: {1}</source>
 Primul atribut: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1530"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Configurația nu a putut fi resetată. Verificați că dosarul pluginului poate fi scris, apoi încercați din nou. Detalii în filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1615"/>
+        <location filename="../filter_mate.py" line="1630"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Noutăți în FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1621"/>
+        <location filename="../filter_mate.py" line="1636"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate lucrează acum cu straturi raster și nor de puncte.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; se adaptează stratului curent: intervalul de valori și clasele unui raster, clasele, altitudinea și atributele unui nor de puncte LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; leagă această selecție de straturi de orice tip, cu predicatele și zona tampon obișnuite: parcele într-un interval de altitudine, puncte LiDAR sub clădiri, un MDT decupat după o comună.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; scrie rasterele (GeoTIFF, COG) și norii de puncte (LAZ, COPC) filtrați.&lt;/li&gt;&lt;li&gt;Algoritmi și modele Processing, qgis_process, API-uri Python și REST.&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate lucrează acum cu straturi raster și nor de puncte.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; se adaptează stratului curent: intervalul de valori și clasele unui raster, clasele, altitudinea și atributele unui nor de puncte LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; leagă această selecție de straturi de orice tip, cu predicatele și zona tampon obișnuite: parcele într-un interval de altitudine, puncte LiDAR sub clădiri, un MDT decupat după o comună.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; scrie rasterele (GeoTIFF, COG) și norii de puncte (LAZ, COPC) filtrați.&lt;/li&gt;&lt;li&gt;Algoritmi și modele Processing, qgis_process, API-uri Python și REST.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1637"/>
+        <location filename="../filter_mate.py" line="1652"/>
         <source>Open the user guide</source>
         <translation>Deschideți ghidul utilizatorului</translation>
     </message>
@@ -1650,92 +1660,92 @@ Primul atribut: {1}</translation>
         <translation>{0} cache-uri șterse</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="861"/>
+        <location filename="../filter_mate_app.py" line="919"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Crearea dockwidget-ului a eșuat: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="871"/>
+        <location filename="../filter_mate_app.py" line="929"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Afișarea dockwidget-ului a eșuat: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1385"/>
+        <location filename="../filter_mate_app.py" line="1443"/>
         <source>Error executing {0}: {1}</source>
         <translation>Eroare la executarea {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1397"/>
+        <location filename="../filter_mate_app.py" line="1455"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Pluginul rulează în mod degradat (servicii hexagonale indisponibile). Performanța poate fi redusă.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1646"/>
+        <location filename="../filter_mate_app.py" line="1704"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate EROARE</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1646"/>
+        <location filename="../filter_mate_app.py" line="1704"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Nu se poate executa {0}: inițializarea widgetului a eșuat.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2429"/>
+        <location filename="../filter_mate_app.py" line="2487"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Nu se poate {0}: strat invalid sau sursă negăsită.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2566"/>
+        <location filename="../filter_mate_app.py" line="2624"/>
         <source>All filters cleared - </source>
         <translation>Toate filtrele au fost șterse - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2567"/>
+        <location filename="../filter_mate_app.py" line="2625"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} entități vizibile în stratul principal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2575"/>
+        <location filename="../filter_mate_app.py" line="2633"/>
         <source>Error: result handler missing</source>
         <translation>Eroare: handler de rezultat lipsă</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2588"/>
+        <location filename="../filter_mate_app.py" line="2646"/>
         <source>Error during filtering: {0}</source>
         <translation>Eroare în timpul filtrării: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2710"/>
+        <location filename="../filter_mate_app.py" line="2768"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} favorit(e) orfan(e) recuperat(e): {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2845"/>
+        <location filename="../filter_mate_app.py" line="2903"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Încărcarea stratului a eșuat - clic pentru a reîncerca</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2902"/>
+        <location filename="../filter_mate_app.py" line="2960"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} strat(uri) încărcat(e) cu succes</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1868"/>
+        <location filename="../filter_mate_app.py" line="1926"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1928"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1873"/>
+        <location filename="../filter_mate_app.py" line="1931"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1875"/>
+        <location filename="../filter_mate_app.py" line="1933"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1748,29 +1758,34 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1885"/>
+        <location filename="../filter_mate_app.py" line="1943"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1892"/>
+        <location filename="../filter_mate_app.py" line="1950"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1899"/>
+        <location filename="../filter_mate_app.py" line="1957"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1923"/>
+        <location filename="../filter_mate_app.py" line="1981"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1233"/>
+        <location filename="../filter_mate_app.py" line="1291"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Alegeți un strat în fila EXPLORING înainte de a rula '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="846"/>
+        <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
+        <translation>{0} strat(uri) rămân filtrate: {1}. Reactivați opțiunea pentru a elimina filtrul.</translation>
     </message>
 </context>
 <context>
@@ -3395,12 +3410,12 @@ Continuați?</translation>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="193"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="196"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="225"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="228"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -3758,52 +3773,52 @@ Continuați?</translation>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="711"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="714"/>
         <source>Type to filter...</source>
         <translation>Tastați pentru a filtra...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="720"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="723"/>
         <source>Select All</source>
         <translation>Selectare tot</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="722"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="725"/>
         <source>Select All (non subset)</source>
         <translation>Selectare tot (non subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="724"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="727"/>
         <source>Select All (subset)</source>
         <translation>Selectare tot (subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="726"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="729"/>
         <source>De-select All</source>
         <translation>Deselectare tot</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="728"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="731"/>
         <source>De-select All (non subset)</source>
         <translation>Deselectare tot (non subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="730"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="733"/>
         <source>De-select All (subset)</source>
         <translation>Deselectare tot (subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1329"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1332"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Se afișează primele {0} entități, sortate după valoarea de afișare. Tastați în filtrul de text pentru a căuta în tot stratul; „Selectează tot” încarcă lista completă.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1337"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1340"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Se afișează {0} entități ale stratului, sortate după valoarea de afișare. Tastați în filtrul de text pentru a căuta în tot stratul; „Selectează tot” încarcă lista completă.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1344"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1347"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>Rezultatele căutării pentru „{0}” în tot stratul.</translation>
     </message>
@@ -3811,42 +3826,42 @@ Continuați?</translation>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="261"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="264"/>
         <source>Select All</source>
         <translation>Selectare tot</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="263"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="266"/>
         <source>De-select All</source>
         <translation>Deselectare tot</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="265"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="268"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Selectare toate straturile după tipul de geometrie (Linii)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="267"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="270"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Deselectare toate straturile după tipul de geometrie (Linii)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="269"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="272"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Selectare toate straturile după tipul de geometrie (Puncte)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="271"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="274"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Deselectare toate straturile după tipul de geometrie (Puncte)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="273"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="276"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Selectare toate straturile după tipul de geometrie (Poligoane)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="275"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="278"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Deselectare toate straturile după tipul de geometrie (Poligoane)</translation>
     </message>
@@ -4068,12 +4083,12 @@ Continuați?</translation>
 <context>
     <name>SearchableJsonView</name>
     <message>
-        <location filename="../ui/widgets/json_view/searchable_view.py" line="75"/>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="79"/>
         <source>Search configuration... (Ctrl+F)</source>
         <translation>Căutare configurare... (Ctrl+F)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="184"/>
         <source>No match</source>
         <translation>Fără potrivire</translation>
     </message>
@@ -4341,7 +4356,7 @@ Continuați?</translation>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="572"/>
         <source>Explore ...</source>
         <translation>Explorare ...</translation>
     </message>

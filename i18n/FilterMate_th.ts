@@ -93,7 +93,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="350"/>
+        <location filename="../ui/controllers/config_controller.py" line="377"/>
         <source>Error cancelling changes: {0}</source>
         <translation>ข้อผิดพลาดในการยกเลิกการเปลี่ยนแปลง: {0}</translation>
     </message>
@@ -222,219 +222,229 @@
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="208"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="232"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>กำลังคืนค่าตัวกรองของเลเยอร์ราสเตอร์ / พอยต์คลาวด์ {0} เลเยอร์…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="455"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="479"/>
         <source>cov. ≥ </source>
         <translation>ครอบคลุม ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="456"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="480"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>สัดส่วนขั้นต่ำของเลเยอร์เป้าหมายแบบโพลิกอนที่อยู่ภายในเรขาคณิตต้นทาง (0 = ซ้อนทับเท่าใดก็ได้) ใช้เมื่อต้นทางเป็นราสเตอร์หรือพอยต์คลาวด์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Raster</source>
         <translation>ราสเตอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="538"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
         <source>Point cloud</source>
         <translation>พอยต์คลาวด์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="547"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>เลเยอร์{0}: เลือกใน EXPLORING, ความสัมพันธ์ใน FILTERING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="562"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="586"/>
         <source>Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)</source>
         <translation>ตัวเลือกพิกเซล: คลิกบนแผนที่เพื่ออ่านค่าของทุกแบนด์ (Ctrl+คลิก เพื่อขยายช่วง)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="571"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="595"/>
         <source>Zoom to the layer</source>
         <translation>ซูมไปที่เลเยอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="564"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="588"/>
         <source>Preview: hide the pixels outside the selection</source>
         <translation>ดูตัวอย่าง: ซ่อนพิกเซลนอกการเลือก</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="566"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="590"/>
         <source>Not used for raster layers</source>
         <translation>ไม่ใช้กับเลเยอร์ราสเตอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="567"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="591"/>
         <source>Reset the raster selection</source>
         <translation>รีเซ็ตการเลือกราสเตอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="570"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="594"/>
         <source>Identify points on the map</source>
         <translation>ระบุจุดบนแผนที่</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="572"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="596"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>ดูตัวอย่างสด: แสดงเฉพาะจุดที่การเลือกเก็บไว้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="598"/>
         <source>Not used for point cloud layers</source>
         <translation>ไม่ใช้กับเลเยอร์พอยต์คลาวด์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="599"/>
         <source>Reset the point cloud criteria</source>
         <translation>รีเซ็ตเกณฑ์พอยต์คลาวด์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="756"/>
         <source>Invalid raster calculator expression</source>
         <translation>นิพจน์ตัวคำนวณราสเตอร์ไม่ถูกต้อง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="772"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="799"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>ไม่พบ PDAL: การคำนวณความสูงเหนือ DTM ต้องใช้ไฟล์ปฏิบัติการ pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1162"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>งาน FilterMate ยังทำงานอยู่: โปรดรอให้เสร็จสิ้น</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1146"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1178"/>
         <source>FilterMate task failed: {0}</source>
         <translation>งาน FilterMate ล้มเหลว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1179"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1211"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>เลือกพิกเซลก่อน: ช่วงค่า คลาส หรือนิพจน์ราสเตอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1188"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1220"/>
         <source>Raster filtered: {0}</source>
         <translation>กรองราสเตอร์แล้ว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1201"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1233"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>นิพจน์พอยต์คลาวด์ถูกปฏิเสธ: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1204"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1236"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>เลือกจุดก่อน: คลาส ช่วงแอตทริบิวต์ หรือนิพจน์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1212"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1244"/>
         <source>Point cloud filtered: {0}</source>
         <translation>กรองพอยต์คลาวด์แล้ว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1276"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
         <source>Filter not applied: {0}</source>
         <translation>ไม่ได้ใช้ตัวกรอง: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1554"/>
         <source>canceled</source>
         <translation>ยกเลิกแล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1280"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1312"/>
         <source>{0} target(s) filtered</source>
         <translation>กรองเลเยอร์เป้าหมายแล้ว {0} เลเยอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1282"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
         <source>{0} failed: {1}</source>
         <translation>{0} ล้มเหลว: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1291"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1323"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: กำลังกรองจาก '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1357"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
         <source>Changed since, left as is: {0}</source>
         <translation>มีการเปลี่ยนแปลงภายหลัง คงไว้ตามเดิม: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1363"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1395"/>
         <source>{0} layer(s) restored</source>
         <translation>คืนค่าแล้ว {0} เลเยอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1429"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>ไม่ได้ส่งออก '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1411"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1443"/>
         <source>Exported: {0}</source>
         <translation>ส่งออกแล้ว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1413"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1445"/>
         <source>Export failed: {0}</source>
         <translation>ส่งออกล้มเหลว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1420"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1452"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>กำลังส่งออก {0} เลเยอร์…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1426"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1458"/>
         <source>Export folder</source>
         <translation>โฟลเดอร์ส่งออก</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1498"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1531"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>ข้ามเลเยอร์เป้าหมายราสเตอร์ / พอยต์คลาวด์: ไม่ได้เลือกฟีเจอร์ต้นทางใน EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1554"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>ไม่ได้กรองเลเยอร์เป้าหมายราสเตอร์ / พอยต์คลาวด์: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>กรองเลเยอร์เป้าหมายราสเตอร์ / พอยต์คลาวด์แล้ว {0} เลเยอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1608"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1641"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>เลือกราสเตอร์ DTM ที่ใช้คำนวณความสูงเหนือพื้นดิน</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1619"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1652"/>
         <source>Height above ground not computed: {0}</source>
         <translation>ไม่ได้คำนวณความสูงเหนือพื้นดิน: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1664"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>กำลังคำนวณความสูงเหนือ '{0}' ด้วย PDAL…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="185"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="209"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>แคชของ FilterMate ใช้พื้นที่ {0} GB เกินขีดจำกัด {1} GB: โปรดยกเลิกตัวกรองของชั้นข้อมูลแรสเตอร์ / พอยต์คลาวด์ที่คุณไม่ต้องการแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="801"/>
+        <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
+        <translation>PDAL {0} เก่าเกินไป: การคำนวณความสูงเหนือ DTM ต้องใช้ PDAL 2.4 ขึ้นไป</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="804"/>
+        <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
+        <translation>ไม่สามารถเรียกใช้ PDAL ได้ ความสูงเหนือ DTM ใช้งานไม่ได้: {0}</translation>
     </message>
 </context>
 <context>
@@ -1257,27 +1267,27 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
 <context>
     <name>FilepathType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="600"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="604"/>
         <source>View</source>
         <translation>วิว</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="602"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="606"/>
         <source>Change</source>
         <translation>เปลี่ยน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="613"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="617"/>
         <source>Select a folder</source>
         <translation>เลือกโฟลเดอร์</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="620"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="624"/>
         <source>Select a file</source>
         <translation>เลือกไฟล์</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="628"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="632"/>
         <source>Save to a file</source>
         <translation>บันทึกเป็นไฟล์</translation>
     </message>
@@ -1285,17 +1295,17 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
 <context>
     <name>FilepathTypeImages</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="660"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="664"/>
         <source>View</source>
         <translation>วิว</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="662"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="666"/>
         <source>Change</source>
         <translation>เปลี่ยน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="671"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="675"/>
         <source>Select an icon</source>
         <translation>เลือกไอคอน</translation>
     </message>
@@ -1311,67 +1321,67 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="206"/>
+        <location filename="../filter_mate.py" line="210"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="330"/>
+        <location filename="../filter_mate.py" line="334"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="330"/>
+        <location filename="../filter_mate.py" line="334"/>
         <source>Open FilterMate panel</source>
         <translation>เปิดแผง FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="339"/>
+        <location filename="../filter_mate.py" line="343"/>
         <source>Reset configuration and database</source>
         <translation>รีเซ็ตการกำหนดค่าและฐานข้อมูล</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="339"/>
+        <location filename="../filter_mate.py" line="343"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>รีเซ็ตการกำหนดค่าเริ่มต้นและลบฐานข้อมูล SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1443"/>
+        <location filename="../filter_mate.py" line="1458"/>
         <source>Reset Configuration</source>
         <translation>รีเซ็ตการกำหนดค่า</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1466"/>
+        <location filename="../filter_mate.py" line="1481"/>
         <source>Configuration reset successfully.</source>
         <translation>รีเซ็ตการกำหนดค่าสำเร็จแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1471"/>
+        <location filename="../filter_mate.py" line="1486"/>
         <source>Default configuration file not found.</source>
         <translation>ไม่พบไฟล์การกำหนดค่าเริ่มต้น</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1492"/>
+        <location filename="../filter_mate.py" line="1507"/>
         <source>Database deleted: {filename}</source>
         <translation>ลบฐานข้อมูลแล้ว: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1506"/>
+        <location filename="../filter_mate.py" line="1521"/>
         <source>Restart required</source>
         <translation>ต้องรีสตาร์ท</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="436"/>
+        <location filename="../filter_mate.py" line="445"/>
         <source>Obsolete configuration detected</source>
         <translation>ตรวจพบการกำหนดค่าที่ล้าสมัย</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="437"/>
+        <location filename="../filter_mate.py" line="446"/>
         <source>unknown version</source>
         <translation>เวอร์ชันไม่ทราบ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="438"/>
+        <location filename="../filter_mate.py" line="447"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1386,12 +1396,12 @@ Do you want to reset to default settings?
 • ไม่: เก็บการกำหนดค่าปัจจุบัน (อาจทำให้เกิดปัญหา)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="445"/>
+        <location filename="../filter_mate.py" line="454"/>
         <source>Corrupted configuration detected</source>
         <translation>ตรวจพบการกำหนดค่าที่เสียหาย</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="446"/>
+        <location filename="../filter_mate.py" line="455"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1406,12 +1416,12 @@ Do you want to reset to default settings?
 • ไม่: ยกเลิก (ปลั๊กอินอาจทำงานไม่ถูกต้อง)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="453"/>
+        <location filename="../filter_mate.py" line="462"/>
         <source>Configuration reset</source>
         <translation>รีเซ็ตการกำหนดค่า</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="454"/>
+        <location filename="../filter_mate.py" line="463"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1420,57 +1430,57 @@ Do you want to continue?</source>
 คุณต้องการดำเนินการต่อหรือไม่?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="502"/>
+        <location filename="../filter_mate.py" line="511"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>ไม่ได้รีเซ็ตการกำหนดค่า ฟีเจอร์บางอย่างอาจทำงานไม่ถูกต้อง</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="513"/>
+        <location filename="../filter_mate.py" line="522"/>
         <source>Configuration created with default values</source>
         <translation>สร้างการกำหนดค่าด้วยค่าเริ่มต้นแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="516"/>
+        <location filename="../filter_mate.py" line="525"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>รีเซ็ตการกำหนดค่าที่เสียหายแล้ว คืนค่าการตั้งค่าเริ่มต้นแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="519"/>
+        <location filename="../filter_mate.py" line="528"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>รีเซ็ตการกำหนดค่าที่ล้าสมัยแล้ว คืนค่าการตั้งค่าเริ่มต้นแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="540"/>
+        <location filename="../filter_mate.py" line="549"/>
         <source>Configuration updated to latest version</source>
         <translation>อัปเดตการกำหนดค่าเป็นเวอร์ชันล่าสุดแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="537"/>
+        <location filename="../filter_mate.py" line="546"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>อัปเดตการกำหนดค่าแล้ว: การตั้งค่าใหม่พร้อมใช้งาน ({sections}) เข้าถึงผ่านเมนูตัวเลือก</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="531"/>
+        <location filename="../filter_mate.py" line="540"/>
         <source>Geometry Simplification</source>
         <translation>การลดความซับซ้อนของเรขาคณิต</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="532"/>
+        <location filename="../filter_mate.py" line="541"/>
         <source>Optimization Thresholds</source>
         <translation>เกณฑ์การปรับปรุง</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="559"/>
+        <location filename="../filter_mate.py" line="568"/>
         <source>Error during configuration migration: {}</source>
         <translation>ข้อผิดพลาดระหว่างการย้ายการกำหนดค่า: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="677"/>
+        <location filename="../filter_mate.py" line="686"/>
         <source>Geometry validation setting</source>
         <translation>การตั้งค่าการตรวจสอบเรขาคณิต</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="679"/>
+        <location filename="../filter_mate.py" line="688"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1497,17 +1507,17 @@ FilterMate แนะนำให้ปิดการตั้งค่านี
 • ไม่: เก็บการตั้งค่าปัจจุบัน</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="707"/>
+        <location filename="../filter_mate.py" line="716"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>ปิดการกรองเรขาคณิตที่ไม่ถูกต้องสำเร็จแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="714"/>
+        <location filename="../filter_mate.py" line="723"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>ไม่ได้แก้ไขการกรองเรขาคณิตที่ไม่ถูกต้อง ฟีเจอร์บางอย่างอาจถูกยกเว้นจากการส่งออก</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1443"/>
+        <location filename="../filter_mate.py" line="1458"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1524,7 +1534,7 @@ QGIS must be restarted to apply the changes.</source>
 ต้องรีสตาร์ท QGIS เพื่อใช้การเปลี่ยนแปลง</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1506"/>
+        <location filename="../filter_mate.py" line="1521"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1533,17 +1543,17 @@ Please restart QGIS to apply the changes.</source>
 กรุณารีสตาร์ท QGIS เพื่อใช้การเปลี่ยนแปลง</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="373"/>
+        <location filename="../filter_mate.py" line="377"/>
         <source>Initialization error: {0}</source>
         <translation>ข้อผิดพลาดในการเริ่มต้น: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="618"/>
+        <location filename="../filter_mate.py" line="627"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} เลเยอร์อ้างอิงไม่ได้โหลด ({layers_list}) ใช้การแสดงผลสำรอง</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1497"/>
+        <location filename="../filter_mate.py" line="1512"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>ไม่สามารถลบ {filename}: {e}</translation>
     </message>
@@ -1553,27 +1563,27 @@ Please restart QGIS to apply the changes.</source>
         <translation type="obsolete">ข้อผิดพลาดระหว่างการรีเซ็ต: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1549"/>
+        <location filename="../filter_mate.py" line="1564"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;ขอบคุณที่ใช้ &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;เข้าร่วมชุมชน Discord ของเราเพื่อ:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;รับความช่วยเหลือและการสนับสนุน&lt;/li&gt;&lt;li&gt;รายงานข้อผิดพลาดและปัญหา&lt;/li&gt;&lt;li&gt;แนะนำฟีเจอร์ใหม่&lt;/li&gt;&lt;li&gt;แบ่งปันเคล็ดลับกับผู้ใช้อื่น&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1565"/>
+        <location filename="../filter_mate.py" line="1580"/>
         <source>  Join us on Discord</source>
         <translation>  เข้าร่วมกับเราบน Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1585"/>
+        <location filename="../filter_mate.py" line="1600"/>
         <source>Don&apos;t show this again</source>
         <translation>ไม่ต้องแสดงอีก</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1656"/>
         <source>Close</source>
         <translation>ปิด</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1708"/>
+        <location filename="../filter_mate.py" line="1723"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>ข้อผิดพลาดในการโหลดปลั๊กอิน: {0} ตรวจสอบคอนโซล QGIS Python สำหรับรายละเอียด</translation>
     </message>
@@ -1617,22 +1627,22 @@ First attribute: {1}</source>
 แอตทริบิวต์แรก: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1530"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>ไม่สามารถรีเซ็ตการกำหนดค่าได้ ตรวจสอบว่าโฟลเดอร์ปลั๊กอินเขียนได้ แล้วลองอีกครั้ง ดูรายละเอียดใน filtermate.log</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1615"/>
+        <location filename="../filter_mate.py" line="1630"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>มีอะไรใหม่ใน FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1621"/>
+        <location filename="../filter_mate.py" line="1636"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
-        <translation>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;ตอนนี้ FilterMate ทำงานกับชั้นข้อมูลแรสเตอร์และพอยต์คลาวด์ได้แล้ว&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; ปรับตามชั้นข้อมูลปัจจุบัน: ช่วงค่าและคลาสของแรสเตอร์ คลาส ความสูง และแอตทริบิวต์ของพอยต์คลาวด์ LiDAR&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; เชื่อมโยงการเลือกนั้นกับชั้นข้อมูลทุกประเภท ด้วยเพรดิเคตและบัฟเฟอร์ตามปกติ: แปลงที่ดินในช่วงความสูง จุด LiDAR ใต้อาคาร DTM ที่ตัดตามขอบเขตเทศบาล&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; บันทึกแรสเตอร์ (GeoTIFF, COG) และพอยต์คลาวด์ (LAZ, COPC) ที่กรองแล้ว&lt;/li&gt;&lt;li&gt;อัลกอริทึมและโมเดลของ Processing, qgis_process, API ของ Python และ REST&lt;/li&gt;&lt;/ul&gt;</translation>
+        <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;ตอนนี้ FilterMate ทำงานกับชั้นข้อมูลแรสเตอร์และพอยต์คลาวด์ได้แล้ว&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; ปรับตามชั้นข้อมูลปัจจุบัน: ช่วงค่าและคลาสของแรสเตอร์ คลาส ความสูง และแอตทริบิวต์ของพอยต์คลาวด์ LiDAR&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; เชื่อมโยงการเลือกนั้นกับชั้นข้อมูลทุกประเภท ด้วยเพรดิเคตและบัฟเฟอร์ตามปกติ: แปลงที่ดินในช่วงความสูง จุด LiDAR ใต้อาคาร DTM ที่ตัดตามขอบเขตเทศบาล&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; บันทึกแรสเตอร์ (GeoTIFF, COG) และพอยต์คลาวด์ (LAZ, COPC) ที่กรองแล้ว&lt;/li&gt;&lt;li&gt;อัลกอริทึมและโมเดลของ Processing, qgis_process, API ของ Python และ REST&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1637"/>
+        <location filename="../filter_mate.py" line="1652"/>
         <source>Open the user guide</source>
         <translation>เปิดคู่มือผู้ใช้</translation>
     </message>
@@ -1650,92 +1660,92 @@ First attribute: {1}</source>
         <translation>ล้างแคช {0} รายการแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="861"/>
+        <location filename="../filter_mate_app.py" line="919"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>สร้างด็อควิดเจ็ตล้มเหลว: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="871"/>
+        <location filename="../filter_mate_app.py" line="929"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>แสดงด็อควิดเจ็ตล้มเหลว: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1385"/>
+        <location filename="../filter_mate_app.py" line="1443"/>
         <source>Error executing {0}: {1}</source>
         <translation>ข้อผิดพลาดในการรัน {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1397"/>
+        <location filename="../filter_mate_app.py" line="1455"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>ปลั๊กอินทำงานในโหมดลดประสิทธิภาพ (บริการหกเหลี่ยมไม่พร้อมใช้งาน) ประสิทธิภาพอาจลดลง</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1646"/>
+        <location filename="../filter_mate_app.py" line="1704"/>
         <source>FilterMate ERROR</source>
         <translation>ข้อผิดพลาด FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1646"/>
+        <location filename="../filter_mate_app.py" line="1704"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>ไม่สามารถรัน {0}: การเริ่มต้นวิดเจ็ตล้มเหลว</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2429"/>
+        <location filename="../filter_mate_app.py" line="2487"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>ไม่สามารถ {0}: เลเยอร์ไม่ถูกต้องหรือไม่พบแหล่งข้อมูล</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2566"/>
+        <location filename="../filter_mate_app.py" line="2624"/>
         <source>All filters cleared - </source>
         <translation>ล้างตัวกรองทั้งหมดแล้ว - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2567"/>
+        <location filename="../filter_mate_app.py" line="2625"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} ฟีเจอร์ที่มองเห็นในเลเยอร์หลัก</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2575"/>
+        <location filename="../filter_mate_app.py" line="2633"/>
         <source>Error: result handler missing</source>
         <translation>ข้อผิดพลาด: ไม่พบตัวจัดการผลลัพธ์</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2588"/>
+        <location filename="../filter_mate_app.py" line="2646"/>
         <source>Error during filtering: {0}</source>
         <translation>ข้อผิดพลาดระหว่างการกรอง: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2710"/>
+        <location filename="../filter_mate_app.py" line="2768"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>กู้คืน {0} รายการโปรดที่ไม่มีเจ้าของ: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2845"/>
+        <location filename="../filter_mate_app.py" line="2903"/>
         <source>Layer loading failed - click to retry</source>
         <translation>โหลดเลเยอร์ล้มเหลว - คลิกเพื่อลองใหม่</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2902"/>
+        <location filename="../filter_mate_app.py" line="2960"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>โหลด {0} เลเยอร์สำเร็จแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1868"/>
+        <location filename="../filter_mate_app.py" line="1926"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1870"/>
+        <location filename="../filter_mate_app.py" line="1928"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1873"/>
+        <location filename="../filter_mate_app.py" line="1931"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1875"/>
+        <location filename="../filter_mate_app.py" line="1933"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1748,29 +1758,34 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1885"/>
+        <location filename="../filter_mate_app.py" line="1943"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1892"/>
+        <location filename="../filter_mate_app.py" line="1950"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1899"/>
+        <location filename="../filter_mate_app.py" line="1957"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1923"/>
+        <location filename="../filter_mate_app.py" line="1981"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1233"/>
+        <location filename="../filter_mate_app.py" line="1291"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>เลือกเลเยอร์ในแท็บ EXPLORING ก่อนเรียกใช้ '{0}'</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="846"/>
+        <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
+        <translation>{0} ชั้นข้อมูลยังคงถูกกรอง: {1} เปิดตัวเลือกอีกครั้งเพื่อยกเลิกการกรอง</translation>
     </message>
 </context>
 <context>
@@ -3395,12 +3410,12 @@ Continue?</source>
 <context>
     <name>QFieldCloudExtension</name>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="193"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="196"/>
         <source>QFieldCloud Settings...</source>
         <translation>QFieldCloud Settings...</translation>
     </message>
     <message>
-        <location filename="../extensions/qfieldcloud/extension.py" line="225"/>
+        <location filename="../extensions/qfieldcloud/extension.py" line="228"/>
         <source>Export filtered layers to QFieldCloud</source>
         <translation>Export filtered layers to QFieldCloud</translation>
     </message>
@@ -3758,52 +3773,52 @@ Continue?</source>
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="711"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="714"/>
         <source>Type to filter...</source>
         <translation>พิมพ์เพื่อกรอง...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="720"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="723"/>
         <source>Select All</source>
         <translation>เลือกทั้งหมด</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="722"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="725"/>
         <source>Select All (non subset)</source>
         <translation>เลือกทั้งหมด (ไม่ใช่ชุดย่อย)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="724"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="727"/>
         <source>Select All (subset)</source>
         <translation>เลือกทั้งหมด (ชุดย่อย)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="726"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="729"/>
         <source>De-select All</source>
         <translation>ยกเลิกการเลือกทั้งหมด</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="728"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="731"/>
         <source>De-select All (non subset)</source>
         <translation>ยกเลิกการเลือกทั้งหมด (ไม่ใช่ชุดย่อย)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="730"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="733"/>
         <source>De-select All (subset)</source>
         <translation>ยกเลิกการเลือกทั้งหมด (ชุดย่อย)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1329"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1332"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>แสดง {0} ฟีเจอร์แรก เรียงตามค่าที่แสดง พิมพ์ในตัวกรองข้อความเพื่อค้นหาทั้งเลเยอร์ &quot;เลือกทั้งหมด&quot; จะโหลดรายการเต็ม</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1337"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1340"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>แสดง {0} ฟีเจอร์ของเลเยอร์ เรียงตามค่าที่แสดง พิมพ์ในตัวกรองข้อความเพื่อค้นหาทั้งเลเยอร์ &quot;เลือกทั้งหมด&quot; จะโหลดรายการเต็ม</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1344"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1347"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>ผลการค้นหา &quot;{0}&quot; ทั้งเลเยอร์</translation>
     </message>
@@ -3811,42 +3826,42 @@ Continue?</source>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="261"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="264"/>
         <source>Select All</source>
         <translation>เลือกทั้งหมด</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="263"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="266"/>
         <source>De-select All</source>
         <translation>ยกเลิกการเลือกทั้งหมด</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="265"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="268"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>เลือกเลเยอร์ทั้งหมดตามประเภทเรขาคณิต (เส้น)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="267"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="270"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>ยกเลิกการเลือกเลเยอร์ทั้งหมดตามประเภทเรขาคณิต (เส้น)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="269"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="272"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>เลือกเลเยอร์ทั้งหมดตามประเภทเรขาคณิต (จุด)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="271"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="274"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>ยกเลิกการเลือกเลเยอร์ทั้งหมดตามประเภทเรขาคณิต (จุด)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="273"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="276"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>เลือกเลเยอร์ทั้งหมดตามประเภทเรขาคณิต (รูปหลายเหลี่ยม)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="275"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="278"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>ยกเลิกการเลือกเลเยอร์ทั้งหมดตามประเภทเรขาคณิต (รูปหลายเหลี่ยม)</translation>
     </message>
@@ -4068,12 +4083,12 @@ Continue?</source>
 <context>
     <name>SearchableJsonView</name>
     <message>
-        <location filename="../ui/widgets/json_view/searchable_view.py" line="75"/>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="79"/>
         <source>Search configuration... (Ctrl+F)</source>
         <translation>ค้นหาการกำหนดค่า... (Ctrl+F)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="184"/>
         <source>No match</source>
         <translation>ไม่ตรงกัน</translation>
     </message>
@@ -4341,7 +4356,7 @@ Continue?</source>
 <context>
     <name>UrlType</name>
     <message>
-        <location filename="../ui/widgets/json_view/datatypes.py" line="568"/>
+        <location filename="../ui/widgets/json_view/datatypes.py" line="572"/>
         <source>Explore ...</source>
         <translation>สำรวจ ...</translation>
     </message>
