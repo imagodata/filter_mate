@@ -32,6 +32,7 @@ FilterMate 5 filters raster and LiDAR point cloud layers as well as vector layer
 - **A layer picked right after a filter, undo or unfilter was reverted**: for 1.5–2 s the panel puts the source layer back in the current-layer list (async layer changes used to move it); a layer the user picks there (list, keyboard or type-to-find) is now kept and applied at once.
 - **Layers removed from the project stayed registered** (since 4.9): QGIS sends layer ids and the removal task only took layer objects, so their FilterMate properties and filter history were never deleted; they are now.
 - **Spin box arrows** (minimum / maximum, buffer, coverage, segments) are drawn by the FilterMate stylesheet: on Linux and macOS they came out as a stray corner.
+- The minimum coverage field is wide enough for its text (it showed `cov. ≥ 50 !`).
 - **QGIS could crash when a layer was removed from the project**: the multiple-selection widget was reset by reading a layout item after `removeWidget` had deleted it.
 - Unregistering a layer that is still in the project (a raster / point cloud kind switched off) would have written a default style named `FilterMate_style_<layer>` into the layer's data source (GeoPackage / PostgreSQL `layer_styles`) or a `.qml` next to its file, and failed on QGIS 4: that code, never read back, is removed.
 - An optional extension without its dependency (Favorites Sharing without the Resource Sharing plugin, the usual case) showed a modal dialog in French at every QGIS start; it is now a translated message bar notice, shown once.
