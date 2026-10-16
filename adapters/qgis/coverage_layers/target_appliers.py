@@ -162,21 +162,42 @@ class VectorTargetJob(TargetJob):
 
     def __init__(self, layer: QgsVectorLayer, operator: Optional[str]) -> None:
         super().__init__(layer, operator)
-        if (operator or '').upper() == 'OR' and self.before.subset:
-            # (previous) OR (kept): the features hidden by the previous subset
-            # must be tested too, so read an unfiltered copy of the layer.
-            unfiltered = QgsVectorLayer(layer.source(), f"{layer.name()}_all", layer.providerType())
-            if unfiltered.isValid():
-                unfiltered.setSubsetString('')
-                self._unfiltered = unfiltered
-                self._source = QgsVectorLayerFeatureSource(unfiltered)
-            else:
-                self._source = QgsVectorLayerFeatureSource(layer)
+        self._error = ''
+        if self.before.subset and (operator or '').upper() not in ('AND', 'AND NOT'):
+            # Replace (no operator) and OR: the result does not depend on the
+            # features the previous subset hides, they are tested too.
+            self._source = self._unfiltered_source(layer)
         else:
             self._source = QgsVectorLayerFeatureSource(layer)
         self._is_polygon = _is_polygon_layer(layer)
         self._pk, self._raw_pk = self._primary_key(layer)
         self._expression = ''
+
+    def _unfiltered_source(self, layer: QgsVectorLayer):
+        """Feature source of every feature of ``layer``, its subset left out (main thread)."""
+        if layer.providerType() == 'memory':
+            # A memory layer opened again is a new, empty one: the source is
+            # taken while its provider shows every feature, signals blocked so
+            # that nothing sees the subset go and come back.
+            provider = layer.dataProvider()
+            subset = provider.subsetString()
+            provider.blockSignals(True)
+            try:
+                provider.setSubsetString('')
+                return QgsVectorLayerFeatureSource(layer)
+            finally:
+                provider.setSubsetString(subset)
+                provider.blockSignals(False)
+        options = QgsVectorLayer.LayerOptions(QgsProject.instance().transformContext())
+        options.loadDefaultStyle = False
+        options.skipCrsValidation = True  # never a "which CRS?" prompt for a private copy
+        unfiltered = QgsVectorLayer(layer.source(), f"{layer.name()}_all", layer.providerType(), options)
+        if not unfiltered.isValid():
+            self._error = "the layer could not be read without its current filter"
+            return None
+        unfiltered.setSubsetString('')
+        self._unfiltered = unfiltered
+        return QgsVectorLayerFeatureSource(unfiltered)
 
     @staticmethod
     def _primary_key(layer: QgsVectorLayer):
@@ -193,6 +214,9 @@ class VectorTargetJob(TargetJob):
 
     def compute(self, source_geometry, source_crs, context, request, is_canceled) -> None:
         self._started = time.perf_counter()
+        if self._error:
+            self.outcome.message = self._error
+            return
         geometry = self._target_geometry(source_geometry, source_crs, context)
         methods = request.methods
         needs_all = 'disjoint' in methods
@@ -224,8 +248,8 @@ class VectorTargetJob(TargetJob):
         self._expression = build_in_expression(self._pk, kept, raw_field=self._raw_pk)
         # Release the provider connection held by the feature source before the
         # subset is applied (an open GeoPackage reader made the count fail).
+        # The unfiltered copy, a QObject of the main thread, goes in apply().
         self._source = None
-        self._unfiltered = None
         self.outcome.kept_count = len(kept)
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
@@ -237,6 +261,7 @@ class VectorTargetJob(TargetJob):
             return QgsProject.instance().mapLayer(self.layer_id).fields()
 
     def apply(self, layer) -> Optional[LayerSnapshot]:
+        self._unfiltered = None  # before the subset is applied, on the main thread
         if not self.outcome.success:
             return None
         subset = combine_subset(self.before.subset, self._expression, self.operator)
