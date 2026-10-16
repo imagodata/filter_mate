@@ -221,6 +221,26 @@ class FilterResultHandler:
         except (RuntimeError, AttributeError):
             perf_mark_end(f"task_{task_name}")
 
+    def handle_task_terminated(self, current_layer_id_before_filter: Optional[str] = None) -> None:
+        """
+        Handle a filter task that failed or was canceled.
+
+        FilterMateApp._set_filter_protection_flags blocked the current-layer combo box, disconnected
+        its handler and the layer tree link, and set the filtering flag; the completion undoes it,
+        a failed or canceled task never reached it. Same post-filter window as after a completion
+        (a layer picked during the task is applied at once).
+
+        Args:
+            current_layer_id_before_filter: Layer ID that was active before filtering
+        """
+        dockwidget = self._get_dockwidget() if self._get_dockwidget else None
+        if not dockwidget:
+            return
+        logger.info("Filter task terminated: ending the protection of the current layer")
+        _record_pending_pick(dockwidget)
+        self._reconnect_layer_tree_view_signal()
+        self._schedule_delayed_reconnection(current_layer_id_before_filter)
+
     def _clear_spatialite_cache(self, source_layer: QgsVectorLayer, task_parameters: Dict[str, Any]) -> None:
         """
         Clear Spatialite cache for all affected layers.

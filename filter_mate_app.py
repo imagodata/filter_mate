@@ -1344,6 +1344,10 @@ class FilterMateApp:
                 lambda tn=task_name, cl=current_layer, tp=task_parameters:
                     self.filter_engine_task_completed(tn, cl, tp)
             )
+            self.appTasks[task_name].taskTerminated.connect(
+                lambda gen=getattr(self.dockwidget, '_combo_protection_gen', None),
+                lid=self._current_layer_id_before_filter: self._filter_engine_task_terminated(gen, lid)
+            )
 
         # Cancel conflicting tasks and add to task manager
         self._cancel_conflicting_tasks()
@@ -1495,6 +1499,26 @@ class FilterMateApp:
             self.dockwidget.manageSignal(["QGIS", "LAYER_TREE_VIEW"], 'disconnect')
         except Exception:  # nosec B110 - Signal may already be disconnected - expected during filtering protection
             pass
+
+    def _filter_engine_task_terminated(self, generation, current_layer_id_before_filter):
+        """A filter / unfilter / reset task failed or was canceled: its protection ends as after a completed one.
+
+        Only the completion (FilterResultHandler) undid _set_filter_protection_flags: after a failed or
+        canceled task the current-layer combo box stayed blocked and the filtering flag set, the panel
+        ignored every layer change. A newer task (cancel and relaunch) owns the protection: left alone.
+        """
+        if getattr(self, '_unloading', False) or self.dockwidget is None:
+            return
+        if getattr(self.dockwidget, '_combo_protection_gen', None) != generation:
+            return
+        if getattr(self, '_removing_all_layers', False):
+            # The project is closing (its tasks are canceled): no window over its layers, but the next project
+            # must not find the panel waiting for this task (get_project_layers_from_app skips it then).
+            self.dockwidget._filtering_in_progress = False
+            self.dockwidget.comboBox_filtering_current_layer.blockSignals(False)
+            return
+        if self._filter_result_handler:
+            self._filter_result_handler.handle_task_terminated(current_layer_id_before_filter)
 
     def _show_filter_start_message(self, task_name, task_parameters, layers_props, layers, current_layer):
         """Show informational message about filtering operation starting."""

@@ -4,6 +4,7 @@
 For 1.5 s after a filter the combo box stays blocked and its checks put the source layer back when an async
 change moved it, never over a layer the user picked (a pick not looked at yet is looked at first).
 A layer picked during the task is applied when it is over.
+A failed or canceled task ends the protection too.
 """
 import importlib
 import pathlib
@@ -152,3 +153,33 @@ def test_a_layer_picked_before_the_task_is_not_applied(window):
     assert _ended(window)
     window.combo.setLayer.assert_not_called()
     window.dock.current_layer_changed.assert_not_called()
+
+
+def test_a_terminated_task_ends_the_protection(window):
+    """A failed or canceled task never reached the completion: the combo box stayed blocked, the flag set."""
+    window.handler.handle_task_terminated("zones")
+    assert not _ended(window)
+    _end(window)()
+    assert _ended(window)
+
+
+def test_a_terminated_task_applies_a_layer_picked_during_it(window):
+    window.dock._user_layer_pick = (time.perf_counter(), "dem")
+    window.handler.handle_task_terminated("zones")
+    assert _ended(window)
+    window.combo.setLayer.assert_called_once_with(window.layers["dem"])
+
+
+def test_a_terminated_task_applies_a_pick_still_shown(window):
+    """Nothing put the source layer back after a terminated task: the combo box still shows the pick."""
+    window.combo.currentLayer.return_value = window.layers["dem"]
+    window.dock._user_layer_pick = (time.perf_counter(), "dem")
+    window.handler.handle_task_terminated("zones")
+    assert _ended(window)
+    window.dock.current_layer_changed.assert_called_once_with(window.layers["dem"], manual_change=True)
+
+
+def test_a_terminated_task_reconnects_the_layer_tree_link(window):
+    window.dock.project_props = {"OPTIONS": {"LAYERS": {"LINK_LEGEND_LAYERS_AND_CURRENT_LAYER_FLAG": True}}}
+    window.handler.handle_task_terminated("zones")
+    assert window.dock.manageSignal.call_args_list[0].args == (["QGIS", "LAYER_TREE_VIEW"], 'connect')
