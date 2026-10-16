@@ -59,7 +59,8 @@
     // Keep the chosen poster and the manual player in sync, including on mobile.
     const heroVideo = document.querySelector('.home-hero video[data-src]');
     if (heroVideo) {
-        const choices = ['hero', 'export', 'noise', 'buffer', 'bridges', 'brush', 'hamlets', 'favorites', 'processing'];
+        const choices = ['hero', 'export', 'noise', 'buffer', 'bridges', 'brush', 'hamlets', 'favorites', 'processing',
+            'slope', 'heights', 'pruning', 'survey'];
         let previous;
         try { previous = sessionStorage.getItem('filtermate-home-video'); } catch (_) { /* Storage is optional. */ }
         const candidates = choices.filter((name) => name !== previous);
