@@ -116,6 +116,8 @@ class CoverageModeController(BaseController):
         self._panel_states: Dict[str, dict] = {}
         self._pixel_tool: Any = None
         self._previous_map_tool: Any = None
+        self._class_tool: Any = None  # the point cloud class pipette (a picker in the point cloud colour)
+        self._previous_class_map_tool: Any = None
         self._preview_base_subset: Optional[str] = None
         self._preview_active = False
         self._mask_overlay = None  # veil of a terrain derivative preview (canvas item)
@@ -332,6 +334,15 @@ class CoverageModeController(BaseController):
                     widget.deleteLater()
                 except Exception as exc:
                     logger.debug(f"[FM5] panel widget not released: {exc}")
+        for tool_name in ('_pixel_tool', '_class_tool'):
+            # A map tool QGIS could give back later (right click after Pan) would call a dead controller.
+            tool = getattr(self, tool_name)
+            setattr(self, tool_name, None)
+            if tool is not None:
+                try:
+                    tool.deleteLater()  # its destructor takes it off the canvas
+                except RuntimeError:
+                    pass
         self._raster_panel = None
         self._pc_panel = None
         self._running_task = None
@@ -453,6 +464,7 @@ class CoverageModeController(BaseController):
         if layer is None:
             return
         self._deactivate_pixel_tool()
+        self._deactivate_class_tool()
         try:
             self._panel_states[layer.id()] = self._current_panel().state() if self._current_panel() is not None else {}
         except Exception as exc:
@@ -1223,13 +1235,19 @@ class CoverageModeController(BaseController):
             pass  # deleted (plugin closing)
 
     def _deactivate_pixel_tool(self) -> None:
-        iface = self._iface()
-        if iface is None or self._pixel_tool is None:
+        if self._pixel_tool is None:
             return
         previous, self._previous_map_tool = self._previous_map_tool, None
+        self._release_map_tool(self._pixel_tool, previous)
+
+    def _release_map_tool(self, tool: Any, previous: Any) -> None:
+        """Take ``tool`` off the map and give the map back to the tool it replaced."""
+        iface = self._iface()
+        if iface is None:
+            return
         try:
             canvas = iface.mapCanvas()
-            if canvas.mapTool() is not self._pixel_tool:
+            if canvas.mapTool() is not tool:
                 return
             if previous is not None:
                 try:
@@ -1237,9 +1255,65 @@ class CoverageModeController(BaseController):
                     return
                 except RuntimeError:
                     pass  # the previous tool was deleted: no tool rather than the picker
-            canvas.unsetMapTool(self._pixel_tool)
+            canvas.unsetMapTool(tool)
         except RuntimeError as exc:
-            logger.debug(f"[FM5] pixel picker not released: {exc}")  # canvas deleted (QGIS closing)
+            logger.debug(f"[FM5] picker not released: {exc}")  # canvas deleted (QGIS closing)
+
+    # === Point cloud: class pipette ===
+
+    def _on_class_pick_toggled(self, enabled: bool) -> None:
+        """The class pipette of the rail: a picker in the point cloud colour goes on the map (or leaves it)."""
+        iface = self._iface()
+        if iface is None:
+            return
+        if not enabled:
+            self._deactivate_class_tool()
+            return
+        canvas = iface.mapCanvas()
+        if self._class_tool is not None and canvas.mapTool() is self._class_tool:
+            return
+        if self._class_tool is None:
+            from ..styles.mockup_design import KIND_COLORS
+            from ..tools.pixel_picker_tool import PixelPickerTool
+            self._class_tool = PixelPickerTool(canvas, KIND_COLORS['point_cloud'])
+            self._class_tool.picked.connect(self._on_class_picked)
+            # The rail button follows the map: up when another tool takes over, down when QGIS gives it back.
+            self._class_tool.activated.connect(lambda: self._extras_call('set_class_pipette_checked', True))
+            self._class_tool.deactivated.connect(lambda: self._extras_call('set_class_pipette_checked', False))
+        self._previous_class_map_tool = canvas.mapTool()
+        canvas.setMapTool(self._class_tool)
+
+    def _deactivate_class_tool(self) -> None:
+        if self._class_tool is None:
+            return
+        previous, self._previous_class_map_tool = self._previous_class_map_tool, None
+        self._release_map_tool(self._class_tool, previous)
+
+    def _on_class_picked(self, point: Any, extend: bool) -> None:
+        """Check the class of the points under the click (Ctrl+click: added to the checked classes)."""
+        from ...core.domain.layer_kind import LayerKind
+        layer, panel, iface = self._active_layer, self._pc_panel, self._iface()
+        if layer is None or panel is None or iface is None or self._kind is not LayerKind.POINT_CLOUD:
+            return
+        from ...adapters.qgis.point_cloud_layer_adapter import class_at
+        code = class_at(layer, iface.mapCanvas(), point)
+        selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)
+        previewed = selecting is not None and selecting.isChecked()
+        hidden = self.tr("only the points drawn on the map can be picked: turn the preview off to pick a class it hides")
+        if code is None:
+            message = self.tr("No classified point under the click")
+            if previewed:
+                message = f"{message}: {hidden}"
+        elif previewed and extend and code in panel.checked_class_codes():
+            message = self.tr("Class {0} is already checked").format(code) + f": {hidden}"
+        elif not panel.select_class(code, extend):
+            message = self.tr("Class {0} is not in the class list of the layer").format(code)
+        else:
+            return
+        try:
+            iface.messageBar().pushInfo("FilterMate", message)
+        except RuntimeError:
+            pass  # message bar deleted (QGIS closing)
 
     def _on_pixel_picked(self, point: Any, extend: bool) -> None:
         layer = self._active_layer

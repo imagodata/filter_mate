@@ -161,6 +161,11 @@ def inverted_codes(present_codes: Iterable[int], checked_codes: Iterable[int]) -
     return tuple(int(code) for code in present_codes if int(code) not in checked)
 
 
+def picked_class_codes(checked_codes: Iterable[int], code: int, extend: bool) -> Tuple[int, ...]:
+    """Classes checked after a pipette click: the picked class alone, or added to the others with Ctrl."""
+    return tuple(sorted({int(code), *checked_codes})) if extend else (int(code),)
+
+
 def class_selection_summary(checked: int, shown: int, kept_points: Optional[int], total_points: Optional[int]) -> str:
     """Line under the class list: ``"3 of 12 classes · 9.8 M / 38.4 M points (25.5 %)"``.
 
@@ -1159,6 +1164,20 @@ class PointCloudExploringPanel(QWidget):
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
         self._update_class_summary()
         self._changed()
+
+    def checked_class_codes(self) -> List[int]:
+        """Codes of the checked classes, sorted."""
+        return self._checked_codes()
+
+    def select_class(self, code: int, extend: bool = False) -> bool:
+        """Check the class picked on the map (added to the checked ones with ``extend``); False when not listed."""
+        if int(code) not in self._present_codes() or self._classes_group.isHidden():
+            return False
+        if not self._classes_group.isChecked():
+            extend = False  # classes left checked under another active group do not come back
+            self._classes_group.setChecked(True)
+        self._check_codes(picked_class_codes(self._checked_codes(), code, extend))
+        return True
 
     def _set_all_classes(self, state: Any) -> None:
         self._check_codes(self._present_codes() if state == Qt.CheckState.Checked else ())

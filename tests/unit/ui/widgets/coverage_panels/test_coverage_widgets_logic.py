@@ -346,6 +346,13 @@ class TestClassQuickSelection:
         assert cloud.inverted_codes([2, 3], [2, 3]) == ()
         assert cloud.inverted_codes([2, 3], []) == (2, 3)
 
+    def test_pipette_click_replaces_the_classes(self):
+        assert cloud.picked_class_codes([2, 5], 6, extend=False) == (6,)
+
+    def test_pipette_ctrl_click_adds_the_class(self):
+        assert cloud.picked_class_codes([2, 5], 6, extend=True) == (2, 5, 6)
+        assert cloud.picked_class_codes([2, 6], 6, extend=True) == (2, 6)
+
     def test_summary_with_counts(self):
         assert cloud.class_selection_summary(3, 12, 9_800_000, 38_400_000) == "3 / 12 · 9.8 M / 38.4 M (25.5 %)"
 

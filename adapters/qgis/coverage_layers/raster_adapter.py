@@ -704,14 +704,39 @@ def rescale_values(values: List[float], old_min: float, old_max: float, low: flo
     return [low + (value - old_min) / span * (high - low) for value in values]
 
 
-_LINKED_RENDERERS: Dict[str, object] = {}
+_LINKED_RENDERERS: Dict[str, object] = {}  # layer id -> copy of the style before the link
+_STRETCHED: Dict[str, int] = {}  # layer id -> address of the renderer the link stretched
+_SAVE_HOOKED: List[object] = []  # projects whose writeMapLayer writes the original style back
+
+
+def _address(renderer) -> int:
+    """Identity of the C++ renderer behind a wrapper (a style set from the style panel is another one)."""
+    try:
+        from qgis.PyQt import sip
+        return int(sip.unwrapinstance(renderer))
+    except Exception:
+        return id(renderer)
+
+
+def _renderer_band(renderer) -> Optional[int]:
+    """Band a single band style reads; None when the renderer does not tell."""
+    for name in ('inputBand', 'grayBand', 'band'):
+        method = getattr(renderer, name, None)
+        if callable(method):
+            try:
+                return int(method())
+            except Exception:
+                continue
+    return None
 
 
 def link_range_to_style(layer: QgsRasterLayer, band: int, low: float, high: float) -> bool:
     """Stretch the layer style over ``[low, high]``: grey contrast or pseudocolour ramp stops.
 
-    The first call keeps a copy of the renderer, restored by :func:`unlink_range_from_style`.
-    Returns False for a renderer that has no single band range (multiband, paletted, ...).
+    The first call keeps a copy of the renderer, restored by :func:`unlink_range_from_style`
+    and written in a saved project instead of the stretched one. A style changed by the user
+    since (style panel) becomes the one kept. Returns False for a renderer that has no single
+    band range (multiband, paletted, ...) or that reads another band than ``band``.
     """
     renderer = layer.renderer()
     if renderer is None or low is None or high is None or high <= low:
@@ -719,8 +744,12 @@ def link_range_to_style(layer: QgsRasterLayer, band: int, low: float, high: floa
     kind = renderer.type()
     if kind not in ('singlebandgray', 'singlebandpseudocolor'):
         return False
-    if layer.id() not in _LINKED_RENDERERS:
+    style_band = _renderer_band(renderer)
+    if band is not None and style_band is not None and style_band != int(band):
+        return False  # the range is in the units of another band
+    if layer.id() not in _LINKED_RENDERERS or _STRETCHED.get(layer.id()) != _address(renderer):
         _LINKED_RENDERERS[layer.id()] = renderer.clone()
+        _hook_project_save()
     try:
         if kind == 'singlebandgray':
             enhancement = renderer.contrastEnhancement()
@@ -744,8 +773,59 @@ def link_range_to_style(layer: QgsRasterLayer, band: int, low: float, high: floa
     except Exception as exc:
         logger.debug(f"[FM5] range not linked to the style: {exc}")
         return False
+    _STRETCHED[layer.id()] = _address(renderer)
     layer.triggerRepaint()
     return True
+
+
+def _hook_project_save() -> None:
+    from qgis.core import QgsProject
+    project = QgsProject.instance()
+    if any(hooked is project for hooked in _SAVE_HOOKED):
+        return
+    project.writeMapLayer.connect(_write_original_style)
+    _SAVE_HOOKED.append(project)
+
+
+def _unhook_project_save() -> None:
+    while _SAVE_HOOKED:
+        project = _SAVE_HOOKED.pop()
+        try:
+            project.writeMapLayer.disconnect(_write_original_style)
+        except (TypeError, RuntimeError):
+            pass
+
+
+def _write_original_style(layer, element, document) -> None:
+    """A saved project keeps the style of a linked raster as it was before the link.
+
+    The written ``<rasterrenderer>`` is replaced by the kept copy; what other hooks or the
+    selection preview put on it (alpha band, transparency) stays, as when unlinking.
+    """
+    try:
+        saved = _LINKED_RENDERERS.get(layer.id())
+        if saved is None or _STRETCHED.get(layer.id()) != _address(layer.renderer()):
+            return  # not linked, or a style set by the user since: written as it is
+        pipe = element.firstChildElement('pipe')
+        written = pipe.firstChildElement('rasterrenderer')
+        if written.isNull():
+            return
+        saved.writeXml(document, pipe)
+        original = pipe.lastChildElement('rasterrenderer')
+        if original.isNull() or original == written:
+            return
+        if written.hasAttribute('alphaBand'):
+            original.setAttribute('alphaBand', written.attribute('alphaBand'))
+        transparency = written.firstChildElement('rasterTransparency')
+        if not transparency.isNull():
+            previous = original.firstChildElement('rasterTransparency')
+            if not previous.isNull():
+                original.removeChild(previous)
+            original.appendChild(transparency.cloneNode(True))
+        pipe.insertBefore(original, written)
+        pipe.removeChild(written)
+    except Exception as exc:
+        logger.warning(f"[FM5] original style of a linked raster not written in the project: {exc}")
 
 
 def is_style_linked(layer: QgsRasterLayer) -> bool:
@@ -755,9 +835,12 @@ def is_style_linked(layer: QgsRasterLayer) -> bool:
 def unlink_range_from_style(layer: QgsRasterLayer) -> bool:
     """Give the layer back the style it had before :func:`link_range_to_style`."""
     saved = _LINKED_RENDERERS.pop(layer.id(), None) if layer is not None else None
+    stretched = _STRETCHED.pop(layer.id(), None) if layer is not None else None
     if saved is None:
         return False
     current = layer.renderer()
+    if current is not None and stretched is not None and _address(current) != stretched:
+        return False  # the user set another style since the link: it stays
     transparency = current.rasterTransparency() if current is not None else None
     restored = saved.clone()
     if transparency is not None:
@@ -778,9 +861,11 @@ def forget_linked_styles(layer_ids=None) -> None:
     """
     if layer_ids is None:
         _LINKED_RENDERERS.clear()
+        _STRETCHED.clear()
         return
     for layer_id in layer_ids:
         _LINKED_RENDERERS.pop(layer_id, None)
+        _STRETCHED.pop(layer_id, None)
 
 
 def unlink_all_styles(project=None) -> int:
@@ -796,4 +881,6 @@ def unlink_all_styles(project=None) -> int:
         except RuntimeError:
             pass
         _LINKED_RENDERERS.pop(layer_id, None)
+        _STRETCHED.pop(layer_id, None)
+    _unhook_project_save()
     return restored
