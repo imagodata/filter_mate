@@ -372,6 +372,62 @@ def _unfilter(env, layer, kind):
     return service_mod.CrossFilterService().unfilter("src", [layer.id()], {layer.id(): kind}, project=env.project)
 
 
+# --- 1. Unfilter keeps a point cloud enriched with HeightAboveGround -------------
+
+class TestUnfilterEnrichedCloud:
+
+    def test_enriched_cloud_stays_a_derived_source(self, env):
+        cloud = _cloud(env)
+        pristine = cloud.source()
+        hag = enrich(cloud, f"{env.session}/lidar_hag_1a2b3c4d.copc.laz").source
+        clip(cloud, f"{env.session}/lidar_5e6f7a8b.copc.laz", LayerKind.POINT_CLOUD)
+        assert _unfilter(env, cloud, LayerKind.POINT_CLOUD) == [cloud.id()]
+        assert cloud.source() == hag  # Unfilter keeps the HeightAboveGround dimension
+        known = env.reg.get(cloud.id())
+        assert known is not None and known.pristine_source == pristine
+        assert env.project.write()[1][cloud.id()].datasource == "./data/lidar.copc.laz"
+        assert env.reg.restore_all(env.project) == 1 and cloud.source() == pristine
+
+    def test_enriched_cloud_with_a_subset_only(self, env):
+        cloud = _cloud(env)
+        pristine = cloud.source()
+        enrich(cloud, f"{env.session}/lidar_hag_1a2b3c4d.copc.laz")
+        assert cloud.setSubsetString("HeightAboveGround >= 2")
+        _unfilter(env, cloud, LayerKind.POINT_CLOUD)
+        assert cloud.subsetString() == "" and env.reg.get(cloud.id()).pristine_source == pristine
+
+    def test_unfilter_then_undo_then_unload(self, env):
+        cloud = _cloud(env)
+        pristine = cloud.source()
+        enrich(cloud, f"{env.session}/lidar_hag_1a2b3c4d.copc.laz")
+        clipped = clip(cloud, f"{env.session}/lidar_5e6f7a8b.copc.laz", LayerKind.POINT_CLOUD).source
+        service = service_mod.CrossFilterService()
+        service.unfilter("src", [cloud.id()], {cloud.id(): LayerKind.POINT_CLOUD}, project=env.project)
+        service.undo("src", project=env.project)
+        assert cloud.source() == clipped and env.reg.get(cloud.id()).pristine_source == pristine
+        env.reg.restore_all(env.project)
+        assert cloud.source() == pristine
+
+    def test_favorite_on_an_enriched_cloud_keeps_it_registered(self, env):
+        from fm_derived_sources_test.adapters.qgis.coverage_layers import favorites_bridge
+        cloud = _cloud(env)
+        pristine = cloud.source()
+        enrich(cloud, f"{env.session}/lidar_hag_1a2b3c4d.copc.laz")
+        clip(cloud, f"{env.session}/lidar_5e6f7a8b.copc.laz", LayerKind.POINT_CLOUD)
+        entry = dict(LayerSnapshot(cloud.id(), "point_cloud", subset="Classification = 2").to_dict(), layer_name="lidar")
+        assert favorites_bridge.apply([entry], project=env.project, kind_of=lambda layer: LayerKind.POINT_CLOUD) == 1
+        assert cloud.subsetString() == "Classification = 2" and "_hag_" in cloud.source()
+        assert env.reg.get(cloud.id()).pristine_source == pristine
+
+    def test_plain_layer_unfiltered_leaves_the_registry(self, env):
+        raster = _raster(env)
+        original = raster.source()
+        clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+        _unfilter(env, raster, LayerKind.RASTER)
+        assert raster.source() == original and not env.reg.is_derived(raster.id())
+        assert snapshots.DERIVED_PROPERTY not in raster.props
+
+
 # --- 2. Alpha band added by the clipped VRT ------------------------------------------
 
 class TestAlphaBand:

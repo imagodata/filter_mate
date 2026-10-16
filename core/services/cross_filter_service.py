@@ -16,7 +16,7 @@ import weakref
 from typing import Callable, Iterable, List, Optional
 
 from ..domain.cross_filter import CrossFilterRequest
-from ..domain.filter_state import CrossOperation, CrossOperationHistory, LayerSnapshot
+from ..domain.filter_state import CrossOperation, CrossOperationHistory
 from ..domain.layer_kind import LayerKind
 
 logger = logging.getLogger(__name__)
@@ -174,7 +174,7 @@ class CrossFilterService:
             kinds: ``{layer_id: LayerKind}``.
         """
         from qgis.core import QgsProject
-        from ...adapters.qgis.coverage_layers.snapshots import restore_snapshot, take_snapshot
+        from ...adapters.qgis.coverage_layers.snapshots import base_snapshot, restore_snapshot, take_snapshot
         project = project or QgsProject.instance()
         changes = []
         for layer_id in layer_ids:
@@ -183,7 +183,7 @@ class CrossFilterService:
             if layer is None or kind is LayerKind.OTHER:
                 continue
             before = take_snapshot(layer, kind)
-            original = LayerSnapshot(layer_id, kind.value, source=before.base_source, provider=before.base_provider, subset='')
+            original = base_snapshot(before)
             if original.same_state(before):
                 continue
             try:

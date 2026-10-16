@@ -358,6 +358,22 @@ def take_snapshot(layer: QgsMapLayer, kind: LayerKind, derived_registry: Optiona
     return LayerSnapshot(layer.id(), kind.value, source=layer.source(), provider=layer.providerType(), subset=subset)
 
 
+def base_snapshot(snapshot: LayerSnapshot, subset: str = '') -> LayerSnapshot:
+    """State Unfilter goes back to: the base source of ``snapshot``, with ``subset``.
+
+    The base of a point cloud enriched with HeightAboveGround is its enriched
+    file, in the session cache: that state is still derived, so the project
+    is written, and unloading restores, the source it was enriched from.
+    """
+    if snapshot.derived and snapshot.enriched_source:
+        return LayerSnapshot(snapshot.layer_id, snapshot.kind, source=snapshot.base_source,
+                             provider=snapshot.base_provider, subset=subset, derived=True,
+                             original_source=snapshot.base_source, original_provider=snapshot.base_provider,
+                             enriched_source=snapshot.enriched_source, enriched_provider=snapshot.enriched_provider)
+    return LayerSnapshot(snapshot.layer_id, snapshot.kind, source=snapshot.base_source,
+                         provider=snapshot.base_provider, subset=subset)
+
+
 def restore_snapshot(layer: QgsMapLayer, snapshot: LayerSnapshot,
                      derived_registry: Optional[DerivedSourceRegistry] = None) -> bool:
     """Put ``layer`` back in the state captured by ``snapshot`` (main thread).
