@@ -169,6 +169,18 @@ def reader_for(path: str) -> str:
     raise ValueError(f"no PDAL reader for {path}")
 
 
+# Authorities PROJ resolves by code; any other CRS (USER:..., none) is written as WKT.
+_PDAL_AUTHORITIES = ('EPSG:', 'IGNF:', 'ESRI:')
+
+
+def srs_for(crs) -> str:
+    """``a_srs`` of a writer for a QgsCoordinateReferenceSystem."""
+    authid = crs.authid() or ''
+    if authid.upper().startswith(_PDAL_AUTHORITIES):
+        return authid
+    return crs.toWkt()
+
+
 def run_pipeline(stages: list, timeout: float = 3600.0, is_canceled: Optional[Callable[[], bool]] = None) -> Tuple[bool, str]:
     """Run a PDAL pipeline given as a list of stages.
 
@@ -189,7 +201,9 @@ def run_pipeline(stages: list, timeout: float = 3600.0, is_canceled: Optional[Ca
             json.dump({"pipeline": stages}, handle)
         process = subprocess.Popen(  # nosec B603 - fixed argv, no shell
             [exe, 'pipeline', pipeline_path],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, **_subprocess_kwargs())
+            # PDAL writes UTF-8 (paths, messages): the Windows locale (cp1252) cannot decode it all.
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace',
+            **_subprocess_kwargs())
         elapsed = 0.0
         while True:
             try:
