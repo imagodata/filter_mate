@@ -140,6 +140,56 @@ class TestSessionLock:
         cache.set_cache_root(str(root))
         assert not cache.is_closed() and os.path.isdir(cache.session_dir())
 
+    @staticmethod
+    def _held(monkeypatch, name):
+        """``name`` cannot be removed (Windows: a file GDAL or a killed process still holds)."""
+        real = os.remove
+
+        def remove(path, *args, **kwargs):
+            if os.path.basename(path) == name:
+                raise PermissionError(13, "in use", path)
+            return real(path, *args, **kwargs)
+
+        monkeypatch.setattr(cache.os, "remove", remove)
+
+    @needs_flock
+    def test_purge_keeps_the_lock_file_while_a_file_cannot_be_removed(self, root, monkeypatch):
+        folder = cache.session_dir()
+        _files(folder, "cloud_1a2b3c4d.laz", "dtm_5e6f7a8b.vrt")
+        self._held(monkeypatch, "cloud_1a2b3c4d.laz")
+        cache.purge_session()
+        assert sorted(os.listdir(folder)) == [cache.LOCK_NAME, "cloud_1a2b3c4d.laz"]
+        assert cache.session_state(folder) == (False, socket.gethostname())  # released, still FilterMate's
+        monkeypatch.undo()
+        _age(folder, 120)
+        cache.set_cache_root(str(root))
+        cache.session_dir()  # the next session of this computer removes it
+        assert not os.path.exists(folder)
+
+    def test_stale_session_keeps_its_lock_file_while_a_file_cannot_be_removed(self, root, monkeypatch):
+        dead = _session(root, "session_dead", host=socket.gethostname())
+        _files(dead, "cloud_1a2b3c4d.laz", "dtm_5e6f7a8b.vrt")
+        _age(dead, 120)
+        self._held(monkeypatch, "cloud_1a2b3c4d.laz")
+        assert cache.cleanup_stale_sessions() == 0
+        assert sorted(os.listdir(dead)) == [cache.LOCK_NAME, "cloud_1a2b3c4d.laz"]
+
+    def test_failed_session_creation_leaves_no_folder(self, root, monkeypatch):
+        def no_lock_file(path, *args, **kwargs):
+            raise PermissionError(13, "denied", path)
+
+        monkeypatch.setattr(cache, "open", no_lock_file, raising=False)
+        with pytest.raises(OSError):
+            cache._create_session(str(root))
+        assert list(root.iterdir()) == []
+
+    def test_empty_session_folder_without_lock_goes_after_a_day(self, root):
+        # Left by a QGIS stopped between creating the folder and its lock file.
+        empty = _session(root, "session_0123456789", age=2 * 86400)
+        recent = _session(root, "session_9876543210", age=3600)
+        cache.cleanup_stale_sessions()
+        assert not empty.exists() and recent.exists()
+
 
 class TestFallback:
 
@@ -156,8 +206,11 @@ class TestFallback:
             cache.set_cache_root(None)
 
     @staticmethod
-    def _fallback_path(tmp_path, monkeypatch, prepare):
-        """Cache path with an unwritable root, once ``prepare(user temp folder)`` ran."""
+    def _fallback_path(tmp_path, monkeypatch, prepare, inspect=None):
+        """Cache path with an unwritable root, once ``prepare(user temp folder)`` ran.
+
+        ``inspect(path)`` runs before the session is purged.
+        """
         blocker = tmp_path / "file"
         blocker.write_text("not a folder")
         (tmp_path / "tmp").mkdir()
@@ -165,24 +218,52 @@ class TestFallback:
         prepare(os.path.dirname(cache.temp_root()))
         cache.set_cache_root(str(blocker / "cache"))
         try:
-            return cache.new_path("dtm", ".vrt")
+            path = cache.new_path("dtm", ".vrt")
+            if inspect is not None:
+                inspect(path)
+            return path
         finally:
             cache.set_cache_root(None)
 
-    @pytest.mark.skipif(not hasattr(os, "getuid"), reason="POSIX owners")
-    def test_user_temp_folder_owned_by_someone_else_is_not_used(self, tmp_path, monkeypatch):
-        user_folder = []
-
-        def other_owner(folder):
+    @staticmethod
+    def _other_owner(monkeypatch):
+        def prepare(folder):
             os.makedirs(folder)
-            user_folder.append(folder)
             uid = os.getuid()
             monkeypatch.setattr(cache.os, "getuid", lambda: uid + 1)
+        return prepare
 
-        path = self._fallback_path(tmp_path, monkeypatch, other_owner)
-        assert not path.startswith(os.path.join(user_folder[0], ""))
+    @pytest.mark.skipif(not hasattr(os, "getuid"), reason="POSIX owners")
+    def test_user_temp_folder_owned_by_someone_else_is_not_used(self, tmp_path, monkeypatch):
+        modes = []
+
+        def private_mode(path):
+            modes.append(os.stat(os.path.dirname(os.path.dirname(os.path.dirname(path)))).st_mode & 0o077)
+
+        path = self._fallback_path(tmp_path, monkeypatch, self._other_owner(monkeypatch), private_mode)
+        assert not path.startswith(os.path.join(os.path.dirname(cache.temp_root()), ""))
         assert os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(path)))).startswith("filtermate-")
-        assert os.stat(os.path.dirname(os.path.dirname(os.path.dirname(path)))).st_mode & 0o077 == 0
+        assert modes == [0]
+
+    @pytest.mark.skipif(not hasattr(os, "getuid"), reason="POSIX owners")
+    def test_private_temp_folder_removed_with_the_session(self, tmp_path, monkeypatch):
+        path = self._fallback_path(tmp_path, monkeypatch, self._other_owner(monkeypatch))
+        private = os.path.dirname(os.path.dirname(os.path.dirname(path)))
+        assert os.path.basename(private).startswith("filtermate-") and not os.path.exists(private)
+
+    def test_user_temp_folder_that_is_a_junction_is_not_used(self, tmp_path, monkeypatch):
+        # Windows junction: not a link for lstat, resolved by realpath.
+        target = tmp_path / "elsewhere"
+        target.mkdir()
+        real_realpath = os.path.realpath
+
+        def junction(folder):
+            os.makedirs(folder)
+            monkeypatch.setattr(cache.os.path, "realpath", lambda path: str(target) if os.path.normcase(
+                os.path.abspath(path)) == os.path.normcase(folder) else real_realpath(path))
+
+        path = self._fallback_path(tmp_path, monkeypatch, junction)
+        assert not path.startswith(os.path.join(os.path.dirname(cache.temp_root()), ""))
 
     @pytest.mark.skipif(os.name == "nt", reason="symbolic links need privileges")
     def test_user_temp_folder_that_is_a_link_is_not_followed(self, tmp_path, monkeypatch):
