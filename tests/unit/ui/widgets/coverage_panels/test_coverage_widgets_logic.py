@@ -567,9 +567,10 @@ class TestPixelHistory:
 
 
 class TestDtmLayerCombo:
-    """Constat 16: PDAL hag_dem reads a file, the DTM list leaves out WMS / XYZ / WCS like the layer lists."""
+    """PDAL hag_dem reads a file through GDAL: the DTM list leaves out WMS / XYZ / WCS like the layer
+    lists, and the virtual / PostGIS rasters."""
 
-    def test_web_rasters_are_excluded(self, monkeypatch):
+    def test_rasters_pdal_cannot_read_are_excluded(self, monkeypatch):
         for name, path in ((".adapters", _PROJECT_ROOT / "adapters"),
                            (".adapters.qgis", _PROJECT_ROOT / "adapters" / "qgis")):
             package = types.ModuleType(_PKG + name)
@@ -580,10 +581,12 @@ class TestDtmLayerCombo:
         combo = types.SimpleNamespace(excludedProviders=lambda: list(excluded),
                                       setExcludedProviders=lambda providers: excluded.__init__(providers))
         try:
-            cloud._exclude_web_rasters(combo)
+            cloud._dtm_rasters_only(combo)
         finally:
             sys.modules.pop(capability, None)
-        assert excluded[0] == "ogr" and {"wms", "wcs", "arcgismapserver"} <= set(excluded)
+        assert excluded[0] == "ogr"
+        assert {"wms", "wcs", "arcgismapserver", "virtualraster", "postgresraster"} <= set(excluded)
+        assert "gdal" not in excluded and len(excluded) == len(set(excluded))
 
     def test_the_dtm_combo_uses_it(self):
         import ast
@@ -591,4 +594,4 @@ class TestDtmLayerCombo:
         tree = ast.parse(path.read_text(encoding="utf-8"))
         build = next(node for node in ast.walk(tree)
                      if isinstance(node, ast.FunctionDef) and node.name == "_build_ranges_group")
-        assert "_exclude_web_rasters(self._hag_layer_combo)" in ast.unparse(build)
+        assert "_dtm_rasters_only(self._hag_layer_combo)" in ast.unparse(build)

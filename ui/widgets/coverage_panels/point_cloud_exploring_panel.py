@@ -384,13 +384,22 @@ def _raster_layer_filter() -> Any:
         return None
 
 
-def _exclude_web_rasters(combo: Any) -> None:
-    """Hide the rasters FilterMate cannot read (WMS, XYZ, WCS...) from a layer combo box, as in the layer lists."""
+# Raster providers without a file PDAL could open (filters.hag_dem reads the DTM through GDAL).
+NON_FILE_RASTER_PROVIDERS = ('virtualraster', 'postgresraster')
+
+
+def _dtm_rasters_only(combo: Any) -> None:
+    """DTM list: hide the rasters PDAL cannot read (WMS / XYZ / WCS as in the layer lists, virtual, PostGIS)."""
     try:
         from ....adapters.qgis.point_cloud_capability import exclude_non_analysis_rasters
+        exclude_non_analysis_rasters(combo)
     except ImportError:
-        return
-    exclude_non_analysis_rasters(combo)
+        pass
+    try:
+        excluded = list(combo.excludedProviders())
+        combo.setExcludedProviders(excluded + [key for key in NON_FILE_RASTER_PROVIDERS if key not in excluded])
+    except (AttributeError, TypeError, RuntimeError):
+        pass
 
 
 @contextmanager
@@ -819,7 +828,7 @@ class PointCloudExploringPanel(QWidget):
             raster_filter = _raster_layer_filter()
             if raster_filter is not None:
                 self._hag_layer_combo.setFilters(raster_filter)
-            _exclude_web_rasters(self._hag_layer_combo)  # PDAL hag_dem reads files: no WMS / XYZ basemap
+            _dtm_rasters_only(self._hag_layer_combo)  # PDAL hag_dem reads files: no basemap, no virtual raster
             self._hag_layer_combo.setAllowEmptyLayer(True)
             self._hag_layer_combo.setLayer(None)
             self._hag_layer_combo.layerChanged.connect(self._changed)
