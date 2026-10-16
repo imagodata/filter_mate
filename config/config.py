@@ -401,19 +401,46 @@ def merge(a, b, path=None):
 
 
 def get_config_json_path():
-    """Path of the active config.json, without reading or writing anything.
+    """Path of the active config.json, without writing anything.
 
     ENV_VARS["CONFIG_JSON_PATH"] once init_env_vars() ran; before that (the
-    plugin constructor reads the forced language there), the file
-    init_env_vars() loads: config.json in the FilterMate folder of the QGIS
-    profile, where the Configuration tab saves. The copy in the plugin
-    folder is only a fallback.
+    plugin constructor reads the forced language there), the path
+    init_env_vars() will settle on: config.json in the FilterMate folder of
+    the QGIS profile, or in the folder its APP.OPTIONS.APP_SQLITE_PATH names
+    (e.g. a QGIS 4 profile sharing the QGIS 3 FilterMate folder). The
+    Configuration tab saves there; reading the profile copy instead brought
+    back a stale language at every start. The copy in the plugin folder is
+    only a fallback.
     """
     path = ENV_VARS.get("CONFIG_JSON_PATH")
     if path:
         return path
     settings_path = QgsApplication.qgisSettingsDirPath().rstrip(os.sep).rstrip('/')
-    return os.path.join(os.path.normpath(os.path.join(settings_path, 'FilterMate')), 'config.json')
+    profile_json = os.path.join(os.path.normpath(os.path.join(settings_path, 'FilterMate')), 'config.json')
+    configured = _configured_config_directory(profile_json)
+    return os.path.join(configured, 'config.json') if configured else profile_json
+
+
+def _configured_config_directory(config_json_path):
+    """Folder named by APP.OPTIONS.APP_SQLITE_PATH in config_json_path, if init_env_vars() would use it.
+
+    Same test as init_env_vars(): its parent folder exists and is writable.
+    None when the file is missing or unreadable, or the option is empty or unusable.
+    """
+    try:
+        with open(config_json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        app = data.get("APP") if isinstance(data.get("APP"), dict) else data.get("app")
+        value = _get_option_value(app.get("OPTIONS", {}).get("APP_SQLITE_PATH"), "")
+    except (OSError, ValueError, AttributeError):
+        return None
+    if not isinstance(value, str) or not value:
+        return None
+    configured = os.path.normpath(value)
+    parent = os.path.dirname(configured)
+    if parent and os.path.exists(parent) and os.access(parent, os.W_OK):
+        return configured
+    return None
 
 
 def init_env_vars():
