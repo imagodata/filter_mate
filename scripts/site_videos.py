@@ -288,6 +288,11 @@ def mark(name):
     return lambda: REC.event('mark', name=name)
 
 
+def still(name):
+    """A step image of the stories, cut from the recording by site_video_render.py (img/stories/<name>.webp)."""
+    return (0, mark('still:' + name))
+
+
 # ------------------------------------------------------------------ helpers from recipe_screenshots.py
 def check_combo_items(combo, texts, uncheck_others=False):
     model = combo.model()
@@ -353,6 +358,14 @@ def rendering():
 def set_extent(rect):
     iface.mapCanvas().setExtent(QgsRectangle(rect))
     iface.mapCanvas().refresh()
+
+
+def zoom_rect(xmin, ymin, xmax, ymax):
+    """Frame a map rectangle and keep it as the scene framing (refocus() returns to it)."""
+    def _s():
+        STATE['scene_rect'] = QgsRectangle(xmin, ymin, xmax, ymax)
+        set_extent(STATE['scene_rect'])
+    return _s
 
 
 def zoom_focus(scale):
@@ -1415,25 +1428,31 @@ PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, de
 
 
 # ------------------------------------------------------------------ FilterMate 5: raster and LiDAR
-# Estavar (Cerdagne): IGN LiDAR HD tile 0616_6153 (COPC), the DTM interpolated from its ground
-# points (1 m) and BD TOPO / cadastre vectors of the same square kilometre.
+# Estavar (Cerdagne, Pyrénées-Orientales): one square kilometre around the village cut from the
+# IGN LiDAR HD tiles 0616_6152 and 0616_6153 (COPC, 25.8 M points), the DTM interpolated from
+# their ground points (1 m), its slope in percent, BD TOPO (IGN WFS) and Etalab cadastre.
+# scripts/site_videos.sh documents how the files of fm_video\data are made.
 FM5_DIR = os.environ.get('FM5_DIR', os.path.join(ROOT, 'data'))
-FM5_DTM = os.path.join(FM5_DIR, 'mnt_1m.tif')
-FM5_GPKG = os.path.join(FM5_DIR, 'cerdagne.gpkg')
-FM5_TILE = os.path.join(FM5_DIR, 'estavar.copc.laz')
-DTM_COLORS = [(1190, '#3f7d4f'), (1215, '#8fb46a'), (1250, '#d8d39a'), (1300, '#c8a27a'), (1358, '#f3efe8')]
+FM5_DTM = os.path.join(FM5_DIR, 'mnt_village.tif')
+FM5_SLOPE = os.path.join(FM5_DIR, 'pente_village.tif')
+FM5_GPKG = os.path.join(FM5_DIR, 'estavar.gpkg')
+FM5_TILE = os.path.join(FM5_DIR, 'estavar_village.copc.laz')
+FM5_EXTENT = (616000, 6151700, 617000, 6152700)
+DTM_COLORS = [(1188, '#3f7d4f'), (1215, '#8fb46a'), (1250, '#d8d39a'), (1300, '#c8a27a'), (1358, '#f3efe8')]
+SLOPE_COLORS = [(0, '#f4f1e4'), (15, '#e8d48c'), (30, '#de8f3c'), (60, '#ad3a2c'), (100, '#5c1a22')]
 
 
-def dtm_layer(name):
+def ramp_layer(path, name, colors, opacity):
     from qgis.core import (QgsColorRampShader, QgsRasterLayer, QgsRasterShader,
                            QgsSingleBandPseudoColorRenderer)
-    rl = QgsRasterLayer(FM5_DTM, name, 'gdal')
-    fn = QgsColorRampShader(DTM_COLORS[0][0], DTM_COLORS[-1][0])
-    fn.setColorRampItemList([QgsColorRampShader.ColorRampItem(v, QColor(c), f'{v} m') for v, c in DTM_COLORS])
+    rl = QgsRasterLayer(path, name, 'gdal')
+    fn = QgsColorRampShader(colors[0][0], colors[-1][0])
+    fn.setClip(False)
+    fn.setColorRampItemList([QgsColorRampShader.ColorRampItem(v, QColor(c), f'{v}') for v, c in colors])
     shader = QgsRasterShader()
     shader.setRasterShaderFunction(fn)
     renderer = QgsSingleBandPseudoColorRenderer(rl.dataProvider(), 1, shader)
-    renderer.setOpacity(0.62)
+    renderer.setOpacity(opacity)
     rl.setRenderer(renderer)
     return rl
 
@@ -1443,19 +1462,23 @@ def hillshade_layer(name):
     rl = QgsRasterLayer(FM5_DTM, name, 'gdal')
     renderer = QgsHillshadeRenderer(rl.dataProvider(), 1, 315.0, 40.0)
     renderer.setZFactor(1.6)
+    if DARK:
+        renderer.setOpacity(0.55)
     rl.setRenderer(renderer)
     return rl
 
 
-def setup5(layer_names, margin=1.04):
-    """Load the Estavar layers (bottom to top) and frame the square kilometre of the tile."""
+def setup5(layer_names, hidden=(), margin=1.03):
+    """Load the Estavar layers (bottom to top), hide `hidden` in the legend, frame the square kilometre."""
     def _s():
         canvas = prepare_window()
         for name in layer_names:
             if name == 'hillshade':
                 ml = hillshade_layer(name)
             elif name == 'mnt':
-                ml = dtm_layer(name)
+                ml = ramp_layer(FM5_DTM, name, DTM_COLORS, 0.62)
+            elif name == 'pente':
+                ml = ramp_layer(FM5_SLOPE, name, SLOPE_COLORS, 0.72)
             elif name == 'lhd':
                 from qgis.core import QgsPointCloudLayer
                 ml = QgsPointCloudLayer(FM5_TILE, name, 'copc')
@@ -1465,7 +1488,10 @@ def setup5(layer_names, margin=1.04):
                 style_layer(ml, STYLE.get(name))
             log(f'layer {name} valid={ml.isValid()}')
             QgsProject.instance().addMapLayer(ml)
-        bb = QgsRectangle(616000, 6152000, 617000, 6153000)
+            if name in hidden:
+                node = QgsProject.instance().layerTreeRoot().findLayer(ml.id())
+                node.setItemVisibilityChecked(False)
+        bb = QgsRectangle(*FM5_EXTENT)
         bb.scale(margin)
         STATE['scene_rect'] = QgsRectangle(bb)
         set_extent(bb)
@@ -1473,8 +1499,8 @@ def setup5(layer_names, margin=1.04):
     return _s
 
 
-def boot5(layers, margin=1.04):
-    return [(1000, setup5(layers, margin)), (3000, open_plugin), (8000, size_dock), (1500, wait_idle())]
+def boot5(layers, hidden=()):
+    return [(1000, setup5(layers, hidden)), (3000, open_plugin), (8000, size_dock), (1500, wait_idle())]
 
 
 def coverage():
@@ -1494,12 +1520,15 @@ def wait_current(name):
     return _s
 
 
+def wait_long():
+    """wait_idle() for minutes, not 100 s: PDAL computes the height above ground first."""
+    fn = wait_idle()
+    fn.max_tries = 4 * 60 * 10
+    return fn
+
+
 def coverage_host():
     return dock().findChild(QWidget, 'stackedWidget_exploring_coverage')
-
-
-def named(name):
-    return lambda: dock().findChild(QWidget, name)
 
 
 def group_check(get_group):
@@ -1577,62 +1606,112 @@ def check_class(text):
     def _s():
         lw = pc_panel()._classes_list
         hits = [lw.item(i) for i in range(lw.count()) if text.lower() in lw.item(i).text().lower()]
-        log(f'class items {[lw.item(i).text() for i in range(lw.count())]} -> {[h.text() for h in hits]}')
+        log(f'class items -> {[h.text() for h in hits]}')
         for item in hits[:1]:
             item.setCheckState(Qt.CheckState.Checked)
     return _s
 
 
+def pick_class(text):
+    """Open the classes group and tick one class, as a user would."""
+    group = lambda: pc_panel()._classes_group  # noqa: E731
+    return (act(group_check(group), open_group(group)) + [
+        hold(600), (0, ensure_visible(lambda: pc_panel()._classes_list)), hold(300),
+    ] + act(class_item(text), check_class(text), lead=700) + [hold(1200)])
+
+
+def height_above(dtm, value):
+    """ATTRIBUTES group: height above the DTM >= value, measured from the layer `dtm`."""
+    group = lambda: pc_panel()._ranges_group  # noqa: E731
+    return (act(group_check(group), open_group(group)) + [
+        hold(500), (0, ensure_visible(lambda: pc_panel()._hag_spin)), hold(300),
+        (0, cam(lambda: pc_panel()._ranges_group, dur=1.2, pad=30)),
+    ] + act(lambda: pc_panel()._hag_check, lambda: pc_panel()._hag_check.setChecked(True))
+        + typed_spin(lambda: pc_panel()._hag_spin, value)
+        + act(lambda: pc_panel()._hag_layer_combo, lambda: pc_panel()._hag_layer_combo.setLayer(layer(dtm)))
+        + [hold(1200)])
+
+
+def run_filter_long(fast=8.0):
+    """run_filter() when PDAL computes the height above ground before the filter."""
+    return act('pushButton_action_filter', click_filter) + [
+        (300, speed(fast)), (1500, wait_long()), (0, refocus), (600, wait_idle()), (400, speed(1.0)),
+    ]
+
+
 def fm5_scene():
-    """Start recording on the whole tile."""
-    return [(500, wait_idle()), (500, rec_start), (0, cam('full', dur=0, drift=1.03)), hold(1200)]
+    """Start recording on the whole square kilometre."""
+    return [(500, wait_idle()), (500, rec_start), (0, cam('full', dur=0, drift=1.03)), hold(1200),
+            (0, cam('canvas', dur=1.4, drift=1.03)), hold(1400)]
 
 
-RANGE = (1190, 1215)
+def to_exploring(name):
+    return pick_layer(name) + [(300, wait_current(name)), hold(800), (0, cam(coverage_host, dur=1.4, pad=24)), hold(900)]
 
-# raster: the valley floor of the DTM (value range, histogram, preview) -> buildings and parcels on it.
-RASTER = boot5(['hillshade', 'mnt', 'parcelle', 'troncon_de_route', 'batiment']) + fm5_scene() + [
-    (0, cam('canvas', dur=1.4, drift=1.03)), hold(1200),
-] + pick_layer('mnt') + [(300, wait_current('mnt')), (0, cam(coverage_host, dur=1.4, pad=24)), hold(1200)] \
+
+# slope (story 9): DTM slope >= 30 % (value range, histogram, preview) -> parcels at least half on it.
+SLOPE = boot5(['hillshade', 'pente', 'parcelle', 'batiment']) + fm5_scene() + to_exploring('pente') \
     + act(group_check(lambda: raster_panel()._range_group), open_group(lambda: raster_panel()._range_group)) + [
     hold(600), (0, ensure_visible(lambda: raster_panel()._max_spin)), hold(300),
     (0, cam(lambda: raster_panel()._range_group, dur=1.2, pad=30)),
-] + typed_spin(lambda: raster_panel()._min_spin, RANGE[0]) + typed_spin(lambda: raster_panel()._max_spin, RANGE[1]) \
-    + [hold(1500)] + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(3200) + [
+] + typed_spin(lambda: raster_panel()._min_spin, 30) + [hold(1500)] \
+    + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(3200) + [
     (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
-] + targets(['batiment', 'parcelle']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
+] + targets(['parcelle']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
     (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + [(0, lambda: counts(['batiment', 'parcelle']))] + show_map(4500, 1.05) \
-    + ending(['batiment', 'parcelle'])
+] + run_filter() + [(0, lambda: counts(['parcelle', 'batiment']))] + show_map(4500, 1.05) + ending(['parcelle'])
 
-# lidar: high vegetation points of the LiDAR HD tile -> buildings within 5 m of them.
-LIDAR = boot5(['hillshade', 'lhd', 'parcelle', 'batiment']) + fm5_scene() + [
-    (0, cam('canvas', dur=1.4, drift=1.03)), hold(1500),
-] + pick_layer('lhd') + [(300, wait_current('lhd')), hold(2500), (0, cam(coverage_host, dur=1.4, pad=24)), hold(1200)] \
-    + act(group_check(lambda: pc_panel()._classes_group), open_group(lambda: pc_panel()._classes_group)) + [
-    hold(800), (0, ensure_visible(lambda: pc_panel()._classes_list)), hold(300),
-] + act(class_item('high veg'), check_class('high veg'), lead=700) + [hold(1500)] \
-    + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(3500) + [
+# heights (story 10): building points more than 9 m above the DTM (PDAL) -> buildings above 9 m.
+HEIGHTS = boot5(['hillshade', 'mnt', 'lhd', 'batiment'], hidden=('mnt',)) + fm5_scene() + to_exploring('lhd') \
+    + pick_class('6 - building') + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() \
+    + show_map(2800) + [(0, cam(coverage_host, dur=1.4, pad=24))] + height_above('mnt', 9) + [
     (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
-] + targets(['batiment']) + predicates(['intersect']) \
-    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(5) + [
+] + targets(['batiment']) + predicates(['intersect']) + [(200, buffer_off), (400, cam(ACTION_ZONE, dur=1.2, pad=40))] \
+    + run_filter_long() + [(0, lambda: counts(['batiment']))] + show_map(4500, 1.05) + ending(['batiment'])
+
+# pruning (story 11): high vegetation more than 8 m above the DTM -> road segments within 3 m of it.
+PRUNING = boot5(['hillshade', 'mnt', 'lhd', 'batiment', 'troncon_de_route'], hidden=('mnt',)) + fm5_scene() \
+    + to_exploring('lhd') + pick_class('5 - high veg') \
+    + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(2800) + [
+    (0, cam(coverage_host, dur=1.4, pad=24)),
+] + height_above('mnt', 8) + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + targets(['troncon_de_route']) + predicates(['intersect']) \
+    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(3) + [
     (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + [(0, lambda: counts(['batiment']))] + show_map(4500, 1.05) + ending(['batiment'])
+] + run_filter_long() + [(0, lambda: counts(['troncon_de_route']))] + show_map(4500, 1.05) \
+    + ending(['troncon_de_route'])
 
-# clip: a cadastral section clips the DTM and the point cloud (vector source, raster and LiDAR targets), then Undo.
-CLIP_DTM = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene() + [
-    (0, cam('canvas', dur=1.4, drift=1.03)), hold(1200),
-] + pick_layer('parcelle') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
-    + typed_custom('"section" = \'AD\'', per_char=60) + settle() + show_map(2200) + [
+
+def survey_export_zip():
+    os.makedirs(EXPORT_DIR, exist_ok=True)
+    dock().lineEdit_exporting_zip.setText(os.path.join(EXPORT_DIR, 'estavar_eglise.zip'))
+
+
+# survey (story 12): the church and 50 m around clip the DTM and the LiDAR, then both are exported.
+SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene() + pick_layer('batiment') + [
+    (1500, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
+] + typed_custom('"nature" = \'Eglise\'', per_char=70) + settle() + show_map(2000) + [
     (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
-] + targets(['mnt', 'lhd']) + predicates(['intersect']) + [(200, buffer_off), (400, cam(ACTION_ZONE, dur=1.2, pad=40))] \
-    + run_filter() + show_map(5000, 1.05) + [(0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
-    + act('pushButton_action_undo_filter', click_undo) + settle(3.0) + [(0, refocus)] + settle() + show_map(2800) \
-    + ending()
+] + targets(['mnt', 'lhd']) + predicates(['intersect']) \
+    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(50) + [
+    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [(0, zoom_rect(616030, 6152100, 616330, 6152400))] + settle() + show_map(4000, 1.05) + [
+    (0, cam('dock', dur=1.4, pad=10)),
+] + act(toolbox_button('export'), lambda: dock().toolBox_tabTools.setCurrentIndex(1)) + [
+    (1200, cam(EXPORT_ZONE, dur=1.4, pad=40)),
+] + act('pushButton_checkable_exporting_layers', enable('pushButton_checkable_exporting_layers')) \
+    + combo_check('checkableComboBoxLayer_exporting_layers', ['mnt', 'lhd'], per_item=500) \
+    + [(200, export_layers_changed)] \
+    + act('pushButton_checkable_exporting_output_folder', enable('pushButton_checkable_exporting_output_folder')) \
+    + act(folder_edit, lambda: folder_edit().clear()) + type_into(folder_edit, EXPORT_DIR, per_char=25, clear=False) \
+    + act('pushButton_checkable_exporting_zip', enable('pushButton_checkable_exporting_zip')) \
+    + [(300, survey_export_zip), (400, cam(['pushButton_action_export', 'pushButton_checkable_exporting_zip'], dur=1.2, pad=40))] \
+    + act('pushButton_action_export', export_with_recap) + [hold(1500)] + settle(4.0) + [(0, wait_long())] \
+    + show_map(3000) + ending()
 
 CLIPS = {'hero': HERO, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
          'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING,
-         'raster': RASTER, 'lidar': LIDAR, 'clip': CLIP_DTM}
+         'slope': SLOPE, 'heights': HEIGHTS, 'pruning': PRUNING, 'survey': SURVEY}
 STEPS = CLIPS[CLIP]
 
 
@@ -1650,7 +1729,7 @@ def run_steps(i=0, tries=0):
             again = fn() is True
         except Exception:
             log(traceback.format_exc())
-        if again and tries < 400:
+        if again and tries < getattr(fn, 'max_tries', 400):
             run_steps(i, tries + 1)
         else:
             run_steps(i + 1)

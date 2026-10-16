@@ -5,6 +5,8 @@
 #   scripts/site_videos.sh render hero explore ... edit (scripts/site_video_render.py) into MP4 + WebP poster
 #   scripts/site_videos.sh publish hero ...        copy the edited MP4 / WebP into website/video/
 #   scripts/site_videos.sh all hero ...            clip, render and publish
+#   scripts/site_videos.sh data                    Estavar data of the raster / point cloud clips (FM_LIDAR_TILES:
+#                                                  folder with the LiDAR HD tiles 0616_6152 and 0616_6153)
 #
 # A clip name ending in -dark (hero-dark) is the dark version: QGIS with the Night Mapping theme,
 # published as video/<clip>-dark.mp4 / .webp; fm.js picks it when the site is dark.
@@ -30,6 +32,7 @@ mkdir -p "$W_LINUX/scripts" "$W_LINUX/plugins" "$W_LINUX/profiles" "$W_LINUX/sit
 
 sync_code() {
     cp "$REPO/scripts/site_videos.py" "$REPO/scripts/site_video_render.py" "$W_LINUX/scripts/"
+    [ -f "$REPO/scripts/site_stills.json" ] && cp "$REPO/scripts/site_stills.json" "$W_LINUX/scripts/"
     rsync -a --delete \
         --exclude .git --exclude .github --exclude .claude --exclude .serena --exclude _bmad --exclude _bmad-output \
         --exclude tests --exclude website --exclude docs --exclude scripts --exclude knowledge --exclude logs \
@@ -117,7 +120,48 @@ case "$cmd" in
             cp "$W_LINUX/site/$c.mp4" "$W_LINUX/site/$c.webp" "$REPO/website/video/"
             echo "published $c ($(du -h "$REPO/website/video/$c.mp4" | cut -f1))"
         done
+        # step images of the stories (site_stills.json / still() marks)
+        if [ -d "$W_LINUX/site/stills" ] && ls "$W_LINUX/site/stills/"*.webp >/dev/null 2>&1; then
+            mkdir -p "$REPO/website/img/stories"
+            cp "$W_LINUX/site/stills/"*.webp "$REPO/website/img/stories/"
+            echo "published $(ls "$W_LINUX/site/stills/"*.webp | wc -l) story images"
+        fi
+        ;;
+    data)
+        # One square kilometre around Estavar: LiDAR HD (IGN, COPC) cropped and merged with PDAL, DTM from its
+        # ground points, slope in percent, BD TOPO from the IGN WFS, Etalab cadastre of the commune (66072).
+        tiles="${FM_LIDAR_TILES:?folder of LHD_FXX_0616_6152 / 0616_6153 .copc.laz}"
+        tiles_w="$(wslpath -w "$tiles")"
+        D="$W_LINUX/data"; mkdir -p "$D"; cd "$D"
+        curl -sSL "https://cadastre.data.gouv.fr/bundler/cadastre-etalab/communes/66072/geojson/parcelles" | gunzip > parcelles.json
+        for t in batiment troncon_de_route troncon_hydrographique; do
+            curl -sSL -o "bdtopo_$t.json" "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=BDTOPO_V3:$t&SRSNAME=EPSG:2154&BBOX=615800,6151700,617200,6153100,EPSG:2154&COUNT=5000&outputFormat=application/json"
+        done
+        bounds='([616000,617000],[6151700,6152700])'
+        cat > crop.json <<EOF2
+{"pipeline":[
+ {"type":"readers.copc","filename":"${tiles_w//\\/\\\\}\\\\LHD_FXX_0616_6152_PTS_C_LAMB93_IGN69.copc.laz","bounds":"$bounds"},
+ {"type":"readers.copc","filename":"${tiles_w//\\/\\\\}\\\\LHD_FXX_0616_6153_PTS_C_LAMB93_IGN69.copc.laz","bounds":"$bounds"},
+ {"type":"filters.merge"}, {"type":"filters.crop","bounds":"$bounds"},
+ {"type":"writers.copc","filename":"estavar_village.copc.laz","a_srs":"EPSG:2154"}]}
+EOF2
+        cat > dtm.json <<'EOF2'
+{"pipeline":[
+ {"type":"readers.copc","filename":"estavar_village.copc.laz"},
+ {"type":"filters.range","limits":"Classification[2:2]"},
+ {"type":"writers.gdal","filename":"mnt_village.tif","resolution":1,"output_type":"idw","window_size":12,"nodata":-9999,
+  "data_type":"float32","origin_x":616000,"origin_y":6151700,"width":1000,"height":1000,"gdalopts":"COMPRESS=DEFLATE,TILED=YES"}]}
+EOF2
+        printf '%s\r\n' '@echo off' "call \"$QGIS\\bin\\o4w_env.bat\"" 'cd /d %~dp0' \
+            'pdal pipeline crop.json || exit /b 1' 'pdal pipeline dtm.json || exit /b 1' \
+            'gdaldem slope -p -compute_edges mnt_village.tif pente_village.tif -co COMPRESS=DEFLATE' \
+            'del estavar.gpkg 2>nul' \
+            'ogr2ogr -f GPKG estavar.gpkg bdtopo_batiment.json -nln batiment -a_srs EPSG:2154' \
+            'ogr2ogr -f GPKG -update estavar.gpkg bdtopo_troncon_de_route.json -nln troncon_de_route -a_srs EPSG:2154' \
+            'ogr2ogr -f GPKG -update estavar.gpkg bdtopo_troncon_hydrographique.json -nln troncon_hydrographique -a_srs EPSG:2154' \
+            'ogr2ogr -f GPKG -update estavar.gpkg parcelles.json -nln parcelle -t_srs EPSG:2154' > prep.bat
+        cmd.exe /c prep.bat
         ;;
     *)
-        sed -n 2,16p "$0"; exit 1 ;;
+        sed -n 2,18p "$0"; exit 1 ;;
 esac
