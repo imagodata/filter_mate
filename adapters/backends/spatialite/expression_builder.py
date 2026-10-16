@@ -58,30 +58,28 @@ USE_OGR_FALLBACK = "__USE_OGR_FALLBACK__"
 
 # Thresholds
 # 2026-10-17: inline the source WKT only when the subset string stays cheap.
-# It is evaluated by every statement QGIS runs on the target (count, extent,
-# each render, each later pan), and the predicate is not prepared: measured
-# through GDAL's GeoPackage driver with SpatiaLite 5.1 (QGIS 4.2.3), about
-# 1.1-1.4 µs per candidate row and per KB of WKT for ST_Crosses (100,000
-# candidates: 3.4 KB 0.3 s, 13 KB 1.5 s, 41 KB 4.5 s, 106 KB 12.4 s, 262 KB
-# 37 s; ``ST_MakeValid(ST_GeomFromText(...))`` itself runs once, 0.06 s for
-# 262 KB). With the target's R-tree the candidates are counted (R-tree
-# window of the source) and the source is inlined when the estimated cost of
-# one statement stays under SPATIALITE_INLINE_BUDGET_SECONDS, up to
-# SPATIALITE_WKT_INLINE_MAX_LENGTH. Otherwise - or above
-# SPATIALITE_WKT_SIMPLIFY_THRESHOLD when the candidates are unknown - the
-# layer goes to the OGR backend: the targets are read once and tested against
-# the prepared union of the source (0.9 s for Crosses on the same 100,000
-# rows in QGIS 4.2.3, plus reading them through the target's subset once)
-# and the subset becomes a key list.
+# It is evaluated again by every statement QGIS runs on the target (count,
+# extent, each full-extent render), and the predicate is not prepared:
+# measured through GDAL's GeoPackage driver with SpatiaLite 5.1 (QGIS 4.2.3),
+# about 1.1-1.4 µs per candidate row and per KB of WKT (Crosses, 100,000
+# candidates: 3.4 KB 0.3 s, 13 KB 1.5 s, 106 KB 12.4 s, 262 KB 37 s). On the
+# real BD TOPO 31 roads, the 87 KB Toulouse Metropole polygon (Intersects,
+# 136,565 R-tree candidates) cost 14.5 s per count, 22 s per extent and 18 s
+# per full read - for every statement. The alternative, the OGR backend,
+# selects once (exact, union of the source) and writes a key list that QGIS
+# applies in 0.3 s, counts in 0.1-0.3 s and reads in 0.7 s (98,687 keys out
+# of 1.15 million rows, see ogr/expression_builder.KEY_LIST_JSON_THRESHOLD).
+# Hence a budget of about 1 s per statement: candidates (target R-tree in the
+# source bounding box) x KB x SPATIALITE_INLINE_COST_US_PER_ROW_KB, up to
+# SPATIALITE_WKT_INLINE_MAX_LENGTH; without a candidate count, up to
+# SPATIALITE_WKT_STATIC_INLINE_LIMIT. The source is never simplified: a 1 m
+# simplification of that polygon (87 KB → 53 KB) still cost 6 s per count and
+# changed 84 of the 98,687 roads.
 SPATIALITE_INLINE_COST_US_PER_ROW_KB = 1.4
-SPATIALITE_INLINE_BUDGET_SECONDS = 3.0
+SPATIALITE_INLINE_BUDGET_SECONDS = 1.0
 SPATIALITE_WKT_INLINE_MAX_LENGTH = 1_000_000
-# 2026-10-16: above this the executor simplifies the source (Intersects /
-# Disjoint only, 1 m at most, see adapters/qgis/geometry_preparation.py), and
-# a source with no candidate count is not inlined. Same value as
-# PostgreSQLExpressionBuilder.MAX_WKT_LENGTH. This builder never simplifies
-# anything itself (its old extent / 1000 pass moved a 30 km source by 30 m).
-SPATIALITE_WKT_SIMPLIFY_THRESHOLD = 100_000
+# Same value as PostgreSQLExpressionBuilder.MAX_WKT_LENGTH.
+SPATIALITE_WKT_STATIC_INLINE_LIMIT = 100_000
 
 # PERF 2026-09-12: GeoPackage R-tree prefilter. SQLite evaluates the spatial
 # predicate row by row over the whole table: with a 2,000-vertex source polygon
@@ -372,8 +370,8 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             self.log_info(f"Buffer of {buffer_value} already applied to the source WKT - no ST_Buffer() in SQL")
             buffer_value = None
 
-        # 2026-10-16: never generalize the source here (results must stay
-        # exact); a source too large to inline goes to the OGR backend.
+        # 2026-10-16: never generalize the source (results must stay exact);
+        # a source too large or too costly to inline goes to the OGR backend.
         if wkt_length > SPATIALITE_WKT_INLINE_MAX_LENGTH:
             self.log_warning(
                 f"Source WKT too large to inline ({wkt_length:,} > {SPATIALITE_WKT_INLINE_MAX_LENGTH:,} chars)"
@@ -430,10 +428,10 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         inline_cost = self._inline_cost_seconds(
             layer, geom_field, source_geom, source_srid, target_srid, buffer_value, predicates
         )
-        if inline_cost is None and wkt_length > SPATIALITE_WKT_SIMPLIFY_THRESHOLD:
+        if inline_cost is None and wkt_length > SPATIALITE_WKT_STATIC_INLINE_LIMIT:
             self.log_warning(
                 f"Source WKT too large to inline without a candidate count ({wkt_length:,} > "
-                f"{SPATIALITE_WKT_SIMPLIFY_THRESHOLD:,} chars) - returning OGR fallback (exact, QGIS processing)"
+                f"{SPATIALITE_WKT_STATIC_INLINE_LIMIT:,} chars) - returning OGR fallback (exact, QGIS processing)"
             )
             return USE_OGR_FALLBACK
         if inline_cost is not None and inline_cost > SPATIALITE_INLINE_BUDGET_SECONDS:

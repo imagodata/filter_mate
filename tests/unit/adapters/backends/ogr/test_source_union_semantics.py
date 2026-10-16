@@ -305,3 +305,72 @@ def test_covers_and_coveredby_are_not_intersects():
     codes = ogr_builder.OGRExpressionBuilder.PREDICATE_CODES
     assert codes["covers"] == codes["contains"]
     assert codes["coveredby"] == codes["within"]
+
+
+# ---------------------------------------------------------------------------
+# Key-list subsets (2026-10-17): QGIS 4.2.3 froze for more than 25 min in
+# setSubsetString with "fid" IN (98,687 literals) on a GeoPackage.
+# ---------------------------------------------------------------------------
+
+def _gpkg_layer(storage="GPKG"):
+    layer = MagicMock()
+    layer.dataProvider.return_value.storageType.return_value = storage
+    layer.fields.return_value.indexOf.return_value = 0
+    return layer
+
+
+@pytest.mark.parametrize("count, json_form", [(1000, False), (1001, True), (98_687, True)])
+def test_large_geopackage_key_list_is_one_json_literal(count, json_form):
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._build_fid_filter_with_values(_gpkg_layer(), list(range(1, count + 1)), "fid")
+    if json_form:
+        assert clause.startswith('"fid" IN (SELECT value FROM json_each(\'[1,2,3,')
+        assert clause.endswith(f",{count}]'))")
+        assert ", " not in clause, "one literal, not a list of SQL tokens"
+    else:
+        assert clause.startswith('"fid" IN (1, 2, 3')
+
+
+def test_json_key_list_quotes_text_keys():
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._json_key_clause('"cleabs"', ["TRON'1", "TRON2"], numeric=False)
+    assert clause == '"cleabs" IN (SELECT value FROM json_each(\'["TRON\'\'1","TRON2"]\'))'
+
+
+@pytest.mark.parametrize("storage, pk_name, expected", [
+    ("GPKG", "fid", True),            # GeoPackage FID column: QGIS feature id == value
+    ("GPKG", "ogc_fid", False),       # another column named like the asked field
+    ("ESRI Shapefile", "fid", False),
+])
+def test_geopackage_fid_values_are_the_feature_ids(storage, pk_name, expected):
+    layer = _gpkg_layer(storage)
+    layer.dataProvider.return_value.pkAttributeIndexes.return_value = [0]
+    layer.fields.return_value.at.return_value.name.return_value = pk_name
+    assert ogr_builder.OGRExpressionBuilder._pk_is_feature_id(layer, "fid") is expected
+
+
+def test_other_formats_keep_the_plain_list():
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._build_fid_filter_with_values(_gpkg_layer("ESRI Shapefile"), list(range(2000)), "fid")
+    assert clause.startswith('"fid" IN (0, 1, 2')
+
+
+def _many_roads(count):
+    return _Layer("troncon_de_route", [_Feature(fid, _Geom("near")) for fid in range(count)])
+
+
+@pytest.mark.parametrize("count, applied", [(1500, True), (5000, True), (5001, False)])
+def test_plain_key_list_is_bounded_on_other_formats(qgis, count, applied):
+    qgis.relations["near"] = {"intersects"}
+    queue = MagicMock()
+    builder = ogr_builder.OGRExpressionBuilder(task_params={"_subset_queue_callback": queue})
+    builder._get_primary_key = lambda layer: "fid"
+    builder.source_geom = _rivers(3)
+    roads = _many_roads(count)
+    assert builder.apply_filter(roads, '{"predicates": ["ST_Intersects"]}') is applied
+    if applied:
+        queue.assert_called_once()
+        assert any("rescans the list" in w for w in builder.warnings)
+    else:
+        queue.assert_not_called()
+        assert "Layer left unfiltered" in builder.last_error

@@ -72,9 +72,8 @@ class SpatialiteSourceContext:
     # Centroid optimization
     param_use_centroids_source_layer: bool = False
 
-    # 2026-10-16: the task's spatial predicates. They decide whether the
-    # source may be simplified at all (vertex-level predicates keep it exact)
-    # and are part of the geometry cache key. None = unknown = exact.
+    # 2026-10-16: the task's spatial predicates, part of the geometry cache
+    # key. None = unknown.
     predicates: Optional[List[str]] = None
 
     # QGIS Project reference (for transforms)
@@ -85,7 +84,6 @@ class SpatialiteSourceContext:
 
     # Helper method callbacks (dependency injection)
     geometry_to_wkt: Optional[Callable] = None  # _geometry_to_wkt
-    simplify_geometry_adaptive: Optional[Callable] = None  # _simplify_geometry_adaptive
     get_optimization_thresholds: Optional[Callable] = None  # _get_optimization_thresholds
 
 
@@ -622,36 +620,10 @@ def process_spatialite_geometries(
     logger.info(f"[Spatialite]   Final geometry type: {geom_type}")
     logger.info(f"[Spatialite]   📏 WKT length: {len(wkt):,} chars")
 
-    # Apply adaptive simplification for large geometries.
-    # 2026-10-16: one threshold for the whole SpatiaLite chain, the expression
-    # builder's inline limit (it used to be read from the PostgreSQL EXISTS
-    # mode option of the optimization thresholds). The callback leaves the geometry
-    # exact for vertex-level predicates (Crosses, Touches, ...) and caps the
-    # tolerance to 1 m otherwise - a 236 KB river network was generalized by
-    # 100 m for a Cross filter. The builder hands sources still above the
-    # limit to the OGR backend, which is exact.
-    from .expression_builder import SPATIALITE_WKT_SIMPLIFY_THRESHOLD
-    if len(wkt) > SPATIALITE_WKT_SIMPLIFY_THRESHOLD and context.simplify_geometry_adaptive:
-        logger.warning(f"[Spatialite]   ⚠️ WKT too long ({len(wkt)} > {SPATIALITE_WKT_SIMPLIFY_THRESHOLD})")
-
-        simplified = context.simplify_geometry_adaptive(
-            collected_geometry,
-            max_wkt_length=SPATIALITE_WKT_SIMPLIFY_THRESHOLD,
-            crs_authid=crs_authid,
-            predicates=context.predicates
-        )
-
-        if simplified is not None and simplified is not collected_geometry and not simplified.isEmpty():
-            if context.geometry_to_wkt:
-                simplified_wkt = context.geometry_to_wkt(simplified, crs_authid)
-            else:
-                simplified_wkt = simplified.asWkt()
-
-            reduction_pct = (1 - len(simplified_wkt) / len(wkt)) * 100
-            logger.info(f"[Spatialite]   ✓ Simplified: {len(wkt)} → {len(simplified_wkt)} chars ({reduction_pct:.1f}% reduction)")
-            wkt = simplified_wkt
-        else:
-            logger.info(f"[Spatialite]   Source kept exact ({len(wkt):,} chars)")
+    # 2026-10-17: the source WKT is never simplified (it used to be, by up
+    # to 100 m, then 1 m for Intersects / Disjoint). The expression builder
+    # inlines it while that is cheap and hands the layer to the OGR backend
+    # otherwise, both exact.
 
     # Escape single quotes for SQL
     return wkt.replace("'", "''")
@@ -661,14 +633,10 @@ def _source_cache_variant(context: SpatialiteSourceContext) -> tuple:
     """Inputs of the source WKT that the geometry cache key must also hold.
 
     2026-10-16: features, buffer distance, CRS, layer and subset were the
-    whole key, so a WKT simplified for Intersects could be served to a Cross
-    filter. The simplification tolerance follows from what is here (the
-    predicates and the threshold) plus the buffer and CRS already in the key.
+    whole key; the predicates and the buffer shape are part of it too.
     """
-    from .expression_builder import SPATIALITE_WKT_SIMPLIFY_THRESHOLD
     return (
         tuple(sorted(str(p) for p in (context.predicates or ()))),
-        SPATIALITE_WKT_SIMPLIFY_THRESHOLD,
         context.param_buffer_segments,
         str(context.param_buffer_type),
         context.param_buffer_expression or '',

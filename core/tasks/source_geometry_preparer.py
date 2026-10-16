@@ -152,7 +152,6 @@ class SourceGeometryPreparer:
         project=None,
         geom_cache=None,
         geometry_to_wkt_fn=None,
-        simplify_geometry_adaptive_fn=None,
         get_optimization_thresholds_fn=None,
         param_buffer_segments=5,
         param_buffer_type=0,
@@ -177,9 +176,8 @@ class SourceGeometryPreparer:
             project: QgsProject instance.
             geom_cache: Geometry cache instance.
             geometry_to_wkt_fn: Callback for WKT conversion.
-            simplify_geometry_adaptive_fn: Callback for adaptive simplification.
-            predicates: The task's spatial predicates (2026-10-16: they decide
-                whether the source may be simplified, and key the cache).
+            predicates: The task's spatial predicates (2026-10-16: part of
+                the source geometry cache key).
             get_optimization_thresholds_fn: Callback for optimization thresholds.
 
         Returns:
@@ -215,7 +213,6 @@ class SourceGeometryPreparer:
             PROJECT=project,
             geom_cache=geom_cache,
             geometry_to_wkt=geometry_to_wkt_fn,
-            simplify_geometry_adaptive=simplify_geometry_adaptive_fn,
             get_optimization_thresholds=get_optimization_thresholds_fn,
             predicates=predicates,
         )

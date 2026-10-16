@@ -1477,25 +1477,6 @@ class FilterEngineTask(QgsTask):
             buffer_value, buffer_segments, buffer_type, extent_size, is_geographic
         )
 
-    def _simplify_geometry_adaptive(
-        self, geometry: Any, max_wkt_length: Optional[int] = None, crs_authid: Optional[str] = None, predicates=None
-    ) -> Any:
-        """Simplify geometry adaptively. Delegates to GeometryHandler.
-
-        2026-10-16: the filter's predicates decide whether the source may be
-        simplified at all (see geometry_preparation.source_simplification_allowed).
-        ``predicates`` defaults to the task's.
-        """
-        if predicates is None:
-            predicates = self._predicate_names()
-        return self._geometry_handler.simplify_geometry_adaptive(
-            geometry, max_wkt_length, crs_authid,
-            buffer_value=getattr(self, 'param_buffer_value', None),
-            buffer_segments=getattr(self, 'param_buffer_segments', 5),
-            buffer_type=getattr(self, 'param_buffer_type', 0),
-            predicates=predicates,
-        )
-
     def _predicate_names(self) -> list:
         """The task's spatial predicates (SQL names), empty when unknown."""
         return list(getattr(self, 'current_predicates', None) or {})
@@ -1518,7 +1499,6 @@ class FilterEngineTask(QgsTask):
             project=getattr(self, 'PROJECT', None),
             geom_cache=getattr(self, 'geom_cache', None),
             geometry_to_wkt_fn=self._geometry_to_wkt,
-            simplify_geometry_adaptive_fn=self._simplify_geometry_adaptive,
             get_optimization_thresholds_fn=self._get_optimization_thresholds,
             predicates=self._predicate_names(),
         )

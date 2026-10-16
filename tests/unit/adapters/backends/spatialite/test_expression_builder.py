@@ -311,16 +311,17 @@ class TestLargeSourceWkt:
     """The builder never generalizes the source; too large → OGR backend (exact)."""
 
     def test_thresholds_are_consistent(self):
-        assert _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD == 100_000
+        assert _mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT == 100_000
         assert _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH == 1_000_000
-        assert 0 < _mod.SPATIALITE_INLINE_BUDGET_SECONDS <= 5
+        # A subset is evaluated by every count, extent and full-extent render.
+        assert _mod.SPATIALITE_INLINE_BUDGET_SECONDS == 1.0
         assert not hasattr(SpatialiteExpressionBuilder, "_simplify_wkt")
 
     @pytest.mark.parametrize("predicate", ["crosses", "touches", "intersects"])
     def test_source_up_to_the_limit_is_inlined_untouched(self, builder, predicate):
         # No candidate count (no GeoPackage R-tree): the static 100 KB limit.
-        wkt = _long_linestring(_mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD - 1_000)
-        assert len(wkt) <= _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD
+        wkt = _long_linestring(_mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT - 1_000)
+        assert len(wkt) <= _mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT
         expr = builder.build_expression(
             layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
             predicates={predicate: True},
@@ -333,7 +334,7 @@ class TestLargeSourceWkt:
     def test_source_above_static_limit_without_count_goes_to_ogr(self, builder, predicate):
         # The 236 KB Toulouse river network, target without an R-tree count.
         wkt = _long_linestring(236_398)
-        assert len(wkt) > _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD
+        assert len(wkt) > _mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT
         expr = builder.build_expression(
             layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
             predicates={predicate: True},
@@ -342,7 +343,8 @@ class TestLargeSourceWkt:
         assert expr == USE_OGR_FALLBACK
         assert any("too large to inline" in w for w in builder._warnings)
 
-    @pytest.mark.parametrize("cost, inlined", [(0.4, True), (2.9, True), (3.1, False), (33.1, False)])
+    # 33.1 s: the Toulouse rivers; 16.7 s: the 87 KB Toulouse Metropole polygon on troncon_de_route.
+    @pytest.mark.parametrize("cost, inlined", [(0.4, True), (0.99, True), (1.01, False), (16.7, False), (33.1, False)])
     def test_inline_decided_by_the_estimated_statement_cost(self, builder, monkeypatch, cost, inlined):
         monkeypatch.setattr(builder, "_inline_cost_seconds", lambda *args: cost)
         wkt = _long_linestring(236_398)

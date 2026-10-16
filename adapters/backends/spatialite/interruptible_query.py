@@ -55,7 +55,7 @@ SPATIALITE_PROGRESS_INTERVAL = _sl_cfg['progress_interval']
 SPATIALITE_INTERRUPT_CHECK_INTERVAL = 0.5  # Check for cancellation every N seconds
 
 # 2026-10-16: the source-WKT simplification threshold lives in
-# expression_builder.SPATIALITE_WKT_SIMPLIFY_THRESHOLD only. The 30 KB value
+# expression_builder (SPATIALITE_WKT_STATIC_INLINE_LIMIT ...) only. The 30 KB value
 # (and SPATIALITE_WKT_MAX_POINTS) defined here was used nowhere and disagreed.
 SPATIALITE_GEOM_INSERT_TIMEOUT = 30  # Timeout for geometry insertion (seconds)
 

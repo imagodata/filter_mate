@@ -29,6 +29,24 @@ from qgis.core import QgsVectorLayer
 
 logger = logging.getLogger('FilterMate.Backend.OGR.ExpressionBuilder')
 
+# 2026-10-17: above this many keys, a GeoPackage / SQLite key-list subset is
+# written as ONE JSON string literal, ``"fid" IN (SELECT value FROM
+# json_each('[...]'))``. QGIS 4.2.3 stayed frozen for more than 25 min in
+# setSubsetString() with ``"fid" IN (98,687 literals)`` on troncon_de_route
+# (more than 10 min headless), while SQLite itself counted them in 0.1 s:
+# the long literal list goes through GDAL's SQL parsing. The JSON form took
+# 0.29 s to apply, 0.14 s to count, 0.8 s for the extent and 0.74 s to read
+# the 98,687 rows out of 1.15 million (BD TOPO 31 roads, headless QGIS 4.2.3).
+KEY_LIST_JSON_THRESHOLD = 1000
+# 2026-10-17: other OGR formats (Shapefile...) evaluate the subset with OGR
+# SQL, which rescans the IN list for every row: on the 383,112 BD TOPO roads
+# as a Shapefile, a read took 3.4 s with 1,000 keys and 8.7 s with 4,000,
+# and QGIS refused 8,000 (setSubsetString False, layer left unfiltered).
+# Above PLAIN_KEY_LIST_WARNING a WARNING names the cost; above
+# PLAIN_KEY_LIST_MAX the filter is refused with an explicit error.
+PLAIN_KEY_LIST_WARNING = 1000
+PLAIN_KEY_LIST_MAX = 5000
+
 # Import the port interface
 try:
     from ....core.ports.geometric_filter_port import GeometricFilterPort
@@ -377,6 +395,20 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 selected_ids = list(layer.selectedFeatureIds())
             self.log_info(f"  - Selected: {len(selected_ids)} features")
 
+            if len(selected_ids) > PLAIN_KEY_LIST_WARNING and not self._is_sqlite_storage(layer):
+                if len(selected_ids) > PLAIN_KEY_LIST_MAX:
+                    self.last_error = (
+                        f"{layer.name()}: {len(selected_ids):,} features selected, more than {PLAIN_KEY_LIST_MAX:,} "
+                        "keys in a subset string for this format (OGR SQL rescans the list for every row, GDAL "
+                        "refuses ~8,000). Layer left unfiltered: convert it to GeoPackage to filter it."
+                    )
+                    self.log_error(self.last_error)
+                    return False
+                self.log_warning(
+                    f"  ⚠️ {len(selected_ids):,} keys in the subset of {layer.name()}: every read of this format "
+                    "rescans the list (about 3 s per 1,000 keys on 380,000 rows); GeoPackage avoids it"
+                )
+
             if not selected_ids:
                 self.log_warning("No features selected - applying empty filter")
                 # 2026-04-29 fix: route through subset queue when wired to
@@ -407,11 +439,16 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     use_pk_values = True
                     self.log_info(f"  - PK field '{pk_field}' exists as attribute: fetching actual values")
 
-            if use_pk_values:
+            if use_pk_values and self._pk_is_feature_id(layer, pk_field):
+                # PERF 2026-10-17: on a GeoPackage the QGIS feature ids ARE the
+                # FID column values (checked on BD TOPO 31: 98,687 / 98,687);
+                # fetching them again by id took 4 s (9 s on 1.15 M rows).
+                pk_values = list(selected_ids)
+            elif use_pk_values:
                 # PERF 2026-09-13: one request for all selected rows instead
                 # of one getFeature() (one provider query) per selected id.
                 pk_values = self._fetch_pk_values(layer, selected_ids, pk_field)
-
+            if use_pk_values:
                 if pk_values:
                     self.log_info(f"  - Retrieved {len(pk_values)} actual PK values")
                     fid_filter = self._build_fid_filter_with_values(layer, pk_values, pk_field)
@@ -551,6 +588,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
         # GeoPackage and SQLite-based formats: use quoted field name
         if 'geopackage' in storage_type or 'gpkg' in storage_type or 'sqlite' in storage_type:
             self.log_info(f"  - GeoPackage/SQLite detected: using quoted '{pk_field}'")
+            if len(fids) > KEY_LIST_JSON_THRESHOLD:
+                return self._json_key_clause(f'"{pk_field}"', fids, is_numeric_pk)
             return f'"{pk_field}" IN ({fid_list})'
 
         # For other OGR formats with detected primary key
@@ -654,8 +693,41 @@ class OGRExpressionBuilder(GeometricFilterPort):
             self.log_info(f"  - Building STRING IN clause for '{pk_field}': {len(pk_values)} values")
             self.log_debug(f"    Sample: {value_list[:100]}...")
 
+        if len(pk_values) > KEY_LIST_JSON_THRESHOLD and self._is_sqlite_storage(layer):
+            return self._json_key_clause(f'"{pk_field}"', formatted_values if is_numeric_pk else pk_values, is_numeric_pk)
+
         # Always use quoted field name for PostgreSQL
         return f'"{pk_field}" IN ({value_list})'
+
+    @staticmethod
+    def _pk_is_feature_id(layer, pk_field: str) -> bool:
+        """True when ``pk_field`` is the FID column of a GeoPackage (QGIS feature id == its value)."""
+        try:
+            storage_type = layer.dataProvider().storageType().lower()
+            if 'gpkg' not in storage_type and 'geopackage' not in storage_type:
+                return False
+            pk_indexes = list(layer.dataProvider().pkAttributeIndexes())
+            return len(pk_indexes) == 1 and layer.fields().at(pk_indexes[0]).name() == pk_field
+        except Exception:
+            return False
+
+    @staticmethod
+    def _is_sqlite_storage(layer) -> bool:
+        """GeoPackage or SQLite layer (subset strings are SQLite SQL)."""
+        try:
+            storage_type = layer.dataProvider().storageType().lower()
+        except Exception:
+            return False
+        return 'geopackage' in storage_type or 'gpkg' in storage_type or 'sqlite' in storage_type
+
+    def _json_key_clause(self, field_sql: str, values: list, numeric: bool) -> str:
+        """``field IN (SELECT value FROM json_each('[...]'))`` (see KEY_LIST_JSON_THRESHOLD)."""
+        if numeric:
+            payload = "[" + ",".join(str(int(float(v))) for v in values) + "]"
+        else:
+            payload = json.dumps([str(v) for v in values], ensure_ascii=False, separators=(",", ":"))
+        self.log_info(f"  - {len(values):,} keys: one JSON literal ({len(payload):,} chars) instead of an IN list")
+        return f"{field_sql} IN (SELECT value FROM json_each('{payload.replace(chr(39), chr(39) * 2)}'))"
 
     @staticmethod
     def _fetch_pk_values(layer, selected_ids, pk_field) -> list:

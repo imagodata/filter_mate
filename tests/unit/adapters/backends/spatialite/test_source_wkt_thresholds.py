@@ -5,10 +5,10 @@ The executor simplified the source above the PostgreSQL option
 ``exists_subquery_threshold`` while the expression builder used its own
 SPATIALITE_WKT_SIMPLIFY_THRESHOLD (1 MB) and interruptible_query defined a
 third, unused 30 KB value. A 236 KB river network was generalized by 100 m
-and Cross returned 1,181 roads instead of ~747. Now one limit (100 KB, the
-PostgreSQL MAX_WKT_LENGTH too) decides both the simplification and the
-inlining; above it the OGR backend filters exactly. These checks read the
-source, so they need no QGIS.
+and Cross returned 1,181 roads instead of ~747. Now the source is never
+simplified; the builder's limits (defined once) decide whether it is inlined
+or filtered by the OGR backend, both exact. These checks read the source, so
+they need no QGIS.
 """
 import ast
 from pathlib import Path
@@ -46,25 +46,28 @@ def _plugin_python_files():
         yield path
 
 
-def test_simplify_threshold_defined_once():
-    owners = [
-        str(path.relative_to(PLUGIN_ROOT))
-        for path in _plugin_python_files()
-        if "SPATIALITE_WKT_SIMPLIFY_THRESHOLD" in _assigned_names(_tree(path))
-    ]
-    assert owners == [str(Path("adapters/backends/spatialite/expression_builder.py"))]
+def test_inline_limits_defined_once():
+    for name in ("SPATIALITE_WKT_STATIC_INLINE_LIMIT", "SPATIALITE_WKT_INLINE_MAX_LENGTH"):
+        owners = [
+            str(path.relative_to(PLUGIN_ROOT))
+            for path in _plugin_python_files()
+            if name in _assigned_names(_tree(path))
+        ]
+        assert owners == [str(Path("adapters/backends/spatialite/expression_builder.py"))], name
+    assert not any(
+        "SPATIALITE_WKT_SIMPLIFY_THRESHOLD" in _assigned_names(_tree(path)) for path in _plugin_python_files()
+    )
 
 
-def test_executor_uses_the_builder_threshold():
+def test_executor_never_simplifies_the_source():
+    """2026-10-17: the source WKT is inlined exact or the OGR backend filters (exact)."""
     source = (SPATIALITE_DIR / "filter_executor.py").read_text(encoding="utf-8")
     tree = ast.parse(source)
-    imported = [
-        alias.name
-        for node in ast.walk(tree)
-        if isinstance(node, ast.ImportFrom) and node.module == "expression_builder" and node.level == 1
-        for alias in node.names
-    ]
-    assert "SPATIALITE_WKT_SIMPLIFY_THRESHOLD" in imported
+    calls = {
+        node.func.attr for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    }
+    assert not calls & {"simplify", "simplify_geometry_adaptive", "convexHull"}
     assert "exists_subquery_threshold" not in source
 
 
@@ -112,7 +115,7 @@ def test_inline_limit_matches_postgresql():
         node for node in pg_tree.body
         if isinstance(node, ast.ClassDef) and node.name == "PostgreSQLExpressionBuilder"
     )
-    assert spatialite["SPATIALITE_WKT_SIMPLIFY_THRESHOLD"] == _constants(pg_class)["MAX_WKT_LENGTH"] == 100_000
+    assert spatialite["SPATIALITE_WKT_STATIC_INLINE_LIMIT"] == _constants(pg_class)["MAX_WKT_LENGTH"] == 100_000
 
 
 def test_no_envelope_repair_nor_ogr_source_simplification():
