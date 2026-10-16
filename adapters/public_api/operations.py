@@ -8,9 +8,12 @@ One implementation behind the three automation surfaces:
 * the Processing algorithms (``filtermate:*``, models, batch, ``qgis_process``);
 * the REST API (``filtermate_api``).
 
-Every operation runs synchronously on the main thread, changes the project
-layers in place like the dock does, and records its changes in the cross
-filter history so the dock's Undo / Redo / Unfilter buttons can revert them.
+Every operation runs synchronously on the main thread, one at a time
+(:func:`busy_reason`), changes the project layers in place like the dock
+does, and records its changes in the cross filter history so the dock's
+Undo / Redo / Unfilter buttons can revert them. A ``feedback``
+(``QgsFeedback``, Processing's) receives the progress and can cancel. The
+derived files nothing refers to any more are removed after each filter.
 Layers are QGIS layer objects; :func:`resolve_layer` finds them by id or name.
 
 Operations:
@@ -34,6 +37,7 @@ from ...core.domain.api_requests import (
     POINT_CLOUD_EXPORT_FORMATS,
     RASTER_EXPORT_FORMATS,
     VECTOR_EXPORT_FORMATS,
+    relation_numbers,
 )
 from ...core.domain.layer_kind import LayerKind
 
@@ -167,21 +171,74 @@ def busy_reason() -> str:
     return BACKGROUND_BUSY if _background_tasks_running() else ""
 
 
-def _exclusive(operation):
-    """Run ``operation`` alone; refused with ``details["busy"]`` while FilterMate is busy."""
-    @functools.wraps(operation)
-    def run(*args, **kwargs) -> OperationReport:
-        reason = busy_reason()
-        if reason:
-            report = OperationReport(error=reason)
-            report.details["busy"] = True
-            return report
-        _RUNNING.append(operation.__name__)
+def _tidy_cache(project=None) -> None:
+    """Remove the derived files nothing refers to any more, keep the cache under its limit.
+
+    The dock tidies after its own runs only: a session driven by Processing,
+    the Python API or REST (``qgis_process`` included) never did.
+    """
+    try:
+        from ...core.services.cross_filter_service import tidy_cache
+        tidy_cache(project)
+    except Exception as exc:
+        logger.debug(f"[FM5] cache not tidied: {exc}")
+
+
+def _exclusive(tidy: bool = True):
+    """Run the operation alone (refused with ``details["busy"]`` while FilterMate is busy).
+
+    ``tidy``: the operation filters layers, the cache is tidied once it is over.
+    """
+    def decorate(operation):
+        @functools.wraps(operation)
+        def run(*args, **kwargs) -> OperationReport:
+            reason = busy_reason()
+            if reason:
+                report = OperationReport(error=reason)
+                report.details["busy"] = True
+                return report
+            _RUNNING.append(operation.__name__)
+            try:
+                return operation(*args, **kwargs)
+            finally:
+                _RUNNING.clear()
+                if tidy:
+                    _tidy_cache(kwargs.get("project"))
+        return run
+    return decorate
+
+
+def _run_task(service, request, source_job, feedback=None):
+    """``service.run(request, source_job, synchronous=True)`` with ``feedback`` relayed.
+
+    The task's progress goes to ``feedback``; a cancel request (Processing's
+    Cancel button) cancels the task, which checks it between its steps.
+    """
+    if feedback is None:
+        return service.run(request, source_job, synchronous=True)
+    task = service.build_task(request, source_job)
+    task.progressChanged.connect(feedback.setProgress)
+    if feedback.isCanceled():
+        task.cancel()
+    feedback.canceled.connect(task.cancel)
+    try:
+        result = task.run()
+    finally:
+        _disconnect((feedback.canceled, task.cancel), (task.progressChanged, feedback.setProgress))
+    task.apply_results(result)
+    return task
+
+
+def _disconnect(*connections) -> None:
+    for signal, slot in connections:
         try:
-            return operation(*args, **kwargs)
-        finally:
-            _RUNNING.clear()
-    return run
+            signal.disconnect(slot)
+        except (TypeError, RuntimeError):
+            pass
+
+
+def _canceled(feedback) -> bool:
+    return feedback is not None and feedback.isCanceled()
 
 
 def _install_registry(project) -> None:
@@ -215,12 +272,12 @@ def _collect(task, project, report: OperationReport) -> OperationReport:
 
 # --- cross filter --------------------------------------------------------------
 
-@_exclusive
+@_exclusive()
 def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Intersect",), buffer: float = 0.0,
                  coverage_min: float = 0.0, operator: Optional[str] = None, selected_only: bool = True,
                  raster_selection=None, point_cloud_criteria=None, source_operator: Optional[str] = None,
                  filter_source: bool = False, footprint_resolution: Optional[float] = None,
-                 max_pixels: Optional[int] = None, project=None, service=None) -> OperationReport:
+                 max_pixels: Optional[int] = None, project=None, service=None, feedback=None) -> OperationReport:
     """Filter ``targets`` (any kind) by the selection made on ``source`` (any kind).
 
     Args:
@@ -239,6 +296,7 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
         filter_source: Raster source: also mask the source raster outside the selection.
         footprint_resolution: Point cloud source: cell size of the footprint (default: config, 2 m).
         max_pixels: Raster source: maximum pixels read (default: config, 4 000 000).
+        feedback: Optional ``QgsFeedback``: progress over the targets, cancellation.
 
     Returns:
         The report; ``done`` lists the target layers filtered (the source only
@@ -261,6 +319,11 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
     if targets and not specs:
         report.error = "no filterable target layer"
         return report
+    try:
+        buffer, coverage_min = relation_numbers(buffer, coverage_min)
+    except ValueError as exc:
+        report.error = str(exc)
+        return report
     in_project = project.mapLayer(layer.id()) is not None
     service = service or (_service() if kind.is_coverage and in_project else _api_service())
     _install_registry(project)
@@ -280,12 +343,14 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
         else:
             request = CrossFilterRequest(source_layer_id=layer.id(), source_kind=kind, targets=tuple(specs),
                                          predicates=tuple(predicates) or ("Intersect",),
-                                         buffer_value=float(buffer or 0.0), coverage_min=float(coverage_min or 0.0),
+                                         buffer_value=buffer, coverage_min=coverage_min,
                                          other_layers_combine_operator=operator)
-            _collect(service.run(request, source_job, synchronous=True), project, report)
+            _collect(_run_task(service, request, source_job, feedback), project, report)
     except Exception as exc:  # never leave the source criteria applied after a failure
         logger.warning(f"[FM5] cross filter from '{_name(layer)}' failed: {exc}", exc_info=True)
         report.error = str(exc) or type(exc).__name__
+    if _canceled(feedback) and not report.error:
+        report.error = "canceled"
     if report.error and kind is LayerKind.POINT_CLOUD:
         _restore_point_cloud_source(layer, source_job.before)
     return report
@@ -367,14 +432,14 @@ def _source_only(layer, kind: LayerKind, source_job, report: OperationReport, se
     return report
 
 
-@_exclusive
+@_exclusive()
 def cross_filter_by_geometry(geometry, crs, targets: Sequence, predicates: Sequence[str] = ("Intersect",),
                              buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
-                             project=None, service=None) -> OperationReport:
+                             project=None, service=None, feedback=None) -> OperationReport:
     """Filter ``targets`` by a geometry (an extent, a drawn polygon) given in ``crs``.
 
     The operation has its own history (not the dock's): undo it with
-    :func:`clear_filters` or the dock's Unfilter.
+    :func:`clear_filters` or the dock's Unfilter. ``feedback``: progress, cancellation.
     """
     from qgis.core import QgsCoordinateTransform, QgsGeometry
     from ...core.domain.cross_filter import CrossFilterRequest
@@ -389,22 +454,36 @@ def cross_filter_by_geometry(geometry, crs, targets: Sequence, predicates: Seque
         report.error = "no filterable target layer"
         return report
     anchor = layers[0]
-    local = QgsGeometry(geometry)
-    if crs is not None and crs.isValid() and crs != anchor.crs():
-        local.transform(QgsCoordinateTransform(crs, anchor.crs(), project.transformContext()))
-    request = CrossFilterRequest(source_layer_id=anchor.id(), source_kind=LayerKind.OTHER, targets=tuple(specs),
-                                 predicates=tuple(predicates) or ("Intersect",), buffer_value=float(buffer or 0.0),
-                                 coverage_min=float(coverage_min or 0.0), other_layers_combine_operator=operator)
-    task = (service or _api_service()).run(request, FixedGeometrySourceJob(anchor, local.asWkt()), synchronous=True)
-    return _collect(task, project, report)
+    try:
+        buffer, coverage_min = relation_numbers(buffer, coverage_min)
+        local = QgsGeometry(geometry)
+        if crs is not None and crs.isValid() and crs != anchor.crs():
+            # QgsCsException when the geometry lies outside the target CRS's area.
+            local.transform(QgsCoordinateTransform(crs, anchor.crs(), project.transformContext()))
+        request = CrossFilterRequest(source_layer_id=anchor.id(), source_kind=LayerKind.OTHER, targets=tuple(specs),
+                                     predicates=tuple(predicates) or ("Intersect",), buffer_value=buffer,
+                                     coverage_min=coverage_min, other_layers_combine_operator=operator)
+        task = _run_task(service or _api_service(), request, FixedGeometrySourceJob(anchor, local.asWkt()), feedback)
+    except Exception as exc:
+        logger.warning(f"[FM5] geometry filter failed: {exc}", exc_info=True)
+        report.error = str(exc) or type(exc).__name__
+        return report
+    _collect(task, project, report)
+    if _canceled(feedback) and not report.error:
+        report.error = "canceled"
+    return report
 
 
 # --- point clouds ----------------------------------------------------------------
 
-@_exclusive
+@_exclusive()
 def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = None, project=None,
-                        service=None) -> OperationReport:
-    """Apply the same criteria (or expression) to several point clouds, as one undoable step."""
+                        service=None, feedback=None) -> OperationReport:
+    """Apply the same criteria (or expression) to several point clouds, as one undoable step.
+
+    A cancel request (``feedback``) stops before the next layer: the layers
+    already filtered stay so, in the undoable step.
+    """
     from ...core.domain.cross_filter import combine_subset
     from ...core.domain.filter_state import CrossOperation
     from ..qgis.coverage_layers.snapshots import take_snapshot
@@ -416,7 +495,13 @@ def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = No
         report.error = "no point cloud criteria: give classes, a range, a return number or an expression"
         return report
     changes = []
-    for reference in layers or []:
+    references = list(layers or [])
+    for index, reference in enumerate(references):
+        if _canceled(feedback):
+            report.error = "canceled"
+            break
+        if feedback is not None:
+            feedback.setProgress(100.0 * index / len(references))
         layer = resolve_layer(reference, project)
         label = reference if isinstance(reference, str) else _name(reference)
         if layer is None:
@@ -442,7 +527,7 @@ def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = No
         layer.triggerRepaint()
     if changes:
         _service(service).history.push(CrossOperation(changes[0][0].layer_id, tuple(changes), 'point cloud filter'))
-    if not report.done and not report.failed:
+    if not report.done and not report.failed and not report.error:
         report.error = "no point cloud layer to filter"
     report.details["expression"] = expression
     return report
@@ -450,7 +535,7 @@ def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = No
 
 # --- unfilter --------------------------------------------------------------------
 
-@_exclusive
+@_exclusive()
 def clear_filters(layers: Sequence, project=None, service=None) -> OperationReport:
     """Put layers of any kind back on their original source with no subset.
 
@@ -504,7 +589,7 @@ def _unique_path(path: str, used: set) -> str:
     return candidate
 
 
-@_exclusive
+@_exclusive(tidy=False)
 def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", raster_format: str = "COG",
                   point_cloud_format: str = "LAZ", crs=None, feedback=None, project=None) -> OperationReport:
     """Write each layer as it is filtered now into ``folder``.
@@ -522,6 +607,7 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
         crs: Optional output CRS (``QgsCoordinateReferenceSystem``).
         feedback: Optional ``QgsFeedback`` (progress, cancellation).
     """
+    from qgis.core import QgsFeedback, QgsRasterBlockFeedback
     from ..qgis.coverage_layers.exporters import POINT_CLOUD_FORMATS, export_point_cloud, export_raster, output_path
     project = _project(project)
     report = OperationReport()
@@ -553,13 +639,18 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
             break
         kind = layer_kind(layer)
         name = layer.name()
+        label = _report_label(report, name, layer.id())
         try:
             if kind is LayerKind.VECTOR:
                 driver, extension = VECTOR_EXPORT_FORMATS[vector_format]
-                ok, path, message = _export_vector(layer, _unique_path(output_path(folder, name, extension), used),
-                                                   driver, crs, project)
+                block, release = _child_feedback(feedback, index, total, QgsFeedback)
+                try:
+                    ok, path, message = _export_vector(layer, _unique_path(output_path(folder, name, extension), used),
+                                                       driver, crs, project, feedback=block)
+                finally:
+                    release()
             elif kind is LayerKind.RASTER:
-                block, release = _raster_feedback(feedback, index, total)
+                block, release = _child_feedback(feedback, index, total, QgsRasterBlockFeedback)
                 try:
                     result = export_raster(layer, _unique_path(output_path(folder, name, '.tif'), used),
                                            raster_format, crs, feedback=block)
@@ -571,34 +662,40 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
                 result = export_point_cloud(layer, path, point_cloud_format, crs)
                 ok, path, message = result.success, result.path, result.message
             else:
-                report.skipped[name] = NOT_FILTERABLE
+                report.skipped[label] = NOT_FILTERABLE
                 continue
         except Exception as exc:  # one layer must not stop the others
             logger.warning(f"[FM5] export of '{name}' failed: {exc}", exc_info=True)
             ok, path, message = False, '', str(exc)
         if ok:
-            report.done[layer.id()] = name
-            report.outputs[name] = path
+            report.done[layer.id()] = label
+            report.outputs[label] = path
             if message:
-                report.details.setdefault("notes", {})[name] = message
+                report.details.setdefault("notes", {})[label] = message
         else:
-            report.failed[name] = message or "export failed"
+            report.failed[label] = message or "export failed"
         if feedback is not None:
             feedback.setProgress(100.0 * (index + 1) / total)
     return report
 
 
-def _raster_feedback(feedback, index: int, total: int):
-    """``(QgsRasterBlockFeedback, release)`` relaying progress and cancellation to ``feedback``.
+def _report_label(report: OperationReport, name: str, layer_id: str) -> str:
+    """``name``, or ``name (layer id)`` when a layer of that name is already in the report."""
+    used = set(report.done.values()) | set(report.failed) | set(report.skipped)
+    return name if name not in used else f"{name} ({layer_id})"
 
-    ``QgsRasterFileWriter`` refuses any other feedback type (a Processing
-    feedback raises TypeError): a block feedback forwards the write progress
-    as this layer's share of the export, and a cancel request stops the write.
+
+def _child_feedback(feedback, index: int, total: int, child_class):
+    """``(child feedback, release)`` relaying progress and cancellation to ``feedback``.
+
+    A writer reports 0-100 % for one layer: the child forwards it as this
+    layer's share of the export, and a cancel request stops the write.
+    ``QgsRasterFileWriter`` refuses any feedback but a ``QgsRasterBlockFeedback``
+    (a Processing feedback raises TypeError): ``child_class`` picks the child.
     """
-    from qgis.core import QgsRasterBlockFeedback
-    if feedback is None or isinstance(feedback, QgsRasterBlockFeedback):
-        return feedback, lambda: None
-    block = QgsRasterBlockFeedback()
+    if feedback is None:
+        return None, lambda: None
+    block = child_class()
 
     def _progress(value):
         feedback.setProgress(100.0 * (index + value / 100.0) / max(1, total))
@@ -607,24 +704,18 @@ def _raster_feedback(feedback, index: int, total: int):
     if feedback.isCanceled():
         block.cancel()
     feedback.canceled.connect(block.cancel)
-
-    def _release():
-        for signal, slot in ((feedback.canceled, block.cancel), (block.progressChanged, _progress)):
-            try:
-                signal.disconnect(slot)
-            except (TypeError, RuntimeError):
-                pass
-
-    return block, _release
+    return block, lambda: _disconnect((feedback.canceled, block.cancel), (block.progressChanged, _progress))
 
 
-def _export_vector(layer, path: str, driver: str, crs, project) -> Tuple[bool, str, str]:
+def _export_vector(layer, path: str, driver: str, crs, project, feedback=None) -> Tuple[bool, str, str]:
     """``QgsVectorFileWriter`` honours the subset string: only the filtered features are written."""
     from qgis.core import QgsCoordinateTransform, QgsVectorFileWriter
     options = QgsVectorFileWriter.SaveVectorOptions()
     options.driverName = driver
     options.fileEncoding = "UTF-8"
     options.layerName = layer.name()
+    if feedback is not None:
+        options.feedback = feedback
     if crs is not None and crs.isValid() and crs != layer.crs():
         options.ct = QgsCoordinateTransform(layer.crs(), crs, project.transformContext())
     result = QgsVectorFileWriter.writeAsVectorFormatV3(layer, path, project.transformContext(), options)
@@ -713,13 +804,14 @@ def _favorite_layer(project, signature: Optional[str], layer_id: Optional[str], 
     return None
 
 
-@_exclusive
-def apply_favorite(name_or_id: str, service=None, project=None) -> OperationReport:
+@_exclusive()
+def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -> OperationReport:
     """Apply a favorite: its subset strings, then its raster / point cloud clips.
 
     Same behaviour as the dock's favorites menu (subsets pushed directly,
     layers resolved by signature, then id, then name). Works headless from
     the favorites saved in the project file when the plugin is not loaded.
+    ``feedback``: canceled before the clips, progress after the subsets.
     """
     from ...core.domain.layer_signature import LayerSignature
     from ...infrastructure.database.sql_utils import safe_set_subset_string
@@ -761,6 +853,11 @@ def apply_favorite(name_or_id: str, service=None, project=None) -> OperationRepo
                 report.failed[layer.name()] = "subset rejected by the provider"
         except Exception as exc:
             report.failed[layer.name()] = str(exc)
+    if coverage and _canceled(feedback):
+        report.error = "canceled"
+        coverage = []
+    elif feedback is not None and coverage:
+        feedback.setProgress(50.0)
     if coverage:
         _install_registry(project)
         applied: List[str] = []

@@ -8,6 +8,7 @@ code que l'API Python et l'API REST) et :
   couches du projet sur place, comme le dock ;
 * déclarent la sortie ``OUTPUT`` (couches traitées) pour pouvoir être
   enchaînés dans le modeleur graphique, par exemple filtre croisé → export ;
+* transmettent le ``feedback`` : progression et bouton Annuler ;
 * ignorent, avec un avertissement, les couches hors projet : un filtre posé
   sur une couche temporaire chargée depuis un chemin serait perdu.
 
@@ -34,6 +35,11 @@ try:  # QGIS 3.22+
     from qgis.core import QgsProcessingParameterPointCloudLayer
 except ImportError:  # pragma: no cover - older QGIS
     QgsProcessingParameterPointCloudLayer = None
+
+try:  # QGIS 3.28+: listes de noms déclarées comme sorties
+    from qgis.core import QgsProcessingOutputVariant
+except ImportError:  # pragma: no cover - older QGIS
+    QgsProcessingOutputVariant = None
 
 
 def point_cloud_layer_type():
@@ -120,6 +126,11 @@ class FilterMateAlgorithm(QgsProcessingAlgorithm):
 
     def add_output(self):
         self.addOutput(QgsProcessingOutputMultipleLayers(self.OUTPUT, self.tr("Couches traitées")))
+        # Noms des couches traitées / en échec (résultats de processing.run) : déclarés quand
+        # QGIS sait décrire une liste (QGIS 3.28+), sans libellé traduit de plus.
+        if QgsProcessingOutputVariant is not None:
+            self.addOutput(QgsProcessingOutputVariant(self.LAYERS_FILTERED, self.LAYERS_FILTERED))
+            self.addOutput(QgsProcessingOutputVariant(self.LAYERS_FAILED, self.LAYERS_FAILED))
 
     # --- lecture des paramètres --------------------------------------------------
 

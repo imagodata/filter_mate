@@ -25,6 +25,8 @@ Shared rules:
   only read.
 - **Main thread.** The operations run synchronously on the Qt main thread (`FlagNoThreading` in Processing; the REST
   API marshals every call that reads or changes QGIS, reads included).
+- **Cache.** After each filter, the derived files nothing refers to any more are removed and the cache is kept under
+  `CROSS_FILTER.cache_max_gb` (oldest undo steps holding a file forgotten first), as after a dock run.
 
 ## Processing algorithms
 
@@ -50,10 +52,17 @@ the next step of a model: plug the `OUTPUT` of a filter into the `LAYERS` of *Ex
 target, a raster source with `FILTER_SOURCE` (or a point cloud source with criteria) filters itself and `OUTPUT` is
 that source.
 
+`LAYERS_FILTERED` and `LAYERS_FAILED` give the names of the layers handled and failed (declared outputs from QGIS
+3.28; returned by `processing.run` on every version).
+
 Notes: the buffer of `cross_filter_from_geometry` is in the units of the first target's CRS; on a target with no
 filter yet, `AND`, `OR` and `AND NOT` keep the new selection, like the vector engine; `filter_point_cloud` and point
 cloud source criteria refuse `AND NOT` without an existing filter (they would keep only the excluded points);
-`FILTER_SOURCE` is off by default (the dock masks a raster source, automation leaves it untouched unless asked).
+`FILTER_SOURCE` is off by default (the dock masks a raster source, automation leaves it untouched unless asked);
+`MAX_PIXELS` and `RESOLUTION` left empty use the FilterMate settings (`CROSS_FILTER.raster_selection_max_pixels`,
+`point_cloud_footprint_resolution`). The progress bar follows the targets and *Cancel* stops a cross filter between
+two steps, a point cloud filter or an export before the next layer (`error`: `canceled`); the raster / point cloud
+clips of `apply_favorite` and a point cloud being written cannot be interrupted.
 
 ### Shipped models (`processing/models/`)
 
@@ -90,9 +99,10 @@ qgis_process run filtermate:extraction_par_emprise --PROJECT_PATH=C:/data/chanti
     dossier_de_sortie=C:/exports/communes
 ```
 
-`qgis_process` does not save the project: a filter only matters for the steps that follow it in the same run. To
-replay a favorite and export the result, chain `apply_favorite` → `export_filtered_layers` in a model and run the
-model. Without the dock, `apply_favorite` reads the favorites saved in the project file.
+`qgis_process` does not save the project: a filter only matters for the steps that follow it in the same run, and the
+derived files of the run are removed when it exits. To replay a favorite and export the result, chain
+`apply_favorite` → `export_filtered_layers` in a model and run the model. Without the dock, `apply_favorite` reads the
+favorites saved in the project file.
 
 ## Python API (other plugins, scripts)
 
@@ -113,7 +123,8 @@ state = api.get_filter_state()      # [{"id", "name", "kind", "subset", "derived
 
 Every operation returns a report: `{"ok", "done", "failed", "skipped", "error", "outputs", "details"}`;
 `details["source_filtered"]` tells whether a cross filter also changed its source. Invalid
-arguments give `ok = False` with a message, never an exception. Signals: `operation_completed(name, report)`,
+arguments (NaN or infinite numbers, a buffer beyond 10 000 000 units, a coverage outside 0-100) give `ok = False` with a
+message, never an exception. Two exported layers with the same name are reported as `name` and `name (layer id)`. Signals: `operation_completed(name, report)`,
 `error_occurred(operation, message)`, plus the 4.7 ones (`filter_applied`, `filter_cleared`).
 
 `raster_selection`: `band`, `mode` (`range`, `classes`, `expression`), `minimum`, `maximum`, `classes`,

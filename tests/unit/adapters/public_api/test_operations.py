@@ -52,7 +52,7 @@ class TestOneAtATime:
         # e.g. a REST call re-entering through processEvents during an export.
         seen = {}
 
-        @operations._exclusive
+        @operations._exclusive(tidy=False)
         def outer():
             seen["reason"] = operations.busy_reason()
             seen["inner"] = operations.clear_filters(["parcelle"], project=MagicMock())
@@ -65,7 +65,7 @@ class TestOneAtATime:
         assert operations.busy_reason() == ""  # released once over
 
     def test_lock_released_when_the_operation_raises(self, idle):
-        @operations._exclusive
+        @operations._exclusive(tidy=False)
         def broken():
             raise RuntimeError("boom")
 
@@ -129,3 +129,297 @@ class TestDockTasksDetected:
     def test_other_plugin_task_is_ignored(self, tasks):
         tasks.append(_Task("Rendering"))
         assert operations.busy_reason() == ""
+
+
+# ---------------------------------------------------------------------------
+# Stand-ins: signals, feedback, layers, project, cross filter task
+# ---------------------------------------------------------------------------
+
+class _Signal:
+    def __init__(self):
+        self.slots = []
+
+    def connect(self, slot):
+        self.slots.append(slot)
+
+    def disconnect(self, slot):
+        self.slots.remove(slot)
+
+    def emit(self, *args):
+        for slot in list(self.slots):
+            slot(*args)
+
+
+class _Feedback:
+    """QgsProcessingFeedback stand-in: progress log, Cancel button."""
+
+    def __init__(self):
+        self.canceled = _Signal()
+        self._canceled = False
+        self.progress = []
+
+    def isCanceled(self):
+        return self._canceled
+
+    def cancel(self):
+        self._canceled = True
+        self.canceled.emit()
+
+    def setProgress(self, value):
+        self.progress.append(value)
+
+
+class _Layer:
+    def __init__(self, layer_id, name):
+        self._id, self._name = layer_id, name
+
+    def id(self):
+        return self._id
+
+    def name(self):
+        return self._name
+
+    def crs(self):
+        return "EPSG:2154"
+
+
+class _Project:
+    def __init__(self, *layers):
+        self.layers = {layer.id(): layer for layer in layers}
+
+    def mapLayer(self, layer_id):
+        return self.layers.get(layer_id)
+
+    def mapLayersByName(self, name):
+        return [layer for layer in self.layers.values() if layer.name() == name]
+
+    def transformContext(self):
+        return None
+
+
+class _CrossTask:
+    """CrossFilterTask stand-in: three steps, checks cancellation between them."""
+
+    def __init__(self, source_id, target_ids, cancel_with=None, cancel_at=None):
+        self.progressChanged = _Signal()
+        self._canceled = False
+        self.cancel_with, self.cancel_at = cancel_with, cancel_at
+        self.error, self.changes = "", []
+        self.source_job = types.SimpleNamespace(layer_id=source_id, kind=operations.LayerKind.VECTOR, details={})
+        self.target_ids = target_ids
+        self.outcomes = []
+        self.steps = 0
+
+    def cancel(self):
+        self._canceled = True
+
+    def isCanceled(self):
+        return self._canceled
+
+    def run(self):
+        for step in range(3):
+            if self.isCanceled():
+                return False
+            if step == self.cancel_at:
+                self.cancel_with.cancel()  # the user clicks Cancel while the task runs
+                continue
+            self.steps += 1
+            self.progressChanged.emit(100.0 * (step + 1) / 3)
+        return True
+
+    def apply_results(self, result):
+        self.outcomes = [types.SimpleNamespace(layer_id=layer_id, success=result, kept_count=1, elapsed=0.0,
+                                               message="" if result else "canceled")
+                         for layer_id in self.target_ids]
+
+
+class _Service:
+    def __init__(self, task):
+        self.task = task
+        self.ran_synchronously = False
+
+    def build_task(self, request, source_job):
+        self.request = request
+        return self.task
+
+    def run(self, request, source_job, synchronous=False):
+        self.request, self.ran_synchronously = request, synchronous
+        self.task.apply_results(self.task.run())
+        return self.task
+
+
+@pytest.fixture
+def vector_world(idle, monkeypatch):
+    """A vector source and target; the source job and the registry hook stubbed."""
+    source, target = _Layer("S", "communes"), _Layer("T", "batiment")
+    monkeypatch.setattr(operations, "layer_kind", lambda layer: operations.LayerKind.VECTOR)
+    monkeypatch.setattr(operations, "_install_registry", lambda project: None)
+    monkeypatch.setattr(operations, "_source_job", lambda layer, kind, report, **kwargs: types.SimpleNamespace(
+        before=None, layer_id=layer.id(), kind=kind, details={}))
+    tidied = []
+    monkeypatch.setattr(service_mod, "tidy_cache", lambda project=None: tidied.append(project))
+    return types.SimpleNamespace(source=source, target=target, project=_Project(source, target), tidied=tidied)
+
+
+class TestFeedbackRelayed:
+    """Processing's progress bar and Cancel button reach the cross filter task."""
+
+    def test_progress_reaches_the_feedback(self, vector_world):
+        feedback = _Feedback()
+        task = _CrossTask("S", ["T"])
+        report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
+                                         service=_Service(task), feedback=feedback)
+        assert report.ok and report.done == {"T": "batiment"}
+        assert feedback.progress[-1] == pytest.approx(100.0)
+        assert task.progressChanged.slots == [] and feedback.canceled.slots == []  # disconnected
+
+    def test_cancel_stops_the_task_and_reports_it(self, vector_world):
+        feedback = _Feedback()
+        task = _CrossTask("S", ["T"], cancel_with=feedback, cancel_at=1)
+        report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
+                                         service=_Service(task), feedback=feedback)
+        assert task.steps == 1  # stopped at the next check
+        assert report.error == "canceled"
+
+    def test_canceled_before_the_start(self, vector_world):
+        feedback = _Feedback()
+        feedback.cancel()
+        task = _CrossTask("S", ["T"])
+        report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
+                                         service=_Service(task), feedback=feedback)
+        assert task.steps == 0 and report.error == "canceled"
+
+    def test_without_feedback_the_service_runs_synchronously(self, vector_world):
+        service = _Service(_CrossTask("S", ["T"]))
+        operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project, service=service)
+        assert service.ran_synchronously is True
+
+    def test_point_cloud_filter_stops_before_the_next_layer(self, idle, monkeypatch):
+        feedback = _Feedback()
+        feedback.cancel()
+        report = operations.filter_point_clouds(["dalle_1", "dalle_2"], "Classification = 2",
+                                                project=_Project(), feedback=feedback)
+        assert report.error == "canceled" and not report.skipped
+
+
+class TestCacheTidied:
+    """The derived files of automation runs are removed (the dock only tidied after its own runs)."""
+
+    def test_tidied_after_a_filter(self, vector_world):
+        operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
+                                service=_Service(_CrossTask("S", ["T"])))
+        assert vector_world.tidied == [vector_world.project]
+
+    def test_tidied_after_a_failed_filter(self, vector_world):
+        operations.cross_filter(vector_world.source, ["ghost"], project=vector_world.project)
+        assert vector_world.tidied == [vector_world.project]
+
+    def test_not_tidied_when_refused_busy(self, vector_world):
+        operations._RUNNING.append("export_layers")
+        operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project)
+        assert vector_world.tidied == []
+
+    def test_not_tidied_after_an_export(self, vector_world, tmp_path):
+        operations.export_layers([], str(tmp_path), project=vector_world.project)
+        assert vector_world.tidied == []
+
+    def test_tidy_failure_does_not_break_the_operation(self, vector_world, monkeypatch):
+        def broken(project=None):
+            raise OSError("cache folder gone")
+        monkeypatch.setattr(service_mod, "tidy_cache", broken)
+        report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
+                                         service=_Service(_CrossTask("S", ["T"])))
+        assert report.ok
+
+
+class TestNumbersChecked:
+    """Python API / Processing: NaN or infinite buffer refused with a message, never run."""
+
+    @pytest.mark.parametrize("buffer, coverage", [(float("nan"), 0), (float("inf"), 0), (0, float("nan")), (0, 150)])
+    def test_cross_filter(self, vector_world, buffer, coverage):
+        service = _Service(_CrossTask("S", ["T"]))
+        report = operations.cross_filter(vector_world.source, ["batiment"], buffer=buffer, coverage_min=coverage,
+                                         project=vector_world.project, service=service)
+        assert report.error and not report.done
+        assert service.task.steps == 0
+
+
+class _Geometry:
+    """QgsGeometry stand-in whose reprojection fails (QgsCsException)."""
+
+    def __init__(self, other=None):
+        pass
+
+    def isNull(self):
+        return False
+
+    def isEmpty(self):
+        return False
+
+    def transform(self, transform):
+        raise RuntimeError("forward transform of (1e+20, 0): latitude or longitude exceeded limits")
+
+
+class TestGeometryFilterErrors:
+    @pytest.fixture
+    def geometry(self, monkeypatch):
+        qgis_core = sys.modules["qgis.core"]
+        monkeypatch.setattr(qgis_core, "QgsGeometry", _Geometry, raising=False)
+        monkeypatch.setattr(qgis_core, "QgsCoordinateTransform", lambda *args: "transform", raising=False)
+        return _Geometry()
+
+    def test_transform_failure_is_a_report_error(self, vector_world, geometry):
+        crs = MagicMock()
+        crs.isValid.return_value = True
+        report = operations.cross_filter_by_geometry(geometry, crs, ["batiment"], project=vector_world.project)
+        assert "latitude or longitude" in report.error
+
+    def test_nan_buffer_is_a_report_error(self, vector_world, geometry):
+        report = operations.cross_filter_by_geometry(geometry, None, ["batiment"], buffer=float("nan"),
+                                                     project=vector_world.project)
+        assert "finite" in report.error
+
+
+class TestExportReport:
+    def test_homonym_layers_both_reported(self, vector_world, tmp_path, monkeypatch):
+        first, second = _Layer("A", "parcelle"), _Layer("B", "parcelle")
+        monkeypatch.setattr(operations, "_export_vector",
+                            lambda layer, path, driver, crs, project, feedback=None: (True, path, ""))
+        report = operations.export_layers([first, second], str(tmp_path), project=_Project(first, second))
+        assert report.done == {"A": "parcelle", "B": "parcelle (B)"}
+        assert sorted(report.outputs) == ["parcelle", "parcelle (B)"]
+        assert report.outputs["parcelle"] != report.outputs["parcelle (B)"]
+
+    def test_vector_writer_gets_a_child_feedback(self, vector_world, tmp_path, monkeypatch):
+        captured = {}
+
+        class _Writer:
+            class WriterError:
+                NoError = 0
+
+            class SaveVectorOptions:
+                feedback = None
+
+            @staticmethod
+            def writeAsVectorFormatV3(layer, path, context, options):
+                captured["feedback"] = options.feedback
+                options.feedback.progressChanged.emit(50.0)
+                return (0, "", path)
+
+        class _ChildFeedback(_Feedback):
+            def __init__(self):
+                super().__init__()
+                self.progressChanged = _Signal()
+
+        qgis_core = sys.modules["qgis.core"]
+        monkeypatch.setattr(qgis_core, "QgsVectorFileWriter", _Writer, raising=False)
+        monkeypatch.setattr(qgis_core, "QgsFeedback", _ChildFeedback, raising=False)
+        feedback = _Feedback()
+        layer = _Layer("A", "parcelle")
+        report = operations.export_layers([layer, _Layer("B", "route")], str(tmp_path), feedback=feedback,
+                                          project=_Project(layer))
+        assert report.ok
+        assert isinstance(captured["feedback"], _ChildFeedback)
+        # 50 % of the first of two layers = 25 % of the export.
+        assert 25.0 in feedback.progress
+        assert feedback.canceled.slots == []
