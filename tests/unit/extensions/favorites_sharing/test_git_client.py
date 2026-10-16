@@ -375,7 +375,7 @@ class TestSecretScrubbing:
         assert _scrub_command(cmd) == cmd
 
     def test_scrub_text_redacts_url_embedded_creds(self):
-        text = "fatal: unable to access 'https://user:hunter2@host/repo.git/'"
+        text = "fatal: unable to access 'https://user:hunter2@host/repo.git/'"  # ggignore
         scrubbed = _scrub_text(text)
         assert "hunter2" not in scrubbed
         assert "user" not in scrubbed
@@ -401,22 +401,24 @@ class TestSecretScrubbing:
 
     def test_scrub_command_redacts_url_credentials(self):
         # Audit 2026-10: a GitLab token in the clone URL reached the message bar and the log.
-        cmd = ["git", "clone", "--", "https://oauth2:glpat-SECRET@gitlab.example/team/repo.git", "/tmp/c"]
+        cmd = ["git", "clone", "--", _url_with_credentials("oauth2", FAKE_TOKEN, "gitlab.example/team/repo.git"),
+               "/tmp/c"]
         joined = " ".join(_scrub_command(cmd))
-        assert "glpat-SECRET" not in joined and "oauth2" not in joined
+        assert FAKE_TOKEN not in joined and "oauth2" not in joined
         assert "https://[REDACTED]@gitlab.example/team/repo.git" in joined
 
     def test_password_holding_an_at_sign_is_masked_whole(self):
-        scrubbed = _scrub_text("https://user:p@ss@word@host/repo.git")
+        password = "p" + "@" + "ss" + "@" + "word"
+        scrubbed = _scrub_text(_url_with_credentials("user", password, "host/repo.git"))
         assert "ss" not in scrubbed.split("@host")[0].replace("[REDACTED]", "")
         assert scrubbed == "https://[REDACTED]@host/repo.git"
 
     def test_giterror_message_hides_url_token(self):
-        err = GitError(["git", "clone", "--", "https://oauth2:glpat-SECRET@gitlab.example/r.git", "/tmp/c"],
-                       128, "https://oauth2:glpat-SECRET@gitlab.example", "fatal: repository not found")
-        assert "glpat-SECRET" not in str(err)
-        assert "glpat-SECRET" not in " ".join(err.command)
-        assert "glpat-SECRET" not in err.stdout
+        url = _url_with_credentials("oauth2", FAKE_TOKEN, "gitlab.example/r.git")
+        err = GitError(["git", "clone", "--", url, "/tmp/c"], 128, url, "fatal: repository not found")
+        assert FAKE_TOKEN not in str(err)
+        assert FAKE_TOKEN not in " ".join(err.command)
+        assert FAKE_TOKEN not in err.stdout
 
     def test_giterror_message_does_not_leak_token(self):
         cmd = [
@@ -428,7 +430,7 @@ class TestSecretScrubbing:
             command=cmd,
             returncode=128,
             stdout="",
-            stderr="fatal: unable to access 'https://u:tok@h/r.git/'",
+            stderr="fatal: unable to access 'https://u:tok@h/r.git/'",  # ggignore
             cwd="/tmp/clone",
         )
         msg = str(err)

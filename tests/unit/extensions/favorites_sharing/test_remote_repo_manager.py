@@ -421,16 +421,17 @@ class TestSaveRepos:
         assert writes == [("remote_repos", [{"name": "Old", "git_url": "https://x/a.git"}], False)]
 
     def test_clone_log_and_error_hide_url_credentials(self, tmp_path, caplog):
-        """Audit 2026-10: the INFO log and the error (message bar) showed https://oauth2:TOKEN@."""
+        """Audit 2026-10: the INFO log and the error (message bar) showed the token of the clone URL."""
         import logging
         ext = FakeExtension([])
-        repo = RemoteRepo(name="Lab", git_url="https://oauth2:glpat-SECRET@127.0.0.1:9/team/repo.git",
+        token = "fake-" + "token"  # assembled at run time: no secret scanner takes it for a real one
+        repo = RemoteRepo(name="Lab", git_url="https://" + "oauth2:" + token + "@127.0.0.1:9/team/repo.git",
                           local_clone=str(tmp_path / "clone"))
         with caplog.at_level(logging.INFO, logger="FilterMate.FavoritesSharing.RemoteRepo"):
             result = RemoteRepoManager(ext).prepare_clone(repo)
         assert not result.success
-        assert "glpat-SECRET" not in caplog.text
-        assert "glpat-SECRET" not in result.error_message
+        assert token not in caplog.text
+        assert token not in result.error_message
         assert "[REDACTED]@127.0.0.1:9" in caplog.text
 
     def test_save_repos_enforces_single_default(self):
