@@ -35,6 +35,12 @@ logger = logging.getLogger('FilterMate.TaskManagementService')
 # class is defined under it, whatever the (translated) description of the task.
 _PLUGIN_PACKAGE = __name__.split('.')[0]
 
+# Left running by safe_cancel_all_tasks: a FilterEngineTask lifts its protections (panel
+# in "filtering" state, signals of the current-layer combo box blocked) on taskCompleted
+# only, and its cancel() drops PostgreSQL views on the main thread. The former loop
+# (task(i), which takes an id) practically never reached it either.
+_TASKS_LEFT_RUNNING = ('FilterEngineTask',)
+
 
 def is_filtermate_task(task: Any) -> bool:
     """True for a task started by FilterMate: a task class of the plugin, or a
@@ -98,8 +104,12 @@ class TaskManagementService:
 
             # tasks(), not task(i) for i < count(): task() takes a task id, not an index
             for task in reversed(list(task_manager.tasks())):
-                if task and is_filtermate_task(task) and task.canCancel():
-                    task.cancel()
+                try:
+                    if (task and is_filtermate_task(task) and type(task).__name__ not in _TASKS_LEFT_RUNNING
+                            and task.canCancel()):
+                        task.cancel()
+                except RuntimeError as e:  # task deleted meanwhile: the others are still canceled
+                    logger.debug(f"Task not canceled: {e}")
 
         except Exception as e:
             logger.warning(f"Could not cancel tasks: {e}")

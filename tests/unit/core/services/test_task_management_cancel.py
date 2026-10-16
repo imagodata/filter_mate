@@ -70,18 +70,27 @@ class TestSafeCancelAllTasks:
     def test_only_filtermate_tasks_are_canceled(self, task_manager):
         processing = ProcessingTask(0, "Buffer")  # a low id: task(0) used to reach it
         other = OtherPluginTask(1, "Exporting tiles")
-        layers = LayersManagementEngineTask(57, "Adding layers")
-        filtering = FilterEngineTask(58, "Filtrage des données")  # translated description
+        layers = LayersManagementEngineTask(57, "Ajout des couches")  # translated description
         export = OtherPluginTask(59, "FilterMate: export")  # raster / point cloud task description
-        task_manager([processing, other, layers, filtering, export])
+        task_manager([processing, other, layers, export])
 
         tms.TaskManagementService().safe_cancel_all_tasks()
 
         assert not processing.canceled and not other.canceled
-        assert layers.canceled and filtering.canceled and export.canceled
+        assert layers.canceled and export.canceled
+
+    def test_a_running_filter_is_left_alone(self, task_manager):
+        """Canceled, a filter left the panel in "filtering" state with the current-layer combo box
+        blocked (lifted on taskCompleted only); the former loop practically never reached it."""
+        filtering = FilterEngineTask(58, "Filtering data")
+        task_manager([filtering])
+
+        tms.TaskManagementService().safe_cancel_all_tasks()
+
+        assert not filtering.canceled
 
     def test_tasks_that_cannot_be_canceled_are_left(self, task_manager):
-        task = FilterEngineTask(3, "Filtering data", can_cancel=False)
+        task = LayersManagementEngineTask(3, "Adding layers", can_cancel=False)
         task_manager([task])
 
         tms.TaskManagementService().safe_cancel_all_tasks()
@@ -89,9 +98,9 @@ class TestSafeCancelAllTasks:
         assert not task.canceled
 
     def test_a_deleted_task_does_not_stop_the_others(self, task_manager):
-        deleted = OtherPluginTask(4, "x")
-        deleted.description = MagicMock(side_effect=RuntimeError("wrapped C/C++ object deleted"))
-        task = FilterEngineTask(5, "Filtering data")
+        deleted = LayersManagementEngineTask(4, "Removing layers")
+        deleted.canCancel = MagicMock(side_effect=RuntimeError("wrapped C/C++ object deleted"))
+        task = LayersManagementEngineTask(5, "Adding layers")
         task_manager([task, deleted])
 
         tms.TaskManagementService().safe_cancel_all_tasks()
