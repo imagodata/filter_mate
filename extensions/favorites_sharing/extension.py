@@ -239,6 +239,8 @@ class FavoritesSharingExtension(BaseExtension):
         self._scanner = ResourceSharingScanner(extension=self)
         self._service = FavoritesSharingService(self._scanner)
         self._remote_repos = RemoteRepoManager(extension=self)
+        # A 4.x plaintext token must not stay on disk until the next save.
+        self._remote_repos.purge_plaintext_auth()
         self.register_service('scanner', self._scanner)
         self.register_service('service', self._service)
         self.register_service('remote_repos', self._remote_repos)

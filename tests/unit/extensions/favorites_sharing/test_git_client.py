@@ -177,14 +177,14 @@ class TestGitClient:
             client._run(["status"])
         assert "not found" in excinfo.value.stderr.lower()
 
-    def test_auth_header_passed_via_config_not_argv(self, tmp_path, seeded_remote, monkeypatch):
-        """Tokens must travel via git's --config, never as bare argv."""
-        captured = {}
-
+    @staticmethod
+    def _spy_clone(tmp_path, seeded_remote, monkeypatch, git_version=None, extra_env=None):
+        """Clone with a stored token; every (argv, env) handed to subprocess.run."""
+        invocations = []
         orig_run = subprocess.run
 
         def spy(cmd, **kwargs):
-            captured.setdefault("invocations", []).append(list(cmd))
+            invocations.append((list(cmd), dict(kwargs.get("env") or {})))
             return orig_run(cmd, **kwargs)
 
         monkeypatch.setattr(subprocess, "run", spy)
@@ -192,20 +192,99 @@ class TestGitClient:
         import extensions.favorites_sharing.git_client as git_client_module
         monkeypatch.setattr(git_client_module, "_resolve_authcfg_header",
                             lambda authcfg_id: "Bearer SECRET-TOKEN-123")
+        if git_version is not None:
+            monkeypatch.setattr(git_client_module, "_git_version", lambda binary: git_version)
 
-        dest = tmp_path / "clone"
-        client = GitClient(cwd=str(dest), authcfg_id="qg1xy7w")
+        client = GitClient(cwd=str(tmp_path / "clone"), authcfg_id="qg1xy7w", extra_env=extra_env or {})
         client.clone(str(seeded_remote), branch="main")
+        return [(argv, env) for argv, env in invocations if "clone" in argv]
 
-        # The token should appear in the -c http.extraHeader= slot, not
-        # anywhere else in the argv list.
-        for argv in captured["invocations"]:
-            joined = " ".join(argv)
-            assert "SECRET-TOKEN-123" in joined
-            # Hard assertion: token is always associated with the config flag
-            idx = argv.index("-c")
-            assert "http.extraHeader" in argv[idx + 1]
-            assert "SECRET-TOKEN-123" in argv[idx + 1]
+    def test_auth_header_passed_via_environment_not_argv(self, tmp_path, seeded_remote, monkeypatch):
+        """Audit 2026-10: argv is world-readable (/proc/<pid>/cmdline): the token travels in the environment."""
+        (argv, env), = self._spy_clone(tmp_path, seeded_remote, monkeypatch)
+        assert "SECRET-TOKEN-123" not in " ".join(argv)
+        index = int(env["GIT_CONFIG_COUNT"]) - 1
+        assert env[f"GIT_CONFIG_KEY_{index}"] == "http.extraHeader"
+        assert env[f"GIT_CONFIG_VALUE_{index}"] == "Authorization: Bearer SECRET-TOKEN-123"
+
+    def test_existing_git_config_count_is_kept(self, tmp_path, seeded_remote, monkeypatch):
+        (argv, env), = self._spy_clone(tmp_path, seeded_remote, monkeypatch, git_version=(2, 43),
+                                        extra_env={"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "core.autocrlf",
+                                                   "GIT_CONFIG_VALUE_0": "false"})
+        assert env["GIT_CONFIG_COUNT"] == "2"
+        assert env["GIT_CONFIG_KEY_0"] == "core.autocrlf"
+        assert env["GIT_CONFIG_KEY_1"] == "http.extraHeader"
+
+    def test_old_git_falls_back_to_the_command_line(self, tmp_path, seeded_remote, monkeypatch):
+        """git < 2.31 has no GIT_CONFIG_COUNT: the -c option is the only way left."""
+        (argv, env), = self._spy_clone(tmp_path, seeded_remote, monkeypatch, git_version=(2, 30))
+        index = argv.index("-c")
+        assert argv[index + 1] == "http.extraHeader=Authorization: Bearer SECRET-TOKEN-123"
+        assert "GIT_CONFIG_COUNT" not in env or "SECRET" not in str(env)
+
+    def test_git_version_parsing(self, monkeypatch):
+        import extensions.favorites_sharing.git_client as git_client_module
+
+        class _Proc:
+            returncode = 0
+            stdout = ""
+
+        for text, expected in (("git version 2.43.0\n", (2, 43)), ("git version 2.39.2.windows.1", (2, 39)),
+                               ("git version 2.30.1 (Apple Git-130)", (2, 30)), ("nonsense", None)):
+            proc = _Proc()
+            proc.stdout = text
+            monkeypatch.setattr(git_client_module, "_GIT_VERSIONS", {})
+            monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: proc)
+            assert git_client_module._git_version("git") == expected
+
+    def test_missing_binary_has_no_version(self):
+        from extensions.favorites_sharing.git_client import _git_version
+        assert _git_version("git-does-not-exist-xyz") is None
+
+
+class TestTransportsAndIdentity:
+    """Audit 2026-10: only https / ssh, and a commit works on a fresh install."""
+
+    def test_local_path_refused_in_production(self, tmp_path, seeded_remote, monkeypatch):
+        import extensions.favorites_sharing.git_client as git_client_module
+        monkeypatch.setattr(git_client_module, "ALLOWED_PROTOCOLS", "https:ssh")  # undo the conftest opening
+        with pytest.raises(GitError) as excinfo:
+            GitClient(cwd=str(tmp_path / "clone")).clone(str(seeded_remote), branch="main")
+        assert "not allowed" in excinfo.value.stderr
+
+    @pytest.mark.parametrize("url", ["http://127.0.0.1:9/team/repo.git", "git://127.0.0.1:9/repo.git",
+                                     "ext::sh -c touch% /tmp/pwned"])
+    def test_plaintext_and_command_transports_refused(self, tmp_path, url):
+        with pytest.raises(GitError) as excinfo:
+            GitClient(cwd=str(tmp_path / "clone"), timeout_seconds=10).clone(url)
+        assert "not allowed" in excinfo.value.stderr
+
+    def test_commit_on_a_fresh_install_uses_the_author_as_committer(self, tmp_path, seeded_remote, monkeypatch):
+        # No global / system identity at all, like a new Windows workstation.
+        for name in ("EMAIL", "GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL"):
+            monkeypatch.delenv(name, raising=False)
+        home = tmp_path / "home"
+        home.mkdir()
+        fresh = {"HOME": str(home), "XDG_CONFIG_HOME": str(home), "GIT_CONFIG_NOSYSTEM": "1",
+                 "GIT_CONFIG_GLOBAL": str(home / "none")}
+        client = GitClient(cwd=str(tmp_path / "clone"), extra_env=fresh)
+        client.clone(str(seeded_remote), branch="main")
+        (tmp_path / "clone" / "bundle.json").write_text("{}")
+        client.add(["bundle.json"])
+        client.commit("publish", author="Acme team <team@acme.example>")
+        res = client._run(["log", "-1", "--format=%cn <%ce>|%an <%ae>"])
+        assert res.stdout.strip() == "Acme team <team@acme.example>|Acme team <team@acme.example>"
+
+    def test_configured_identity_stays_the_committer(self, tmp_path, seeded_remote):
+        client = GitClient(cwd=str(tmp_path / "clone"))
+        client.clone(str(seeded_remote), branch="main")
+        client._run(["config", "user.name", "Local User"])
+        client._run(["config", "user.email", "local@example.com"])
+        (tmp_path / "clone" / "bundle.json").write_text("{}")
+        client.add(["bundle.json"])
+        client.commit("publish", author="Acme team <team@acme.example>")
+        res = client._run(["log", "-1", "--format=%cn <%ce>|%an <%ae>"])
+        assert res.stdout.strip() == "Local User <local@example.com>|Acme team <team@acme.example>"
 
 
 # ---------------------------------------------------------------------------
@@ -250,6 +329,25 @@ class TestSecretScrubbing:
     def test_scrub_text_empty_string_is_safe(self):
         assert _scrub_text("") == ""
         assert _scrub_text(None) is None  # type: ignore[arg-type]
+
+    def test_scrub_command_redacts_url_credentials(self):
+        # Audit 2026-10: a GitLab token in the clone URL reached the message bar and the log.
+        cmd = ["git", "clone", "--", "https://oauth2:glpat-SECRET@gitlab.example/team/repo.git", "/tmp/c"]
+        joined = " ".join(_scrub_command(cmd))
+        assert "glpat-SECRET" not in joined and "oauth2" not in joined
+        assert "https://[REDACTED]@gitlab.example/team/repo.git" in joined
+
+    def test_password_holding_an_at_sign_is_masked_whole(self):
+        scrubbed = _scrub_text("https://user:p@ss@word@host/repo.git")
+        assert "ss" not in scrubbed.split("@host")[0].replace("[REDACTED]", "")
+        assert scrubbed == "https://[REDACTED]@host/repo.git"
+
+    def test_giterror_message_hides_url_token(self):
+        err = GitError(["git", "clone", "--", "https://oauth2:glpat-SECRET@gitlab.example/r.git", "/tmp/c"],
+                       128, "https://oauth2:glpat-SECRET@gitlab.example", "fatal: repository not found")
+        assert "glpat-SECRET" not in str(err)
+        assert "glpat-SECRET" not in " ".join(err.command)
+        assert "glpat-SECRET" not in err.stdout
 
     def test_giterror_message_does_not_leak_token(self):
         cmd = [

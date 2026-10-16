@@ -14,14 +14,19 @@ Design rules:
 - No auto-rebase, no auto-merge. Conflicts surface as ``GitError`` with
   the clone path attached so the UI can offer "Open clone" rather than
   risking history rewrites.
-- stderr is captured and returned verbatim — operators paste it into bug
-  reports.
-- Credentials are injected via ``http.extraHeader`` so they never land
-  in process argv. The credential comes from ``authcfg_id`` only, resolved
-  at exec time through ``QgsAuthManager``, which decrypts the stored
-  Basic/PAT credential into an ``Authorization:`` header. The plaintext
-  never touches config.json (the legacy plaintext ``auth_header`` was
-  removed in FilterMate 5.0, audit EXT-6).
+- stderr is captured and returned with credentials scrubbed — operators
+  paste it into bug reports.
+- Credentials are injected as an ``http.extraHeader`` passed through the
+  environment (``GIT_CONFIG_COUNT`` / ``GIT_CONFIG_KEY_n`` /
+  ``GIT_CONFIG_VALUE_n``, git >= 2.31), never in the process argv, which
+  any local user can read (``/proc/<pid>/cmdline``, process lists). Older
+  git only takes it as a ``-c`` option on the command line. The credential
+  comes from ``authcfg_id`` only, resolved at exec time through
+  ``QgsAuthManager``, which decrypts the stored Basic/PAT credential into an
+  ``Authorization:`` header. The plaintext never touches config.json (the
+  legacy plaintext ``auth_header`` was removed in FilterMate 5.0, audit EXT-6).
+- Transports are limited to https and ssh (``GIT_ALLOW_PROTOCOL``): no
+  plaintext http / git carrying the token, no ``ext::`` command transport.
 """
 
 from __future__ import annotations
@@ -31,7 +36,7 @@ import os
 import re
 import subprocess
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.Git')
 
@@ -42,13 +47,52 @@ DEFAULT_TIMEOUT_SECONDS = 30
 _AUTH_HEADER_RE = re.compile(
     r"(http\.extraHeader=Authorization:\s*)[^\n]+", re.IGNORECASE
 )
-_URL_CREDS_RE = re.compile(r"(\w+://)([^/@\s]+)@")
+# userinfo of a URL (``https://user:token@host``), greedy up to the last "@"
+# of the authority so a password holding "@" is masked whole.
+_URL_CREDS_RE = re.compile(r"(\w+://)([^/\s]+)@")
 _REDACTED = "[REDACTED]"
+
+# Transports git may use (GIT_ALLOW_PROTOCOL): https and ssh. Plaintext http
+# and git:// would carry the token in clear, ``ext::`` runs a command, and a
+# local path / file:// is no documented publish target.
+ALLOWED_PROTOCOLS = "https:ssh"
+
+# ``GIT_CONFIG_COUNT`` / ``GIT_CONFIG_KEY_n`` / ``GIT_CONFIG_VALUE_n``: git 2.31+.
+_CONFIG_ENV_MIN_VERSION = (2, 31)
+_GIT_VERSIONS: Dict[str, Tuple[int, int]] = {}
 
 
 def _scrub_command(cmd: List[str]) -> List[str]:
-    """Return a copy of ``cmd`` with any embedded auth header redacted."""
-    return [_AUTH_HEADER_RE.sub(rf"\1{_REDACTED}", arg) for arg in cmd]
+    """Return a copy of ``cmd`` with auth headers and URL credentials redacted."""
+    return [_scrub_text(arg) for arg in cmd]
+
+
+def _git_version(git_binary: str) -> Optional[Tuple[int, int]]:
+    """``(major, minor)`` of ``git_binary``, None when it cannot be read.
+
+    Read once per binary (``git --version``: ``git version 2.43.0``,
+    ``2.39.2.windows.1``, ``2.30.1 (Apple Git-130)``).
+    """
+    if git_binary not in _GIT_VERSIONS:
+        try:
+            proc = subprocess.run(  # nosec B603 - fixed argv, no shell, timeout enforced
+                [git_binary, "--version"], capture_output=True, text=True, timeout=10, check=False,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return None
+        match = re.search(r"(\d+)\.(\d+)", proc.stdout or "")
+        if proc.returncode != 0 or match is None:
+            return None
+        _GIT_VERSIONS[git_binary] = (int(match.group(1)), int(match.group(2)))
+    return _GIT_VERSIONS[git_binary]
+
+
+def _split_identity(author: str) -> Optional[Tuple[str, str]]:
+    """``("Name", "email")`` of ``"Name <email>"``, None when there is no email."""
+    match = re.fullmatch(r"\s*(.*?)\s*<([^<>]+)>\s*", author or "")
+    if match is None:
+        return None
+    return match.group(1) or match.group(2), match.group(2)
 
 
 def _strip_control_chars(value: str) -> str:
@@ -145,12 +189,13 @@ class GitError(RuntimeError):
 
     def __init__(self, command: List[str], returncode: int,
                  stdout: str, stderr: str, cwd: Optional[str] = None):
-        # M7 (2026-04-23): scrub auth headers from cmd & stderr so the
-        # exception (often surfaced in log files / bug reports) doesn't
+        # M7 (2026-04-23): scrub auth headers and URL credentials
+        # (``git clone -- https://oauth2:TOKEN@host/...``) from cmd & output
+        # so the exception (message bar, log files, bug reports) doesn't
         # leak credentials.
         self.command = _scrub_command(command)
         self.returncode = returncode
-        self.stdout = stdout
+        self.stdout = _scrub_text(stdout)
         self.stderr = _scrub_text(stderr)
         self.cwd = cwd
         cmd_str = " ".join(self.command)
@@ -227,27 +272,35 @@ class GitClient:
         exception type.
         """
         cmd: List[str] = [self.git_binary]
-        # Inject auth header as a --config override so it is not logged
-        # as part of the URL. Only set for operations that touch the net.
-        # Resolved here (not at __init__) so QgsAuthManager prompts for
-        # the master password at the moment of use, not at config load.
-        header = self._resolve_auth_header()
-        if header:
-            # Strip CR/LF: a header containing "\n[remote \"x\"]..." would
-            # otherwise inject extra git config through the ``-c`` flag.
-            safe_header = _strip_control_chars(header)
-            cmd += [
-                "-c",
-                f"http.extraHeader=Authorization: {safe_header}",
-            ]
-        cmd += list(args)
-
         run_cwd = cwd or self.cwd
         env = os.environ.copy()
         # Never prompt for credentials — fail fast on auth issues.
         env.setdefault("GIT_TERMINAL_PROMPT", "0")
         env.setdefault("GIT_ASKPASS", "echo")
+        env["GIT_ALLOW_PROTOCOL"] = ALLOWED_PROTOCOLS
         env.update(self.extra_env)
+
+        # Inject the auth header as an http.extraHeader config override, out
+        # of the URL. Resolved here (not at __init__) so QgsAuthManager
+        # prompts for the master password at the moment of use, not at
+        # config load.
+        header = self._resolve_auth_header()
+        if header:
+            # Strip CR/LF: a header containing "\n[remote \"x\"]..." would
+            # otherwise inject extra git config through the ``-c`` flag.
+            value = f"Authorization: {_strip_control_chars(header)}"
+            if (_git_version(self.git_binary) or (0, 0)) >= _CONFIG_ENV_MIN_VERSION:
+                # Through the environment: argv is readable by any local user.
+                try:
+                    index = max(0, int(env.get("GIT_CONFIG_COUNT") or 0))
+                except ValueError:
+                    index = 0
+                env[f"GIT_CONFIG_KEY_{index}"] = "http.extraHeader"
+                env[f"GIT_CONFIG_VALUE_{index}"] = value
+                env["GIT_CONFIG_COUNT"] = str(index + 1)
+            else:
+                cmd += ["-c", f"http.extraHeader={value}"]
+        cmd += list(args)
 
         logger.debug("git run: cwd=%s cmd=%s", run_cwd, _scrub_command(cmd))
         try:
@@ -354,12 +407,25 @@ class GitClient:
         bundles carry the publishing team's identity rather than the
         machine's default git config. Newlines in ``author`` are
         stripped — the field must stay single-line so a malicious
-        identity cannot inject extra commit trailers.
+        identity cannot inject extra commit trailers. On a fresh install
+        with no git identity at all, the author is also the committer
+        (git refuses to commit without one).
         """
+        author = _strip_control_chars(author or "")
         args = ["commit", "-m", message]
         if author:
-            args += ["--author", _strip_control_chars(author)]
+            args += ["--author", author]
+            identity = _split_identity(author)
+            if identity is not None:
+                for key, value in zip(("user.name", "user.email"), identity):
+                    if not self._has_config(key):
+                        args = ["-c", f"{key}={value}"] + args
         return self._run(args)
+
+    def _has_config(self, key: str) -> bool:
+        """True when git has a value for ``key`` here (repo, global or system config)."""
+        res = self._run(["config", "--get", key], check=False)
+        return res.ok and bool((res.stdout or "").strip())
 
     def push(self, remote: str = "origin", branch: Optional[str] = None) -> GitResult:
         """``git push <remote> [branch]``.

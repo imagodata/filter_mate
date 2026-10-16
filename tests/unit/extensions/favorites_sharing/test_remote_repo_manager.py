@@ -37,6 +37,9 @@ class FakeExtension:
     def get_remote_repos(self):
         return list(self._repos)
 
+    def get_config(self, key, default=None):
+        return list(self._repos) if key == "remote_repos" else default
+
     def get_git_binary_path(self) -> str:
         return self._git_binary_path
 
@@ -379,6 +382,55 @@ class TestSaveRepos:
         mgr.save_repos([repo])
         saved_entry = ext.last_set_call[1][0]
         assert saved_entry == {"name": "Old", "git_url": "https://x/a.git"}
+
+    def test_plaintext_auth_header_purged_at_load(self, caplog):
+        """Audit 2026-10: the refused 4.x token no longer waits on disk for the next save."""
+        import logging
+        raw = [
+            {"name": "Old", "git_url": "https://x/a.git", "auth_header": "Bearer SECRET", "custom": 1},
+            {"name": "New", "git_url": "https://x/b.git", "authcfg_id": "cfg1"},
+            "not-a-dict",
+        ]
+        ext = FakeExtension([])
+        ext.get_config = lambda key, default=None: [dict(e) if isinstance(e, dict) else e for e in raw]
+        with caplog.at_level(logging.ERROR, logger="FilterMate.FavoritesSharing.RemoteRepo"):
+            assert RemoteRepoManager(ext).purge_plaintext_auth() is True
+        assert ext.last_set_call[0] == "remote_repos"
+        assert ext.last_set_call[1] == [
+            {"name": "Old", "git_url": "https://x/a.git", "custom": 1},  # only the token goes
+            {"name": "New", "git_url": "https://x/b.git", "authcfg_id": "cfg1"},
+            "not-a-dict",
+        ]
+        assert "SECRET" not in caplog.text
+        assert "'Old'" in caplog.text and "removed from config.json" in caplog.text
+
+    def test_purge_without_plaintext_writes_nothing(self):
+        ext = FakeExtension([{"name": "New", "git_url": "https://x/b.git"}])
+        assert RemoteRepoManager(ext).purge_plaintext_auth() is False
+        assert ext.last_set_call is None
+
+    def test_extension_purges_when_initialized(self, monkeypatch):
+        from extensions.favorites_sharing import extension as extension_module
+        calls = []
+        monkeypatch.setattr(extension_module.RemoteRepoManager, "purge_plaintext_auth",
+                            lambda self: calls.append(self) or False)
+        ext = extension_module.FavoritesSharingExtension()
+        monkeypatch.setattr(ext, "register_service", lambda *args: None, raising=False)
+        ext.initialize(iface=None)
+        assert len(calls) == 1
+
+    def test_clone_log_and_error_hide_url_credentials(self, tmp_path, caplog):
+        """Audit 2026-10: the INFO log and the error (message bar) showed https://oauth2:TOKEN@."""
+        import logging
+        ext = FakeExtension([])
+        repo = RemoteRepo(name="Lab", git_url="https://oauth2:glpat-SECRET@127.0.0.1:9/team/repo.git",
+                          local_clone=str(tmp_path / "clone"))
+        with caplog.at_level(logging.INFO, logger="FilterMate.FavoritesSharing.RemoteRepo"):
+            result = RemoteRepoManager(ext).prepare_clone(repo)
+        assert not result.success
+        assert "glpat-SECRET" not in caplog.text
+        assert "glpat-SECRET" not in result.error_message
+        assert "[REDACTED]@127.0.0.1:9" in caplog.text
 
     def test_save_repos_enforces_single_default(self):
         """Two is_default=True entries → only the first survives as default."""

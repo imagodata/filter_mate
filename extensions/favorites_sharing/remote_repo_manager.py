@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from .git_client import GitClient, GitError
+from .git_client import GitClient, GitError, _scrub_text
 from .git_resolver import GitResolution, resolve_for_extension
 
 logger = logging.getLogger('FilterMate.FavoritesSharing.RemoteRepo')
@@ -361,6 +361,38 @@ class RemoteRepoManager:
     # CRUD — persist back into EXTENSIONS.favorites_sharing.remote_repos
     # ------------------------------------------------------------------
 
+    def purge_plaintext_auth(self) -> bool:
+        """Remove the refused plaintext ``auth_header`` of 4.x entries from config.json now.
+
+        Refused (never used) since 5.0.0, it stayed on disk until the user
+        saved the repo list. Only that key goes; every entry is kept as is.
+        Returns True when config.json was rewritten.
+        """
+        if self._extension is None or not hasattr(self._extension, "set_config"):
+            return False
+        try:
+            raw = self._extension.get_config("remote_repos", default=[])
+        except Exception as exc:
+            logger.debug("Cannot read remote_repos from config: %s", exc)
+            return False
+        if not isinstance(raw, list):
+            return False
+        legacy = [entry for entry in raw if isinstance(entry, dict) and "auth_header" in entry]
+        if not legacy:
+            return False
+        names = [str(entry.get("name") or "?") for entry in legacy if str(entry.get("auth_header") or "").strip()]
+        if names:
+            logger.error(
+                "Repos %s: the plaintext auth_header in config.json is refused since FilterMate %s "
+                "and has been removed from config.json. Store the token in the QGIS Authentication "
+                "Manager and select it in Manage Repos → Edit → Authentication.",
+                ", ".join(repr(name) for name in names), PLAINTEXT_AUTH_REMOVED_IN,
+            )
+            _PLAINTEXT_AUTH_REPORTED.update(names)
+        cleaned = [{k: v for k, v in entry.items() if k != "auth_header"} if isinstance(entry, dict) else entry
+                   for entry in raw]
+        return bool(self._extension.set_config("remote_repos", cleaned))
+
     def save_repos(self, repos: List[RemoteRepo]) -> bool:
         """Persist the given list of repos to FilterMate config.
 
@@ -502,7 +534,7 @@ class RemoteRepoManager:
             if not client.is_cloned():
                 logger.info(
                     "Cloning %s → %s (branch=%s)",
-                    repo.git_url, repo.expanded_local_clone, repo.branch or "<default>",
+                    _scrub_text(repo.git_url), repo.expanded_local_clone, repo.branch or "<default>",
                 )
                 client.clone(repo.git_url, branch=repo.branch or None)
             else:
