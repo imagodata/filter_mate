@@ -95,6 +95,7 @@ class ControllerIntegration:
         # Connection tracking
         self._connections: list = []
         self._is_setup: bool = False
+        self._current_tab_index: Optional[int] = None
 
     @property
     def enabled(self) -> bool:
@@ -308,7 +309,7 @@ class ControllerIntegration:
 
     def _register_controllers(self) -> None:
         """Register all controllers with the registry."""
-        if not self._registry:
+        if self._registry is None:
             return
 
         # Register with tab indices
@@ -575,12 +576,10 @@ class ControllerIntegration:
             index: New tab index
         """
         if self._registry:
-            try:
-                tab_index = TabIndex(index)
-                self._registry.notify_tab_changed(tab_index)
-            except ValueError:
-                # Invalid tab index, ignore
-                pass
+            # notify_tab_changed takes the previous tab too; an index without
+            # a controller (or None, before the first change) is skipped there.
+            old_index, self._current_tab_index = self._current_tab_index, index
+            self._registry.notify_tab_changed(old_index, index)
 
     def _on_current_layer_changed(self) -> None:
         """Handle current layer change event.

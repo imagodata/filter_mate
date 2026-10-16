@@ -153,6 +153,12 @@ class FavoritesController(BaseController):
 
     def teardown(self) -> None:
         """Clean up resources."""
+        # The service belongs to FilterMateApp and outlives this controller.
+        if self._favorites_service:
+            try:
+                self._favorites_service.favorites_changed.disconnect(self._on_favorites_loaded)
+            except (TypeError, RuntimeError):
+                pass  # Signal wasn't connected
         self._favorites_service = None
         super().teardown()
 

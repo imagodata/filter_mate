@@ -483,9 +483,13 @@ class BackendController(BaseController):
         Shows backend selection menu or triggers reload if no layers.
         """
 
-        # Lazy initialization fallback
+        # Lazy initialization fallback. Once set up, read the dock state again:
+        # setup() now runs when the dock is built, before the optimization
+        # settings are restored (the first click used to read them here).
         if not self._initialized:
             self.setup()
+        else:
+            self._sync_with_dockwidget()
 
         # Check if in waiting state (no layers)
         if self._indicator_label:
