@@ -1,6 +1,6 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Explore, filter and export vector, raster and LiDAR point cloud layers in QGIS, from one panel.**
+**🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers in QGIS, from one panel.**
 
 [![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.0.0-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
 [![QGIS 3.22 → 4.x](https://img.shields.io/badge/QGIS-3.22%20%E2%86%92%204.x%20%C2%B7%20Qt5%20%2F%20Qt6-589632)](https://plugins.qgis.org/plugins/filter_mate)
@@ -21,48 +21,49 @@ and replayed from Processing or a script.
 </p>
 <p align="center"><em>The panel follows the current layer: a raster on the left, a LiDAR point cloud on the right.</em></p>
 
-**Website and user guide:** [imagodata.github.io/filter_mate](https://imagodata.github.io/filter_mate) ·
-[User guide](https://imagodata.github.io/filter_mate/guide.html) ·
-[Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) ·
-[Use cases](https://imagodata.github.io/filter_mate/stories.html)
+🌐 [Website](https://imagodata.github.io/filter_mate) ·
+📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) ·
+🇫🇷 [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) ·
+💡 [Use cases](https://imagodata.github.io/filter_mate/stories.html) ·
+📥 [Install from the QGIS repository](https://plugins.qgis.org/plugins/filter_mate)
 
 ---
 
-## How it works
+## ⚙️ How it works
 
 The panel has four sections, used top to bottom.
 
 | Section | What you do there |
 |---|---|
-| **EXPLORING** | Select on the current layer. Vector: one feature, several, or an expression. Raster: a band, a pixel value (picked on the map), a value range on a live histogram, classes of a paletted raster, a raster calculator expression. Point cloud: ASPRS / LiDAR HD classes, Z, intensity and return ranges, chained attribute conditions, height above a DTM. |
-| **FILTERING** | Choose the layers to filter and how they relate to the selection: geometric predicates (intersects, within, disjoint…), a buffer, AND / OR with existing filters, a minimum coverage for polygons. |
-| **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
-| **CONFIGURATION** | Backends, theme, layer kinds, cache and other options, from the panel. |
+| 🧭 **EXPLORING** | Select on the current layer. Vector: one feature, several, or an expression. Raster: a band, a pixel value (picked on the map), a value range on a live histogram, classes of a paletted raster, a raster calculator expression. Point cloud: ASPRS / LiDAR HD classes, Z, intensity and return ranges, chained attribute conditions, height above a DTM. |
+| 🔍 **FILTERING** | Choose the layers to filter and how they relate to the selection: geometric predicates (intersects, within, disjoint…), a buffer, AND / OR with existing filters, a minimum coverage for polygons. |
+| 📦 **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
+| 🔧 **CONFIGURATION** | Backends, theme, layer kinds, cache and other options, from the panel. |
 
 Every kind of layer can be the source or a target:
 
-| Source ↓ / Target → | Vector | Raster | Point cloud |
+| Source ↓ / Target → | 🗺️ Vector | 🏔️ Raster | ☁️ Point cloud |
 |---|---|---|---|
-| **Vector** (features) | features kept by the predicates | pixels inside / outside, clipped VRT | points inside / outside, clipped COPC |
-| **Raster** (value range, classes…) | features over the selected pixels, with a minimum coverage | raster clipped to the selected area | points over the selected area |
-| **Point cloud** (classes, ranges…) | features under the kept points | raster clipped to their footprint | the same criteria on every tile |
+| 🗺️ **Vector** (features) | features kept by the predicates | pixels inside / outside, clipped VRT | points inside / outside, clipped COPC |
+| 🏔️ **Raster** (value range, classes…) | features over the selected pixels, with a minimum coverage | raster clipped to the selected area | points over the selected area |
+| ☁️ **Point cloud** (classes, ranges…) | features under the kept points | raster clipped to their footprint | the same criteria on every tile |
 
 Filtered layers keep their id, style and place in the layer tree. Unfilter, Undo / Redo and unloading the plugin put
 the original source back, and project files are always saved with the original sources.
 
-## Features
+## ✨ Features
 
-- **Fast on large data.** Filters run as SQL on PostgreSQL / PostGIS, Spatialite and GeoPackage (spatial index used,
+- ⚡ **Fast on large data.** Filters run as SQL on PostgreSQL / PostGIS, Spatialite and GeoPackage (spatial index used,
   no reload), with an OGR path for everything else. On a full BD TOPO department, the 37 layers of a GeoPackage are
   filtered by a commune in 2–3 s.
-- **Undo / Redo** of every filter, per layer, and a global history.
-- **Favorites**: save a filter with its layers and settings, replay it in a click, share it with a team through a git
+- ↩️ **Undo / Redo** of every filter, per layer, and a global history.
+- ⭐ **Favorites**: save a filter with its layers and settings, replay it in a click, share it with a team through a git
   repository ([docs/favorites_sharing/USER_GUIDE.md](docs/favorites_sharing/USER_GUIDE.md)).
-- **Automation**: nine Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
+- 🤖 **Automation**: nine Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
   other plugins, an optional REST API ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
-- **QGIS 3.22 to 4.x**, Qt5 and Qt6, light and dark themes, 34 languages.
+- 🧩 **QGIS 3.22 to 4.x**, Qt5 and Qt6, 🌗 light and dark themes, 🌍 34 languages.
 
-## Installation
+## 📥 Installation
 
 In QGIS: **Plugins → Manage and Install Plugins**, search for **FilterMate**, then **Install Plugin**. The FilterMate
 button appears in the plugin toolbar.
@@ -70,16 +71,16 @@ button appears in the plugin toolbar.
 Manual install: download a zip from [GitHub Releases](https://github.com/imagodata/filter_mate/releases) and use
 **Plugins → Manage and Install Plugins → Install from ZIP**.
 
-### Requirements
+### 📋 Requirements
 
 | | |
 |---|---|
-| QGIS | 3.22 or later, QGIS 4.x included. Point cloud layers need QGIS 3.26+. |
-| PostgreSQL / PostGIS (optional) | `psycopg2`, shipped with most QGIS installs; otherwise `pip install psycopg2-binary` in the QGIS Python. |
-| PDAL (optional) | PDAL 2.4+ (`pdal` command, shipped with QGIS on Windows) for the height above a DTM and direct COPC writing. Without it, point clouds are clipped by the QGIS exporter. |
-| REST API (optional) | `pip install -r requirements-api.txt` (FastAPI, Uvicorn, Pydantic). |
+| 🟢 QGIS | 3.22 or later, QGIS 4.x included. Point cloud layers need QGIS 3.26+. |
+| 🐘 PostgreSQL / PostGIS (optional) | `psycopg2`, shipped with most QGIS installs; otherwise `pip install psycopg2-binary` in the QGIS Python. |
+| ☁️ PDAL (optional) | PDAL 2.4+ (`pdal` command, shipped with QGIS on Windows) for the height above a DTM and direct COPC writing. Without it, point clouds are clipped by the QGIS exporter. |
+| 🌐 REST API (optional) | `pip install -r requirements-api.txt` (FastAPI, Uvicorn, Pydantic). |
 
-## Automation in two lines
+## 🤖 Automation in two lines
 
 ```python
 from qgis.utils import plugins
@@ -92,18 +93,18 @@ api.cross_filter("mnt", ["parcelle", "lhd"], coverage_min=50,
 The same operation is available as the `filtermate:cross_filter_from_raster` Processing algorithm, from
 `qgis_process`, and as `POST /filters/cross` on the REST API. See [docs/AUTOMATION.md](docs/AUTOMATION.md).
 
-## Documentation
+## 📚 Documentation
 
 | | |
 |---|---|
-| [User guide](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) | Step by step: first filter, exploring, predicates and buffers, rasters and point clouds, favorites, export, backends, configuration. |
-| [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Eight business questions answered on a full BD TOPO department. |
-| [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API. |
-| [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) | Source tree, code rules, tests and releases, for contributors. |
-| [CHANGELOG.md](CHANGELOG.md) | Release notes. |
+| 📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) | Step by step: first filter, exploring, predicates and buffers, rasters and point clouds, favorites, export, backends, configuration. |
+| 💡 [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Eight business questions answered on a full BD TOPO department. |
+| 🤖 [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API. |
+| ⭐ [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |
+| 🏗️ [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) | Source tree, code rules, tests and releases, for contributors. |
+| 📝 [CHANGELOG.md](CHANGELOG.md) | Release notes. |
 
-## Development
+## 🛠️ Development
 
 ```bash
 pip install -r requirements-test.txt
@@ -114,9 +115,9 @@ The CI also loads the plugin in the official QGIS Docker images (3.22 → nightl
 (`tests/qgis_headless/`). Start with [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a map of the source tree and
 [CONTRIBUTING.md](CONTRIBUTING.md) for the code rules (Qt5 / Qt6 guards, translations, zip build, pull requests).
 
-Bugs and ideas: [GitHub issues](https://github.com/imagodata/filter_mate/issues).
+🐛 Bugs and 💬 ideas: [GitHub issues](https://github.com/imagodata/filter_mate/issues).
 
-## License
+## 📄 License
 
 GNU General Public License v3.0, see [LICENSE](LICENSE). Developed by [imagodata](https://github.com/imagodata) · simon.ducournau+filter_mate@gmail.com.
 Map data in the screenshots: BD TOPO® and LiDAR HD © IGN, Licence Ouverte 2.0.
