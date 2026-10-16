@@ -662,31 +662,6 @@ class TestGeometryHandler:
         )
         assert result is None
 
-    def test_simplify_geometry_adaptive_returns_original_on_none(self):
-        """simplify_geometry_adaptive should return None for None geometry."""
-        result = self.handler.simplify_geometry_adaptive(None)
-        assert result is None
-
-    def test_simplify_geometry_adaptive_returns_original_on_empty(self):
-        """simplify_geometry_adaptive should return empty geometry unchanged."""
-        mock_geom = MagicMock()
-        mock_geom.isEmpty.return_value = True
-        # Empty geometry evaluates as falsy
-        mock_geom.__bool__ = MagicMock(return_value=True)
-
-        result = self.handler.simplify_geometry_adaptive(mock_geom)
-        assert result is mock_geom
-
-    def test_simplify_geometry_adaptive_no_adapter(self):
-        """When adapter is not available, should return original geometry."""
-        self.mock_bs.get_geometry_preparation_adapter.return_value = None
-        mock_geom = MagicMock()
-        mock_geom.isEmpty.return_value = False
-        mock_geom.__bool__ = MagicMock(return_value=True)
-
-        result = self.handler.simplify_geometry_adaptive(mock_geom)
-        assert result is mock_geom
-
     @pytest.mark.parametrize("authid, geographic", [
         ("EPSG:4326", True), ("IGNF:WGS84G", True), ("EPSG:6318", True), ("EPSG:7844", True),
         ("EPSG:2154", False), ("EPSG:4647", False), ("EPSG:4087", False), ("ESRI:102110", False),
@@ -709,23 +684,6 @@ class TestGeometryHandler:
         with patch.object(module, "QgsCoordinateReferenceSystem", return_value=crs):
             assert self.handler.get_wkt_precision("FOO:1") == 8
         assert self.handler.get_wkt_precision(None) == 8
-
-    def test_simplify_geometry_adaptive_forwards_predicates(self):
-        """2026-10-16: the adapter needs the predicates to keep Cross/Touch sources exact."""
-        adapter_instance = MagicMock()
-        simplified = MagicMock()
-        adapter_instance.simplify_geometry_adaptive.return_value = MagicMock(success=True, geometry=simplified)
-        self.mock_bs.get_geometry_preparation_adapter.return_value = MagicMock(return_value=adapter_instance)
-        mock_geom = MagicMock()
-        mock_geom.isEmpty.return_value = False
-
-        result = self.handler.simplify_geometry_adaptive(
-            mock_geom, 1_000_000, "EPSG:2154", predicates=["ST_Crosses"]
-        )
-        assert result is simplified
-        kwargs = adapter_instance.simplify_geometry_adaptive.call_args.kwargs
-        assert kwargs["predicates"] == ["ST_Crosses"]
-        assert kwargs["max_wkt_length"] == 1_000_000
 
 
 # ===========================================================================

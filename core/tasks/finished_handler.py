@@ -156,10 +156,12 @@ class FinishedHandler:
             logger.info("Task was canceled - skipping pending subset requests to prevent partial filter application")
 
         # Apply pending subset strings on main thread
+        apply_failures: List[str] = []
         if pending_subset_requests:
             applied_count = apply_pending_subset_requests(
                 pending_subset_requests,
-                safe_set_subset_fn
+                safe_set_subset_fn,
+                failures=apply_failures,
             )
             logger.info(f"Applied {applied_count} pending subset requests")
 
@@ -194,8 +196,13 @@ class FinishedHandler:
             iface=iface,
         )
 
+        # 2026-10-17: a filter the provider refused is not a success
+        if apply_failures:
+            self._display_apply_failures(apply_failures, iface)
+
         # Clean up OGR backend temporary GEOS-safe layers
         self._cleanup_ogr_temp_layers(task_parameters)
+        self._release_task_caches(task_parameters)
 
         # MIG-023: Log TaskBridge metrics for migration validation
         self._log_task_bridge_metrics(task_bridge)
@@ -474,6 +481,35 @@ class FinishedHandler:
                 "Task completed with partial success. "
                 f"Some operations succeeded but an exception occurred: {exception}"
             )
+
+    @staticmethod
+    def _display_apply_failures(failures: List[str], iface: Any) -> None:
+        """Message bar warning for the filters the providers refused (2026-10-17)."""
+        shown = "; ".join(failures[:3]) + (f" (+{len(failures) - 3})" if len(failures) > 3 else "")
+        message = QCoreApplication.translate(
+            "FinishedHandler", "Filter not applied, previous filter kept: {0}"
+        ).format(shown)
+        logger.warning(message)
+        try:
+            iface.messageBar().pushWarning("FilterMate", message)
+        except (RuntimeError, AttributeError):
+            pass
+
+    @staticmethod
+    def _release_task_caches(task_parameters: Dict[str, Any]) -> None:
+        """Drop the backends' per-task caches (source union, buffered source, bbox).
+
+        2026-10-17: they hang on the task object, which task_parameters (the
+        source layer's PROJECT_LAYERS entry) keeps until the next task.
+        """
+        if not isinstance(task_parameters, dict):
+            return
+        for stale in ('_ogr_source_union_cache', '_ogr_buffered_source_cache', '_spatialite_source_bbox_cache'):
+            task_parameters.pop(stale, None)
+        task = task_parameters.get('_parent_task')
+        store = getattr(task, '__dict__', None)
+        if isinstance(store, dict):
+            store.pop('_filtermate_task_caches', None)
 
     def _cleanup_ogr_temp_layers(self, task_parameters: Dict[str, Any]) -> None:
         """Clean up OGR backend temporary GEOS-safe layers.

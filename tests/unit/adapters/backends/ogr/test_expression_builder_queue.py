@@ -132,6 +132,7 @@ class TestOGRApplyFilterQueueRouting:
         builder.source_geom = source_layer
 
         target = _make_layer()
+        target.subsetString.return_value = ""
         # No features selected after selectbylocation runs.
         target.selectedFeatureIds.return_value = []
 
@@ -139,7 +140,9 @@ class TestOGRApplyFilterQueueRouting:
         fake_processing = types.SimpleNamespace(run=MagicMock())
         fake_qgis = types.SimpleNamespace(
             processing=fake_processing,
-            core=types.SimpleNamespace(QgsVectorLayer=MagicMock),
+            core=types.SimpleNamespace(
+                QgsVectorLayer=MagicMock, QgsFeatureRequest=MagicMock, QgsGeometry=MagicMock,
+            ),
         )
         monkeypatch.setitem(sys.modules, "qgis", fake_qgis)
         monkeypatch.setitem(sys.modules, "qgis.processing", fake_processing)
@@ -171,9 +174,8 @@ class TestOGRApplyFilterFallbackPath:
         src = inspect.getsource(OGRExpressionBuilder.apply_filter)
         assert "queue_callback = self.task_params.get('_subset_queue_callback')" in src
         assert "if queue_callback is not None:" in src
-        # Both call sites (empty-result + main success path) must guard the
-        # synchronous fallback in an else branch — no unconditional removal.
-        assert "safe_set_subset_string(layer, \"1 = 0\")" in src
+        # 2026-10-17: the empty result ("1 = 0") goes through the same
+        # combination and the same queue / synchronous branch as any key list.
         assert "safe_set_subset_string(layer, final_filter)" in src
 
 
@@ -182,16 +184,20 @@ class TestOGRApplyFilterFallbackPath:
 # ===========================================================================
 
 class TestBufferedSourceCache:
-    def test_cache_lives_in_task_params_shared_by_the_backends(self):
-        task_params = {"buffer_segments": 5}
+    def test_cache_lives_with_the_task_shared_by_the_backends(self):
+        # 2026-10-17: held by the task, not by task_params (= PROJECT_LAYERS,
+        # which outlives the task); a legacy entry there is dropped.
+        task = types.SimpleNamespace()
+        task_params = {"buffer_segments": 5, "_parent_task": task, "_ogr_buffered_source_cache": {"k": "stale"}}
         first = OGRExpressionBuilder(task_params=task_params)
         second = OGRExpressionBuilder(task_params=task_params)
         first._buffered_source_cache()["k"] = "layer"
         assert second._buffered_source_cache()["k"] == "layer"
-        assert task_params["_ogr_buffered_source_cache"] == {"k": "layer"}
+        assert "_ogr_buffered_source_cache" not in task_params
+        assert OGRExpressionBuilder(task_params={"_parent_task": types.SimpleNamespace()})._buffered_source_cache() == {}
 
     def test_static_buffer_computed_once_for_several_targets(self, monkeypatch):
-        task_params = {"buffer_segments": 6, "buffer_endcap_style": "flat"}
+        task_params = {"buffer_segments": 6, "buffer_endcap_style": "flat", "_parent_task": types.SimpleNamespace()}
         builder = OGRExpressionBuilder(task_params=task_params)
         source = MagicMock()
         source.id.return_value = "src_layer"

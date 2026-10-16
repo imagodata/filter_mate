@@ -290,65 +290,6 @@ class GeometryHandler:
         return result
 
     # =========================================================================
-    # Geometry Simplification
-    # =========================================================================
-
-    def simplify_geometry_adaptive(
-        self,
-        geometry: Any,
-        max_wkt_length: Optional[int] = None,
-        crs_authid: Optional[str] = None,
-        buffer_value: Optional[float] = None,
-        buffer_segments: int = 5,
-        buffer_type: int = 0,
-        predicates=None,
-    ) -> Any:
-        """Simplify geometry adaptively using GeometryPreparationAdapter.
-
-        Args:
-            geometry: QgsGeometry to simplify
-            max_wkt_length: Maximum WKT string length
-            crs_authid: CRS authority ID
-            buffer_value: Buffer distance value
-            buffer_segments: Number of buffer segments
-            buffer_type: Buffer end cap type
-            predicates: Spatial predicates of the filter. Unknown (None/empty)
-                or vertex-exact ones (Crosses, Touches, ...) keep it exact.
-
-        Returns:
-            QgsGeometry: Simplified geometry (or original on failure)
-        """
-        if not geometry or geometry.isEmpty():
-            return geometry
-
-        try:
-            AdapterClass = self._backend_services.get_geometry_preparation_adapter()
-            if AdapterClass is None:
-                logger.warning("GeometryPreparationAdapter not available, returning original geometry")
-                return geometry
-
-            result = AdapterClass().simplify_geometry_adaptive(
-                geometry=geometry,
-                max_wkt_length=max_wkt_length,
-                crs_authid=crs_authid,
-                buffer_value=buffer_value,
-                buffer_segments=buffer_segments,
-                buffer_type=buffer_type,
-                predicates=predicates,
-            )
-
-            if result.success and result.geometry:
-                return result.geometry
-            logger.warning(f"GeometryPreparationAdapter simplify failed: {result.message}")
-            return geometry
-        except ImportError as e:
-            logger.error(f"GeometryPreparationAdapter not available: {e}")
-            return geometry
-        except (RuntimeError, ValueError, AttributeError) as e:
-            logger.error(f"GeometryPreparationAdapter simplify error: {e}")
-            return geometry
-
-    # =========================================================================
     # Memory Layer Operations
     # =========================================================================
 
