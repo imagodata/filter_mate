@@ -50,7 +50,9 @@ THEME = os.environ.get('FM_THEME', 'light').lower()
 DARK = THEME == 'dark'
 ROOT = os.environ.get('FM_VIDEO_OUT', r'C:\Users\Simon\AppData\Local\Temp\fm_video')
 GPKG = os.environ.get('FM_GPKG', r'C:\Users\Simon\Documents\bdtopo31\BDT_3-5_GPKG_LAMB93_D031-ED2026-03-15.gpkg')
-OUT = os.path.join(ROOT, CLIP + ('-dark' if DARK else ''))
+# FM_MEASURE=1: replay a scene for its logged counts only, no frame grabbed, in fm_video\\measure\\<clip>
+MEASURE = bool(os.environ.get('FM_MEASURE'))
+OUT = os.path.join(ROOT, 'measure' if MEASURE else '', CLIP + ('-dark' if DARK else ''))
 EXPORT_DIR = os.path.join(ROOT, 'export_out')
 LOG = os.path.join(OUT, 'capture.log')
 FPS = 15
@@ -142,6 +144,10 @@ class Recorder:
         return time.perf_counter() - self.t0 if self.t0 is not None else 0.0
 
     def start(self):
+        if MEASURE:
+            self.t0 = time.perf_counter()
+            log('measure only: no frames')
+            return
         mw = iface.mainWindow()
         self.dpr = mw.devicePixelRatioF()
         self.size = (mw.width(), mw.height())
@@ -189,6 +195,9 @@ class Recorder:
             log(traceback.format_exc())
 
     def stop(self):
+        if MEASURE:
+            log('stopped (measure only)')
+            return
         self.timer.stop()
         duration = self.now()
         self.queue.put(None)
@@ -1235,7 +1244,7 @@ BRUSH = boot(S5_LAYERS, 'commune', '"nom_officiel" = \'Bagnères-de-Luchon\'', 1
 S6_LAYERS = ['commune', 'zone_de_vegetation', 'zone_d_activite_ou_d_interet', 'zone_d_habitation', 'batiment',
              'troncon_de_route']
 S6_SCOPE_TARGETS = ['zone_de_vegetation', 'batiment', 'troncon_de_route']
-S6_TARGETS = ['batiment', 'zone_d_habitation', 'zone_d_activite_ou_d_interet']
+S6_TARGETS = ['zone_d_habitation', 'zone_d_activite_ou_d_interet']
 PAVED_EXPR = '"nature" NOT IN (\'Chemin\', \'Sentier\', \'Escalier\', \'Piste cyclable\', \'Route empierrée\')'
 
 

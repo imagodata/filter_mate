@@ -257,6 +257,24 @@ def render(clip):
 
     site = os.path.join(ROOT, 'site')
     os.makedirs(site, exist_ok=True)
+    if os.environ.get('FM_STILLS_ONLY'):
+        # Step images only, from an existing recording: no video is encoded again.
+        cache_only = {}
+        full = (round(size[0] * dpr), round(size[1] * dpr))
+
+        def frame_at(ts):
+            i = max(bisect.bisect_right(times, ts) - 1, 0)
+            if i not in cache_only:
+                cache_only.clear()
+                im = Image.open(os.path.join(base, 'frames', f'{i:06d}.jpg')).convert('RGB')
+                if im.size != full:
+                    fixed = Image.new('RGB', full, im.getpixel((im.width - 1, im.height - 1)))
+                    fixed.paste(im, (0, 0))
+                    im = fixed
+                cache_only[i] = im
+            return cache_only[i]
+        save_stills(clip, events, frame_at, site)
+        return
     mp4 = os.path.join(site, f'{clip}.mp4')
     cmd = [FFMPEG, '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24',
            '-s', f'{OUT_W}x{OUT_H}', '-r', str(FPS), '-i', '-',
