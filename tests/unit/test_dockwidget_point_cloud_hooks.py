@@ -103,6 +103,76 @@ class TestDockwidgetHooks:
 
 
 @pytest.mark.unit
+class TestVectorFilterWithCoverageTargets:
+    """Constat 14: the raster / point cloud targets of a vector source follow a vector filter
+    task the app really created, never one it refused (their undo step would be paired
+    with another vector run)."""
+
+    @staticmethod
+    def _launch_task_event():
+        from unittest.mock import MagicMock
+        func = _method(_DOCKWIDGET, "FilterMateDockWidget", "launchTaskEvent")
+        namespace = {"logger": MagicMock()}
+        exec(compile(ast.fix_missing_locations(ast.Module(body=[func], type_ignores=[])), str(_DOCKWIDGET), "exec"),
+             namespace)
+        return namespace["launchTaskEvent"]
+
+    @staticmethod
+    def _dock(app_creates_the_task, legacy=False, coverage_busy=False):
+        """The dock as FilterMateApp leaves it: ``filter_mate_app`` (AppInitializer), ``app`` (legacy only)."""
+        from types import SimpleNamespace
+        from unittest.mock import MagicMock
+        app = SimpleNamespace(appTasks={"filter": None, "unfilter": None, "reset": None},
+                              _initializing_project=False, _loading_new_project=False)
+        integration = MagicMock()
+        integration.delegate_point_cloud_task.return_value = False
+        integration.delegate_split_coverage_targets.return_value = (["v2"], ["r1"])
+        integration.coverage_controller.vector_source_busy.return_value = coverage_busy
+        layer = MagicMock()
+        layer.id.return_value = "v1"
+        emitted = []
+
+        def emit(task_name):  # FilterMateApp.manage_task, run synchronously by the signal
+            emitted.append(task_name)
+            if app_creates_the_task and task_name in app.appTasks:
+                app.appTasks[task_name] = object()
+
+        dock = SimpleNamespace(_controller_integration=integration, widgets_initialized=True, current_layer=layer,
+                               PROJECT_LAYERS={"v1": {"filtering": {}}},
+                               get_layers_to_filter=lambda: ["v2", "r1"], setLayerVariableEvent=lambda *a: None,
+                               launchingTask=SimpleNamespace(emit=emit), emitted=emitted)
+        setattr(dock, "app" if legacy else "filter_mate_app", app)
+        return dock, integration
+
+    @pytest.mark.parametrize("task_name", ["filter", "unfilter", "reset"])
+    @pytest.mark.parametrize("legacy", [False, True], ids=["app_initializer", "legacy"])
+    def test_refused_vector_task_leaves_the_coverage_targets(self, task_name, legacy):
+        dock, integration = self._dock(app_creates_the_task=False, legacy=legacy)
+        self._launch_task_event()(dock, None, task_name)
+        assert dock.emitted == [task_name]
+        integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    @pytest.mark.parametrize("task_name", ["filter", "unfilter", "reset"])
+    def test_launched_vector_task_reaches_the_coverage_targets(self, task_name):
+        dock, integration = self._dock(app_creates_the_task=True)
+        self._launch_task_event()(dock, None, task_name)
+        integration.delegate_vector_source_coverage_task.assert_called_once_with(task_name, dock.current_layer, ["r1"])
+
+    def test_undo_is_still_mirrored(self):
+        dock, integration = self._dock(app_creates_the_task=False)
+        self._launch_task_event()(dock, None, "undo")
+        integration.delegate_vector_source_coverage_task.assert_called_once_with("undo", dock.current_layer, ["r1"])
+
+    @pytest.mark.parametrize("task_name", ["filter", "unfilter", "reset", "undo", "redo"])
+    def test_nothing_runs_while_the_coverage_targets_are_still_clipped(self, task_name):
+        dock, integration = self._dock(app_creates_the_task=True, coverage_busy=True)
+        self._launch_task_event()(dock, None, task_name)
+        assert dock.emitted == []
+        integration.delegate_vector_source_coverage_task.assert_not_called()
+        integration.coverage_controller.vector_source_busy.assert_called_once_with(dock.current_layer)
+
+
+@pytest.mark.unit
 class TestControllerIntegration:
 
     def test_delegations_exist_and_fail_closed(self):

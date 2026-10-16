@@ -44,6 +44,7 @@ EXPLORING_BUTTONS = (
 )
 COVERAGE_SPIN_NAME = 'mQgsSpinBox_filtering_coverage_min'
 MAX_SOURCE_FEATURES = 100000
+HISTOGRAM_CACHE_SIZE = 32
 
 
 def _kind_of(layer: Any):
@@ -84,6 +85,20 @@ def _option(key: str, default):
         return default
 
 
+class _LinkedRun:
+    """One vector filter run of a source: ``op_id`` of the cross operation it recorded, None when none.
+
+    Undo / Redo of the vector source only replay that operation when it is
+    still the top of the source's cross history: a step forgotten since (a
+    removed layer, the cache limit) never makes them undo another one.
+    """
+
+    __slots__ = ('op_id',)
+
+    def __init__(self, op_id: Optional[int] = None) -> None:
+        self.op_id = op_id
+
+
 class CoverageModeController(BaseController):
     """Raster / point cloud source mode of the dock, and coverage targets of vector sources."""
 
@@ -104,29 +119,52 @@ class CoverageModeController(BaseController):
         self._preview_base_subset: Optional[str] = None
         self._preview_active = False
         self._histogram_cache: Dict[Tuple[str, int], Tuple[list, float, float]] = {}
+        self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
         self._button_slots: List[Tuple[Any, Any]] = []
-        # Vector sources: one flag per vector filter run, True when it also clipped coverage targets.
-        self._linked_runs: Dict[str, List[bool]] = {}
-        self._linked_redo: Dict[str, List[bool]] = {}
+        # Vector sources: one entry per vector filter run, with the cross operation it recorded (if any).
+        self._linked_runs: Dict[str, List[_LinkedRun]] = {}
+        self._linked_redo: Dict[str, List[_LinkedRun]] = {}
         self._running_task: Any = None
         self._export_task: Any = None
         self._hag_task: Any = None
         self._tidy_pending = False
         self._cache_warned = False
+        self._project_connected: set = set()  # names of the QgsProject signals connected by setup()
+        self._vector_tasks: Dict[str, Any] = {}  # vector source id -> cross task clipping its coverage targets
         self._extras: Any = None  # CoverageDockExtras: layer card, kind tools, source geometry line
 
     # === Lifecycle ===
 
+    def _project_slots(self):
+        return (('readProject', self._on_project_read), ('cleared', self._on_project_cleared),
+                ('layersWillBeRemoved', self._on_layers_removed))
+
     def setup(self) -> None:
-        """Panels are built on the first raster / point cloud layer; stored clips are replayed."""
+        """Panels are built on the first raster / point cloud layer; stored clips are replayed.
+
+        Safe to call again: each project signal is connected once (a failed
+        connection is tried again), the replay and the PDAL probe run once.
+        """
+        if getattr(self, '_torn_down', False):
+            return
         try:
             from qgis.core import QgsProject
-            from qgis.PyQt.QtCore import QTimer
             project = QgsProject.instance()
-            project.readProject.connect(self._on_project_read)
-            project.cleared.connect(self._on_project_cleared)
-            project.layersWillBeRemoved.connect(self._on_layers_removed)
-            self._project_signal_connected = True
+            for name, slot in self._project_slots():
+                if name in self._project_connected:
+                    continue
+                try:
+                    getattr(project, name).connect(slot)
+                    self._project_connected.add(name)
+                except Exception as exc:
+                    logger.debug(f"[FM5] project signal {name} not connected: {exc}")
+        except Exception as exc:
+            logger.debug(f"[FM5] project signals not connected: {exc}")
+        if getattr(self, '_setup_done', False):
+            return
+        self._setup_done = True
+        try:
+            from qgis.PyQt.QtCore import QTimer
             QTimer.singleShot(1500, self.replay_stored_filters)
         except Exception as exc:
             logger.debug(f"[FM5] stored filters replay not scheduled: {exc}")
@@ -137,37 +175,56 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] pdal version not read in the background: {exc}")
         logger.debug("CoverageModeController setup complete (panels deferred)")
 
+    def _leave_removed_layers(self, layer_ids: Optional[List[str]]) -> None:
+        """Layers removed (None: the project was closed): leave the mode of the active one, forget their styles.
+
+        Never raises: the caller forgets the histories whatever happens here.
+        """
+        active, active_id = self._active_layer, self._active_id()
+        removed = active is not None and (layer_ids is None or active_id is None or active_id in layer_ids)
+        if removed or layer_ids is None:
+            try:
+                current = getattr(self.dockwidget, 'current_layer', None)
+                if removed and (current is active or _same_layer(current, active)):
+                    self.dockwidget.current_layer = None  # about to be deleted: Filter would read it
+                # Before its input is forgotten: leaving the layer saves it again.
+                self.deactivate()  # the pixel picker leaves the map, the panels go
+            except Exception as exc:
+                logger.warning(f"[FM5] coverage mode not left cleanly: {exc}", exc_info=True)
+        if self._extras is not None:
+            self._extras_call('forget_layers', layer_ids)
+            if removed or layer_ids is None:
+                self._extras_call('show_vector', None)  # vector buttons back, no raster tool, no stale card
+
     def _on_project_cleared(self) -> None:
         """A new / closed project: histories and links refer to layers that are gone."""
         from ...core.services.cross_filter_service import clear_histories
+        self._leave_removed_layers(None)
         clear_histories()  # the dock's and the automation one
         self._linked_runs.clear()
         self._linked_redo.clear()
         self._panel_states.clear()
         self._histogram_cache.clear()
+        self._stats_watched.clear()  # the same ids come back with new layers when the project is opened again
         self._schedule_cache_tidy()
 
     def _on_layers_removed(self, layer_ids) -> None:
         from ...core.services.cross_filter_service import forget_layer_everywhere
-        for layer_id in layer_ids or []:
+        layer_ids = list(layer_ids or [])
+        self._leave_removed_layers(layer_ids)
+        for layer_id in layer_ids:
             forget_layer_everywhere(layer_id)
             self._linked_runs.pop(layer_id, None)
             self._linked_redo.pop(layer_id, None)
             self._panel_states.pop(layer_id, None)
+            self._stats_watched.discard(layer_id)
         self._schedule_cache_tidy()  # runs once the layers are gone
 
-    def _unlink_dropped_run(self, source_id: str) -> None:
-        """The oldest cross operation of a vector source was forgotten: so is its link.
-
-        ``_linked_runs`` pairs each vector filter run with a cross operation
-        (True) or none (False); the oldest True stood for the dropped
-        operation, which a later Undo / Redo must no longer look for.
-        """
-        runs = self._linked_runs.get(source_id) or []
-        for index, linked in enumerate(runs):
-            if linked:
-                runs[index] = False
-                return
+    def _unlink_dropped_run(self, source_id: str, op_id: Optional[int]) -> None:
+        """A cross operation of a vector source was forgotten: so is the run that recorded it."""
+        for run in self._linked_runs.get(source_id) or []:
+            if run.op_id is not None and run.op_id == op_id:
+                run.op_id = None
 
     def _schedule_cache_tidy(self, delay_ms: int = 0) -> None:
         """Remove unused derived files soon (once no FilterMate task runs)."""
@@ -197,7 +254,7 @@ class CoverageModeController(BaseController):
         if report['dropped']:
             for service, step in report['dropped']:
                 if service is self.service and step.from_undo:
-                    self._unlink_dropped_run(step.operation.source_layer_id)
+                    self._unlink_dropped_run(step.operation.source_layer_id, step.operation.op_id)
             self.update_undo_redo_buttons()
         over = bool(report['limit']) and report['size'] > report['limit']
         if not over:
@@ -238,20 +295,20 @@ class CoverageModeController(BaseController):
         if self._extras is not None:
             self._extras_call('teardown')
             self._extras = None
-        if getattr(self, '_project_signal_connected', False):
+        if self._project_connected:
             try:
                 from qgis.core import QgsProject
                 project = QgsProject.instance()
-                for signal, slot in ((project.readProject, self._on_project_read),
-                                     (project.cleared, self._on_project_cleared),
-                                     (project.layersWillBeRemoved, self._on_layers_removed)):
+                for name, slot in self._project_slots():
+                    if name not in self._project_connected:
+                        continue
                     try:
-                        signal.disconnect(slot)
+                        getattr(project, name).disconnect(slot)
                     except (TypeError, RuntimeError):
                         pass
             except Exception:
                 pass
-            self._project_signal_connected = False
+            self._project_connected.clear()
         try:
             self.service.cancel_all()
         except Exception:
@@ -285,6 +342,13 @@ class CoverageModeController(BaseController):
     def active_layer(self) -> Any:
         return self._active_layer
 
+    def _active_id(self) -> Optional[str]:
+        """Id of the active layer, None without one or once its C++ object is deleted."""
+        try:
+            return self._active_layer.id() if self._active_layer is not None else None
+        except RuntimeError:
+            return None
+
     @property
     def active_kind(self) -> Any:
         return self._kind
@@ -304,7 +368,9 @@ class CoverageModeController(BaseController):
         """Take over the layer change for a raster or point cloud layer.
 
         Returns:
-            True when handled here (the vector chain must stop).
+            True when handled here (the vector chain must stop): a raster /
+            point cloud layer, or a layer the vector chain would refuse while
+            one is shown.
         """
         kind = _kind_of(layer)
         if getattr(kind, 'is_coverage', False):
@@ -313,15 +379,33 @@ class CoverageModeController(BaseController):
                 return False
             self.activate(layer, kind)
             return True
+        if not self._vector_chain_takes(layer, kind):
+            # A web raster, a table without geometry, a vector not listed (yet): the vector chain
+            # would make it the dock's current layer, then refuse it. With a raster / point cloud
+            # shown, the chain stops here and that layer stays current; otherwise it decides.
+            return self._active_layer is not None
         if self._active_layer is not None:
             self.deactivate()
         self._extras_call('show_vector', layer)
         return False
 
+    def _vector_chain_takes(self, layer: Any, kind: Any) -> bool:
+        """True when the dock's vector chain will make ``layer`` the current layer (a listed vector layer)."""
+        from ...core.domain.layer_kind import LayerKind
+        if kind is not LayerKind.VECTOR:
+            return False
+        try:
+            return layer.id() in (getattr(self.dockwidget, 'PROJECT_LAYERS', None) or {})
+        except (RuntimeError, AttributeError, TypeError):
+            return False
+
     def activate(self, layer: Any, kind: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
         dw = self.dockwidget
-        if self._active_layer is not None and not _same_layer(self._active_layer, layer):
+        # Activated again for the layer it shows (F5, a late layer change signal):
+        # the input and the live preview stay as they are.
+        again = self._active_layer is not None and _same_layer(self._active_layer, layer)
+        if self._active_layer is not None and not again:
             self._leave_layer()
         self._disconnect_previous_vector_selection(dw, layer)
         try:
@@ -333,14 +417,15 @@ class CoverageModeController(BaseController):
         self._kind = kind
         if first_activation:
             self._save_dock_state()
-        self._apply_layout(kind)
+        self._apply_layout(kind, keep_preview=again)
         self._show_kind_badge(layer, kind)
         self._extras_call('show_for', layer, kind)
         if kind is LayerKind.RASTER:
             self._populate_raster(layer)
         else:
             self._populate_point_cloud(layer)
-        self._restore_panel_state(layer)
+        if not again:
+            self._restore_panel_state(layer)
         self._sync_layer_combo(layer)
         self._populate_filtering_targets(layer)
         self._load_coverage_min(layer)
@@ -614,7 +699,7 @@ class CoverageModeController(BaseController):
         self._call(badge, 'setToolTip', self.tr("{0} layer: selection in EXPLORING, relation in FILTERING").format(label))
         self._call(badge, 'setStyleSheet', badge_stylesheet(name, color))
 
-    def _apply_layout(self, kind: Any) -> None:
+    def _apply_layout(self, kind: Any, keep_preview: bool = False) -> None:
         from ...core.domain.layer_kind import LayerKind
         dw = self.dockwidget
         for widget in self._saved_visibility:
@@ -649,13 +734,22 @@ class CoverageModeController(BaseController):
                 self._call(button, 'setEnabled', False)
             else:
                 self._call(button, 'setEnabled', True)
-        selecting = getattr(dw, 'pushButton_checkable_exploring_selecting', None)
-        if selecting is not None:
+        if not keep_preview:
+            self._set_selecting_checked(False)  # no preview on a layer just shown
+
+    def _set_selecting_checked(self, checked: bool) -> None:
+        """Check the preview button of the dock without running its handler."""
+        selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)
+        if selecting is None:
+            return
+        try:
+            selecting.blockSignals(True)
             try:
-                selecting.blockSignals(True)
-                selecting.setChecked(False)
+                selecting.setChecked(bool(checked))
             finally:
                 selecting.blockSignals(False)
+        except RuntimeError:
+            pass  # deleted (plugin closing)
 
     def _current_panel(self):
         from ...core.domain.layer_kind import LayerKind
@@ -666,11 +760,15 @@ class CoverageModeController(BaseController):
         return None
 
     def _restore_panel_state(self, layer: Any) -> None:
+        from ...core.domain.layer_kind import LayerKind
         state = self._panel_states.get(layer.id())
         panel = self._current_panel()
         if state and panel is not None:
             try:
                 panel.restore_state(state)
+                if self._kind is LayerKind.RASTER and state.get('preview'):
+                    # The preview box comes back checked: so do the button and the mask on the map.
+                    self._on_raster_preview_toggled(True)
             except Exception as exc:
                 logger.debug(f"[FM5] panel state not restored: {exc}")
 
@@ -727,11 +825,14 @@ class CoverageModeController(BaseController):
 
     def _refresh_histogram(self, layer: Any, band: int) -> None:
         from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram
-        key = (layer.source(), int(band))
+        key = self._histogram_key(layer, band)
         cached = self._histogram_cache.get(key)
         if cached is None:
             cached = band_histogram(self._base_raster(layer), band, bins=64)
-            self._histogram_cache[key] = cached
+            if cached[0]:  # statistics unavailable (yet): read them again next time
+                self._histogram_cache[key] = cached
+            while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
+                del self._histogram_cache[next(iter(self._histogram_cache))]  # oldest first
         counts, minimum, maximum = cached
         self._raster_panel.set_histogram(band, counts, minimum, maximum)
         self._update_kept_ratio()
@@ -747,6 +848,17 @@ class CoverageModeController(BaseController):
         self._base_keepalive = base
         return base if base.isValid() else layer
 
+    @staticmethod
+    def _histogram_key(layer: Any, band: int) -> Tuple[str, int]:
+        """Histograms are read on the original raster (see :meth:`_base_raster`): a filter keeps the key."""
+        try:
+            from ...adapters.qgis.coverage_layers.snapshots import registry
+            snapshot = registry().get(layer.id())
+        except Exception:
+            snapshot = None
+        source = snapshot.original_source if snapshot is not None and snapshot.original_source else layer.source()
+        return source, int(band)
+
     def _on_raster_band_changed(self, band: int) -> None:
         if self._active_layer is not None:
             try:
@@ -759,7 +871,7 @@ class CoverageModeController(BaseController):
         if panel is None or layer is None:
             return
         selection = panel.selection()
-        cached = self._histogram_cache.get((layer.source(), panel.current_band()))
+        cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band()))
         if selection is None or cached is None or not cached[0]:
             panel.set_kept_ratio(None)
             return
@@ -801,13 +913,9 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] raster expression not validated: {exc}")
 
     def _on_raster_preview_toggled(self, enabled: bool) -> None:
-        selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)
-        if selecting is not None and selecting.isChecked() != enabled:
-            try:
-                selecting.blockSignals(True)
-                selecting.setChecked(enabled)
-            finally:
-                selecting.blockSignals(False)
+        # The dock button and the panel box show the same state (either one can toggle it).
+        self._set_selecting_checked(enabled)
+        self._call(self._raster_panel, 'set_preview_checked', enabled)
         self._preview_active = bool(enabled)
         if enabled:
             self._apply_raster_preview()
@@ -818,12 +926,12 @@ class CoverageModeController(BaseController):
         layer, panel = self._active_layer, self._raster_panel
         if layer is None or panel is None:
             return
-        from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview
+        from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
-        cached = self._histogram_cache.get((layer.source(), panel.current_band()))
-        low, high = (cached[1], cached[2]) if cached else (None, None)
-        if selection is not None:
-            apply_selection_preview(layer, selection, low, high)
+        if selection is None:
+            clear_selection_preview(layer)  # nothing selected: every pixel shows again
+        else:
+            apply_selection_preview(layer, selection)
 
     def _populate_point_cloud(self, layer: Any, keep_kept: bool = False) -> None:
         try:
@@ -853,12 +961,11 @@ class CoverageModeController(BaseController):
         """Refresh the panel when QGIS finishes the statistics of the layer (computed in the background
         after loading: until then only some attributes, often Z alone, have a range)."""
         signal = getattr(layer, 'statisticsCalculationStateChanged', None)
-        watched = self.__dict__.setdefault('_stats_watched', set())
-        if signal is None or layer.id() in watched:
+        if signal is None or layer.id() in self._stats_watched:
             return
         layer_id = layer.id()
         signal.connect(lambda *_args, lid=layer_id: self._on_point_cloud_statistics(lid))
-        watched.add(layer_id)
+        self._stats_watched.add(layer_id)
 
     def _on_point_cloud_statistics(self, layer_id: str) -> None:
         from ...core.domain.layer_kind import LayerKind
@@ -894,6 +1001,11 @@ class CoverageModeController(BaseController):
         self._refresh_canvas(layer)
 
     def _stop_preview(self, layer: Any) -> None:
+        """Drop the live preview of ``layer``; the preview button (and box) follow, unchecked.
+
+        A button left checked would bring the preview back at the next input
+        change, on top of a filter just applied or an undo.
+        """
         from ...core.domain.layer_kind import LayerKind
         try:
             if self._kind is LayerKind.RASTER:
@@ -905,6 +1017,9 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] preview not cleared: {exc}")
         self._preview_base_subset = None
         self._preview_active = False
+        self._set_selecting_checked(False)
+        if self._kind is LayerKind.RASTER:
+            self._call(self._raster_panel, 'set_preview_checked', False)
 
     def _point_cloud_expression(self, include_hag: bool = True) -> str:
         panel = self._pc_panel
@@ -1061,13 +1176,20 @@ class CoverageModeController(BaseController):
         iface = self._iface()
         if iface is None or self._pixel_tool is None:
             return
-        canvas = iface.mapCanvas()
-        if canvas.mapTool() is self._pixel_tool:
-            if self._previous_map_tool is not None:
-                canvas.setMapTool(self._previous_map_tool)
-            else:
-                canvas.unsetMapTool(self._pixel_tool)
-        self._previous_map_tool = None
+        previous, self._previous_map_tool = self._previous_map_tool, None
+        try:
+            canvas = iface.mapCanvas()
+            if canvas.mapTool() is not self._pixel_tool:
+                return
+            if previous is not None:
+                try:
+                    canvas.setMapTool(previous)
+                    return
+                except RuntimeError:
+                    pass  # the previous tool was deleted: no tool rather than the picker
+            canvas.unsetMapTool(self._pixel_tool)
+        except RuntimeError as exc:
+            logger.debug(f"[FM5] pixel picker not released: {exc}")  # canvas deleted (QGIS closing)
 
     def _on_pixel_picked(self, point: Any, extend: bool) -> None:
         layer = self._active_layer
@@ -1081,7 +1203,11 @@ class CoverageModeController(BaseController):
             layer_point = transform.transform(point)
         except Exception:
             layer_point = point
-        values = identify_values(self._base_raster(layer), layer_point)
+        try:
+            values = identify_values(self._base_raster(layer), layer_point)
+        except RuntimeError as exc:
+            logger.debug(f"[FM5] pixel not read, layer deleted: {exc}")
+            return
         self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend)
 
     # === FILTERING request ===
@@ -1209,10 +1335,12 @@ class CoverageModeController(BaseController):
                 self._run_filter(layer)
             elif task_name in ('unfilter', 'reset'):
                 self._run_unfilter(layer, reset=task_name == 'reset')
-            elif task_name == 'undo':
-                self._finish_restore(self.service.undo(layer.id()))
-            elif task_name == 'redo':
-                self._finish_restore(self.service.redo(layer.id()))
+            elif task_name in ('undo', 'redo'):
+                # The point cloud preview subset must go first: the history only
+                # restores a layer still in the state it recorded.
+                self._stop_preview(layer)
+                step = self.service.undo if task_name == 'undo' else self.service.redo
+                self._finish_restore(step(layer.id()))
             elif task_name == 'export':
                 self._run_export([layer.id()])
         except Exception as exc:
@@ -1222,7 +1350,11 @@ class CoverageModeController(BaseController):
         return True
 
     def is_running(self) -> bool:
-        task = self._running_task
+        """A cross filter or a height above ground computation of the dock is queued or running."""
+        return self._task_active(self._running_task) or self._task_active(self._hag_task)
+
+    @staticmethod
+    def _task_active(task: Any) -> bool:
         if task is None:
             return False
         try:
@@ -1237,7 +1369,7 @@ class CoverageModeController(BaseController):
         except Exception:
             return []
 
-    def _run_filter(self, layer: Any) -> None:
+    def _run_filter(self, layer: Any, hag_tried: bool = False) -> None:
         from ...core.domain.layer_kind import LayerKind
         from ...core.domain.cross_filter import combine_subset
         from ...core.domain.filter_state import CrossOperation
@@ -1266,7 +1398,12 @@ class CoverageModeController(BaseController):
             expression = self._point_cloud_expression()
             hag = self._pc_panel.hag_settings() if self._pc_panel is not None else None
             if hag is not None and 'HeightAboveGround' not in self._point_cloud_attributes(layer):
-                self._prepare_height_above_ground(layer, hag, lambda: self._run_filter(layer))
+                if hag_tried:
+                    # Computed, yet the derived point cloud shows no such dimension: never run PDAL in a loop.
+                    show_warning(self.tr("Height above ground not computed: {0}").format(
+                        "no HeightAboveGround dimension in the derived point cloud"))
+                    return
+                self._prepare_height_above_ground(layer, hag, lambda: self._run_filter(layer, hag_tried=True))
                 return
             before = take_snapshot(layer, LayerKind.POINT_CLOUD)
             source_op = settings['source_operator']
@@ -1339,8 +1476,8 @@ class CoverageModeController(BaseController):
         def done(task, result):
             if getattr(self, '_torn_down', False):
                 return
-            self._set_busy(False)
             self._running_task = None
+            self._set_busy(False)
             layer = self._map_layer(source_job.layer_id)
             if not result:
                 # Nothing was applied: put back the point cloud selection subset
@@ -1381,8 +1518,9 @@ class CoverageModeController(BaseController):
             logger.warning(f"[FM5] point cloud selection not rolled back: {exc}")
 
     def _set_busy(self, busy: bool) -> None:
+        """Disable the Filter button while a task runs; enabled again once no other task of the dock runs."""
         button = getattr(self.dockwidget, 'pushButton_action_filter', None)
-        self._call(button, 'setEnabled', not busy)
+        self._call(button, 'setEnabled', not busy and not self.is_running())
 
     def _after_run(self, layer: Any, outcomes, message: str, warning: bool = False) -> None:
         show_info, show_warning = _feedback()
@@ -1404,8 +1542,8 @@ class CoverageModeController(BaseController):
 
     def _refresh_counts(self, layer: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
-        if layer is None:
-            return
+        if layer is None or not _same_layer(layer, self._active_layer):
+            return  # a task of another layer ended: the panel shows the current one
         try:
             if self._kind is LayerKind.POINT_CLOUD and self._pc_panel is not None:
                 self._pc_panel.set_current_subset(layer.subsetString())
@@ -1521,11 +1659,11 @@ class CoverageModeController(BaseController):
         source_id = source.id()
         try:
             if task_name == 'filter':
-                runs = self._linked_runs.setdefault(source_id, [])
-                runs.append(False)  # set to True once the cross task really changed a layer
+                run = _LinkedRun()  # gets its cross operation once the cross task really changed a layer
+                self._linked_runs.setdefault(source_id, []).append(run)
                 self._linked_redo[source_id] = []
                 if coverage_ids and self._vector_engine_filters_targets():
-                    self._run_vector_source_filter(source, coverage_ids, run_index=len(runs) - 1)
+                    self._run_vector_source_filter(source, coverage_ids, run=run)
             elif task_name in ('unfilter', 'reset'):
                 # Same history rules as the vector engine: Unfilter records
                 # nothing (a later Undo goes back to before the last filter, for
@@ -1541,19 +1679,28 @@ class CoverageModeController(BaseController):
             elif task_name == 'undo':
                 runs = self._linked_runs.get(source_id) or []
                 if runs:
-                    linked = runs.pop()
-                    self._linked_redo.setdefault(source_id, []).append(linked)
-                    if linked:
+                    run = runs.pop()
+                    self._linked_redo.setdefault(source_id, []).append(run)
+                    if self._run_is_next(run, self.service.history.peek_undo(source_id)):
                         self._finish_restore(self.service.undo(source_id))
             elif task_name == 'redo':
                 redo = self._linked_redo.get(source_id) or []
                 if redo:
-                    linked = redo.pop()
-                    self._linked_runs.setdefault(source_id, []).append(linked)
-                    if linked:
+                    run = redo.pop()
+                    self._linked_runs.setdefault(source_id, []).append(run)
+                    if self._run_is_next(run, self.service.history.peek_redo(source_id)):
                         self._finish_restore(self.service.redo(source_id))
         except Exception as exc:
             logger.warning(f"[FM5] coverage targets of '{self._layer_name(source)}' not processed: {exc}", exc_info=True)
+
+    @staticmethod
+    def _run_is_next(run: _LinkedRun, operation: Any) -> bool:
+        """True when ``operation`` (top of the cross undo / redo stack) is the one ``run`` recorded.
+
+        An operation forgotten since (removed layer, cache limit) leaves the
+        run without its step: the next one belongs to an older run.
+        """
+        return run.op_id is not None and operation is not None and operation.op_id == run.op_id
 
     def _vector_engine_filters_targets(self) -> bool:
         """The vector engine only filters distant layers when both buttons are on."""
@@ -1567,7 +1714,7 @@ class CoverageModeController(BaseController):
                 return False
         return True
 
-    def _run_vector_source_filter(self, source: Any, coverage_ids: List[str], run_index: Optional[int] = None) -> bool:
+    def _run_vector_source_filter(self, source: Any, coverage_ids: List[str], run: Optional[_LinkedRun] = None) -> bool:
         _, show_warning = _feedback()
         features = self._vector_source_features(source)
         if not features:
@@ -1587,11 +1734,17 @@ class CoverageModeController(BaseController):
         source_id = source.id()
 
         def done(task, result):
+            self._vector_task_over(source_id, task)
             if getattr(self, '_torn_down', False):
                 return
-            runs = self._linked_runs.get(source_id) or []
-            if task.changes and run_index is not None and run_index < len(runs):
-                runs[run_index] = True
+            if task.changes and run is not None:
+                if self._map_layer(source_id) is None:
+                    # The source was removed (or the project closed) meanwhile: its history went with it.
+                    self.service.history.clear_source(source_id)
+                else:
+                    # The service recorded the operation just before calling back: it is on top.
+                    operation = self.service.history.peek_undo(source_id)
+                    run.op_id = operation.op_id if operation is not None else None
             failures = [o for o in task.outcomes if not o.success]
             if not result:
                 message = self.tr("Raster / point cloud targets not filtered: {0}").format(task.error or self.tr("canceled"))
@@ -1601,8 +1754,35 @@ class CoverageModeController(BaseController):
                     message += ' — ' + self._failure_text(failures)
             self._after_run(self._map_layer(source_id), task.outcomes, message, warning=not result or bool(failures))
 
-        self.service.run(request, job, on_done=done)
+        task = self.service.run(request, job, on_done=done)
+        if task is not None:
+            self._vector_tasks[source_id] = task
+            for signal_name in ('taskCompleted', 'taskTerminated'):
+                try:
+                    # Also over when its callback failed before reaching done().
+                    getattr(task, signal_name).connect(lambda t=task: self._vector_task_over(source_id, t))
+                except (AttributeError, TypeError, RuntimeError):
+                    pass
         return True
+
+    def _vector_task_over(self, source_id: str, task: Any) -> None:
+        if self._vector_tasks.get(source_id) is task:
+            del self._vector_tasks[source_id]
+
+    def vector_source_busy(self, source: Any) -> bool:
+        """True, and the user is told to wait, while a cross task clips the coverage targets of ``source``.
+
+        A Filter, Unfilter, Reset, Undo or Redo of the source meanwhile would
+        pair its runs with the wrong cross operation (or none).
+        """
+        try:
+            busy = source is not None and source.id() in self._vector_tasks
+        except (RuntimeError, AttributeError):
+            return False
+        if busy:
+            _, show_warning = _feedback()
+            show_warning(self.tr("A FilterMate task is still running: wait for it to finish"))
+        return busy
 
     def _vector_source_features(self, source: Any) -> list:
         """Features of the EXPLORING selection, with geometry."""
@@ -1657,20 +1837,22 @@ class CoverageModeController(BaseController):
     # === Undo / redo buttons ===
 
     def can_undo(self) -> bool:
-        layer = self._active_layer
-        return layer is not None and self.service.can_undo(layer.id())
+        layer_id = self._active_id()
+        return layer_id is not None and self.service.can_undo(layer_id)
 
     def can_redo(self) -> bool:
-        layer = self._active_layer
-        return layer is not None and self.service.can_redo(layer.id())
+        layer_id = self._active_id()
+        return layer_id is not None and self.service.can_redo(layer_id)
 
     def update_undo_redo_buttons(self) -> None:
         if self._active_layer is None:
             self._call(self._app(), 'update_undo_redo_buttons')
             return
         dw = self.dockwidget
-        self._call(getattr(dw, 'pushButton_action_undo_filter', None), 'setEnabled', self.can_undo())
-        self._call(getattr(dw, 'pushButton_action_redo_filter', None), 'setEnabled', self.can_redo())
+        # Same rule as FilterMateApp.update_undo_redo_buttons: Undo / Redo only on the FILTERING tab.
+        on_filtering = getattr(dw, 'tabTools_current_index', 0) == 0
+        self._call(getattr(dw, 'pushButton_action_undo_filter', None), 'setEnabled', on_filtering and self.can_undo())
+        self._call(getattr(dw, 'pushButton_action_redo_filter', None), 'setEnabled', on_filtering and self.can_redo())
 
     # === Height above ground ===
 
@@ -1697,6 +1879,13 @@ class CoverageModeController(BaseController):
             if task.after is not None:
                 from ...core.domain.filter_state import CrossOperation
                 self.service.history.push(CrossOperation(layer.id(), ((task.before, task.after),), 'height above ground'))
+            if not _same_layer(self._active_layer, layer):
+                # Another layer was picked meanwhile: the panels and the kind are its own,
+                # the filter of this one is not run (its height stays, undoable).
+                self._refresh_canvas(layer)
+                self.update_undo_redo_buttons()
+                show_warning(self.tr("Filter not applied: {0}").format(self._layer_name(layer)))
+                return
             self._populate_point_cloud(layer)
             then()
 

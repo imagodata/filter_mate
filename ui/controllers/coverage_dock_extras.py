@@ -43,6 +43,9 @@ ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 
 # (the 3D action is ``mActionNew3DMapCanvas`` in QGIS 4.2, ``mActionNew3DMapView`` in older builds).
 ACTION_ELEVATION_PROFILE = ('mActionElevationProfile',)
 ACTION_NEW_3D_VIEW = ('mActionNew3DMapCanvas', 'mActionNew3DMapView')
+# Vector providers whose feature count is a server / database query: the card leaves it out
+# (it is read on the main thread at every layer change).
+UNCOUNTED_PROVIDERS = ('postgres', 'oracle', 'mssql', 'hana', 'wfs', 'oapif', 'arcgisfeatureserver', 'virtual')
 
 
 def _identity(text: str) -> str:
@@ -139,6 +142,15 @@ def vector_card_text(geometry_label: str, feature_count: Optional[int],
     return " · ".join(parts)
 
 
+def feature_count_is_cheap(provider: str, subset: str) -> bool:
+    """Whether the card may count the features: a local source without a filter.
+
+    A filtered GeoPackage / Spatialite layer counts through its subset
+    (``EXISTS``, ``ST_DWithin``...), a database or web layer runs a query.
+    """
+    return not (subset or '').strip() and (provider or '') not in UNCOUNTED_PROVIDERS
+
+
 def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -> str:
     """Rich text of the layer card: a kind bullet, the bold name, then ``kind · meta`` (mockup)."""
     from html import escape
@@ -193,8 +205,9 @@ class CoverageDockExtras(QObject):
         self._zone_previous_tool = None
         self._layer_id: Optional[str] = None
         self._hover_base = None
-        self._hover_base_id: Optional[str] = None
+        self._hover_base_key: Optional[Tuple[str, str]] = None  # (layer id, source) the base was opened for
         self._link_connected = False
+        self._linked_layer_id: Optional[str] = None  # raster whose style follows the range
 
     @property
     def dockwidget(self) -> Any:
@@ -328,7 +341,7 @@ class CoverageDockExtras(QObject):
         self._guarded(self._set_kind_icons, kind_value)
 
     def show_vector(self, layer: Any = None) -> None:
-        """Vector layer: its card, no kind tool, vector buttons back."""
+        """Vector layer: its card, no kind tool, vector buttons back (no card without a layer: it was removed)."""
         self._layer_id = None
         for step in (self.leave, self._hide_coverage_widgets, self._restore_vector_buttons):
             self._guarded(step)
@@ -336,6 +349,8 @@ class CoverageDockExtras(QObject):
         if layer is not None:
             self._guarded(self.ensure_card)
             self._guarded(self._update_card, layer, 'vector')
+        elif self._card is not None:
+            self._guarded(self._card.setVisible, False)
 
     @staticmethod
     def _safe_id(layer: Any) -> Optional[str]:
@@ -365,15 +380,34 @@ class CoverageDockExtras(QObject):
                 self._guarded(self._uncheck, button)
         self._guarded(self._stop_hover)
         self._guarded(self._stop_zone_tool)
-        self._hover_base, self._hover_base_id = None, None
+        self._hover_base, self._hover_base_key = None, None
 
     @staticmethod
     def _uncheck(button: Any) -> None:
         if button.isChecked():
             button.setChecked(False)  # runs the toggled slot, which disconnects
 
+    def forget_layers(self, layer_ids: Optional[Sequence[str]] = None) -> None:
+        """Layers removed from the project (None: the project was closed).
+
+        Their saved styles are dropped, never restored (a layer opened again
+        with the same id has its own style); the tools of the shown layer stop.
+        """
+        from ...adapters.qgis.coverage_layers.raster_adapter import forget_linked_styles
+        forget_linked_styles(layer_ids)
+
+        def gone(layer_id: Optional[str]) -> bool:
+            return layer_id is not None and (layer_ids is None or layer_id in layer_ids)
+
+        if gone(self._linked_layer_id):
+            self._linked_layer_id = None
+        if gone(self._layer_id):
+            self.leave()
+            self._layer_id = None
+
     def teardown(self) -> None:
         self.leave()
+        self._guarded(self._unlink_all_styles)  # plugin unloaded: every layer gets its own style back
         self._guarded(self._restore_vector_buttons)
         self._guarded(self._release_zone_tool)
         widgets = [self._card, *self._tools.values()]
@@ -411,7 +445,7 @@ class CoverageDockExtras(QObject):
         except Exception:
             geometry = ''
         try:
-            count = layer.featureCount()
+            count = layer.featureCount() if feature_count_is_cheap(layer.providerType(), layer.subsetString()) else None
         except Exception:
             count = None
         return vector_card_text(geometry, count, self.tr)
@@ -543,9 +577,11 @@ class CoverageDockExtras(QObject):
         from ...adapters.qgis.coverage_layers.raster_adapter import identify_values
         layer_point = self._layer_point(point)
         try:
-            if self._hover_base_id != layer.id():
-                # FilterMate derived source: the original raster is opened once, not every 60 ms.
-                self._hover_base, self._hover_base_id = controller._base_raster(layer), layer.id()
+            key = (layer.id(), layer.source())
+            if self._hover_base_key != key:
+                # FilterMate derived source: the original raster is opened once, not every 60 ms;
+                # again when a filter / undo changed the source.
+                self._hover_base, self._hover_base_key = controller._base_raster(layer), key
             values = identify_values(self._hover_base, layer_point)
         except Exception as exc:
             logger.debug(f"[FM5] value under the cursor unreadable: {exc}")
@@ -589,13 +625,19 @@ class CoverageDockExtras(QObject):
         from ...adapters.qgis.coverage_layers.raster_adapter import link_range_to_style
         low, high = self._link_range()
         try:
+            if self._linked_layer_id not in (None, layer.id()):
+                self._unlink_style()  # one linked raster at a time
+            self._linked_layer_id = layer.id()
             if not link_range_to_style(layer, panel.current_band(), low, high):
                 logger.debug("[FM5] this raster style has no single band range to link")
         except RuntimeError:
             pass
 
     def _unlink_style(self) -> None:
-        layer = self._controller.active_layer
+        """Give the linked raster its style back: the layer that was linked, which is no longer
+        the active one when the controller has already moved to the next layer."""
+        layer_id, self._linked_layer_id = self._linked_layer_id, None
+        layer = self._controller._map_layer(layer_id) if layer_id is not None else None
         if layer is None:
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import unlink_range_from_style
@@ -603,6 +645,11 @@ class CoverageDockExtras(QObject):
             unlink_range_from_style(layer)
         except RuntimeError:
             pass
+
+    @staticmethod
+    def _unlink_all_styles() -> None:
+        from ...adapters.qgis.coverage_layers.raster_adapter import unlink_all_styles
+        unlink_all_styles()
 
     # === Raster: statistics of a rectangle ===
 
