@@ -536,8 +536,16 @@ def process_spatialite_geometries(
         return None
 
     # Dissolve using unaryUnion
-    logger.info(f"[Spatialite] Applying dissolve (unaryUnion) on {len(geometries)} geometries")
-    collected_geometry = safe_unary_union(geometries)
+    # 2026-10-17: not with a buffer expression. Its distance is evaluated
+    # per source feature (the attributes are lost in a union), so every
+    # SpatiaLite / GeoPackage target goes to the OGR backend, which buffers
+    # each feature and unites afterwards; this WKT is not used for them.
+    if context.param_buffer_expression and str(context.param_buffer_expression).strip():
+        logger.info(f"[Spatialite] Buffer expression: no dissolve of the {len(geometries)} source geometries")
+        collected_geometry = safe_collect_geometry(geometries)
+    else:
+        logger.info(f"[Spatialite] Applying dissolve (unaryUnion) on {len(geometries)} geometries")
+        collected_geometry = safe_unary_union(geometries)
 
     if collected_geometry is None:
         logger.warning("[Spatialite] unaryUnion failed, falling back to safe_collect_geometry")

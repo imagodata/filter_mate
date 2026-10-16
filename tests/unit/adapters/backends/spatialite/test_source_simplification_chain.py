@@ -149,6 +149,27 @@ class TestProcessSpatialiteGeometries:
     def test_context_has_no_simplification_callback(self):
         assert not hasattr(executor.SpatialiteSourceContext(), "simplify_geometry_adaptive")
 
+    @pytest.mark.parametrize("expression, dissolved", [
+        ("CASE WHEN \"importance\" = '1' THEN 300 ELSE 250 END", False),
+        ("", True),
+        (None, True),
+    ])
+    def test_no_dissolve_before_a_buffer_expression(self, qgis_env, expression, dissolved):
+        # 2026-10-17: the distance is evaluated per source feature; a union
+        # first would lose the attributes (the OGR backend buffers, then unites).
+        qgis_env["geometry"] = _Merged(1_000)
+        calls = []
+        core_geometry = sys.modules[f"{ROOT}.core.geometry"]
+        core_geometry.safe_unary_union = lambda geometries: calls.append("union") or qgis_env["geometry"]
+        core_geometry.safe_collect_geometry = lambda geometries: calls.append("collect") or qgis_env["geometry"]
+        context = executor.SpatialiteSourceContext(
+            source_layer_crs_authid="EPSG:2154",
+            param_buffer_expression=expression,
+            geometry_to_wkt=lambda geometry, crs_authid: geometry.asWkt(3),
+        )
+        executor.process_spatialite_geometries(FEATURES, context)
+        assert calls[0] == ("union" if dissolved else "collect")
+
 
 class TestGeometryCacheKey:
     def test_variant_holds_the_predicates(self):
