@@ -370,6 +370,15 @@ def file_key(name: str) -> str:
     return name.split('.', 1)[0]
 
 
+def in_session(source: str) -> bool:
+    """True when ``source`` refers to a file of the current session (plain path or URI).
+
+    Session folder names (``session_<hex>``) survive any URI encoding.
+    """
+    folder = _session_dir
+    return bool(folder and source and os.path.basename(folder) in source)
+
+
 def _entries(folder: str):
     with os.scandir(folder) as scan:
         return [entry for entry in scan if entry.name != LOCK_NAME]
