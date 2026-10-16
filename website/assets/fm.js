@@ -76,16 +76,17 @@
 
     // ---------------------------------------------------------------- light / dark footage
     // Every recording exists twice: video/<clip>.mp4 (QGIS light theme) and
-    // video/<clip>-dark.mp4 (Night Mapping). Videos, posters and poster images follow
+    // video/<clip>-dark.mp4 (Night Mapping), and so do the story images (img/stories/<name>-dark.webp).
+    // Videos, posters and images follow
     // the site theme (data-theme on <html>, else the system preference), also when it changes.
     const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
     const siteIsDark = () => {
         const forced = document.documentElement.dataset.theme;
         return forced ? forced === 'dark' : darkScheme.matches;
     };
-    const footage = /(^|\/)video\/([a-z0-9_]+?)(-dark)?\.(mp4|webp)$/;
+    const footage = /(^|\/)(video|img\/stories)\/([a-z0-9_-]+?)(-dark)?\.(mp4|webp)$/;
     const themed = (url) => (url && footage.test(url)
-        ? url.replace(footage, (m, pre, name, dark, ext) => pre + 'video/' + name + (siteIsDark() ? '-dark' : '') + '.' + ext)
+        ? url.replace(footage, (m, pre, dir, name, dark, ext) => pre + dir + '/' + name + (siteIsDark() ? '-dark' : '') + '.' + ext)
         : url);
     const lightOf = (url) => (url || '').replace(/-dark\.(mp4|webp)$/, '.$1');
     function applyFootageTheme() {
@@ -108,7 +109,7 @@
                 }
             }
         });
-        document.querySelectorAll('img[src^="video/"]').forEach((img) => {
+        document.querySelectorAll('img[src^="video/"], img[src^="img/stories/"]').forEach((img) => {
             const src = themed(img.getAttribute('src'));
             if (src !== img.getAttribute('src')) img.setAttribute('src', src);
         });

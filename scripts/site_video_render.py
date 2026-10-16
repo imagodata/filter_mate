@@ -323,6 +323,7 @@ def render(clip):
     subprocess.run([FFMPEG, '-y', '-loglevel', 'error', '-i', png, '-c:v', 'libwebp', '-quality', '70',
                     os.path.join(site, f'{clip}.webp')], check=True)
     os.remove(png)
+    save_stills(clip, events, source, site)
     sheet = Image.new('RGB', (4 * 400, 4 * 245), (30, 30, 30))
     d = ImageDraw.Draw(sheet)
     for k, (to, im) in enumerate(thumbs):
@@ -332,6 +333,41 @@ def render(clip):
     sheet.save(os.path.join(site, f'{clip}-sheet.jpg'), quality=85)
     mb = os.path.getsize(mp4) / 1e6
     print(f'{clip}: {duration:.1f} s, {n_out} frames, {mb:.2f} MB, {len(times)} source frames')
+
+
+def save_stills(clip, events, source, site, width=1600):
+    """Step images of the stories: the whole window at each ``still:<name>`` mark, 1600 px wide WebP.
+
+    A dark recording (clip name ending in -dark) writes ``<name>-dark.webp``, so the site can show
+    the image matching its theme; they land in ``<site>/stills``.
+    """
+    marks = [e for e in events if e['kind'] == 'mark' and str(e.get('name', '')).startswith('still:')]
+    # Stills chosen after the recording: scripts/site_stills.json maps a clip (without -dark) to
+    # [name, event kind, n-th event of that kind (0-based, negative from the end), offset in s].
+    # Light and dark recordings run the same steps, so the same event gives the same moment.
+    config = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'site_stills.json')
+    if os.path.exists(config):
+        with open(config, encoding='utf-8') as f:
+            wanted = json.load(f).get(clip[:-5] if clip.endswith('-dark') else clip, [])
+        for name, kind, nth, offset in wanted:
+            of_kind = [e for e in events if e['kind'] == kind]
+            if of_kind:
+                marks.append({'kind': 'mark', 'name': 'still:' + name, 't': of_kind[nth]['t'] + float(offset)})
+    if not marks:
+        return
+    out = os.path.join(site, 'stills')
+    os.makedirs(out, exist_ok=True)
+    suffix = '-dark' if clip.endswith('-dark') else ''
+    for e in marks:
+        name = e['name'][len('still:'):] + suffix
+        im = source(e['t'])
+        im = im.resize((width, round(im.height * width / im.width)), Image.Resampling.LANCZOS)
+        png = os.path.join(out, f'{name}.png')
+        im.save(png)
+        subprocess.run([FFMPEG, '-y', '-loglevel', 'error', '-i', png, '-c:v', 'libwebp', '-quality', '82',
+                        os.path.join(out, f'{name}.webp')], check=True)
+        os.remove(png)
+    print(f'{clip}: {len(marks)} stills')
 
 
 if __name__ == '__main__':
