@@ -2878,6 +2878,31 @@ class FilterMateApp:
         if self._datasource_manager:
             self._datasource_manager.remove_datasource_for_layer(layer_info)
 
+    def _layer_to_show_after_refresh(self):
+        """``(layer, reason)`` for the panel after a refresh: the layer the user picked in the current-layer
+        combo box while it is still the panel's layer (a refresh late after loading used to switch it back to
+        QGIS' active layer), else QGIS' active layer, else the first registered layer."""
+        pick = getattr(self.dockwidget, '_user_layer_pick', None)
+        try:
+            if pick and pick[1] in self.PROJECT_LAYERS:
+                # Still the panel's layer, or still shown by the combo box (a pick the panel had not applied).
+                current = getattr(self.dockwidget, 'current_layer', None)
+                combo = getattr(self.dockwidget, 'comboBox_filtering_current_layer', None)
+                shown = combo.currentLayer() if combo is not None else None
+                for layer in (current, shown):
+                    if layer is not None and layer.id() == pick[1]:
+                        return layer, 'picked'
+        except (RuntimeError, AttributeError):
+            pass  # the panel's layer was deleted
+        active = self.iface.activeLayer()
+        if active and isinstance(active, get_filterable_layer_types() or (QgsVectorLayer,)) and active.id() in self.PROJECT_LAYERS:
+            return active, 'active'
+        if self.PROJECT_LAYERS:
+            first_layer = self.PROJECT.mapLayer(list(self.PROJECT_LAYERS.keys())[0])
+            if first_layer:
+                return first_layer, 'first'
+        return None, ''
+
     def _refresh_ui_with_layers(self, validate_postgres=False, show_success=False, allow_retry=False):
         """Refresh UI after layer operations (reload/project load). Consolidates 2 similar methods."""
         from qgis.PyQt.QtCore import QTimer
@@ -2947,16 +2972,11 @@ class FilterMateApp:
                 exclude_non_analysis_rasters(self.dockwidget.comboBox_filtering_current_layer)
         except Exception as e: logger.debug(f"ComboBox filter setup (non-critical): {e}")
 
-        # Trigger layer change with active or first layer
-        active = self.iface.activeLayer()
-        if active and isinstance(active, get_filterable_layer_types() or (QgsVectorLayer,)) and active.id() in self.PROJECT_LAYERS:
-            self.dockwidget.current_layer_changed(active)
-            logger.info(f"UI refreshed with active layer: {active.name()}")
-        elif self.PROJECT_LAYERS:
-            first_layer = self.PROJECT.mapLayer(list(self.PROJECT_LAYERS.keys())[0])
-            if first_layer:
-                self.dockwidget.current_layer_changed(first_layer)
-                logger.info(f"UI refreshed with first layer: {first_layer.name()}")
+        # Trigger layer change with the user's layer, else the active or first layer
+        shown, reason = self._layer_to_show_after_refresh()
+        if shown is not None:
+            self.dockwidget.current_layer_changed(shown)
+            logger.info(f"UI refreshed with {reason} layer: {shown.name()}")
 
         # Show success notification if requested
         if show_success and should_show_message('layer_loaded'):

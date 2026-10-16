@@ -37,7 +37,11 @@ combo = QgsMapLayerComboBox(); lay.addWidget(combo)
 class D: pass
 
 
-d = D(); d.comboBox_filtering_current_layer = combo; d.ended = 0
+d = D()
+d.comboBox_filtering_current_layer = combo
+d.ended = 0
+d.applied = []  # current_layer_changed calls: the pick reconciled when the panel had not applied it
+d.current_layer_changed = lambda layer, manual_change=False: (d.applied.append(layer.name()), setattr(d, 'current_layer', layer))
 d._end_post_filter_window = lambda: setattr(d, 'ended', d.ended + 1)
 ns['_enable_layer_search'](combo)
 ns['_stamp_user_layer_picks'](d)
@@ -50,7 +54,9 @@ def name():
 
 
 def step(label, fn, expect_pick):
-    d.__dict__.pop('_user_layer_pick', None); d.ended = 0
+    d.__dict__.pop('_user_layer_pick', None)
+    d.ended = 0
+    d.applied = []
     before = name()
     fn()
     for _ in range(5):
@@ -58,7 +64,8 @@ def step(label, fn, expect_pick):
     picked = getattr(d, '_user_layer_pick', None)
     got = picked is not None
     ok = got == expect_pick
-    print(f"{'OK ' if ok else 'BAD'} {label:42s} {before}->{name()} recorded={got} window_ended={d.ended}", flush=True)
+    print(f"{'OK ' if ok else 'BAD'} {label:42s} {before}->{name()} recorded={got} window_ended={d.ended} "
+          f"applied={d.applied}", flush=True)
     return ok
 
 

@@ -119,10 +119,11 @@ class TestAppStaticGuards:
 
     def test_refresh_ui_with_layers_uses_capability_helpers(self):
         method = _method(_first_class(_parse(_APP)), "_refresh_ui_with_layers")
-        called = _called_names(method)
-        assert "get_current_layer_combo_filters" in called
-        assert "get_filterable_layer_types" in called
-        assert "QgsVectorLayer" not in _isinstance_type_args(method)
+        # The layer to show (user pick, active, first) is chosen by _layer_to_show_after_refresh.
+        chooser = _method(_first_class(_parse(_APP)), "_layer_to_show_after_refresh")
+        assert "get_current_layer_combo_filters" in _called_names(method)
+        assert "get_filterable_layer_types" in _called_names(chooser)
+        assert "QgsVectorLayer" not in _isinstance_type_args(method) + _isinstance_type_args(chooser)
         assert "QgsMapLayerProxyModel.Filter.HasGeometry" in ast.unparse(method)
 
     def test_first_class_is_still_the_app(self):
@@ -226,7 +227,7 @@ class TestFilterUsableLayersFallback:
 def _refresh_app(combo_flags, filterable_types, active):
     proxy_model = MagicMock()
     namespace = _extract(
-        ["_refresh_ui_with_layers"],
+        ["_refresh_ui_with_layers", "_layer_to_show_after_refresh"],
         {"QTimer": MagicMock(), "logger": MagicMock(), "weakref": weakref,
          "perf_mark_end": MagicMock(), "should_show_message": lambda category: False,
          "QCoreApplication": MagicMock(), "QgsMapLayerProxyModel": proxy_model,
@@ -241,6 +242,8 @@ def _refresh_app(combo_flags, filterable_types, active):
     app.dockwidget.widgets_initialized = True
     app.iface.activeLayer.return_value = active
     app._refresh_ui_with_layers = types.MethodType(namespace["_refresh_ui_with_layers"], app)
+    app._layer_to_show_after_refresh = types.MethodType(namespace["_layer_to_show_after_refresh"], app)
+    app.dockwidget._user_layer_pick = None  # no pick: the active layer decides
     return app, proxy_model
 
 

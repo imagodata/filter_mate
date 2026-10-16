@@ -1000,7 +1000,13 @@ class ConfigurationManager(QObject):
                 end_window = getattr(dock, '_end_post_filter_window', None)
                 if callable(end_window):
                     end_window()
-            except RuntimeError:
+                    return
+                # The combo's handler runs during the input itself: still another current layer means it
+                # was disconnected (start-up refreshes, signal re-wiring), and the pick was only shown.
+                current = getattr(dock, 'current_layer', None)
+                if (current is None or current.id() != now) and not getattr(dock, '_filtering_in_progress', False):
+                    dock.current_layer_changed(combo.currentLayer(), manual_change=True)
+            except (RuntimeError, AttributeError):
                 pass  # combo deleted (plugin closing)
 
         class _UserLayerPick(QObject):

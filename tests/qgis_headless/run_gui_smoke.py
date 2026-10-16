@@ -30,7 +30,7 @@ from qgis.PyQt.QtCore import QSettings, Qt, QTimer
 from qgis.utils import iface
 import qgis.utils
 
-STATE = {'results': [], 'python_errors': [], 'started': time.time()}
+STATE = {'results': [], 'python_errors': [], 'started': time.time(), 'perf0': time.perf_counter()}
 faulthandler.enable(all_threads=True)  # a native crash prints the Python stack of every thread
 
 
@@ -112,7 +112,8 @@ class _RecentRecords(logging.Handler):
         self.lines = []
 
     def emit(self, record):
-        self.lines = (self.lines + [f"{record.levelname[0]} {record.name}: {record.getMessage()[:220]}"])[-600:]
+        self.lines = (self.lines + [f"{record.created - STATE['started']:7.2f} {record.levelname[0]} {record.name}: "
+                                    f"{record.getMessage()[:200]}"])[-1500:]
 
 
 _RECENT = _RecentRecords()
@@ -314,6 +315,48 @@ def s_dock_ready():
     expected = ['zones', 'dem'] + (['cloud'] if has_point_clouds() else [])
     check('dock open, every fixture layer registered', dock() is not None and dock().isVisible() and registered(*expected),
           f"registered={[name for name in expected if registered(name)]}")
+    return settled()
+
+
+def press(key):
+    """A real key press on the current-layer combo box (what a user does)."""
+    from qgis.PyQt.QtCore import QEvent
+    from qgis.PyQt.QtGui import QKeyEvent
+    from qgis.PyQt.QtWidgets import QApplication
+    QApplication.sendEvent(dock().comboBox_filtering_current_layer,
+                           QKeyEvent(QEvent.Type.KeyPress, key, Qt.KeyboardModifier.NoModifier))
+
+
+def s_pick_before_late_refresh():
+    """The user picks a layer in the first seconds; a refresh late after loading (_refresh_ui_with_layers)
+    used to switch the panel back to QGIS' active layer."""
+    combo = dock().comboBox_filtering_current_layer
+    before = combo.currentLayer()
+    for key in (Qt.Key.Key_Down, Qt.Key.Key_Up):
+        press(key)
+        if combo.currentLayer() is not None and combo.currentLayer() is not before:
+            break
+    STATE['early_pick'] = combo.currentLayer().name() if combo.currentLayer() else None
+    print(f"   early pick at {time.time() - STATE['started']:.2f}s: {STATE['early_pick']}", flush=True)
+    since = time.time()
+    return lambda: time.time() - since > 0.5
+
+
+def s_late_refresh_check():
+    d = dock()
+    before = (getattr(d, '_user_layer_pick', None), d.comboBox_filtering_current_layer.currentLayer(),
+              getattr(d, 'current_layer', None))
+    app()._refresh_ui_with_layers()
+    shown = getattr(d, 'current_layer', None)
+    if not check('a late refresh keeps the layer the user picked', shown is not None and shown.name() == STATE['early_pick'],
+                 f"picked={STATE['early_pick']} shown={shown.name() if shown else None} "
+                 f"active in QGIS={iface.activeLayer().name() if iface.activeLayer() else None}"):
+        pick, combo_layer, current = before
+        print(f"   before the refresh: recorded pick={pick} combo={combo_layer.name() if combo_layer else None} "
+              f"panel={current.name() if current else None}", flush=True)
+        print(f"   pick recorded at {pick[0] - STATE['perf0']:.2f}s" if pick else "   no pick recorded", flush=True)
+        dump_recent(60, ('current_layer_changed ENTRY', 'UI refreshed', 'efer', 'estor', 'protect', 'setLayer',
+                         'active layer', 'Active layer', 'manual'))
     return settled()
 
 
@@ -596,7 +639,7 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
-STEPS = [s_setup, s_open_plugin, s_dock_ready, s_layout_check,
+STEPS = [s_setup, s_open_plugin, s_dock_ready, s_layout_check, s_pick_before_late_refresh, s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_user_pick_after_undo_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,
