@@ -38,7 +38,7 @@ try:
 except ImportError:
     QgsCollapsibleGroupBox = None
 
-from ....core.domain.raster_filter_criteria import RasterSelection, RasterSelectionMode
+from ....core.domain.raster_filter_criteria import RasterDerivative, RasterSelection, RasterSelectionMode
 from .histogram_widget import RangeHistogramWidget, normalize_range, spin_bounds
 
 if TYPE_CHECKING:
@@ -173,6 +173,45 @@ def range_formula(band: int, low: Bound, high: Bound, reference: str) -> str:
                            minimum=low, maximum=high).to_calc_formula(reference)
 
 
+# Unit shown after the bounds of a derivative.
+DERIVATIVE_SUFFIXES = {
+    RasterDerivative.SLOPE_DEGREES: " °",
+    RasterDerivative.SLOPE_PERCENT: " %",
+    RasterDerivative.ASPECT: " °",
+}
+DERIVATIVE_DECIMALS = 2
+
+
+def derivative_presets(derivative: RasterDerivative) -> List[Tuple[str, Bound, Bound]]:
+    """Usual thresholds of a derivative: ``(key, low, high)``, ``None`` bound = open side.
+
+    The key names the threshold (``"flat"``, ``"east"``...): the widget translates it.
+    Aspect has no north entry: it wraps around 0 and a range cannot.
+    """
+    if derivative is RasterDerivative.SLOPE_DEGREES:
+        return [("flat", None, 5.0), ("gentle", 5.0, 15.0), ("moderate", 15.0, 30.0), ("steep", 30.0, None)]
+    if derivative is RasterDerivative.SLOPE_PERCENT:
+        return [("flat", None, 5.0), ("gentle", 5.0, 15.0), ("moderate", 15.0, 30.0), ("steep", 30.0, None)]
+    if derivative is RasterDerivative.ASPECT:
+        return [("east", 45.0, 135.0), ("south", 135.0, 225.0), ("west", 225.0, 315.0)]
+    if derivative is RasterDerivative.HILLSHADE:
+        return [("shadow", None, 50.0), ("lit", 150.0, None)]
+    return []
+
+
+def format_preset(label: str, low: Bound, high: Bound, suffix: str = "") -> str:
+    """Combo text of a preset: ``"Flat (< 5 °)"``."""
+    def number(value: float) -> str:
+        return f"{value:g}"
+    if low is None:
+        span = f"< {number(high)}{suffix}"
+    elif high is None:
+        span = f"> {number(low)}{suffix}"
+    else:
+        span = f"{number(low)}–{number(high)}{suffix}"
+    return f"{label} ({span})"
+
+
 def _optional_float(value: Any) -> Bound:
     if value is None or isinstance(value, bool):
         return None
@@ -189,7 +228,7 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
     Returns:
         Dict with ``layer_id``, ``mode`` (RasterSelectionMode), ``band`` (>= 1),
         ``minimum`` / ``maximum`` (ordered, None = unbounded), ``classes``
-        (sorted ints), ``expression`` and ``preview``.
+        (sorted ints), ``expression``, ``preview`` and ``derivative`` (RasterDerivative).
     """
     state = state if isinstance(state, dict) else {}
     try:
@@ -200,6 +239,10 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         band = max(1, int(state.get("band", 1)))
     except (TypeError, ValueError):
         band = 1
+    try:
+        derivative = RasterDerivative(state.get("derivative", RasterDerivative.VALUE.value))
+    except ValueError:
+        derivative = RasterDerivative.VALUE
     low, high = _optional_float(state.get("minimum")), _optional_float(state.get("maximum"))
     if low is not None and high is not None and low > high:
         low, high = high, low
@@ -217,6 +260,7 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         "classes": sorted(classes),
         "expression": str(state.get("expression") or ""),
         "preview": bool(state.get("preview", False)),
+        "derivative": derivative,
     }
 
 
@@ -229,7 +273,7 @@ def build_raster_selection(state: Any) -> Optional[RasterSelection]:
     parsed = parse_raster_state(state)
     mode = parsed["mode"]
     if mode is RasterSelectionMode.RANGE:
-        selection = RasterSelection(band=parsed["band"], mode=mode,
+        selection = RasterSelection(band=parsed["band"], mode=mode, derivative=parsed["derivative"],
                                     minimum=parsed["minimum"], maximum=parsed["maximum"])
     elif mode is RasterSelectionMode.CLASSES:
         selection = RasterSelection(band=parsed["band"], mode=mode, classes=frozenset(parsed["classes"]))
@@ -280,11 +324,12 @@ class RasterExploringPanel(QWidget):
         self._layer_id: Optional[str] = None
         self._reference = DEFAULT_REFERENCE
         self._mode = RasterSelectionMode.RANGE
+        self._derivative = RasterDerivative.VALUE
         self._low: Bound = None
         self._high: Bound = None
         self._decimals = FLOAT_DECIMALS
         self._coordinate_decimals = 2
-        self._histograms: Dict[int, Tuple[List[int], float, float]] = {}
+        self._histograms: Dict[Tuple[int, RasterDerivative], Tuple[List[int], float, float]] = {}
         self._last_pixel: Optional[Tuple[float, float, Dict[int, Optional[float]]]] = None
         self._history: List[Tuple[float, float, Optional[float], int]] = []
         self._switching_mode = False
@@ -330,6 +375,25 @@ class RasterExploringPanel(QWidget):
         self._band_combo.currentIndexChanged.connect(self._on_band_index_changed)
         band_row.addWidget(self._band_combo)
         layout.addLayout(band_row)
+
+        derivative_row = QHBoxLayout()
+        derivative_row.addWidget(QLabel(self.tr("Compute on"), self))
+        self._derivative_combo = QComboBox(self)
+        self._derivative_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._derivative_combo.setToolTip(self.tr(
+            "Quantity the range applies to. Slope, aspect, hillshade and roughness read the band as a DTM."))
+        self._derivative_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self._derivative_combo.setMinimumContentsLength(8)
+        for derivative, label in ((RasterDerivative.VALUE, self.tr("Pixel value")),
+                                  (RasterDerivative.SLOPE_DEGREES, self.tr("Slope (degrees)")),
+                                  (RasterDerivative.SLOPE_PERCENT, self.tr("Slope (%)")),
+                                  (RasterDerivative.ASPECT, self.tr("Aspect (degrees)")),
+                                  (RasterDerivative.HILLSHADE, self.tr("Hillshade (0-255)")),
+                                  (RasterDerivative.ROUGHNESS, self.tr("Roughness (TRI, mean difference)"))):
+            self._derivative_combo.addItem(label, derivative.value)
+        self._derivative_combo.currentIndexChanged.connect(self._on_derivative_index_changed)
+        derivative_row.addWidget(self._derivative_combo)
+        layout.addLayout(derivative_row)
 
         self._pixel_group = self._build_pixel_group()
         if hasattr(self._pixel_group, 'setCollapsed'):
@@ -429,6 +493,13 @@ class RasterExploringPanel(QWidget):
         self._max_spin.valueChanged.connect(self._on_max_spin_changed)
         group_layout.addLayout(spins_row)
 
+        self._presets_combo = QComboBox(self._range_group)
+        self._presets_combo.setToolTip(self.tr("Usual thresholds of the quantity"))
+        self._presets_combo.setAccessibleName(self.tr("Usual thresholds"))
+        self._presets_combo.activated.connect(self._on_preset_activated)
+        group_layout.addWidget(self._presets_combo)
+        self._fill_presets()
+
         self._kept_ratio_label = QLabel("", self._range_group)
         group_layout.addWidget(self._kept_ratio_label)
         self._preview_check = QCheckBox(self.tr("Preview on the map (hide the other pixels)"), self._range_group)
@@ -470,10 +541,10 @@ class RasterExploringPanel(QWidget):
         group_layout.addWidget(self._expression_status)
         buttons_row = QHBoxLayout()
         buttons_row.addStretch()
-        use_range = QPushButton(self.tr("Use the range"), self._expression_group)
-        use_range.setToolTip(self.tr("Write the current value range as an expression"))
-        use_range.clicked.connect(self._use_range_as_expression)
-        buttons_row.addWidget(use_range)
+        self._use_range_button = QPushButton(self.tr("Use the range"), self._expression_group)
+        self._use_range_button.setToolTip(self.tr("Write the current value range as an expression"))
+        self._use_range_button.clicked.connect(self._use_range_as_expression)
+        buttons_row.addWidget(self._use_range_button)
         group_layout.addLayout(buttons_row)
         return self._expression_group
 
@@ -504,13 +575,15 @@ class RasterExploringPanel(QWidget):
         else:
             self.reset()
 
-    def set_histogram(self, band: int, counts: Sequence[int], minimum: float, maximum: float) -> None:
-        """Store the histogram of ``band``; shown at once when it is the current band.
+    def set_histogram(self, band: int, counts: Sequence[int], minimum: float, maximum: float,
+                      derivative: RasterDerivative = RasterDerivative.VALUE) -> None:
+        """Store the histogram of ``band`` for ``derivative``; shown at once when it is the current one.
 
         Does not emit ``selectionChanged``.
         """
-        self._histograms[int(band)] = ([int(count) for count in counts or ()], float(minimum), float(maximum))
-        if int(band) == self.current_band():
+        self._histograms[(int(band), derivative)] = ([int(count) for count in counts or ()],
+                                                     float(minimum), float(maximum))
+        if int(band) == self.current_band() and derivative is self._derivative:
             self._show_band_histogram()
             self._set_range(self._low, self._high)
 
@@ -530,12 +603,20 @@ class RasterExploringPanel(QWidget):
 
     def preview_enabled(self) -> bool:
         """Whether the map preview is asked for a mode it supports (range or classes)."""
-        return self._preview_check.isChecked() and self._mode is not RasterSelectionMode.EXPRESSION
+        return (self._preview_check.isChecked() and self._mode is not RasterSelectionMode.EXPRESSION
+                and not self.current_derivative().is_terrain)
 
     def set_preview_checked(self, checked: bool) -> None:
         """Check or uncheck the "Preview on the map" box (the dock button changed it). Does not emit."""
         with _signals_blocked(self._preview_check):
             self._preview_check.setChecked(bool(checked))
+
+    def current_derivative(self) -> RasterDerivative:
+        """Quantity the selection applies to: the one of the combo in range mode, the pixel value otherwise.
+
+        Classes and expressions read pixel values, whatever the combo says.
+        """
+        return self._derivative if self._mode is RasterSelectionMode.RANGE else RasterDerivative.VALUE
 
     def current_band(self) -> int:
         """1-based number of the selected band (1 when no band is listed)."""
@@ -580,7 +661,8 @@ class RasterExploringPanel(QWidget):
         if hasattr(self._pixel_group, 'setCollapsed'):
             self._pixel_group.setCollapsed(False)
         value = values.get(band)
-        if extend and value is not None and self._mode is RasterSelectionMode.RANGE:
+        if (extend and value is not None and self._mode is RasterSelectionMode.RANGE
+                and not self._derivative.is_terrain):
             self._set_range(*extend_range(self._low, self._high, value))
             self._emit_now()
 
@@ -619,6 +701,7 @@ class RasterExploringPanel(QWidget):
         if self._band_combo.count():
             with _signals_blocked(self._band_combo):
                 self._band_combo.setCurrentIndex(0)
+        self._set_derivative(RasterDerivative.VALUE)
         self._apply_band()
         self._set_range(None, None)
         self._set_all_classes(Qt.CheckState.Unchecked, emit=False)
@@ -643,6 +726,7 @@ class RasterExploringPanel(QWidget):
             "classes": self._checked_classes(),
             "expression": self._expression_edit.text(),
             "preview": self._preview_check.isChecked(),
+            "derivative": self._derivative.value,
         }
 
     def restore_state(self, state: Dict[str, Any]) -> None:
@@ -653,6 +737,7 @@ class RasterExploringPanel(QWidget):
         if index >= 0:
             with _signals_blocked(self._band_combo):
                 self._band_combo.setCurrentIndex(index)
+        self._set_derivative(parsed["derivative"])
         self._apply_band()
         self._set_range(parsed["minimum"], parsed["maximum"])
         wanted = set(parsed["classes"])
@@ -662,7 +747,7 @@ class RasterExploringPanel(QWidget):
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
         with _signals_blocked(self._expression_edit, self._preview_check):
             self._expression_edit.setText(parsed["expression"])
-            self._preview_check.setChecked(parsed["preview"])
+            self._preview_check.setChecked(parsed["preview"] and not parsed["derivative"].is_terrain)
         mode = parsed["mode"]
         if mode is RasterSelectionMode.CLASSES and not self._has_classes():
             mode = RasterSelectionMode.RANGE
@@ -691,6 +776,7 @@ class RasterExploringPanel(QWidget):
             self._switching_mode = False
         changed = mode is not self._mode
         self._mode = mode
+        self._update_mode_controls()
         if emit and changed:
             self._emit_now()
 
@@ -737,22 +823,27 @@ class RasterExploringPanel(QWidget):
         """Adopt the decimals and the cached histogram of the current band."""
         info = self._band_info(self.current_band())
         self._decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
-        self._histogram.set_decimals(self._decimals)
+        # The pixel readouts keep the band decimals; the range follows the quantity it applies to.
+        range_decimals = DERIVATIVE_DECIMALS if self._derivative.is_terrain else self._decimals
+        self._histogram.set_decimals(range_decimals)
         with _signals_blocked(self._min_spin, self._max_spin):
-            self._min_spin.setDecimals(self._decimals)
-            self._max_spin.setDecimals(self._decimals)
+            self._min_spin.setDecimals(range_decimals)
+            self._max_spin.setDecimals(range_decimals)
         self._show_band_histogram()
 
     def _show_band_histogram(self) -> None:
-        counts, minimum, maximum = self._histograms.get(self.current_band(), ([], 0.0, 0.0))
+        counts, minimum, maximum = self._histograms.get((self.current_band(), self._derivative), ([], 0.0, 0.0))
         self._histogram.set_histogram(counts, minimum, maximum)
-        low, high = spin_bounds(*self._data_bounds(), self._decimals)
+        low, high = spin_bounds(*self._data_bounds(), self._range_decimals())
         with _signals_blocked(self._min_spin, self._max_spin):
             for spin in (self._min_spin, self._max_spin):
                 spin.setRange(low, high)
 
+    def _range_decimals(self) -> int:
+        return DERIVATIVE_DECIMALS if self._derivative.is_terrain else self._decimals
+
     def _data_bounds(self) -> Tuple[Bound, Bound]:
-        cached = self._histograms.get(self.current_band())
+        cached = self._histograms.get((self.current_band(), self._derivative))
         if cached is None:
             return None, None
         return cached[1], cached[2]
@@ -764,6 +855,65 @@ class RasterExploringPanel(QWidget):
         self._zone_label.setVisible(False)  # its statistics were those of the previous band
         self.bandChanged.emit(self.current_band())
         self._emit_now()
+
+    # === Derivative ===
+
+    def _set_derivative(self, derivative: RasterDerivative) -> None:
+        """Adopt ``derivative`` in the combo and everything that depends on it, without emitting."""
+        self._derivative = derivative
+        index = self._derivative_combo.findData(derivative.value)
+        with _signals_blocked(self._derivative_combo):
+            self._derivative_combo.setCurrentIndex(max(0, index))
+        suffix = DERIVATIVE_SUFFIXES.get(derivative, "")
+        for spin in (self._min_spin, self._max_spin):
+            spin.setSuffix(suffix)
+        self._fill_presets()
+        self._update_mode_controls()
+
+    def _on_derivative_index_changed(self, _index: int) -> None:
+        try:
+            derivative = RasterDerivative(self._derivative_combo.currentData())
+        except ValueError:
+            derivative = RasterDerivative.VALUE
+        self._set_derivative(derivative)
+        self._apply_band()
+        self._set_range(None, None)  # the old bounds were in another unit
+        self._zone_label.setVisible(False)
+        self.bandChanged.emit(self.current_band())  # the controller then sends the histogram
+        self._emit_now()
+
+    def _fill_presets(self) -> None:
+        names = {"flat": self.tr("Flat"), "gentle": self.tr("Gentle"), "moderate": self.tr("Moderate"),
+                 "steep": self.tr("Steep"), "east": self.tr("East"), "south": self.tr("South"),
+                 "west": self.tr("West"), "shadow": self.tr("Shadow"), "lit": self.tr("Lit")}
+        suffix = DERIVATIVE_SUFFIXES.get(self._derivative, "")
+        presets = derivative_presets(self._derivative)
+        with _signals_blocked(self._presets_combo):
+            self._presets_combo.clear()
+            self._presets_combo.addItem(self.tr("Usual thresholds…"), None)
+            for key, low, high in presets:
+                self._presets_combo.addItem(format_preset(names[key], low, high, suffix), (low, high))
+        self._presets_combo.setVisible(bool(presets))
+
+    def _on_preset_activated(self, index: int) -> None:
+        bounds = self._presets_combo.itemData(index)
+        if bounds is None:
+            return
+        self._set_range(*bounds)
+        self._presets_combo.setCurrentIndex(0)
+        self._emit_now()
+
+    def _update_mode_controls(self) -> None:
+        """Enable what makes sense for the quantity: a derivative has no preview, expression or classes."""
+        terrain = self._derivative.is_terrain
+        if terrain and self._preview_check.isChecked():
+            with _signals_blocked(self._preview_check):
+                self._preview_check.setChecked(False)  # nothing to show: no stale tick
+        self._preview_check.setEnabled(not terrain)
+        self._preview_check.setToolTip(
+            self.tr("The map preview is not available for slope, aspect, hillshade and roughness") if terrain else "")
+        self._use_range_button.setEnabled(not terrain)
+        self._derivative_combo.setEnabled(self._mode is RasterSelectionMode.RANGE)
 
     # === Range ===
 

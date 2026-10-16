@@ -94,6 +94,7 @@ CLASS_COLORS: Dict[int, str] = {
     18: "#c050c0", 64: "#b04040", 65: "#c050c0", 66: "#cfd8dc", 67: "#e07a5f",
 }
 DEFAULT_CLASS_COLOR = "#9e9e9e"
+CLASS_COUNT_ROLE = 0x0101  # Qt.UserRole + 1: points of the class, -1 when unknown
 
 
 # ---------------------------------------------------------------------------
@@ -152,6 +153,22 @@ def preset_codes(name: str, present_codes: Iterable[int]) -> Tuple[int, ...]:
         return tuple(code for code in present if code not in NOISE_CLASSES)
     wanted = set(CLASS_PRESETS.get(name, ()))
     return tuple(code for code in present if code in wanted)
+
+
+def inverted_codes(present_codes: Iterable[int], checked_codes: Iterable[int]) -> Tuple[int, ...]:
+    """Codes of the list that are NOT checked (the "Invert" quick selection), in list order."""
+    checked = {int(code) for code in checked_codes}
+    return tuple(int(code) for code in present_codes if int(code) not in checked)
+
+
+def class_selection_summary(checked: int, shown: int, kept_points: Optional[int], total_points: Optional[int]) -> str:
+    """Line under the class list: ``"3 of 12 classes · 9.8 M / 38.4 M points (25.5 %)"``.
+
+    The points are those of the checked classes, when every class of the list has a count.
+    """
+    text = f"{checked} / {shown}"
+    counted = format_point_counts(kept_points, total_points)
+    return f"{text} · {counted}" if counted else text
 
 
 def attribute_available(attributes: Sequence[str], name: str) -> bool:
@@ -734,37 +751,29 @@ class PointCloudExploringPanel(QWidget):
             "Water": self.tr("Water"),
             WITHOUT_NOISE_PRESET: self.tr("Without noise"),
         }
-        presets = QGridLayout()
-        presets.setSpacing(2)
-        self._preset_buttons: Dict[str, Any] = {}
-        for index, name in enumerate([*CLASS_PRESETS, WITHOUT_NOISE_PRESET]):
-            button = QPushButton(preset_titles.get(name, name), self._classes_group)
-            button.setToolTip(self.tr("Check only these classes"))
-            button.clicked.connect(lambda _checked=False, n=name: self._apply_preset(n))
-            # Two columns: three made the panel wider than a 440 px dock (the EXPLORING area scrolled sideways).
-            presets.addWidget(button, index // 2, index % 2)
-            self._preset_buttons[name] = button
-        group_layout.addLayout(presets)
-
-        buttons_row = QHBoxLayout()
-        button_all = QPushButton(self.tr("All"), self._classes_group)
-        button_none = QPushButton(self.tr("None"), self._classes_group)
-        button_all.clicked.connect(lambda: self._set_all_classes(Qt.CheckState.Checked))
-        button_none.clicked.connect(lambda: self._set_all_classes(Qt.CheckState.Unchecked))
-        buttons_row.addWidget(button_all)
-        buttons_row.addWidget(button_none)
-        buttons_row.addStretch()
-        group_layout.addLayout(buttons_row)
-        # FilterMate 5 design: the class list only (the presets stay usable from the code / state).
-        for button in (*self._preset_buttons.values(), button_all, button_none):
-            button.setVisible(False)
-        group_layout.setSpacing(0)
+        # One compact combo (a button grid made the dock wider than 440 px): the usual selections
+        # of the raster "Usual thresholds" combo, for classes.
+        self._quick_combo = _make_combo(self._classes_group, COMBO_MIN_WIDTH, self.tr("Quick class selection"))
+        self._quick_combo.setObjectName("comboBox_point_cloud_class_quick_selection")
+        self._quick_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._quick_combo.addItem(self.tr("Quick selection…"), None)
+        for name in (*CLASS_PRESETS, WITHOUT_NOISE_PRESET):
+            self._quick_combo.addItem(preset_titles.get(name, name), ("preset", name))
+        self._quick_combo.addItem(self.tr("All classes"), ("all", None))
+        self._quick_combo.addItem(self.tr("No class"), ("none", None))
+        self._quick_combo.addItem(self.tr("Invert the selection"), ("invert", None))
+        self._quick_combo.activated.connect(self._on_quick_selection)
+        group_layout.addWidget(self._quick_combo)
 
         self._classes_list = QListWidget(self._classes_group)
         self._classes_list.setMaximumHeight(300)  # the whole ASPRS list, as in the mockup
         self._classes_list.setAccessibleName(self.tr("Point classes"))
         self._classes_list.itemChanged.connect(self._changed)
+        self._classes_list.itemChanged.connect(self._update_class_summary)
         group_layout.addWidget(self._classes_list)
+        self._class_summary_label = QLabel("", self._classes_group)
+        self._class_summary_label.setObjectName("label_point_cloud_class_summary")
+        group_layout.addWidget(self._class_summary_label)
         return self._classes_group
 
     def _build_ranges_group(self) -> Any:
@@ -1011,6 +1020,7 @@ class PointCloudExploringPanel(QWidget):
             for item in self._class_items():
                 checked = int(item.data(Qt.ItemDataRole.UserRole)) in wanted
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+            self._update_class_summary()
             self._hag_check.setChecked(parsed["hag_enabled"])
             self._hag_spin.setValue(parsed["hag_min"])
             self._restore_hag_layer(parsed["hag_layer_id"])
@@ -1120,10 +1130,15 @@ class PointCloudExploringPanel(QWidget):
                 item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
                 item.setCheckState(Qt.CheckState.Unchecked)
                 item.setData(Qt.ItemDataRole.UserRole, int(code))
+                item.setData(CLASS_COUNT_ROLE, int(count))
                 self._classes_list.addItem(item)
         present = self._present_codes()
-        for name, button in self._preset_buttons.items():
-            button.setEnabled(bool(preset_codes(name, present)))
+        model = self._quick_combo.model()
+        for index in range(self._quick_combo.count()):
+            data = self._quick_combo.itemData(index)
+            if data is not None and data[0] == "preset":
+                model.item(index).setEnabled(bool(preset_codes(data[1], present)))
+        self._update_class_summary()
 
     def _class_items(self) -> List[Any]:
         items = (self._classes_list.item(index) for index in range(self._classes_list.count()))
@@ -1142,6 +1157,7 @@ class PointCloudExploringPanel(QWidget):
             for item in self._class_items():
                 checked = int(item.data(Qt.ItemDataRole.UserRole)) in wanted
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+        self._update_class_summary()
         self._changed()
 
     def _set_all_classes(self, state: Any) -> None:
@@ -1149,6 +1165,33 @@ class PointCloudExploringPanel(QWidget):
 
     def _apply_preset(self, name: str) -> None:
         self._check_codes(preset_codes(name, self._present_codes()))
+
+    def _on_quick_selection(self, index: int) -> None:
+        data = self._quick_combo.itemData(index)
+        self._quick_combo.setCurrentIndex(0)  # a one-shot action, the combo stays on its title
+        if data is None:
+            return
+        action, name = data
+        if action == "preset":
+            self._apply_preset(name)
+        elif action == "all":
+            self._set_all_classes(Qt.CheckState.Checked)
+        elif action == "none":
+            self._set_all_classes(Qt.CheckState.Unchecked)
+        else:
+            self._check_codes(inverted_codes(self._present_codes(), self._checked_codes()))
+
+    def _update_class_summary(self, *_args) -> None:
+        """Checked classes and the points they hold, under the list."""
+        items = self._class_items()
+        checked = [item for item in items if item.checkState() == Qt.CheckState.Checked]
+        counts = [int(item.data(CLASS_COUNT_ROLE)) for item in items]
+        kept = None
+        if items and all(count >= 0 for count in counts):
+            kept = sum(int(item.data(CLASS_COUNT_ROLE)) for item in checked)
+        total = sum(counts) if kept is not None else None
+        self._class_summary_label.setText(
+            class_selection_summary(len(checked), len(items), kept if checked else None, total))
 
     # === Conditions ===
 

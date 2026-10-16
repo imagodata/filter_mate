@@ -623,6 +623,9 @@ class CoverageDockExtras(QObject):
         if layer is None or panel is None:
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import link_range_to_style
+        if panel.current_derivative().is_terrain:
+            self._unlink_style()  # the range is in slope / aspect units, not in those of the style
+            return
         low, high = self._link_range()
         try:
             if self._linked_layer_id not in (None, layer.id()):
