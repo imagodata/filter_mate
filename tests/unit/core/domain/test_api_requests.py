@@ -13,6 +13,7 @@ from core.domain.api_requests import (
     point_cloud_criteria_from_values,
     raster_selection_from_dict,
     raster_selection_from_values,
+    relation_numbers,
 )
 from core.domain.raster_filter_criteria import RasterSelectionMode
 
@@ -149,3 +150,25 @@ class TestReviewFindings:
 
     def test_lowercase_labels(self):
         assert normalize_predicates(["intersect", "are within", "DISJOINT"]) == ("Intersect", "Are within", "Disjoint")
+
+
+class TestFiniteNumbers:
+    """Audit 2026-10: NaN slips through every comparison, Infinity covers everything."""
+
+    def test_relation_numbers(self):
+        assert relation_numbers(None, None) == (0.0, 0.0)
+        assert relation_numbers(-5, "50") == (-5.0, 50.0)
+
+    @pytest.mark.parametrize("buffer, coverage", [
+        (float("nan"), 0), (float("inf"), 0), (-float("inf"), 0), ("nan", 0), (2e7, 0),
+        (0, float("nan")), (0, 101), (0, -1), ("x", 0),
+    ])
+    def test_relation_numbers_reject(self, buffer, coverage):
+        with pytest.raises(ValueError):
+            relation_numbers(buffer, coverage)
+
+    @pytest.mark.parametrize("key", ["z_min", "z_max", "intensity_min", "intensity_max"])
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+    def test_point_cloud_bounds_must_be_finite(self, key, value):
+        with pytest.raises(ValueError):
+            point_cloud_criteria_from_values(**{key: value})

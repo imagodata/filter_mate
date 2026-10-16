@@ -26,14 +26,14 @@ logger = logging.getLogger(__name__)
 def is_point_cloud_filtering_enabled() -> bool:
     """Return the live value of ``APP.OPTIONS.POINT_CLOUD.enabled`` (False by default)."""
     try:
-        from ...config.config import ENV_VARS, _get_option_value
+        from ...config.config import ENV_VARS, _get_option_bool
         cfg = (
             ENV_VARS.get('CONFIG_DATA', {})
             .get('APP', {})
             .get('OPTIONS', {})
             .get('POINT_CLOUD', {})
         )
-        return bool(_get_option_value(cfg.get('enabled'), False))
+        return _get_option_bool(cfg.get('enabled'), False)
     except (ImportError, AttributeError, TypeError):
         return False
 
@@ -41,14 +41,14 @@ def is_point_cloud_filtering_enabled() -> bool:
 def is_raster_filtering_enabled() -> bool:
     """Return the live value of ``APP.OPTIONS.RASTER.enabled`` (False when unset)."""
     try:
-        from ...config.config import ENV_VARS, _get_option_value
+        from ...config.config import ENV_VARS, _get_option_bool
         cfg = (
             ENV_VARS.get('CONFIG_DATA', {})
             .get('APP', {})
             .get('OPTIONS', {})
             .get('RASTER', {})
         )
-        return bool(_get_option_value(cfg.get('enabled'), False))
+        return _get_option_bool(cfg.get('enabled'), False)
     except (ImportError, AttributeError, TypeError):
         return False
 
@@ -163,6 +163,24 @@ def exclude_non_analysis_rasters(combo: Any) -> None:
         combo.setExcludedProviders(merged)
     except (AttributeError, TypeError, RuntimeError) as exc:
         logger.debug(f"Web rasters not excluded from the layer combo box: {exc}")
+
+
+def is_non_analysis_raster(layer: Any) -> bool:
+    """True for a raster whose pixels FilterMate cannot read (WMS, XYZ, WCS basemap...).
+
+    ``isinstance(layer, get_filterable_layer_types())`` admits every ``QgsRasterLayer``
+    once rasters are on: callers registering layers drop these with this check.
+    """
+    raster_type = _resolve_raster_class()
+    if raster_type is None or layer is None:
+        return False
+    try:
+        from qgis.core import QgsVectorLayer
+        if raster_type is QgsVectorLayer:  # mocked qgis.core: one class for both
+            return False
+        return isinstance(layer, raster_type) and layer.providerType() not in ANALYSIS_RASTER_PROVIDERS
+    except (ImportError, TypeError, RuntimeError, AttributeError):
+        return False
 
 
 def is_raster_layer(layer: Any) -> bool:

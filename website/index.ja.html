@@ -64,7 +64,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="選ばれた動画を見る"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>動画を見る</button>
                 <a class="home-text-link" href="guide.html" hreflang="en">ガイドを読む <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
             </div>
-            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5・Qt6</p>
+            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5・Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>操作の流れを見る</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -93,6 +93,23 @@
         </ol>
         <a class="inline-cta" href="guide.html#tutorial" hreflang="en">初めてのフィルタのチュートリアルへ <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
         <div class="callout demo-download"><strong>小さなデータセットで試す。</strong><p>Toutens 周辺の 4 レイヤ、スタイル設定済みの QGIS プロジェクト、インポート可能なお気に入り、英語・フランス語の手順を収録。ZIP を展開してからプロジェクトを開いてください。</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>デモをダウンロード（ZIP、203 KB）</a></div>
+    </div>
+</section>
+
+<section class="home-section fm5" id="fm5" aria-labelledby="fm5-title">
+    <div class="home-container capability-layout">
+        <div class="fm5-visual">
+            <div class="fm5-shots">
+                <img src="img/guide/fm5_raster_exploring.png" alt="ラスターレイヤの EXPLORING パネル：バンド、値の範囲、ヒストグラム" loading="lazy" width="440" height="1086">
+                <img src="img/guide/fm5_pointcloud_exploring.png" alt="点群の EXPLORING パネル：LiDAR のクラス" loading="lazy" width="440" height="1086">
+            </div>
+            <p class="fm5-caption">パネルは現在のレイヤに合わせて切り替わります。左がラスター、右が点群です。</p>
+        </div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">FilterMate 5 の新機能</p><h2 id="fm5-title">ラスターも LiDAR 点群も、ほかのレイヤと同じようにフィルタリング。</h2><p>ラスターまたは点群を現在のレイヤに選ぶと、EXPLORING にそのレイヤ専用のツールが表示されます。FILTERING はその選択を、あらゆる種類のレイヤに結び付けます。</p></div>
+            <ul class="capability-list"><li><strong>ラスター</strong><span>バンド、ピクセル選択、ヒストグラムとライブプレビュー付きの値の範囲、クラス、ラスター式。</span></li><li><strong>点群</strong><span>ASPRS・LiDAR HD のクラス、Z・強度・リターンの範囲、DTM からの高さ。</span></li><li><strong>あらゆる方向</strong><span>ベクタ、ラスター、点群をソースにもターゲットにも：バッファ、最小カバー率、Disjoint を使える 9 通りの組み合わせ。</span></li><li><strong>安心して元に戻せる</strong><span>切り抜いたレイヤは ID とスタイルを保ちます。元に戻す、やり直し、プロジェクトファイルは元のデータソースに戻ります。</span></li><li><strong>エクスポート</strong><span>ラスターは GeoTIFF と COG、点群は LAZ、LAS、COPC、GPKG、CSV で書き出します。</span></li><li><strong>自動化</strong><span>Processing アルゴリズム 7 個、モデル 4 個、qgis_process、Python API と REST API。</span></li><li><strong>検証済み</strong><span>QGIS 3.22、3.28、3.34、3.44、4.2 で CI を実行し、Processing とパネル自体の両方を検証。</span></li></ul>
+            <a class="inline-cta" href="guide.html#raster-lidar" hreflang="en">FilterMate 5 のガイドを読む <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
     </div>
 </section>
 
@@ -153,7 +170,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.ja.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>imagodata による QGIS 向け空間フィルタリング。</p></div><ul><li><a href="guide.html" hreflang="en">ユーザーガイド <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">活用例 <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">ロードマップ <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">ソースコード</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">問題を報告</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 4.9.2 · 動画とスクリーンショットの地図データ：BD TOPO® © IGN、Licence Ouverte 2.0。</div>
+    <div class="home-container footer-note">FilterMate 5.0 · 動画とスクリーンショットの地図データ：BD TOPO® © IGN、Licence Ouverte 2.0。</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="動画"><video controls playsinline muted></video><form method="dialog"><button>閉じる</button></form></dialog>

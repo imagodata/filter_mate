@@ -2,7 +2,9 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased] - FilterMate 5.0 (branch `claude/v5-raster-lidar`)
+## [5.0.0] - 2026-10-15
+
+FilterMate 5 filters raster and LiDAR point cloud layers as well as vector layers: EXPLORING selects on the current layer whatever its kind, FILTERING relates that selection to layers of any kind, EXPORTING writes each kind. Raster and point cloud support is on by default and can be switched off in the Configuration tab (`APP.OPTIONS.RASTER.enabled`, `APP.OPTIONS.POINT_CLOUD.enabled`). Requirements unchanged: QGIS 3.22 or later (point clouds from 3.26), Qt5 or Qt6; PDAL 2.4 or later is optional (height above a DTM, direct COPC writing). Every release is now tested in CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, with Processing and with the dock itself.
 
 ### Added
 
@@ -26,6 +28,12 @@ All notable changes to FilterMate will be documented in this file.
 ### Fixed
 
 - **QGIS 3.22 – 3.34: QGIS crashed when the panel opened.** A spacer inserted in the EXPORTING values with `QBoxLayout.insertItem` was deleted at once by PyQt5 5.15.6 (no ownership transfer) and left a dangling item in the layout. It is now handed to the layout (`sip.transferto`); `tests/test_no_layout_insert_item_temporaries.py` keeps it that way.
+- **FILTERING / EXPORTING rows thousands of pixels apart** (one row visible): the alignment of the key icons with their rows fed back into the page height whenever the section had free height (tall dock, enlarged lower zone); the key column no longer sets the page height.
+- **A layer picked in the first seconds after the panel opened could be reverted** to QGIS' active layer by a late refresh, or shown in the list without being applied; it is kept and applied.
+- **A layer picked right after a filter, undo or unfilter was reverted**: for 1.5–2 s the panel puts the source layer back in the current-layer list (async layer changes used to move it); a layer the user picks there (list, keyboard or type-to-find) is now kept and applied at once.
+- **Layers removed from the project stayed registered** (since 4.9): QGIS sends layer ids and the removal task only took layer objects, so their FilterMate properties and filter history were never deleted; they are now.
+- **Spin box arrows** (minimum / maximum, buffer, coverage, segments) are drawn by the FilterMate stylesheet: on Linux and macOS they came out as a stray corner.
+- The minimum coverage field is wide enough for its text (it showed `cov. ≥ 50 !`).
 - **QGIS could crash when a layer was removed from the project**: the multiple-selection widget was reset by reading a layout item after `removeWidget` had deleted it.
 - Unregistering a layer that is still in the project (a raster / point cloud kind switched off) would have written a default style named `FilterMate_style_<layer>` into the layer's data source (GeoPackage / PostgreSQL `layer_styles`) or a `.qml` next to its file, and failed on QGIS 4: that code, never read back, is removed.
 - An optional extension without its dependency (Favorites Sharing without the Resource Sharing plugin, the usual case) showed a modal dialog in French at every QGIS start; it is now a translated message bar notice, shown once.
@@ -44,6 +52,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Changed
 
+- **Favorites Sharing (breaking)**: the plaintext `auth_header` of a repo entry is refused (audit EXT-6, announced for 5.0). The repo is kept but the token is not used: store it in the QGIS Authentication Manager and select it in *Manage Repos → Edit → Authentication* (`authcfg_id`); the next save removes the plaintext token from `config.json`.
 - One-time "What's new in FilterMate 5" dialog the first time the panel opens after the update (raster and point cloud layers, link to the user guide); the Discord invitation waits for the next opening. Plugin description and tags mention raster and LiDAR point cloud layers.
 - Switching raster or point cloud layers on or off in the Configuration tab (`APP.OPTIONS.RASTER.enabled`, `APP.OPTIONS.POINT_CLOUD.enabled`, both on by default) takes effect at once: those layers are added to or removed from the layer lists. A configuration written by a development build from before the raster option, while point clouds were experimental and off, gets them on once. Turning a kind off neither cancels running tasks nor unfilters its layers: a warning names those that stay filtered.
 - `filtermate:batch_filter` runs on the main thread (`setSubsetString` is not thread-safe).

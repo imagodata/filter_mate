@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
 from ..accessor import Favorite, FavoritesUnavailable, FilterMateAccessor, HistoryStep
+from .filters import active_filters_after_change
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
@@ -70,5 +71,5 @@ def apply_favorite(favorite_id: str, request: Request) -> ApplyFavoriteResponse:
         )
     return ApplyFavoriteResponse(
         step=step,
-        active_filters=accessor.get_active_filters(),
+        active_filters=active_filters_after_change(accessor),
     )
