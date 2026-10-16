@@ -16,7 +16,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Bâtiments sans point de la classe"/>
+      <Option name="component_description" type="QString" value="Buildings without a point of the class"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="120"/>
@@ -100,7 +100,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Écrire les bâtiments retenus"/>
+      <Option name="component_description" type="QString" value="Write the kept buildings"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="280"/>
@@ -121,7 +121,7 @@
             <Option name="outputs_collapsed" type="bool" value="false"/>
             <Option name="parameters_collapsed" type="bool" value="false"/>
           </Option>
-          <Option name="component_description" type="QString" value="Dossier de sortie"/>
+          <Option name="component_description" type="QString" value="Output folder"/>
           <Option name="component_height" type="double" value="30"/>
           <Option name="component_pos_x" type="double" value="820"/>
           <Option name="component_pos_y" type="double" value="280"/>
@@ -169,12 +169,12 @@
   <Option name="groupBoxes"/>
   <Option name="help" type="Map">
     <Option name="ALG_CREATOR" type="QString" value="FilterMate"/>
-    <Option name="ALG_DESC" type="QString" value="Calcule l'empreinte des points de classe bâtiment (6) du nuage et garde les bâtiments qui ne la touchent pas (prédicat Disjoint) : bâtiments démolis, non relevés ou mal classés. Le nuage source reste filtré sur la classe choisie (annulable depuis FilterMate)."/>
+    <Option name="ALG_DESC" type="QString" value="Computes the footprint of the building class (6) points of the point cloud and keeps the buildings that do not touch it (Disjoint predicate): demolished, unsurveyed or misclassified buildings. The source cloud stays filtered on the chosen class (can be undone from FilterMate)."/>
     <Option name="ALG_VERSION" type="QString" value="5.0"/>
   </Option>
   <Option name="internal_version" type="QString" value="Version2"/>
   <Option name="modelVariables"/>
-  <Option name="model_group" type="QString" value="Modèles FilterMate"/>
+  <Option name="model_group" type="QString" value="FilterMate models"/>
   <Option name="model_name" type="QString" value="batiments_absents_du_lidar"/>
   <Option name="outputGroup" type="QString" value=""/>
   <Option name="outputOrder"/>
@@ -182,7 +182,7 @@
     <Option name="batiments" type="Map">
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Bâtiments"/>
+      <Option name="description" type="QString" value="Buildings"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="layer_type" type="int" value="2"/>
@@ -194,7 +194,7 @@
     <Option name="classes" type="Map">
       <Option name="default" type="QString" value="6"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Classes bâtiment"/>
+      <Option name="description" type="QString" value="Building classes"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata"/>
@@ -206,7 +206,7 @@
       <Option name="create_by_default" type="bool" value="true"/>
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Dossier de sortie"/>
+      <Option name="description" type="QString" value="Output folder"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata" type="Map">
@@ -221,7 +221,7 @@
     <Option name="nuage" type="Map">
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Nuage de points"/>
+      <Option name="description" type="QString" value="Point cloud"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata"/>
@@ -243,7 +243,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Bâtiments"/>
+      <Option name="component_description" type="QString" value="Buildings"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="260"/>
@@ -264,7 +264,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Classes bâtiment"/>
+      <Option name="component_description" type="QString" value="Building classes"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="170"/>
@@ -285,7 +285,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Nuage de points"/>
+      <Option name="component_description" type="QString" value="Point cloud"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="80"/>

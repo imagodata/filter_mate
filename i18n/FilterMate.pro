@@ -24,6 +24,10 @@ SOURCES = \
     ../extensions/qfieldcloud/ui/settings_dialog.py \
     ../infrastructure/database/sql_utils.py \
     ../infrastructure/feedback/__init__.py \
+    ../processing/algorithms/batch_filter_algorithm.py \
+    ../processing/algorithms/common.py \
+    ../processing/algorithms/cross_filter_algorithm.py \
+    ../processing/algorithms/layer_operations_algorithms.py \
     ../ui/controllers/backend_controller.py \
     ../ui/controllers/config_controller.py \
     ../ui/controllers/favorites_controller.py \

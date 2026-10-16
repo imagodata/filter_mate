@@ -41,14 +41,6 @@ from qgis.core import (
 from ...core.domain.api_requests import OPERATORS, PREDICATES  # noqa: F401 - re-exported for scripts
 from .common import FilterMateAlgorithm, QgsProcessingParameterPointCloudLayer, advanced
 
-_TARGETS_HELP = (
-    "Vecteur : sous-ensemble des entités. Raster : pixels hors zone en NoData (VRT découpé). "
-    "Nuage de points : points hors zone retirés (fichier COPC dérivé, PDAL). Disjoint garde l'extérieur.\n\n"
-    "Seules les couches du projet sont filtrées. Le filtre est annulable depuis FilterMate et les sources "
-    "d'origine sont toujours écrites dans le projet. La sortie « Couches traitées » s'enchaîne dans un modèle, "
-    "par exemple vers « Exporter les couches filtrées »."
-)
-
 
 class CrossFilterAlgorithm(FilterMateAlgorithm):
     """Filtre des couches vecteur, raster et nuage de points par une couche vecteur."""
@@ -58,21 +50,21 @@ class CrossFilterAlgorithm(FilterMateAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterVectorLayer(
-            self.SOURCE, self.tr("Couche source"), [QgsProcessing.SourceType.TypeVectorAnyGeometry]))
+            self.SOURCE, self.tr("Source layer"), [QgsProcessing.SourceType.TypeVectorAnyGeometry]))
         self.addParameter(QgsProcessingParameterBoolean(
-            self.SELECTED_ONLY, self.tr("Entités sélectionnées uniquement"), defaultValue=True))
+            self.SELECTED_ONLY, self.tr("Selected features only"), defaultValue=True))
         self.add_target_parameters(QgsProcessingParameterDistance(
-            self.BUFFER, self.tr("Tampon"), defaultValue=0.0, parentParameterName=self.SOURCE))
+            self.BUFFER, self.tr("Buffer"), defaultValue=0.0, parentParameterName=self.SOURCE))
         self.add_output()
 
     def processAlgorithm(self, parameters, context, feedback):
         from ...adapters.public_api import operations
         source = self.parameterAsVectorLayer(parameters, self.SOURCE, context)
         if source is None:
-            raise QgsProcessingException(self.tr("Couche source invalide"))
+            raise QgsProcessingException(self.tr("Invalid source layer"))
         selected_only = self.parameterAsBoolean(parameters, self.SELECTED_ONLY, context)
         count = source.selectedFeatureCount() if selected_only and source.selectedFeatureCount() else source.featureCount()
-        feedback.pushInfo(self.tr("{0} entité(s) source").format(count))
+        feedback.pushInfo(self.tr("{0} source feature(s)").format(count))
         report = operations.cross_filter(source, self.parameterAsLayerList(parameters, self.TARGETS, context),
                                          selected_only=selected_only, project=context.project(), feedback=feedback,
                                          **self.target_settings(parameters, context))
@@ -82,12 +74,12 @@ class CrossFilterAlgorithm(FilterMateAlgorithm):
         return "cross_filter"
 
     def displayName(self):
-        return self.tr("Filtrer des couches de tout type par une couche vecteur")
+        return self.tr("Filter layers of any type by a vector layer")
 
     def shortHelpString(self):
         return self.tr(
-            "Filtre sur place des couches vecteur, raster et nuage de points par les entités d'une couche "
-            "vecteur, avec les prédicats géométriques, un tampon et une couverture minimale.\n\n") + self.tr(_TARGETS_HELP)
+            "Filters vector, raster and point cloud layers in place by the features of a vector layer, "
+            "with the geometric predicates, a buffer and a minimum coverage.\n\n") + self.targets_help()
 
 
 class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
@@ -108,27 +100,27 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
 
     def initAlgorithm(self, config=None):
         number = QgsProcessingParameterNumber.Type.Double
-        self.addParameter(QgsProcessingParameterRasterLayer(self.SOURCE, self.tr("Raster source")))
-        self.addParameter(QgsProcessingParameterBand(self.BAND, self.tr("Bande"), 1, self.SOURCE))
+        self.addParameter(QgsProcessingParameterRasterLayer(self.SOURCE, self.tr("Source raster")))
+        self.addParameter(QgsProcessingParameterBand(self.BAND, self.tr("Band"), 1, self.SOURCE))
         self.addParameter(QgsProcessingParameterEnum(
-            self.MODE, self.tr("Pixels retenus"),
-            options=[self.tr("Plage de valeurs"), self.tr("Classes"), self.tr("Expression raster")], defaultValue=0))
-        self.addParameter(QgsProcessingParameterNumber(self.MINIMUM, self.tr("Valeur minimum (plage)"),
+            self.MODE, self.tr("Pixels to keep"),
+            options=[self.tr("Value range"), self.tr("Classes"), self.tr("Raster expression")], defaultValue=0))
+        self.addParameter(QgsProcessingParameterNumber(self.MINIMUM, self.tr("Minimum value (range)"),
                                                        type=number, optional=True))
-        self.addParameter(QgsProcessingParameterNumber(self.MAXIMUM, self.tr("Valeur maximum (plage)"),
+        self.addParameter(QgsProcessingParameterNumber(self.MAXIMUM, self.tr("Maximum value (range)"),
                                                        type=number, optional=True))
         self.addParameter(QgsProcessingParameterString(
-            self.CLASSES, self.tr("Valeurs de classes (ex. 6,7)"), optional=True))
+            self.CLASSES, self.tr("Class values (e.g. 6,7)"), optional=True))
         self.addParameter(QgsProcessingParameterString(
-            self.EXPRESSION, self.tr("Expression raster, pixel gardé si non nul (ex. \"mnt@1\" > 1200)"),
+            self.EXPRESSION, self.tr("Raster expression, pixel kept if non-zero (e.g. \"dem@1\" > 1200)"),
             optional=True))
         self.addParameter(QgsProcessingParameterBoolean(
-            self.FILTER_SOURCE, self.tr("Masquer aussi le raster source hors sélection"), defaultValue=False))
+            self.FILTER_SOURCE, self.tr("Also hide the source raster outside the selection"), defaultValue=False))
         self.add_target_parameters(QgsProcessingParameterDistance(
-            self.BUFFER, self.tr("Tampon"), defaultValue=0.0, parentParameterName=self.SOURCE))
+            self.BUFFER, self.tr("Buffer"), defaultValue=0.0, parentParameterName=self.SOURCE))
         # Sans valeur : réglage CROSS_FILTER.raster_selection_max_pixels (4 000 000 par défaut).
         self.addParameter(advanced(QgsProcessingParameterNumber(
-            self.MAX_PIXELS, self.tr("Pixels lus au maximum (au-delà : rééchantillonnage)"),
+            self.MAX_PIXELS, self.tr("Maximum pixels read (beyond: resampling)"),
             type=QgsProcessingParameterNumber.Type.Integer, optional=True, minValue=10000)))
         self.add_output()
 
@@ -137,7 +129,7 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
         from ...core.domain.api_requests import raster_selection_from_values
         source = self.parameterAsRasterLayer(parameters, self.SOURCE, context)
         if source is None:
-            raise QgsProcessingException(self.tr("Raster source invalide"))
+            raise QgsProcessingException(self.tr("Invalid source raster"))
         try:
             selection = raster_selection_from_values(
                 band=self.parameterAsInt(parameters, self.BAND, context) or 1,
@@ -148,7 +140,7 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
                 expression=self.parameterAsString(parameters, self.EXPRESSION, context))
         except ValueError as exc:
             raise QgsProcessingException(str(exc))
-        feedback.pushInfo(self.tr("Sélection : {0}").format(selection.describe()))
+        feedback.pushInfo(self.tr("Selection: {0}").format(selection.describe()))
         report = operations.cross_filter(
             source, self.parameterAsLayerList(parameters, self.TARGETS, context) or [],
             raster_selection=selection, filter_source=self.parameterAsBoolean(parameters, self.FILTER_SOURCE, context),
@@ -160,24 +152,24 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
     def _log_source(self, report, feedback):
         details = report.details.get("source") or {}
         if details.get("kept_pixels") is not None:
-            feedback.pushInfo(self.tr("{0} pixel(s) retenu(s) sur {1}").format(
+            feedback.pushInfo(self.tr("{0} of {1} pixel(s) kept").format(
                 details["kept_pixels"], details.get("total_pixels", "?")))
 
     def name(self):
         return "cross_filter_from_raster"
 
     def displayName(self):
-        return self.tr("Filtrer des couches de tout type par les pixels d'un raster")
+        return self.tr("Filter layers of any type by the pixels of a raster")
 
     def shortHelpString(self):
         return self.tr(
-            "Retient les pixels d'un raster (plage de valeurs d'une bande, classes d'un raster catégorisé ou "
-            "expression raster), les vectorise à la taille du pixel et filtre les couches cibles par cette zone.\n\n"
-            "Exemples : parcelles contenues dans la zone 1200–1300 m avec une couverture de 50 % ; MNT limité "
-            "aux classes forêt ; points LiDAR des zones de pente < 15 % (pente calculée par « Pente » juste avant "
-            "dans un modèle).\n\n"
-            "Le raster source peut être une sortie de modèle : il est lu sans être modifié. Avec « Masquer aussi "
-            "le raster source » et une source du projet, la source est elle-même filtrée.\n\n") + self.tr(_TARGETS_HELP)
+            "Keeps the pixels of a raster (value range of a band, classes of a categorized raster or "
+            "raster expression), vectorizes them at the pixel size and filters the target layers by this area.\n\n"
+            "Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited "
+            "to the forest classes; LiDAR points of the areas with a slope < 15% (slope computed by \"Slope\" "
+            "just before in a model).\n\n"
+            "The source raster can be a model output: it is read without being modified. With \"Also hide the "
+            "source raster outside the selection\" and a project source, the source itself is filtered.\n\n") + self.targets_help()
 
 
 class CrossFilterFromPointCloudAlgorithm(FilterMateAlgorithm):
@@ -193,16 +185,16 @@ class CrossFilterFromPointCloudAlgorithm(FilterMateAlgorithm):
     def initAlgorithm(self, config=None):
         if QgsProcessingParameterPointCloudLayer is None:
             from qgis.core import QgsProcessingParameterMapLayer
-            self.addParameter(QgsProcessingParameterMapLayer(self.SOURCE, self.tr("Nuage de points source")))
+            self.addParameter(QgsProcessingParameterMapLayer(self.SOURCE, self.tr("Source point cloud")))
         else:
-            self.addParameter(QgsProcessingParameterPointCloudLayer(self.SOURCE, self.tr("Nuage de points source")))
+            self.addParameter(QgsProcessingParameterPointCloudLayer(self.SOURCE, self.tr("Source point cloud")))
         self.add_point_cloud_criteria_parameters()
-        self.add_operator_parameter(self.tr("Combinaison des critères avec le filtre existant de la source"),
+        self.add_operator_parameter(self.tr("Combine the criteria with the existing filter of the source"),
                                     self.SOURCE_OPERATOR)
         self.add_target_parameters()
         # Sans valeur : réglage CROSS_FILTER.point_cloud_footprint_resolution (2 par défaut).
         self.addParameter(advanced(QgsProcessingParameterNumber(
-            self.RESOLUTION, self.tr("Résolution de l'empreinte des points (unités du nuage)"),
+            self.RESOLUTION, self.tr("Point footprint resolution (point cloud units)"),
             type=QgsProcessingParameterNumber.Type.Double, optional=True, minValue=0.1)))
         self.add_output()
 
@@ -210,10 +202,10 @@ class CrossFilterFromPointCloudAlgorithm(FilterMateAlgorithm):
         from ...adapters.public_api import operations
         source = self.parameterAsLayer(parameters, self.SOURCE, context)
         if source is None:
-            raise QgsProcessingException(self.tr("Nuage de points source invalide"))
+            raise QgsProcessingException(self.tr("Invalid source point cloud"))
         criteria = self.point_cloud_criteria(parameters, context)
         if criteria is not None:
-            feedback.pushInfo(self.tr("Critères : {0}").format(criteria.to_subset_string()))
+            feedback.pushInfo(self.tr("Criteria: {0}").format(criteria.to_subset_string()))
         report = operations.cross_filter(
             source, self.parameterAsLayerList(parameters, self.TARGETS, context) or [],
             point_cloud_criteria=criteria,
@@ -222,22 +214,23 @@ class CrossFilterFromPointCloudAlgorithm(FilterMateAlgorithm):
             project=context.project(), feedback=feedback, **self.target_settings(parameters, context))
         details = report.details.get("source") or {}
         if details.get("truncated"):
-            feedback.pushWarning(self.tr("Empreinte calculée sur un nombre de points limité : augmentez la résolution"))
+            feedback.pushWarning(self.tr("Footprint computed from a limited number of points: increase the resolution"))
         return self.finish(report, feedback)
 
     def name(self):
         return "cross_filter_from_point_cloud"
 
     def displayName(self):
-        return self.tr("Filtrer des couches de tout type par les points d'un nuage")
+        return self.tr("Filter layers of any type by the points of a point cloud")
 
     def shortHelpString(self):
         return self.tr(
-            "Applique des critères au nuage source (classes ASPRS, plages Z et intensité, numéro de retour, "
-            "expression), calcule l'empreinte des points retenus et filtre les couches cibles par cette zone.\n\n"
-            "Exemples : bâtiments recoupant des points de classe 6 (couverture ≥ 10 %) ; Disjoint = bâtiments "
-            "absents du nuage ; MNT limité à l'emprise des points eau (classe 9).\n\n"
-            "Sans critère, l'empreinte porte sur les points affichés par le nuage.\n\n") + self.tr(_TARGETS_HELP)
+            "Applies criteria to the source point cloud (ASPRS classes, Z and intensity ranges, return number, "
+            "expression), computes the footprint of the retained points and filters the target layers by this "
+            "area.\n\n"
+            "Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = buildings "
+            "absent from the point cloud; a DEM limited to the extent of the water points (class 9).\n\n"
+            "Without criteria, the footprint covers the points displayed by the point cloud.\n\n") + self.targets_help()
 
 
 class CrossFilterFromGeometryAlgorithm(FilterMateAlgorithm):
@@ -247,9 +240,9 @@ class CrossFilterFromGeometryAlgorithm(FilterMateAlgorithm):
     GEOMETRY = "GEOMETRY"
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterExtent(self.EXTENT, self.tr("Emprise"), optional=True))
+        self.addParameter(QgsProcessingParameterExtent(self.EXTENT, self.tr("Extent"), optional=True))
         self.addParameter(QgsProcessingParameterGeometry(
-            self.GEOMETRY, self.tr("Géométrie (WKT, prioritaire sur l'emprise)"), optional=True))
+            self.GEOMETRY, self.tr("Geometry (WKT, takes precedence over the extent)"), optional=True))
         self.add_target_parameters()
         self.add_output()
 
@@ -264,7 +257,7 @@ class CrossFilterFromGeometryAlgorithm(FilterMateAlgorithm):
             geometry = QgsGeometry.fromRect(self.parameterAsExtent(parameters, self.EXTENT, context))
             crs = self.parameterAsExtentCrs(parameters, self.EXTENT, context)
         if geometry is None or geometry.isEmpty():
-            raise QgsProcessingException(self.tr("Donnez une emprise ou une géométrie"))
+            raise QgsProcessingException(self.tr("Provide an extent or a geometry"))
         if crs is None or not crs.isValid():
             crs = context.project().crs() if context.project() else None
         report = operations.cross_filter_by_geometry(
@@ -276,10 +269,10 @@ class CrossFilterFromGeometryAlgorithm(FilterMateAlgorithm):
         return "cross_filter_from_geometry"
 
     def displayName(self):
-        return self.tr("Filtrer des couches de tout type par une emprise ou une géométrie")
+        return self.tr("Filter layers of any type by an extent or a geometry")
 
     def shortHelpString(self):
         return self.tr(
-            "Filtre les couches cibles par une emprise (couche, canevas, saisie) ou une géométrie WKT, avec les "
-            "mêmes prédicats, tampon et couverture que l'onglet FILTERING. L'opération est inscrite dans "
-            "l'historique de la première couche cible.\n\n") + self.tr(_TARGETS_HELP)
+            "Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the "
+            "same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the "
+            "history of the first target layer.\n\n") + self.targets_help()

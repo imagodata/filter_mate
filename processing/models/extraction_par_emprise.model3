@@ -16,7 +16,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Écrire les couches filtrées"/>
+      <Option name="component_description" type="QString" value="Write the filtered layers"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="280"/>
@@ -37,7 +37,7 @@
             <Option name="outputs_collapsed" type="bool" value="false"/>
             <Option name="parameters_collapsed" type="bool" value="false"/>
           </Option>
-          <Option name="component_description" type="QString" value="Dossier de sortie"/>
+          <Option name="component_description" type="QString" value="Output folder"/>
           <Option name="component_height" type="double" value="30"/>
           <Option name="component_pos_x" type="double" value="820"/>
           <Option name="component_pos_y" type="double" value="280"/>
@@ -95,7 +95,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Filtrer par l'emprise"/>
+      <Option name="component_description" type="QString" value="Filter by the extent"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="120"/>
@@ -157,12 +157,12 @@
   <Option name="groupBoxes"/>
   <Option name="help" type="Map">
     <Option name="ALG_CREATOR" type="QString" value="FilterMate"/>
-    <Option name="ALG_DESC" type="QString" value="Filtre les couches choisies (BD TOPO, MNT, LiDAR...) par les entités d'une couche d'emprise (communes, zone d'étude), puis écrit un fichier par couche : GPKG pour les vecteurs, COG pour les rasters, LAZ pour les nuages.&#xa;&#xa;En traitement par lot, itérez sur les entités de l'emprise (bouton d'itération) pour produire un paquet par commune."/>
+    <Option name="ALG_DESC" type="QString" value="Filters the chosen layers (BD TOPO, DEM, LiDAR...) by the features of an extent layer (communes, study area), then writes one file per layer: GPKG for vectors, COG for rasters, LAZ for point clouds.&#xa;&#xa;In batch mode, iterate over the features of the extent layer (iteration button) to produce one package per commune."/>
     <Option name="ALG_VERSION" type="QString" value="5.0"/>
   </Option>
   <Option name="internal_version" type="QString" value="Version2"/>
   <Option name="modelVariables"/>
-  <Option name="model_group" type="QString" value="Modèles FilterMate"/>
+  <Option name="model_group" type="QString" value="FilterMate models"/>
   <Option name="model_name" type="QString" value="extraction_par_emprise"/>
   <Option name="outputGroup" type="QString" value=""/>
   <Option name="outputOrder"/>
@@ -170,7 +170,7 @@
     <Option name="couches" type="Map">
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Couches à extraire"/>
+      <Option name="description" type="QString" value="Layers to extract"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="layer_type" type="int" value="-2"/>
@@ -183,7 +183,7 @@
       <Option name="create_by_default" type="bool" value="true"/>
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Dossier de sortie"/>
+      <Option name="description" type="QString" value="Output folder"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata" type="Map">
@@ -201,7 +201,7 @@
       </Option>
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Couche d'emprise"/>
+      <Option name="description" type="QString" value="Extent layer"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata"/>
@@ -211,7 +211,7 @@
     <Option name="selection_seule" type="Map">
       <Option name="default" type="bool" value="true"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Entités sélectionnées uniquement"/>
+      <Option name="description" type="QString" value="Selected features only"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata"/>
@@ -222,7 +222,7 @@
       <Option name="data_type" type="int" value="1"/>
       <Option name="default" type="double" value="0"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Tampon autour de l'emprise"/>
+      <Option name="description" type="QString" value="Buffer around the extent"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="max" type="double" value="1.7976931348623157e+308"/>
@@ -246,7 +246,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Couches à extraire"/>
+      <Option name="component_description" type="QString" value="Layers to extract"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="260"/>
@@ -267,7 +267,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Couche d'emprise"/>
+      <Option name="component_description" type="QString" value="Extent layer"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="80"/>
@@ -288,7 +288,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Entités sélectionnées uniquement"/>
+      <Option name="component_description" type="QString" value="Selected features only"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="170"/>
@@ -309,7 +309,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Tampon autour de l'emprise"/>
+      <Option name="component_description" type="QString" value="Buffer around the extent"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="350"/>

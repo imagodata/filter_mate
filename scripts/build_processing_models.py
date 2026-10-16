@@ -51,8 +51,25 @@ if registry.providerById('filtermate') is None:
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(HERE), 'processing', 'models')
 os.makedirs(OUT, exist_ok=True)
-GROUP = "Modèles FilterMate"
+GROUP = "FilterMate models"
 DOUBLE = QgsProcessingParameterNumber.Type.Double
+
+
+# QGIS derives the name of a model's output parameter from its (displayed) description. The labels are in English
+# but docs/AUTOMATION.md and qgis_process scripts address the French name, so it is pinned after writing.
+STABLE_PARAMETER_NAMES = {'output_folder': 'dossier_de_sortie'}
+
+
+def keep_parameter_names(path):
+    """Rename the generated output parameters back to their historical names in the written .model3."""
+    with open(path, encoding='utf-8') as handle:
+        text = handle.read()
+    for generated, stable in STABLE_PARAMETER_NAMES.items():
+        if f'"{generated}"' not in text:
+            print(f"WARNING: no '{generated}' parameter in {path}; check the output parameter name", flush=True)
+        text = text.replace(f'"{generated}"', f'"{stable}"')
+    with open(path, 'w', encoding='utf-8') as handle:
+        handle.write(text)
 
 
 def static(value):
@@ -111,6 +128,7 @@ class Builder:
         path = os.path.join(OUT, f"{self.model.name()}.model3")
         if not self.model.toFile(path):
             raise RuntimeError(f"could not write {path}")
+        keep_parameter_names(path)
         ok, errors = True, []
         if hasattr(self.model, 'validate'):
             result = self.model.validate()
@@ -126,97 +144,100 @@ def any_layers(name, description, layer_type=QgsProcessing.SourceType.TypeMapLay
 # 1. Delivery package for an area: area -> any layers -> files ---------------------------------
 def delivery_package():
     b = Builder(
-        'extraction_par_emprise', "Extraction de données par emprise (vecteur, raster, nuage)",
-        "Filtre les couches choisies (BD TOPO, MNT, LiDAR...) par les entités d'une couche d'emprise "
-        "(communes, zone d'étude), puis écrit un fichier par couche : GPKG pour les vecteurs, COG pour "
-        "les rasters, LAZ pour les nuages.\n\nEn traitement par lot, itérez sur les entités de l'emprise "
-        "(bouton d'itération) pour produire un paquet par commune.")
-    area = b.add_input(QgsProcessingParameterVectorLayer('emprise', "Couche d'emprise",
+        'extraction_par_emprise', "Extract data by extent (vector, raster, point cloud)",
+        "Filters the chosen layers (BD TOPO, DEM, LiDAR...) by the features of an extent layer "
+        "(communes, study area), then writes one file per layer: GPKG for vectors, COG for "
+        "rasters, LAZ for point clouds.\n\n"
+        "In batch mode, iterate over the features of the extent layer (iteration button) to "
+        "produce one package per commune.")
+    area = b.add_input(QgsProcessingParameterVectorLayer('emprise', "Extent layer",
                                                           [QgsProcessing.SourceType.TypeVectorPolygon]))
-    selected = b.add_input(QgsProcessingParameterBoolean('selection_seule', "Entités sélectionnées uniquement",
+    selected = b.add_input(QgsProcessingParameterBoolean('selection_seule', "Selected features only",
                                                          defaultValue=True))
-    layers = b.add_input(any_layers('couches', "Couches à extraire"))
-    buffer = b.add_input(QgsProcessingParameterNumber('tampon', "Tampon autour de l'emprise", type=DOUBLE,
+    layers = b.add_input(any_layers('couches', "Layers to extract"))
+    buffer = b.add_input(QgsProcessingParameterNumber('tampon', "Buffer around the extent", type=DOUBLE,
                                                       defaultValue=0.0))
-    b.add_child('filtre', 'filtermate:cross_filter', "Filtrer par l'emprise", {
+    b.add_child('filtre', 'filtermate:cross_filter', "Filter by the extent", {
         'SOURCE': model_input(area), 'SELECTED_ONLY': model_input(selected), 'TARGETS': model_input(layers),
         'PREDICATES': static([0]), 'BUFFER': model_input(buffer), 'COVERAGE': static(0.0), 'OPERATOR': static(0)})
-    b.add_child('export', 'filtermate:export_filtered_layers', "Écrire les couches filtrées", {
+    b.add_child('export', 'filtermate:export_filtered_layers', "Write the filtered layers", {
         'LAYERS': child_output('filtre', 'OUTPUT'), 'VECTOR_FORMAT': static(0), 'RASTER_FORMAT': static(0),
-        'POINT_CLOUD_FORMAT': static(0)}, outputs={'OUTPUT_FOLDER': ('dossier', "Dossier de sortie")})
+        'POINT_CLOUD_FORMAT': static(0)}, outputs={'OUTPUT_FOLDER': ('dossier', "Output folder")})
     return b.save()
 
 
 # 2. High vegetation near power lines: classes -> buffer of the lines -> COPC --------------------
 def vegetation_near_lines():
     b = Builder(
-        'vegetation_pres_des_lignes', "Végétation haute près des lignes (LiDAR)",
-        "Garde les points de végétation (classes ASPRS 4 et 5 par défaut) des nuages choisis, limite les "
-        "nuages au couloir autour des lignes (tampon) et écrit les points restants en COPC. Points de départ "
-        "d'un contrôle d'élagage : lignes électriques, voies ferrées, routes.")
-    lines = b.add_input(QgsProcessingParameterVectorLayer('lignes', "Lignes (réseau)",
+        'vegetation_pres_des_lignes', "Tall vegetation near lines (LiDAR)",
+        "Keeps the vegetation points (ASPRS classes 4 and 5 by default) of the chosen point "
+        "clouds, limits the clouds to the corridor around the lines (buffer) and writes the "
+        "remaining points as COPC. Starting points for a pruning check: power lines, railways, "
+        "roads.")
+    lines = b.add_input(QgsProcessingParameterVectorLayer('lignes', "Lines (network)",
                                                            [QgsProcessing.SourceType.TypeVectorLine]))
-    clouds = b.add_input(any_layers('nuages', "Nuages de points", QgsProcessing.SourceType.TypeMapLayer))
-    classes = b.add_input(QgsProcessingParameterString('classes', "Classes de végétation", defaultValue="4,5"))
-    corridor = b.add_input(QgsProcessingParameterNumber('couloir', "Demi-largeur du couloir", type=DOUBLE,
+    clouds = b.add_input(any_layers('nuages', "Point clouds", QgsProcessing.SourceType.TypeMapLayer))
+    classes = b.add_input(QgsProcessingParameterString('classes', "Vegetation classes", defaultValue="4,5"))
+    corridor = b.add_input(QgsProcessingParameterNumber('couloir', "Corridor half-width", type=DOUBLE,
                                                         defaultValue=10.0, minValue=0.0))
-    b.add_child('classes', 'filtermate:filter_point_cloud', "Garder la végétation", {
+    b.add_child('classes', 'filtermate:filter_point_cloud', "Keep the vegetation", {
         'LAYERS': model_input(clouds), 'CLASSES': model_input(classes), 'OPERATOR': static(0)})
-    b.add_child('couloir', 'filtermate:cross_filter', "Limiter au couloir des lignes", {
+    b.add_child('couloir', 'filtermate:cross_filter', "Limit to the line corridor", {
         'SOURCE': model_input(lines), 'SELECTED_ONLY': static(False), 'TARGETS': child_output('classes', 'OUTPUT'),
         'PREDICATES': static([0]), 'BUFFER': model_input(corridor), 'COVERAGE': static(0.0), 'OPERATOR': static(0)})
-    b.add_child('export', 'filtermate:export_filtered_layers', "Écrire les points en COPC", {
+    b.add_child('export', 'filtermate:export_filtered_layers', "Write the points as COPC", {
         'LAYERS': child_output('couloir', 'OUTPUT'), 'VECTOR_FORMAT': static(0), 'RASTER_FORMAT': static(0),
-        'POINT_CLOUD_FORMAT': static(1)}, outputs={'OUTPUT_FOLDER': ('dossier', "Dossier de sortie")})
+        'POINT_CLOUD_FORMAT': static(1)}, outputs={'OUTPUT_FOLDER': ('dossier', "Output folder")})
     return b.save()
 
 
 # 3. Gentle slopes: DTM -> slope -> range -> parcels with a minimum coverage ----------------------
 def gentle_slopes():
     b = Builder(
-        'parcelles_en_pente_faible', "Parcelles en pente faible (MNT)",
-        "Calcule la pente du MNT (native:slope), retient les pixels sous la pente maximale et garde les "
-        "couches cibles (parcelles, bâtiments...) dont au moins la part choisie de la surface est dans cette "
-        "zone, puis écrit le résultat en GPKG.")
-    dtm = b.add_input(QgsProcessingParameterRasterLayer('mnt', "MNT"))
-    slope_max = b.add_input(QgsProcessingParameterNumber('pente_max', "Pente maximale (degrés)", type=DOUBLE,
+        'parcelles_en_pente_faible', "Parcels on gentle slopes (DTM)",
+        "Computes the slope of the DTM (native:slope), keeps the pixels under the maximum slope "
+        "and keeps the target layers (parcels, buildings...) of which at least the chosen share "
+        "of the area is in this zone, then writes the result as GPKG.")
+    dtm = b.add_input(QgsProcessingParameterRasterLayer('mnt', "DTM"))
+    slope_max = b.add_input(QgsProcessingParameterNumber('pente_max', "Maximum slope (degrees)", type=DOUBLE,
                                                          defaultValue=15.0, minValue=0.0, maxValue=90.0))
-    targets = b.add_input(any_layers('cibles', "Couches à filtrer (parcelles...)",
+    targets = b.add_input(any_layers('cibles', "Layers to filter (parcels...)",
                                      QgsProcessing.SourceType.TypeVectorPolygon))
-    coverage = b.add_input(QgsProcessingParameterNumber('couverture', "Part minimale en pente faible (%)",
+    coverage = b.add_input(QgsProcessingParameterNumber('couverture', "Minimum share on a gentle slope (%)",
                                                         type=DOUBLE, defaultValue=50.0, minValue=0.0,
                                                         maxValue=100.0))
-    b.add_child('pente', 'native:slope', "Pente du MNT", {
+    b.add_child('pente', 'native:slope', "DTM slope", {
         'INPUT': model_input(dtm), 'Z_FACTOR': static(1.0),
         'OUTPUT': static(QgsProcessing.TEMPORARY_OUTPUT)})
-    b.add_child('zone', 'filtermate:cross_filter_from_raster', "Parcelles dans la zone de pente faible", {
+    b.add_child('zone', 'filtermate:cross_filter_from_raster', "Parcels in the gentle slope zone", {
         'SOURCE': child_output('pente', 'OUTPUT'), 'BAND': static(1), 'MODE': static(0),
         'MINIMUM': static(0.0), 'MAXIMUM': model_input(slope_max), 'FILTER_SOURCE': static(False),
         'TARGETS': model_input(targets), 'PREDICATES': static([0]), 'BUFFER': static(0.0),
         'COVERAGE': model_input(coverage), 'OPERATOR': static(0)})
-    b.add_child('export', 'filtermate:export_filtered_layers', "Écrire les couches filtrées", {
+    b.add_child('export', 'filtermate:export_filtered_layers', "Write the filtered layers", {
         'LAYERS': child_output('zone', 'OUTPUT'), 'VECTOR_FORMAT': static(0), 'RASTER_FORMAT': static(0),
-        'POINT_CLOUD_FORMAT': static(0)}, outputs={'OUTPUT_FOLDER': ('dossier', "Dossier de sortie")})
+        'POINT_CLOUD_FORMAT': static(0)}, outputs={'OUTPUT_FOLDER': ('dossier', "Output folder")})
     return b.save()
 
 
 # 4. Buildings missing from the point cloud: class 6 footprint, Disjoint ---------------------------
 def buildings_missing_from_lidar():
     b = Builder(
-        'batiments_absents_du_lidar', "Bâtiments absents du nuage LiDAR (contrôle)",
-        "Calcule l'empreinte des points de classe bâtiment (6) du nuage et garde les bâtiments qui ne la "
-        "touchent pas (prédicat Disjoint) : bâtiments démolis, non relevés ou mal classés. Le nuage source "
-        "reste filtré sur la classe choisie (annulable depuis FilterMate).")
-    cloud = b.add_input(QgsProcessingParameterPointCloudLayer('nuage', "Nuage de points"))
-    classes = b.add_input(QgsProcessingParameterString('classes', "Classes bâtiment", defaultValue="6"))
-    buildings = b.add_input(any_layers('batiments', "Bâtiments", QgsProcessing.SourceType.TypeVectorPolygon))
-    b.add_child('absents', 'filtermate:cross_filter_from_point_cloud', "Bâtiments sans point de la classe", {
+        'batiments_absents_du_lidar', "Buildings missing from the LiDAR point cloud (check)",
+        "Computes the footprint of the building class (6) points of the point cloud and keeps the "
+        "buildings that do not touch it (Disjoint predicate): demolished, unsurveyed or "
+        "misclassified buildings. The source cloud stays filtered on the chosen class (can be "
+        "undone from FilterMate).")
+    cloud = b.add_input(QgsProcessingParameterPointCloudLayer('nuage', "Point cloud"))
+    classes = b.add_input(QgsProcessingParameterString('classes', "Building classes", defaultValue="6"))
+    buildings = b.add_input(any_layers('batiments', "Buildings", QgsProcessing.SourceType.TypeVectorPolygon))
+    b.add_child('absents', 'filtermate:cross_filter_from_point_cloud', "Buildings without a point of the class", {
         'SOURCE': model_input(cloud), 'CLASSES': model_input(classes), 'SOURCE_OPERATOR': static(0),
         'TARGETS': model_input(buildings), 'PREDICATES': static([2]), 'BUFFER': static(0.0),
         'COVERAGE': static(0.0), 'OPERATOR': static(0), 'RESOLUTION': static(2.0)})
-    b.add_child('export', 'filtermate:export_filtered_layers', "Écrire les bâtiments retenus", {
+    b.add_child('export', 'filtermate:export_filtered_layers', "Write the kept buildings", {
         'LAYERS': child_output('absents', 'OUTPUT'), 'VECTOR_FORMAT': static(0), 'RASTER_FORMAT': static(0),
-        'POINT_CLOUD_FORMAT': static(0)}, outputs={'OUTPUT_FOLDER': ('dossier', "Dossier de sortie")})
+        'POINT_CLOUD_FORMAT': static(0)}, outputs={'OUTPUT_FOLDER': ('dossier', "Output folder")})
     return b.save()
 
 

@@ -3142,6 +3142,493 @@ Continuer ?</translation>
     </message>
 </context>
 <context>
+    <name>Processing</name>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="62"/>
+        <source>Layers to filter</source>
+        <translation>Couches à filtrer</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="69"/>
+        <source>Filter expression</source>
+        <translation>Expression de filtre</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="88"/>
+        <source>No layer selected.</source>
+        <translation>Aucune couche sélectionnée.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="103"/>
+        <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
+        <translation>Expression invalide pour la couche '{0}', ignorée.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="125"/>
+        <source>Filter several layers (batch)</source>
+        <translation>Filtrer plusieurs couches (batch)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="129"/>
+        <location filename="../processing/algorithms/common.py" line="78"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="137"/>
+        <source>Applies the same filter expression to several vector layers in a single run.</source>
+        <translation>Applique la même expression de filtre à plusieurs couches vectorielles en une seule exécution.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="91"/>
+        <source>Layers to filter (vector, raster, point cloud)</source>
+        <translation>Couches à filtrer (vecteur, raster, nuage de points)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="94"/>
+        <source>Geometric predicates</source>
+        <translation>Prédicats géométriques</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="97"/>
+        <source>Buffer (source units)</source>
+        <translation>Tampon (unités de la source)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="100"/>
+        <source>Minimum coverage of the target polygons (%)</source>
+        <translation>Couverture minimale des polygones cibles (%)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="102"/>
+        <source>Combine with the existing filter of the targets</source>
+        <translation>Combinaison avec le filtre existant des cibles</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="109"/>
+        <source>Vector: subset of the features. Raster: pixels outside the area set to NoData (clipped VRT). Point cloud: points outside the area removed (derived COPC file, PDAL). Disjoint keeps the outside.
+
+Only project layers are filtered. The filter can be undone from FilterMate and the original sources are always recorded in the project. The &quot;Processed layers&quot; output can be chained in a model, for example into &quot;Export filtered layers&quot;.</source>
+        <translation>Vecteur : sous-ensemble des entités. Raster : pixels hors zone en NoData (VRT découpé). Nuage de points : points hors zone retirés (fichier COPC dérivé, PDAL). Disjoint garde l'extérieur.
+
+Seules les couches du projet sont filtrées. Le filtre est annulable depuis FilterMate et les sources d'origine sont toujours écrites dans le projet. La sortie « Couches traitées » s'enchaîne dans un modèle, par exemple vers « Exporter les couches filtrées ».</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="118"/>
+        <source>Replace</source>
+        <translation>Remplacer</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="124"/>
+        <source>ASPRS classes to keep (e.g. 3,4,5; empty = all)</source>
+        <translation>Classes ASPRS à garder (ex. 3,4,5 ; vide = toutes)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="125"/>
+        <source>Minimum Z</source>
+        <translation>Z minimum</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="125"/>
+        <source>Maximum Z</source>
+        <translation>Z maximum</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="126"/>
+        <source>Minimum intensity</source>
+        <translation>Intensité minimum</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="127"/>
+        <source>Maximum intensity</source>
+        <translation>Intensité maximum</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="130"/>
+        <source>Return number (empty = all)</source>
+        <translation>Numéro de retour (vide = tous)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="133"/>
+        <source>Point cloud expression (e.g. ReturnNumber = NumberOfReturns)</source>
+        <translation>Expression nuage de points (ex. ReturnNumber = NumberOfReturns)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="137"/>
+        <source>Processed layers</source>
+        <translation>Couches traitées</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="185"/>
+        <source>Layer skipped: {0} ({1})</source>
+        <translation>Couche ignorée : {0} ({1})</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="188"/>
+        <source>filtered</source>
+        <translation>filtrée</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="194"/>
+        <source> ({0:.1f} s)</source>
+        <translation> ({0:.1f} s)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="197"/>
+        <source>{0}: {1}{2}</source>
+        <translation>{0} : {1}{2}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="199"/>
+        <source>{0}: failed — {1}</source>
+        <translation>{0} : échec — {1}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="52"/>
+        <source>Source layer</source>
+        <translation>Couche source</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="54"/>
+        <source>Selected features only</source>
+        <translation>Entités sélectionnées uniquement</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="56"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="119"/>
+        <source>Buffer</source>
+        <translation>Tampon</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="63"/>
+        <source>Invalid source layer</source>
+        <translation>Couche source invalide</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="66"/>
+        <source>{0} source feature(s)</source>
+        <translation>{0} entité(s) source</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="76"/>
+        <source>Filter layers of any type by a vector layer</source>
+        <translation>Filtrer des couches de tout type par une couche vecteur</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="79"/>
+        <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
+
+</source>
+        <translation>Filtre sur place des couches vecteur, raster et nuage de points par les entités d'une couche vecteur, avec les prédicats géométriques, un tampon et une couverture minimale.
+
+</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="102"/>
+        <source>Source raster</source>
+        <translation>Raster source</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="103"/>
+        <source>Band</source>
+        <translation>Bande</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="105"/>
+        <source>Pixels to keep</source>
+        <translation>Pixels retenus</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <source>Value range</source>
+        <translation>Plage de valeurs</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <source>Classes</source>
+        <translation>Classes</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <source>Raster expression</source>
+        <translation>Expression raster</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="107"/>
+        <source>Minimum value (range)</source>
+        <translation>Valeur minimum (plage)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Maximum value (range)</source>
+        <translation>Valeur maximum (plage)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="112"/>
+        <source>Class values (e.g. 6,7)</source>
+        <translation>Valeurs de classes (ex. 6,7)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="114"/>
+        <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
+        <translation>Expression raster, pixel gardé si non nul (ex. &quot;mnt@1&quot; &gt; 1200)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="117"/>
+        <source>Also hide the source raster outside the selection</source>
+        <translation>Masquer aussi le raster source hors sélection</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="122"/>
+        <source>Maximum pixels read (beyond: resampling)</source>
+        <translation>Pixels lus au maximum (au-delà : rééchantillonnage)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="131"/>
+        <source>Invalid source raster</source>
+        <translation>Raster source invalide</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="142"/>
+        <source>Selection: {0}</source>
+        <translation>Sélection : {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="154"/>
+        <source>{0} of {1} pixel(s) kept</source>
+        <translation>{0} pixel(s) retenu(s) sur {1}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="161"/>
+        <source>Filter layers of any type by the pixels of a raster</source>
+        <translation>Filtrer des couches de tout type par les pixels d'un raster</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="164"/>
+        <source>Keeps the pixels of a raster (value range of a band, classes of a categorized raster or raster expression), vectorizes them at the pixel size and filters the target layers by this area.
+
+Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited to the forest classes; LiDAR points of the areas with a slope &lt; 15% (slope computed by &quot;Slope&quot; just before in a model).
+
+The source raster can be a model output: it is read without being modified. With &quot;Also hide the source raster outside the selection&quot; and a project source, the source itself is filtered.
+
+</source>
+        <translation>Retient les pixels d'un raster (plage de valeurs d'une bande, classes d'un raster catégorisé ou expression raster), les vectorise à la taille du pixel et filtre les couches cibles par cette zone.
+
+Exemples : parcelles contenues dans la zone 1200–1300 m avec une couverture de 50 % ; MNT limité aux classes forêt ; points LiDAR des zones de pente &lt; 15 % (pente calculée par « Pente » juste avant dans un modèle).
+
+Le raster source peut être une sortie de modèle : il est lu sans être modifié. Avec « Masquer aussi le raster source » et une source du projet, la source est elle-même filtrée.
+
+</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="187"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="189"/>
+        <source>Source point cloud</source>
+        <translation>Nuage de points source</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="191"/>
+        <source>Combine the criteria with the existing filter of the source</source>
+        <translation>Combinaison des critères avec le filtre existant de la source</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="196"/>
+        <source>Point footprint resolution (point cloud units)</source>
+        <translation>Résolution de l'empreinte des points (unités du nuage)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="204"/>
+        <source>Invalid source point cloud</source>
+        <translation>Nuage de points source invalide</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="207"/>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
+        <source>Criteria: {0}</source>
+        <translation>Critères : {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="216"/>
+        <source>Footprint computed from a limited number of points: increase the resolution</source>
+        <translation>Empreinte calculée sur un nombre de points limité : augmentez la résolution</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="223"/>
+        <source>Filter layers of any type by the points of a point cloud</source>
+        <translation>Filtrer des couches de tout type par les points d'un nuage</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="226"/>
+        <source>Applies criteria to the source point cloud (ASPRS classes, Z and intensity ranges, return number, expression), computes the footprint of the retained points and filters the target layers by this area.
+
+Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = buildings absent from the point cloud; a DEM limited to the extent of the water points (class 9).
+
+Without criteria, the footprint covers the points displayed by the point cloud.
+
+</source>
+        <translation>Applique des critères au nuage source (classes ASPRS, plages Z et intensité, numéro de retour, expression), calcule l'empreinte des points retenus et filtre les couches cibles par cette zone.
+
+Exemples : bâtiments recoupant des points de classe 6 (couverture ≥ 10 %) ; Disjoint = bâtiments absents du nuage ; MNT limité à l'emprise des points eau (classe 9).
+
+Sans critère, l'empreinte porte sur les points affichés par le nuage.
+
+</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="242"/>
+        <source>Extent</source>
+        <translation>Emprise</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="244"/>
+        <source>Geometry (WKT, takes precedence over the extent)</source>
+        <translation>Géométrie (WKT, prioritaire sur l'emprise)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="259"/>
+        <source>Provide an extent or a geometry</source>
+        <translation>Donnez une emprise ou une géométrie</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="271"/>
+        <source>Filter layers of any type by an extent or a geometry</source>
+        <translation>Filtrer des couches de tout type par une emprise ou une géométrie</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="274"/>
+        <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
+
+</source>
+        <translation>Filtre les couches cibles par une emprise (couche, canevas, saisie) ou une géométrie WKT, avec les mêmes prédicats, tampon et couverture que l'onglet FILTERING. L'opération est inscrite dans l'historique de la première couche cible.
+
+</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="43"/>
+        <source>Point clouds</source>
+        <translation>Nuages de points</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="45"/>
+        <source>Combine with the existing filter of each point cloud</source>
+        <translation>Combinaison avec le filtre existant de chaque nuage</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="52"/>
+        <source>Provide classes, a range, a return number or an expression</source>
+        <translation>Donnez des classes, une plage, un numéro de retour ou une expression</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="64"/>
+        <source>Filter point clouds by criteria</source>
+        <translation>Filtrer des nuages de points par critères</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
+        <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
+        <translation>Applique les mêmes critères (classes ASPRS, plages Z et intensité, numéro de retour, expression) à un ou plusieurs nuages de points du projet, par exemple toutes les dalles LiDAR HD d'un chantier. Le filtre est l'expression du nuage (sous-ensemble) : il est immédiat et annulable depuis FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="80"/>
+        <source>Layers to clear</source>
+        <translation>Couches à défiltrer</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="87"/>
+        <source>cleared</source>
+        <translation>défiltrée</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="93"/>
+        <source>Clear the filters of layers of any type</source>
+        <translation>Défiltrer des couches de tout type</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="96"/>
+        <source>Removes the filter from the chosen layers: subset cleared for vectors and point clouds, original source restored for clipped rasters and point clouds. Useful at the start of a model to start again from the complete data. Can be undone from FilterMate.</source>
+        <translation>Retire le filtre des couches choisies : sous-ensemble vidé pour les vecteurs et les nuages, source d'origine rétablie pour les rasters et nuages découpés. Utile en tête d'un modèle pour repartir des données complètes. Annulable depuis FilterMate.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="108"/>
+        <source>Favorite name or identifier</source>
+        <translation>Nom ou identifiant du favori</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="115"/>
+        <source>Provide the name of the favorite</source>
+        <translation>Donnez le nom du favori</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="119"/>
+        <source>Favorite: {0}</source>
+        <translation>Favori : {0}</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="126"/>
+        <source>Apply a FilterMate favorite</source>
+        <translation>Appliquer un favori FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="129"/>
+        <source>Replays a favorite saved in FilterMate (by name or identifier): filters of the vector and point cloud layers, clips of the rasters and point clouds. Layers are found by signature, then identifier, then name. Without the dock (qgis_process), the favorites saved in the project are used.</source>
+        <translation>Rejoue un favori enregistré dans FilterMate (par son nom ou son identifiant) : filtres des couches vecteur et nuage, découpes des rasters et nuages. Les couches sont retrouvées par signature, identifiant puis nom. Sans le dock (qgis_process), les favoris sauvegardés dans le projet sont utilisés.</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="148"/>
+        <source>Layers to export</source>
+        <translation>Couches à exporter</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="150"/>
+        <source>Vector format</source>
+        <translation>Format vecteur</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="152"/>
+        <source>Raster format</source>
+        <translation>Format raster</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="154"/>
+        <source>Point cloud format</source>
+        <translation>Format nuage de points</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="156"/>
+        <source>Output CRS (empty = the layer&apos;s CRS)</source>
+        <translation>SCR de sortie (vide = celui de la couche)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="158"/>
+        <source>Output folder</source>
+        <translation>Dossier de sortie</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="159"/>
+        <source>Files written</source>
+        <translation>Fichiers écrits</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="179"/>
+        <source>exported</source>
+        <translation>exportée</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="188"/>
+        <source>Export filtered layers (vector, raster, point cloud)</source>
+        <translation>Exporter les couches filtrées (vecteur, raster, nuage)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="191"/>
+        <source>Writes each layer as it is filtered, one file per layer named after the layer: subset features for vectors, retained pixels (NoData elsewhere) as GeoTIFF or COG for rasters, retained points as LAZ, COPC, LAS, GPKG or CSV for point clouds.
+
+In a model, connect &quot;Processed layers&quot; of a FilterMate filter to &quot;Layers to export&quot;. COPC requires PDAL (shipped with QGIS); without PDAL, a LAZ is written instead.</source>
+        <translation>Écrit chaque couche telle qu'elle est filtrée, un fichier par couche nommé d'après la couche : entités du sous-ensemble pour les vecteurs, pixels retenus (NoData ailleurs) en GeoTIFF ou COG pour les rasters, points retenus en LAZ, COPC, LAS, GPKG ou CSV pour les nuages.
+
+Dans un modèle, branchez « Couches traitées » d'un filtre FilterMate sur « Couches à exporter ». COPC demande PDAL (livré avec QGIS) ; sans PDAL, un LAZ est écrit à la place.</translation>
+    </message>
+</context>
+<context>
     <name>PublishFavoritesDialog</name>
     <message>
         <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="119"/>
