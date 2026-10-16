@@ -11,7 +11,7 @@ Date: January 2026
 import os
 import logging
 import weakref
-from typing import Dict, Callable, Optional, Any
+from typing import Dict, Callable, List, Optional, Any
 from qgis.PyQt.QtCore import QTimer
 
 try:
@@ -104,7 +104,8 @@ class LayerTaskCompletionHandler:
         self,
         result_project_layers: Dict,
         task_name: str,
-        loading_new_project: bool = False
+        loading_new_project: bool = False,
+        changed_layer_ids: Optional[List[str]] = None
     ) -> None:
         """
         Handle completion of layer management task.
@@ -113,6 +114,9 @@ class LayerTaskCompletionHandler:
             result_project_layers: Updated PROJECT_LAYERS dictionary
             task_name: Type of task ('add_layers', 'remove_layers', 'remove_all_layers')
             loading_new_project: True if loading a new project
+            changed_layer_ids: Ids the task registered (add_layers) or unregistered
+                (remove_layers). When given, the result is merged into the current
+                PROJECT_LAYERS instead of replacing it (see _merge_task_result).
         """
         logger.info(f"Layer task completed: {task_name}, layers={len(result_project_layers) if result_project_layers else 0}")
 
@@ -122,7 +126,7 @@ class LayerTaskCompletionHandler:
             return
 
         try:
-            self._apply_task_result(result_project_layers, task_name)
+            self._apply_task_result(result_project_layers, task_name, changed_layer_ids)
         finally:
             # Whatever failed above, the add_layers task is over: release its pending
             # counter, or every layer added later waits in the queue for good.
@@ -135,8 +139,46 @@ class LayerTaskCompletionHandler:
                     layer_total = 0
                 perf_mark_end("project_open", f"{layer_total} layers registered")
 
-    def _apply_task_result(self, result_project_layers: Dict, task_name: str) -> None:
+    def _merge_task_result(self, result_project_layers: Dict, task_name: str, changed_layer_ids: List[str]) -> Dict:
+        """PROJECT_LAYERS after the task: its result, minus the layers unregistered since it
+        started, plus the layers registered since it started.
+
+        Layer tasks run concurrently and each one returns a whole dict built from the
+        PROJECT_LAYERS it started with: a remove_layers working on its copy dropped a
+        layer registered meanwhile by an add_layers, and an add_layers brought back a
+        layer unregistered meanwhile (a raster kind turned off while a point cloud kind
+        is turned on). Without such an overlap the result is returned unchanged.
+        """
+        current = dict(self._get_project_layers() or {})
+        changed = set(changed_layer_ids)
+        if task_name == 'add_layers':
+            merged = {key: value for key, value in result_project_layers.items()
+                      if key in current or key in changed}
+        else:
+            merged = {key: value for key, value in result_project_layers.items()
+                      if key in current and key not in changed}
+        for key, value in current.items():
+            if key not in result_project_layers and not (task_name == 'remove_layers' and key in changed):
+                merged[key] = value
+        return merged
+
+    def _apply_task_result(
+        self,
+        result_project_layers: Dict,
+        task_name: str,
+        changed_layer_ids: Optional[List[str]]
+    ) -> None:
         """Register the task result, clean up removed layers and refresh the panel."""
+        removed_layer_ids = None
+        if changed_layer_ids is not None and task_name in ('add_layers', 'remove_layers'):
+            if task_name == 'remove_layers':
+                registered = set(self._get_project_layers() or {})
+                dockwidget = self._get_dockwidget()
+                if dockwidget is not None:
+                    registered.update(getattr(dockwidget, 'PROJECT_LAYERS', None) or {})
+                removed_layer_ids = [layer_id for layer_id in changed_layer_ids if layer_id in registered]
+            result_project_layers = self._merge_task_result(result_project_layers, task_name, changed_layer_ids)
+
         # Update PROJECT_LAYERS
         self._set_project_layers(result_project_layers)
         project = self._get_project()
@@ -162,7 +204,7 @@ class LayerTaskCompletionHandler:
                 if task_name == 'add_layers':
                     self._handle_add_layers(result_project_layers, dockwidget)
                 else:
-                    self._handle_remove_layers(result_project_layers, dockwidget, cur, conn)
+                    self._handle_remove_layers(result_project_layers, dockwidget, cur, conn, removed_layer_ids)
 
                 self._save_project_variables()
                 dockwidget.get_project_layers_from_app(result_project_layers, project)
@@ -235,7 +277,8 @@ class LayerTaskCompletionHandler:
         result_project_layers: Dict,
         dockwidget: Any,
         cursor: Any,
-        connection: Any
+        connection: Any,
+        removed_layer_ids: Optional[List[str]] = None
     ) -> None:
         """
         Handle layer removals.
@@ -248,12 +291,15 @@ class LayerTaskCompletionHandler:
             dockwidget: Dockwidget instance
             cursor: Database cursor
             connection: Database connection
+            removed_layer_ids: Layers unregistered by the task; when None, the
+                registered layers missing from the result
         """
         history_manager = self._get_history_manager()
         project_uuid = self._get_uuid()
 
         dock_layer_keys = list(dockwidget.PROJECT_LAYERS.keys())
-        removed_layer_ids = [key for key in dock_layer_keys if key not in result_project_layers]
+        if removed_layer_ids is None:
+            removed_layer_ids = [key for key in dock_layer_keys if key not in result_project_layers]
 
         for layer_key in removed_layer_ids:
             try:

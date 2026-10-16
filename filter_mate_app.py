@@ -1382,9 +1382,11 @@ class FilterMateApp:
             self.appTasks[task_name].begun.connect(self.on_remove_layer_task_begun)
 
         # Connect signals with Qt.ConnectionType.QueuedConnection
+        # The list itself is captured (filled by run() before resultingLayers is emitted):
+        # the task may already be deleted when the queued slot runs.
         self.appTasks[task_name].resultingLayers.connect(
-            lambda result_project_layers, tn=task_name:
-                self.layer_management_engine_task_completed(result_project_layers, tn),
+            lambda result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids:
+                self.layer_management_engine_task_completed(result_project_layers, tn, ids),
             Qt.ConnectionType.QueuedConnection
         )
         self.appTasks[task_name].savingLayerVariable.connect(
@@ -2822,8 +2824,13 @@ class FilterMateApp:
                 self.favorites_manager.save_to_project_file(self.PROJECT)
                 logger.debug(f"Backed up {count} favorites to project file (.qgz)")
 
-    def layer_management_engine_task_completed(self, result_project_layers, task_name):
-        """Handle layer management task completion. Delegates to LayerTaskCompletionHandler."""
+    def layer_management_engine_task_completed(self, result_project_layers, task_name, changed_layer_ids=None):
+        """Handle layer management task completion. Delegates to LayerTaskCompletionHandler.
+
+        ``changed_layer_ids``: the ids the task registered or unregistered (see
+        LayersManagementEngineTask.changed_layer_ids); None replaces PROJECT_LAYERS
+        with the result, as before.
+        """
         if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
             return
         if self._layer_task_completion_handler is not None:
@@ -2837,7 +2844,8 @@ class FilterMateApp:
                 self._layer_task_completion_handler.handle_task_completion(
                     result_project_layers=result_project_layers,
                     task_name=task_name,
-                    loading_new_project=self._loading_new_project
+                    loading_new_project=self._loading_new_project,
+                    changed_layer_ids=changed_layer_ids
                 )
                 return
             except Exception as e:

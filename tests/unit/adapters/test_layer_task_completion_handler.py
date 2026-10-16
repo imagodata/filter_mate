@@ -9,6 +9,8 @@ LayerTaskCompletionHandler: end of the add_layers / remove_layers tasks.
 - A failure while tracking datasources (PostgreSQL session with a raster) no longer
   ends the completion: the add_layers pending counter is always released, or every
   layer added afterwards waited in the queue for good.
+- Overlapping layer tasks: the result is merged into the current PROJECT_LAYERS
+  instead of replacing it.
 
 The module is loaded from its file (no package: its optional perf_timer import
 falls back to a no-op) and runs against a real sqlite file and a real HistoryService.
@@ -211,3 +213,70 @@ class TestCompletionAlwaysFinishes:
             env.handler.handle_task_completion(dict(env.project_layers), "add_layers")
 
         assert env.pending == 0
+
+
+@pytest.mark.unit
+class TestOverlappingLayerTasks:
+    """Each layer task returns a whole dict built from the PROJECT_LAYERS it started with."""
+
+    def test_without_overlap_the_result_is_registered_unchanged(self, tmp_path):
+        env = _Env(tmp_path, ["B", "A"])
+        result = {"A": env.project_layers["A"]}  # the task sorts its result
+
+        env.handler.handle_task_completion(result, "remove_layers", changed_layer_ids=["B"])
+
+        assert list(env.project_layers) == ["A"]
+        assert env.project_layers["A"] is result["A"]
+
+        env.project_layers["X"] = _layer("X")  # registered by the add task in the shared dict
+        result = {"X": env.project_layers["X"], "A": env.project_layers["A"]}
+        env.handler.handle_task_completion(result, "add_layers", changed_layer_ids=["X"])
+
+        assert list(env.project_layers) == ["X", "A"]
+
+    def test_a_layer_added_while_a_removal_ran_stays_registered(self, tmp_path):
+        """remove_layers started with {A, B}; add_layers registered X and finished first."""
+        env = _Env(tmp_path, ["A", "B", "X"])
+        env.push_history("X")
+
+        env.handler.handle_task_completion({"A": _layer("A")}, "remove_layers", changed_layer_ids=["B"])
+
+        assert set(env.project_layers) == {"A", "X"}
+        assert (PROJECT, "X") in _rows(env.db_path, "fm_project_layers_properties")
+        assert (PROJECT, "B") not in _rows(env.db_path, "fm_project_layers_properties")
+        assert env.history_layers() == [("X",)]
+        assert set(env.panel_layers()) == {"A", "X"}
+
+    def test_a_layer_removed_while_an_addition_ran_stays_unregistered(self, tmp_path):
+        """Rasters turned off while point clouds are turned on: the removal finished first,
+        the addition's result still held the rasters."""
+        env = _Env(tmp_path, ["A", "X"])  # B (raster) already unregistered
+
+        env.handler.handle_task_completion(
+            {"A": _layer("A"), "B": _layer("B"), "X": _layer("X")}, "add_layers", changed_layer_ids=["X"])
+
+        assert set(env.project_layers) == {"A", "X"}
+
+    def test_two_removals_keep_both_removed(self, tmp_path):
+        env = _Env(tmp_path, ["A", "C"])  # the first removal took B out
+
+        env.handler.handle_task_completion({"A": _layer("A"), "B": _layer("B")}, "remove_layers",
+                                           changed_layer_ids=["C"])
+
+        assert set(env.project_layers) == {"A"}
+
+    def test_a_layer_registered_after_the_removal_started_is_unregistered(self, tmp_path):
+        """The removal's copy did not hold X yet; X is leaving the project all the same."""
+        env = _Env(tmp_path, ["A", "X"])
+
+        env.handler.handle_task_completion({"A": _layer("A")}, "remove_layers", changed_layer_ids=["X"])
+
+        assert set(env.project_layers) == {"A"}
+        assert (PROJECT, "X") not in _rows(env.db_path, "fm_project_layers_properties")
+
+    def test_an_unregistered_id_cleans_nothing(self, tmp_path):
+        env = _Env(tmp_path, ["A"], db_layers=["A", "Z"])
+
+        env.handler.handle_task_completion({"A": _layer("A")}, "remove_layers", changed_layer_ids=["Z"])
+
+        assert (PROJECT, "Z") in _rows(env.db_path, "fm_project_layers_properties")

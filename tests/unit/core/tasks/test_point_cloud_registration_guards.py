@@ -272,6 +272,7 @@ def _task(existing=None, default_is_linking=True):
     cls = task_mod.LayersManagementEngineTask
     task = cls.__new__(cls)
     task.project_layers = {}
+    task.changed_layer_ids = []
     task.CONFIG_DATA = {"CURRENT_PROJECT": {"OPTIONS": {"LAYERS": {"LAYER_PROPERTIES_COUNT": 0}}}}
     task._deferred_layer_variables = []
     task._deferred_warnings = []
@@ -483,6 +484,24 @@ class TestManageProjectLayers:
 
         assert task.manage_project_layers() is True
         assert list(task.project_layers) == ["vec-1"]
+        # Every id is reported, registered in this task's copy or not: an add_layers running
+        # meanwhile may have registered it (LayerTaskCompletionHandler merges the result).
+        assert task.changed_layer_ids == ["pc-1", "unknown-id"]
+
+    def test_add_layers_reports_the_layers_it_registered(self, point_cloud_enabled):
+        task = _task()
+        pc = _FakePointCloudLayer(layer_id="pc-1", name="nuage")
+        table = _vector_layer(layer_id="vec-1", name="table without geometry")
+        known = _vector_layer(layer_id="vec-0", name="routes")
+        task.project_layers["vec-0"] = {"infos": {"layer_geometry_type": "GeometryType.Line", "layer_name": "routes"}}
+        task.layers = [table, pc, known]
+        reached = self._recording_add(task, {"pc-1": POINT_CLOUD_GEOMETRY_TYPE})
+        add_point_cloud = task.add_project_layer
+        task.add_project_layer = lambda layer: False if layer is table else add_point_cloud(layer)
+
+        assert task.manage_project_layers() is True
+        assert reached == [pc]
+        assert task.changed_layer_ids == ["pc-1"]
 
     def test_remove_layers_works_on_a_copy(self, point_cloud_enabled):
         """The worker must not delete from the shared PROJECT_LAYERS: LayerTaskCompletionHandler finds the
