@@ -246,6 +246,71 @@ def s_raster_unfilter_check():
           and layer('batiment').subsetString() == '')
 
 
+# --- raster: terrain derivative (slope) --------------------------------------
+
+def s_terrain_source():
+    dock().comboBox_filtering_current_layer.setLayer(layer('mnt'))
+
+
+def s_terrain_mode():
+    d, ctrl = dock(), controller()
+    panel = ctrl._raster_panel
+    check('terrain: raster mode active', ctrl.active_layer is not None and ctrl.active_layer.name() == 'mnt')
+    combo = panel._derivative_combo
+    names = [combo.itemData(i) for i in range(combo.count())]
+    check('terrain: "Compute on" lists every quantity', names == ['value', 'slope_degrees', 'slope_percent',
+                                                                  'aspect', 'hillshade', 'roughness'], str(names))
+    check('terrain: starts on the pixel value', panel.current_derivative().value == 'value')
+    combo.setCurrentIndex(combo.findData('slope_degrees'))  # the user's gesture: the controller sends the histogram
+    bounds = panel._data_bounds()
+    check('terrain: slope histogram is in degrees (0-90)', bounds == (0.0, 90.0), str(bounds))
+    check('terrain: slope presets offered', panel._presets_combo.count() == 5 and panel._presets_combo.isVisibleTo(panel),
+          str([panel._presets_combo.itemText(i) for i in range(panel._presets_combo.count())]))
+    panel._presets_combo.activated.emit(2)  # "Gentle (5-15 deg)"
+    panel._presets_combo.activated.emit(1)  # "Flat (< 5 deg)"
+    selection = panel.selection()
+    check('terrain: preset becomes a slope selection',
+          selection is not None and selection.derivative.value == 'slope_degrees' and selection.maximum == 5.0
+          and selection.minimum is None, str(selection))
+    check('terrain: no map preview for a derivative', not panel._preview_check.isEnabled() and not panel._use_range_button.isEnabled())
+    panel._set_range(None, 15.0)
+    panel._emit_now()
+    set_targets(['parcelle', 'batiment'])
+    set_predicates(['Intersect'])
+    set_buffer(0.0)
+    ctrl._coverage_spin.setValue(50)
+    check('terrain: selection is slope <= 15', panel.selection().maximum == 15.0 and panel.selection().derivative.value == 'slope_degrees')
+    save(d, '08-terrain-slope-panel')
+
+
+def s_terrain_filter():
+    STATE['bat_before'] = count(layer('batiment'))
+    run_task('filter')
+
+
+def s_terrain_check():
+    parcelles, bat, mnt = layer('parcelle'), layer('batiment'), layer('mnt')
+    check('terrain R->V: buildings filtered by slope', 0 < count(bat) < STATE['bat_before'], f"{count(bat)} of {STATE['bat_before']} buildings")
+    check('terrain R->V: parcels filtered by slope', parcelles.subsetString() != '', parcelles.subsetString()[:60])
+    check('terrain R source masked through the clipped VRT', mnt.source().endswith('.vrt') or mnt.providerType() == 'virtualraster',
+          f"{mnt.providerType()} {mnt.source()[-40:]}")
+    check('terrain: undo enabled', dock().pushButton_action_undo_filter.isEnabled())
+    save(iface.mainWindow(), '09-terrain-slope-after')
+
+
+def s_terrain_unfilter():
+    run_task('unfilter')
+
+
+def s_terrain_unfilter_check():
+    check('terrain unfilter restores all', layer('parcelle').subsetString() == '' and layer('batiment').subsetString() == ''
+          and layer('mnt').source().endswith('mnt_1m.tif'), layer('mnt').source()[-40:])
+    panel = controller()._raster_panel
+    panel._derivative_combo.setCurrentIndex(0)  # back to the pixel value for the rest of the run
+    check('terrain: back on the pixel value', panel.current_derivative().value == 'value' and panel._data_bounds()[1] > 90.0,
+          str(panel._data_bounds()))
+
+
 def s_pc_source():
     dock().comboBox_filtering_current_layer.setLayer(layer('lhd'))
 
@@ -288,6 +353,20 @@ def s_pc_undo():
 def s_pc_undo_check():
     check('P undo restores', layer('lhd').subsetString() == '' and layer('batiment').subsetString() == '',
           f"lhd='{layer('lhd').subsetString()}' bat='{layer('batiment').subsetString()[:40]}'")
+
+
+def s_pc_quick_check():
+    panel = controller()._pc_panel
+    combo = panel._quick_combo
+    texts = [combo.itemText(i) for i in range(combo.count())]
+    check('LiDAR classes: quick selection combo', texts[0].startswith('Quick') and 'Invert the selection' in texts, str(texts))
+    combo.activated.emit(1)  # Ground
+    check('LiDAR classes: "Ground" checks class 2', panel._checked_codes() == [2], str(panel._checked_codes()))
+    check('LiDAR classes: summary line', panel._class_summary_label.text().startswith('1 / '), panel._class_summary_label.text())
+    combo.activated.emit(combo.count() - 1)  # invert
+    check('LiDAR classes: invert', 2 not in panel._checked_codes() and len(panel._checked_codes()) >= 1, str(panel._checked_codes()))
+    combo.activated.emit(combo.count() - 2)  # none
+    check('LiDAR classes: none', panel._checked_codes() == [])
 
 
 def s_back_to_vector():
@@ -343,8 +422,10 @@ STEPS = [
     (s_vector_filter, 9000), (s_vector_check, 1000), (s_vector_undo, 3000), (s_vector_undo_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
+    (s_terrain_source, 3000), (s_terrain_mode, 2500), (s_terrain_filter, 8000), (s_terrain_check, 1000),
+    (s_terrain_unfilter, 3000), (s_terrain_unfilter_check, 1000),
     (s_pc_source, 4000), (s_pc_mode, 2500), (s_pc_filter, 15000), (s_pc_check, 1000),
-    (s_pc_undo, 3000), (s_pc_undo_check, 1000), (s_back_to_vector, 3000), (s_back_to_vector_check, 1000),
+    (s_pc_undo, 3000), (s_pc_undo_check, 1000), (s_pc_quick_check, 500), (s_back_to_vector, 3000), (s_back_to_vector_check, 1000),
     (s_export, 2000), (s_export_wait, 1000), (s_export_check, 500), (s_finish, 500),
 ]
 
