@@ -272,7 +272,7 @@ def s_terrain_mode():
     check('terrain: preset becomes a slope selection',
           selection is not None and selection.derivative.value == 'slope_degrees' and selection.maximum == 5.0
           and selection.minimum is None, str(selection))
-    check('terrain: no map preview for a derivative', not panel._preview_check.isEnabled() and not panel._use_range_button.isEnabled())
+    check('terrain: preview stays available, expression button off', panel._preview_check.isEnabled() and not panel._use_range_button.isEnabled())
     panel._set_range(None, 15.0)
     panel._emit_now()
     set_targets(['parcelle', 'batiment'])
@@ -281,6 +281,59 @@ def s_terrain_mode():
     ctrl._coverage_spin.setValue(50)
     check('terrain: selection is slope <= 15', panel.selection().maximum == 15.0 and panel.selection().derivative.value == 'slope_degrees')
     save(d, '08-terrain-slope-panel')
+
+
+def s_terrain_preview():
+    dock().pushButton_checkable_exploring_selecting.setChecked(True)
+
+
+def s_terrain_preview_check():
+    ctrl = controller()
+    overlay = ctrl._mask_overlay
+    check('terrain preview: the veil is on the canvas', overlay is not None and overlay.visible)
+    item = overlay._item if overlay is not None else None
+    if item is not None:
+        rect = item.boundingRect()
+        check('terrain preview: veil covers the raster', rect.width() > 10 and rect.height() > 10, f"{rect.width():.0f}x{rect.height():.0f}")
+        image = item._image
+        veiled = sum(1 for x in range(0, image.width(), 20) for y in range(0, image.height(), 20) if image.pixelColor(x, y).alpha() > 0)
+        total = len(range(0, image.width(), 20)) * len(range(0, image.height(), 20))
+        check('terrain preview: veils only the steeper half', 0.2 < veiled / total < 0.8, f"{veiled}/{total}")
+    check('terrain preview: no value transparency left on the layer', not layer('mnt').renderer().rasterTransparency()
+          or not layer('mnt').renderer().rasterTransparency().transparentSingleValuePixelList())
+    save(iface.mainWindow(), '08b-terrain-preview')
+    dock().pushButton_checkable_exploring_selecting.setChecked(False)
+
+
+def s_terrain_pick():
+    from qgis.core import QgsPointXY
+    ctrl = controller()
+    check('terrain preview: veil removed when the button is off', ctrl._mask_overlay is None or not ctrl._mask_overlay.visible)
+    centre = layer('mnt').extent().center()
+    ctrl._on_pixel_picked(QgsPointXY(centre.x(), centre.y()), False)
+    panel = ctrl._raster_panel
+    text, bands = panel._pixel_value_label.text(), panel._pixel_bands_label.text()
+    check('pixel picker: slope in degrees under the click', text.endswith(' °') and 0 <= float(text.split()[0]) <= 90, text)
+    check('pixel picker: aspect, hillshade and roughness listed', all(n in bands for n in ('Aspect', 'Hillshade', 'Roughness')), bands.replace(chr(10), ' | '))
+    before = (panel._low, panel._high)
+    ctrl._on_pixel_picked(QgsPointXY(centre.x() + 40, centre.y() + 40), True)  # Ctrl+click: the range grows to the slope
+    check('pixel picker: Ctrl+click extends the range in degrees', (panel._low, panel._high) != before and panel._high is not None
+          and panel._high <= 90, f"{before} -> {(panel._low, panel._high)}")
+    extras = ctrl._extras
+    link = extras._tools['pushButton_checkable_exploring_raster_link']
+    check('buttons: style link is off while the range applies to a slope', not link.isEnabled() and 'slope' in link.toolTip().lower(), link.toolTip()[:60])
+    from qgis.core import QgsRectangle
+    ext = layer('mnt').extent()
+    zone = QgsRectangle(ext.center().x() - 100, ext.center().y() - 100, ext.center().x() + 100, ext.center().y() + 100)
+    extras._on_zone_drawn(zone)
+    text = panel._zone_label.text()
+    import re
+    found = re.search(r'min\s+(-?[\d.]+).*?max\s+(-?[\d.]+)', text)
+    check('buttons: rectangle statistics are in degrees (0-90, not elevations)',
+          found is not None and 0 <= float(found.group(1)) <= float(found.group(2)) <= 90, text)
+    check('buttons: zoom tooltip names the selected pixels', 'selected pixels' in dock().pushButton_exploring_zoom.toolTip(), dock().pushButton_exploring_zoom.toolTip()[:60])
+    panel._set_range(None, 15.0)
+    panel._emit_now()
 
 
 def s_terrain_filter():
@@ -307,6 +360,8 @@ def s_terrain_unfilter_check():
           and layer('mnt').source().endswith('mnt_1m.tif'), layer('mnt').source()[-40:])
     panel = controller()._raster_panel
     panel._derivative_combo.setCurrentIndex(0)  # back to the pixel value for the rest of the run
+    link = controller()._extras._tools['pushButton_checkable_exploring_raster_link']
+    check('buttons: style link is back on the pixel value', link.isEnabled(), link.toolTip()[:60])
     check('terrain: back on the pixel value', panel.current_derivative().value == 'value' and panel._data_bounds()[1] > 90.0,
           str(panel._data_bounds()))
 
@@ -422,7 +477,7 @@ STEPS = [
     (s_vector_filter, 9000), (s_vector_check, 1000), (s_vector_undo, 3000), (s_vector_undo_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
-    (s_terrain_source, 3000), (s_terrain_mode, 2500), (s_terrain_filter, 8000), (s_terrain_check, 1000),
+    (s_terrain_source, 3000), (s_terrain_mode, 2500), (s_terrain_preview, 2500), (s_terrain_preview_check, 1000), (s_terrain_pick, 1500), (s_terrain_filter, 8000), (s_terrain_check, 1000),
     (s_terrain_unfilter, 3000), (s_terrain_unfilter_check, 1000),
     (s_pc_source, 4000), (s_pc_mode, 2500), (s_pc_filter, 15000), (s_pc_check, 1000),
     (s_pc_undo, 3000), (s_pc_undo_check, 1000), (s_pc_quick_check, 500), (s_back_to_vector, 3000), (s_back_to_vector_check, 1000),

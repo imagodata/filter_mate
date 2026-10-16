@@ -265,7 +265,7 @@ class FakePanel:
     def current_derivative(self):
         return types.SimpleNamespace(is_terrain=False, value="value")
 
-    def set_hover_value(self, x, y, value=None):
+    def set_hover_value(self, x, y, value=None, derived=None):
         self.hover.append(value)
 
 

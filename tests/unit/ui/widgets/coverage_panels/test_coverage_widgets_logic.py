@@ -255,6 +255,20 @@ class TestDerivativeInTheState:
         assert raster.format_preset("Gentle", 5.0, 15.0) == "Gentle (5–15)"
 
 
+class TestDerivedValueText:
+    def test_unit_follows_the_quantity(self):
+        D = raster.RasterDerivative
+        assert raster.format_derived_value(D.SLOPE_DEGREES, 12.345) == "12.35 °" or raster.format_derived_value(D.SLOPE_DEGREES, 12.345) == "12.34 °"
+        assert raster.format_derived_value(D.SLOPE_PERCENT, 30.0) == "30.00 %"
+        assert raster.format_derived_value(D.ASPECT, 270.0) == "270.00 °"
+        assert raster.format_derived_value(D.HILLSHADE, 180.0) == "180.00"  # no unit
+        assert raster.format_derived_value(D.ROUGHNESS, 0.5) == "0.50"
+
+    def test_missing_value(self):
+        assert raster.format_derived_value(raster.RasterDerivative.ASPECT, None) == "NoData"
+        assert raster.format_derived_value(raster.RasterDerivative.ASPECT, None, "n/a") == "n/a"
+
+
 class TestRasterSelectionFromState:
     def test_range(self):
         selection = raster.build_raster_selection({"mode": "range", "band": 2, "minimum": 200.0, "maximum": 260.0})
