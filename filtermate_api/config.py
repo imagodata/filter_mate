@@ -3,7 +3,8 @@ API configuration.
 
 Reads settings from environment variables, falling back to defaults.
 Kept intentionally separate from the QGIS plugin config (config/config.py)
-which depends on QgsApplication and QgsProject.
+which depends on QgsApplication and QgsProject: only the values it already
+computed (``ENV_VARS``, when the plugin runs in this process) are read.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import hashlib
 import json
 import logging
 import os
-import tempfile
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -41,15 +42,32 @@ def _hash_api_key(plaintext: str) -> str:
     return hashlib.sha256(plaintext.encode("utf-8")).hexdigest()
 
 
+def _plugin_env_vars() -> dict:
+    """``ENV_VARS`` of the FilterMate plugin running in this process, ``{}`` otherwise.
+
+    Read from the plugin module QGIS already imported, never imported here:
+    that would initialise QGIS-bound state (standalone uvicorn, tests).
+    """
+    names = ["filter_mate.config.config"]
+    if __package__ and "." in __package__:  # filter_mate.filtermate_api, whatever the plugin folder name
+        names.insert(0, f"{__package__.rsplit('.', 1)[0]}.config.config")
+    for name in names:
+        env_vars = getattr(sys.modules.get(name), "ENV_VARS", None)
+        if isinstance(env_vars, dict) and env_vars:
+            return env_vars
+    return {}
+
+
 def _default_export_root() -> Path:
-    """Per-user folder in the temp directory (shared /tmp on Linux)."""
-    import getpass
-    try:
-        user = getpass.getuser()
-    except Exception:
-        user = "user"
-    safe = "".join(c for c in user if c.isalnum() or c in "-_") or "user"
-    return Path(tempfile.gettempdir()) / f"filtermate_exports_{safe}"
+    """``exports`` in the FilterMate folder of the QGIS profile, else ``~/.filtermate/exports``.
+
+    Never in the shared temp folder: another account could create the folder
+    (or a link of that name) first and read or redirect the exports.
+    """
+    profile = _plugin_env_vars().get("PLUGIN_CONFIG_DIRECTORY")
+    if profile:
+        return Path(profile) / "exports"
+    return Path.home() / ".filtermate" / "exports"
 
 
 @dataclass
@@ -122,7 +140,9 @@ class APIConfig:
         """Load API config from a JSON file.
 
         Looks for an ``"API"`` key in the JSON. If absent, returns defaults.
-        Falls back to ``config/config.json`` in the project root.
+        Without ``path``: the config.json the plugin uses (QGIS profile,
+        ``ENV_VARS["CONFIG_JSON_PATH"]``), else ``config/config.json`` in the
+        project root (standalone).
 
         Auth fields (mutually exclusive — ``api_key_sha256`` wins):
 
@@ -135,7 +155,7 @@ class APIConfig:
           ``FILTERMATE_API_KEY`` env var.
         """
         if path is None:
-            path = _PROJECT_ROOT / "config" / "config.json"
+            path = _plugin_env_vars().get("CONFIG_JSON_PATH") or _PROJECT_ROOT / "config" / "config.json"
         path = Path(path)
         if not path.exists():
             return cls()

@@ -25,8 +25,9 @@ _LAYERS = [LayerSummary(layer_id="L1", name="communes", provider_type="ogr", geo
            LayerSummary(layer_id="L2", name="lhd", provider_type="pdal", layer_kind="point_cloud")]
 
 
-def _client(accessor) -> TestClient:
-    return TestClient(create_app(config=APIConfig(), accessor=accessor), base_url="http://127.0.0.1:8000")
+def _client(accessor, export_root=None) -> TestClient:
+    config = APIConfig(export_root=export_root) if export_root else APIConfig()
+    return TestClient(create_app(config=config, accessor=accessor), base_url="http://127.0.0.1:8000")
 
 
 class _BusyAccessor(InMemoryAccessor):
@@ -92,8 +93,9 @@ class TestUndoAfterOperation:
 
 
 class TestFailureReasons:
-    def test_export_failure_says_why(self):
-        response = _client(_FailingAccessor(layers=list(_LAYERS))).post("/export", json={"layers": ["communes"]})
+    def test_export_failure_says_why(self, tmp_path):
+        response = _client(_FailingAccessor(layers=list(_LAYERS)), export_root=tmp_path / "exports").post(
+            "/export", json={"layers": ["communes"]})
         assert response.status_code == 400
         assert response.json()["detail"] == "Export failed: no output folder"
 

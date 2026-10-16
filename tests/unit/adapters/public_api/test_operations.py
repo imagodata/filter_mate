@@ -390,6 +390,24 @@ class TestExportReport:
         assert sorted(report.outputs) == ["parcelle", "parcelle (B)"]
         assert report.outputs["parcelle"] != report.outputs["parcelle (B)"]
 
+    @pytest.mark.skipif(sys.platform.startswith("win"), reason="symbolic links need privileges on Windows")
+    def test_symlinked_output_file_is_not_written(self, vector_world, tmp_path, monkeypatch):
+        # Audit 2026-10: a link planted as the output file would make the writer write anywhere.
+        written = []
+        monkeypatch.setattr(operations, "_export_vector",
+                            lambda layer, path, driver, crs, project, feedback=None: (written.append(path) or
+                                                                                      (True, path, "")))
+        victim = tmp_path / "victim.txt"
+        victim.write_text("keep")
+        (tmp_path / "out").mkdir()
+        (tmp_path / "out" / "parcelle.gpkg").symlink_to(victim)
+        layer = _Layer("A", "parcelle")
+        report = operations.export_layers([layer, _Layer("B", "route")], str(tmp_path / "out"),
+                                          project=_Project(layer))
+        assert "symbolic link" in report.failed["parcelle"]
+        assert written == [str(tmp_path / "out" / "route.gpkg")]
+        assert victim.read_text() == "keep"
+
     def test_vector_writer_gets_a_child_feedback(self, vector_world, tmp_path, monkeypatch):
         captured = {}
 

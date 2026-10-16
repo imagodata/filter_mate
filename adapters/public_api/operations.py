@@ -643,22 +643,23 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
         try:
             if kind is LayerKind.VECTOR:
                 driver, extension = VECTOR_EXPORT_FORMATS[vector_format]
+                path = _output_file(_unique_path(output_path(folder, name, extension), used))
                 block, release = _child_feedback(feedback, index, total, QgsFeedback)
                 try:
-                    ok, path, message = _export_vector(layer, _unique_path(output_path(folder, name, extension), used),
-                                                       driver, crs, project, feedback=block)
+                    ok, path, message = _export_vector(layer, path, driver, crs, project, feedback=block)
                 finally:
                     release()
             elif kind is LayerKind.RASTER:
+                path = _output_file(_unique_path(output_path(folder, name, '.tif'), used))
                 block, release = _child_feedback(feedback, index, total, QgsRasterBlockFeedback)
                 try:
-                    result = export_raster(layer, _unique_path(output_path(folder, name, '.tif'), used),
-                                           raster_format, crs, feedback=block)
+                    result = export_raster(layer, path, raster_format, crs, feedback=block)
                 finally:
                     release()
                 ok, path, message = result.success, result.path, result.message
             elif kind is LayerKind.POINT_CLOUD:
-                path = _unique_path(output_path(folder, name, POINT_CLOUD_FORMATS[point_cloud_format]), used)
+                path = _output_file(_unique_path(output_path(folder, name, POINT_CLOUD_FORMATS[point_cloud_format]),
+                                                 used))
                 result = export_point_cloud(layer, path, point_cloud_format, crs)
                 ok, path, message = result.success, result.path, result.message
             else:
@@ -677,6 +678,13 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
         if feedback is not None:
             feedback.setProgress(100.0 * (index + 1) / total)
     return report
+
+
+def _output_file(path: str) -> str:
+    """``path``, unless it is a symbolic link: writing would follow it anywhere (ValueError)."""
+    if os.path.islink(path):
+        raise ValueError(f"not written: {path} is a symbolic link")
+    return path
 
 
 def _report_label(report: OperationReport, name: str, layer_id: str) -> str:

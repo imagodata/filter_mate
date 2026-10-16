@@ -175,7 +175,11 @@ API's own changes. Right after a FilterMate 5 operation (cross, geometry, point 
 `409`: revert the operation with `POST /filters/clear`; the next `POST /filters/apply` lifts the refusal.
 
 `POST /export` only writes below the export root of the server (`FILTERMATE_API_EXPORT_ROOT`, or `API.export_root`
-in `config.json`; default: `<temp>/filtermate_exports_<user>`). Clients give a sub-folder name, never a path.
+in `config.json`; default: `exports` in the FilterMate folder of the QGIS profile, `~/.filtermate/exports` when the API
+runs outside QGIS). Clients give a sub-folder name, never a path. The root is created private (mode 0700); a root
+that is a symbolic link, a file or (POSIX) a folder of another user is refused (`500 Export root unavailable`), and
+no output file that is a symbolic link is written over. The API reads the `API` section of the `config.json` the plugin
+uses (QGIS profile), or `config/config.json` of the plugin folder outside QGIS.
 
 Web pages the user visits must not drive QGIS through the browser:
 
