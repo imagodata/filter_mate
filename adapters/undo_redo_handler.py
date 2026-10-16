@@ -614,7 +614,12 @@ class UndoRedoHandler:
                 dw = weak_dockwidget()
                 if not dw:
                     return
-                if getattr(dw, '_user_layer_pick', (0.0, None))[0] >= protection_started:
+                # A user input not looked at yet goes first: this check and the input can fall due in one pass
+                # of the event loop, the check used to put the source layer back over the pick.
+                record_pending_pick = getattr(dw, '_record_pending_layer_pick', None)
+                if callable(record_pending_pick):
+                    record_pending_pick()
+                if (getattr(dw, '_user_layer_pick', None) or (0.0, None))[0] >= protection_started:
                     return
 
                 saved_layer = QgsProject.instance().mapLayer(saved_layer_id)

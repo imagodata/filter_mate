@@ -40,6 +40,15 @@ from ..infrastructure.feedback import show_success_with_backend, show_info
 logger = get_app_logger()
 
 
+def _record_pending_pick(dockwidget) -> None:
+    """Look at a user input on the current-layer combo box not looked at yet (``_record_pending_layer_pick``,
+    ConfigurationManager._stamp_user_layer_picks): code that puts the source layer back runs it first, as it can
+    run in the same pass of the event loop as the input, before the call the input posted."""
+    record_pending_pick = getattr(dockwidget, '_record_pending_layer_pick', None)
+    if callable(record_pending_pick):
+        record_pending_pick()
+
+
 class FilterResultHandler:
     """
     Handles filter operation completion and result application.
@@ -874,10 +883,20 @@ class FilterResultHandler:
         def window_current():
             return getattr(dockwidget, '_combo_protection_gen', None) == generation
 
+        def user_picked():
+            """A layer other than the source picked in this window."""
+            picked_at, picked_id = getattr(dockwidget, '_user_layer_pick', None) or (0.0, None)
+            return picked_at >= protection_started and picked_id not in (None, saved_layer_id)
+
         def restore_combobox_if_needed():
             """Check and restore combobox to saved layer if it was changed."""
             try:
                 if not dockwidget or not window_current():
+                    return
+                # This check and a user input can fall due in one pass of the event loop: it used to put the
+                # source layer back over the pick (which now ends the window).
+                _record_pending_pick(dockwidget)
+                if not window_current() or user_picked():
                     return
                 saved_layer = QgsProject.instance().mapLayer(saved_layer_id)
                 if saved_layer and saved_layer.isValid():
@@ -937,7 +956,7 @@ class FilterResultHandler:
         def apply_user_pick():
             """The layer the user picked in this window (signals blocked: never processed) becomes current."""
             try:
-                picked_at, picked_id = getattr(dockwidget, '_user_layer_pick', (0.0, None))
+                picked_at, picked_id = getattr(dockwidget, '_user_layer_pick', None) or (0.0, None)
                 if picked_at < protection_started or not picked_id:
                     return
                 app = getattr(dockwidget, 'app', None)
@@ -951,7 +970,8 @@ class FilterResultHandler:
                 if current is not None and current.id() == picked_id:
                     return
                 logger.info(f"Applying the layer picked during the post-filter window: '{picked.name()}'")
-                if dockwidget.comboBox_filtering_current_layer.currentLayer() is not picked:
+                shown = dockwidget.comboBox_filtering_current_layer.currentLayer()
+                if shown is None or shown.id() != picked_id:
                     dockwidget.comboBox_filtering_current_layer.setLayer(picked)  # signals connected: applies it
                 else:
                     dockwidget.current_layer_changed(picked, manual_change=True)

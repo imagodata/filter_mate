@@ -976,6 +976,13 @@ class ConfigurationManager(QObject):
         ends it at once (``d._end_post_filter_window``, set by FilterResultHandler) and the undo /
         redo checks leave it alone. An event filter on the combo, its popup and the search popup,
         because blockSignals silences ``activated`` too and the completer bypasses the combo.
+
+        The input is looked at just after it is handled, or at once by a check that would move the
+        combo back (``d._record_pending_layer_pick``): a check due in the same pass of the event loop
+        as the input runs before the call the input posts, and used to put the source layer back
+        over the pick. A popup closing after an input in it counts as an input too: Qt 5's macOS
+        style flashes the clicked item in event loops of its own, where the call posted by the click
+        runs, and the combo only takes the item after the popup is closed.
         """
         import time
         import weakref
@@ -985,15 +992,22 @@ class ConfigurationManager(QObject):
             return
         dock_ref = weakref.ref(d)
         inputs = (QEvent.Type.MouseButtonRelease, QEvent.Type.KeyPress, QEvent.Type.Wheel)
+        pending = {}  # 'before': the combo's layer before the first input not looked at yet
+        popups = []  # the combo's list and the search popup
+        in_popup = []  # their viewports too: an input there arms the popup's closing
 
         def layer_id():
             layer = combo.currentLayer()
             return layer.id() if layer is not None else None
 
-        def after_input(before):
+        def record_pending_pick():
+            """Record the pick of the inputs not looked at yet (none: nothing to do)."""
             try:
-                dock = dock_ref()
+                if 'before' not in pending:
+                    return
                 now = layer_id()
+                before = pending.pop('before')
+                dock = dock_ref()
                 if dock is None or now is None or now == before:
                     return  # no change: a click in the search field, Escape, Home / End...
                 dock._user_layer_pick = (time.perf_counter(), now)
@@ -1012,24 +1026,31 @@ class ConfigurationManager(QObject):
         class _UserLayerPick(QObject):
             def eventFilter(self, watched, event):  # noqa: N802 - Qt override
                 try:
-                    if event.type() in inputs:
-                        before = layer_id()
-                        QTimer.singleShot(0, lambda: after_input(before))
+                    kind = event.type()
+                    if kind in inputs and watched in in_popup:
+                        pending['popup_input'] = True
+                    if kind in inputs or (kind == QEvent.Type.Hide and watched in popups
+                                          and pending.pop('popup_input', False)):
+                        pending.setdefault('before', layer_id())  # before the combo handles the input
+                        QTimer.singleShot(0, record_pending_pick)
                 except RuntimeError:
                     pass
                 return False
 
         try:
             pick_filter = _UserLayerPick(combo)
-            watched = [combo, combo.view(), combo.view().viewport()]
-            if combo.lineEdit() is not None:
-                watched.append(combo.lineEdit())
+            popups += [combo.view()]
             completer = combo.completer()
             if completer is not None and completer.popup() is not None:
-                watched += [completer.popup(), completer.popup().viewport()]
+                popups += [completer.popup()]
+            in_popup += [widget for popup in popups for widget in (popup, popup.viewport())]
+            watched = [combo] + in_popup
+            if combo.lineEdit() is not None:
+                watched.append(combo.lineEdit())
             for widget in watched:
                 widget.installEventFilter(pick_filter)
             combo._fm_pick_filter = pick_filter
+            d._record_pending_layer_pick = record_pending_pick
         except (AttributeError, TypeError, RuntimeError) as e:
             logger.debug(f"User layer picks not recorded: {e}")
 

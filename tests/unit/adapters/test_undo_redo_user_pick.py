@@ -85,3 +85,12 @@ def test_user_pick_before_undo_does_not_disable_the_protection(handler_module, m
     dock._user_layer_pick = (earlier, 'other')
     handler_module._test_timers[0]()
     dock.comboBox_filtering_current_layer.setLayer.assert_called_once_with(source)
+
+
+def test_a_pick_not_looked_at_yet_is_looked_at_first(handler_module, monkeypatch):
+    """The check and the key press fall due in one pass: the check runs before the call the pick detector
+    posted (ConfigurationManager._stamp_user_layer_picks), it used to put the source layer back over the pick."""
+    dock, source = _setup(handler_module, monkeypatch)
+    dock._record_pending_layer_pick = lambda: setattr(dock, '_user_layer_pick', (time.perf_counter(), 'other'))
+    handler_module._test_timers[0]()
+    dock.comboBox_filtering_current_layer.setLayer.assert_not_called()
