@@ -318,6 +318,11 @@ def s_dock_ready():
     return settled()
 
 
+def coverage_connected():
+    """The raster / point cloud controller receives the project signals (CoverageModeController.setup)."""
+    return getattr(coverage(), '_project_connected', set()) == {'readProject', 'cleared', 'layersWillBeRemoved'}
+
+
 def s_controllers_check():
     """The controller registry stayed empty until 5.0 (an empty registry was falsy): no controller was set up,
     so stored raster / point cloud filters were never replayed and the Configuration tab never saved an edit."""
@@ -326,7 +331,7 @@ def s_controllers_check():
     check('dock controllers registered and set up', registry is not None and len(registry) == 10
           and integration.validate_controllers()['all_valid'], repr(registry))
     check('raster / point cloud controller connected to the project (stored filters replayed)',
-          getattr(coverage(), '_project_signal_connected', False))
+          coverage_connected())
     check('configuration controller applies the edits', integration.config_controller._initialized)
 
 
@@ -644,7 +649,7 @@ def s_reopen_pick_raster():
     layer current, without its EXPLORING page."""
     integration = dock()._controller_integration
     check('closing the dock keeps its controllers', dock().isVisible() and integration.registry is not None
-          and coverage() is STATE['coverage_before_close'] and getattr(coverage(), '_project_signal_connected', False),
+          and coverage() is STATE['coverage_before_close'] and coverage_connected(),
           f"registry={integration.registry!r} coverage={coverage()!r}")
     dock().comboBox_filtering_current_layer.setLayer(layer('dem'))
     return switched_to('dem', coverage_page=True)
