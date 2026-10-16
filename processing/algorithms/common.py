@@ -88,44 +88,53 @@ class FilterMateAlgorithm(QgsProcessingAlgorithm):
     def add_target_parameters(self, buffer_parameter=None):
         """Couches cibles, prédicats, tampon, couverture minimale et combinaison."""
         self.addParameter(QgsProcessingParameterMultipleLayers(
-            self.TARGETS, self.tr("Couches à filtrer (vecteur, raster, nuage de points)"),
+            self.TARGETS, self.tr("Layers to filter (vector, raster, point cloud)"),
             layerType=QgsProcessing.SourceType.TypeMapLayer, optional=self.targets_optional()))
         self.addParameter(QgsProcessingParameterEnum(
-            self.PREDICATES, self.tr("Prédicats géométriques"), options=list(PREDICATES),
+            self.PREDICATES, self.tr("Geometric predicates"), options=list(PREDICATES),
             allowMultiple=True, defaultValue=[0]))
         self.addParameter(buffer_parameter or QgsProcessingParameterNumber(
-            self.BUFFER, self.tr("Tampon (unités de la source)"),
+            self.BUFFER, self.tr("Buffer (source units)"),
             type=QgsProcessingParameterNumber.Type.Double, defaultValue=0.0))
         self.addParameter(QgsProcessingParameterNumber(
-            self.COVERAGE, self.tr("Couverture minimale des polygones cibles (%)"),
+            self.COVERAGE, self.tr("Minimum coverage of the target polygons (%)"),
             type=QgsProcessingParameterNumber.Type.Double, defaultValue=0.0, minValue=0.0, maxValue=100.0))
-        self.add_operator_parameter(self.tr("Combinaison avec le filtre existant des cibles"))
+        self.add_operator_parameter(self.tr("Combine with the existing filter of the targets"))
 
     def targets_optional(self) -> bool:
         return False
 
+    def targets_help(self):
+        """Help paragraph shared by the cross filters (what each kind of target becomes)."""
+        return self.tr(
+            "Vector: subset of the features. Raster: pixels outside the area set to NoData (clipped VRT). "
+            "Point cloud: points outside the area removed (derived COPC file, PDAL). Disjoint keeps the outside.\n\n"
+            "Only project layers are filtered. The filter can be undone from FilterMate and the original sources "
+            "are always recorded in the project. The \"Processed layers\" output can be chained in a model, "
+            "for example into \"Export filtered layers\".")
+
     def add_operator_parameter(self, label, name=None):
         self.addParameter(QgsProcessingParameterEnum(
-            name or self.OPERATOR, label, options=[self.tr("Remplacer"), "AND", "OR", "AND NOT"], defaultValue=0))
+            name or self.OPERATOR, label, options=[self.tr("Replace"), "AND", "OR", "AND NOT"], defaultValue=0))
 
     def add_point_cloud_criteria_parameters(self, prefix=""):
         """Classes ASPRS, plages Z et intensité, numéro de retour, expression."""
         number = QgsProcessingParameterNumber.Type.Double
         self.addParameter(QgsProcessingParameterString(
-            prefix + "CLASSES", self.tr("Classes ASPRS à garder (ex. 3,4,5 ; vide = toutes)"), optional=True))
-        for name, label in (("Z_MIN", self.tr("Z minimum")), ("Z_MAX", self.tr("Z maximum")),
-                            ("INTENSITY_MIN", self.tr("Intensité minimum")),
-                            ("INTENSITY_MAX", self.tr("Intensité maximum"))):
+            prefix + "CLASSES", self.tr("ASPRS classes to keep (e.g. 3,4,5; empty = all)"), optional=True))
+        for name, label in (("Z_MIN", self.tr("Minimum Z")), ("Z_MAX", self.tr("Maximum Z")),
+                            ("INTENSITY_MIN", self.tr("Minimum intensity")),
+                            ("INTENSITY_MAX", self.tr("Maximum intensity"))):
             self.addParameter(QgsProcessingParameterNumber(prefix + name, label, type=number, optional=True))
         self.addParameter(QgsProcessingParameterNumber(
-            prefix + "RETURN_NUMBER", self.tr("Numéro de retour (vide = tous)"),
+            prefix + "RETURN_NUMBER", self.tr("Return number (empty = all)"),
             type=QgsProcessingParameterNumber.Type.Integer, optional=True, minValue=1, maxValue=15))
         self.addParameter(QgsProcessingParameterString(
-            prefix + "EXPRESSION", self.tr("Expression nuage de points (ex. ReturnNumber = NumberOfReturns)"),
+            prefix + "EXPRESSION", self.tr("Point cloud expression (e.g. ReturnNumber = NumberOfReturns)"),
             optional=True, multiLine=False))
 
     def add_output(self):
-        self.addOutput(QgsProcessingOutputMultipleLayers(self.OUTPUT, self.tr("Couches traitées")))
+        self.addOutput(QgsProcessingOutputMultipleLayers(self.OUTPUT, self.tr("Processed layers")))
         # Noms des couches traitées / en échec (résultats de processing.run) : déclarés quand
         # QGIS sait décrire une liste (QGIS 3.28+), sans libellé traduit de plus.
         if QgsProcessingOutputVariant is not None:
@@ -173,10 +182,10 @@ class FilterMateAlgorithm(QgsProcessingAlgorithm):
     def finish(self, report, feedback, verb=None):
         """Journal du rapport d'opération et dictionnaire de résultats Processing."""
         for name, reason in report.skipped.items():
-            feedback.pushWarning(self.tr("Couche ignorée : {0} ({1})").format(name, reason))
+            feedback.pushWarning(self.tr("Layer skipped: {0} ({1})").format(name, reason))
         if report.error:
             raise QgsProcessingException(report.error)
-        verb = verb or self.tr("filtrée")
+        verb = verb or self.tr("filtered")
         layers = report.details.get("layers", {})
         for layer_id, name in report.done.items():
             info = layers.get(name) or {}
@@ -185,9 +194,9 @@ class FilterMateAlgorithm(QgsProcessingAlgorithm):
                 suffix = self.tr(" ({0:.1f} s)").format(info["seconds"])
             if name in report.outputs:
                 suffix = " → " + report.outputs[name]
-            feedback.pushInfo(self.tr("{0} : {1}{2}").format(name, verb, suffix))
+            feedback.pushInfo(self.tr("{0}: {1}{2}").format(name, verb, suffix))
         for name, message in report.failed.items():
-            feedback.reportError(self.tr("{0} : échec — {1}").format(name, message))
+            feedback.reportError(self.tr("{0}: failed — {1}").format(name, message))
         return {
             self.OUTPUT: report.done_ids,
             self.LAYERS_FILTERED: report.done_names,
