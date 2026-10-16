@@ -368,17 +368,17 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
     </div>
     <div class="callout scope-note"><strong>Distance géométrique.</strong> Ce résultat ne mesure ni temps de trajet ni accès des véhicules de secours. La desserte doit être vérifiée avec le réseau, les restrictions de circulation et le terrain.</div>
     <div class="story-brief">
-        <div><h4>Le besoin</h4><p>Au centre de secours d'<strong>Aspet</strong>, en pied de Pyrénées, on prépare le plan d'intervention : quels lieux-dits et zones d'activité sont à plus de 200 m d'une route revêtue, pour préparer une vérification de terrain ?</p></div>
+        <div><h4>Le besoin</h4><p>Au centre de secours d'<strong>Aspet</strong>, en pied de Pyrénées, on prépare le plan d'intervention : quels lieux-dits, bâtiments et zones d'activité sont à plus de 200 m d'une route revêtue, pour préparer une vérification de terrain ?</p></div>
         <div><h4>La traduction FilterMate</h4><p>C'est le prédicat <strong>Disjoint</strong> avec un <strong>tampon de 200 m</strong> : garder ce qui n'a aucun point commun avec la zone tampon. Comme Disjoint retient tout ce qui est loin, y compris dans le reste du département, les couches cibles sont d'abord cadrées par un <strong>filtre attributaire</strong> sur le code INSEE, appliqué avec l'algorithme Processing de FilterMate. Le second filtre se combine alors avec <strong>AND</strong>.</p></div>
     </div>
     <ol class="steps">
-        <li><strong>Cadrer Aspet spatialement</strong> pour les routes, les bâtiments et la végétation (histoire 1), puis <strong>attributairement</strong> pour les deux couches cibles : Boîte à outils → FilterMate → <em>Filtrer plusieurs couches</em>, couches <em>zone_d_habitation</em> et <em>zone_d_activite_ou_d_interet</em>, expression <code>"insee_commune" = '31020'</code>. 87 lieux-dits et 31 zones d'activité.
-            <figure><img src="img/stories/s6-03.webp" alt="Étape 1 : Aspet cadrée, lieux-dits en orange" loading="lazy" width="1600" height="945"><figcaption>Étape 1. Les deux couches cibles portent un filtre attributaire, les autres un filtre spatial.</figcaption></figure>
+        <li><strong>Cadrer Aspet spatialement</strong> pour les routes, les bâtiments et la végétation (histoire 1), puis <strong>attributairement</strong> pour les trois couches cibles : Boîte à outils → FilterMate → <em>Filtrer plusieurs couches</em>, couches <em>batiment</em>, <em>zone_d_habitation</em> et <em>zone_d_activite_ou_d_interet</em>, expression <code>"insee_commune" = '31020'</code>. On obtient notamment 87 lieux-dits et 31 zones d'activité.
+            <figure><img src="img/stories/s6-03.webp" alt="Étape 1 : Aspet cadrée, lieux-dits en orange" loading="lazy" width="1600" height="945"><figcaption>Étape 1. Les trois couches cibles portent un filtre attributaire, les autres un filtre spatial.</figcaption></figure>
         </li>
         <li><strong>Ne garder que les routes revêtues.</strong> Source <em>troncon_de_route</em>, Custom selection <code>"nature" NOT IN ('Chemin', 'Sentier', 'Escalier', 'Piste cyclable', 'Route empierrée')</code> : 494 tronçons sur 1 168.
             <figure><img src="img/stories/s6-04.webp" alt="Étape 2 : les routes revêtues sont surlignées, chemins et sentiers ne le sont pas" loading="lazy" width="1600" height="945"><figcaption>Étape 2. Les chemins et sentiers, nombreux en montagne, sont écartés.</figcaption></figure>
         </li>
-        <li><strong>Disjoint, 200 m, AND.</strong> Cibles <em>zone_d_habitation</em> et <em>zone_d_activite_ou_d_interet</em>, prédicat <strong>Disjoint</strong> seul, Buffer 200, ligne Combine operator active avec <strong>AND</strong> à droite (opérateur des couches cibles).
+        <li><strong>Disjoint, 200 m, AND.</strong> Cibles <em>batiment</em>, <em>zone_d_habitation</em> et <em>zone_d_activite_ou_d_interet</em>, prédicat <strong>Disjoint</strong> seul, Buffer 200, ligne Combine operator active avec <strong>AND</strong> à droite (opérateur des couches cibles).
             <figure><img src="img/stories/s6-05.webp" alt="Étape 3 : Disjoint coché, tampon de 200 m, opérateur AND pour les couches cibles" loading="lazy" width="1600" height="945"><figcaption>Étape 3. Disjoint plus tampon : un anneau d'exclusion.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
@@ -386,7 +386,7 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
         </li>
     </ol>
     <h3>Résultat</h3>
-    <p><strong>22 lieux-dits</strong> d'Aspet sont à plus de 200 m d'une route revêtue ; aucune des 31 zones d'activité n'est dans ce cas. À 100 m, ils seraient 32.</p>
+    <p><strong>22 lieux-dits</strong> d'Aspet sont à plus de 200 m d'une route revêtue ; aucun bâtiment ni aucune des 31 zones d'activité n'est dans ce cas. À 100 m, les lieux-dits seraient 32.</p>
     <div class="callout warn">
         <strong>Disjoint sans cadrage.</strong> Sans le filtre attributaire de l'étape 1, Disjoint aurait renvoyé les 31 599 lieux-dits du département qui ne touchent pas la bande de 200 m autour des routes d'Aspet. Un prédicat d'exclusion demande toujours de borner les cibles d'abord.
     </div>

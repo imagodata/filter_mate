@@ -74,6 +74,64 @@
         try { sessionStorage.setItem('filtermate-home-video', chosen); } catch (_) { /* Storage is optional. */ }
     }
 
+    // ---------------------------------------------------------------- light / dark footage
+    // Every recording exists twice: video/<clip>.mp4 (QGIS light theme) and
+    // video/<clip>-dark.mp4 (Night Mapping). Videos, posters and poster images follow
+    // the site theme (data-theme on <html>, else the system preference), also when it changes.
+    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const siteIsDark = () => {
+        const forced = document.documentElement.dataset.theme;
+        return forced ? forced === 'dark' : darkScheme.matches;
+    };
+    const footage = /(^|\/)video\/([a-z0-9_]+?)(-dark)?\.(mp4|webp)$/;
+    const themed = (url) => (url && footage.test(url)
+        ? url.replace(footage, (m, pre, name, dark, ext) => pre + 'video/' + name + (siteIsDark() ? '-dark' : '') + '.' + ext)
+        : url);
+    const lightOf = (url) => (url || '').replace(/-dark\.(mp4|webp)$/, '.$1');
+    function applyFootageTheme() {
+        document.querySelectorAll('video[data-src]').forEach((v) => {
+            const src = themed(v.dataset.src);
+            const poster = themed(v.getAttribute('poster'));
+            if (poster && poster !== v.getAttribute('poster')) {
+                v.setAttribute('poster', poster);
+                // a poster has no error event: probe it, keep the light one if the dark one is missing
+                const probe = new Image();
+                probe.onerror = () => { if (v.getAttribute('poster') === poster) v.setAttribute('poster', lightOf(poster)); };
+                probe.src = poster;
+            }
+            if (src !== v.dataset.src) {
+                v.dataset.src = src;
+                if (v.getAttribute('src')) {
+                    const playing = !v.paused;
+                    v.src = src;
+                    if (playing) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+                }
+            }
+        });
+        document.querySelectorAll('img[src^="video/"]').forEach((img) => {
+            const src = themed(img.getAttribute('src'));
+            if (src !== img.getAttribute('src')) img.setAttribute('src', src);
+        });
+        document.querySelectorAll('[data-watch][data-video]').forEach((btn) => {
+            btn.dataset.video = themed(btn.dataset.video);
+            if (btn.dataset.poster) btn.dataset.poster = themed(btn.dataset.poster);
+        });
+    }
+    // A dark version not published yet falls back to the light one.
+    document.addEventListener('error', (event) => {
+        const el = event.target;
+        if (el.tagName === 'IMG' && /-dark\.webp$/.test(el.getAttribute('src') || '')) {
+            el.setAttribute('src', lightOf(el.getAttribute('src')));
+        } else if (el.tagName === 'VIDEO' && /-dark\.mp4$/.test(el.getAttribute('src') || '')) {
+            if (el.dataset.src) el.dataset.src = lightOf(el.dataset.src);
+            el.setAttribute('poster', lightOf(el.getAttribute('poster')));
+            el.src = lightOf(el.getAttribute('src'));
+        }
+    }, true);
+    applyFootageTheme();
+    if (darkScheme.addEventListener) darkScheme.addEventListener('change', applyFootageTheme);
+    new MutationObserver(applyFootageTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
     // ---------------------------------------------------------------- background footage
     // Videos load only when their sheet comes into view and pause when it leaves.
     // Reduced motion or a data-saving connection keeps the poster; "Watch" still plays.
