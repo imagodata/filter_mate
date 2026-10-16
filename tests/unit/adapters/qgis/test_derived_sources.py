@@ -678,3 +678,55 @@ def test_hooks_of_another_project_keep_the_current_ones(env, tmp_path):
     assert not env.project.layersAdded.slots and not other.layersWillBeRemoved.slots
 
 
+# --- 12. A target whose job cannot be built is reported -----------------------------
+
+def test_target_whose_job_cannot_be_built_is_reported(env, monkeypatch):
+    _raster(env, layer_id="dem")
+    appliers = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.target_appliers")
+
+    def make_job(layer, kind, operator, clip_mode):
+        raise RuntimeError("raster provider unavailable")
+
+    appliers.make_job = make_job
+    task_module = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.cross_filter_task")
+    task_module.CrossFilterTask = lambda description, request, source_job, jobs, done: types.SimpleNamespace(target_jobs=jobs)
+    monkeypatch.setitem(sys.modules, appliers.__name__, appliers)
+    monkeypatch.setitem(sys.modules, task_module.__name__, task_module)
+    request = cross.CrossFilterRequest("zones", LayerKind.VECTOR, targets=(cross.TargetSpec("dem", LayerKind.RASTER),))
+    task = service_mod.CrossFilterService().build_task(request, types.SimpleNamespace(layer_name="zones"), project=env.project)
+    [job] = task.target_jobs
+    job.compute(None, None, None, request, lambda: False)  # nothing to compute
+    assert (job.layer_id, job.layer_name, job.kind) == ("dem", "dem", LayerKind.RASTER)
+    assert (job.outcome.success, job.outcome.message) == (False, "raster provider unavailable")
+
+
+# --- 13. Unload lets the canceled tasks close their files ------------------------
+
+class FakeTask:
+    def __init__(self, description, clock, runs_for):
+        self._description, self.clock, self.runs_for = description, clock, runs_for
+        self.canceled, self.waits = False, []
+
+    def description(self):
+        return self._description
+
+    def cancel(self):
+        self.canceled = True
+
+    def waitForFinished(self, timeout_ms):
+        self.waits.append(timeout_ms)
+        self.clock[0] += min(self.runs_for, timeout_ms / 1000.0)
+        return self.runs_for * 1000.0 <= timeout_ms
+
+
+def test_unload_waits_a_bounded_time_for_the_canceled_tasks(monkeypatch):
+    clock = [100.0]
+    tasks = [FakeTask("FilterMate: height above dtm", clock, 0.5), FakeTask("Other plugin", clock, 9.0),
+             FakeTask("FilterMate: export", clock, 9.0), FakeTask("FilterMate: lidar", clock, 0.1)]
+    manager = types.SimpleNamespace(activeTasks=lambda: tasks)
+    monkeypatch.setattr(sys.modules["qgis.core"], "QgsApplication", types.SimpleNamespace(taskManager=lambda: manager))
+    monkeypatch.setattr(service_mod.time, "monotonic", lambda: clock[0])
+    assert service_mod.stop_filtermate_tasks(wait_seconds=2.0) == 3
+    assert [task.canceled for task in tasks] == [True, False, True, True]
+    assert tasks[0].waits == [2000] and tasks[2].waits == [1500]
+    assert tasks[3].waits == [] and tasks[1].waits == []  # budget spent: never waitForFinished(0)

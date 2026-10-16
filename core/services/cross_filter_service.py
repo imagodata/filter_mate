@@ -12,10 +12,11 @@ Undo / Redo / Unfilter buttons can restore derived sources as well as
 subset strings.
 """
 import logging
+import time
 import weakref
 from typing import Callable, Iterable, List, Optional
 
-from ..domain.cross_filter import CrossFilterRequest
+from ..domain.cross_filter import CrossFilterOutcome, CrossFilterRequest
 from ..domain.filter_state import CrossOperation, CrossOperationHistory
 from ..domain.layer_kind import LayerKind
 
@@ -33,6 +34,19 @@ def _config_option(key: str, default):
         return _get_option_value(section.get(key), default)
     except Exception:
         return default
+
+
+class _UnpreparedTarget:
+    """A target whose job could not be built: the task reports it failed, like the others."""
+
+    def __init__(self, layer, kind: LayerKind, reason: str) -> None:
+        self.layer_id = layer.id()
+        self.layer_name = layer.name()
+        self.kind = kind
+        self.outcome = CrossFilterOutcome(self.layer_id, kind, False, reason)
+
+    def compute(self, *args) -> None:
+        """Nothing to compute: the outcome already holds the reason."""
 
 
 class CrossFilterService:
@@ -68,7 +82,7 @@ class CrossFilterService:
                 job = make_job(layer, target.kind, request.other_layers_combine_operator, clip_mode)
             except Exception as exc:
                 logger.warning(f"[FM5] target '{layer.name()}' skipped: {exc}", exc_info=True)
-                job = None
+                job = _UnpreparedTarget(layer, target.kind, str(exc))
             if job is not None:
                 jobs.append(job)
 
@@ -303,6 +317,41 @@ def filtermate_tasks_active() -> bool:
     except Exception:
         return False
     return any(str(task.description()).startswith('FilterMate') for task in tasks)
+
+
+def stop_filtermate_tasks(wait_seconds: float = 2.0) -> int:
+    """Cancel the FilterMate tasks still running, then give them a moment to end (plugin unload).
+
+    Exports, height-above-ground runs and cross filters read and write the
+    cache, removed next: a killed pdal process or a GDAL dataset must close
+    its files first (Windows cannot delete a file still open). A task still
+    running after ``wait_seconds`` is left to the closed cache, which stops
+    its callback from applying anything.
+
+    Returns:
+        Number of tasks canceled.
+    """
+    try:
+        from qgis.core import QgsApplication
+        tasks = [task for task in QgsApplication.taskManager().activeTasks()
+                 if str(task.description()).startswith('FilterMate: ')]
+    except Exception:
+        return 0
+    for task in tasks:
+        try:
+            task.cancel()
+        except RuntimeError:
+            pass
+    deadline = time.monotonic() + wait_seconds
+    for task in tasks:
+        left = int((deadline - time.monotonic()) * 1000)
+        if left <= 0:
+            break  # never waitForFinished(0): that waits for ever
+        try:
+            task.waitForFinished(left)
+        except RuntimeError:
+            pass
+    return len(tasks)
 
 
 def tidy_cache(project=None) -> Optional[dict]:
