@@ -687,6 +687,23 @@ class TestGeometryHandler:
         result = self.handler.simplify_geometry_adaptive(mock_geom)
         assert result is mock_geom
 
+    def test_simplify_geometry_adaptive_forwards_predicates(self):
+        """2026-10-16: the adapter needs the predicates to keep Cross/Touch sources exact."""
+        adapter_instance = MagicMock()
+        simplified = MagicMock()
+        adapter_instance.simplify_geometry_adaptive.return_value = MagicMock(success=True, geometry=simplified)
+        self.mock_bs.get_geometry_preparation_adapter.return_value = MagicMock(return_value=adapter_instance)
+        mock_geom = MagicMock()
+        mock_geom.isEmpty.return_value = False
+
+        result = self.handler.simplify_geometry_adaptive(
+            mock_geom, 1_000_000, "EPSG:2154", predicates=["ST_Crosses"]
+        )
+        assert result is simplified
+        kwargs = adapter_instance.simplify_geometry_adaptive.call_args.kwargs
+        assert kwargs["predicates"] == ["ST_Crosses"]
+        assert kwargs["max_wkt_length"] == 1_000_000
+
 
 # ===========================================================================
 # InitializationHandler Tests

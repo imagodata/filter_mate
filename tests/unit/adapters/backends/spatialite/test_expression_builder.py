@@ -291,6 +291,50 @@ class TestBuildExpression:
 
 
 # ===========================================================================
+# Tests -- large source WKT (2026-10-16)
+# ===========================================================================
+
+def _long_linestring(min_chars):
+    """A valid-looking MULTILINESTRING WKT of at least ``min_chars`` characters."""
+    coords = ", ".join(f"{560000 + i * 0.5:.3f} {6280000 + (i % 7) * 0.25:.3f}" for i in range(min_chars // 20 + 1))
+    return f"MULTILINESTRING(({coords}))"
+
+
+class TestLargeSourceWkt:
+    """The builder never generalizes the source; too large → OGR backend (exact)."""
+
+    def test_thresholds_are_consistent(self):
+        assert _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD == 1_000_000
+        assert _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH >= _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD
+        # SQLite's default SQLITE_MAX_SQL_LENGTH is 1,000,000,000 bytes.
+        assert _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH < 1_000_000_000
+        assert not hasattr(SpatialiteExpressionBuilder, "_simplify_wkt")
+
+    @pytest.mark.parametrize("predicate", ["crosses", "touches", "intersects"])
+    def test_source_above_simplify_threshold_is_inlined_untouched(self, builder, predicate):
+        wkt = _long_linestring(_mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD + 10)
+        assert len(wkt) > _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={predicate: True},
+            source_geom=wkt,
+        )
+        assert expr != USE_OGR_FALLBACK
+        assert f"ST_GeomFromText('{wkt}'" in expr
+
+    def test_source_above_inline_limit_goes_to_ogr(self, builder):
+        wkt = "MULTILINESTRING((0 0, 1 1" + ", 2 2" * (_mod.SPATIALITE_WKT_INLINE_MAX_LENGTH // 5) + "))"
+        assert len(wkt) > _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"crosses": True},
+            source_geom=wkt,
+        )
+        assert expr == USE_OGR_FALLBACK
+        assert any("too large to inline" in w for w in builder._warnings)
+
+
+# ===========================================================================
 # Tests -- GeoPackage detection
 # ===========================================================================
 

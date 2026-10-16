@@ -50,6 +50,12 @@ from .geometry_safety import (
 
 logger = logging.getLogger('FilterMate.Core.Geometry.Buffer')
 
+# 2026-10-16: the automatic post-buffer simplification (1 % of the buffer)
+# never exceeds this, in metres - the cap applied to every spatial-filter
+# source (adapters/qgis/geometry_preparation.SOURCE_SIMPLIFY_MAX_TOLERANCE).
+# A larger ``buffer_simplify_after_tolerance`` set by the user still applies.
+BUFFER_RESULT_MAX_AUTO_TOLERANCE = 1.0
+
 
 @dataclass
 class BufferConfig:
@@ -585,6 +591,7 @@ def simplify_buffer_result(
         adaptive_tolerance = max(tolerance, buffer_dist * 0.01)
         # Cap at 5% of buffer distance to avoid excessive simplification
         adaptive_tolerance = min(adaptive_tolerance, buffer_dist * 0.05)
+        adaptive_tolerance = min(adaptive_tolerance, max(tolerance, BUFFER_RESULT_MAX_AUTO_TOLERANCE))
     else:
         adaptive_tolerance = tolerance
 

@@ -36,16 +36,70 @@ from qgis.core import (
 
 logger = logging.getLogger('FilterMate.Adapters.GeometryPreparation')
 
-# 2026-09-13: a simplified source WKT may exceed ``max_wkt_length`` by this
-# factor before the envelope fallbacks (convex hull, bounding boxes) are
-# considered. The fallbacks change the meaning of the filter, so they are a
-# last resort for sources that would otherwise not fit in a subset string.
-SIMPLIFICATION_HARD_LIMIT_FACTOR = 10
+# 2026-10-16: the source geometry of a spatial filter is never generalized by
+# more than this, in metres (``/ 111000`` in a geographic CRS). It used to go
+# up to 100 m, and up to 10 km for "extreme" reductions: 691 Toulouse rivers
+# shrank from 236 KB to 14 KB of WKT and "Cross" returned 1,181 roads instead
+# of ~747. The convex hull / bounding box fallbacks are gone too: a source too
+# large to inline goes to the OGR backend instead (see the SpatiaLite
+# expression builder), which stays exact.
+SOURCE_SIMPLIFY_MAX_TOLERANCE = 1.0
+
+# 2026-10-16: the only predicates for which a source moved by at most
+# SOURCE_SIMPLIFY_MAX_TOLERANCE is acceptable: the answer only changes for
+# targets within that distance of the source. Crosses, Touches, Equals,
+# Overlaps, Within, Contains, Covers and CoveredBy depend on the exact vertices
+# (a road that crosses a river may only touch, or miss, its simplified copy),
+# so any other predicate - or none known - keeps the source exact.
+SIMPLIFY_TOLERANT_PREDICATES = frozenset(('intersects', 'disjoint'))
 
 # 2026-09-13: with a buffer, the simplification tolerance is capped to
 # ``|buffer| / BUFFER_TOLERANCE_DIVISOR`` so the buffer keeps its meaning
 # (a 20 m road buffer simplified with a 78 m tolerance meant nothing).
 BUFFER_TOLERANCE_DIVISOR = 10.0
+
+# UI keys (FilterEngineTask.predicates) whose plain name differs.
+_PREDICATE_ALIASES = {
+    'intersect': 'intersects', 'contain': 'contains', 'equal': 'equals', 'touch': 'touches',
+    'overlap': 'overlaps', 'cross': 'crosses', 'are within': 'within',
+}
+
+
+def _normalize_predicate(name) -> str:
+    """``'ST_Intersects'``, ``'Intersect'`` and ``'intersects'`` → ``'intersects'``."""
+    key = str(name).strip().lower()
+    if key.startswith('st_'):
+        key = key[3:]
+    return _PREDICATE_ALIASES.get(key, key)
+
+
+def source_simplification_allowed(predicates) -> bool:
+    """Whether the source geometry of a spatial filter may be simplified at all.
+
+    Args:
+        predicates: Predicate names (SQL ``ST_*`` names, UI keys or plain
+            names), or a dict keyed by them. ``None`` or empty means unknown.
+
+    Returns:
+        True only when every predicate is in SIMPLIFY_TOLERANT_PREDICATES.
+    """
+    if not predicates:
+        return False
+    return all(_normalize_predicate(p) in SIMPLIFY_TOLERANT_PREDICATES for p in predicates)
+
+
+def max_source_simplify_tolerance(is_geographic: bool, buffer_value: Optional[float] = None) -> float:
+    """Largest tolerance allowed on a source geometry, in CRS units.
+
+    ``SOURCE_SIMPLIFY_MAX_TOLERANCE`` metres, or a tenth of the buffer when
+    that is smaller.
+    """
+    tolerance = SOURCE_SIMPLIFY_MAX_TOLERANCE
+    if buffer_value:
+        tolerance = min(tolerance, abs(float(buffer_value)) / BUFFER_TOLERANCE_DIVISOR)
+    if is_geographic:
+        tolerance /= 111000.0
+    return tolerance
 
 
 @dataclass
@@ -715,7 +769,8 @@ class GeometryPreparationAdapter:
         max_wkt_length: Optional[int] = None,
         buffer_value: Optional[float] = None,
         buffer_segments: int = 5,
-        buffer_type: int = 0
+        buffer_type: int = 0,
+        predicates=None
     ) -> GeometryPreparationResult:
         """
         Convert features to WKT with automatic simplification for large geometries.
@@ -734,6 +789,8 @@ class GeometryPreparationAdapter:
             buffer_value: Buffer value for tolerance calculation
             buffer_segments: Buffer segments
             buffer_type: Buffer end cap type
+            predicates: Spatial predicates the WKT is used with (see
+                simplify_geometry_adaptive; unknown keeps the WKT exact)
 
         Returns:
             GeometryPreparationResult with WKT string (possibly simplified)
@@ -822,7 +879,8 @@ class GeometryPreparationAdapter:
                 crs_authid=crs_authid,
                 buffer_value=buffer_value,
                 buffer_segments=buffer_segments,
-                buffer_type=buffer_type
+                buffer_type=buffer_type,
+                predicates=predicates
             )
 
             if simplify_result.success and simplify_result.wkt:
@@ -857,16 +915,24 @@ class GeometryPreparationAdapter:
         crs_authid: Optional[str] = None,
         buffer_value: Optional[float] = None,
         buffer_segments: int = 5,
-        buffer_type: int = 0
+        buffer_type: int = 0,
+        predicates=None
     ) -> GeometryPreparationResult:
         """
         Simplify geometry adaptively to fit within WKT size limit.
 
-        Progressive simplification algorithm that:
-        1. Estimates optimal tolerance based on geometry extent and target size
-        2. Uses topology-preserving simplification
-        3. Progressively increases tolerance until target size is reached
-        4. Falls back to convexHull/boundingBox for extreme cases
+        2026-10-16: the result stays usable for an exact-enough filter:
+
+        1. Nothing is simplified unless every predicate tolerates it
+           (``source_simplification_allowed``): Crosses, Touches, Equals,
+           Overlaps, Within, Contains, ... keep the exact vertices.
+        2. The tolerance starts from an extent/buffer based guess and grows
+           until the target size is reached, but never beyond
+           ``max_source_simplify_tolerance`` (1 m, or a tenth of the buffer).
+        3. When the target is not reached, the best simplification within
+           that cap is returned anyway. There is no convex hull or bounding
+           box fallback: the SpatiaLite expression builder hands sources too
+           large to inline to the OGR backend, which stays exact.
 
         Args:
             geometry: QgsGeometry to simplify
@@ -875,9 +941,12 @@ class GeometryPreparationAdapter:
             buffer_value: Buffer value for tolerance calculation
             buffer_segments: Buffer segments (affects precision)
             buffer_type: Buffer end cap type (0=round, 1=flat, 2=square)
+            predicates: Spatial predicates the geometry is used with (names or
+                a dict keyed by them). None or empty keeps the geometry exact.
 
         Returns:
-            GeometryPreparationResult with simplified geometry
+            GeometryPreparationResult with the (possibly) simplified geometry.
+            The geometry may still exceed ``max_wkt_length``.
         """
         if not geometry or geometry.isEmpty():
             return GeometryPreparationResult(
@@ -895,13 +964,21 @@ class GeometryPreparationAdapter:
         # Check if simplification needed
         original_wkt = geometry.asWkt(wkt_precision)
         original_length = len(original_wkt)
+        exact_result = GeometryPreparationResult(
+            success=True,
+            geometry=geometry,
+            wkt=original_wkt.replace("'", "''")
+        )
 
         if original_length <= max_wkt_length:
-            return GeometryPreparationResult(
-                success=True,
-                geometry=geometry,
-                wkt=original_wkt.replace("'", "''")
+            return exact_result
+
+        if not source_simplification_allowed(predicates):
+            logger.info(
+                f"Source geometry kept exact ({original_length:,} chars > {max_wkt_length:,}): "
+                f"predicates {sorted(predicates) if predicates else 'unknown'} need its exact vertices"
             )
+            return exact_result
 
         logger.info(
             f"Simplifying geometry: {original_length} chars → target {max_wkt_length}"
@@ -927,117 +1004,69 @@ class GeometryPreparationAdapter:
             buffer_type=buffer_type
         )
 
-        # Progressive simplification
-        tolerance = initial_tolerance
-        best_simplified = geometry
-        best_wkt_length = original_length
+        # Progressive simplification, capped (see SOURCE_SIMPLIFY_MAX_TOLERANCE)
+        max_tolerance = max_source_simplify_tolerance(is_geographic, buffer_value)
+        tolerance = min(initial_tolerance, max_tolerance)
+        best_simplified = None
+        best_wkt = None
+        best_tolerance = None
         max_attempts = 15
         tolerance_multiplier = 2.0
 
-        # Get tolerance limits
-        max_tolerance = 100.0 / 111000.0 if is_geographic else 100.0
-
-        # Increase max tolerance for extreme reductions
-        if reduction_ratio < 0.01:
-            max_tolerance *= min(1.0 / reduction_ratio, 100)
-
-        # 2026-09-13: never simplify a buffered source beyond a fraction of
-        # its buffer (the buffer is what the user asked for).
-        if buffer_value:
-            buffer_cap = abs(float(buffer_value)) / BUFFER_TOLERANCE_DIVISOR
-            if is_geographic:
-                buffer_cap /= 111000.0
-            max_tolerance = min(max_tolerance, buffer_cap)
-
-        # 2026-09-13: the extent-based first guess could already exceed
-        # ``max_tolerance`` on a wide source, which skipped the loop entirely
-        # and went straight to the convex hull. Start from the cap instead.
-        tolerance = min(tolerance, max_tolerance)
-
-        for attempt in range(max_attempts):
-            if tolerance > max_tolerance:
-                break
-
+        for _attempt in range(max_attempts):
             simplified = geometry.simplify(tolerance)
 
-            if simplified is None or simplified.isEmpty():
-                tolerance *= 1.5
-                continue
-
             # Check geometry type preserved
-            if QgsWkbTypes.geometryType(simplified.wkbType()) != QgsWkbTypes.geometryType(geometry.wkbType()):
-                tolerance *= tolerance_multiplier
-                continue
+            if (
+                simplified is not None and not simplified.isEmpty()
+                and QgsWkbTypes.geometryType(simplified.wkbType()) == QgsWkbTypes.geometryType(geometry.wkbType())
+            ):
+                simplified_wkt = simplified.asWkt(wkt_precision)
+                if best_wkt is None or len(simplified_wkt) < len(best_wkt):
+                    best_simplified = simplified
+                    best_wkt = simplified_wkt
+                    best_tolerance = tolerance
+                if len(simplified_wkt) <= max_wkt_length:
+                    break
 
-            simplified_wkt = simplified.asWkt(wkt_precision)
-            wkt_length = len(simplified_wkt)
+            if tolerance >= max_tolerance:
+                break
+            tolerance = min(tolerance * tolerance_multiplier, max_tolerance)
 
-            if wkt_length < best_wkt_length:
-                best_simplified = simplified
-                best_wkt_length = wkt_length
-
-            if wkt_length <= max_wkt_length:
-                reduction_pct = (1 - wkt_length / original_length) * 100
-                logger.info(
-                    f"Simplified: {original_length} → {wkt_length} chars "
-                    f"({reduction_pct:.1f}% reduction)"
-                )
-                return GeometryPreparationResult(
-                    success=True,
-                    geometry=simplified,
-                    wkt=simplified_wkt.replace("'", "''")
-                )
-
-            tolerance *= tolerance_multiplier
-
-        # 2026-09-13: keep the best real simplification whenever it stays
-        # under the hard limit. The envelope fallbacks change the meaning of
-        # the filter (a 20 m buffer around 7000 road segments used to become
-        # the convex hull of the whole area), so they only apply to sources
-        # that would otherwise not fit in a subset string at all.
-        hard_limit = int(max_wkt_length * SIMPLIFICATION_HARD_LIMIT_FACTOR)
-        final_wkt = best_simplified.asWkt(wkt_precision)
-        reduction_pct = (1 - len(final_wkt) / original_length) * 100
-        if len(final_wkt) <= hard_limit:
+        if best_simplified is None or len(best_wkt) >= original_length:
             logger.warning(
-                f"Target {max_wkt_length} chars not reached, keeping the best "
-                f"simplification: {original_length} → {len(final_wkt)} chars "
-                f"({reduction_pct:.1f}% reduction, hard limit {hard_limit})"
+                f"Simplification within {max_tolerance:g} CRS units did not shrink the source: "
+                f"kept exact ({original_length:,} chars)"
             )
-            return GeometryPreparationResult(
-                success=True,  # Partial success
-                geometry=best_simplified,
-                wkt=final_wkt.replace("'", "''")
-            )
+            return exact_result
 
-        # Try fallbacks for extreme cases
-        fallback_result = self._try_simplification_fallbacks(
-            geometry, max_wkt_length, wkt_precision
+        self._warn_simplified_source(
+            original_length, len(best_wkt), max_wkt_length, best_tolerance, is_geographic
         )
-        if fallback_result and fallback_result.success:
-            self._warn_approximate_filter(len(final_wkt), hard_limit)
-            return fallback_result
-
-        # Return best result even if not under limit
-        logger.warning(
-            f"Could not reach target, using best: {original_length} → "
-            f"{len(final_wkt)} chars ({reduction_pct:.1f}% reduction)"
-        )
-
         return GeometryPreparationResult(
-            success=True,  # Partial success
+            success=True,
             geometry=best_simplified,
-            wkt=final_wkt.replace("'", "''")
+            wkt=best_wkt.replace("'", "''")
         )
 
     @staticmethod
-    def _warn_approximate_filter(wkt_length: int, hard_limit: int) -> None:
-        """Tell the user (QGIS message log) that the filter is now approximate."""
+    def _warn_simplified_source(
+        original_length: int,
+        final_length: int,
+        target_length: int,
+        tolerance: float,
+        is_geographic: bool
+    ) -> None:
+        """Tell the user (QGIS message log) how far the source was simplified."""
+        if is_geographic:
+            tolerance_text = f"{tolerance:.2e}° (~{tolerance * 111000.0:.2f} m)"
+        else:
+            tolerance_text = f"{tolerance:g} CRS units (m)"
+        reached = "" if final_length <= target_length else f", above the {target_length:,} target"
         message = (
-            f"FilterMate: the source geometry is too complex for an exact filter "
-            f"({wkt_length:,} chars after simplification, limit {hard_limit:,}). "
-            "An envelope of the source is used instead: the result is approximate. "
-            "Select fewer features or use the PostgreSQL backend for an exact filter."
+            f"FilterMate: source geometry simplified with a {tolerance_text} tolerance "
+            f"({original_length:,} → {final_length:,} chars{reached}). "
+            "Only targets within that distance of the source can be affected."
         )
         logger.warning(message)
         try:
@@ -1084,62 +1113,6 @@ class GeometryPreparationAdapter:
             scale = 2
 
         return base_tolerance * scale
-
-    def _try_simplification_fallbacks(
-        self,
-        geometry: QgsGeometry,
-        max_wkt_length: int,
-        wkt_precision: int
-    ) -> Optional[GeometryPreparationResult]:
-        """Try aggressive fallbacks for extreme simplification needs."""
-
-        # Fallback 1: Convex Hull
-        try:
-            hull = geometry.convexHull()
-            if hull and not hull.isEmpty():
-                hull_wkt = hull.asWkt(wkt_precision)
-                if len(hull_wkt) <= max_wkt_length:
-                    logger.warning("Using Convex Hull fallback - precision lost")
-                    return GeometryPreparationResult(
-                        success=True,
-                        geometry=hull,
-                        wkt=hull_wkt.replace("'", "''")
-                    )
-        except Exception:  # nosec B110 - fallback attempt only, next strategy tried below
-            pass
-
-        # Fallback 2: Oriented Bounding Box
-        try:
-            oriented_bbox = geometry.orientedMinimumBoundingBox()[0]
-            if oriented_bbox and not oriented_bbox.isEmpty():
-                bbox_wkt = oriented_bbox.asWkt(wkt_precision)
-                if len(bbox_wkt) <= max_wkt_length:
-                    logger.warning("Using Oriented BBox fallback - precision lost")
-                    return GeometryPreparationResult(
-                        success=True,
-                        geometry=oriented_bbox,
-                        wkt=bbox_wkt.replace("'", "''")
-                    )
-        except Exception:  # nosec B110 - fallback attempt only, next strategy tried below
-            pass
-
-        # Fallback 3: Simple Bounding Box
-        try:
-            bbox = geometry.boundingBox()
-            if not bbox.isEmpty():
-                bbox_geom = QgsGeometry.fromRect(bbox)
-                if bbox_geom and not bbox_geom.isEmpty():
-                    bbox_wkt = bbox_geom.asWkt(wkt_precision)
-                    logger.warning("Using Bounding Box fallback - maximum precision lost")
-                    return GeometryPreparationResult(
-                        success=True,
-                        geometry=bbox_geom,
-                        wkt=bbox_wkt.replace("'", "''")
-                    )
-        except Exception:  # nosec B110 - last fallback attempt, returns None below if it also fails
-            pass
-
-        return None
 
     def _is_geographic_crs(self, crs_authid: Optional[str]) -> bool:
         """Check if CRS is geographic based on auth ID."""

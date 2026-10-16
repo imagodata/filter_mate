@@ -617,29 +617,34 @@ def process_spatialite_geometries(
     logger.info(f"[Spatialite]   Final geometry type: {geom_type}")
     logger.info(f"[Spatialite]   📏 WKT length: {len(wkt):,} chars")
 
-    # Apply adaptive simplification for large geometries
-    if context.get_optimization_thresholds:
-        thresholds = context.get_optimization_thresholds()
-        max_wkt_length = thresholds.get('exists_subquery_threshold', 100000)
+    # Apply adaptive simplification for large geometries.
+    # 2026-10-16: one threshold for the whole SpatiaLite chain, the expression
+    # builder's (this used to be the 100 KB PostgreSQL EXISTS threshold, so a
+    # 236 KB river network was generalized by 100 m). The callback leaves the
+    # geometry exact for vertex-level predicates (Crosses, Touches, ...) and
+    # caps the tolerance to 1 m otherwise; the builder hands sources still too
+    # large to inline to the OGR backend.
+    from .expression_builder import SPATIALITE_WKT_SIMPLIFY_THRESHOLD
+    if len(wkt) > SPATIALITE_WKT_SIMPLIFY_THRESHOLD and context.simplify_geometry_adaptive:
+        logger.warning(f"[Spatialite]   ⚠️ WKT too long ({len(wkt)} > {SPATIALITE_WKT_SIMPLIFY_THRESHOLD})")
 
-        if len(wkt) > max_wkt_length and context.simplify_geometry_adaptive:
-            logger.warning(f"[Spatialite]   ⚠️ WKT too long ({len(wkt)} > {max_wkt_length})")
+        simplified = context.simplify_geometry_adaptive(
+            collected_geometry,
+            max_wkt_length=SPATIALITE_WKT_SIMPLIFY_THRESHOLD,
+            crs_authid=crs_authid
+        )
 
-            simplified = context.simplify_geometry_adaptive(
-                collected_geometry,
-                max_wkt_length=max_wkt_length,
-                crs_authid=crs_authid
-            )
+        if simplified is not None and simplified is not collected_geometry and not simplified.isEmpty():
+            if context.geometry_to_wkt:
+                simplified_wkt = context.geometry_to_wkt(simplified, crs_authid)
+            else:
+                simplified_wkt = simplified.asWkt()
 
-            if simplified and not simplified.isEmpty():
-                if context.geometry_to_wkt:
-                    simplified_wkt = context.geometry_to_wkt(simplified, crs_authid)
-                else:
-                    simplified_wkt = simplified.asWkt()
-
-                reduction_pct = (1 - len(simplified_wkt) / len(wkt)) * 100
-                logger.info(f"[Spatialite]   ✓ Simplified: {len(wkt)} → {len(simplified_wkt)} chars ({reduction_pct:.1f}% reduction)")
-                wkt = simplified_wkt
+            reduction_pct = (1 - len(simplified_wkt) / len(wkt)) * 100
+            logger.info(f"[Spatialite]   ✓ Simplified: {len(wkt)} → {len(simplified_wkt)} chars ({reduction_pct:.1f}% reduction)")
+            wkt = simplified_wkt
+        else:
+            logger.info(f"[Spatialite]   Source kept exact ({len(wkt):,} chars)")
 
     # Escape single quotes for SQL
     return wkt.replace("'", "''")

@@ -57,11 +57,20 @@ except ImportError:
 USE_OGR_FALLBACK = "__USE_OGR_FALLBACK__"
 
 # Thresholds
-# 2026-09-13: raised from 100 KB to 1 MB. The executor already runs the
-# buffer-aware adaptive simplification; this extent-based pass (tolerance =
-# extent / 1000, i.e. ~20 m on a 20 km source) is only a safety net for
-# WKTs that would otherwise not fit in a subset string.
+# 2026-10-16: the single source-WKT threshold of the SpatiaLite chain. Above
+# it, filter_executor.process_spatialite_geometries() simplifies the source,
+# by at most 1 m and only for Intersects / Disjoint (see
+# adapters/qgis/geometry_preparation.py); smaller sources are inlined exact.
+# This builder no longer simplifies anything itself (its extent / 1000 pass
+# moved a 30 km source by 30 m).
 SPATIALITE_WKT_SIMPLIFY_THRESHOLD = 1_000_000
+# 2026-10-16: largest source WKT inlined in a subset string. SQLite accepts
+# statements up to SQLITE_MAX_SQL_LENGTH (1,000,000,000 bytes by default) and
+# GDAL's GeoPackage driver passes the filter through as is, but the string is
+# parsed again by every statement QGIS runs on the layer (count, extent, each
+# render) and kept in the project. Beyond this size the layer goes to the OGR
+# backend (QGIS processing against the source layer), which stays exact.
+SPATIALITE_WKT_INLINE_MAX_LENGTH = 10 * SPATIALITE_WKT_SIMPLIFY_THRESHOLD
 
 # PERF 2026-09-12: GeoPackage R-tree prefilter. SQLite evaluates the spatial
 # predicate row by row over the whole table: with a 2,000-vertex source polygon
@@ -310,11 +319,14 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             self.log_info(f"Buffer of {buffer_value} already applied to the source WKT - no ST_Buffer() in SQL")
             buffer_value = None
 
-        # Simplify large WKT
-        if wkt_length >= SPATIALITE_WKT_SIMPLIFY_THRESHOLD:
-            source_geom = self._simplify_wkt(source_geom, buffer_state.get('buffer_value'))
-            wkt_length = len(source_geom)
-            self.log_info(f"WKT simplified to {wkt_length} chars")
+        # 2026-10-16: never generalize the source here (results must stay
+        # exact); a source too large to inline goes to the OGR backend.
+        if wkt_length > SPATIALITE_WKT_INLINE_MAX_LENGTH:
+            self.log_warning(
+                f"Source WKT too large to inline ({wkt_length:,} > {SPATIALITE_WKT_INLINE_MAX_LENGTH:,} chars)"
+                " - returning OGR fallback (exact, QGIS processing)"
+            )
+            return USE_OGR_FALLBACK
 
         # Build geometry expression
         geom_expr = f'"{geom_field}"'
@@ -632,31 +644,6 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
                 source_geom_sql = f"ST_MakeValid({source_geom_sql})"
 
         return source_geom_sql
-
-    def _simplify_wkt(self, wkt: str, buffer_value: Optional[float] = None) -> str:
-        """Simplify WKT geometry to reduce complexity.
-
-        2026-09-13: with a buffer the tolerance is capped to a tenth of it so
-        the buffer keeps its meaning.
-        """
-        try:
-            from qgis.core import QgsGeometry
-            geom = QgsGeometry.fromWkt(wkt)
-            if geom and not geom.isEmpty():
-                # Calculate tolerance based on bbox
-                bbox = geom.boundingBox()
-                tolerance = max(bbox.width(), bbox.height()) / 1000
-                if buffer_value:
-                    tolerance = min(tolerance, abs(float(buffer_value)) / 10.0)
-
-                # Simplify
-                simplified = geom.simplify(tolerance)
-                if simplified and not simplified.isEmpty():
-                    return simplified.asWkt()
-        except Exception as e:
-            self.log_warning(f"WKT simplification failed: {e}")
-
-        return wkt
 
     def _is_geometric_filter(self, subset: str) -> bool:
         """Check if subset contains geometric filter patterns."""

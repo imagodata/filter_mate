@@ -54,10 +54,9 @@ SPATIALITE_BATCH_SIZE = _sl_cfg['batch_size']
 SPATIALITE_PROGRESS_INTERVAL = _sl_cfg['progress_interval']
 SPATIALITE_INTERRUPT_CHECK_INTERVAL = 0.5  # Check for cancellation every N seconds
 
-# WKT simplification thresholds to prevent GeomFromText freeze on complex geometries
-# GeomFromText parsing complexity is O(n²) for polygon validation
-SPATIALITE_WKT_SIMPLIFY_THRESHOLD = 30000  # 30KB - trigger Python simplification
-SPATIALITE_WKT_MAX_POINTS = 3000  # Max points before aggressive simplification
+# 2026-10-16: the source-WKT simplification threshold lives in
+# expression_builder.SPATIALITE_WKT_SIMPLIFY_THRESHOLD only. The 30 KB value
+# (and SPATIALITE_WKT_MAX_POINTS) defined here was used nowhere and disagreed.
 SPATIALITE_GEOM_INSERT_TIMEOUT = 30  # Timeout for geometry insertion (seconds)
 
 # Sentinel value to signal that OGR fallback is required
@@ -345,8 +344,6 @@ __all__ = [
     'SPATIALITE_BATCH_SIZE',
     'SPATIALITE_PROGRESS_INTERVAL',
     'SPATIALITE_INTERRUPT_CHECK_INTERVAL',
-    'SPATIALITE_WKT_SIMPLIFY_THRESHOLD',
-    'SPATIALITE_WKT_MAX_POINTS',
     'SPATIALITE_GEOM_INSERT_TIMEOUT',
     'USE_OGR_FALLBACK',
 ]

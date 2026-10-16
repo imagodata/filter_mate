@@ -315,6 +315,7 @@ class GeometryHandler:
         buffer_value: Optional[float] = None,
         buffer_segments: int = 5,
         buffer_type: int = 0,
+        predicates=None,
     ) -> Any:
         """Simplify geometry adaptively using GeometryPreparationAdapter.
 
@@ -325,6 +326,8 @@ class GeometryHandler:
             buffer_value: Buffer distance value
             buffer_segments: Number of buffer segments
             buffer_type: Buffer end cap type
+            predicates: Spatial predicates of the filter. Unknown (None/empty)
+                or vertex-exact ones (Crosses, Touches, ...) keep it exact.
 
         Returns:
             QgsGeometry: Simplified geometry (or original on failure)
@@ -345,6 +348,7 @@ class GeometryHandler:
                 buffer_value=buffer_value,
                 buffer_segments=buffer_segments,
                 buffer_type=buffer_type,
+                predicates=predicates,
             )
 
             if result.success and result.geometry:

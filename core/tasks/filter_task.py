@@ -1478,12 +1478,17 @@ class FilterEngineTask(QgsTask):
         )
 
     def _simplify_geometry_adaptive(self, geometry: Any, max_wkt_length: Optional[int] = None, crs_authid: Optional[str] = None) -> Any:
-        """Simplify geometry adaptively. Delegates to GeometryHandler."""
+        """Simplify geometry adaptively. Delegates to GeometryHandler.
+
+        2026-10-16: the filter's predicates decide whether the source may be
+        simplified at all (see geometry_preparation.source_simplification_allowed).
+        """
         return self._geometry_handler.simplify_geometry_adaptive(
             geometry, max_wkt_length, crs_authid,
             buffer_value=getattr(self, 'param_buffer_value', None),
             buffer_segments=getattr(self, 'param_buffer_segments', 5),
             buffer_type=getattr(self, 'param_buffer_type', 0),
+            predicates=list(getattr(self, 'current_predicates', None) or {}),
         )
 
     def prepare_spatialite_source_geom(self) -> Optional[str]:
