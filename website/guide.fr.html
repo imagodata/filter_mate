@@ -154,15 +154,15 @@
     <p>FilterMate est un panneau ancrable. Par défaut il s'ouvre à droite de la fenêtre QGIS et se déplace, se détache ou se redimensionne comme n'importe quel panneau QGIS.</p>
     <figure>
         <img src="img/guide/qgis-window.png" alt="QGIS 4.2 avec un petit projet BD TOPO et le panneau FilterMate ancré à droite" loading="lazy" width="1600" height="945">
-        <figcaption>QGIS 4.2 (thème sombre) avec le panneau FilterMate ancré à droite. Le projet contient cinq couches GeoPackage.</figcaption>
+        <figcaption>QGIS 4.2 avec le panneau FilterMate ancré à droite. Le projet contient cinq couches GeoPackage.</figcaption>
     </figure>
 
     <p>Le panneau se compose de quatre zones, de haut en bas :</p>
     <div class="table-wrap">
     <table>
         <tr><th>Zone</th><th>Rôle</th></tr>
-        <tr><td><strong>Badges d'en-tête</strong></td><td>Le badge <span class="badge" style="background:#f39c12;">&#9733; n</span> compte les favoris enregistrés et ouvre leur menu. Le badge coloré indique le backend qui gère la couche courante : <span class="badge" style="background:#58d68d;">PostgreSQL</span> <span class="badge" style="background:#bb8fce;">Spatialite</span> <span class="badge" style="background:#5dade2;">OGR</span> <span class="badge" style="background:#f0b27a;">Memory</span>.</td></tr>
-        <tr><td><strong>Zone Exploring</strong></td><td>Choix des entités de référence sur la couche courante : sélection simple, multiple ou par expression, plus une colonne de boutons de navigation.</td></tr>
+        <tr><td><strong>Badges d'en-tête</strong></td><td>Le bouton &#9733; ouvre le menu des favoris ; il passe à l'orange dès que des favoris sont enregistrés. Le badge coloré indique le type de la couche courante et ce qui la lit : le backend pour une couche vecteur (PostgreSQL, Spatialite, OGR, Memory), le fournisseur pour un raster ou un nuage de points. Par exemple <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
+        <tr><td><strong>Zone Exploring</strong></td><td>Sélection sur la couche courante, décrite par la fiche en haut de la zone. Pour une couche vecteur : sélection simple, multiple ou par expression, plus une colonne de boutons de navigation. Les rasters et les nuages de points ont leurs propres outils (<a href="#raster-lidar">section 13</a>).</td></tr>
         <tr><td><strong>Onglets d'outils</strong></td><td>Trois onglets repliables : <strong>Filtering</strong>, <strong>Exporting</strong> et <strong>Configuration</strong>. Un seul est ouvert à la fois.</td></tr>
         <tr><td><strong>Barre d'actions</strong></td><td>Les six boutons qui agissent réellement : Filter, Undo, Redo, Unfilter, Export, About.</td></tr>
     </table>
@@ -175,8 +175,8 @@
         </figure>
         <div>
             <figure>
-                <img src="img/guide/header-badges.png" alt="Badges favoris et backend dans l'en-tête du panneau" loading="lazy" width="614" height="42">
-                <figcaption>En-tête : 4 favoris enregistrés, couche courante gérée par le backend Spatialite.</figcaption>
+                <img src="img/guide/header-badges.png" alt="Badges favoris et backend dans l'en-tête du panneau" loading="lazy" width="614" height="48">
+                <figcaption>En-tête : le bouton des favoris et la couche courante, une couche vecteur lue par le backend Spatialite.</figcaption>
             </figure>
             <figure>
                 <img src="img/guide/action-bar.png" alt="La barre d'actions avec Filter, Undo, Redo, Unfilter, Export et About" loading="lazy" width="614" height="119">
@@ -209,7 +209,7 @@
 
     <h3>Sélection simple</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-single.png" alt="Sélection simple avec une route choisie par son nom" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-single.png" alt="Sélection simple avec une route choisie par son nom" loading="lazy" width="596" height="449">
         <figcaption>Sélection simple sur une couche de routes : l'entité est choisie par son nom, le champ en dessous définit l'attribut affiché.</figcaption>
     </figure>
     <p>
@@ -220,7 +220,7 @@
 
     <h3>Sélection multiple</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-multiple.png" alt="Sélection multiple avec quatre routes cochées" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-multiple.png" alt="Sélection multiple avec quatre routes cochées" loading="lazy" width="596" height="449">
         <figcaption>Sélection multiple : quatre routes sont cochées. La ligne au-dessus de la liste résume la sélection ; le champ de texte filtre la liste au fil de la saisie.</figcaption>
     </figure>
     <p>
@@ -230,7 +230,7 @@
 
     <h3>Sélection personnalisée (expression)</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-custom.png" alt="Sélection personnalisée avec une expression QGIS" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-custom.png" alt="Sélection personnalisée avec une expression QGIS" loading="lazy" width="596" height="449">
         <figcaption>Sélection personnalisée : n'importe quelle expression QGIS, ici les routes d'importance 3 ou 4.</figcaption>
     </figure>
     <p>
@@ -266,7 +266,7 @@
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/filtering-tab.png" alt="L'onglet Filtering avec couches cibles, prédicat et tampon définis" loading="lazy" width="590" height="620">
+        <img src="img/guide/filtering-tab.png" alt="L'onglet Filtering avec couches cibles, prédicat et tampon définis" loading="lazy" width="590" height="617">
         <figcaption>Onglet Filtering : couche source, deux couches cibles, opérateurs de combinaison, prédicat Intersect, tampon rond de 50 m.</figcaption>
     </figure>
     <p>
@@ -468,7 +468,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/export-tab.png" alt="L'onglet Exporting" loading="lazy" width="590" height="620">
+        <img src="img/guide/export-tab.png" alt="L'onglet Exporting" loading="lazy" width="590" height="617">
         <figcaption>Onglet Exporting : couches, CRS, format de style, format de sortie, dossier de sortie avec mode batch, ZIP.</figcaption>
     </figure>
     <p>
@@ -501,7 +501,7 @@ AND ST_Intersects("geom",
 <section id="configuration">
     <h2><span class="num">10</span>Configuration</h2>
     <figure class="narrow">
-        <img src="img/guide/configuration-tab.png" alt="L'onglet Configuration avec l'arbre des réglages" loading="lazy" width="590" height="620">
+        <img src="img/guide/configuration-tab.png" alt="L'onglet Configuration avec l'arbre des réglages" loading="lazy" width="590" height="617">
         <figcaption>Onglet Configuration : un arbre de réglages, modifiés sur place. Les changements sont enregistrés immédiatement.</figcaption>
     </figure>
     <p>
