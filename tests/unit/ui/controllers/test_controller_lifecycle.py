@@ -225,6 +225,16 @@ def test_teardown_disconnects_the_coverage_controller_from_the_project(integrati
     assert integration.coverage_controller is None
 
 
+def test_closing_the_dock_keeps_the_controllers(integration, project):
+    coverage = integration.coverage_controller
+    coverage._deactivate_pixel_tool = MagicMock()
+    integration.on_dock_closed()
+    coverage._deactivate_pixel_tool.assert_called_once_with()
+    assert integration.coverage_controller is coverage
+    assert project.readProject.slots == [coverage._on_project_read]
+    assert all(controller.calls == ['setup'] for controller in _stubs(integration))
+
+
 def test_tab_change_notifies_the_previous_and_the_new_tab(integration):
     tabs = integration._dockwidget.tabTools
     exporting, config = integration.exporting_controller, integration.config_controller

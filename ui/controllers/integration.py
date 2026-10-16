@@ -11,7 +11,7 @@ Usage:
         self._controller_integration = ControllerIntegration(self)
         self._controller_integration.setup()
 
-    In closeEvent:
+    When the plugin unloads (filter_mate.py unload; closing the dock only hides it):
         self._controller_integration.teardown()
 """
 from typing import TYPE_CHECKING, Optional, Dict, Any, Tuple
@@ -238,6 +238,18 @@ class ControllerIntegration:
             self._is_setup = False
 
             logger.info("Controller integration teardown complete")
+
+    def on_dock_closed(self) -> None:
+        """The dock was closed: it is only hidden, the controllers stay set up.
+
+        They are torn down when the plugin unloads (``teardown``); tearing them
+        down here left the reopened dock without its raster / point cloud mode.
+        Only the pixel picker stops: it would keep the map tool while the
+        panel showing the pixel values is hidden.
+        """
+        controller = self._point_cloud_ui_controller
+        if controller is not None:
+            controller._deactivate_pixel_tool()
 
     def _create_controllers(self) -> None:
         """Create all controller instances."""
