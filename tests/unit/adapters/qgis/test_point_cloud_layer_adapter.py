@@ -445,3 +445,54 @@ class TestHelpers:
     ])
     def test_to_int(self, value, expected):
         assert adapter._to_int(value) == expected
+
+
+class TestClassUnderClick:
+    def test_most_frequent_class_wins(self):
+        points = [{"Classification": 6}, {"Classification": 2}, {"Classification": 6}, {"Classification": 5}]
+        assert adapter.dominant_class(points) == 6
+
+    def test_lowest_code_on_a_tie(self):
+        assert adapter.dominant_class([{"Classification": 5}, {"Classification": 2}]) == 2
+
+    def test_no_classified_point(self):
+        assert adapter.dominant_class([]) is None
+        assert adapter.dominant_class(None) is None
+        assert adapter.dominant_class([{"Z": 12.0}, {"Classification": None}, object()]) is None
+
+    def test_identify_tool_labels_are_read(self):
+        # The QGIS identify tool gives "2 (Ground)", not the bare code.
+        points = [{"Classification": "2 (Ground)"}, {"Classification": "6 (Building)"}, {"Classification": "6 (Building)"}]
+        assert adapter.dominant_class(points) == 6
+
+    @pytest.mark.parametrize("value, expected", [
+        (2, 2), ("2", 2), ("17 (Bridge deck)", 17), (" 9 (Water)", 9), ("Ground", -1), (None, -1), (True, -1),
+    ])
+    def test_class_code(self, value, expected):
+        assert adapter.class_code(value) == expected
+
+    def test_no_canvas_reads_nothing(self):
+        assert adapter.class_at(object(), None, None) is None
+
+
+class TestMayHaveClasses:
+    class _Attribute:
+        def __init__(self, name):
+            self._name = name
+
+        def name(self):
+            return self._name
+
+    def _layer(self, *names):
+        attributes = [self._Attribute(name) for name in names]
+        collection = types.SimpleNamespace(attributes=lambda: attributes)
+        return types.SimpleNamespace(attributes=lambda: collection)
+
+    def test_listed_classification(self):
+        assert adapter.may_have_classes(self._layer("X", "Y", "Z", "Classification")) is True
+
+    def test_listed_without_classification(self):
+        assert adapter.may_have_classes(self._layer("X", "Y", "Z", "Intensity")) is False
+
+    def test_unknown_attributes_keep_the_pipette(self):
+        assert adapter.may_have_classes(object()) is True

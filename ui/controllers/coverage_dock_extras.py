@@ -37,6 +37,7 @@ ICON_HOVER = ('<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="11.
 ICON_ZONE = '<rect x="3" y="4" width="18" height="14" stroke-dasharray="2.5 2"/><path d="M8 15v-3M12 15V8M16 15v-5"/>'
 ICON_PROFILE = '<path d="M2 18l5-7 4 4 4-8 7 11M2 21h20"/>'
 ICON_LINK_STYLE = '<path d="M4 20V10M9 20V5M14 20v-8M19 20v-4M2 20h20"/>'
+ICON_PIPETTE = '<path d="M20.5 3.5a2.1 2.1 0 0 0-3 0L14 7l-1.5-1.5-1.5 1.5 1.5 1.5L4 16v4h4l7.5-7.5L17 14l1.5-1.5L17 11l3.5-3.5a2.1 2.1 0 0 0 0-3z"/>'
 ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 12v10"/>'
 
 # QGIS main window actions run by the point cloud tools, first name found wins
@@ -161,12 +162,14 @@ def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -
 
 
 # The rail keeps the shared EXPLORING buttons that matter most: pixel picker, zoom to the selection,
-# preview and reset. The extra tools (value under the cursor, statistics of a rectangle, style link,
-# elevation profile, 3D view) are still implemented below but no longer put on the rail: the picker reads
-# the value and QGIS has its own statistics, profile and 3D tools. List a tool here to bring it back.
+# preview and reset. On top of them: the style link for a raster (no QGIS tool stretches the colours over
+# the selected range) and the class pipette for a point cloud (a click on the map checks the class of the
+# points there). The other tools (value under the cursor, statistics of a rectangle, elevation profile,
+# 3D view) are still implemented below but not put on the rail: the picker reads the value and QGIS has
+# its own statistics, profile and 3D tools. List a tool here to bring it back.
 RAIL_TOOLS = {
-    'raster': (),
-    'point_cloud': (),
+    'raster': ('pushButton_checkable_exploring_raster_link',),
+    'point_cloud': ('pushButton_checkable_exploring_point_cloud_pipette',),
 }
 _RAIL_TOOL_NAMES = frozenset(name for names in RAIL_TOOLS.values() for name in names)
 
@@ -267,6 +270,9 @@ class CoverageDockExtras(QObject):
             logger.debug("[FM5] EXPLORING tool rail not found, kind tools not added")
             return
         self._link_tip = self.tr("Link the range to the style: the layer colours stretch over the selected range")
+        self._class_pipette_tip = self.tr(
+            "Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds "
+            "another one")
         specs = (
             ('pushButton_checkable_exploring_raster_hover', True,
              self.tr("Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) "
@@ -277,6 +283,8 @@ class CoverageDockExtras(QObject):
                      "band (or of the slope, aspect... the range applies to)"),
              self._on_zone_toggled),
             ('pushButton_checkable_exploring_raster_link', True, self._link_tip, self._on_link_toggled),
+            ('pushButton_checkable_exploring_point_cloud_pipette', True, self._class_pipette_tip,
+             self._on_class_pipette_toggled),
             ('pushButton_exploring_point_cloud_profile', False,
              self.tr("Elevation profile: open the QGIS elevation profile of the map"), self._open_elevation_profile),
             ('pushButton_exploring_point_cloud_3d', False,
@@ -316,6 +324,7 @@ class CoverageDockExtras(QObject):
             'pushButton_checkable_exploring_raster_hover': ICON_HOVER,
             'pushButton_checkable_exploring_raster_zone': ICON_ZONE,
             'pushButton_checkable_exploring_raster_link': ICON_LINK_STYLE,
+            'pushButton_checkable_exploring_point_cloud_pipette': ICON_PIPETTE,
             'pushButton_exploring_point_cloud_profile': ICON_PROFILE,
             'pushButton_exploring_point_cloud_3d': ICON_3D,
         }
@@ -345,6 +354,7 @@ class CoverageDockExtras(QObject):
             button.setVisible(name in visible)
         if kind_value == 'point_cloud':
             self._tools_enabled_by_action()
+            self._guarded(self._class_pipette_enabled, layer)
         if kind_value == 'raster':
             self._guarded(self._watch_panel)
         self._refresh_icons()
@@ -406,7 +416,7 @@ class CoverageDockExtras(QObject):
     def leave(self) -> None:
         """Stop the map interactions of the outgoing layer (hover, rectangle tool)."""
         for name in ('pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
-                     'pushButton_checkable_exploring_raster_link'):
+                     'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_point_cloud_pipette'):
             button = self._tools.get(name)
             if button is not None:
                 self._guarded(self._uncheck, button)
@@ -544,6 +554,30 @@ class CoverageDockExtras(QObject):
                     pass
         self._hidden_vector_buttons = {}
 
+    # === Point cloud: class pipette ===
+
+    def _on_class_pipette_toggled(self, checked: bool) -> None:
+        self._controller._on_class_pick_toggled(checked)
+
+    def _class_pipette_enabled(self, layer: Any) -> None:
+        """A point cloud without the Classification attribute has no class to pick."""
+        button = self._tools.get('pushButton_checkable_exploring_point_cloud_pipette')
+        if button is None:
+            return
+        from ...adapters.qgis.point_cloud_layer_adapter import may_have_classes
+        enabled = may_have_classes(layer)
+        button.setEnabled(enabled)
+        button.setToolTip(self._class_pipette_tip if enabled else self.tr(
+            "Class pipette: this point cloud has no Classification attribute"))
+
+    def set_class_pipette_checked(self, checked: bool) -> None:
+        """The class picker left the map: the pipette button follows without running its slot."""
+        button = self._tools.get('pushButton_checkable_exploring_point_cloud_pipette')
+        if button is not None:
+            button.blockSignals(True)
+            button.setChecked(bool(checked))
+            button.blockSignals(False)
+
     # === Raster: value under the cursor ===
 
     def _canvas(self):
@@ -668,9 +702,21 @@ class CoverageDockExtras(QObject):
                 self._unlink_style()  # one linked raster at a time
             self._linked_layer_id = layer.id()
             if not link_range_to_style(layer, panel.current_band(), low, high):
-                logger.debug("[FM5] this raster style has no single band range to link")
+                self._link_refused()
         except RuntimeError:
             pass
+
+    def _link_refused(self) -> None:
+        """The style has no single band range on the band of the panel: say so, the button comes up."""
+        logger.debug("[FM5] this raster style has no single band range to link")
+        button = self._tools.get('pushButton_checkable_exploring_raster_link')
+        if button is not None and button.isChecked():
+            button.setChecked(False)  # runs the toggled slot: disconnected, a previous link given back
+        iface = self._controller._iface()
+        if iface is not None:
+            iface.messageBar().pushInfo("FilterMate", self.tr(
+                "The style cannot follow the range: it needs a single band grey or pseudocolor style "
+                "on the band of the panel"))
 
     def _unlink_style(self) -> None:
         """Give the linked raster its style back: the layer that was linked, which is no longer

@@ -108,13 +108,13 @@ class TestPointCloudCard:
 
 
 class TestTools:
-    def test_raster_rail_has_no_extra_tool(self):
-        # Picker, zoom, preview and reset are the shared buttons; hover, statistics and style link are off the rail.
-        assert extras.tools_for("raster") == []
+    def test_raster_rail_adds_the_style_link(self):
+        # Picker, zoom, preview and reset are the shared buttons; hover and statistics are off the rail.
+        assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_link"]
 
-    def test_point_cloud_rail_has_no_extra_tool(self):
+    def test_point_cloud_rail_adds_the_class_pipette(self):
         # The elevation profile and the 3D view are the standard QGIS tools: not on the rail.
-        assert extras.tools_for("point_cloud") == []
+        assert extras.tools_for("point_cloud") == ["pushButton_checkable_exploring_point_cloud_pipette"]
 
     def test_vector_has_no_extra_tool(self):
         assert extras.tools_for("vector") == []
@@ -126,7 +126,7 @@ class TestTools:
 
     def test_every_tool_has_an_icon(self):
         assert all(body.strip().startswith("<") for body in (extras.ICON_HOVER, extras.ICON_ZONE, extras.ICON_LINK_STYLE,
-                                                            extras.ICON_PROFILE, extras.ICON_3D))
+                                                            extras.ICON_PIPETTE, extras.ICON_PROFILE, extras.ICON_3D))
 
 
 class TestZone:
@@ -389,3 +389,24 @@ def test_value_under_the_cursor_reads_the_new_source_after_a_filter(dock_extras)
     layer._source = "/cache/r1_cut.vrt"
     env.dock._read_hover_value()
     assert env.controller.based == ["/data/r1.tif", "/cache/r1_cut.vrt"]
+
+
+class TestClassPipette:
+    def _pipette(self, env):
+        calls = []
+        env.controller._on_class_pick_toggled = calls.append
+        pipette = FakeButton(env.dock._on_class_pipette_toggled)
+        env.dock._tools["pushButton_checkable_exploring_point_cloud_pipette"] = pipette
+        return pipette, calls
+
+    def test_button_drives_the_class_picker(self, dock_extras):
+        pipette, calls = self._pipette(dock_extras)
+        pipette.setChecked(True)
+        pipette.setChecked(False)
+        assert calls == [True, False]
+
+    def test_leaving_the_layer_takes_the_picker_off_the_map(self, dock_extras):
+        pipette, calls = self._pipette(dock_extras)
+        pipette.setChecked(True)
+        dock_extras.dock.leave()
+        assert calls == [True, False] and not pipette.isChecked()
