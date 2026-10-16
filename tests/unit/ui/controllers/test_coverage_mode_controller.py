@@ -847,6 +847,74 @@ class TestLayerLifecycle:
         controller.setup()
         assert [len(s.slots) for s in (project.readProject, project.cleared, project.layersWillBeRemoved)] == [1, 1, 1]
 
+    def test_setup_retries_a_failed_connection_without_doubling_the_others(self, ctrl_module, monkeypatch):
+        class FlakySignal(FakeSignal):
+            failures = 1
+
+            def connect(self, slot):
+                if self.failures:
+                    self.failures -= 1
+                    raise TypeError("not ready")
+                super().connect(slot)
+
+        project = types.SimpleNamespace(readProject=FakeSignal(), cleared=FlakySignal(), layersWillBeRemoved=FakeSignal())
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject",
+                            types.SimpleNamespace(instance=lambda: project), raising=False)
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller.setup()
+        assert [len(s.slots) for s in (project.readProject, project.cleared, project.layersWillBeRemoved)] == [1, 0, 1]
+        controller.setup()
+        assert [len(s.slots) for s in (project.readProject, project.cleared, project.layersWillBeRemoved)] == [1, 1, 1]
+
+    def _removal(self, ctrl_module, layers, monkeypatch, current):
+        dock = _dock(current_layer=current)
+        controller = ctrl_module.CoverageModeController(dock)
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")
+        controller._extras = object()  # the dock additions exist
+        extras = []
+        monkeypatch.setattr(controller, "_extras_call", lambda method, *a: extras.append((method,) + a))
+        return controller, dock, extras
+
+    def test_removed_active_layer_brings_the_vector_rail_back(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, dock, extras = self._removal(ctrl_module, layers, monkeypatch, current=layers["r1"])
+        controller._on_layers_removed(["r1"])
+        assert extras == [("forget_layers", ["r1"]), ("show_vector", None)]  # no raster tool, no stale card
+        assert dock.current_layer is None  # Filter would read a deleted layer
+
+    def test_other_removed_layer_leaves_the_dock_alone(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, dock, extras = self._removal(ctrl_module, layers, monkeypatch, current=layers["r1"])
+        controller._on_layers_removed(["p1"])
+        assert extras == [("forget_layers", ["p1"])]
+        assert dock.current_layer is layers["r1"] and controller.active_layer is layers["r1"]
+
+    def test_closed_project_brings_the_vector_rail_back(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, dock, extras = self._removal(ctrl_module, layers, monkeypatch, current=layers["r1"])
+        controller._on_project_cleared()
+        assert extras == [("forget_layers", None), ("show_vector", None)]
+        assert dock.current_layer is None and controller.active_layer is None
+
+    def test_histories_are_forgotten_even_when_leaving_the_layer_fails(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+
+        def broken():
+            raise ValueError("panel already deleted")
+
+        monkeypatch.setattr(controller, "deactivate", broken)
+        controller._active_layer = layers["r1"]
+        controller._on_layers_removed(["r1"])
+        controller._on_project_cleared()
+        assert ctrl_module._test_service_module.calls == [("forget", "r1"), ("clear_histories",)]
+
+    def test_preview_button_signals_unblocked_when_checking_fails(self, ctrl_module):
+        selecting = MagicMock()
+        selecting.setChecked.side_effect = TypeError("unexpected")
+        controller = ctrl_module.CoverageModeController(_dock(pushButton_checkable_exploring_selecting=selecting))
+        with pytest.raises(TypeError):
+            controller._set_selecting_checked(False)
+        assert selecting.blockSignals.call_args_list[-1].args == (False,)
+
 
 @pytest.mark.unit
 class TestLinkedRunsAfterLayerRemoval:
@@ -999,12 +1067,22 @@ class TestVectorLayerChange:
 
     def test_web_raster_or_table_keeps_the_raster(self, ctrl_module, layers, monkeypatch):
         controller, calls = self._controller(ctrl_module, layers, monkeypatch)
-        assert controller.on_current_layer_changed(layers["o1"]) is False
+        table = FakeLayer("t1", "vector")  # a table without geometry: a vector layer FilterMate does not list
+        # True: the vector chain stops (it would make the layer current, then refuse it).
+        assert controller.on_current_layer_changed(layers["o1"]) is True
+        assert controller.on_current_layer_changed(table) is True
         assert calls == []
 
     def test_vector_layer_not_listed_keeps_the_raster(self, ctrl_module, layers, monkeypatch):
         controller, calls = self._controller(ctrl_module, layers, monkeypatch)
+        assert controller.on_current_layer_changed(layers["v2"]) is True  # e.g. added, add_layers not over
+        assert calls == []
+
+    def test_without_a_raster_shown_the_vector_chain_decides(self, ctrl_module, layers, monkeypatch):
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch)
+        controller._active_layer = None
         assert controller.on_current_layer_changed(layers["v2"]) is False
+        assert controller.on_current_layer_changed(layers["o1"]) is False
         assert calls == []
 
     def test_listed_vector_layer_ends_the_mode(self, ctrl_module, layers, monkeypatch):

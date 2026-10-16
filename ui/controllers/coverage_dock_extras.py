@@ -341,7 +341,7 @@ class CoverageDockExtras(QObject):
         self._guarded(self._set_kind_icons, kind_value)
 
     def show_vector(self, layer: Any = None) -> None:
-        """Vector layer: its card, no kind tool, vector buttons back."""
+        """Vector layer: its card, no kind tool, vector buttons back (no card without a layer: it was removed)."""
         self._layer_id = None
         for step in (self.leave, self._hide_coverage_widgets, self._restore_vector_buttons):
             self._guarded(step)
@@ -349,6 +349,8 @@ class CoverageDockExtras(QObject):
         if layer is not None:
             self._guarded(self.ensure_card)
             self._guarded(self._update_card, layer, 'vector')
+        elif self._card is not None:
+            self._guarded(self._card.setVisible, False)
 
     @staticmethod
     def _safe_id(layer: Any) -> Optional[str]:

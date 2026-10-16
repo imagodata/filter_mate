@@ -129,22 +129,42 @@ class CoverageModeController(BaseController):
         self._hag_task: Any = None
         self._tidy_pending = False
         self._cache_warned = False
+        self._project_connected: set = set()  # names of the QgsProject signals connected by setup()
+        self._vector_tasks: Dict[str, Any] = {}  # vector source id -> cross task clipping its coverage targets
         self._extras: Any = None  # CoverageDockExtras: layer card, kind tools, source geometry line
 
     # === Lifecycle ===
 
+    def _project_slots(self):
+        return (('readProject', self._on_project_read), ('cleared', self._on_project_cleared),
+                ('layersWillBeRemoved', self._on_layers_removed))
+
     def setup(self) -> None:
-        """Panels are built on the first raster / point cloud layer; stored clips are replayed."""
-        if getattr(self, '_project_signal_connected', False) or getattr(self, '_torn_down', False):
-            return  # already set up: the project signals are connected once
+        """Panels are built on the first raster / point cloud layer; stored clips are replayed.
+
+        Safe to call again: each project signal is connected once (a failed
+        connection is tried again), the replay and the PDAL probe run once.
+        """
+        if getattr(self, '_torn_down', False):
+            return
         try:
             from qgis.core import QgsProject
-            from qgis.PyQt.QtCore import QTimer
             project = QgsProject.instance()
-            project.readProject.connect(self._on_project_read)
-            project.cleared.connect(self._on_project_cleared)
-            project.layersWillBeRemoved.connect(self._on_layers_removed)
-            self._project_signal_connected = True
+            for name, slot in self._project_slots():
+                if name in self._project_connected:
+                    continue
+                try:
+                    getattr(project, name).connect(slot)
+                    self._project_connected.add(name)
+                except Exception as exc:
+                    logger.debug(f"[FM5] project signal {name} not connected: {exc}")
+        except Exception as exc:
+            logger.debug(f"[FM5] project signals not connected: {exc}")
+        if getattr(self, '_setup_done', False):
+            return
+        self._setup_done = True
+        try:
+            from qgis.PyQt.QtCore import QTimer
             QTimer.singleShot(1500, self.replay_stored_filters)
         except Exception as exc:
             logger.debug(f"[FM5] stored filters replay not scheduled: {exc}")
@@ -155,12 +175,31 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] pdal version not read in the background: {exc}")
         logger.debug("CoverageModeController setup complete (panels deferred)")
 
+    def _leave_removed_layers(self, layer_ids: Optional[List[str]]) -> None:
+        """Layers removed (None: the project was closed): leave the mode of the active one, forget their styles.
+
+        Never raises: the caller forgets the histories whatever happens here.
+        """
+        active, active_id = self._active_layer, self._active_id()
+        removed = active is not None and (layer_ids is None or active_id is None or active_id in layer_ids)
+        if removed or layer_ids is None:
+            try:
+                current = getattr(self.dockwidget, 'current_layer', None)
+                if removed and (current is active or _same_layer(current, active)):
+                    self.dockwidget.current_layer = None  # about to be deleted: Filter would read it
+                # Before its input is forgotten: leaving the layer saves it again.
+                self.deactivate()  # the pixel picker leaves the map, the panels go
+            except Exception as exc:
+                logger.warning(f"[FM5] coverage mode not left cleanly: {exc}", exc_info=True)
+        if self._extras is not None:
+            self._extras_call('forget_layers', layer_ids)
+            if removed or layer_ids is None:
+                self._extras_call('show_vector', None)  # vector buttons back, no raster tool, no stale card
+
     def _on_project_cleared(self) -> None:
         """A new / closed project: histories and links refer to layers that are gone."""
         from ...core.services.cross_filter_service import clear_histories
-        self.deactivate()  # the pixel picker leaves the map, the panels go
-        if self._extras is not None:
-            self._extras_call('forget_layers', None)
+        self._leave_removed_layers(None)
         clear_histories()  # the dock's and the automation one
         self._linked_runs.clear()
         self._linked_redo.clear()
@@ -172,12 +211,7 @@ class CoverageModeController(BaseController):
     def _on_layers_removed(self, layer_ids) -> None:
         from ...core.services.cross_filter_service import forget_layer_everywhere
         layer_ids = list(layer_ids or [])
-        active_id = self._active_id()
-        if self._active_layer is not None and (active_id is None or active_id in layer_ids):
-            # Before forgetting its input: leaving the layer saves it again.
-            self.deactivate()
-        if self._extras is not None:
-            self._extras_call('forget_layers', layer_ids)
+        self._leave_removed_layers(layer_ids)
         for layer_id in layer_ids:
             forget_layer_everywhere(layer_id)
             self._linked_runs.pop(layer_id, None)
@@ -261,20 +295,20 @@ class CoverageModeController(BaseController):
         if self._extras is not None:
             self._extras_call('teardown')
             self._extras = None
-        if getattr(self, '_project_signal_connected', False):
+        if self._project_connected:
             try:
                 from qgis.core import QgsProject
                 project = QgsProject.instance()
-                for signal, slot in ((project.readProject, self._on_project_read),
-                                     (project.cleared, self._on_project_cleared),
-                                     (project.layersWillBeRemoved, self._on_layers_removed)):
+                for name, slot in self._project_slots():
+                    if name not in self._project_connected:
+                        continue
                     try:
-                        signal.disconnect(slot)
+                        getattr(project, name).disconnect(slot)
                     except (TypeError, RuntimeError):
                         pass
             except Exception:
                 pass
-            self._project_signal_connected = False
+            self._project_connected.clear()
         try:
             self.service.cancel_all()
         except Exception:
@@ -334,7 +368,9 @@ class CoverageModeController(BaseController):
         """Take over the layer change for a raster or point cloud layer.
 
         Returns:
-            True when handled here (the vector chain must stop).
+            True when handled here (the vector chain must stop): a raster /
+            point cloud layer, or a layer the vector chain would refuse while
+            one is shown.
         """
         kind = _kind_of(layer)
         if getattr(kind, 'is_coverage', False):
@@ -344,9 +380,10 @@ class CoverageModeController(BaseController):
             self.activate(layer, kind)
             return True
         if not self._vector_chain_takes(layer, kind):
-            # A web raster, a table, a layer FilterMate does not list: the vector chain
-            # refuses it and the current layer stays the same, so does this mode.
-            return False
+            # A web raster, a table without geometry, a vector not listed (yet): the vector chain
+            # would make it the dock's current layer, then refuse it. With a raster / point cloud
+            # shown, the chain stops here and that layer stays current; otherwise it decides.
+            return self._active_layer is not None
         if self._active_layer is not None:
             self.deactivate()
         self._extras_call('show_vector', layer)
@@ -707,8 +744,10 @@ class CoverageModeController(BaseController):
             return
         try:
             selecting.blockSignals(True)
-            selecting.setChecked(bool(checked))
-            selecting.blockSignals(False)
+            try:
+                selecting.setChecked(bool(checked))
+            finally:
+                selecting.blockSignals(False)
         except RuntimeError:
             pass  # deleted (plugin closing)
 

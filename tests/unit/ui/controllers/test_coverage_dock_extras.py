@@ -339,6 +339,12 @@ class TestRangeLinkedToStyle:
         assert not [c for c in dock_extras.adapter.calls if c[0] == "unlink"]
         assert not dock_extras.link.isChecked()
 
+    def test_removed_layer_card_is_hidden(self, dock_extras):
+        shown = []
+        dock_extras.dock._card = types.SimpleNamespace(setVisible=shown.append)
+        dock_extras.dock.show_vector(None)  # the raster shown was removed: no vector layer to describe yet
+        assert shown == [False]
+
     def test_closed_project_forgets_every_style(self, dock_extras):
         self._link_r1(dock_extras)
         dock_extras.dock.forget_layers(None)
