@@ -368,17 +368,17 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
     </div>
     <div class="callout scope-note"><strong>Geometric distance.</strong> This result measures neither travel time nor access for emergency vehicles. Check accessibility using the road network, traffic restrictions and field observations.</div>
     <div class="story-brief">
-        <div><h4>The need</h4><p>At the fire station of <strong>Aspet</strong>, in the Pyrenean foothills, the response plan is being prepared: which hamlets and activity zones lie more than 200 m from a paved road, as candidates for a field check?</p></div>
+        <div><h4>The need</h4><p>At the fire station of <strong>Aspet</strong>, in the Pyrenean foothills, the response plan is being prepared: which hamlets, buildings and activity zones lie more than 200 m from a paved road, as candidates for a field check?</p></div>
         <div><h4>The FilterMate translation</h4><p>This is the <strong>Disjoint</strong> predicate with a <strong>200 m buffer</strong>: keep what shares no point with the buffer zone. Since Disjoint keeps everything far away, including the rest of the department, the target layers are first scoped by an <strong>attribute filter</strong> on the INSEE code, applied with FilterMate's Processing algorithm. The second filter then combines with <strong>AND</strong>.</p></div>
     </div>
     <ol class="steps">
-        <li><strong>Scope Aspet spatially</strong> for roads, buildings and vegetation (story 1), then <strong>by attribute</strong> for the two target layers: Toolbox → FilterMate → <em>Filter multiple layers</em>, layers <em>zone_d_habitation</em> and <em>zone_d_activite_ou_d_interet</em>, expression <code>"insee_commune" = '31020'</code>. 87 hamlets and 31 activity zones.
-            <figure><img src="img/stories/s6-03.webp" alt="Step 1: Aspet scoped, hamlets in orange" loading="lazy" width="1600" height="945"><figcaption>Step 1. The two target layers carry an attribute filter, the others a spatial one.</figcaption></figure>
+        <li><strong>Scope Aspet spatially</strong> for roads, buildings and vegetation (story 1), then <strong>by attribute</strong> for the three target layers: Toolbox → FilterMate → <em>Filter multiple layers</em>, layers <em>batiment</em>, <em>zone_d_habitation</em> and <em>zone_d_activite_ou_d_interet</em>, expression <code>"insee_commune" = '31020'</code>. This includes 87 hamlets and 31 activity zones.
+            <figure><img src="img/stories/s6-03.webp" alt="Step 1: Aspet scoped, hamlets in orange" loading="lazy" width="1600" height="945"><figcaption>Step 1. The three target layers carry an attribute filter, the others a spatial one.</figcaption></figure>
         </li>
         <li><strong>Keep only paved roads.</strong> Source <em>troncon_de_route</em>, Custom selection <code>"nature" NOT IN ('Chemin', 'Sentier', 'Escalier', 'Piste cyclable', 'Route empierrée')</code>: 494 segments out of 1,168.
             <figure><img src="img/stories/s6-04.webp" alt="Step 2: paved roads are highlighted, tracks and footpaths are not" loading="lazy" width="1600" height="945"><figcaption>Step 2. Tracks and footpaths, plentiful in the mountains, are left out.</figcaption></figure>
         </li>
-        <li><strong>Disjoint, 200 m, AND.</strong> Targets <em>zone_d_habitation</em> and <em>zone_d_activite_ou_d_interet</em>, Disjoint predicate alone, Buffer 200, Combine operator row on with <strong>AND</strong> on the right (the target layers' operator).
+        <li><strong>Disjoint, 200 m, AND.</strong> Targets <em>batiment</em>, <em>zone_d_habitation</em> and <em>zone_d_activite_ou_d_interet</em>, Disjoint predicate alone, Buffer 200, Combine operator row on with <strong>AND</strong> on the right (the target layers' operator).
             <figure><img src="img/stories/s6-05.webp" alt="Step 3: Disjoint ticked, 200 m buffer, AND operator for the target layers" loading="lazy" width="1600" height="945"><figcaption>Step 3. Disjoint plus buffer: an exclusion ring.</figcaption></figure>
         </li>
         <li><strong>Filter.</strong>
@@ -386,7 +386,7 @@ AND ("nature" IN ('Bois', 'Forêt fermée de feuillus', 'Forêt fermée de conif
         </li>
     </ol>
     <h3>Result</h3>
-    <p><strong>22 hamlets</strong> of Aspet are more than 200 m from a paved road; none of the 31 activity zones is. At 100 m they would be 32.</p>
+    <p><strong>22 hamlets</strong> of Aspet are more than 200 m from a paved road; no buildings and none of the 31 activity zones are. At 100 m the hamlet count would be 32.</p>
     <div class="callout warn">
         <strong>Disjoint without scope.</strong> Without the attribute filter of step 1, Disjoint would have returned the 31,599 hamlets of the department that do not touch the 200 m band around Aspet's roads. An exclusion predicate always requires bounding the targets first.
     </div>
