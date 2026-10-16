@@ -31,7 +31,8 @@ except ImportError:
     from qgis.core import QgsMapLayerProxyModel
 try:
     from .adapters.qgis.point_cloud_capability import (
-        get_filterable_layer_types, get_current_layer_combo_filters, exclude_non_analysis_rasters)
+        get_filterable_layer_types, get_current_layer_combo_filters, exclude_non_analysis_rasters,
+        is_non_analysis_raster)
 except ImportError:
     def get_filterable_layer_types():
         """Vector-only fallback when the point cloud capability module is unavailable."""
@@ -44,6 +45,10 @@ except ImportError:
     def exclude_non_analysis_rasters(_combo):
         """No provider exclusion when the point cloud capability module is unavailable."""
         return None
+
+    def is_non_analysis_raster(_layer):
+        """Vector only when the point cloud capability module is unavailable: no raster to exclude."""
+        return False
 from qgis.utils import iface
 
 import os.path
@@ -253,9 +258,10 @@ class FilterMateApp:
         """Return only valid vector layers with available sources."""
         service = self._get_layer_lifecycle_service()
         if service: return service.filter_usable_layers(layers, POSTGRESQL_AVAILABLE)
-        # Fallback: minimal validation
+        # Fallback: minimal validation (no basemap: a WMS / XYZ raster cannot be read)
         filterable_types = get_filterable_layer_types() or (QgsVectorLayer,)
-        return [layer_item for layer_item in layers if isinstance(layer_item, filterable_types) and layer_item.isValid() and is_layer_source_available(layer_item)]
+        return [layer_item for layer_item in layers if isinstance(layer_item, filterable_types)
+                and not is_non_analysis_raster(layer_item) and layer_item.isValid() and is_layer_source_available(layer_item)]
 
     def _on_layers_added(self, layers):
         """Signal handler for layersAdded: accumulate layers and process as single batch."""

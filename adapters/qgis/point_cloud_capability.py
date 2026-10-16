@@ -165,6 +165,21 @@ def exclude_non_analysis_rasters(combo: Any) -> None:
         logger.debug(f"Web rasters not excluded from the layer combo box: {exc}")
 
 
+def is_non_analysis_raster(layer: Any) -> bool:
+    """True for a raster whose pixels FilterMate cannot read (WMS, XYZ, WCS basemap...).
+
+    ``isinstance(layer, get_filterable_layer_types())`` admits every ``QgsRasterLayer``
+    once rasters are on: callers registering layers drop these with this check.
+    """
+    raster_type = _resolve_raster_class()
+    if raster_type is None or layer is None:
+        return False
+    try:
+        return isinstance(layer, raster_type) and layer.providerType() not in ANALYSIS_RASTER_PROVIDERS
+    except (TypeError, RuntimeError, AttributeError):
+        return False
+
+
 def is_raster_layer(layer: Any) -> bool:
     """True when ``layer`` is an analysable ``QgsRasterLayer`` and raster filtering is usable."""
     if layer is None:

@@ -96,7 +96,8 @@ def _install_chain():
         ),
         f"{_ROOT}.adapters": _stub_module(f"{_ROOT}.adapters"),
         f"{_ROOT}.adapters.qgis": _stub_module(f"{_ROOT}.adapters.qgis"),
-        _CAPABILITY: _stub_module(_CAPABILITY, get_filterable_layer_types=lambda: (MagicMock,)),
+        _CAPABILITY: _stub_module(_CAPABILITY, get_filterable_layer_types=lambda: (MagicMock,),
+                                  is_non_analysis_raster=lambda layer: False),
     }
     for name, mod in chain.items():
         sys.modules[name] = mod
@@ -133,6 +134,7 @@ def capability(monkeypatch):
     cap = sys.modules[_CAPABILITY]
     utils = sys.modules[_UTILS]
     monkeypatch.setattr(cap, "get_filterable_layer_types", lambda: (lls.QgsVectorLayer,))
+    monkeypatch.setattr(cap, "is_non_analysis_raster", lambda layer: False)
     monkeypatch.setattr(utils, "is_sip_deleted", lambda obj: False)
     monkeypatch.setattr(utils, "is_layer_valid", lambda layer: bool(layer.isValid()))
     monkeypatch.setattr(utils, "is_layer_source_available", lambda layer, require_psycopg2=False: True)
@@ -221,6 +223,19 @@ class TestFilterUsableLayersPointCloud:
         vec = _vector_layer()
 
         assert _service().filter_usable_layers([pc, vec]) == [vec]
+
+    def test_basemap_raster_is_rejected(self, capability, monkeypatch, caplog):
+        """Rasters on: a WMS / XYZ / WCS layer is a QgsRasterLayer, so a filterable type, but
+        FilterMate cannot read its pixels; adding one restarted add_layers and a panel rebuild."""
+        caplog.set_level(logging.INFO, logger=_LOGGER)
+        cap, _ = capability
+        basemap = _FakePointCloudLayer("osm", "OpenStreetMap")  # any filterable type will do
+        monkeypatch.setattr(cap, "get_filterable_layer_types", lambda: (lls.QgsVectorLayer, _FakePointCloudLayer))
+        monkeypatch.setattr(cap, "is_non_analysis_raster", lambda layer: layer is basemap)
+        vec = _vector_layer()
+
+        assert _service().filter_usable_layers([basemap, vec]) == [vec]
+        assert "web or basemap raster" in caplog.text
 
     def test_temporary_point_cloud_is_rejected(self, capability, monkeypatch):
         cap, utils = capability

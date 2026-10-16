@@ -367,6 +367,42 @@ class TestExcludeNonAnalysisRasters:
         cap.exclude_non_analysis_rasters(object())  # no exception
 
 
+class _FakeRasterLayer:
+    def __init__(self, provider="gdal"):
+        self._provider = provider
+
+    def providerType(self):
+        return self._provider
+
+
+class TestIsNonAnalysisRaster:
+    """A basemap (WMS, XYZ, WCS) is a QgsRasterLayer FilterMate cannot read."""
+
+    @pytest.fixture
+    def core(self, env):
+        env.set_core(types.SimpleNamespace(QgsVectorLayer=_FakeVectorLayer, QgsRasterLayer=_FakeRasterLayer))
+
+    @pytest.mark.parametrize("provider", ["wms", "wcs", "arcgismapserver", "grassraster"])
+    def test_web_and_other_rasters(self, core, provider):
+        assert cap.is_non_analysis_raster(_FakeRasterLayer(provider)) is True
+
+    @pytest.mark.parametrize("provider", ["gdal", "virtualraster", "postgresraster"])
+    def test_analysable_rasters(self, core, provider):
+        assert cap.is_non_analysis_raster(_FakeRasterLayer(provider)) is False
+
+    def test_vector_and_none(self, core):
+        assert cap.is_non_analysis_raster(_FakeVectorLayer()) is False
+        assert cap.is_non_analysis_raster(None) is False
+
+    def test_without_raster_class(self, env):
+        assert cap.is_non_analysis_raster(_FakeRasterLayer("wms")) is False
+
+    def test_deleted_layer(self, core):
+        layer = _FakeRasterLayer()
+        layer.providerType = MagicMock(side_effect=RuntimeError("wrapped C/C++ object deleted"))
+        assert cap.is_non_analysis_raster(layer) is False
+
+
 class _FakeProject:
     def __init__(self, layers, fail=False):
         self._layers = {layer.id(): layer for layer in layers}
