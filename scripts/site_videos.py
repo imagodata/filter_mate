@@ -1663,15 +1663,38 @@ def to_exploring(name):
     return pick_layer(name) + [(300, wait_current(name)), hold(800), (0, cam(coverage_host, dur=1.4, pad=24)), hold(900)]
 
 
-# slope (story 9): DTM slope >= 30 % (value range, histogram, preview) -> parcels at least half on it.
-SLOPE = boot5(['hillshade', 'pente', 'parcelle', 'batiment']) + fm5_scene() + to_exploring('pente') \
-    + act(group_check(lambda: raster_panel()._range_group), open_group(lambda: raster_panel()._range_group)) + [
+def combo_pick(get_combo, data, keep=1200):
+    """Open a combo of a panel and visibly choose the entry holding `data`."""
+    def show():
+        get_combo().showPopup()
+
+    def choose():
+        combo = get_combo()
+        index = combo.findData(data)
+        if index < 0:
+            log(f'combo entry not found: {data}')
+            hide_popup()
+            return
+        view = combo.view()
+        r = to_main(view.viewport(), view.visualRect(combo.model().index(index, 0)))
+        REC.event('point', x=r.center().x(), y=r.center().y())
+        REC.event('click', x=r.center().x(), y=r.center().y())
+        combo.setCurrentIndex(index)
+        hide_popup()
+
+    return act(get_combo, show) + [(keep, choose), hold(350)]
+
+
+# slope (story 9): slope of the DTM computed on the fly (Compute on: Slope %) >= 30 % -> parcels at
+# least half on it. The pente layer is only the backdrop: a derivative has no map preview.
+SLOPE = boot5(['hillshade', 'pente', 'mnt', 'parcelle', 'batiment'], hidden=('mnt',)) + fm5_scene() \
+    + to_exploring('mnt') + combo_pick(lambda: raster_panel()._derivative_combo, 'slope_percent') + [
+    hold(900), still('s9-01'),
+] + act(group_check(lambda: raster_panel()._range_group), open_group(lambda: raster_panel()._range_group)) + [
     hold(600), (0, ensure_visible(lambda: raster_panel()._max_spin)), hold(300),
     (0, cam(lambda: raster_panel()._range_group, dur=1.2, pad=30)),
-] + typed_spin(lambda: raster_panel()._min_spin, 30) + [hold(1300), still('s9-01')] \
-    + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(3200) + [
-    still('s9-02'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
-] + targets(['parcelle']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
+] + typed_spin(lambda: raster_panel()._min_spin, 30) + [hold(1300), still('s9-02'), (0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + targets(['parcelle']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
     hold(600), still('s9-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + run_filter() + [(0, lambda: counts(['parcelle', 'batiment']))] + show_map(4500, 1.05) + [still('s9-04')] \
     + ending(['parcelle'])
