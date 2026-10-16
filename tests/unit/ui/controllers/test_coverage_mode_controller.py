@@ -764,6 +764,80 @@ class TestReactivation:
 
 
 @pytest.mark.unit
+class TestLayerLifecycle:
+    """Constats 6, 9, 11: removed layers and closed projects."""
+
+    def test_removed_active_layer_deactivates_before_its_input_is_forgotten(self, ctrl_module, layers, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")
+        controller._raster_panel = MagicMock()
+        controller._raster_panel.state.return_value = {"mode": "range"}
+        controller._on_layers_removed(["r1"])
+        assert controller.active_layer is None
+        assert "r1" not in controller._panel_states  # not put back by leaving the layer
+
+    def test_other_removed_layer_keeps_the_mode(self, ctrl_module, layers, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        controller._active_layer = layers["r1"]
+        controller._on_layers_removed(["p1"])
+        assert controller.active_layer is layers["r1"]
+
+    def test_closed_project_deactivates(self, ctrl_module, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        calls = []
+        monkeypatch.setattr(controller, "deactivate", lambda: calls.append("deactivate"))
+        controller._on_project_cleared()
+        assert calls == ["deactivate"]
+
+    def test_statistics_are_watched_again_after_the_project_is_opened_again(self, ctrl_module, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        controller._watch_point_cloud_statistics(StatsLayer("p1"))
+        controller._on_project_cleared()
+        reopened = StatsLayer("p1")  # same id, new layer
+        controller._watch_point_cloud_statistics(reopened)
+        assert len(reopened.statisticsCalculationStateChanged.slots) == 1
+        controller._on_layers_removed(["p1"])
+        added_again = StatsLayer("p1")
+        controller._watch_point_cloud_statistics(added_again)
+        assert len(added_again.statisticsCalculationStateChanged.slots) == 1
+
+    def test_deleted_active_layer_has_no_undo(self, ctrl_module):
+        class Deleted:
+            def id(self):
+                raise RuntimeError("wrapped C/C++ object of type QgsRasterLayer has been deleted")
+
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = Deleted()
+        assert controller.can_undo() is False and controller.can_redo() is False
+
+    def test_pixel_picker_released_when_the_previous_tool_is_gone(self, ctrl_module):
+        canvas = MagicMock()
+        tool = object()
+        canvas.mapTool.return_value = tool
+        canvas.setMapTool.side_effect = RuntimeError("wrapped C/C++ object has been deleted")
+        app = MagicMock()
+        app.iface.mapCanvas.return_value = canvas
+        controller = ctrl_module.CoverageModeController(_dock(filter_mate_app=app))
+        controller._pixel_tool, controller._previous_map_tool = tool, object()
+        controller._deactivate_pixel_tool()  # no exception
+        canvas.unsetMapTool.assert_called_once_with(tool)
+        assert controller._previous_map_tool is None
+
+    def test_setup_connects_the_project_signals_once(self, ctrl_module, monkeypatch):
+        project = types.SimpleNamespace(readProject=FakeSignal(), cleared=FakeSignal(), layersWillBeRemoved=FakeSignal())
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject",
+                            types.SimpleNamespace(instance=lambda: project), raising=False)
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller.setup()
+        controller.setup()
+        assert [len(s.slots) for s in (project.readProject, project.cleared, project.layersWillBeRemoved)] == [1, 1, 1]
+
+
+@pytest.mark.unit
 class TestTaskResultOfAnotherLayer:
     """Constat 8: a task ending after a layer switch leaves the panel and the Filter button alone."""
 

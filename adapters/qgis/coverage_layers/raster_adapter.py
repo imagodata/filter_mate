@@ -599,3 +599,31 @@ def unlink_range_from_style(layer: QgsRasterLayer) -> bool:
     layer.setRenderer(restored)
     layer.triggerRepaint()
     return True
+
+
+def forget_linked_styles(layer_ids=None) -> None:
+    """Drop the styles saved for layers removed from the project (every one when ``layer_ids`` is None).
+
+    Never restored: a layer opened again with the same id has its own style.
+    """
+    if layer_ids is None:
+        _LINKED_RENDERERS.clear()
+        return
+    for layer_id in layer_ids:
+        _LINKED_RENDERERS.pop(layer_id, None)
+
+
+def unlink_all_styles(project=None) -> int:
+    """Give every linked raster of the project its style back (plugin unloaded); returns how many."""
+    from qgis.core import QgsProject
+    project = project or QgsProject.instance()
+    restored = 0
+    for layer_id in list(_LINKED_RENDERERS):
+        layer = project.mapLayer(layer_id)
+        try:
+            if layer is not None and unlink_range_from_style(layer):
+                restored += 1
+        except RuntimeError:
+            pass
+        _LINKED_RENDERERS.pop(layer_id, None)
+    return restored

@@ -195,6 +195,7 @@ class CoverageDockExtras(QObject):
         self._hover_base = None
         self._hover_base_id: Optional[str] = None
         self._link_connected = False
+        self._linked_layer_id: Optional[str] = None  # raster whose style follows the range
 
     @property
     def dockwidget(self) -> Any:
@@ -372,8 +373,27 @@ class CoverageDockExtras(QObject):
         if button.isChecked():
             button.setChecked(False)  # runs the toggled slot, which disconnects
 
+    def forget_layers(self, layer_ids: Optional[Sequence[str]] = None) -> None:
+        """Layers removed from the project (None: the project was closed).
+
+        Their saved styles are dropped, never restored (a layer opened again
+        with the same id has its own style); the tools of the shown layer stop.
+        """
+        from ...adapters.qgis.coverage_layers.raster_adapter import forget_linked_styles
+        forget_linked_styles(layer_ids)
+
+        def gone(layer_id: Optional[str]) -> bool:
+            return layer_id is not None and (layer_ids is None or layer_id in layer_ids)
+
+        if gone(self._linked_layer_id):
+            self._linked_layer_id = None
+        if gone(self._layer_id):
+            self.leave()
+            self._layer_id = None
+
     def teardown(self) -> None:
         self.leave()
+        self._guarded(self._unlink_all_styles)  # plugin unloaded: every layer gets its own style back
         self._guarded(self._restore_vector_buttons)
         self._guarded(self._release_zone_tool)
         widgets = [self._card, *self._tools.values()]
@@ -589,13 +609,19 @@ class CoverageDockExtras(QObject):
         from ...adapters.qgis.coverage_layers.raster_adapter import link_range_to_style
         low, high = self._link_range()
         try:
+            if self._linked_layer_id not in (None, layer.id()):
+                self._unlink_style()  # one linked raster at a time
+            self._linked_layer_id = layer.id()
             if not link_range_to_style(layer, panel.current_band(), low, high):
                 logger.debug("[FM5] this raster style has no single band range to link")
         except RuntimeError:
             pass
 
     def _unlink_style(self) -> None:
-        layer = self._controller.active_layer
+        """Give the linked raster its style back: the layer that was linked, which is no longer
+        the active one when the controller has already moved to the next layer."""
+        layer_id, self._linked_layer_id = self._linked_layer_id, None
+        layer = self._controller._map_layer(layer_id) if layer_id is not None else None
         if layer is None:
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import unlink_range_from_style
@@ -603,6 +629,11 @@ class CoverageDockExtras(QObject):
             unlink_range_from_style(layer)
         except RuntimeError:
             pass
+
+    @staticmethod
+    def _unlink_all_styles() -> None:
+        from ...adapters.qgis.coverage_layers.raster_adapter import unlink_all_styles
+        unlink_all_styles()
 
     # === Raster: statistics of a rectangle ===
 

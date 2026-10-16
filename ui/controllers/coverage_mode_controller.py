@@ -104,6 +104,7 @@ class CoverageModeController(BaseController):
         self._preview_base_subset: Optional[str] = None
         self._preview_active = False
         self._histogram_cache: Dict[Tuple[str, int], Tuple[list, float, float]] = {}
+        self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
         self._button_slots: List[Tuple[Any, Any]] = []
         # Vector sources: one flag per vector filter run, True when it also clipped coverage targets.
         self._linked_runs: Dict[str, List[bool]] = {}
@@ -119,6 +120,8 @@ class CoverageModeController(BaseController):
 
     def setup(self) -> None:
         """Panels are built on the first raster / point cloud layer; stored clips are replayed."""
+        if getattr(self, '_project_signal_connected', False) or getattr(self, '_torn_down', False):
+            return  # already set up: the project signals are connected once
         try:
             from qgis.core import QgsProject
             from qgis.PyQt.QtCore import QTimer
@@ -140,20 +143,32 @@ class CoverageModeController(BaseController):
     def _on_project_cleared(self) -> None:
         """A new / closed project: histories and links refer to layers that are gone."""
         from ...core.services.cross_filter_service import clear_histories
+        self.deactivate()  # the pixel picker leaves the map, the panels go
+        if self._extras is not None:
+            self._extras_call('forget_layers', None)
         clear_histories()  # the dock's and the automation one
         self._linked_runs.clear()
         self._linked_redo.clear()
         self._panel_states.clear()
         self._histogram_cache.clear()
+        self._stats_watched.clear()  # the same ids come back with new layers when the project is opened again
         self._schedule_cache_tidy()
 
     def _on_layers_removed(self, layer_ids) -> None:
         from ...core.services.cross_filter_service import forget_layer_everywhere
-        for layer_id in layer_ids or []:
+        layer_ids = list(layer_ids or [])
+        active_id = self._active_id()
+        if self._active_layer is not None and (active_id is None or active_id in layer_ids):
+            # Before forgetting its input: leaving the layer saves it again.
+            self.deactivate()
+        if self._extras is not None:
+            self._extras_call('forget_layers', layer_ids)
+        for layer_id in layer_ids:
             forget_layer_everywhere(layer_id)
             self._linked_runs.pop(layer_id, None)
             self._linked_redo.pop(layer_id, None)
             self._panel_states.pop(layer_id, None)
+            self._stats_watched.discard(layer_id)
         self._schedule_cache_tidy()  # runs once the layers are gone
 
     def _unlink_dropped_run(self, source_id: str) -> None:
@@ -284,6 +299,13 @@ class CoverageModeController(BaseController):
     @property
     def active_layer(self) -> Any:
         return self._active_layer
+
+    def _active_id(self) -> Optional[str]:
+        """Id of the active layer, None without one or once its C++ object is deleted."""
+        try:
+            return self._active_layer.id() if self._active_layer is not None else None
+        except RuntimeError:
+            return None
 
     @property
     def active_kind(self) -> Any:
@@ -866,12 +888,11 @@ class CoverageModeController(BaseController):
         """Refresh the panel when QGIS finishes the statistics of the layer (computed in the background
         after loading: until then only some attributes, often Z alone, have a range)."""
         signal = getattr(layer, 'statisticsCalculationStateChanged', None)
-        watched = self.__dict__.setdefault('_stats_watched', set())
-        if signal is None or layer.id() in watched:
+        if signal is None or layer.id() in self._stats_watched:
             return
         layer_id = layer.id()
         signal.connect(lambda *_args, lid=layer_id: self._on_point_cloud_statistics(lid))
-        watched.add(layer_id)
+        self._stats_watched.add(layer_id)
 
     def _on_point_cloud_statistics(self, layer_id: str) -> None:
         from ...core.domain.layer_kind import LayerKind
@@ -1082,13 +1103,20 @@ class CoverageModeController(BaseController):
         iface = self._iface()
         if iface is None or self._pixel_tool is None:
             return
-        canvas = iface.mapCanvas()
-        if canvas.mapTool() is self._pixel_tool:
-            if self._previous_map_tool is not None:
-                canvas.setMapTool(self._previous_map_tool)
-            else:
-                canvas.unsetMapTool(self._pixel_tool)
-        self._previous_map_tool = None
+        previous, self._previous_map_tool = self._previous_map_tool, None
+        try:
+            canvas = iface.mapCanvas()
+            if canvas.mapTool() is not self._pixel_tool:
+                return
+            if previous is not None:
+                try:
+                    canvas.setMapTool(previous)
+                    return
+                except RuntimeError:
+                    pass  # the previous tool was deleted: no tool rather than the picker
+            canvas.unsetMapTool(self._pixel_tool)
+        except RuntimeError as exc:
+            logger.debug(f"[FM5] pixel picker not released: {exc}")  # canvas deleted (QGIS closing)
 
     def _on_pixel_picked(self, point: Any, extend: bool) -> None:
         layer = self._active_layer
@@ -1102,7 +1130,11 @@ class CoverageModeController(BaseController):
             layer_point = transform.transform(point)
         except Exception:
             layer_point = point
-        values = identify_values(self._base_raster(layer), layer_point)
+        try:
+            values = identify_values(self._base_raster(layer), layer_point)
+        except RuntimeError as exc:
+            logger.debug(f"[FM5] pixel not read, layer deleted: {exc}")
+            return
         self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend)
 
     # === FILTERING request ===
@@ -1690,12 +1722,12 @@ class CoverageModeController(BaseController):
     # === Undo / redo buttons ===
 
     def can_undo(self) -> bool:
-        layer = self._active_layer
-        return layer is not None and self.service.can_undo(layer.id())
+        layer_id = self._active_id()
+        return layer_id is not None and self.service.can_undo(layer_id)
 
     def can_redo(self) -> bool:
-        layer = self._active_layer
-        return layer is not None and self.service.can_redo(layer.id())
+        layer_id = self._active_id()
+        return layer_id is not None and self.service.can_redo(layer_id)
 
     def update_undo_redo_buttons(self) -> None:
         if self._active_layer is None:

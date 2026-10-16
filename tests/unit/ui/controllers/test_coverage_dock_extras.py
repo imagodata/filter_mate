@@ -178,3 +178,176 @@ class TestVectorCard:
         html = extras.card_html("a<b", "Vector", "Line", "#6fb1f0", square=False)
         assert "a&lt;b" in html and "#6fb1f0" in html and "●" in html and "Vector · Line" in html
         assert "■" in extras.card_html("mnt", "Raster", "", "#f0b35a", square=True)
+
+
+# ---------------------------------------------------------------------------
+# Dock additions with a fake controller (audit fixes)
+# ---------------------------------------------------------------------------
+
+class FakeLayer:
+    def __init__(self, layer_id, provider="ogr", subset="", source=None):
+        self._id, self._provider, self._subset = layer_id, provider, subset
+        self._source = source or f"/data/{layer_id}.tif"
+        self.counted = 0
+
+    def id(self):
+        return self._id
+
+    def name(self):
+        return self._id
+
+    def source(self):
+        return self._source
+
+    def providerType(self):
+        return self._provider
+
+    def subsetString(self):
+        return self._subset
+
+    def featureCount(self):
+        self.counted += 1
+        return 12
+
+    def geometryType(self):
+        return 0
+
+
+class FakeSignal:
+    def __init__(self):
+        self.slots = []
+
+    def connect(self, slot):
+        self.slots.append(slot)
+
+    def disconnect(self, slot):
+        self.slots.remove(slot)
+
+
+class FakeButton:
+    """Checkable button: ``setChecked`` runs the toggled slot like Qt."""
+
+    def __init__(self, slot):
+        self.checked, self.slot = False, slot
+
+    def isChecked(self):
+        return self.checked
+
+    def setChecked(self, checked):
+        if checked != self.checked:
+            self.checked = checked
+            self.slot(checked)
+
+    def setVisible(self, _visible):
+        pass
+
+    def setParent(self, _parent):
+        pass
+
+    def deleteLater(self):
+        pass
+
+
+class FakePanel:
+    def __init__(self):
+        self.selectionChanged = FakeSignal()
+        self.hover = []
+
+    def selection(self):
+        return None
+
+    def _data_bounds(self):
+        return 0.0, 10.0
+
+    def current_band(self):
+        return 1
+
+    def set_hover_value(self, x, y, value=None):
+        self.hover.append(value)
+
+
+class FakeController:
+    def __init__(self, layers):
+        self.layers = layers
+        self.active_layer = None
+        self._raster_panel = FakePanel()
+        self.dockwidget = types.SimpleNamespace()
+        self.based = []
+
+    def _map_layer(self, layer_id):
+        return self.layers.get(layer_id)
+
+    def _iface(self):
+        return None
+
+    def _base_raster(self, layer):
+        self.based.append(layer.source())
+        return layer
+
+
+@pytest.fixture
+def dock_extras(monkeypatch):
+    """A CoverageDockExtras on a fake controller; the raster adapter is a recording stub."""
+    for name in (".adapters", ".adapters.qgis", ".adapters.qgis.coverage_layers"):
+        package = types.ModuleType(_PKG + name)
+        package.__path__ = []
+        monkeypatch.setitem(sys.modules, _PKG + name, package)
+    adapter = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.raster_adapter")
+    adapter.calls = []
+    adapter.link_range_to_style = lambda layer, band, low, high: adapter.calls.append(("link", layer.id())) or True
+    adapter.unlink_range_from_style = lambda layer: adapter.calls.append(("unlink", layer.id())) or True
+    adapter.forget_linked_styles = lambda ids=None: adapter.calls.append(("forget", ids))
+    adapter.unlink_all_styles = lambda project=None: adapter.calls.append(("unlink_all",)) or 0
+    adapter.identify_values = lambda layer, point: {1: 3.0}
+    monkeypatch.setitem(sys.modules, adapter.__name__, adapter)
+    monkeypatch.setattr(extras.CoverageDockExtras, "_refresh_icons", lambda self: None)
+    monkeypatch.setattr(extras.CoverageDockExtras, "_set_kind_icons", lambda self, kind: None)
+    layers = {lid: FakeLayer(lid) for lid in ("r1", "r2")}
+    controller = FakeController(layers)
+    dock = extras.CoverageDockExtras(controller)
+    link = FakeButton(dock._on_link_toggled)
+    dock._tools = {"pushButton_checkable_exploring_raster_link": link}
+    return types.SimpleNamespace(dock=dock, controller=controller, adapter=adapter, layers=layers, link=link)
+
+
+class TestRangeLinkedToStyle:
+    """Constat 4: the style is given back to the raster that was linked, never to the next one."""
+
+    def _link_r1(self, env):
+        env.controller.active_layer = env.layers["r1"]
+        env.dock.show_for(env.layers["r1"], "raster")
+        env.link.setChecked(True)
+        assert ("link", "r1") in env.adapter.calls
+
+    def test_switching_raster_unlinks_the_outgoing_one(self, dock_extras):
+        self._link_r1(dock_extras)
+        dock_extras.controller.active_layer = dock_extras.layers["r2"]  # the controller moves first
+        dock_extras.dock.show_for(dock_extras.layers["r2"], "raster")
+        assert [c for c in dock_extras.adapter.calls if c[0] == "unlink"] == [("unlink", "r1")]
+        assert not dock_extras.link.isChecked()
+
+    def test_switching_to_a_vector_unlinks_the_raster(self, dock_extras):
+        self._link_r1(dock_extras)
+        dock_extras.controller.active_layer = None  # deactivated before show_vector
+        dock_extras.dock.show_vector(None)
+        assert [c for c in dock_extras.adapter.calls if c[0] == "unlink"] == [("unlink", "r1")]
+
+    def test_removed_layer_style_is_forgotten_not_restored(self, dock_extras):
+        self._link_r1(dock_extras)
+        dock_extras.dock.forget_layers(["r1"])
+        assert ("forget", ["r1"]) in dock_extras.adapter.calls
+        assert not [c for c in dock_extras.adapter.calls if c[0] == "unlink"]
+        assert not dock_extras.link.isChecked()
+
+    def test_closed_project_forgets_every_style(self, dock_extras):
+        self._link_r1(dock_extras)
+        dock_extras.dock.forget_layers(None)
+        assert ("forget", None) in dock_extras.adapter.calls and dock_extras.dock._linked_layer_id is None
+
+    def test_teardown_gives_every_style_back(self, dock_extras):
+        self._link_r1(dock_extras)
+        dock_extras.controller.active_layer = None  # the controller deactivates before the additions
+        dock_extras.dock.teardown()
+        assert ("unlink", "r1") in dock_extras.adapter.calls and ("unlink_all",) in dock_extras.adapter.calls
+
+

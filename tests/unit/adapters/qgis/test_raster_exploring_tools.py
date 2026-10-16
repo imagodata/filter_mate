@@ -215,3 +215,22 @@ class TestSelectionPreview:
         assert preview_layer.hidden([-9999.0, 1.0]) == [-9999.0]
 
 
+class TestLinkedStyles:
+    """Constat 4: saved styles never outlive their layer, and come back when the plugin unloads."""
+
+    def test_forget_removed_layers_or_all(self, monkeypatch):
+        monkeypatch.setattr(adapter, "_LINKED_RENDERERS", {"a": object(), "b": object()})
+        adapter.forget_linked_styles(["a", "unknown"])
+        assert list(adapter._LINKED_RENDERERS) == ["b"]
+        adapter.forget_linked_styles()
+        assert adapter._LINKED_RENDERERS == {}
+
+    def test_unload_gives_every_layer_its_style_back(self, monkeypatch):
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsRasterTransparency",
+                            _transparency_class(PixelSince330), raising=False)
+        layer = FakeRasterLayer(_transparency_class(PixelSince330)())
+        saved = FakeRenderer(layer.renderer().rasterTransparency(), kind="singlebandpseudocolor")
+        monkeypatch.setattr(adapter, "_LINKED_RENDERERS", {"mnt": saved, "gone": object()})
+        project = types.SimpleNamespace(mapLayer={"mnt": layer}.get)
+        assert adapter.unlink_all_styles(project) == 1
+        assert layer.renderer().type() == "singlebandpseudocolor" and adapter._LINKED_RENDERERS == {}
