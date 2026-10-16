@@ -591,8 +591,8 @@ processing.run("filtermate:batch_filter", {
 
 <!-- 13 ----------------------------------------------------------------- -->
 <section id="raster-lidar">
-    <h2><span class="num">13</span>Rasters and point clouds <small>(5.0, in development)</small></h2>
-    <div class="callout warn"><p><strong>Not released yet.</strong> This section describes FilterMate 5.0 in development; the released version (4.9.2) filters vector layers.</p></div>
+    <h2><span class="num">13</span>Rasters and point clouds <small>(5.0)</small></h2>
+    <div class="callout tip"><p><strong>New in 5.0.</strong> Raster and LiDAR point cloud layers are first-class sources and targets. Requirements are unchanged: QGIS 3.22 or later (point clouds from 3.26), Qt5 or Qt6. PDAL 2.4 or later is optional (height above a DTM, direct COPC writing).</p></div>
     <p>
         The principle stays the same: <strong>EXPLORING selects</strong> on the current layer, <strong>FILTERING relates</strong> that selection to the layers to filter
         with its geometric predicates and buffer. When the current layer is a raster or a point cloud, the vector groups of EXPLORING make room for the panel of that
@@ -631,9 +631,61 @@ processing.run("filtermate:batch_filter", {
         </tbody>
     </table>
     </div>
+    <h3>Nine combinations</h3>
     <p>
-        Undo, Redo and Unfilter put the original sources back; the project is always saved with them and the clips are replayed when it is opened.
-        Export writes rasters as GeoTIFF / COG and point clouds as LAZ / COPC. The Processing algorithm <code>filtermate:cross_filter</code> does the same in a model.
+        The source (the current layer) and the targets can be of any kind: vector → vector, vector → raster, vector → point cloud, raster → vector, raster → raster,
+        raster → point cloud, point cloud → vector, point cloud → raster and point cloud → point cloud. FILTERING keeps its form: layers to filter, combine operators,
+        geometric predicates and buffer. Two settings are new: the <strong>minimum coverage</strong> (%) of polygons by the source geometry, and <strong>Disjoint</strong>,
+        which keeps what lies outside it.
+    </p>
+    <div class="fig-row">
+        <figure class="narrow">
+            <img src="img/guide/fm5_filtering_targets.png" alt="FILTERING with a vector source and a raster and a point cloud in the list of layers to filter" loading="lazy" width="440" height="1086">
+            <figcaption>FILTERING from a vector layer: the raster and the point cloud are listed with the other targets.</figcaption>
+        </figure>
+        <figure class="narrow">
+            <img src="img/guide/fm5_export_tab.png" alt="EXPORTING with a raster, a point cloud and a vector layer checked" loading="lazy" width="440" height="1086">
+            <figcaption>EXPORTING: a raster, a point cloud and a vector layer in the same export.</figcaption>
+        </figure>
+    </div>
+    <h3>Results on the map</h3>
+    <div class="fig-row">
+        <figure>
+            <img src="img/guide/fm5_vector_to_raster.png" alt="A raster clipped around a selected polygon on the QGIS map canvas" loading="lazy" width="954" height="591">
+            <figcaption>Vector → raster: the pixels around the selected polygon are kept (buffer 150 m).</figcaption>
+        </figure>
+        <figure>
+            <img src="img/guide/fm5_raster_to_vector.png" alt="Polygons kept by a raster value range, the other pixels hidden by the live preview" loading="lazy" width="954" height="591">
+            <figcaption>Raster → vector: polygons that satisfy the value range; the preview hides the other pixels.</figcaption>
+        </figure>
+        <figure>
+            <img src="img/guide/fm5_pointcloud_to_vector.png" alt="Building points (class 6) inside the polygon kept by the point cloud filter" loading="lazy" width="954" height="591">
+            <figcaption>Point cloud → vector: the polygon that contains class 6 (building) points.</figcaption>
+        </figure>
+    </div>
+    <p>These screenshots were taken in QGIS 4.2 on a small synthetic data set.</p>
+    <h3>Undo, project files, export</h3>
+    <p>
+        Clipped rasters (VRT) and point clouds (COPC) keep the layer id, style and position. Undo, Redo and Unfilter put the original sources back; the project is always saved with
+        the original source and the clips are replayed when it is opened. Export writes rasters as GeoTIFF / COG and point clouds as LAZ / LAS / COPC / GPKG / CSV, alone or with vector layers.
+    </p>
+    <h3>Options</h3>
+    <p>
+        Raster and point cloud support are on by default. In the <strong>Configuration</strong> tab, <code>APP.OPTIONS.RASTER.enabled</code> and
+        <code>APP.OPTIONS.POINT_CLOUD.enabled</code> switch each kind off or on; the layer lists follow at once. Turning a kind off does not unfilter its layers: a warning names those that stay filtered.
+        The <code>APP.OPTIONS.CROSS_FILTER.*</code> options set the point cloud clip mode (exact or bounding box), the maximum raster pixels, the footprint resolution, the cache size and the path of <code>pdal</code>.
+    </p>
+    <figure class="narrow">
+        <img src="img/guide/fm5_configuration.png" alt="Configuration tab showing the RASTER and POINT_CLOUD enabled options" loading="lazy" width="440" height="1086">
+        <figcaption>Configuration tab: the RASTER and POINT_CLOUD options.</figcaption>
+    </figure>
+    <div class="callout"><p><strong>PDAL.</strong> The height above a DTM and the direct writing of COPC files need PDAL 2.4 or later. With an older PDAL, point cloud targets are clipped by the QGIS exporter, a COPC export writes LAZ with a message, and the height above a DTM is disabled with a message naming the version.</p></div>
+    <h3>Automation</h3>
+    <p>
+        Seven Processing algorithms (<code>cross_filter_from_raster</code>, <code>cross_filter_from_point_cloud</code>, <code>cross_filter_from_geometry</code>, <code>filter_point_cloud</code>,
+        <code>clear_filters</code>, <code>apply_favorite</code>, <code>export_filtered_layers</code>) and four ready-made models (extraction by area, high vegetation near lines,
+        parcels on gentle slopes, buildings missing from the LiDAR) run from the toolbox, <code>qgis_process</code> (the plugin starts without a QGIS window), Python and the REST API.
+        See <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a>.
     </p>
 </section>
 
@@ -670,7 +722,7 @@ processing.run("filtermate:batch_filter", {
 </section>
 
 <footer class="doc-foot">
-    <p>FilterMate 4.9.2, GPL-3.0, by imagodata. Map data in the videos and screenshots: BD TOPO® © IGN, Licence Ouverte 2.0.</p>
+    <p>FilterMate 5.0, GPL-3.0, by imagodata. Map data in the videos and screenshots: BD TOPO® © IGN, Licence Ouverte 2.0.</p>
     <p><a href="index.html">Home</a>, <a href="guide.html">User guide</a>, <a href="stories.html">Use cases</a>, <a href="roadmap.html">Roadmap</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
 </footer>
 

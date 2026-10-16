@@ -64,7 +64,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Ausgewähltes Video ansehen"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Video ansehen</button>
                 <a class="home-text-link" href="guide.html" hreflang="en">Anleitung lesen <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
             </div>
-            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 und Qt6</p>
+            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 und Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>Ablauf kennenlernen</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -93,6 +93,23 @@
         </ol>
         <a class="inline-cta" href="guide.html#tutorial" hreflang="en">Zum ersten räumlichen Filter <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
         <div class="callout demo-download"><strong>Mit einem kleinen Datensatz ausprobieren.</strong><p>Vier Ebenen rund um Toutens, ein gestaltetes QGIS-Projekt, ein importierbarer Favorit und Anleitungen auf Englisch und Französisch. Entpacken Sie das ZIP vor dem Öffnen.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Demo herunterladen (ZIP, 203 KB)</a></div>
+    </div>
+</section>
+
+<section class="home-section fm5" id="fm5" aria-labelledby="fm5-title">
+    <div class="home-container capability-layout">
+        <div class="fm5-visual">
+            <div class="fm5-shots">
+                <img src="img/guide/fm5_raster_exploring.png" alt="EXPLORING-Panel einer Rasterebene: Band, Wertebereich und Histogramm" loading="lazy" width="440" height="1086">
+                <img src="img/guide/fm5_pointcloud_exploring.png" alt="EXPLORING-Panel einer Punktwolke: LiDAR-Klassen" loading="lazy" width="440" height="1086">
+            </div>
+            <p class="fm5-caption">Das Panel folgt der aktuellen Ebene: links ein Raster, rechts eine Punktwolke.</p>
+        </div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">Neu in FilterMate 5</p><h2 id="fm5-title">Raster und LiDAR-Punktwolken, gefiltert wie jede andere Ebene.</h2><p>Wählen Sie ein Raster oder eine Punktwolke als aktuelle Ebene, und EXPLORING zeigt die passenden Werkzeuge. FILTERING bezieht die Auswahl dann auf Ebenen jeder Art.</p></div>
+            <ul class="capability-list"><li><strong>Raster</strong><span>Band, Pixelwahl, Wertebereich mit Histogramm und Live-Vorschau, Klassen, Raster-Ausdruck.</span></li><li><strong>Punktwolken</strong><span>ASPRS- und LiDAR-HD-Klassen, Bereiche für Z, Intensität und Rückgabe, Höhe über einem DGM.</span></li><li><strong>In jede Richtung</strong><span>Vektor, Raster und Punktwolke als Quelle oder Ziel: neun Kombinationen mit Puffer, Mindestabdeckung und Disjoint.</span></li><li><strong>Sicher rückgängig zu machen</strong><span>Zugeschnittene Ebenen behalten ID und Stil. Rückgängig, Wiederholen und Projektdateien führen zur Originalquelle zurück.</span></li><li><strong>Exportieren</strong><span>GeoTIFF und COG für Raster; LAZ, LAS, COPC, GPKG und CSV für Punktwolken.</span></li><li><strong>Automatisieren</strong><span>Sieben Processing-Algorithmen, vier Modelle, qgis_process sowie Python- und REST-API.</span></li><li><strong>Getestet</strong><span>CI unter QGIS 3.22, 3.28, 3.34, 3.44 und 4.2, über Processing und das Panel selbst.</span></li></ul>
+            <a class="inline-cta" href="guide.html#raster-lidar" hreflang="en">Die Anleitung zu FilterMate 5 lesen <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
     </div>
 </section>
 
@@ -153,7 +170,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.de.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Räumliche Filter für QGIS, von imagodata.</p></div><ul><li><a href="guide.html" hreflang="en">Anleitung <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">Anwendungsfälle <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">Roadmap <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Quellcode</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Problem melden</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 4.9.2 · Kartendaten in Videos und Bildschirmfotos: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+    <div class="home-container footer-note">FilterMate 5.0 · Kartendaten in Videos und Bildschirmfotos: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="Video"><video controls playsinline muted></video><form method="dialog"><button>Schließen</button></form></dialog>
