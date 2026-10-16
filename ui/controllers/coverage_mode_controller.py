@@ -84,6 +84,20 @@ def _option(key: str, default):
         return default
 
 
+class _LinkedRun:
+    """One vector filter run of a source: ``op_id`` of the cross operation it recorded, None when none.
+
+    Undo / Redo of the vector source only replay that operation when it is
+    still the top of the source's cross history: a step forgotten since (a
+    removed layer, the cache limit) never makes them undo another one.
+    """
+
+    __slots__ = ('op_id',)
+
+    def __init__(self, op_id: Optional[int] = None) -> None:
+        self.op_id = op_id
+
+
 class CoverageModeController(BaseController):
     """Raster / point cloud source mode of the dock, and coverage targets of vector sources."""
 
@@ -106,9 +120,9 @@ class CoverageModeController(BaseController):
         self._histogram_cache: Dict[Tuple[str, int], Tuple[list, float, float]] = {}
         self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
         self._button_slots: List[Tuple[Any, Any]] = []
-        # Vector sources: one flag per vector filter run, True when it also clipped coverage targets.
-        self._linked_runs: Dict[str, List[bool]] = {}
-        self._linked_redo: Dict[str, List[bool]] = {}
+        # Vector sources: one entry per vector filter run, with the cross operation it recorded (if any).
+        self._linked_runs: Dict[str, List[_LinkedRun]] = {}
+        self._linked_redo: Dict[str, List[_LinkedRun]] = {}
         self._running_task: Any = None
         self._export_task: Any = None
         self._hag_task: Any = None
@@ -171,18 +185,11 @@ class CoverageModeController(BaseController):
             self._stats_watched.discard(layer_id)
         self._schedule_cache_tidy()  # runs once the layers are gone
 
-    def _unlink_dropped_run(self, source_id: str) -> None:
-        """The oldest cross operation of a vector source was forgotten: so is its link.
-
-        ``_linked_runs`` pairs each vector filter run with a cross operation
-        (True) or none (False); the oldest True stood for the dropped
-        operation, which a later Undo / Redo must no longer look for.
-        """
-        runs = self._linked_runs.get(source_id) or []
-        for index, linked in enumerate(runs):
-            if linked:
-                runs[index] = False
-                return
+    def _unlink_dropped_run(self, source_id: str, op_id: Optional[int]) -> None:
+        """A cross operation of a vector source was forgotten: so is the run that recorded it."""
+        for run in self._linked_runs.get(source_id) or []:
+            if run.op_id is not None and run.op_id == op_id:
+                run.op_id = None
 
     def _schedule_cache_tidy(self, delay_ms: int = 0) -> None:
         """Remove unused derived files soon (once no FilterMate task runs)."""
@@ -212,7 +219,7 @@ class CoverageModeController(BaseController):
         if report['dropped']:
             for service, step in report['dropped']:
                 if service is self.service and step.from_undo:
-                    self._unlink_dropped_run(step.operation.source_layer_id)
+                    self._unlink_dropped_run(step.operation.source_layer_id, step.operation.op_id)
             self.update_undo_redo_buttons()
         over = bool(report['limit']) and report['size'] > report['limit']
         if not over:
@@ -1586,11 +1593,11 @@ class CoverageModeController(BaseController):
         source_id = source.id()
         try:
             if task_name == 'filter':
-                runs = self._linked_runs.setdefault(source_id, [])
-                runs.append(False)  # set to True once the cross task really changed a layer
+                run = _LinkedRun()  # gets its cross operation once the cross task really changed a layer
+                self._linked_runs.setdefault(source_id, []).append(run)
                 self._linked_redo[source_id] = []
                 if coverage_ids and self._vector_engine_filters_targets():
-                    self._run_vector_source_filter(source, coverage_ids, run_index=len(runs) - 1)
+                    self._run_vector_source_filter(source, coverage_ids, run=run)
             elif task_name in ('unfilter', 'reset'):
                 # Same history rules as the vector engine: Unfilter records
                 # nothing (a later Undo goes back to before the last filter, for
@@ -1606,19 +1613,28 @@ class CoverageModeController(BaseController):
             elif task_name == 'undo':
                 runs = self._linked_runs.get(source_id) or []
                 if runs:
-                    linked = runs.pop()
-                    self._linked_redo.setdefault(source_id, []).append(linked)
-                    if linked:
+                    run = runs.pop()
+                    self._linked_redo.setdefault(source_id, []).append(run)
+                    if self._run_is_next(run, self.service.history.peek_undo(source_id)):
                         self._finish_restore(self.service.undo(source_id))
             elif task_name == 'redo':
                 redo = self._linked_redo.get(source_id) or []
                 if redo:
-                    linked = redo.pop()
-                    self._linked_runs.setdefault(source_id, []).append(linked)
-                    if linked:
+                    run = redo.pop()
+                    self._linked_runs.setdefault(source_id, []).append(run)
+                    if self._run_is_next(run, self.service.history.peek_redo(source_id)):
                         self._finish_restore(self.service.redo(source_id))
         except Exception as exc:
             logger.warning(f"[FM5] coverage targets of '{self._layer_name(source)}' not processed: {exc}", exc_info=True)
+
+    @staticmethod
+    def _run_is_next(run: _LinkedRun, operation: Any) -> bool:
+        """True when ``operation`` (top of the cross undo / redo stack) is the one ``run`` recorded.
+
+        An operation forgotten since (removed layer, cache limit) leaves the
+        run without its step: the next one belongs to an older run.
+        """
+        return run.op_id is not None and operation is not None and operation.op_id == run.op_id
 
     def _vector_engine_filters_targets(self) -> bool:
         """The vector engine only filters distant layers when both buttons are on."""
@@ -1632,7 +1648,7 @@ class CoverageModeController(BaseController):
                 return False
         return True
 
-    def _run_vector_source_filter(self, source: Any, coverage_ids: List[str], run_index: Optional[int] = None) -> bool:
+    def _run_vector_source_filter(self, source: Any, coverage_ids: List[str], run: Optional[_LinkedRun] = None) -> bool:
         _, show_warning = _feedback()
         features = self._vector_source_features(source)
         if not features:
@@ -1654,9 +1670,10 @@ class CoverageModeController(BaseController):
         def done(task, result):
             if getattr(self, '_torn_down', False):
                 return
-            runs = self._linked_runs.get(source_id) or []
-            if task.changes and run_index is not None and run_index < len(runs):
-                runs[run_index] = True
+            if task.changes and run is not None:
+                # The service recorded the operation just before calling back: it is on top.
+                operation = self.service.history.peek_undo(source_id)
+                run.op_id = operation.op_id if operation is not None else None
             failures = [o for o in task.outcomes if not o.success]
             if not result:
                 message = self.tr("Raster / point cloud targets not filtered: {0}").format(task.error or self.tr("canceled"))

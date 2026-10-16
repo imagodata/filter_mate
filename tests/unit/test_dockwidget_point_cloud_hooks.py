@@ -103,6 +103,58 @@ class TestDockwidgetHooks:
 
 
 @pytest.mark.unit
+class TestVectorFilterWithCoverageTargets:
+    """Constat 14: the raster / point cloud targets of a vector source follow a vector filter
+    task the app really created, never one it refused (their undo step would be paired
+    with another vector run)."""
+
+    @staticmethod
+    def _launch_task_event():
+        from unittest.mock import MagicMock
+        func = _method(_DOCKWIDGET, "FilterMateDockWidget", "launchTaskEvent")
+        namespace = {"logger": MagicMock()}
+        exec(compile(ast.fix_missing_locations(ast.Module(body=[func], type_ignores=[])), str(_DOCKWIDGET), "exec"),
+             namespace)
+        return namespace["launchTaskEvent"]
+
+    @staticmethod
+    def _dock(app_creates_the_task):
+        from types import SimpleNamespace
+        from unittest.mock import MagicMock
+        app = SimpleNamespace(appTasks={"filter": None}, _initializing_project=False, _loading_new_project=False)
+        integration = MagicMock()
+        integration.delegate_point_cloud_task.return_value = False
+        integration.delegate_split_coverage_targets.return_value = (["v2"], ["r1"])
+        layer = MagicMock()
+        layer.id.return_value = "v1"
+
+        def emit(task_name):  # FilterMateApp.manage_task, run synchronously by the signal
+            if app_creates_the_task and task_name in app.appTasks:
+                app.appTasks[task_name] = object()
+
+        dock = SimpleNamespace(_controller_integration=integration, widgets_initialized=True, current_layer=layer,
+                               PROJECT_LAYERS={"v1": {"filtering": {}}}, app=app,
+                               get_layers_to_filter=lambda: ["v2", "r1"], setLayerVariableEvent=lambda *a: None,
+                               launchingTask=SimpleNamespace(emit=emit))
+        return dock, integration
+
+    def test_refused_vector_filter_leaves_the_coverage_targets(self):
+        dock, integration = self._dock(app_creates_the_task=False)
+        self._launch_task_event()(dock, None, "filter")
+        integration.delegate_vector_source_coverage_task.assert_not_called()
+
+    def test_launched_vector_filter_clips_the_coverage_targets(self):
+        dock, integration = self._dock(app_creates_the_task=True)
+        self._launch_task_event()(dock, None, "filter")
+        integration.delegate_vector_source_coverage_task.assert_called_once_with("filter", dock.current_layer, ["r1"])
+
+    def test_undo_is_still_mirrored(self):
+        dock, integration = self._dock(app_creates_the_task=False)
+        self._launch_task_event()(dock, None, "undo")
+        integration.delegate_vector_source_coverage_task.assert_called_once_with("undo", dock.current_layer, ["r1"])
+
+
+@pytest.mark.unit
 class TestControllerIntegration:
 
     def test_delegations_exist_and_fail_closed(self):

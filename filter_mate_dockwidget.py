@@ -6930,7 +6930,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if integration is not None and hasattr(integration, 'delegate_split_coverage_targets'):
             _, coverage_targets = integration.delegate_split_coverage_targets(all_targets)
         source_layer = self.current_layer
+        # The app may refuse the vector filter (edit mode, no parameters) or defer it:
+        # the coverage targets (and their undo step) only follow a filter task it created.
+        app_tasks = getattr(app, 'appTasks', None) if app is not None else None
+        previous_task = app_tasks.get(task_name) if isinstance(app_tasks, dict) else None
         self.launchingTask.emit(task_name)
+        if task_name == 'filter' and isinstance(app_tasks, dict) and app_tasks.get(task_name) is previous_task:
+            logger.info("launchTaskEvent: vector filter not launched, raster / point cloud targets left as they are")
+            return
         if integration is not None and hasattr(integration, 'delegate_vector_source_coverage_task'):
             integration.delegate_vector_source_coverage_task(task_name, source_layer, coverage_targets)
 

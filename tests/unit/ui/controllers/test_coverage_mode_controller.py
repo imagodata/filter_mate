@@ -254,18 +254,27 @@ class TestVectorSourceTargets:
         assert controller.split_coverage_targets([]) == ([], [])
 
     @staticmethod
-    def _linking(controller, changed=True):
-        """Stand-in for _run_vector_source_filter: the cross task changed layers (or not)."""
-        def fake(source, ids, run_index=None):
+    def _linking(ctrl_module, controller, changed=True):
+        """Stand-in for _run_vector_source_filter: the cross task changed the targets (or not).
+
+        Like the service, a task with changes records one operation (one change per target).
+        """
+        filter_state = ctrl_module._test_filter_state
+
+        def fake(source, ids, run=None):
             if changed:
-                controller._linked_runs[source.id()][run_index] = True
+                operation = filter_state.CrossOperation(source.id(), tuple(
+                    (filter_state.LayerSnapshot(i, "raster", source="/a"),
+                     filter_state.LayerSnapshot(i, "raster", source="/b")) for i in ids))
+                controller.service.history.push(operation)
+                run.op_id = operation.op_id
             return True
         return fake
 
     def test_undo_redo_follow_linked_runs(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
-        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller))
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(ctrl_module, controller))
         monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
         source = layers["v1"]
         controller.run_vector_source_task("filter", source, ["r1"])   # linked run
@@ -283,7 +292,7 @@ class TestVectorSourceTargets:
     def test_cross_task_without_change_is_not_linked(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
-        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller, changed=False))
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(ctrl_module, controller, changed=False))
         controller.run_vector_source_task("filter", layers["v1"], ["r1"])
         controller.run_vector_source_task("undo", layers["v1"], [])
         assert ("undo", "v1") not in ctrl_module._test_service.calls
@@ -295,12 +304,12 @@ class TestVectorSourceTargets:
         ran = []
         monkeypatch.setattr(controller, "_run_vector_source_filter", lambda *a, **k: ran.append(a) or True)
         controller.run_vector_source_task("filter", layers["v1"], ["r1"])
-        assert ran == [] and controller._linked_runs["v1"] == [False]
+        assert ran == [] and [run.op_id for run in controller._linked_runs["v1"]] == [None]
 
     def test_unfilter_keeps_links_like_the_vector_history(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
-        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller))
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(ctrl_module, controller))
         monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
         controller.run_vector_source_task("filter", layers["v1"], ["r1", "p1"])
         controller.run_vector_source_task("unfilter", layers["v1"], ["r1", "p1"])
@@ -312,22 +321,21 @@ class TestVectorSourceTargets:
     def test_reset_clears_links_and_history(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
-        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(controller))
+        monkeypatch.setattr(controller, "_run_vector_source_filter", self._linking(ctrl_module, controller))
         monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
-        cleared = []
-        ctrl_module._test_service.history = types.SimpleNamespace(clear_source=lambda sid: cleared.append(sid))
         controller.run_vector_source_task("filter", layers["v1"], ["r1"])
+        assert ctrl_module._test_service.history.can_undo("v1")
         controller.run_vector_source_task("reset", layers["v1"], ["r1"])
-        assert cleared == ["v1"]
+        assert not ctrl_module._test_service.history.can_undo("v1")
         controller.run_vector_source_task("undo", layers["v1"], [])
         assert ("undo", "v1") not in ctrl_module._test_service.calls
 
     def test_filter_without_coverage_targets_records_unlinked_run(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         ran = []
-        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda source, ids, run_index=None: ran.append(ids) or True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter", lambda source, ids, run=None: ran.append(ids) or True)
         controller.run_vector_source_task("filter", layers["v1"], [])
-        assert ran == [] and controller._linked_runs["v1"] == [False]
+        assert ran == [] and [run.op_id for run in controller._linked_runs["v1"]] == [None]
 
     def test_source_features_without_selection_warns(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
@@ -447,7 +455,7 @@ class TestFailuresCacheAndTeardown:
         controller = ctrl_module.CoverageModeController(_dock())
         tidies = []
         monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: tidies.append(a))
-        controller._linked_runs["r1"] = [True]
+        controller._linked_runs["r1"] = [ctrl_module._LinkedRun(1)]
         controller._on_layers_removed(["r1", "p1"])
         assert ctrl_module._test_service_module.calls == [("forget", "r1"), ("forget", "p1")]
         assert "r1" not in controller._linked_runs and tidies == [()]
@@ -489,15 +497,17 @@ class TestFailuresCacheAndTeardown:
         controller = ctrl_module.CoverageModeController(_dock())
         refreshed = []
         monkeypatch.setattr(controller, "update_undo_redo_buttons", lambda: refreshed.append(1))
-        controller._linked_runs["v1"] = [True, False, True]
-        controller._linked_runs["v2"] = [True]
-        step = SimpleNamespace(from_undo=True, operation=SimpleNamespace(source_layer_id="v1"))
+        run = ctrl_module._LinkedRun
+        controller._linked_runs["v1"] = [run(11), run(None), run(12)]
+        controller._linked_runs["v2"] = [run(13)]
+        step = SimpleNamespace(from_undo=True, operation=SimpleNamespace(source_layer_id="v1", op_id=11))
         other_service = object()  # the automation history: its steps are not linked to the dock
         ctrl_module._test_service_module.tidy_report = {
             "size": 0, "limit": 0, "removed": 0,
             "dropped": [(ctrl_module._test_service, step), (other_service, step)]}
         controller._tidy_cache()
-        assert controller._linked_runs == {"v1": [False, False, True], "v2": [True]}
+        assert {sid: [r.op_id for r in runs] for sid, runs in controller._linked_runs.items()} == \
+            {"v1": [None, None, 12], "v2": [13]}
         assert refreshed == [1]
 
     def test_teardown_cancels_export_and_height_tasks(self, ctrl_module, monkeypatch):
@@ -835,6 +845,66 @@ class TestLayerLifecycle:
         controller.setup()
         controller.setup()
         assert [len(s.slots) for s in (project.readProject, project.cleared, project.layersWillBeRemoved)] == [1, 1, 1]
+
+
+@pytest.mark.unit
+class TestLinkedRunsAfterLayerRemoval:
+    """Constat 11: a removed target never makes Undo of a vector source restore the wrong step."""
+
+    def _controller(self, ctrl_module, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        monkeypatch.setattr(controller, "_vector_engine_filters_targets", lambda: True)
+        monkeypatch.setattr(controller, "_run_vector_source_filter",
+                            TestVectorSourceTargets._linking(ctrl_module, controller))
+        monkeypatch.setattr(controller, "_finish_restore", lambda ids: None)
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        return controller
+
+    def test_undo_restores_the_targets_left_by_the_removed_one(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, monkeypatch)
+        history = ctrl_module._test_service.history
+        controller.run_vector_source_task("filter", layers["v1"], ["r2"])        # run 1 clips r2
+        first = history.peek_undo("v1")
+        controller.run_vector_source_task("filter", layers["v1"], ["r1", "r2"])  # run 2 clips r1 and r2
+        second = history.peek_undo("v1")
+        controller._on_layers_removed(["r1"])
+        controller.run_vector_source_task("undo", layers["v1"], [])
+        assert ctrl_module._test_service.calls == [("undo", "v1")]
+        assert history.peek_redo("v1").op_id == second.op_id
+        assert history.peek_redo("v1").layer_ids == ("r2",)  # r2 goes back to run 1's clip
+        assert history.peek_undo("v1") is first
+
+    def test_operation_of_the_removed_layer_alone_is_not_replaced_by_an_older_one(self, ctrl_module, layers, monkeypatch):
+        controller = self._controller(ctrl_module, monkeypatch)
+        controller.run_vector_source_task("filter", layers["v1"], ["r2"])  # run 1 clips r2
+        controller.run_vector_source_task("filter", layers["v1"], ["r1"])  # run 2 clips r1 only
+        controller._on_layers_removed(["r1"])
+        controller.run_vector_source_task("undo", layers["v1"], [])        # undoes run 2: nothing left of it
+        assert ctrl_module._test_service.calls == []
+        controller.run_vector_source_task("undo", layers["v1"], [])        # run 1
+        assert ctrl_module._test_service.calls == [("undo", "v1")]
+
+    def test_cross_task_records_its_operation_on_the_run(self, ctrl_module, layers, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        jobs = types.ModuleType(f"{adapters.package.__name__}.source_jobs")
+        jobs.VectorSourceJob = lambda source, features: object()
+        monkeypatch.setitem(sys.modules, jobs.__name__, jobs)
+        monkeypatch.setattr(controller, "_vector_source_features", lambda source: ["feature"])
+        monkeypatch.setattr(controller, "_target_specs", lambda ids, exclude_id="": ids)
+        monkeypatch.setattr(controller, "_filtering_settings", lambda: {})
+        monkeypatch.setattr(controller, "_build_request", lambda *a: object())
+        monkeypatch.setattr(controller, "_after_run", lambda *a, **k: None)
+        callbacks = []
+        ctrl_module._test_service.run = lambda request, job, on_done=None: callbacks.append(on_done)
+        run = ctrl_module._LinkedRun()
+        assert controller._run_vector_source_filter(layers["v1"], ["r1"], run=run)
+        filter_state = ctrl_module._test_filter_state
+        changes = ((filter_state.LayerSnapshot("r1", "raster", source="/a"),
+                    filter_state.LayerSnapshot("r1", "raster", source="/b")),)
+        operation = filter_state.CrossOperation("v1", changes)
+        ctrl_module._test_service.history.push(operation)  # what the service records before calling back
+        callbacks[0](types.SimpleNamespace(changes=list(changes), outcomes=[], error=""), True)
+        assert run.op_id == operation.op_id
 
 
 @pytest.mark.unit
