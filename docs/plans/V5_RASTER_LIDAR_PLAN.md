@@ -30,6 +30,8 @@ Revue adversariale (Opus) : 33 constats, corrigés dans 62a84f2d sauf les points
 | #101, #102 | Nuages : conditions d'attributs dynamiques et chaînées, panneau qui suit les statistiques de la couche ; outils raster d'EXPLORING |
 | `claude/v5-release-hardening` | Avant la sortie : fonds de plan web exclus du combo, cache des fichiers dérivés nettoyé et plafonné (verrou de session, repli dans le temp, fichiers en cours d'écriture protégés), échecs nommés par couche, tâches annulées au déchargement, fenêtre « Nouveautés de FilterMate 5 », metadata ; job CI QGIS sans interface (Docker, 8 images de 3.22 à la nightly), qui a trouvé trois incompatibilités, corrigées : plugin non chargé avant QGIS 3.34.2 (`QAction` / `QShortcut`), rasters cibles non découpés avec GDAL < 3.9 (`cutlineWKT`), PDAL < 2.4 sans `writers.copc` ; options raster et nuage (actives par défaut) appliquées dès leur modification dans l'onglet Configuration |
 
+**Sortie 5.0.0 le 15/10/2026** (PR #103 durcissement et compatibilité, #104 test du dock et correctifs, puis release : metadata, CHANGELOG, README, tag `v5.0.0`). Site GitHub Pages et nouvelles captures QGIS 4.2 : préparés sur une branche à part, non publiés.
+
 **Vérifications** : suite unitaire 2266 OK ; tests API 126 OK (fastapi en dossier isolé) ; flake8 (config CI) 0 ; `scripts/fm5_scenarios.py` 62/62 (QGIS 4.2
 sans interface, dalle LiDAR HD 0616_6153 Cerdagne, MNT 1 m et classes dérivés par PDAL, BD TOPO et parcelles WFS) ;
 `scripts/fm5_gui_check.py` 26/26 sur QGIS 4.2 (Qt6) et 25/25 sur QGIS 3.44 LTR (Qt5), profil jetable.

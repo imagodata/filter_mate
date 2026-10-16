@@ -64,7 +64,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="观看所选视频"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>观看视频</button>
                 <a class="home-text-link" href="guide.html" hreflang="en">阅读指南 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
             </div>
-            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 和 Qt6</p>
+            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 和 Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>了解操作流程</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -93,6 +93,23 @@
         </ol>
         <a class="inline-cta" href="guide.html#tutorial" hreflang="en">跟随教程建立第一个筛选 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
         <div class="callout demo-download"><strong>用小型数据集试用。</strong><p>包含 Toutens 周边四个图层、已设置样式的 QGIS 工程、可导入的收藏，以及英文和法文说明。打开工程前请先解压 ZIP。</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>下载示例数据（ZIP，203 KB）</a></div>
+    </div>
+</section>
+
+<section class="home-section fm5" id="fm5" aria-labelledby="fm5-title">
+    <div class="home-container capability-layout">
+        <div class="fm5-visual">
+            <div class="fm5-shots">
+                <img src="img/guide/fm5_raster_exploring.png" alt="栅格图层的 EXPLORING 面板：波段、数值范围与直方图" loading="lazy" width="440" height="1086">
+                <img src="img/guide/fm5_pointcloud_exploring.png" alt="点云的 EXPLORING 面板：LiDAR 分类" loading="lazy" width="440" height="1086">
+            </div>
+            <p class="fm5-caption">面板会跟随当前图层变化：左为栅格，右为点云。</p>
+        </div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">FilterMate 5 新功能</p><h2 id="fm5-title">栅格与 LiDAR 点云，像任何图层一样筛选。</h2><p>将栅格或点云设为当前图层，EXPLORING 就会显示相应的工具；FILTERING 再把选择结果与任何类型的图层关联起来。</p></div>
+            <ul class="capability-list"><li><strong>栅格</strong><span>波段、像元拾取、带直方图和实时预览的数值范围、分类、栅格表达式。</span></li><li><strong>点云</strong><span>ASPRS 与 LiDAR HD 分类、Z、强度与回波范围、相对 DTM 的高度。</span></li><li><strong>任意方向</strong><span>矢量、栅格与点云都能作为源或目标：九种组合，并支持缓冲区、最小覆盖率与 Disjoint。</span></li><li><strong>可放心撤销</strong><span>裁切后的图层保留原有 ID 与样式。撤销、重做和工程文件都会回到原始数据源。</span></li><li><strong>导出</strong><span>栅格输出 GeoTIFF 与 COG；点云输出 LAZ、LAS、COPC、GPKG 与 CSV。</span></li><li><strong>自动化</strong><span>七个 Processing 算法、四个模型、qgis_process，以及 Python 与 REST API。</span></li><li><strong>已测试</strong><span>CI 在 QGIS 3.22、3.28、3.34、3.44 和 4.2 上，通过 Processing 和面板本身进行测试。</span></li></ul>
+            <a class="inline-cta" href="guide.html#raster-lidar" hreflang="en">阅读 FilterMate 5 指南 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        </div>
     </div>
 </section>
 
@@ -153,7 +170,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.zh-hans.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>imagodata 开发的 QGIS 空间筛选工具。</p></div><ul><li><a href="guide.html" hreflang="en">使用指南 <small lang="en">(EN)</small></a></li><li><a href="stories.html" hreflang="en">应用案例 <small lang="en">(EN)</small></a></li><li><a href="roadmap.html" hreflang="en">开发规划 <small lang="en">(EN)</small></a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">源代码</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">报告问题</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 4.9.2 · 视频和截图地图数据：BD TOPO® © IGN，Licence Ouverte 2.0。</div>
+    <div class="home-container footer-note">FilterMate 5.0 · 视频和截图地图数据：BD TOPO® © IGN，Licence Ouverte 2.0。</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="视频"><video controls playsinline muted></video><form method="dialog"><button>关闭</button></form></dialog>
