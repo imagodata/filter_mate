@@ -306,13 +306,13 @@ class CoverageModeController(BaseController):
                         getattr(project, name).disconnect(slot)
                     except (TypeError, RuntimeError):
                         pass
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug(f"[FM5] project signals not disconnected: {exc}")
             self._project_connected.clear()
         try:
             self.service.cancel_all()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] running tasks not canceled: {exc}")
         for task_name in ('_export_task', '_hag_task'):
             task = getattr(self, task_name, None)
             setattr(self, task_name, None)
@@ -328,8 +328,8 @@ class CoverageModeController(BaseController):
                 try:
                     widget.setParent(None)
                     widget.deleteLater()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug(f"[FM5] panel widget not released: {exc}")
         self._raster_panel = None
         self._pc_panel = None
         self._running_task = None
@@ -1112,8 +1112,8 @@ class CoverageModeController(BaseController):
         try:
             transform = QgsCoordinateTransform(layer.crs(), canvas.mapSettings().destinationCrs(), QgsProject.instance())
             extent = transform.transformBoundingBox(extent)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] extent not reprojected to the canvas CRS: {exc}")
         canvas.setExtent(extent)
         canvas.refresh()
 
@@ -1138,8 +1138,8 @@ class CoverageModeController(BaseController):
         try:
             transform = QgsCoordinateTransform(layer.crs(), canvas.mapSettings().destinationCrs(), QgsProject.instance())
             extent = transform.transformBoundingBox(extent)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] extent not reprojected to the canvas CRS: {exc}")
         extent.scale(1.05)  # a small margin around the selected pixels
         canvas.setExtent(extent)
         canvas.refresh()
@@ -1557,8 +1557,8 @@ class CoverageModeController(BaseController):
         try:
             if self._kind is LayerKind.POINT_CLOUD and self._pc_panel is not None:
                 self._pc_panel.set_current_subset(layer.subsetString())
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] point cloud subset not shown: {exc}")
 
     def _run_unfilter(self, layer: Any, reset: bool) -> None:
         settings = self._filtering_settings()
@@ -1926,8 +1926,8 @@ class CoverageModeController(BaseController):
         try:
             if iface is not None:
                 iface.mapCanvas().refresh()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] canvas not refreshed: {exc}")
 
     @staticmethod
     def _call(target: Any, method: str, *args: Any) -> None:

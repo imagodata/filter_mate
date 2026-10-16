@@ -209,7 +209,7 @@ def advanced(parameter):
     from qgis.core import Qgis
     flag = getattr(getattr(Qgis, "ProcessingParameterFlag", None), "Advanced", None)
     if flag is None:
-        flag = QgsProcessingParameterDefinition.FlagAdvanced
+        flag = QgsProcessingParameterDefinition.Flag.FlagAdvanced
     parameter.setFlags(parameter.flags() | flag)
     return parameter
 

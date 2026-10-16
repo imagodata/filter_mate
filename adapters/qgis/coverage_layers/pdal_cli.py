@@ -43,8 +43,8 @@ def _candidates() -> List[str]:
                 os.path.normpath(os.path.join(prefix, 'bin')),
                 os.path.normpath(prefix),  # macOS bundle: Contents/MacOS
             ]
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] QGIS prefix folders not added to the PDAL search: {exc}")
     found = []
     for folder in folders:
         for name in names:

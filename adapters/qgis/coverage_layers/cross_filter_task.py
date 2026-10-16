@@ -22,7 +22,7 @@ class CrossFilterTask(QgsTask):
 
     def __init__(self, description: str, request, source_job, target_jobs: list,
                  on_done: Optional[Callable] = None) -> None:
-        super().__init__(description, QgsTask.CanCancel)
+        super().__init__(description, QgsTask.Flag.CanCancel)
         self.request = request
         self.source_job = source_job
         self.target_jobs = list(target_jobs)

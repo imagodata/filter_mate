@@ -138,7 +138,8 @@ def _all_stats():
     stat = getattr(Qgis, 'RasterBandStatistic', None)
     if stat is not None:
         return stat.Min | stat.Max | stat.Mean | stat.StdDev
-    return QgsRasterBandStats.Min | QgsRasterBandStats.Max | QgsRasterBandStats.Mean | QgsRasterBandStats.StdDev
+    stats = QgsRasterBandStats.Stats
+    return stats.Min | stats.Max | stats.Mean | stats.StdDev
 
 
 def band_range(layer: QgsRasterLayer, band: int, sample_size: int = 250000) -> Tuple[Optional[float], Optional[float], Optional[float]]:
@@ -177,7 +178,7 @@ def identify_values(layer: QgsRasterLayer, point: QgsPointXY) -> Dict[int, Optio
         fmt = Qgis.RasterIdentifyFormat.Value
     except AttributeError:
         from qgis.core import QgsRaster
-        fmt = QgsRaster.IdentifyFormatValue
+        fmt = QgsRaster.IdentifyFormat.IdentifyFormatValue
     result = layer.dataProvider().identify(point, fmt)
     values: Dict[int, Optional[float]] = {}
     if not result.isValid():
@@ -212,13 +213,13 @@ def read_band_array(provider: QgsRasterDataProvider, band: int, extent: QgsRecta
     try:
         if block.hasNoDataValue():
             array[array == float(block.noDataValue())] = np.nan
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] source NoData not applied: {exc}")
     try:
         for user_range in provider.userNoDataValues(band) or []:
             array[(array >= user_range.min()) & (array <= user_range.max())] = np.nan
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] user NoData ranges not applied: {exc}")
     return array
 
 
@@ -229,8 +230,8 @@ def crs_kind(crs) -> str:
             return 'geographic'
         if crs.authid() in ('EPSG:3857', 'EPSG:900913'):
             return 'mercator'
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] CRS kind unknown, read as projected: {exc}")
     return 'projected'
 
 

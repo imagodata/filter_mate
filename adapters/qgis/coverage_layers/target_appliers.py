@@ -139,8 +139,8 @@ def _simplified_for_cutline(geometry: QgsGeometry, tolerance: float, max_vertice
             simplified = geometry.simplify(tolerance)
             if simplified is not None and not simplified.isEmpty():
                 return make_valid(simplified)
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] geometry not simplified: {exc}")
     return geometry
 
 
@@ -642,8 +642,8 @@ class PointCloudTargetJob(TargetJob):
             if self._derived_provider == 'pdal':
                 try:
                     layer.dataProvider().generateIndex()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug(f"[FM5] PDAL index not generated: {exc}")
             if not layer.setSubsetString(self._own_subset):
                 self.outcome.message = f"the layer's own filter could not be kept: {self._own_subset[:120]}"
                 logger.warning(f"[FM5] '{layer.name()}': {self.outcome.message}")
