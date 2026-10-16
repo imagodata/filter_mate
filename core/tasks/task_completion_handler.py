@@ -10,7 +10,7 @@ from typing import List, Tuple, Optional, Any, Callable
 
 from qgis.core import QgsMessageLog, Qgis, QgsProject
 from qgis.utils import iface
-from qgis.PyQt.QtCore import QTimer
+from qgis.PyQt.QtCore import QCoreApplication, QTimer
 
 from ...core.ports.qgis_port import get_qgis_factory
 from ...infrastructure.signal_utils import SignalBlocker
@@ -192,7 +192,8 @@ def _unfreeze_canvas(canvas) -> None:
 
 def apply_pending_subset_requests(
     pending_requests: List[Tuple[Any, str]],  # List[Tuple[QgsVectorLayer, str]]
-    safe_set_subset_fn: Callable[[Any, str], bool]  # Callable[[QgsVectorLayer, str], bool]
+    safe_set_subset_fn: Callable[[Any, str], bool],  # Callable[[QgsVectorLayer, str], bool]
+    failures: Optional[List[str]] = None,
 ) -> int:
     """
     Apply pending subset string requests on main thread.
@@ -203,6 +204,9 @@ def apply_pending_subset_requests(
     Args:
         pending_requests: List of (layer, expression) tuples
         safe_set_subset_fn: Function to safely set subset string
+        failures: When given, receives one "<layer>: <error>" line per filter
+            the provider refused (2026-10-17: shown in the message bar
+            instead of a silent success)
 
     Returns:
         int: Number of successfully applied filters
@@ -441,6 +445,8 @@ def apply_pending_subset_requests(
                         f"finished() ✗ FAILED: {layer.name()} - {error_msg}",
                         "FilterMate", Qgis.MessageLevel.Critical
                     )
+                    if failures is not None:
+                        failures.append(f"{layer.name()}: {error_msg}")
 
         except Exception as e:  # catch-all safety net: subset application must not crash finished()
             import traceback
@@ -450,6 +456,8 @@ def apply_pending_subset_requests(
                 f"finished() ✗ Exception: {layer.name() if layer else 'Unknown'} - {str(e)}",
                 "FilterMate", Qgis.MessageLevel.Critical
             )
+            if failures is not None:
+                failures.append(f"{layer.name() if layer else 'Unknown'}: {e}")
 
         # Track last-touched DB path so the next iteration knows whether the
         # lock-error retry applies (same shared SQLite file).
@@ -502,6 +510,16 @@ def _schedule_deferred_filter_application(
                         )
                     else:
                         logger.error(f"Failed to apply deferred filter to {lyr.name()}")
+                        # 2026-10-17: deferred after the task messages: say it here
+                        try:
+                            iface.messageBar().pushWarning(
+                                "FilterMate",
+                                QCoreApplication.translate(
+                                    "TaskCompletionHandler", "The filter of {0} could not be applied; it keeps its previous filter."
+                                ).format(lyr.name())
+                            )
+                        except (RuntimeError, AttributeError):
+                            pass
             except (RuntimeError, AttributeError, ValueError) as e:
                 logger.error(f"Error applying deferred filter: {e}")
 

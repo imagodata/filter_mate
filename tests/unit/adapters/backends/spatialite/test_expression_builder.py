@@ -310,6 +310,11 @@ def _long_linestring(min_chars):
 class TestLargeSourceWkt:
     """The builder never generalizes the source; too large → OGR backend (exact)."""
 
+    @pytest.fixture(autouse=True)
+    def _json1(self, monkeypatch):
+        # The OGR backend's long key lists need JSON1 in GDAL's SQLite.
+        monkeypatch.setattr(_mod, "json1_available", lambda: True)
+
     def test_thresholds_are_consistent(self):
         assert _mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT == 100_000
         assert _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH == 1_000_000
@@ -341,7 +346,6 @@ class TestLargeSourceWkt:
             source_geom=wkt,
         )
         assert expr == USE_OGR_FALLBACK
-        assert any("too large to inline" in w for w in builder._warnings)
 
     # 33.1 s: the Toulouse rivers; 16.7 s: the 87 KB Toulouse Metropole polygon on troncon_de_route.
     @pytest.mark.parametrize("cost, inlined", [(0.4, True), (0.99, True), (1.01, False), (16.7, False), (33.1, False)])
@@ -403,9 +407,49 @@ class TestLargeSourceWkt:
         assert _mod.gpkg_rtree_count(str(path), "roads", "geom", (10.0, 0.0, 19.9, 1.0)) == 10
         assert _mod.gpkg_rtree_count(str(path), "other", "geom") is None
 
+    @pytest.mark.parametrize("cost", [None, 16.7])
+    def test_without_json1_the_source_stays_inline(self, builder, monkeypatch, cost):
+        # 2026-10-17: the OGR backend could not write the key list (a plain
+        # list that long freezes QGIS): slow but exact inline subset.
+        monkeypatch.setattr(_mod, "json1_available", lambda: False)
+        monkeypatch.setattr(builder, "_inline_cost_seconds", lambda *args: cost)
+        wkt = _long_linestring(236_398)
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"crosses": True},
+            source_geom=wkt,
+        )
+        assert expr != USE_OGR_FALLBACK
+        assert any("no JSON1" in w for w in builder._warnings)
+
+    def test_sql_buffer_doubles_the_estimate(self, builder, mock_gpkg_layer, monkeypatch):
+        monkeypatch.setattr(_mod, "gpkg_rtree_count", lambda *args: 100_000)
+        monkeypatch.setattr(builder, "_source_bbox", lambda *args: (0.0, 0.0, 1.0, 1.0))
+        wkt = _long_linestring(10_000)
+        plain = builder._inline_cost_seconds(mock_gpkg_layer, "geom", wkt, 2154, 2154, None, {"intersects": True})
+        buffered = builder._inline_cost_seconds(mock_gpkg_layer, "geom", wkt, 2154, 2154, 20.0, {"intersects": True})
+        assert buffered == pytest.approx(plain * _mod.SPATIALITE_INLINE_SQL_BUFFER_FACTOR)
+
+    def test_rtree_count_cache_is_bounded(self, tmp_path, monkeypatch):
+        import sqlite3
+        path = tmp_path / "t.gpkg"
+        con = sqlite3.connect(path)
+        con.execute("CREATE TABLE gpkg_extensions (table_name, column_name, extension_name)")
+        con.execute("INSERT INTO gpkg_extensions VALUES ('roads', 'geom', 'gpkg_rtree_index')")
+        con.execute("CREATE VIRTUAL TABLE rtree_roads_geom USING rtree(id, minx, maxx, miny, maxy)")
+        con.commit()
+        con.close()
+        _mod.clear_rtree_cache()
+        for index in range(_mod.RTREE_COUNT_CACHE_MAX + 10):
+            _mod.gpkg_rtree_count(str(path), "roads", "geom", (index, 0.0, index + 1.0, 1.0))
+        assert len(_mod._RTREE_COUNT_CACHE) <= _mod.RTREE_COUNT_CACHE_MAX
+
     def test_source_bbox_parsed_once_per_task(self, monkeypatch):
-        # Builders are created per target layer but share the task parameters.
-        task_params = {"buffer_endcap_style": "round", "source_srid": 2154}
+        # Builders are created per target layer but share the task (2026-10-17:
+        # the memo hangs on the task, not on task_params = PROJECT_LAYERS).
+        task = types.SimpleNamespace()
+        task_params = {"buffer_endcap_style": "round", "source_srid": 2154, "_parent_task": task,
+                       "_spatialite_source_bbox_cache": {"stale": 1}}
         calls = []
 
         def _compute(self, *args):
@@ -421,7 +465,8 @@ class TestLargeSourceWkt:
         # Another source (or buffer) is computed again and replaces it.
         SpatialiteExpressionBuilder(task_params)._source_bbox(wkt, 2154, 2154, 10.0)
         assert len(calls) == 2
-        assert len(task_params["_spatialite_source_bbox_cache"]) == 1
+        assert len(task._filtermate_task_caches["spatialite_source_bbox"]) == 1
+        assert "_spatialite_source_bbox_cache" not in task_params
 
 
 # ===========================================================================

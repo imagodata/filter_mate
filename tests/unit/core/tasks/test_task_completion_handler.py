@@ -224,6 +224,22 @@ class TestApplyPendingSharedSqlite:
         mock_sleep.assert_not_called()
         assert safe_set.call_count == 2
 
+    def test_refused_filters_are_reported(self, monkeypatch):
+        """2026-10-17: a filter the provider refused must not end as a silent success."""
+        monkeypatch.setattr(_tch, "iface", MagicMock())
+        first, second = self._shared_layers(2)
+        error = MagicMock()
+        error.message.return_value = "no such table: json_each"
+        second.error.return_value = error
+        safe_set = MagicMock(side_effect=lambda layer, expr: layer is first)
+        failures = []
+
+        with patch("time.sleep"):
+            applied = apply_pending_subset_requests([(first, "1"), (second, "2")], safe_set, failures=failures)
+
+        assert applied == 1
+        assert failures == [f"{second.name()}: no such table: json_each"]
+
 
 # ---------------------------------------------------------------------------
 # PERF 2026-09-12: provider work after a successful setSubsetString

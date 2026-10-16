@@ -19,6 +19,7 @@ Hexagonal Architecture:
 """
 
 import logging
+import re
 from typing import Optional, Dict, Any, Tuple
 from qgis.core import (
     QgsVectorLayer,
@@ -42,6 +43,16 @@ logger = logging.getLogger('filter_mate')
 # backend (adapters/backends/spatialite/expression_builder.USE_OGR_FALLBACK).
 # It must never reach apply_filter() nor a subset string.
 OGR_FALLBACK_SENTINEL = "__USE_OGR_FALLBACK__"
+
+# 2026-10-17: a key list written by a previous spatial step: ``"fid" IN (...)``,
+# ``"<primary key>" IN (...)`` (PostgreSQL, ``cleabs``, ``ogc_fid``...), the
+# JSON form ``"fid" IN (SELECT value FROM json_each('...'))``, a Disjoint
+# complement ``NOT ("fid" IN (...))``, or an empty / full result.
+_KEY_LIST_SUBSET_RE = re.compile(
+    r"""^\s*(?:NOT\s*\(\s*)?\(?\s*(["']?)(?P<name>[A-Za-z_]\w*)\1\s+(?:IN\s*\(|=\s*-?\d+)""",
+    re.IGNORECASE,
+)
+_CONSTANT_SUBSETS = ("1 = 0", "1 = 1", "1=0", "1=1")
 
 
 class FilterOrchestrator:
@@ -510,11 +521,10 @@ class FilterOrchestrator:
         )
 
         # Check for FID-only filters from previous spatial steps
-        is_fid_only_filter = bool(re.match(
-            r'^\s*\(?\s*(["\']?)fid\1\s+(IN\s*\(|=\s*-?\d+)',
-            old_subset,
-            re.IGNORECASE
-        ))
+        # 2026-10-17: any key-list form a backend writes (see
+        # _is_key_list_subset); it used to match "fid" only, so "cleabs" IN
+        # (...) or "ogc_fid" IN (...) accumulated as an attribute filter.
+        is_fid_only_filter = self._is_key_list_subset(layer, old_subset)
 
         # Check for style/display expression patterns
         is_style_expression = any(re.search(pattern, old_subset, re.IGNORECASE | re.DOTALL) for pattern in [
@@ -551,6 +561,28 @@ class FilterOrchestrator:
             logger.debug(f"  → Existing: '{old_subset[:100]}...'")
             logger.debug("  → Reason: Preserving user's attribute filter with geometric filter")
             return old_subset, combine_operator
+
+    @staticmethod
+    def _is_key_list_subset(layer, subset: str) -> bool:
+        """Whether ``subset`` is the key list of a previous spatial step (2026-10-17).
+
+        The key must be ``fid`` or one of the layer's primary-key fields, so a
+        user filter such as ``"nature" IN ('Route', 'Chemin')`` stays an
+        attribute filter.
+        """
+        text = (subset or '').strip()
+        if text in _CONSTANT_SUBSETS:
+            return True
+        match = _KEY_LIST_SUBSET_RE.match(text)
+        if not match:
+            return False
+        keys = {'fid'}
+        try:
+            fields = layer.fields()
+            keys |= {fields.at(index).name().lower() for index in layer.primaryKeyAttributes()}
+        except Exception:  # nosec B110 - no primary key info: "fid" only
+            pass
+        return match.group('name').lower() in keys
 
     def _get_combine_operator(self) -> Optional[str]:
         """
@@ -823,10 +855,18 @@ class FilterOrchestrator:
         Args:
             backend: Backend instance that may have warnings
         """
-        if hasattr(backend, 'user_warnings') and backend.user_warnings:
-            if not hasattr(self.parent_task, 'backend_warnings'):
-                self.parent_task.backend_warnings = []
-            self.parent_task.backend_warnings.extend(backend.user_warnings)
+        warnings = getattr(backend, 'user_warnings', None)
+        if not isinstance(warnings, list) or not warnings:
+            return
+        if not hasattr(self.parent_task, 'backend_warnings'):
+            self.parent_task.backend_warnings = []
+        self.parent_task.backend_warnings.extend(warnings)
+        # 2026-10-17: backend_warnings was read by nothing; warning_messages is
+        # what the finished handler shows in the message bar.
+        messages = getattr(self.parent_task, 'warning_messages', None)
+        if isinstance(messages, list):
+            messages.extend(w for w in warnings if w not in messages)
+        backend.user_warnings = []
 
     def _log_filter_success(self, layer: QgsVectorLayer, backend_name: str) -> None:
         """

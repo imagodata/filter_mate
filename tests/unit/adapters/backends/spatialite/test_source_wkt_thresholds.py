@@ -81,17 +81,14 @@ def test_builder_never_simplifies_nor_envelopes():
     assert not calls & {"simplify", "convexHull", "orientedMinimumBoundingBox", "fromRect"}
 
 
-def test_source_preparation_has_no_envelope_fallback():
+def test_source_preparation_has_no_simplification_left():
+    """2026-10-17: the source simplification code is removed, not just unused."""
     tree = _tree(PLUGIN_ROOT / "adapters" / "qgis" / "geometry_preparation.py")
-    methods = {node.name: node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)}
-    assert "_try_simplification_fallbacks" not in methods
-    calls = {
-        node.func.attr
-        for node in ast.walk(methods["simplify_geometry_adaptive"])
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-    }
-    assert not calls & {"convexHull", "orientedMinimumBoundingBox", "fromRect"}
-    assert 0 < _constants(tree)["SOURCE_SIMPLIFY_MAX_TOLERANCE"] <= 1.0
+    names = {n.name for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.ClassDef))}
+    assert not names & {"simplify_geometry_adaptive", "features_to_wkt_with_simplification",
+                        "_try_simplification_fallbacks", "source_simplification_allowed"}
+    handler = _tree(PLUGIN_ROOT / "core" / "tasks" / "geometry_handler.py")
+    assert "simplify_geometry_adaptive" not in {n.name for n in ast.walk(handler) if isinstance(n, ast.FunctionDef)}
 
 
 def _constants(scope):
@@ -140,3 +137,20 @@ def test_no_post_buffer_simplification():
     ):
         names = {n.name for n in ast.walk(_tree(path)) if isinstance(n, ast.FunctionDef)}
         assert "simplify_buffer_result" not in names, path.name
+
+
+def _regex_source(path):
+    """Source text of the _GEOMETRIC_FILTER_RE assignment."""
+    source = path.read_text(encoding="utf-8")
+    node = next(
+        n for n in _tree(path).body
+        if isinstance(n, ast.Assign) and getattr(n.targets[0], "id", None) == "_GEOMETRIC_FILTER_RE"
+    )
+    return ast.get_source_segment(source, node.value)
+
+
+def test_both_paths_detect_spatial_filters_alike():
+    """2026-10-17: the SQL and the OGR path decide 'replace or combine' with the same pattern."""
+    assert _regex_source(SPATIALITE_DIR / "expression_builder.py") == _regex_source(
+        PLUGIN_ROOT / "adapters" / "backends" / "ogr" / "expression_builder.py"
+    )

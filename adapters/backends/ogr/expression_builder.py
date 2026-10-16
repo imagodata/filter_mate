@@ -21,6 +21,7 @@ Date: January 2026
 """
 
 import json
+import re
 import logging
 import threading
 from typing import Dict, Optional, Any
@@ -42,10 +43,73 @@ KEY_LIST_JSON_THRESHOLD = 1000
 # SQL, which rescans the IN list for every row: on the 383,112 BD TOPO roads
 # as a Shapefile, a read took 3.4 s with 1,000 keys and 8.7 s with 4,000,
 # and QGIS refused 8,000 (setSubsetString False, layer left unfiltered).
+# Memory (and delimited text) layers evaluate the subset with QgsExpression,
+# which also scans the list for every feature: on 100,000 rows a read took
+# 10.8 s with 1,000 keys, 45 s with 5,000, 156 s with 20,000 (QGIS 4.2.3).
 # Above PLAIN_KEY_LIST_WARNING a WARNING names the cost; above
 # PLAIN_KEY_LIST_MAX the filter is refused with an explicit error.
+# PostgreSQL is not bounded: its planner hashes a long IN list once per
+# statement and the key is indexed.
 PLAIN_KEY_LIST_WARNING = 1000
 PLAIN_KEY_LIST_MAX = 5000
+
+# 2026-10-17: caches that used to live in ``task_params`` (= the source
+# layer's PROJECT_LAYERS entry, so they outlived the task). Dropped on sight.
+STALE_TASK_PARAM_CACHES = (
+    '_ogr_source_union_cache', '_ogr_buffered_source_cache', '_spatialite_source_bbox_cache',
+)
+
+# DE-9IM patterns of A covers B / A is covered by B (A, B: relate(A, B)).
+COVERS_PATTERNS = ("T*****FF*", "*T****FF*", "***T**FF*", "****T*FF*")
+COVERED_BY_PATTERNS = ("T*F**F***", "*TF**F***", "**FT*F***", "**F*TF***")
+
+
+# 2026-10-17: a spatial function CALL (name followed by "("), not a substring.
+_GEOMETRIC_FILTER_RE = re.compile(
+    r"\b(?:ST_\w+|Intersects|Contains|Within|Touches|Overlaps|Crosses|Disjoint|Equals|Covers|CoveredBy"
+    r"|MbrIntersects|GeomFromText|GeomFromGPB|Buffer)\s*\(",
+    re.IGNORECASE,
+)
+
+
+def _de9im_matches(matrix: str, pattern: str) -> bool:
+    """DE-9IM ``matrix`` (e.g. "0F1FF0102") against ``pattern`` (T, F, *, 0, 1, 2)."""
+    if not matrix or len(matrix) != 9:
+        return False
+    for cell, wanted in zip(matrix.upper(), pattern.upper()):
+        if wanted == '*':
+            continue
+        if wanted == 'T':
+            if cell not in '012':
+                return False
+        elif cell != wanted:
+            return False
+    return True
+
+
+def _de9im_any(matrix: str, patterns) -> bool:
+    return any(_de9im_matches(matrix, pattern) for pattern in patterns)
+
+
+def task_scoped_cache(task, name: str, owner) -> dict:
+    """Cache ``name`` held by the filter task, or by ``owner`` without a task (2026-10-17)."""
+    store = getattr(task, '__dict__', None) if task is not None else None
+    if store is None:
+        store = owner.__dict__
+    return store.setdefault('_filtermate_task_caches', {}).setdefault(name, {})
+
+
+def json1_available() -> bool:
+    """Whether GDAL's SQLite has ``json_each`` (see infrastructure.database.sqlite_capabilities)."""
+    try:
+        from ....infrastructure.database.sqlite_capabilities import gdal_sqlite_json1_available
+    except ImportError:
+        try:
+            from infrastructure.database.sqlite_capabilities import gdal_sqlite_json1_available
+        except ImportError:
+            return False
+    return gdal_sqlite_json1_available()
+
 
 # Import the port interface
 try:
@@ -161,8 +225,10 @@ class OGRExpressionBuilder(GeometricFilterPort):
         'within': 6,
         'crosses': 7,
         # 2026-10-16: were missing, so Covers / CoveredBy fell back to code 0
-        # (Intersects). select-by-location has no covers predicate: the
-        # closest are Contains / Within, as FilterEngineTask maps them.
+        # (Intersects). select-by-location has no covers predicate: on its
+        # per-feature fallback only, Contains / Within APPROXIMATE them (a
+        # boundary contact counts for Covers, not for Contains). The union
+        # path (_select_against_union) tests them exactly.
         'covers': 1,
         'coveredby': 6,
     }
@@ -181,6 +247,9 @@ class OGRExpressionBuilder(GeometricFilterPort):
         self._source_layer_keep_alive = []
         self._feedback = None
         self.last_error = None
+        # 2026-10-17: messages for the QGIS message bar (collected by the
+        # orchestrator into the task's warning_messages).
+        self.user_warnings = []
 
     def get_backend_name(self) -> str:
         """Get backend name."""
@@ -279,17 +348,31 @@ class OGRExpressionBuilder(GeometricFilterPort):
         combine_operator: Optional[str] = None
     ) -> bool:
         """
-        Apply filter using QGIS processing selectbylocation algorithm.
+        Apply filter: select the target features in QGIS, write them as a key list.
+
+        2026-10-17: the same semantics as the SQL backends.
+
+        - The source is the union of its features, buffered after the union
+          (as the SpatiaLite executor does), mixed geometry types reduced to
+          the highest dimension (polygons, else lines, else points).
+        - The target is read WITHOUT its current subset: the new key list is
+          then combined with ``old_subset`` by the rules every backend uses
+          (``_combine_with_old_subset``). Reading through the old subset used
+          to turn ``(old) OR (keys)`` into ``old``, and to intersect a new
+          spatial filter with the previous one instead of replacing it.
+        - Disjoint alone is written ``NOT (<keys of the intersecting
+          features>)``: the key list stays the size of the source window, not
+          of the whole table.
 
         Thread Safety:
         - Uses lock for concurrent access detection
-        - Uses data provider directly to avoid layer signals
 
         Args:
             layer: Layer to filter
             expression: JSON parameters from build_expression
-            old_subset: Existing subset (handled via selection)
-            combine_operator: Combine operator
+            old_subset: Existing subset to combine with (see the orchestrator's
+                _determine_subset_strategy)
+            combine_operator: Combine operator, None to replace
 
         Returns:
             True if filter applied successfully
@@ -315,6 +398,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             predicates = params.get('predicates', ['intersects'])
             buffer_value = params.get('buffer_value')
             buffer_expression = params.get('buffer_expression')
+            names = [str(pred).lower().replace('st_', '') for pred in predicates] or ['intersects']
 
             # Get source layer
             source_layer = self.source_geom
@@ -332,54 +416,43 @@ class OGRExpressionBuilder(GeometricFilterPort):
             self.log_info(f"📍 Applying OGR filter to {layer.name()}")
             self.log_info(f"  - Source: {source_layer.name()} ({source_layer.featureCount()} features)")
 
-            # FIX v4.2.11: Apply buffer to source layer if needed (static or dynamic)
-            if buffer_expression and buffer_expression.strip():
-                self.log_info(f"  - Applying dynamic buffer expression: {buffer_expression[:50]}...")
-                source_layer = self._apply_buffer_expression_to_layer(source_layer, buffer_expression)
-                if source_layer is None:
-                    self.last_error = f"Failed to apply dynamic buffer expression: {buffer_expression[:80]}"
-                    self.log_error(self.last_error)
-                    return False
-                self.log_info(f"  - Buffered source: {source_layer.featureCount()} features")
-            elif buffer_value is not None and buffer_value != 0:
-                self.log_info(f"  - Applying static buffer: {buffer_value}m")
-                source_layer = self._apply_buffer_to_layer(source_layer, buffer_value)
-                if source_layer is None:
-                    self.last_error = f"Failed to apply static buffer ({buffer_value}m)"
-                    self.log_error(self.last_error)
-                    return False
-                self.log_info(f"  - Buffered source: {source_layer.featureCount()} features")
-
-            # 2026-10-17: test the union of the source, like the SpatiaLite
-            # and GeoPackage SQL (one dissolved WKT). select-by-location
-            # tests each source feature on its own: "Cross" from the 691
-            # Toulouse rivers kept 702 roads instead of ~747 (a road meeting
-            # two rivers at a junction crosses the network, not either river)
-            # and ran 691 target requests, each paying the target's subset
-            # again (98 s for troncon_de_route).
-            source_union = self._source_union(source_layer)
-
-            # Map predicates to QGIS codes
-            predicate_codes = []
-            for pred in predicates:
-                pred_lower = pred.lower().replace('st_', '')
-                code = self.PREDICATE_CODES.get(pred_lower, 0)
-                predicate_codes.append(code)
-
             # Create feedback for cancellation
             self._feedback = CancellableFeedback()
 
+            target = self._unfiltered_target(layer, old_subset, combine_operator)
+            source_union = self._source_geometry(source_layer, buffer_value, buffer_expression)
+            complement = False
             if source_union is not None:
-                selected_ids = self._select_against_union(layer, source_union, source_layer.crs(), predicate_codes)
+                if names == ['disjoint']:
+                    complement = True
+                    selected_ids = self._select_against_union(target, source_union, source_layer.crs(), ['intersects'])
+                else:
+                    selected_ids = self._select_against_union(target, source_union, source_layer.crs(), names)
                 if selected_ids is None:
                     return False
             else:
-                # Run selectbylocation
+                # Per-feature fallback (no union available): buffer each feature
+                if buffer_expression and buffer_expression.strip():
+                    source_layer = self._apply_buffer_expression_to_layer(source_layer, buffer_expression)
+                    if source_layer is None:
+                        self.last_error = f"Failed to apply dynamic buffer expression: {buffer_expression[:80]}"
+                        self.log_error(self.last_error)
+                        return False
+                elif buffer_value is not None and buffer_value != 0:
+                    source_layer = self._apply_buffer_to_layer(source_layer, buffer_value)
+                    if source_layer is None:
+                        self.last_error = f"Failed to apply static buffer ({buffer_value}m)"
+                        self.log_error(self.last_error)
+                        return False
+                # select-by-location has no Covers / CoveredBy: Contains /
+                # Within approximate them on this fallback only (exact on the
+                # union path, see _select_against_union).
+                predicate_codes = [self.PREDICATE_CODES.get(name, 0) for name in names]
                 try:
                     processing.run(
                         'native:selectbylocation',
                         {
-                            'INPUT': layer,
+                            'INPUT': target,
                             'INTERSECT': source_layer,
                             'PREDICATE': predicate_codes,
                             'METHOD': 0  # New selection
@@ -390,86 +463,40 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     self.last_error = f"native:selectbylocation processing failed: {e}"
                     self.log_error(self.last_error)
                     return False
+                selected_ids = list(target.selectedFeatureIds())
+                target.removeSelection()
+            self.log_info(f"  - {'Intersecting' if complement else 'Selected'}: {len(selected_ids)} features")
 
-                # Get selected feature IDs
-                selected_ids = list(layer.selectedFeatureIds())
-            self.log_info(f"  - Selected: {len(selected_ids)} features")
-
-            if len(selected_ids) > PLAIN_KEY_LIST_WARNING and not self._is_sqlite_storage(layer):
+            if len(selected_ids) > PLAIN_KEY_LIST_WARNING and self._rescans_key_lists(layer):
                 if len(selected_ids) > PLAIN_KEY_LIST_MAX:
+                    kept = "keeps its previous filter" if layer.subsetString() else "is left unfiltered"
                     self.last_error = (
-                        f"{layer.name()}: {len(selected_ids):,} features selected, more than {PLAIN_KEY_LIST_MAX:,} "
-                        "keys in a subset string for this format (OGR SQL rescans the list for every row, GDAL "
-                        "refuses ~8,000). Layer left unfiltered: convert it to GeoPackage to filter it."
+                        f"{layer.name()}: {len(selected_ids):,} features to list, more than {PLAIN_KEY_LIST_MAX:,} "
+                        "keys for this file format (OGR SQL rescans the list for every row, GDAL refuses ~8,000). "
+                        f"The layer {kept}: convert it to GeoPackage to filter it."
                     )
                     self.log_error(self.last_error)
+                    self.user_warnings.append(self.last_error)
                     return False
                 self.log_warning(
                     f"  ⚠️ {len(selected_ids):,} keys in the subset of {layer.name()}: every read of this format "
                     "rescans the list (about 3 s per 1,000 keys on 380,000 rows); GeoPackage avoids it"
                 )
 
-            if not selected_ids:
-                self.log_warning("No features selected - applying empty filter")
-                # 2026-04-29 fix: route through subset queue when wired to
-                # ensure setSubsetString runs on the Qt main thread (cf
-                # `FilterEngineTask.queue_subset_request` docstring).
-                queue_callback = self.task_params.get('_subset_queue_callback') if self.task_params else None
-                if queue_callback is not None:
-                    queue_callback(layer, "1 = 0")
-                else:
-                    safe_set_subset_string(layer, "1 = 0")
-                return True
+            if len(selected_ids) > KEY_LIST_JSON_THRESHOLD and self._is_sqlite_storage(layer) and not json1_available():
+                kept = "keeps its previous filter" if layer.subsetString() else "is left unfiltered"
+                self.last_error = (
+                    f"{layer.name()}: {len(selected_ids):,} keys and no JSON1 in this SQLite build: a plain key "
+                    f"list that long freezes QGIS. The layer {kept}."
+                )
+                self.log_error(self.last_error)
+                self.user_warnings.append(self.last_error)
+                return False
 
-            # FIX v4.5.3: For OGR layers with a real PK attribute field, use actual
-            # field values instead of QGIS internal FIDs. selectedFeatureIds() returns
-            # QGIS-internal IDs which don't match attribute values and the pseudo
-            # 'fid' column is unreliable in setSubsetString for many OGR drivers
-            # (ESRI Shapefile, PostgreSQL via OGR, etc.).
-            pk_field = self._get_primary_key(layer)
-            use_pk_values = False
-
-            # Use actual PK values when we have a real attribute field (not pseudo 'fid')
-            if pk_field and pk_field.lower() != 'fid':
-                use_pk_values = True
-                self.log_info(f"  - Real PK field '{pk_field}' detected: fetching actual attribute values")
-            else:
-                # Even for 'fid', check if it's a real field in the layer
-                if pk_field and layer.fields().indexOf(pk_field) >= 0:
-                    use_pk_values = True
-                    self.log_info(f"  - PK field '{pk_field}' exists as attribute: fetching actual values")
-
-            if use_pk_values and self._pk_is_feature_id(layer, pk_field):
-                # PERF 2026-10-17: on a GeoPackage the QGIS feature ids ARE the
-                # FID column values (checked on BD TOPO 31: 98,687 / 98,687);
-                # fetching them again by id took 4 s (9 s on 1.15 M rows).
-                pk_values = list(selected_ids)
-            elif use_pk_values:
-                # PERF 2026-09-13: one request for all selected rows instead
-                # of one getFeature() (one provider query) per selected id.
-                pk_values = self._fetch_pk_values(layer, selected_ids, pk_field)
-            if use_pk_values:
-                if pk_values:
-                    self.log_info(f"  - Retrieved {len(pk_values)} actual PK values")
-                    fid_filter = self._build_fid_filter_with_values(layer, pk_values, pk_field)
-                else:
-                    self.log_warning("  - Could not retrieve PK values, falling back to FID-based filter")
-                    fid_filter = self._build_fid_filter(layer, selected_ids)
-            else:
-                # No real PK field: use QGIS internal FIDs with pseudo 'fid' column
-                fid_filter = self._build_fid_filter(layer, selected_ids)
-
-            # Clear selection (filter applied via subset)
-            layer.removeSelection()
-
-            # Combine with existing filter if needed
-            if old_subset and combine_operator:
-                if self._is_geometric_filter(old_subset):
-                    final_filter = fid_filter
-                else:
-                    final_filter = f"({old_subset}) {combine_operator} ({fid_filter})"
-            else:
-                final_filter = fid_filter
+            key_filter = self._key_filter(layer, target, selected_ids)
+            if complement:
+                key_filter = "1 = 1" if not selected_ids else f"NOT ({key_filter})"
+            final_filter = self._combine_with_old_subset(old_subset, combine_operator, key_filter)
 
             # Apply filter
             self.log_info(f"  - Applying filter: {final_filter[:200]}..." if len(final_filter) > 200 else f"  - Applying filter: {final_filter}")
@@ -500,14 +527,6 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 )
                 self.log_error(f"✗ Failed to apply FID filter to {layer.name()}")
                 self.log_error(f"  - Filter expression: {final_filter[:500]}...")
-                self.log_error(f"  - Primary key field: {pk_name}")
-                self.log_error(f"  - Number of FIDs: {len(selected_ids)}")
-                try:
-                    provider = layer.dataProvider()
-                    self.log_error(f"  - Provider capabilities: {provider.capabilities()}")
-                    self.log_error(f"  - Storage type: {storage}")
-                except Exception as diag_e:
-                    self.log_error(f"  - Could not get diagnostics: {diag_e}")
 
             return success
 
@@ -515,6 +534,102 @@ class OGRExpressionBuilder(GeometricFilterPort):
             self.last_error = f"OGR apply_filter exception: {e}"
             self.log_error(self.last_error)
             return False
+
+    def _key_filter(self, layer, target, selected_ids: list) -> str:
+        """Key-list subset of ``selected_ids`` (ids read from ``target``) for ``layer``.
+
+        FIX v4.5.3: for OGR layers with a real PK attribute field, use actual
+        field values instead of QGIS internal FIDs (the pseudo 'fid' column
+        is unreliable in setSubsetString for many OGR drivers).
+        """
+        if not selected_ids:
+            return "1 = 0"
+        pk_field = self._get_primary_key(layer)
+        use_pk_values = bool(pk_field) and (
+            pk_field.lower() != 'fid' or layer.fields().indexOf(pk_field) >= 0
+        )
+        if not use_pk_values:
+            # No real PK field: use QGIS internal FIDs with pseudo 'fid' column
+            return self._build_fid_filter(layer, selected_ids)
+        if self._pk_is_feature_id(layer, pk_field):
+            # PERF 2026-10-17: on a GeoPackage the QGIS feature ids ARE the
+            # FID column values (checked on BD TOPO 31: 98,687 / 98,687);
+            # fetching them again by id took 4 s (9 s on 1.15 M rows).
+            pk_values = list(selected_ids)
+        else:
+            # PERF 2026-09-13: one request for all selected rows. The ids come
+            # from ``target`` (the unfiltered reading of the layer), so are the
+            # values: a PostgreSQL feature id is only valid in its own layer.
+            pk_values = self._fetch_pk_values(target, selected_ids, pk_field)
+        if not pk_values:
+            self.log_warning("  - Could not retrieve PK values, falling back to FID-based filter")
+            return self._build_fid_filter(layer, selected_ids)
+        self.log_info(f"  - Retrieved {len(pk_values)} actual PK values")
+        return self._build_fid_filter_with_values(layer, pk_values, pk_field)
+
+    def _combine_with_old_subset(self, old_subset: Optional[str], combine_operator: Optional[str], new_filter: str) -> str:
+        """Same rule as SpatialiteExpressionBuilder.apply_filter (2026-10-17).
+
+        The orchestrator passes an operator only with an attribute filter;
+        a previous spatial filter (geometric or key list) is replaced.
+        """
+        if old_subset and combine_operator and not self._is_geometric_filter(old_subset):
+            return f"({old_subset}) {combine_operator} ({new_filter})"
+        return new_filter
+
+    def _unfiltered_target(self, layer, old_subset=None, combine_operator=None):
+        """The target layer read WITHOUT its current subset (2026-10-17).
+
+        A second layer on the same data source, subset removed (same feature
+        ids for OGR and SpatiaLite, PK values fetched from it for
+        PostgreSQL). When the source cannot be reopened (memory layer,
+        unknown URI), the layer itself is read and a WARNING says the result
+        is limited to its current subset.
+        """
+        current = layer.subsetString()
+        if not current:
+            return layer
+        if (
+            old_subset and combine_operator == 'AND' and current == old_subset
+            and not self._is_geometric_filter(old_subset)
+        ):
+            return layer  # (old) AND (keys): reading through old gives the same keys, faster
+        try:
+            from qgis.core import QgsProviderRegistry, QgsVectorLayer
+            provider = layer.providerType()
+            if provider != 'memory':
+                registry = QgsProviderRegistry.instance()
+                parts = dict(registry.decodeUri(provider, layer.source()))
+                for key in ('subset', 'sql'):
+                    parts.pop(key, None)
+                clone = QgsVectorLayer(registry.encodeUri(provider, parts), f"{layer.name()} (unfiltered)", provider)
+                if clone.isValid() and not clone.subsetString():
+                    self._temp_layers_keep_alive.append(clone)
+                    return clone
+        except Exception as exc:  # nosec B110 - falls back to the layer itself below
+            self.log_debug(f"  - Unfiltered reading of {layer.name()} unavailable: {exc}")
+        self.log_warning(
+            f"  ⚠️ {layer.name()} ({layer.providerType()}) cannot be read without its current filter: "
+            "the new filter is computed inside it"
+        )
+        return layer
+
+    @staticmethod
+    def _rescans_key_lists(layer) -> bool:
+        """Layers whose subset rescans a key list for every row (2026-10-17).
+
+        OGR files evaluated by OGR SQL (Shapefile, GeoJSON, ...) and the
+        QgsExpression-based providers (memory, delimited text): bounded by
+        PLAIN_KEY_LIST_MAX. GeoPackage / SQLite use the JSON literal;
+        PostgreSQL, SpatiaLite and WFS layers are not bounded.
+        """
+        try:
+            provider = layer.providerType()
+        except Exception:
+            return False
+        if provider in ('memory', 'delimitedtext'):
+            return True
+        return provider == 'ogr' and not OGRExpressionBuilder._is_sqlite_storage(layer)
 
     def cancel(self):
         """Cancel ongoing operation."""
@@ -694,7 +809,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             self.log_debug(f"    Sample: {value_list[:100]}...")
 
         if len(pk_values) > KEY_LIST_JSON_THRESHOLD and self._is_sqlite_storage(layer):
-            return self._json_key_clause(f'"{pk_field}"', formatted_values if is_numeric_pk else pk_values, is_numeric_pk)
+            return self._json_key_clause(f'"{pk_field}"', pk_values, is_numeric_pk)
 
         # Always use quoted field name for PostgreSQL
         return f'"{pk_field}" IN ({value_list})'
@@ -721,12 +836,30 @@ class OGRExpressionBuilder(GeometricFilterPort):
         return 'geopackage' in storage_type or 'gpkg' in storage_type or 'sqlite' in storage_type
 
     def _json_key_clause(self, field_sql: str, values: list, numeric: bool) -> str:
-        """``field IN (SELECT value FROM json_each('[...]'))`` (see KEY_LIST_JSON_THRESHOLD)."""
+        """``field IN (SELECT value FROM json_each('[...]'))`` (see KEY_LIST_JSON_THRESHOLD).
+
+        2026-10-17: integers are written as they are (int64 beyond 2^53
+        included), integral floats as integers, other numbers and text keys
+        as JSON strings; None keys are dropped (they match nothing).
+        """
+        kept = [v for v in values if v is not None]
         if numeric:
-            payload = "[" + ",".join(str(int(float(v))) for v in values) + "]"
+            items = []
+            for value in kept:
+                if isinstance(value, bool):
+                    items.append(json.dumps(str(value)))
+                elif isinstance(value, int):
+                    items.append(str(value))
+                elif isinstance(value, float) and value.is_integer():
+                    items.append(str(int(value)))
+                elif isinstance(value, str) and value.lstrip('-').isdigit():
+                    items.append(str(int(value)))
+                else:
+                    items.append(json.dumps(value if isinstance(value, (int, float)) else str(value), ensure_ascii=False))
+            payload = "[" + ",".join(items) + "]"
         else:
-            payload = json.dumps([str(v) for v in values], ensure_ascii=False, separators=(",", ":"))
-        self.log_info(f"  - {len(values):,} keys: one JSON literal ({len(payload):,} chars) instead of an IN list")
+            payload = json.dumps([str(v) for v in kept], ensure_ascii=False, separators=(",", ":"))
+        self.log_info(f"  - {len(kept):,} keys: one JSON literal ({len(payload):,} chars) instead of an IN list")
         return f"{field_sql} IN (SELECT value FROM json_each('{payload.replace(chr(39), chr(39) * 2)}'))"
 
     @staticmethod
@@ -747,92 +880,160 @@ class OGRExpressionBuilder(GeometricFilterPort):
         return pk_values
 
     def _buffered_source_cache(self) -> dict:
-        """Per-task cache of buffered source layers, shared by every target layer.
+        """Buffered source layers of the task, shared by every target layer.
 
         PERF 2026-09-13: apply_filter() runs once per target layer and buffered
-        the source layer each time - 36 buffers of the same 4 711 road segments
-        for a 36-layer cascade. task_params is the dict shared by all the
-        backends of one task, so the buffered layer is computed once.
+        the source layer each time. 2026-10-17: held by the task (it used to
+        live in task_params and outlive it, see _task_cache).
         """
-        params = self.task_params if isinstance(self.task_params, dict) else None
-        if params is None:
-            return {}
-        return params.setdefault('_ogr_buffered_source_cache', {})
+        return self._task_cache('ogr_buffered_source')
 
-    def _source_union(self, layer: 'QgsVectorLayer'):
-        """Union of the source geometries, or None to test the source features one by one.
+    def _task_cache(self, name: str) -> dict:
+        """A cache that lives as long as the filter task (2026-10-17).
 
-        2026-10-17: the filter tests the union of the source on every
-        backend (SpatiaLite / GeoPackage inline one dissolved WKT). Computed
-        once per task and source layer (task_params cache, like the buffered
-        source). None for a single-feature source (same answer, the
-        select-by-location path stays) and, with a WARNING, when the union
-        fails or mixes geometry types.
+        ``task_params`` is the source layer's entry of PROJECT_LAYERS: a cache
+        kept there outlived the task (a buffered source or a source union
+        became stale after an edit). The caches now hang on the task object
+        (``_parent_task``, set by the orchestrator, released by the finished
+        handler); without a task (tests, API) they live with this builder.
         """
-        try:
-            if layer.featureCount() <= 1:
-                return None
-        except RuntimeError:
-            return None
-        from qgis.core import QgsFeatureRequest, QgsGeometry, QgsWkbTypes
+        params = self.task_params if isinstance(self.task_params, dict) else {}
+        for stale in STALE_TASK_PARAM_CACHES:
+            params.pop(stale, None)
+        return task_scoped_cache(params.get('_parent_task'), name, self)
+
+    def _source_geometry(self, layer: 'QgsVectorLayer', buffer_value=None, buffer_expression=None):
+        """Union of the source as the SQL backends see it, or None to test feature by feature.
+
+        2026-10-17, aligned on filter_executor.process_spatialite_geometries():
+        union first, mixed geometry types reduced to the highest dimension
+        (polygons, else lines, else points), then the static buffer on the
+        union (an erosion of the union is not the union of the erosions).
+        A dynamic buffer expression buffers each feature (its own distance)
+        before the union. Computed once per task, source and buffer.
+        """
+        from qgis.core import QgsFeatureRequest, QgsGeometry
 
         params = self.task_params if isinstance(self.task_params, dict) else {}
-        cache = params.setdefault('_ogr_source_union_cache', {})
-        if layer.id() in cache:
-            return cache[layer.id()]
-        geometries = [
-            feature.geometry()
-            for feature in layer.getFeatures(QgsFeatureRequest().setNoAttributes())
-            if feature.hasGeometry() and not feature.geometry().isEmpty()
-        ]
-        union = QgsGeometry.unaryUnion(geometries) if geometries else None
+        segments = int(params.get('buffer_segments', 5) or 5)
+        cap = str(params.get('buffer_endcap_style', 'round')).lower()
+        dynamic = bool(buffer_expression and str(buffer_expression).strip())
+        distance = 0.0 if dynamic else float(buffer_value or 0.0)
+        cache = self._task_cache('ogr_source_geometry')
+        try:
+            key = (layer.id(), distance, str(buffer_expression or '').strip(), segments, cap)
+        except RuntimeError:
+            return None
+        if key in cache:
+            return cache[key]
+        source = layer
+        if dynamic:
+            source = self._apply_buffer_expression_to_layer(layer, buffer_expression)
+            if source is None:
+                cache[key] = None
+                return None
+        try:
+            geometries = [
+                feature.geometry()
+                for feature in source.getFeatures(QgsFeatureRequest().setNoAttributes())
+                if feature.hasGeometry() and not feature.geometry().isEmpty()
+            ]
+        except (RuntimeError, TypeError):
+            geometries = []
+        union = None
+        if len(geometries) == 1:
+            union = QgsGeometry(geometries[0])
+        elif geometries:
+            union = QgsGeometry.unaryUnion(geometries)
+            if union is None or union.isEmpty():
+                union = QgsGeometry.unaryUnion([geometry.makeValid() for geometry in geometries])
+        if union is not None and not union.isEmpty():
+            union = self._highest_dimension(union)
         if union is None or union.isEmpty():
-            union = QgsGeometry.unaryUnion([geometry.makeValid() for geometry in geometries]) if geometries else None
-        if (
-            union is None or union.isEmpty()
-            or QgsWkbTypes.geometryType(union.wkbType()) != QgsWkbTypes.geometryType(layer.wkbType())
-        ):
-            self.log_warning(
-                f"  ⚠️ Union of the source {layer.name()} unavailable: each source feature is tested on its own "
-                "(Crosses / Touches / Within may differ from the SQL backends)"
-            )
-            union = None
-        else:
-            self.log_info(f"  - Source dissolved: {len(geometries)} features → 1 (union semantics)")
-        cache[layer.id()] = union
+            if geometries:
+                self.log_warning(
+                    f"  ⚠️ Union of the source {layer.name()} unavailable: each source feature is tested on its own "
+                    "(Crosses / Touches / Within may differ from the SQL backends)"
+                )
+            cache[key] = None
+            return None
+        if distance:
+            union = self._buffer_geometry(union, distance, segments, cap)
+        self.log_info(f"  - Source dissolved: {len(geometries)} features → 1 (union semantics)")
+        cache[key] = union
         return union
 
-    def _select_against_union(self, layer, union, union_crs, predicate_codes) -> Optional[list]:
-        """Ids of the ``layer`` features related to ``union`` by any of ``predicate_codes``.
+    @staticmethod
+    def _highest_dimension(geometry):
+        """Polygons of a mixed collection, else its lines, else its points (as the SQL executor)."""
+        from qgis.core import QgsGeometry, QgsWkbTypes
 
-        2026-10-17: same codes and directions as native:selectbylocation
-        (INPUT = target, INTERSECT = source): Contains = the target contains
-        the source, Within = the target is within the source. One request
-        (bounding box of the source, the whole layer for Disjoint) through
-        the layer and its subset, a prepared source, and a prepared
-        Intersects before the costlier predicates. Measured on 100,000 road
-        segments and a 260 KB river network (shapely / GEOS 3.14): 3 s to
-        read the candidates through a framed subset, 0.07 s for Intersects,
-        0.4 s for Crosses on the hits; select-by-location with the union
-        took 4.6 s, one request per river 35 s through the same subset.
+        if 'GeometryCollection' not in QgsWkbTypes.displayString(geometry.wkbType()):
+            return geometry
+        collection = geometry.constGet()
+        parts = {}
+        for index in range(collection.numGeometries()):
+            part = collection.geometryN(index)
+            parts.setdefault(QgsWkbTypes.geometryType(part.wkbType()), []).append(QgsGeometry(part.clone()))
+        for dimension in (
+            QgsWkbTypes.GeometryType.PolygonGeometry,
+            QgsWkbTypes.GeometryType.LineGeometry,
+            QgsWkbTypes.GeometryType.PointGeometry,
+        ):
+            if parts.get(dimension):
+                return QgsGeometry.collectGeometry(parts[dimension])
+        return None
+
+    @staticmethod
+    def _buffer_geometry(geometry, distance: float, segments: int, cap: str):
+        """The static buffer of filter_executor._apply_static_buffer (round joins, miter 2)."""
+        from qgis.core import Qgis, QgsGeometry
+
+        caps = {'round': Qgis.EndCapStyle.Round, 'flat': Qgis.EndCapStyle.Flat, 'square': Qgis.EndCapStyle.Square}
+        buffered = geometry.buffer(float(distance), max(int(segments), 1), caps.get(cap, Qgis.EndCapStyle.Round),
+                                   Qgis.JoinStyle.Round, 2.0)
+        if buffered is None:
+            return QgsGeometry()
+        if distance < 0 and not buffered.isEmpty():
+            buffered = buffered.makeValid()
+        return buffered
+
+    def _select_against_union(self, layer, union, union_crs, predicates) -> Optional[list]:
+        """Ids of the ``layer`` features related to ``union`` by any of ``predicates``.
+
+        2026-10-17: same directions as native:selectbylocation (INPUT =
+        target, INTERSECT = source): Contains = the target contains the
+        source, Within = the target is within the source. Covers / CoveredBy
+        are exact here (DE-9IM of the source against the target). One request
+        (bounding box of the source, the whole layer for Disjoint), a
+        prepared source, and a prepared Intersects before the costlier
+        predicates. Measured on 100,000 road segments and a 260 KB river
+        network: Crosses 0.94 s, Intersects 0.43 s in QGIS 4.2.3.
         Returns None (last_error set) when cancelled.
         """
         from qgis.core import QgsFeatureRequest, QgsGeometry, QgsProject
 
+        names = {str(name).lower().replace('st_', '') for name in predicates}
+        if union.isEmpty():
+            # An erosion that ate the whole source: nothing intersects it.
+            if 'disjoint' not in names:
+                return []
         engine = QgsGeometry.createGeometryEngine(union.constGet())
         engine.prepareGeometry()
-        codes = set(predicate_codes)
         request = QgsFeatureRequest().setNoAttributes()
         request.setDestinationCrs(union_crs, QgsProject.instance().transformContext())
-        if 2 not in codes:  # every predicate but Disjoint needs a shared point
+        if 'disjoint' not in names:  # every predicate but Disjoint needs a shared point
             request.setFilterRect(union.boundingBox())
         tests = {
-            1: engine.within,     # target contains source
-            3: engine.isEqual,
-            4: engine.touches,
-            5: engine.overlaps,
-            6: engine.contains,   # target within source
-            7: engine.crosses,
+            'contains': engine.within,     # target contains source
+            'equals': engine.isEqual,
+            'touches': engine.touches,
+            'overlaps': engine.overlaps,
+            'within': engine.contains,     # target within source
+            'crosses': engine.crosses,
+            # source DE-9IM against the target: target covers source <=> source covered by target
+            'covers': lambda g: _de9im_any(engine.relate(g), COVERED_BY_PATTERNS),
+            'coveredby': lambda g: _de9im_any(engine.relate(g), COVERS_PATTERNS),
         }
         selected = []
         for index, feature in enumerate(layer.getFeatures(request)):
@@ -843,10 +1044,10 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 continue
             geometry = feature.geometry().constGet()
             if not engine.intersects(geometry):
-                if 2 in codes:
+                if 'disjoint' in names:
                     selected.append(feature.id())
                 continue
-            if 0 in codes or any(code in tests and tests[code](geometry) for code in codes):
+            if 'intersects' in names or any(name in tests and tests[name](geometry) for name in names):
                 selected.append(feature.id())
         return selected
 
@@ -1157,18 +1358,12 @@ class OGRExpressionBuilder(GeometricFilterPort):
         return "fid"
 
     def _is_geometric_filter(self, subset: str) -> bool:
-        """Check if subset contains geometric filter patterns."""
-        subset_lower = subset.lower()
+        """Whether ``subset`` holds a spatial predicate (2026-10-17: function calls, not substrings).
 
-        # OGR filters are typically FID-based
-        geometric_patterns = [
-            'intersects',
-            'contains',
-            'within',
-            'st_'
-        ]
-
-        return any(p in subset_lower for p in geometric_patterns)
+        ``"st_code" = 3`` or ``"name" LIKE '%contains%'`` used to count as
+        geometric (``st_`` / ``contains`` substrings) and were replaced.
+        """
+        return bool(_GEOMETRIC_FILTER_RE.search(subset or ''))
 
 
 # =============================================================================
