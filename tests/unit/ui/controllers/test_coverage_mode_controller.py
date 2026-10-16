@@ -621,6 +621,82 @@ def adapters(monkeypatch, ctrl_module):
 
 
 @pytest.mark.unit
+class TestHeightAboveGroundLayerSwitch:
+    """Constats 1 / 10: the HAG callback and its retry stay on the layer they were started for."""
+
+    @pytest.fixture
+    def hag(self, monkeypatch, ctrl_module, adapters):
+        module = types.ModuleType(f"{adapters.package.__name__}.hag_task")
+        filter_state = ctrl_module._test_filter_state
+
+        class Task:
+            def __init__(self, layer, dem):
+                self.done = FakeSignal()
+                self.before = filter_state.LayerSnapshot(layer.id(), "point_cloud", source="/p1.laz")
+                self.after = filter_state.LayerSnapshot(layer.id(), "point_cloud", source="/p1_hag.copc.laz")
+                module.created.append(self)
+
+        module.HeightAboveGroundTask = Task
+        module.created = []
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+        return module
+
+    def _controller(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock(tabTools_current_index=0))
+        controller._active_layer, controller._kind = layers["p1"], _kind(ctrl_module, "POINT_CLOUD")
+        populated = []
+        monkeypatch.setattr(controller, "_populate_point_cloud", lambda layer, keep_kept=False: populated.append(layer.id()))
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        return controller, populated
+
+    def test_layer_switched_during_the_computation_gets_neither_populate_nor_filter(
+            self, ctrl_module, layers, hag, monkeypatch):
+        controller, populated = self._controller(ctrl_module, layers, monkeypatch)
+        layers["dem"] = FakeLayer("dem", "raster")
+        ran = []
+        controller._prepare_height_above_ground(layers["p1"], ("dem", 2.0), lambda: ran.append("filter"))
+        controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")  # user picked r1
+        hag.created[0].done.emit(True, "")
+        assert ran == [] and populated == []
+        assert ctrl_module._test_service.history.can_undo("p1")  # the computed height stays undoable
+        assert ctrl_module._test_feedback.messages[-1] == ("warning", "Filter not applied: {0}".format("p1"))
+
+    def test_same_layer_continues_with_the_filter(self, ctrl_module, layers, hag, monkeypatch):
+        controller, populated = self._controller(ctrl_module, layers, monkeypatch)
+        layers["dem"] = FakeLayer("dem", "raster")
+        ran = []
+        controller._prepare_height_above_ground(layers["p1"], ("dem", 2.0), lambda: ran.append("filter"))
+        hag.created[0].done.emit(True, "")
+        assert ran == ["filter"] and populated == ["p1"]
+
+    def test_height_computed_once_even_without_the_dimension(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, _ = self._controller(ctrl_module, layers, monkeypatch)
+        controller._pc_panel = MagicMock()
+        controller._pc_panel.hag_settings.return_value = ("dem", 2.0)
+        controller._pc_panel.expression.return_value = "HeightAboveGround >= 2"
+        monkeypatch.setattr(controller, "_filtering_settings", lambda: dict(targets=[], source_operator=None))
+        monkeypatch.setattr(controller, "_build_request", lambda *a: object())
+        monkeypatch.setattr(controller, "_point_cloud_attributes", lambda layer: ["X", "Y", "Z"])  # PDAL wrote no HAG
+        prepared = []
+        monkeypatch.setattr(controller, "_prepare_height_above_ground",
+                            lambda layer, hag, then: prepared.append(then) or then())
+        controller._run_filter(layers["p1"])
+        assert len(prepared) == 1  # the retry does not start PDAL again
+        assert ctrl_module._test_feedback.messages[-1][0] == "warning"
+
+    def test_height_computation_blocks_undo_and_unfilter(self, ctrl_module, layers, adapters):
+        controller = ctrl_module.CoverageModeController(_dock(current_layer=layers["p1"]))
+        controller._active_layer = layers["p1"]
+        controller._hag_task = RunningTask()
+        assert controller.is_running()
+        controller.handle_task("undo")
+        controller.handle_task("unfilter")
+        assert ctrl_module._test_service.calls == []
+        controller._hag_task = RunningTask(FakeQgsTask.TaskStatus.Complete)
+        assert not controller.is_running()
+
+
+@pytest.mark.unit
 class TestPreviewStopsBeforeHistory:
     """Constat 2: the live preview never makes Undo / Redo skip the point cloud."""
 
@@ -685,6 +761,31 @@ class TestReactivation:
         controller._raster_panel.restore_state.assert_called_once_with(state)
         selecting.setChecked.assert_called_with(True)
         assert ("apply", "r1", None, None) in adapters.calls
+
+
+@pytest.mark.unit
+class TestTaskResultOfAnotherLayer:
+    """Constat 8: a task ending after a layer switch leaves the panel and the Filter button alone."""
+
+    def test_counts_of_another_layer_do_not_reach_the_panel(self, ctrl_module, layers):
+        controller = ctrl_module.CoverageModeController(_dock())
+        layers["p2"] = FakeLayer("p2", "pc")
+        controller._active_layer, controller._kind = layers["p2"], _kind(ctrl_module, "POINT_CLOUD")
+        controller._pc_panel = MagicMock()
+        controller._refresh_counts(layers["p1"])
+        controller._pc_panel.set_current_subset.assert_not_called()
+        controller._refresh_counts(layers["p2"])
+        controller._pc_panel.set_current_subset.assert_called_once()
+
+    def test_filter_button_stays_disabled_while_another_task_runs(self, ctrl_module, adapters):
+        button = MagicMock()
+        controller = ctrl_module.CoverageModeController(_dock(pushButton_action_filter=button))
+        controller._hag_task = RunningTask()
+        controller._set_busy(False)
+        button.setEnabled.assert_called_with(False)
+        controller._hag_task = None
+        controller._set_busy(False)
+        button.setEnabled.assert_called_with(True)
 
 
 @pytest.mark.unit

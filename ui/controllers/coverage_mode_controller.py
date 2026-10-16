@@ -1245,7 +1245,11 @@ class CoverageModeController(BaseController):
         return True
 
     def is_running(self) -> bool:
-        task = self._running_task
+        """A cross filter or a height above ground computation of the dock is queued or running."""
+        return self._task_active(self._running_task) or self._task_active(self._hag_task)
+
+    @staticmethod
+    def _task_active(task: Any) -> bool:
         if task is None:
             return False
         try:
@@ -1260,7 +1264,7 @@ class CoverageModeController(BaseController):
         except Exception:
             return []
 
-    def _run_filter(self, layer: Any) -> None:
+    def _run_filter(self, layer: Any, hag_tried: bool = False) -> None:
         from ...core.domain.layer_kind import LayerKind
         from ...core.domain.cross_filter import combine_subset
         from ...core.domain.filter_state import CrossOperation
@@ -1289,7 +1293,12 @@ class CoverageModeController(BaseController):
             expression = self._point_cloud_expression()
             hag = self._pc_panel.hag_settings() if self._pc_panel is not None else None
             if hag is not None and 'HeightAboveGround' not in self._point_cloud_attributes(layer):
-                self._prepare_height_above_ground(layer, hag, lambda: self._run_filter(layer))
+                if hag_tried:
+                    # Computed, yet the derived point cloud shows no such dimension: never run PDAL in a loop.
+                    show_warning(self.tr("Height above ground not computed: {0}").format(
+                        "no HeightAboveGround dimension in the derived point cloud"))
+                    return
+                self._prepare_height_above_ground(layer, hag, lambda: self._run_filter(layer, hag_tried=True))
                 return
             before = take_snapshot(layer, LayerKind.POINT_CLOUD)
             source_op = settings['source_operator']
@@ -1362,8 +1371,8 @@ class CoverageModeController(BaseController):
         def done(task, result):
             if getattr(self, '_torn_down', False):
                 return
-            self._set_busy(False)
             self._running_task = None
+            self._set_busy(False)
             layer = self._map_layer(source_job.layer_id)
             if not result:
                 # Nothing was applied: put back the point cloud selection subset
@@ -1404,8 +1413,9 @@ class CoverageModeController(BaseController):
             logger.warning(f"[FM5] point cloud selection not rolled back: {exc}")
 
     def _set_busy(self, busy: bool) -> None:
+        """Disable the Filter button while a task runs; enabled again once no other task of the dock runs."""
         button = getattr(self.dockwidget, 'pushButton_action_filter', None)
-        self._call(button, 'setEnabled', not busy)
+        self._call(button, 'setEnabled', not busy and not self.is_running())
 
     def _after_run(self, layer: Any, outcomes, message: str, warning: bool = False) -> None:
         show_info, show_warning = _feedback()
@@ -1427,8 +1437,8 @@ class CoverageModeController(BaseController):
 
     def _refresh_counts(self, layer: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
-        if layer is None:
-            return
+        if layer is None or not _same_layer(layer, self._active_layer):
+            return  # a task of another layer ended: the panel shows the current one
         try:
             if self._kind is LayerKind.POINT_CLOUD and self._pc_panel is not None:
                 self._pc_panel.set_current_subset(layer.subsetString())
@@ -1720,6 +1730,13 @@ class CoverageModeController(BaseController):
             if task.after is not None:
                 from ...core.domain.filter_state import CrossOperation
                 self.service.history.push(CrossOperation(layer.id(), ((task.before, task.after),), 'height above ground'))
+            if not _same_layer(self._active_layer, layer):
+                # Another layer was picked meanwhile: the panels and the kind are its own,
+                # the filter of this one is not run (its height stays, undoable).
+                self._refresh_canvas(layer)
+                self.update_undo_redo_buttons()
+                show_warning(self.tr("Filter not applied: {0}").format(self._layer_name(layer)))
+                return
             self._populate_point_cloud(layer)
             then()
 
