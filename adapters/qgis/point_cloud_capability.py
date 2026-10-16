@@ -26,14 +26,14 @@ logger = logging.getLogger(__name__)
 def is_point_cloud_filtering_enabled() -> bool:
     """Return the live value of ``APP.OPTIONS.POINT_CLOUD.enabled`` (False by default)."""
     try:
-        from ...config.config import ENV_VARS, _get_option_value
+        from ...config.config import ENV_VARS, _get_option_bool
         cfg = (
             ENV_VARS.get('CONFIG_DATA', {})
             .get('APP', {})
             .get('OPTIONS', {})
             .get('POINT_CLOUD', {})
         )
-        return bool(_get_option_value(cfg.get('enabled'), False))
+        return _get_option_bool(cfg.get('enabled'), False)
     except (ImportError, AttributeError, TypeError):
         return False
 
@@ -41,14 +41,14 @@ def is_point_cloud_filtering_enabled() -> bool:
 def is_raster_filtering_enabled() -> bool:
     """Return the live value of ``APP.OPTIONS.RASTER.enabled`` (False when unset)."""
     try:
-        from ...config.config import ENV_VARS, _get_option_value
+        from ...config.config import ENV_VARS, _get_option_bool
         cfg = (
             ENV_VARS.get('CONFIG_DATA', {})
             .get('APP', {})
             .get('OPTIONS', {})
             .get('RASTER', {})
         )
-        return bool(_get_option_value(cfg.get('enabled'), False))
+        return _get_option_bool(cfg.get('enabled'), False)
     except (ImportError, AttributeError, TypeError):
         return False
 

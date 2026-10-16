@@ -8,6 +8,7 @@ swapped per test for a ``SimpleNamespace`` holding DISTINCT classes, which
 is what makes ``isinstance`` meaningful; the conftest's MagicMock module is
 also exercised because that is the environment every other unit test runs in.
 """
+import ast
 import importlib.util
 import os
 import sys
@@ -53,6 +54,19 @@ def _supports_point_cloud_filtering(qgis_version_int, feature_enabled, has_point
     )
 
 
+def _real_option_readers() -> dict:
+    """``_get_option_value`` / ``_get_option_bool`` and their constants, from config/config.py."""
+    path = os.path.join(_PROJECT_ROOT, "config", "config.py")
+    tree = ast.parse(open(path, encoding="utf-8").read())
+    names = {"_get_option_value", "_get_option_bool", "_FALSE_STRINGS", "_TRUE_STRINGS"}
+    body = [node for node in tree.body
+            if (isinstance(node, ast.FunctionDef) and node.name in names)
+            or (isinstance(node, ast.Assign) and any(getattr(t, "id", None) in names for t in node.targets))]
+    namespace = {}
+    exec(compile(ast.Module(body=body, type_ignores=[]), path, "exec"), namespace)
+    return {name: namespace[name] for name in names}
+
+
 def _install_package() -> None:
     if _PKG in sys.modules:
         return
@@ -69,9 +83,8 @@ def _install_package() -> None:
 
     config_mod = types.ModuleType(f"{_PKG}.config.config")
     config_mod.ENV_VARS = {"CONFIG_DATA": {}}
-    config_mod._get_option_value = lambda option, default=None: (
-        default if option is None else option["value"] if isinstance(option, dict) and "value" in option else option
-    )
+    # The real option readers (config.py itself needs QGIS to import).
+    config_mod.__dict__.update(_real_option_readers())
     sys.modules[f"{_PKG}.config.config"] = config_mod
 
     support_mod = types.ModuleType(f"{_PKG}.core.domain.point_cloud_support")
@@ -163,6 +176,21 @@ class TestFeatureFlag:
     def test_wrapped_value_false(self, env):
         env.set_flag(False)
         assert cap.is_point_cloud_filtering_enabled() is False
+
+    @pytest.mark.parametrize("text", ["false", "False", "0", "no", "off", ""])
+    def test_false_text_is_off(self, env, text):
+        """A hand-edited config.json: bool("false") is True, the flag read it as on."""
+        env.set_flag(text)
+        assert cap.is_point_cloud_filtering_enabled() is False
+
+    @pytest.mark.parametrize("text", ["true", "1", "yes"])
+    def test_true_text_is_on(self, env, text):
+        env.set_flag(text)
+        assert cap.is_point_cloud_filtering_enabled() is True
+
+    def test_raster_flag_false_text_is_off(self, env):
+        config_mod.ENV_VARS["CONFIG_DATA"] = {"APP": {"OPTIONS": {"RASTER": {"enabled": {"value": "false"}}}}}
+        assert cap.is_raster_filtering_enabled() is False
 
     def test_config_data_none_is_off(self, env):
         config_mod.ENV_VARS["CONFIG_DATA"] = None
