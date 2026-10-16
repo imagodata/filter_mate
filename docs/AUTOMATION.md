@@ -18,8 +18,9 @@ Shared rules:
   the dock's history: the dock's Undo on that layer reverts them. The others (vector source, geometry, unfilter) are
   kept in a separate history so they never interleave with the dock's vector history: revert them with
   `clear_filters` or the dock's Unfilter.
-- **One at a time.** An operation is refused while another one runs, and while a FilterMate task of the dock (vector
-  filter, cross filter, export) still runs in the background: the error says so, try again when it ends.
+- **One at a time.** An operation is refused while another one runs, and while a task of the dock that changes or
+  reads the filters still runs in the background (vector filter, cross filter, export, height above ground; not an
+  expression evaluation): the error says so, try again when it ends.
 - **Project layers only.** A layer loaded from a path by Processing is a temporary copy: filtering it would be lost,
   so it is skipped with a warning. A *source* can be a temporary layer (a model output such as a slope raster): it is
   only read.
@@ -166,7 +167,8 @@ Start the API from QGIS with a `QGISFilterMateAccessor(plugin.get_public_api(), 
 | `GET /layers` | — | layers with `layer_kind` |
 | `POST /favorites/{id}/apply` | — | replays the favorite like the dock's menu: subsets (remote layers too), raster / point cloud clips |
 
-Answers: `400` names what stopped the operation (`"Cross filter failed: <reason>"`); `503` with `Retry-After` when QGIS
+Answers: `400` names what stopped the operation (`"Cross filter failed: <reason>"`; an unexpected error in QGIS is
+reported as such, its details stay in the FilterMate log); `503` with `Retry-After` when QGIS
 is busy (its main thread on a long task for 30 s, or a FilterMate operation or task running): nothing was changed,
 retry later. A change that is done is never reported as failed: its `active_filters` snapshot is `{}` when QGIS was too
 busy to read it back (`GET /filters/state` reads the state).

@@ -122,9 +122,18 @@ class TestDockTasksDetected:
         tasks.append(task_class("Filtering data"))  # translated description, no "FilterMate" prefix
         assert operations.busy_reason() == operations.BACKGROUND_BUSY
 
-    def test_filtermate_task(self, tasks):
-        tasks.append(_Task("FilterMate: export"))
+    @pytest.mark.parametrize("class_name", ["CrossFilterTask", "CoverageExportTask", "HeightAboveGroundTask"])
+    def test_dock_tasks_changing_the_filters(self, tasks, class_name):
+        tasks.append(type(class_name, (_Task,), {})("FilterMate: something"))
         assert operations.busy_reason() == operations.BACKGROUND_BUSY
+
+    @pytest.mark.parametrize("class_name, description", [
+        ("ExpressionEvaluationTask", "FilterMate: Evaluating on communes"),  # review 2026-10: no filter
+        ("LayersManagementEngineTask", "FilterMate: adding layers"),
+    ])
+    def test_filtermate_tasks_that_do_not_filter_are_ignored(self, tasks, class_name, description):
+        tasks.append(type(class_name, (_Task,), {})(description))
+        assert operations.busy_reason() == ""
 
     def test_other_plugin_task_is_ignored(self, tasks):
         tasks.append(_Task("Rendering"))
@@ -228,9 +237,11 @@ class _CrossTask:
         return True
 
     def apply_results(self, result):
-        self.outcomes = [types.SimpleNamespace(layer_id=layer_id, success=result, kept_count=1, elapsed=0.0,
-                                               message="" if result else "canceled")
-                         for layer_id in self.target_ids]
+        # Like CrossFilterTask: each job's outcome comes from its compute step;
+        # with result False nothing is applied, but computed jobs still say success.
+        self.outcomes = [types.SimpleNamespace(layer_id=layer_id, success=index < self.steps, kept_count=1,
+                                               elapsed=0.0, message="")
+                         for index, layer_id in enumerate(self.target_ids)]
 
 
 class _Service:
@@ -280,6 +291,23 @@ class TestFeedbackRelayed:
                                          service=_Service(task), feedback=feedback)
         assert task.steps == 1  # stopped at the next check
         assert report.error == "canceled"
+        # Review 2026-10: a target computed before the cancel was not applied: not "done".
+        assert report.done == {} and report.failed == {}
+
+    def test_source_only_canceled_before_it_is_applied(self, vector_world, monkeypatch):
+        calls = []
+        job = types.SimpleNamespace(before=None, layer_id="S", kind=operations.LayerKind.RASTER, details={},
+                                    apply=lambda layer: calls.append("apply"), release=lambda: calls.append("release"))
+        monkeypatch.setattr(operations, "_source_job", lambda layer, kind, report, **kwargs: job)
+        feedback = _Feedback()
+        feedback.cancel()
+        service = _Service(_CrossTask("S", []))
+        service.history = MagicMock()
+        report = operations.cross_filter(vector_world.source, [], project=vector_world.project, service=service,
+                                         feedback=feedback)
+        assert report.error == "canceled"
+        assert calls == ["release"]
+        service.history.push.assert_not_called()
 
     def test_canceled_before_the_start(self, vector_world):
         feedback = _Feedback()
@@ -300,6 +328,55 @@ class TestFeedbackRelayed:
         report = operations.filter_point_clouds(["dalle_1", "dalle_2"], "Classification = 2",
                                                 project=_Project(), feedback=feedback)
         assert report.error == "canceled" and not report.skipped
+
+
+class TestUnexpectedErrorsFlagged:
+    """Review 2026-10: kept for the local caller, flagged so REST hides them (paths, SQL)."""
+
+    def test_operation_error(self, vector_world):
+        class _Failing(_Service):
+            def run(self, request, source_job, synchronous=False):
+                raise OSError("[Errno 13] Permission denied: '/home/u/.local/share/QGIS/cache/session_1/x.vrt'")
+
+        report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
+                                         service=_Failing(_CrossTask("S", ["T"])))
+        assert "Permission denied" in report.error
+        assert report.details["internal_error"] is True
+
+    def test_validation_error_is_not_flagged(self, vector_world):
+        report = operations.cross_filter(vector_world.source, ["batiment"], buffer=float("nan"),
+                                         project=vector_world.project)
+        assert report.error and "internal_error" not in report.details
+
+    def test_export_layer_failure(self, vector_world, tmp_path, monkeypatch):
+        def broken(*args, **kwargs):
+            raise RuntimeError("sqlite3: no such table gpkg_contents in /srv/qgis/private.gpkg")
+
+        monkeypatch.setattr(operations, "_export_vector", broken)
+        layer = _Layer("A", "parcelle")
+        report = operations.export_layers([layer], str(tmp_path), project=_Project(layer))
+        assert "no such table" in report.failed["parcelle"]
+        assert report.details["internal_failures"] == ["parcelle"]
+
+
+class TestHomonymsEverywhere:
+    def test_cross_filter_targets(self, vector_world):
+        twin = _Layer("T2", "batiment")
+        project = _Project(vector_world.source, vector_world.target, twin)
+        task = _CrossTask("S", ["T", "T2"])
+        task.steps = 2
+        task.run = lambda: True
+        report = operations.cross_filter(vector_world.source, ["T", "T2"], project=project, service=_Service(task))
+        assert report.done == {"T": "batiment", "T2": "batiment (T2)"}
+        assert set(report.details["layers"]) == {"batiment", "batiment (T2)"}
+
+    def test_clear_filters(self, vector_world):
+        twin = _Layer("T2", "batiment")
+        service = MagicMock()
+        service.unfilter.return_value = ["T"]
+        report = operations.clear_filters(["T", "T2"], project=_Project(vector_world.target, twin), service=service)
+        assert report.done == {"T": "batiment"}
+        assert report.skipped == {"batiment (T2)": "not filtered"}
 
 
 class TestCacheTidied:

@@ -509,6 +509,33 @@ class TestOperationsThroughTheAccessor:
         assert operations.resolve_layer.call_args.args[0] == "L1"
         assert operations.cross_filter.call_args.args[0] is layer_a
 
+    def test_unexpected_errors_never_reach_the_client(self, accessor, operations, project_with_layers):
+        # Review 2026-10: paths of the cache, SQL, module names stay in the QGIS log.
+        from filtermate_api.qgis_accessor import INTERNAL_ERROR
+        operations.resolve_layer.return_value = project_with_layers[1]
+        operations.cross_filter.return_value = _report(
+            done={"L2": "roads"}, failed={"mnt": "/home/u/cache/x.vrt: denied", "lhd": "outside the area"},
+            error="sqlite3.OperationalError: no such column secret",
+            details={"internal_error": True, "internal_failures": ["mnt"]})
+        result = accessor.cross_filter("communes", ["roads", "mnt", "lhd"], ["Intersect"])
+        assert result.error == INTERNAL_ERROR
+        assert result.failed == {"mnt": INTERNAL_ERROR, "lhd": "outside the area"}
+
+    def test_validation_errors_are_kept(self, accessor, operations, project_with_layers):
+        operations.resolve_layer.return_value = project_with_layers[1]
+        operations.cross_filter.return_value = _report(error="a raster source needs a pixel selection")
+        assert accessor.cross_filter("communes", ["roads"], ["Intersect"]).error == \
+            "a raster source needs a pixel selection"
+
+    def test_missing_module_name_stays_in_the_log(self, accessor, monkeypatch):
+        import filtermate_api.qgis_accessor as qgis_accessor
+
+        def missing(name):
+            raise ImportError("No module named 'filter_mate.adapters.public_api.operations'")
+        monkeypatch.setattr(qgis_accessor, "_plugin_module", missing)
+        result = accessor.clear_filters(["roads"])
+        assert "filter_mate.adapters" not in result.error
+
     def test_unknown_source_is_none(self, accessor, operations):
         operations.resolve_layer.return_value = None
         assert accessor.cross_filter("ghost", ["roads"], ["Intersect"]) is None

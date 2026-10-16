@@ -24,6 +24,7 @@ try/except so a misconfigured plugin doesn't bring the API down.
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -38,6 +39,8 @@ from .accessor import (
     OperationResult,
 )
 from .main_thread import QGISBusy, run_on_main_thread
+
+logger = logging.getLogger("filtermate_api.qgis_accessor")
 
 
 def _plugin_module(name: str):
@@ -111,6 +114,31 @@ def _safe(callable_, default):
         return callable_()
     except Exception:
         return default
+
+
+# What a REST client reads instead of an unexpected exception's text (paths of
+# the cache, SQL, module names); the operation logged it in the QGIS log.
+INTERNAL_ERROR = "unexpected error in QGIS: see the FilterMate log"
+
+
+def _unavailable(exc: ImportError) -> str:
+    logger.error("FilterMate operations not importable: %s", exc)
+    return "FilterMate operations unavailable: see the FilterMate log"
+
+
+def _client_messages(report):
+    """``(error, failed)`` of ``report`` for a client: unexpected exceptions replaced by INTERNAL_ERROR.
+
+    Validation messages (bad selection, layer not found, busy) are kept.
+    """
+    error = report.error or None
+    if error and report.details.get("internal_error"):
+        error = INTERNAL_ERROR
+    failed = dict(report.failed)
+    for label in report.details.get("internal_failures") or ():
+        if label in failed:
+            failed[label] = INTERNAL_ERROR
+    return error, failed
 
 
 def _report_busy(report) -> None:
@@ -240,7 +268,7 @@ class QGISFilterMateAccessor:
             operations = _plugin_module("adapters.public_api.operations")
             requests = _plugin_module("core.domain.api_requests")
         except ImportError as exc:
-            return CrossFilterResult(error=str(exc))
+            return CrossFilterResult(error=_unavailable(exc))
         project = QgsProject.instance()
         # Same resolution as the Python API and Processing: layer id, then name.
         source = operations.resolve_layer(source_layer, project)
@@ -263,13 +291,14 @@ class QGISFilterMateAccessor:
 
     @staticmethod
     def _cross_result(report) -> CrossFilterResult:
-        return CrossFilterResult(filtered=report.done_names, failed=dict(report.failed),
-                                 skipped=dict(report.skipped), error=report.error or None)
+        error, failed = _client_messages(report)
+        return CrossFilterResult(filtered=report.done_names, failed=failed, skipped=dict(report.skipped), error=error)
 
     @staticmethod
     def _operation_result(report) -> OperationResult:
-        return OperationResult(done=report.done_names, failed=dict(report.failed), skipped=dict(report.skipped),
-                               error=report.error or None, outputs=dict(report.outputs))
+        error, failed = _client_messages(report)
+        return OperationResult(done=report.done_names, failed=failed, skipped=dict(report.skipped),
+                               error=error, outputs=dict(report.outputs))
 
     def _mark_applied(self, layer: str, source: str) -> None:
         self._last_applied_at = datetime.now(timezone.utc).isoformat()
@@ -287,7 +316,7 @@ class QGISFilterMateAccessor:
             from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry
             operations = _plugin_module("adapters.public_api.operations")
         except ImportError as exc:
-            return CrossFilterResult(error=str(exc))
+            return CrossFilterResult(error=_unavailable(exc))
         reference = QgsCoordinateReferenceSystem(crs)
         geometry = QgsGeometry.fromWkt(wkt)
         if not reference.isValid() or geometry.isNull():
@@ -311,7 +340,9 @@ class QGISFilterMateAccessor:
             requests = _plugin_module("core.domain.api_requests")
             report = operations.filter_point_clouds(layers, requests.point_cloud_criteria_from_dict(criteria),
                                                     operator=operator)
-        except (ImportError, ValueError) as exc:
+        except ImportError as exc:
+            return OperationResult(error=_unavailable(exc))
+        except ValueError as exc:  # invalid criteria
             return OperationResult(error=str(exc))
         _report_busy(report)
         if report.done:
@@ -325,7 +356,7 @@ class QGISFilterMateAccessor:
         try:
             report = _plugin_module("adapters.public_api.operations").clear_filters(layers)
         except ImportError as exc:
-            return OperationResult(error=str(exc))
+            return OperationResult(error=_unavailable(exc))
         _report_busy(report)
         if report.done:
             self._mark_applied(report.done_names[0], "rest_api:clear")
@@ -340,7 +371,7 @@ class QGISFilterMateAccessor:
         try:
             operations = _plugin_module("adapters.public_api.operations")
         except ImportError as exc:
-            return OperationResult(error=str(exc))
+            return OperationResult(error=_unavailable(exc))
         output_crs = None
         if crs:
             from qgis.core import QgsCoordinateReferenceSystem
