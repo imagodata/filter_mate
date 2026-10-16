@@ -21,7 +21,7 @@ from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransformContex
 from ....core.domain.filter_state import LayerSnapshot
 from ....core.domain.layer_kind import LayerKind
 from ....core.domain.raster_filter_criteria import RasterSelection, RasterSelectionMode
-from .geometry_tools import buffer_geometry, transform_geometry, union_geometries
+from .geometry_tools import WHOLE_SOURCE_METHODS, buffer_geometry, make_valid, transform_geometry, union_geometries
 from .snapshots import registry, swap_source, take_snapshot
 
 logger = logging.getLogger(__name__)
@@ -51,11 +51,14 @@ class SourceJob:
         self.elapsed = time.perf_counter() - started
         return self.geometry
 
-    def _buffer(self, raw: QgsGeometry, request) -> QgsGeometry:
-        """Buffer in metres like the vector engine, even for a geographic source CRS."""
+    def _buffer(self, raw: QgsGeometry, request, around: Optional[QgsGeometry] = None) -> QgsGeometry:
+        """Buffer in metres like the vector engine, even for a geographic source CRS.
+
+        ``around``: geometry whose centroid picks the UTM zone (default ``raw``).
+        """
         if not request.buffer_value or raw.isEmpty() or not self.crs.isGeographic():
             return buffer_geometry(raw, request.buffer_value, request.buffer_segments, request.buffer_type)
-        center = raw.centroid().asPoint()
+        center = (around if around is not None and not around.isEmpty() else raw).centroid().asPoint()
         zone = min(60, max(1, int((center.x() + 180.0) / 6.0) + 1))
         metric = QgsCoordinateReferenceSystem(f"EPSG:{(32600 if center.y() >= 0 else 32700) + zone}")
         context = QgsCoordinateTransformContext()
@@ -95,6 +98,20 @@ class VectorSourceJob(SourceJob):
             if geometry is not None and not geometry.isEmpty():
                 self._geometries.append(QgsGeometry(geometry))
         self.details['features'] = len(self._geometries)
+
+    def parts(self, request) -> Optional[List[QgsGeometry]]:
+        """The buffered selected features, for the vector targets (after :meth:`compute`); None when the union does.
+
+        Intersect and Disjoint are tested against the union; the other
+        predicates hold when ONE selected feature satisfies them
+        (native:selectbylocation), not their union: a parcel containing one
+        of three selected buildings is kept. A buffer can erase every
+        feature: an empty list then matches nothing.
+        """
+        if len(self._geometries) < 2 or all(m in WHOLE_SOURCE_METHODS for m in request.methods):
+            return None
+        parts = (make_valid(self._buffer(g, request, around=self.raw_geometry)) for g in self._geometries)
+        return [part for part in parts if not part.isEmpty()]
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
         return union_geometries(self._geometries)
@@ -140,8 +157,14 @@ class RasterSourceJob(SourceJob):
         if self._provider is None:
             self.message = 'raster provider unavailable'
             return QgsGeometry()
+        if is_canceled():
+            self.message = 'canceled'
+            return QgsGeometry()
         result = selection_geometry(self._provider, self.selection, self._extent, self._width, self._height,
                                     self._crs_wkt, max_pixels=self._max_pixels)
+        if is_canceled():  # the polygonization cannot be interrupted: its result is dropped
+            self.message = 'canceled'
+            return QgsGeometry()
         self.details.update(kept_pixels=result.kept_pixels, total_pixels=result.total_pixels, cell_size=result.cell_size)
         return result.geometry
 
@@ -177,10 +200,15 @@ class RasterSourceJob(SourceJob):
             self.raw_geometry = self._raw_geometry(lambda: False)
         if self.raw_geometry.isEmpty() or self.before.base_provider != 'gdal':
             return None
+        from . import cache
         job = RasterTargetJob(layer, None)
         request = CrossFilterRequest(self.layer_id, LayerKind.RASTER, targets=(TargetSpec(self.layer_id, LayerKind.RASTER),))
-        job.compute(self.raw_geometry, self.crs, QgsCoordinateTransformContext(), request, lambda: False)
-        return job.apply(layer) if job.outcome.success else None
+        try:
+            job.compute(self.raw_geometry, self.crs, QgsCoordinateTransformContext(), request, lambda: False)
+            return job.apply(layer) if job.outcome.success else None
+        finally:
+            # Not a target of the task: its VRT is released for the cache cleaner here.
+            cache.settle(job.outputs)
 
     def _record(self, layer, provider: str, nodata=None) -> LayerSnapshot:
         import json
@@ -205,24 +233,48 @@ class PointCloudSourceJob(SourceJob):
         if before is not None:
             # Snapshot taken before the controller applied the selection subset.
             self.before = before
-        # The task reads its own copy of the layer (same source, same subset):
-        # the live layer may change (preview, removal) while the task runs.
-        from qgis.core import QgsPointCloudLayer
-        copy = QgsPointCloudLayer(layer.source(), f"{layer.name()}_footprint", layer.providerType())
-        if copy.isValid():
-            copy.setSubsetString(layer.subsetString())
-            self._layer = copy
-        else:
-            self._layer = layer
         self._resolution = resolution
+        self._layer = None
+        self._error = ''
+        if layer.providerType() == 'vpc':
+            self._error = "a virtual point cloud (VPC) cannot be a source: its points are read tile by tile"
+            return
+        # The task reads its own copy of the layer (same source, same subset):
+        # the live layer may change (preview, removal) while the task runs, and
+        # it is never read from the task thread.
+        from .point_cloud_footprint import index_ready, open_point_cloud
+        copy = open_point_cloud(layer.source(), f"{layer.name()}_footprint", layer.providerType())
+        subset = layer.subsetString()
+        # Spelled in parentheses: QGIS caches the decoded blocks under the
+        # subset text, and the statistics task of the project layer may have
+        # cached unfiltered blocks under its spelling (see open_point_cloud).
+        # The line break keeps a final "--" comment out of the parenthesis.
+        self._subset = f"({subset}\n)" if subset else ''
+        if not copy.isValid() or not index_ready(copy):
+            self._error = "the point cloud could not be read (not indexed yet?)"
+        elif subset and not copy.setSubsetString(self._subset):
+            self._error = f"the selection was rejected by the point cloud: {subset[:120]}"
+        else:
+            self._layer = copy
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
-        from .point_cloud_footprint import DEFAULT_POINTS_LIMIT, footprint_geometry
-        result = footprint_geometry(self._layer, self._resolution)
+        from .point_cloud_footprint import footprint_geometry, selection_check
+        if self._error:
+            self.message = self._error
+            return QgsGeometry()
+        try:
+            result = footprint_geometry(self._layer, self._resolution, is_canceled=is_canceled,
+                                        check=selection_check(self._subset))
+        except RuntimeError as exc:
+            self.message = str(exc)
+            return QgsGeometry()
+        if is_canceled():
+            self.message = 'canceled'
+            return QgsGeometry()
         self.details.update(points_read=result.points_read, cell_size=result.cell_size)
-        if result.points_read >= DEFAULT_POINTS_LIMIT:
+        if result.truncated:
             self.details['truncated'] = True
-            logger.warning(f"[FM5] footprint of '{self.layer_name}' read the maximum of {DEFAULT_POINTS_LIMIT} points: "
+            logger.warning(f"[FM5] footprint of '{self.layer_name}' read the maximum of {result.points_read} points: "
                            f"it may miss areas, use a coarser resolution")
         return result.geometry
 

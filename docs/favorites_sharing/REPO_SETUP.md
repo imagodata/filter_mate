@@ -91,6 +91,8 @@ Les valeurs sont **mergées** lors d'un publish : FilterMate ne clobbe jamais le
 | **Publisher** | Push sur la branche cible | PAT scope `repo` / `write_repository` |
 | **Admin du repo** | Admin Git | Tooling Git natif (gh/glab/web) |
 
+> **Depuis FilterMate 5.0** : un `auth_header` en clair dans `config.json` (laissé par la 4.x) est refusé. Le dépôt reste configuré, mais le jeton n'est pas utilisé et est retiré de `config.json` au chargement de l'extension. Chaque publisher enregistre le jeton dans le gestionnaire d'authentification QGIS et le choisit dans **Manage Repos → Edit → Authentication** (`authcfg_id`).
+
 Recommandations :
 - **GitHub** : équipe de publishers en *Write* sur le repo (collaborators ou team).
 - **GitLab** : rôle *Developer* minimum sur le projet.
