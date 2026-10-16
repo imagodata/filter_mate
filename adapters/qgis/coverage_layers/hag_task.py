@@ -23,6 +23,53 @@ from .snapshots import registry, take_snapshot
 logger = logging.getLogger(__name__)
 
 
+def _horizontal(crs):
+    """Horizontal part of a compound CRS (QGIS >= 3.38); None when it cannot be told apart."""
+    getter = getattr(crs, 'horizontalCrs', None)
+    if getter is not None:
+        horizontal = getter()
+        return horizontal if horizontal.isValid() else crs
+    wkt = crs.toWkt().lstrip().upper()
+    return None if wkt.startswith(('COMPD_CS', 'COMPOUNDCRS')) else crs
+
+
+def _same_crs(a, b) -> bool:
+    """QGIS equality, or the same definition under other names (GDAL); True when GDAL cannot tell."""
+    if a == b:
+        return True
+    try:
+        from osgeo import osr
+        first, second = osr.SpatialReference(), osr.SpatialReference()
+        if first.ImportFromWkt(a.toWkt()) != 0 or second.ImportFromWkt(b.toWkt()) != 0:
+            return True
+        for srs in (first, second):
+            if hasattr(srs, 'DemoteTo2D'):  # GDAL >= 3.6: 3D (EPSG:4979) and 2D (EPSG:4326) share X / Y
+                srs.DemoteTo2D(None)
+        if first.IsSame(second):
+            return True
+        if first.IsGeographic() and second.IsGeographic():  # older GDAL: the same datum is enough
+            return first.GetAttrValue('DATUM') == second.GetAttrValue('DATUM')
+        return False
+    except Exception:  # GDAL exceptions turned on by another plugin
+        return True
+
+
+def crs_mismatch(cloud_crs, dem_crs) -> str:
+    """Why the DTM cannot be sampled at the point X / Y ('' when it can, or cannot be told).
+
+    ``filters.hag_dem`` reads the raster at the coordinates of the points
+    without reprojecting: the horizontal CRS must be the same. A vertical
+    part (LiDAR HD: Lambert-93 + NGF-IGN69) does not matter.
+    """
+    if not cloud_crs.isValid() or not dem_crs.isValid():
+        return ''
+    cloud, dem = _horizontal(cloud_crs), _horizontal(dem_crs)
+    if cloud is None or dem is None or _same_crs(cloud, dem):
+        return ''
+    return (f"the DTM is in {dem.authid() or dem.description()} and the point cloud in "
+            f"{cloud.authid() or cloud.description()}: reproject the DTM to the point cloud CRS first")
+
+
 class HeightAboveGroundTask(QgsTask):
     """Add ``HeightAboveGround`` to a point cloud layer; emits ``done(ok, message)``."""
 
@@ -35,14 +82,16 @@ class HeightAboveGroundTask(QgsTask):
         self.before: LayerSnapshot = take_snapshot(layer, LayerKind.POINT_CLOUD)
         dem_snapshot = registry().get(dem_layer.id())
         self.dem_path = (dem_snapshot.original_source if dem_snapshot else dem_layer.source()).split('|')[0]
-        self.crs = layer.crs().authid() or layer.crs().toWkt()
+        self.crs = pdal_cli.srs_for(layer.crs())
+        self.crs_error = crs_mismatch(layer.crs(), dem_layer.crs())
         self.output = ''
         self.message = ''
         self.after = None
 
     def run(self) -> bool:
         started = time.perf_counter()
-        self.message = pdal_cli.copc_unavailable_reason()  # the panel gate may be stale: the pipeline ends with writers.copc
+        # The panel gate may be stale: the pipeline ends with writers.copc.
+        self.message = self.crs_error or pdal_cli.copc_unavailable_reason()
         if self.message:
             return False
         try:
