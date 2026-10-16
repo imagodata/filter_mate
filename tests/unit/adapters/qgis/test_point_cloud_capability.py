@@ -425,6 +425,11 @@ class TestIsNonAnalysisRaster:
     def test_without_raster_class(self, env):
         assert cap.is_non_analysis_raster(_FakeRasterLayer("wms")) is False
 
+    def test_one_class_for_vectors_and_rasters(self, env):
+        """Mocked qgis.core where QgsRasterLayer is QgsVectorLayer: every vector is no basemap."""
+        env.set_core(types.SimpleNamespace(QgsVectorLayer=_FakeRasterLayer, QgsRasterLayer=_FakeRasterLayer))
+        assert cap.is_non_analysis_raster(_FakeRasterLayer("ogr")) is False
+
     def test_deleted_layer(self, core):
         layer = _FakeRasterLayer()
         layer.providerType = MagicMock(side_effect=RuntimeError("wrapped C/C++ object deleted"))

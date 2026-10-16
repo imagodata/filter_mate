@@ -175,8 +175,11 @@ def is_non_analysis_raster(layer: Any) -> bool:
     if raster_type is None or layer is None:
         return False
     try:
+        from qgis.core import QgsVectorLayer
+        if raster_type is QgsVectorLayer:  # mocked qgis.core: one class for both
+            return False
         return isinstance(layer, raster_type) and layer.providerType() not in ANALYSIS_RASTER_PROVIDERS
-    except (TypeError, RuntimeError, AttributeError):
+    except (ImportError, TypeError, RuntimeError, AttributeError):
         return False
 
 
