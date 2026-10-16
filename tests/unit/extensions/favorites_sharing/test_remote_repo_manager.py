@@ -409,15 +409,16 @@ class TestSaveRepos:
         assert RemoteRepoManager(ext).purge_plaintext_auth() is False
         assert ext.last_set_call is None
 
-    def test_extension_purges_when_initialized(self, monkeypatch):
+    def test_extension_purge_hook_leaves_the_write_to_the_registry(self, monkeypatch):
         from extensions.favorites_sharing import extension as extension_module
-        calls = []
-        monkeypatch.setattr(extension_module.RemoteRepoManager, "purge_plaintext_auth",
-                            lambda self: calls.append(self) or False)
         ext = extension_module.FavoritesSharingExtension()
-        monkeypatch.setattr(ext, "register_service", lambda *args: None, raising=False)
-        ext.initialize(iface=None)
-        assert len(calls) == 1
+        writes = []
+        monkeypatch.setattr(ext, "get_config", lambda key, default=None: [
+            {"name": "Old", "git_url": "https://x/a.git", "auth_header": "Bearer SECRET"}])
+        monkeypatch.setattr(ext, "set_config", lambda key, value, persist=True: writes.append((key, value, persist))
+                            or True)
+        assert ext.purge_legacy_config() is True
+        assert writes == [("remote_repos", [{"name": "Old", "git_url": "https://x/a.git"}], False)]
 
     def test_clone_log_and_error_hide_url_credentials(self, tmp_path, caplog):
         """Audit 2026-10: the INFO log and the error (message bar) showed https://oauth2:TOKEN@."""

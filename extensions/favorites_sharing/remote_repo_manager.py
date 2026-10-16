@@ -361,12 +361,13 @@ class RemoteRepoManager:
     # CRUD — persist back into EXTENSIONS.favorites_sharing.remote_repos
     # ------------------------------------------------------------------
 
-    def purge_plaintext_auth(self) -> bool:
-        """Remove the refused plaintext ``auth_header`` of 4.x entries from config.json now.
+    def purge_plaintext_auth(self, persist: bool = True) -> bool:
+        """Remove the refused plaintext ``auth_header`` of 4.x entries from the config.
 
         Refused (never used) since 5.0.0, it stayed on disk until the user
         saved the repo list. Only that key goes; every entry is kept as is.
-        Returns True when config.json was rewritten.
+        ``persist=False``: the live config only (the caller writes it).
+        Returns True when the config changed.
         """
         if self._extension is None or not hasattr(self._extension, "set_config"):
             return False
@@ -391,7 +392,7 @@ class RemoteRepoManager:
             _PLAINTEXT_AUTH_REPORTED.update(names)
         cleaned = [{k: v for k, v in entry.items() if k != "auth_header"} if isinstance(entry, dict) else entry
                    for entry in raw]
-        return bool(self._extension.set_config("remote_repos", cleaned))
+        return bool(self._extension.set_config("remote_repos", cleaned, persist=persist))
 
     def save_repos(self, repos: List[RemoteRepo]) -> bool:
         """Persist the given list of repos to FilterMate config.

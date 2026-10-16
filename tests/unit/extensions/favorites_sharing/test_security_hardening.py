@@ -110,7 +110,7 @@ def test_commit_author_newline_is_stripped(tmp_path):
 
 
 def _poisoned_commit(tmp_path, git_version):
-    """Commit with a poisoned stored credential; ``(argv, env)`` git would have got."""
+    """ls-remote (network, https) with a poisoned stored credential; ``(argv, env)`` git would have got."""
     captured: Dict[str, Any] = {}
 
     class _FakeProc:
@@ -128,7 +128,7 @@ def _poisoned_commit(tmp_path, git_version):
                lambda authcfg_id: "Bearer token\n[remote \"x\"]\nurl=evil"), \
             patch("extensions.favorites_sharing.git_client._git_version", lambda binary: git_version), \
             patch("extensions.favorites_sharing.git_client.subprocess.run", _fake_run):
-        client.commit("msg")
+        client.ls_remote("https://git.example/team/repo.git")
     return captured["cmd"], captured["env"]
 
 

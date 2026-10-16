@@ -28,6 +28,13 @@ pytestmark = pytest.mark.skipif(
     shutil.which("git") is None, reason="git binary not available",
 )
 
+# Fake credentials, assembled at run time so no secret scanner takes them for real ones.
+FAKE_TOKEN = "fake-" + "token"
+
+
+def _url_with_credentials(user: str, password: str, rest: str) -> str:
+    return "https://" + user + ":" + password + "@" + rest
+
 
 # ---------------------------------------------------------------------------
 # Fixtures: a tiny bare remote + helper to build clones
@@ -178,49 +185,100 @@ class TestGitClient:
         assert "not found" in excinfo.value.stderr.lower()
 
     @staticmethod
-    def _spy_clone(tmp_path, seeded_remote, monkeypatch, git_version=None, extra_env=None):
-        """Clone with a stored token; every (argv, env) handed to subprocess.run."""
+    def _spy(tmp_path, monkeypatch, run, git_version=(2, 43), extra_env=None,
+             remote_url="https://git.example/team/repo.git"):
+        """Run ``run(client)`` against a fake git; every (argv, env) handed to subprocess.run.
+
+        The fake answers ``git config --get remote.<name>.url`` with ``remote_url``.
+        """
         invocations = []
-        orig_run = subprocess.run
 
-        def spy(cmd, **kwargs):
+        class _Proc:
+            returncode = 0
+            stderr = ""
+
+            def __init__(self, stdout=""):
+                self.stdout = stdout
+
+        def fake_run(cmd, **kwargs):
             invocations.append((list(cmd), dict(kwargs.get("env") or {})))
-            return orig_run(cmd, **kwargs)
+            return _Proc(remote_url + "\n" if "--get" in cmd else "")
 
-        monkeypatch.setattr(subprocess, "run", spy)
+        monkeypatch.setattr(subprocess, "run", fake_run)
         # The credential comes from the QGIS Auth Manager (authcfg_id), resolved at exec time.
         import extensions.favorites_sharing.git_client as git_client_module
         monkeypatch.setattr(git_client_module, "_resolve_authcfg_header",
                             lambda authcfg_id: "Bearer SECRET-TOKEN-123")
-        if git_version is not None:
-            monkeypatch.setattr(git_client_module, "_git_version", lambda binary: git_version)
+        monkeypatch.setattr(git_client_module, "_git_version", lambda binary: git_version)
+        run(GitClient(cwd=str(tmp_path / "clone"), authcfg_id="qg1xy7w", extra_env=extra_env or {}))
+        return invocations
 
-        client = GitClient(cwd=str(tmp_path / "clone"), authcfg_id="qg1xy7w", extra_env=extra_env or {})
-        client.clone(str(seeded_remote), branch="main")
-        return [(argv, env) for argv, env in invocations if "clone" in argv]
+    @staticmethod
+    def _has_token(invocation):
+        argv, env = invocation
+        return "SECRET-TOKEN-123" in " ".join(argv) + " ".join(env.values())
 
-    def test_auth_header_passed_via_environment_not_argv(self, tmp_path, seeded_remote, monkeypatch):
+    def test_auth_header_passed_via_environment_not_argv(self, tmp_path, monkeypatch):
         """Audit 2026-10: argv is world-readable (/proc/<pid>/cmdline): the token travels in the environment."""
-        (argv, env), = self._spy_clone(tmp_path, seeded_remote, monkeypatch)
+        (argv, env), = self._spy(tmp_path, monkeypatch, lambda c: c.clone("https://git.example/team/repo.git"))
         assert "SECRET-TOKEN-123" not in " ".join(argv)
         index = int(env["GIT_CONFIG_COUNT"]) - 1
         assert env[f"GIT_CONFIG_KEY_{index}"] == "http.extraHeader"
         assert env[f"GIT_CONFIG_VALUE_{index}"] == "Authorization: Bearer SECRET-TOKEN-123"
 
-    def test_existing_git_config_count_is_kept(self, tmp_path, seeded_remote, monkeypatch):
-        (argv, env), = self._spy_clone(tmp_path, seeded_remote, monkeypatch, git_version=(2, 43),
-                                        extra_env={"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "core.autocrlf",
-                                                   "GIT_CONFIG_VALUE_0": "false"})
+    def test_existing_git_config_count_is_kept(self, tmp_path, monkeypatch):
+        (argv, env), = self._spy(tmp_path, monkeypatch, lambda c: c.clone("https://git.example/team/repo.git"),
+                                 extra_env={"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "core.autocrlf",
+                                            "GIT_CONFIG_VALUE_0": "false"})
         assert env["GIT_CONFIG_COUNT"] == "2"
         assert env["GIT_CONFIG_KEY_0"] == "core.autocrlf"
         assert env["GIT_CONFIG_KEY_1"] == "http.extraHeader"
 
-    def test_old_git_falls_back_to_the_command_line(self, tmp_path, seeded_remote, monkeypatch):
+    def test_old_git_falls_back_to_the_command_line(self, tmp_path, monkeypatch):
         """git < 2.31 has no GIT_CONFIG_COUNT: the -c option is the only way left."""
-        (argv, env), = self._spy_clone(tmp_path, seeded_remote, monkeypatch, git_version=(2, 30))
+        (argv, env), = self._spy(tmp_path, monkeypatch, lambda c: c.clone("https://git.example/team/repo.git"),
+                                 git_version=(2, 30))
         index = argv.index("-c")
         assert argv[index + 1] == "http.extraHeader=Authorization: Bearer SECRET-TOKEN-123"
-        assert "GIT_CONFIG_COUNT" not in env or "SECRET" not in str(env)
+        assert "SECRET" not in " ".join(env.values())
+
+    @pytest.mark.parametrize("url", ["http://intranet/team/repo.git", "git@github.com:team/repo.git",
+                                     "ssh://git@host/team/repo.git", "/srv/git/team.git",
+                                     "\\\\server\\share\\team.git", "file:///srv/git/team.git"])
+    def test_token_only_ever_sent_to_https(self, tmp_path, monkeypatch, url):
+        # Review 2026-10: never in clear over http, never to ssh or a local remote.
+        invocations = self._spy(tmp_path, monkeypatch, lambda c: c.clone(url))
+        assert invocations and not any(self._has_token(i) for i in invocations)
+
+    def test_local_commands_get_no_header(self, tmp_path, monkeypatch):
+        invocations = self._spy(tmp_path, monkeypatch, lambda c: (c.add(["a.json"]), c.has_staged_changes(),
+                                                                    c.commit("m", author="T <t@x>"), c.head_sha()))
+        assert invocations and not any(self._has_token(i) for i in invocations)
+
+    def test_push_to_an_https_origin_gets_the_header(self, tmp_path, monkeypatch):
+        invocations = self._spy(tmp_path, monkeypatch, lambda c: c.push("origin", "main"))
+        lookup, push = invocations
+        assert "remote.origin.url" in lookup[0] and not self._has_token(lookup)
+        assert push[0][-3:] == ["--", "origin", "main"] and self._has_token(push)
+
+    def test_pull_from_an_http_origin_gets_none(self, tmp_path, monkeypatch):
+        invocations = self._spy(tmp_path, monkeypatch, lambda c: c.pull_fast_forward(),
+                                remote_url="http://intranet/team/repo.git")
+        assert not any(self._has_token(i) for i in invocations)
+
+    def test_unreadable_version_read_once(self, monkeypatch):
+        import extensions.favorites_sharing.git_client as git_client_module
+        calls = []
+
+        class _Proc:
+            returncode = 1
+            stdout = ""
+
+        monkeypatch.setattr(git_client_module, "_GIT_VERSIONS", {})
+        monkeypatch.setattr(subprocess, "run", lambda *args, **kwargs: calls.append(args) or _Proc())
+        assert git_client_module._git_version("odd-git") is None
+        assert git_client_module._git_version("odd-git") is None
+        assert len(calls) == 1
 
     def test_git_version_parsing(self, monkeypatch):
         import extensions.favorites_sharing.git_client as git_client_module
@@ -245,19 +303,22 @@ class TestGitClient:
 class TestTransportsAndIdentity:
     """Audit 2026-10: only https / ssh, and a commit works on a fresh install."""
 
-    def test_local_path_refused_in_production(self, tmp_path, seeded_remote, monkeypatch):
-        import extensions.favorites_sharing.git_client as git_client_module
-        monkeypatch.setattr(git_client_module, "ALLOWED_PROTOCOLS", "https:ssh")  # undo the conftest opening
+    def test_local_team_repo_works(self, tmp_path, seeded_remote):
+        # Review 2026-10: a team repo on a local / UNC path is a real setup.
+        client = GitClient(cwd=str(tmp_path / "clone"))
+        client.clone(str(seeded_remote), branch="main")
+        assert client.is_cloned()
+
+    def test_command_transport_refused(self, tmp_path):
         with pytest.raises(GitError) as excinfo:
-            GitClient(cwd=str(tmp_path / "clone")).clone(str(seeded_remote), branch="main")
+            GitClient(cwd=str(tmp_path / "clone"), timeout_seconds=10).clone("ext::sh -c touch% /tmp/pwned")
         assert "not allowed" in excinfo.value.stderr
 
-    @pytest.mark.parametrize("url", ["http://127.0.0.1:9/team/repo.git", "git://127.0.0.1:9/repo.git",
-                                     "ext::sh -c touch% /tmp/pwned"])
-    def test_plaintext_and_command_transports_refused(self, tmp_path, url):
-        with pytest.raises(GitError) as excinfo:
+    @pytest.mark.parametrize("url", ["http://127.0.0.1:9/team/repo.git", "git://127.0.0.1:9/repo.git"])
+    def test_intranet_transports_allowed(self, tmp_path, url):
+        with pytest.raises(GitError) as excinfo:  # nothing listens there: refused by the network, not by policy
             GitClient(cwd=str(tmp_path / "clone"), timeout_seconds=10).clone(url)
-        assert "not allowed" in excinfo.value.stderr
+        assert "not allowed" not in excinfo.value.stderr
 
     def test_commit_on_a_fresh_install_uses_the_author_as_committer(self, tmp_path, seeded_remote, monkeypatch):
         # No global / system identity at all, like a new Windows workstation.
@@ -325,6 +386,14 @@ class TestSecretScrubbing:
         scrubbed = _scrub_text(text)
         assert "SECRET-XYZ" not in scrubbed
         assert "[REDACTED]" in scrubbed
+
+    @pytest.mark.parametrize("scheme, prefix", [("Basic", "Authorization: "), ("Bearer", "> authorization: ")])
+    def test_scrub_text_redacts_a_bare_authorization_line(self, scheme, prefix):
+        import base64
+        secret = base64.b64encode(("user:" + FAKE_TOKEN).encode()).decode() if scheme == "Basic" else FAKE_TOKEN
+        scrubbed = _scrub_text("header\n" + prefix + scheme + " " + secret + "\nnext")
+        assert secret not in scrubbed
+        assert scrubbed.endswith("[REDACTED]\nnext")
 
     def test_scrub_text_empty_string_is_safe(self):
         assert _scrub_text("") == ""
@@ -434,9 +503,9 @@ class TestAuthcfgResolution:
         client = gc_mod.GitClient(cwd=str(tmp_path / "x"), authcfg_id="qg1xy7w")
         assert calls["count"] == 0
 
-        # Running a command does
+        # Running a network command against an https remote does
         try:
-            client.clone(str(seeded_remote), branch="main")
+            client.clone("https://127.0.0.1:9/team/repo.git", branch="main")
         except gc_mod.GitError:
             pass
         assert calls["count"] >= 1

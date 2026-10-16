@@ -20,13 +20,17 @@ Design rules:
   environment (``GIT_CONFIG_COUNT`` / ``GIT_CONFIG_KEY_n`` /
   ``GIT_CONFIG_VALUE_n``, git >= 2.31), never in the process argv, which
   any local user can read (``/proc/<pid>/cmdline``, process lists). Older
-  git only takes it as a ``-c`` option on the command line. The credential
+  git only takes it as a ``-c`` option on the command line. It is given
+  only to the commands that reach the remote (clone, fetch, pull, push,
+  ls-remote), and only when that remote is an ``https://`` URL: never sent
+  in clear over ``http://``, never to an ssh or local remote. The credential
   comes from ``authcfg_id`` only, resolved at exec time through
   ``QgsAuthManager``, which decrypts the stored Basic/PAT credential into an
   ``Authorization:`` header. The plaintext never touches config.json (the
   legacy plaintext ``auth_header`` was removed in FilterMate 5.0, audit EXT-6).
-- Transports are limited to https and ssh (``GIT_ALLOW_PROTOCOL``): no
-  plaintext http / git carrying the token, no ``ext::`` command transport.
+- Transports: git's own default list minus ``ext::`` (which runs a
+  command), through ``GIT_ALLOW_PROTOCOL``: team repos on a local / UNC
+  path or an intranet ``http://`` server keep working.
 """
 
 from __future__ import annotations
@@ -47,19 +51,24 @@ DEFAULT_TIMEOUT_SECONDS = 30
 _AUTH_HEADER_RE = re.compile(
     r"(http\.extraHeader=Authorization:\s*)[^\n]+", re.IGNORECASE
 )
+# A bare header line echoed by a server or a verbose trace (``Authorization: Basic ...``).
+_RAW_AUTH_RE = re.compile(r"(Authorization:\s*)(?!\[REDACTED\])[^\n]+", re.IGNORECASE)
 # userinfo of a URL (``https://user:token@host``), greedy up to the last "@"
 # of the authority so a password holding "@" is masked whole.
 _URL_CREDS_RE = re.compile(r"(\w+://)([^/\s]+)@")
 _REDACTED = "[REDACTED]"
 
-# Transports git may use (GIT_ALLOW_PROTOCOL): https and ssh. Plaintext http
-# and git:// would carry the token in clear, ``ext::`` runs a command, and a
-# local path / file:// is no documented publish target.
-ALLOWED_PROTOCOLS = "https:ssh"
+# Transports git may use (GIT_ALLOW_PROTOCOL): git's default policy without
+# ``ext::``, which runs a command. Local / UNC paths (file) and intranet
+# http:// remotes are real team setups; the token only ever goes to https.
+ALLOWED_PROTOCOLS = "file:git:http:https:ssh"
+
+# Commands that talk to the remote: the only ones given the auth header.
+_NETWORK_COMMANDS = frozenset({"clone", "fetch", "pull", "push", "ls-remote"})
 
 # ``GIT_CONFIG_COUNT`` / ``GIT_CONFIG_KEY_n`` / ``GIT_CONFIG_VALUE_n``: git 2.31+.
 _CONFIG_ENV_MIN_VERSION = (2, 31)
-_GIT_VERSIONS: Dict[str, Tuple[int, int]] = {}
+_GIT_VERSIONS: Dict[str, Optional[Tuple[int, int]]] = {}
 
 
 def _scrub_command(cmd: List[str]) -> List[str]:
@@ -70,21 +79,32 @@ def _scrub_command(cmd: List[str]) -> List[str]:
 def _git_version(git_binary: str) -> Optional[Tuple[int, int]]:
     """``(major, minor)`` of ``git_binary``, None when it cannot be read.
 
-    Read once per binary (``git --version``: ``git version 2.43.0``,
-    ``2.39.2.windows.1``, ``2.30.1 (Apple Git-130)``).
+    Read once per binary, failure included (``git --version``:
+    ``git version 2.43.0``, ``2.39.2.windows.1``, ``2.30.1 (Apple Git-130)``).
     """
     if git_binary not in _GIT_VERSIONS:
+        version = None
         try:
             proc = subprocess.run(  # nosec B603 - fixed argv, no shell, timeout enforced
                 [git_binary, "--version"], capture_output=True, text=True, timeout=10, check=False,
             )
+            match = re.search(r"(\d+)\.(\d+)", proc.stdout or "")
+            if proc.returncode == 0 and match is not None:
+                version = (int(match.group(1)), int(match.group(2)))
         except (OSError, subprocess.SubprocessError):
-            return None
-        match = re.search(r"(\d+)\.(\d+)", proc.stdout or "")
-        if proc.returncode != 0 or match is None:
-            return None
-        _GIT_VERSIONS[git_binary] = (int(match.group(1)), int(match.group(2)))
+            pass
+        _GIT_VERSIONS[git_binary] = version
     return _GIT_VERSIONS[git_binary]
+
+
+def _subcommand(args: List[str]) -> Tuple[str, List[str]]:
+    """``(git command, its arguments)`` of ``args``, past leading ``-c key=value`` options."""
+    index = 0
+    while index < len(args) and args[index].startswith("-"):
+        index += 2 if args[index] == "-c" else 1
+    if index >= len(args):
+        return "", []
+    return args[index], list(args[index + 1:])
 
 
 def _split_identity(author: str) -> Optional[Tuple[str, str]]:
@@ -120,6 +140,7 @@ def _scrub_text(text: str) -> str:
     if not text:
         return text
     scrubbed = _AUTH_HEADER_RE.sub(rf"\1{_REDACTED}", text)
+    scrubbed = _RAW_AUTH_RE.sub(rf"\1{_REDACTED}", scrubbed)
     scrubbed = _URL_CREDS_RE.sub(rf"\1{_REDACTED}@", scrubbed)
     return scrubbed
 
@@ -281,10 +302,13 @@ class GitClient:
         env.update(self.extra_env)
 
         # Inject the auth header as an http.extraHeader config override, out
-        # of the URL. Resolved here (not at __init__) so QgsAuthManager
-        # prompts for the master password at the moment of use, not at
-        # config load.
-        header = self._resolve_auth_header()
+        # of the URL, for a command reaching an https remote only. Resolved
+        # here (not at __init__) so QgsAuthManager prompts for the master
+        # password at the moment of use, not at config load.
+        command, rest = _subcommand(list(args))
+        header = None
+        if command in _NETWORK_COMMANDS and self._remote_url(command, rest, cwd).lower().startswith("https://"):
+            header = self._resolve_auth_header()
         if header:
             # Strip CR/LF: a header containing "\n[remote \"x\"]..." would
             # otherwise inject extra git config through the ``-c`` flag.
@@ -340,6 +364,22 @@ class GitClient:
                 cwd=run_cwd,
             )
         return result
+
+    def _remote_url(self, command: str, rest: List[str], cwd: Optional[str] = None) -> str:
+        """URL a network command talks to ("" when unknown).
+
+        clone / ls-remote name it after ``--``; push names a remote after
+        ``--``, pull / fetch use ``origin`` (our flow): read from the clone's
+        config, without any header.
+        """
+        positional = rest[rest.index("--") + 1:] if "--" in rest else [a for a in rest if not a.startswith("-")]
+        if command in ("clone", "ls-remote"):
+            return positional[0] if positional else ""
+        remote = positional[0] if command == "push" and positional else "origin"
+        if "://" in remote:
+            return remote
+        res = self._run(["config", "--get", f"remote.{remote}.url"], cwd=cwd, check=False)
+        return (res.stdout or "").strip() if res.ok else ""
 
     # ------------------------------------------------------------------
     # High-level operations

@@ -239,8 +239,6 @@ class FavoritesSharingExtension(BaseExtension):
         self._scanner = ResourceSharingScanner(extension=self)
         self._service = FavoritesSharingService(self._scanner)
         self._remote_repos = RemoteRepoManager(extension=self)
-        # A 4.x plaintext token must not stay on disk until the next save.
-        self._remote_repos.purge_plaintext_auth()
         self.register_service('scanner', self._scanner)
         self.register_service('service', self._service)
         self.register_service('remote_repos', self._remote_repos)
@@ -342,6 +340,15 @@ class FavoritesSharingExtension(BaseExtension):
         ))
 
         return actions
+
+    def purge_legacy_config(self) -> bool:
+        """Drop the refused plaintext ``auth_header`` of 4.x repos from the live config.
+
+        Called by the registry when it loads the extension configs — enabled,
+        disabled or missing its dependencies alike —, which then writes
+        config.json. Returns True when the config changed.
+        """
+        return RemoteRepoManager(extension=self).purge_plaintext_auth(persist=False)
 
     def get_remote_repos(self) -> List[Dict[str, Any]]:
         """Return the configured remote repos (never None, never malformed).

@@ -203,13 +203,13 @@ Each entry in `remote_repos` is a dict:
 | Field | Required | Notes |
 |---|---|---|
 | `name` | yes | Display label in the publish combo. |
-| `git_url` | no | When empty → fallback A (write locally, user pushes). `https://` or ssh only (`http://`, `git://`, local paths and `ext::` are refused). |
+| `git_url` | no | When empty → fallback A (write locally, user pushes). https, ssh, a local / UNC path, `http://` or `git://` (`ext::` is refused). The credential is only sent to an `https://` remote. |
 | `branch` | no | Defaults to the remote's HEAD. |
 | `local_clone` | no | Empty → `[profile]/FilterMate/repos/<slug>`. Relative paths anchor on the same dir. |
 | `target_collection` | no | Sub-directory under `collections/`. Empty → repo root *is* the collection. **Validated** with `safe_join_under()` — values that would escape `local_clone` (`../foo`, absolute paths, symlink-out) are rejected with a warning. |
 | `is_default` | no | Picks this repo on dialog open. |
 | `authcfg_id` | no | **Preferred** — id of a QGIS Auth Manager entry. Resolved at exec time. |
-| `auth_header` | no | **Refused since 5.0** — a plaintext header left by 4.x is never used and is removed from `config.json` when the extension starts (an error names the repo). |
+| `auth_header` | no | **Refused since 5.0** — a plaintext header left by 4.x is never used and is removed from `config.json` when the extensions load, even disabled or missing their dependencies (an error names the repo). |
 
 ### Authentication: use QGIS Auth Manager
 
@@ -238,7 +238,8 @@ publishers). The defenses below are wired by default:
 | Plain-text PAT in `config.json` | Prefer `authcfg_id` (encrypted at rest) | [git_client.py](git_client.py): `_resolve_authcfg_header()` |
 | Token leak in logs / GitError msgs | Scrub `Authorization:` headers + URL-embedded creds (`https://user:token@`) in commands, stdout, stderr and the clone log | [git_client.py](git_client.py): `_scrub_command/_scrub_text` |
 | Token visible in `argv` / process list | `http.extraHeader` passed in the environment (`GIT_CONFIG_COUNT` / `GIT_CONFIG_KEY_n` / `GIT_CONFIG_VALUE_n`, git ≥ 2.31); `-c` on the command line only for older git | [git_client.py](git_client.py): `_run()` |
-| Token sent in clear, command transports | `GIT_ALLOW_PROTOCOL=https:ssh` | [git_client.py](git_client.py): `ALLOWED_PROTOCOLS` |
+| Token sent in clear or to the wrong place | Header only for clone / fetch / pull / push / ls-remote to an `https://` remote | [git_client.py](git_client.py): `_run()`, `_remote_url()` |
+| Command transport (`ext::`) | `GIT_ALLOW_PROTOCOL=file:git:http:https:ssh` (git's default list without `ext`) | [git_client.py](git_client.py): `ALLOWED_PROTOCOLS` |
 | Path traversal via `target_collection: "../foo"` | `safe_join_under()` realpath check | [path_utils.py](path_utils.py), [remote_repo_manager.py](remote_repo_manager.py): `RemoteRepo.collection_dir` |
 | Symlink bypass of `allowed_collections` | TODO — H1 in audit 2026-04-27 | (not yet wired in scanner) |
 | Malformed bundle ingested into DB | Validator runs at scan time | TODO C3 — wire `validate()` in `_load_file()` |
