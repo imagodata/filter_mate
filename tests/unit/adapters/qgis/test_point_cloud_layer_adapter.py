@@ -284,7 +284,9 @@ class TestReadSummaryRanges:
         stats = _Stats(minimums={"Z": 1.5, "Intensity": 0, "ReturnNumber": 1},
                        maximums={"Z": 250.0, "Intensity": 65535, "ReturnNumber": 5})
         summary = adapter.read_point_cloud_summary(_Layer(stats=stats))
-        assert [r.name for r in summary.ranges] == ["Z", "Intensity"]
+        # Classification is offered as a condition (class AND height above the DTM)
+        assert [r.name for r in summary.ranges] == ["Z", "Intensity", "Classification"]
+        assert summary.range_of("Classification") == _AttributeSummary("Classification", None, None)
         assert summary.range_of("Z") == _AttributeSummary("Z", 1.5, 250.0)
         assert summary.range_of("Intensity") == _AttributeSummary("Intensity", 0.0, 65535.0)
         assert summary.range_of("ReturnNumber") is None
@@ -294,7 +296,7 @@ class TestReadSummaryRanges:
                        maximums={"ScanAngleRank": 19.0, "Z": 8.0, "UserData": 3})
         layer = _Layer(attributes=("X", "Y", "UserData", "Classification", "ScanAngleRank", "Z"), stats=stats)
         summary = adapter.read_point_cloud_summary(layer)
-        assert [r.name for r in summary.ranges] == ["Z", "UserData", "ScanAngleRank"]
+        assert [r.name for r in summary.ranges] == ["Z", "UserData", "Classification", "ScanAngleRank"]
         assert summary.range_of("ScanAngleRank") == _AttributeSummary("ScanAngleRank", -20.5, 19.0)
 
     def test_ranges_follow_constant_order(self):
