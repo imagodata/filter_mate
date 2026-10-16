@@ -36,7 +36,6 @@ from .accessor import (
     HistoryStep,
     LayerSummary,
     OperationResult,
-    UndoUnavailable,
 )
 from .main_thread import QGISBusy, run_on_main_thread
 
@@ -154,9 +153,6 @@ class QGISFilterMateAccessor:
         self._last_applied_layer: Optional[str] = None
         self._last_applied_source: Optional[str] = None
         self._last_error: Optional[str] = None
-        # FilterMate 5 operation the last API change was (not in the vector
-        # history /filters/undo walks), None after an apply_filter.
-        self._last_operation: Optional[str] = None
 
     def _app_attribute(self, name: str):
         """``name`` of the plugin's application (``plugin.app``), or of the plugin itself."""
@@ -198,7 +194,7 @@ class QGISFilterMateAccessor:
             crs_authid = _safe(crs_obj.authid, "") if crs_obj else ""
             if kind == "vector":
                 count = _safe(layer.featureCount, -1)
-                geometry = _GEOMETRY_TYPE_NAMES.get(_safe(layer.geometryType, -1), "Unknown")
+                geometry = _geometry_type_name(_safe(layer.geometryType, -1))
             elif kind == "point_cloud":
                 count = _safe(layer.pointCount, -1)
                 geometry = "PointCloud"
@@ -262,7 +258,7 @@ class QGISFilterMateAccessor:
         _report_busy(report)
         result = self._cross_result(report)
         if not result.error:
-            self._mark_applied(source_layer, "rest_api:cross", operation="cross filter")
+            self._mark_applied(source_layer, "rest_api:cross")
         return result
 
     @staticmethod
@@ -275,11 +271,10 @@ class QGISFilterMateAccessor:
         return OperationResult(done=report.done_names, failed=dict(report.failed), skipped=dict(report.skipped),
                                error=report.error or None, outputs=dict(report.outputs))
 
-    def _mark_applied(self, layer: str, source: str, operation: Optional[str] = None) -> None:
+    def _mark_applied(self, layer: str, source: str) -> None:
         self._last_applied_at = datetime.now(timezone.utc).isoformat()
         self._last_applied_layer = layer
         self._last_applied_source = source
-        self._last_operation = operation
 
     def cross_filter_by_geometry(self, wkt: str, crs: str, target_layers: List[str], predicates: List[str],
                                  buffer: float = 0.0, coverage_min: float = 0.0,
@@ -303,7 +298,7 @@ class QGISFilterMateAccessor:
         _report_busy(report)
         result = self._cross_result(report)
         if not result.error:
-            self._mark_applied("geometry", "rest_api:geometry", operation="geometry filter")
+            self._mark_applied("geometry", "rest_api:geometry")
         return result
 
     def filter_point_clouds(self, layers: List[str], criteria: Dict,
@@ -320,7 +315,7 @@ class QGISFilterMateAccessor:
             return OperationResult(error=str(exc))
         _report_busy(report)
         if report.done:
-            self._mark_applied(report.done_names[0], "rest_api:point_cloud", operation="point cloud filter")
+            self._mark_applied(report.done_names[0], "rest_api:point_cloud")
         return self._operation_result(report)
 
     def clear_filters(self, layers: List[str]) -> OperationResult:
@@ -333,7 +328,7 @@ class QGISFilterMateAccessor:
             return OperationResult(error=str(exc))
         _report_busy(report)
         if report.done:
-            self._mark_applied(report.done_names[0], "rest_api:clear", operation="unfilter")
+            self._mark_applied(report.done_names[0], "rest_api:clear")
         return self._operation_result(report)
 
     def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
@@ -393,7 +388,6 @@ class QGISFilterMateAccessor:
             self._last_applied_layer = layer_name
             self._last_applied_source = source
             self._last_error = None
-            self._last_operation = None
         else:
             self._last_error = f"apply_filter({layer_name!r}) returned False"
         return ok
@@ -485,7 +479,7 @@ class QGISFilterMateAccessor:
         if report.error or not report.done:
             return None
         layer_name = getattr(entry, "layer_name", "") or report.done_names[0]
-        self._mark_applied(layer_name, f"favorite:{favorite_id}", operation="favorite")
+        self._mark_applied(layer_name, f"favorite:{favorite_id}")
         return HistoryStep(layer_name=layer_name, expression=getattr(entry, "expression", "") or "")
 
     # ------------------------------------------------------------------
@@ -493,11 +487,11 @@ class QGISFilterMateAccessor:
     # ------------------------------------------------------------------
 
     def _step_via_history(self, direction: str) -> Optional[HistoryStep]:
-        """Undo / redo one step of the shared HistoryService, on the main thread."""
-        if self._last_operation:
-            # The last API change is not in this history: an undo now would
-            # revert an unrelated step of the dock.
-            raise UndoUnavailable(self._last_operation)
+        """Undo / redo one step of the HistoryService shared with the dock, on the main thread.
+
+        The dock's vector filter history: neither ``apply_filter`` nor the
+        FilterMate 5 operations record anything in it.
+        """
         return run_on_main_thread(_unless_busy, self._step_via_history_inline, direction)
 
     def _step_via_history_inline(self, direction: str) -> Optional[HistoryStep]:
@@ -595,3 +589,11 @@ _GEOMETRY_TYPE_NAMES: Dict[int, str] = {
     3: "Unknown",
     4: "NoGeometry",
 }
+
+
+def _geometry_type_name(value) -> str:
+    """API name of a geometry type: an int (PyQt5 enum) or an enum with ``.value`` (Qgis.GeometryType, PyQt6)."""
+    try:
+        return _GEOMETRY_TYPE_NAMES.get(int(getattr(value, "value", value)), "Unknown")
+    except (TypeError, ValueError):
+        return "Unknown"

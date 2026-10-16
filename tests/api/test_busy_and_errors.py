@@ -5,7 +5,6 @@
   503 with Retry-After: nothing was changed, the client retries.
 * A change that is done is not turned into an error because the snapshot
   sent with it could not be read.
-* Undo / redo right after a FilterMate 5 operation: 409 naming the way out.
 * 400s say what stopped the operation.
 """
 from __future__ import annotations
@@ -16,7 +15,7 @@ pytest.importorskip("fastapi")
 
 from fastapi.testclient import TestClient  # noqa: E402
 
-from filtermate_api.accessor import InMemoryAccessor, LayerSummary, OperationResult, UndoUnavailable  # noqa: E402
+from filtermate_api.accessor import InMemoryAccessor, LayerSummary, OperationResult  # noqa: E402
 from filtermate_api.config import APIConfig  # noqa: E402
 from filtermate_api.main_thread import QGISBusy  # noqa: E402
 from filtermate_api.server import create_app  # noqa: E402
@@ -41,14 +40,6 @@ class _BusyAccessor(InMemoryAccessor):
 class _SnapshotBusyAccessor(InMemoryAccessor):
     def get_active_filters(self):  # type: ignore[override]
         raise QGISBusy("main thread busy")
-
-
-class _AfterOperationAccessor(InMemoryAccessor):
-    def undo_filter(self):  # type: ignore[override]
-        raise UndoUnavailable("cross filter")
-
-    def redo_filter(self):  # type: ignore[override]
-        raise UndoUnavailable("cross filter")
 
 
 class _FailingAccessor(InMemoryAccessor):
@@ -81,15 +72,6 @@ class TestDoneChangeIsNotAnError:
         accessor.apply_filter("communes", "x = 1", "test")
         response = _client(accessor).post("/filters/undo")
         assert response.status_code == 200  # a retried undo would undo twice
-
-
-class TestUndoAfterOperation:
-    @pytest.mark.parametrize("route", ["/filters/undo", "/filters/redo"])
-    def test_409_points_to_clear(self, route):
-        response = _client(_AfterOperationAccessor(layers=list(_LAYERS))).post(route)
-        assert response.status_code == 409
-        assert "cross filter" in response.json()["detail"]
-        assert "POST /filters/clear" in response.json()["detail"]
 
 
 class TestFailureReasons:

@@ -11,6 +11,7 @@ Endpoints for filtering, expressions, etc. will be added in T2-T6.
 """
 
 import logging
+import re
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -97,7 +98,11 @@ class BodySizeLimitMiddleware:
         while True:
             message = await receive()
             if message["type"] != "http.request":
-                return  # client gone before the end of the body
+                # Client gone before the end of the body: answer anyway, an
+                # outer BaseHTTPMiddleware fails (500) when no response comes.
+                response = JSONResponse(status_code=400, content={"detail": "Request body incomplete"})
+                await response(scope, receive, send)
+                return
             body = message.get("body", b"")
             size += len(body)
             if size > self._max_body_bytes:
@@ -119,15 +124,29 @@ class BodySizeLimitMiddleware:
         await self.app(scope, replay, send)
 
 
+_PORT = re.compile(r"[0-9]{1,5}")
+
+
 def _host_name(value: str) -> str:
-    """Host of a ``Host`` header without its port (``[::1]:8000`` -> ``::1``)."""
+    """Host of a ``Host`` header without its port (``[::1]:8000`` -> ``::1``), "" when malformed.
+
+    Only a numeric ``:port`` may follow the host: ``[::1]evil`` or
+    ``127.0.0.1:abc`` name no loopback host.
+    """
     value = (value or "").strip().lower()
     if value.startswith("["):
         end = value.find("]")
-        return value[1:end] if end > 0 else ""
-    if value.count(":") == 1:
-        return value.split(":", 1)[0]
-    return value  # no port, or a bare IPv6 address
+        if end <= 0:
+            return ""
+        host, rest = value[1:end], value[end + 1:]
+    elif value.count(":") == 1:
+        host, port = value.split(":", 1)
+        rest = ":" + port
+    else:
+        return value  # no port, or a bare IPv6 address
+    if rest and not (rest.startswith(":") and _PORT.fullmatch(rest[1:])):
+        return ""
+    return host
 
 
 class LoopbackHostMiddleware:
@@ -137,7 +156,8 @@ class LoopbackHostMiddleware:
     rebinding a hostile page gets its own host name resolved to 127.0.0.1
     and talks to the API as a same-origin page, past CORS. Its requests
     still carry that host name, so only ``127.0.0.1``, ``localhost`` and
-    ``::1`` (any port) are served.
+    ``::1`` (any port) are served. A request without ``Host`` (HTTP/1.0) is
+    served: a browser always sends one.
     """
 
     def __init__(self, app: ASGIApp, allowed_hosts: Iterable[str] = _LOOPBACK_HOSTS) -> None:
@@ -145,8 +165,69 @@ class LoopbackHostMiddleware:
         self._allowed_hosts = frozenset(allowed_hosts)
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] == "http" and _host_name(Headers(scope=scope).get("host", "")) not in self._allowed_hosts:
+        host = Headers(scope=scope).get("host") if scope["type"] == "http" else None
+        if host is not None and _host_name(host) not in self._allowed_hosts:
             response = JSONResponse(status_code=400, content={"detail": "Invalid host header"})
+            await response(scope, receive, send)
+            return
+        await self.app(scope, receive, send)
+
+
+_SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+
+
+def _is_json(content_type: str) -> bool:
+    media = content_type.split(";", 1)[0].strip().lower()
+    return media == "application/json" or (media.startswith("application/") and media.endswith("+json"))
+
+
+class CrossSiteWriteGuard:
+    """Refuse changes asked by another web site (CSRF), and bodies that are not JSON.
+
+    A browser sends a cross-site "simple" request — a form post, a no-cors
+    fetch — with no pre-flight, so CORS never gets a say: on a loopback API
+    without a key, any page the user visits could undo a filter or apply a
+    favorite. Such a request carries the page's ``Origin`` (or at least
+    ``Sec-Fetch-Site: cross-site``): a request that is not a read is refused
+    (403) unless that origin is the API's own (its ``/docs`` page) or listed
+    in ``cors_origins``. Non-browser clients send neither header. A body must
+    be JSON (415): a form can only post urlencoded, multipart or plain text.
+    """
+
+    def __init__(self, app: ASGIApp, allowed_origins: Iterable[str] = ()) -> None:
+        self.app = app
+        self._allowed_origins = frozenset(allowed_origins)
+
+    def _origin_allowed(self, origin: str, scope: Scope, headers: Headers) -> bool:
+        if "*" in self._allowed_origins or origin in self._allowed_origins:
+            return True
+        own = f"{scope.get('scheme', 'http')}://{headers.get('host', '')}"
+        return origin.lower() == own.lower()
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http" or scope["method"] in _SAFE_METHODS:
+            await self.app(scope, receive, send)
+            return
+        headers = Headers(scope=scope)
+        origin = headers.get("origin")
+        if origin is not None:
+            refused = not self._origin_allowed(origin, scope, headers)
+        else:
+            refused = headers.get("sec-fetch-site", "").lower() == "cross-site"
+        if refused:
+            response = JSONResponse(status_code=status.HTTP_403_FORBIDDEN,
+                                    content={"detail": "Cross-site request refused (origin not in cors_origins)"})
+            await response(scope, receive, send)
+            return
+        content_type = headers.get("content-type")
+        try:
+            has_body = int(headers.get("content-length") or 0) > 0
+        except ValueError:
+            has_body = True
+        has_body = has_body or "chunked" in headers.get("transfer-encoding", "").lower()
+        if (content_type is not None or has_body) and not _is_json(content_type or ""):
+            response = JSONResponse(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                                    content={"detail": "Content-Type must be application/json"})
             await response(scope, receive, send)
             return
         await self.app(scope, receive, send)
@@ -238,7 +319,8 @@ def create_app(
     # --- Middlewares ---
     # Starlette runs the LAST added middleware first: they are added from
     # the innermost to the outermost. Request path:
-    #   loopback Host check -> CORS -> API key -> body-size cap -> routes.
+    #   loopback Host check -> CORS -> cross-site write guard -> API key
+    #   -> body-size cap -> routes.
 
     # Body-size cap (P1-API-HARDEN), innermost: unauthenticated callers are
     # 401'd before their body is read. Override via
@@ -256,6 +338,10 @@ def create_app(
     # API key auth (#28). Always installed; no-op when api_key is None/empty
     # so dev mode is still ergonomic.
     app.add_middleware(APIKeyMiddleware, api_key_hash=config.api_key_hash)
+
+    # CSRF: a page's form post or no-cors fetch reaches the routes with no
+    # pre-flight (see CrossSiteWriteGuard), key or not.
+    app.add_middleware(CrossSiteWriteGuard, allowed_origins=config.cors_origins)
 
     # CORS, outside auth: CORSMiddleware answers browser pre-flights
     # (OPTIONS) itself — browsers never attach X-API-Key to a pre-flight,
@@ -331,5 +417,13 @@ def create_app(
     return app
 
 
-# Default app instance — used by ``uvicorn filtermate_api.server:app``
-app = create_app()
+def __getattr__(name: str):
+    """``app``, built on first use — ``uvicorn filtermate_api.server:app``.
+
+    Built at import, it validated the configuration there: an insecure
+    config.json made ``create_app`` itself impossible to import.
+    """
+    if name == "app":
+        globals()["app"] = create_app()
+        return globals()["app"]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

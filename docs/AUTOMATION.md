@@ -171,9 +171,9 @@ is busy (its main thread on a long task for 30 s, or a FilterMate operation or t
 retry later. A change that is done is never reported as failed: its `active_filters` snapshot is `{}` when QGIS was too
 busy to read it back (`GET /filters/state` reads the state).
 
-`POST /filters/undo` and `/filters/redo` walk the dock's vector filter history (its Undo / Redo buttons), not the
-API's own changes. Right after a FilterMate 5 operation (cross, geometry, point cloud, clear, favorite) they answer
-`409`: revert the operation with `POST /filters/clear`; the next `POST /filters/apply` lifts the refusal.
+`POST /filters/undo` and `/filters/redo` are the dock's Undo / Redo for vector filters: the same history, whatever
+added its last step. Nothing the API changes is recorded there: neither `POST /filters/apply` nor the FilterMate 5
+operations (cross, geometry, point cloud, clear, favorites); revert those with `POST /filters/clear`.
 
 `POST /export` only writes below the export root of the server (`FILTERMATE_API_EXPORT_ROOT`, or `API.export_root`
 in `config.json`; default: `exports` in the FilterMate folder of the QGIS profile, `~/.filtermate/exports` when the API
@@ -185,12 +185,18 @@ uses (QGIS profile), or `config/config.json` of the plugin folder outside QGIS.
 Web pages the user visits must not drive QGIS through the browser:
 
 - **CORS is off by default**: no origin may call the API from a browser until it is listed in `API.cors_origins`
-  (`config.json`) or `FILTERMATE_API_CORS_ORIGINS` (comma-separated). `*` is refused without an API key.
+  (`config.json`, a list or a comma-separated string) or `FILTERMATE_API_CORS_ORIGINS` (comma-separated). `*` is
+  refused without an API key.
+- **No cross-site changes**: a request that is not a read (`POST`…) and comes from a web page — an `Origin` header,
+  or `Sec-Fetch-Site: cross-site` — is refused (`403`) unless that origin is the API's own (`/docs`) or listed in
+  `cors_origins`: a form post or a no-cors fetch needs no pre-flight, CORS alone does not stop it. A request body must
+  be JSON (`Content-Type: application/json`, else `415`). Scripts and programs send no `Origin`: nothing changes
+  for them.
 - **Loopback host names only**: bound to `127.0.0.1`, `localhost` or `::1`, the API answers only requests whose `Host`
-  is one of these names (any port), which defeats DNS rebinding. A reverse proxy in front must forward
-  `Host: 127.0.0.1`. Bound to another address, an API key is required.
+  is one of these names (a numeric port at most), which defeats DNS rebinding. A request with no `Host` (HTTP/1.0) is
+  served. A reverse proxy in front must forward `Host: 127.0.0.1`. Bound to another address, an API key is required.
 - **Limits**: request bodies over 1 MiB (`FILTERMATE_API_MAX_BODY_BYTES`) get 413, chunked or not; an expression is at
-  most 500 000 characters, a request at most 1 000 layers; NaN and Infinity are refused, a buffer is at most 10 000 000
+  most 500 000 characters, a request at most 1 000 layers of at most 1 000 characters each; NaN and Infinity are refused, a buffer is at most 10 000 000
   units (10 000 km in metres) in absolute value. Validation errors (422) say where and why, without echoing the value.
 
 ```bash

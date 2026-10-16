@@ -18,6 +18,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, Field
 
 from ..accessor import FilterMateAccessor, OperationResult
+from .filters import LayerName
 
 router = APIRouter(prefix="/export", tags=["export"])
 
@@ -25,7 +26,8 @@ _SUBFOLDER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(/[A-Za-z0-9][A-Za-z0-
 
 
 class ExportRequestBody(BaseModel):
-    layers: List[str] = Field(..., min_length=1, max_length=1000, description="Layers of any kind, exported as filtered now")
+    layers: List[LayerName] = Field(..., min_length=1, max_length=1000,
+                                    description="Layers of any kind, exported as filtered now")
     subfolder: str = Field(default="export", description="Sub-folder of the server export root (a/b allowed, no ..)")
     vector_format: Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV"] = "GPKG"
     raster_format: Literal["COG", "GTiff"] = "COG"

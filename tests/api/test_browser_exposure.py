@@ -103,7 +103,8 @@ class TestMiddlewareOrder:
         app = create_app(config=APIConfig(api_key="k", cors_origins=["https://app.example"]),
                          accessor=InMemoryAccessor())
         names = [middleware.cls.__name__ for middleware in app.user_middleware]
-        assert names == ["LoopbackHostMiddleware", "CORSMiddleware", "APIKeyMiddleware", "BodySizeLimitMiddleware"]
+        assert names == ["LoopbackHostMiddleware", "CORSMiddleware", "CrossSiteWriteGuard", "APIKeyMiddleware",
+                         "BodySizeLimitMiddleware"]
 
     def test_preflight_without_key_is_answered_by_cors(self):
         response = _preflight(self._keyed(), origin="https://app.example", path="/layers", headers="x-api-key")

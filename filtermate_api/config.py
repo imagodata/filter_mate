@@ -42,6 +42,24 @@ def _hash_api_key(plaintext: str) -> str:
     return hashlib.sha256(plaintext.encode("utf-8")).hexdigest()
 
 
+def _origins(value) -> list:
+    """``cors_origins`` as a list of origins.
+
+    A string (a hand-edited config.json) is split on commas: CORSMiddleware
+    would test substrings of it (``"http://localhost:3000"`` allowing
+    ``"http://local"``). Anything else but a list of strings is refused.
+    """
+    if value is None:
+        return []
+    if isinstance(value, str):
+        items = value.split(",")
+    elif isinstance(value, (list, tuple)) and all(isinstance(item, str) for item in value):
+        items = list(value)
+    else:
+        raise APIConfigError(f"cors_origins must be a list of origins or a comma-separated string, got {value!r}")
+    return [item.strip() for item in items if item.strip()]
+
+
 def _plugin_env_vars() -> dict:
     """``ENV_VARS`` of the FilterMate plugin running in this process, ``{}`` otherwise.
 
@@ -98,6 +116,7 @@ class APIConfig:
     export_root: Path = field(default_factory=lambda: _default_export_root())
 
     def __post_init__(self) -> None:
+        self.cors_origins = _origins(self.cors_origins)
         # Derive the hash from plaintext when only ``api_key`` was
         # provided (env path, legacy JSON path, or direct construction
         # in tests). When both are provided, trust ``api_key_hash`` as

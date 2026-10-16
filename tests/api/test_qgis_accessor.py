@@ -543,18 +543,33 @@ class TestOperationsThroughTheAccessor:
             accessor.undo_filter()
         plugin.app.history_manager.undo.assert_not_called()
 
-    def test_undo_after_an_operation_is_refused_until_the_next_apply(self, accessor, operations, plugin,
-                                                                    project_with_layers):
-        from filtermate_api.accessor import UndoUnavailable
+    def test_undo_is_the_dock_undo_whatever_the_api_did_before(self, accessor, operations, plugin,
+                                                               project_with_layers):
+        # Review 2026-10: no guard pretending the API's changes are in this
+        # history (apply_filter records nothing there either): /filters/undo
+        # is the dock's vector Undo, documented as such.
         operations.resolve_layer.return_value = project_with_layers[1]
         operations.cross_filter.return_value = _report(done={"L2": "roads"})
         accessor.cross_filter("communes", ["roads"], ["Intersect"])
-        # The cross filter is not in the dock's vector history: an undo would
-        # revert an unrelated dock step.
-        with pytest.raises(UndoUnavailable):
-            accessor.undo_filter()
-        plugin.app.history_manager.undo.assert_not_called()
-        accessor.apply_filter("communes", "x = 1", "rest_api")
         plugin.app.history_manager.undo.return_value = None
         assert accessor.undo_filter() is None
         plugin.app.history_manager.undo.assert_called_once()
+
+
+class TestGeometryTypeNames:
+    """QGIS 4 / PyQt6: Qgis.GeometryType is an enum, no longer an int."""
+
+    def test_pyqt6_enum_and_pyqt5_int(self):
+        import enum
+        from filtermate_api.qgis_accessor import _geometry_type_name
+
+        class GeometryType(enum.Enum):
+            Point = 0
+            Line = 1
+            Polygon = 2
+
+        assert _geometry_type_name(GeometryType.Polygon) == "Polygon"
+        assert _geometry_type_name(GeometryType.Line) == "LineString"
+        assert _geometry_type_name(2) == "Polygon"
+        assert _geometry_type_name(None) == "Unknown"
+        assert _geometry_type_name(-1) == "Unknown"
