@@ -29,6 +29,7 @@ FilterMate 5 filters raster and LiDAR point cloud layers as well as vector layer
 
 - **QGIS 3.22 – 3.34: QGIS crashed when the panel opened.** A spacer inserted in the EXPORTING values with `QBoxLayout.insertItem` was deleted at once by PyQt5 5.15.6 (no ownership transfer) and left a dangling item in the layout. It is now handed to the layout (`sip.transferto`); `tests/test_no_layout_insert_item_temporaries.py` keeps it that way.
 - **FILTERING / EXPORTING rows thousands of pixels apart** (one row visible): the alignment of the key icons with their rows fed back into the page height whenever the section had free height (tall dock, enlarged lower zone); the key column no longer sets the page height.
+- **A layer picked in the first seconds after the panel opened could be reverted** to QGIS' active layer by a late refresh, or shown in the list without being applied; it is kept and applied.
 - **A layer picked right after a filter, undo or unfilter was reverted**: for 1.5–2 s the panel puts the source layer back in the current-layer list (async layer changes used to move it); a layer the user picks there (list, keyboard or type-to-find) is now kept and applied at once.
 - **Layers removed from the project stayed registered** (since 4.9): QGIS sends layer ids and the removal task only took layer objects, so their FilterMate properties and filter history were never deleted; they are now.
 - **Spin box arrows** (minimum / maximum, buffer, coverage, segments) are drawn by the FilterMate stylesheet: on Linux and macOS they came out as a stray corner.
